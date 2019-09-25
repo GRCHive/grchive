@@ -1,9 +1,12 @@
 const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
-    entry: path.resolve(__dirname, 'ts', 'main.ts'),
+    entry: {
+        main: ['./ts/main.ts', './sass/main.scss']
+    },
     output: {
-        filename: 'main.js',
+        filename: '[name].js',
         path: path.resolve(__dirname, 'dist')
     },
     module: {
@@ -19,7 +22,9 @@ module.exports = {
             {
                 test: /\.s[ac]ss$/,
                 use: [
-                    'vue-style-loader',
+                    {
+                        loader: MiniCssExtractPlugin.loader
+                    },
                     'css-loader',
                     {
                         loader: 'sass-loader',
@@ -27,7 +32,7 @@ module.exports = {
                             implementation: require('sass'),
                             sassOptions: {
                                 fiber: require('fibers'),
-                                indentedSyntax: true
+                                indentedSyntax: false
                             }
                         }
                     }
@@ -44,11 +49,14 @@ module.exports = {
             }
         ]
     },
+    plugins: [
+        new MiniCssExtractPlugin({
+            filename: 'main.css'
+        })
+    ],
     resolve: {
-        modules: [path.resolve(__dirname, 'node_modules')],
-        extensions: ['.ts', '.js', '.vue', '.json'],
         alias: {
             'vue$': 'vue/dist/vue.esm.js'
         }
-    }
+    },
 };
