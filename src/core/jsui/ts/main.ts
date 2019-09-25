@@ -1,6 +1,13 @@
-function greeter(person) {
-    console.log("Hello, " + person);
-}
+import Vue from 'vue';
+import Vuetify from 'vuetify';
+Vue.use(Vuetify);
 
-let user = "Jane User";
-greeter(user);
+const opts = {};
+export default new Vuetify(opts);
+
+var app = new Vue({
+    el: '#app',
+    data: {
+        message: 'Hello World!'
+    }
+});

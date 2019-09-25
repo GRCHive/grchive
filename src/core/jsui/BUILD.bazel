@@ -5,8 +5,10 @@ filegroup(
     name = "node_modules",
     srcs = glob([
         "node_modules/**/*",
-        "node_modules/*"
-    ])
+        "node_modules/*",
+    ]) + [
+        "@corejsui-npm//:node_modules",
+    ]
 )
 
 genrule(
@@ -14,7 +16,6 @@ genrule(
     srcs = glob([
         "ts/*.ts",
     ]) + [
-        "@corejsui-npm//:node_modules",
         ":node_modules"
     ],
     outs = [

@@ -7,6 +7,7 @@ import (
 
 func main() {
 	r := gin.Default()
+	r = r.Delims("[[", "]]")
 
 	r.LoadHTMLGlob("src/webserver/templates/*")
 	r.Static("/static/corejsui", "src/core/jsui/dist")
