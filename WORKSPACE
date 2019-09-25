@@ -1,5 +1,11 @@
+workspace(
+    name = "audit_stuff",
+    managed_directories = {"@npm": ["node_modules"]},
+)
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+# GO
 http_archive(
     name = "io_bazel_rules_go",
     urls = [
@@ -66,3 +72,45 @@ go_repository(
     importpath = "gopkg.in/go-playground/validator.v8",
     tag = "v8.18.2"
 )
+
+# NODE
+http_archive(
+    name = "build_bazel_rules_nodejs",
+    sha256 = "da217044d24abd16667324626a33581f3eaccabf80985b2688d6a08ed2f864be",
+    urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/0.37.1/rules_nodejs-0.37.1.tar.gz"],
+)
+
+load("@build_bazel_rules_nodejs//:defs.bzl", "node_repositories", "npm_install")
+
+node_repositories(
+    package_json = ["//src/core/jsui:package.json"],
+    node_version = "12.10.0",
+    node_repositories = {
+        "12.10.0-linux_amd64": ("node-v12.10.0-linux-x64.tar.gz", "node-v12.10.0-linux-x64", "3de23fd9f2145ff76d0583e7f57aa4ccead58b3fb991e215f862e779c9cdf151"),
+    },
+    node_urls = ["https://nodejs.org/dist/v{version}/{filename}"],
+)
+
+npm_install(
+    name = "corejsui-npm",
+    package_json = "//src/core/jsui:package.json",
+    package_lock_json = "//src/core/jsui:package-lock.json"
+)
+
+# SASS
+http_archive(
+    name = "io_bazel_rules_sass",
+    # Make sure to check for the latest version when you install
+    url = "https://github.com/bazelbuild/rules_sass/archive/1.15.2.zip",
+    strip_prefix = "rules_sass-1.15.2",
+    sha256 = "96cedd370d8b87759c8b4a94e6e1c3bef7c17762770215c65864d9fba40f07cf",
+)
+
+# Fetch required transitive dependencies. This is an optional step because you
+# can always fetch the required NodeJS transitive dependency on your own.
+load("@io_bazel_rules_sass//:package.bzl", "rules_sass_dependencies")
+rules_sass_dependencies()
+
+# Setup repositories which are needed for the Sass rules.
+load("@io_bazel_rules_sass//:defs.bzl", "sass_repositories")
+sass_repositories()

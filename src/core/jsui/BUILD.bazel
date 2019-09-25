@@ -1,0 +1,26 @@
+package(default_visibility=["//visibility:public"])
+load("@io_bazel_rules_sass//:defs.bzl", "sass_library")
+
+filegroup(
+    name = "node_modules",
+    srcs = glob([
+        "node_modules/**/*",
+        "node_modules/*"
+    ])
+)
+
+genrule(
+    name = "corejsui",
+    srcs = glob([
+        "ts/*.ts",
+    ]) + [
+        "@corejsui-npm//:node_modules",
+        ":node_modules"
+    ],
+    outs = [
+        "dist/main.js"
+    ],
+    cmd = "cd src/core/jsui && npx webpack && cd ../../../ && mkdir -p `dirname $@` && cp src/core/jsui/dist/main.js $@",
+    message = "Run Webpack for corejsui",
+    local=True
+)
