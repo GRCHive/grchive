@@ -1,13 +1,10 @@
-import Vue from 'vue';
-import Vuetify from 'vuetify';
-Vue.use(Vuetify);
+import Vue from 'vue'
+import vuetify from  './vuetify'
 
-const opts = {};
-export default new Vuetify(opts);
+import App from '../vue/App'
 
-var app = new Vue({
+new Vue({
     el: '#app',
-    data: {
-        message: 'Hello World!'
-    }
-});
+    components: {App},
+    vuetify
+}).$mount('#app')

@@ -10,7 +10,10 @@ filegroup(
 
 go_binary(
     name = "webserver",
-    srcs = ["main.go"],
+    srcs = [
+        "main.go",
+        "config.go"
+    ],
     deps = [
         "@com_github_gin_gonic_gin//:go_default_library",
     ],

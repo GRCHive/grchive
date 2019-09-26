@@ -1,5 +1,6 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
     entry: {
@@ -13,11 +14,22 @@ module.exports = {
         rules: [
             {
                 test: /\.tsx?$/,
-                use: 'ts-loader',
+                use: [
+                    {
+                        loader: 'ts-loader',
+                        options: {
+                            appendTsSuffixTo: [/\.vue$/]
+                        }
+                    }
+                ],
                 exclude: [ 
                     /node_modules/,
                     /external/
-                ]
+                ],
+            },
+            {
+                test: /\.vue$/,
+                use: 'vue-loader'
             },
             {
                 test: /\.s[ac]ss$/,
@@ -52,11 +64,13 @@ module.exports = {
     plugins: [
         new MiniCssExtractPlugin({
             filename: 'main.css'
-        })
+        }),
+        new VueLoaderPlugin()
     ],
     resolve: {
         alias: {
             'vue$': 'vue/dist/vue.esm.js'
-        }
+        },
+        extensions: ['.ts', '.js', '.vue', '.json',]
     },
 };

@@ -14,6 +14,10 @@ genrule(
     name = "corejsui",
     srcs = glob([
         "ts/*.ts",
+    ]) + glob([
+        "vue/*.vue",
+    ]) + glob([
+        "sass/*.scss",
     ]) + [
         ":node_modules"
     ],
