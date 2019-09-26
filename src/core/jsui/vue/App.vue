@@ -1,7 +1,8 @@
 <template>
     <v-app>
         <AppBar
-            :company-name="companyName"></AppBar>
+            :company-name="companyName">
+        </AppBar>
 
     </v-app>
 </template>
