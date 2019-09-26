@@ -1,8 +1,12 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "strict": true,
-    "module": "es2015",
-    "moduleResolution": "node"
-  }
+    "include": [
+        "./**/*.ts",
+        "./**/*.vue"
+    ],
+    "exclude": [
+        "node_modules"
+    ],
+    "files": [
+        "vue-shims.d.ts"
+    ]
 }

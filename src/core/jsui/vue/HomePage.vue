@@ -1,22 +1,21 @@
 <template>
     <v-app>
-        <AppBar
+        <HomePageAppBar
             :company-name="companyName">
-        </AppBar>
-
+        </HomePageAppBar>
     </v-app>
 </template>
 
 <script lang="ts">
 
-import AppBar from './AppBar'
+import HomePageAppBar from './HomePageAppBar.vue'
 
 export default {
     props: [
         'companyName'
     ],
     components: {
-        AppBar
+        HomePageAppBar
     }
 }
 
