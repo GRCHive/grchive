@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -10,7 +11,12 @@ func main() {
 	r = r.Delims("[[", "]]")
 
 	// Static assets that can eventually be served by Nginx.
-	r.Static("/static/corejsui", "src/core/jsui/dist")
+	_, err := os.Stat("src/core/jsui/dist-smap")
+	if os.IsNotExist(err) {
+		r.Static("/static/corejsui", "src/core/jsui/dist-nosmap")
+	} else {
+		r.Static("/static/corejsui", "src/core/jsui/dist-smap")
+	}
 
 	// Dynamic(?) content that needs to be served by Go.
 	r.LoadHTMLGlob("src/webserver/templates/*")

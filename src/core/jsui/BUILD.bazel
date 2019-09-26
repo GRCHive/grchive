@@ -10,8 +10,8 @@ filegroup(
     ]
 )
 
-genrule(
-    name = "corejsui",
+filegroup(
+    name = "corejsui-files",
     srcs = glob([
         "ts/*.ts",
     ]) + glob([
@@ -20,17 +20,39 @@ genrule(
         "sass/*.scss",
     ]) + [
         ":node_modules"
-    ],
-    outs = [
-        "dist/main.js",
-        "dist/main.css"
-    ],
-    cmd = "\
+    ]
+)
+
+CMD = "\
         cd src/core/jsui && npx webpack && cd ../../../ && \
         for X in $(OUTS); do \
             mkdir -p `dirname $$X`; \
-            cp src/core/jsui/dist/`basename $$X` $$X; \
-        done",
-    message = "Run Webpack for corejsui",
+            FNAME=\"src/core/jsui/dist/`basename $$X`\";\
+            cp $$FNAME $$X; \
+        done"
+
+genrule(
+    name = "corejsui-nosmap",
+    srcs = [":corejsui-files"],
+    outs = [
+        "dist-nosmap/main.js",
+        "dist-nosmap/main.css"
+    ],
+    cmd = CMD,
+    message = "Run Webpack for corejsui (no smap)",
+    local=True
+)
+
+genrule(
+    name = "corejsui-smap",
+    srcs = [":corejsui-files"],
+    outs = [
+        "dist-smap/main.js",
+        "dist-smap/main.css",
+        "dist-smap/main.js.map",
+        "dist-smap/main.css.map"
+    ],
+    cmd = CMD,
+    message = "Run Webpack for corejsui (with smap)",
     local=True
 )

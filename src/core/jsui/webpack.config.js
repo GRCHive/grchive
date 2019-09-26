@@ -3,6 +3,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
+    devtool: "source-map",
     entry: {
         main: ['./ts/main.ts', './sass/main.scss']
     },
@@ -24,7 +25,6 @@ module.exports = {
                 ],
                 exclude: [ 
                     /node_modules/,
-                    /external/
                 ],
             },
             {
@@ -57,7 +57,10 @@ module.exports = {
                     options: {
                         presets: ['@babel/preset-env']
                     }
-                }
+                },
+                exclude: [ 
+                    /node_modules/,
+                ],
             }
         ]
     },

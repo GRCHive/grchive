@@ -19,6 +19,9 @@ go_binary(
     ],
     data = [
         ":templates",
-        "//src/core/jsui:corejsui",
-    ]
+    ] + select({
+        "//:production": ["//src/core/jsui:corejsui-nosmap"],
+        "//conditions:default": ["//src/core/jsui:corejsui-smap"],
+    })
+
 )
