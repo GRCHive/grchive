@@ -20,9 +20,9 @@ filegroup(
 filegroup(
     name = "corejsui-files",
     srcs = glob([
-        "ts/*.ts",
+        "ts/**/*.ts",
     ]) + glob([
-        "vue/*.vue",
+        "vue/**/*.vue",
     ]) + glob([
         "sass/*.scss",
     ]) + [

@@ -6,7 +6,7 @@ import (
 )
 
 func renderGettingStartedPage(c *gin.Context) {
-	renderContactUsPage(c)
+	c.HTML(http.StatusOK, "gettingStarted.tmpl", loadGlobalProps())
 }
 
 func renderContactUsPage(c *gin.Context) {

@@ -3,6 +3,7 @@ import vuetify from  './vuetify'
 import LandingPage from '../vue/pages/LandingPage.vue'
 import ContactUsPage from '../vue/pages/ContactUsPage.vue'
 import LoginPage from '../vue/pages/LoginPage.vue'
+import GettingStartedPage from '../vue/pages/GettingStartedPage.vue'
 
 new Vue({
     el: '#app',
@@ -10,6 +11,7 @@ new Vue({
         LandingPage,
         ContactUsPage,
         LoginPage,
+        GettingStartedPage
     },
     vuetify
 }).$mount('#app')

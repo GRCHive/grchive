@@ -1,5 +1,5 @@
 export function createGetStartedUrl() : string {
-    return createContactUsUrl();
+    return "/getting-started";
 }
 
 export function createContactUsUrl() : string {
