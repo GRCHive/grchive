@@ -26,7 +26,7 @@
                             <p
                                 class="white--text display-2 font-weight-bold above-overlay"
                             >
-                                Transform your audit process with {{ companyName }}.
+                                Simplify your audit process with {{ companyName }}.
                             </p>
                         </v-row>
 
@@ -52,7 +52,7 @@
 
 <script lang="ts">
 
-import { createGetStartedUrl, createAssetUrl} from '../ts/url'
+import { createGetStartedUrl, createAssetUrl} from '../../ts/url'
 
 export default {
     props: [

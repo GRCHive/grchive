@@ -25,7 +25,7 @@
 
 <script lang="ts">
 
-import { createContactUsUrl, createLoginUrl, createHomePageUrl } from '../ts/url'
+import { createContactUsUrl, createLoginUrl, createHomePageUrl } from '../../ts/url'
 
 export default {
     props: [

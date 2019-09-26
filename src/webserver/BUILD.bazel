@@ -12,7 +12,9 @@ go_binary(
     name = "webserver",
     srcs = [
         "main.go",
-        "config.go"
+        "config.go",
+        "url.go",
+        "pages.go"
     ],
     deps = [
         "@com_github_gin_gonic_gin//:go_default_library",

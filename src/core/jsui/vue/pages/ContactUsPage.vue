@@ -6,18 +6,14 @@
         </landing-page-app-bar>
 
         <v-content>
-            <landing-carousel
-                :company-name="companyName"
-            >
-            </landing-carousel>
+            <h1>Contact Us Pls</h1>
         </v-content>
     </v-app>
 </template>
 
 <script lang="ts">
 
-import LandingPageAppBar from './LandingPageAppBar.vue'
-import LandingCarousel from './LandingCarousel.vue'
+import LandingPageAppBar from '../components/LandingPageAppBar.vue'
 
 export default {
     props: [
@@ -25,7 +21,6 @@ export default {
     ],
     components: {
         LandingPageAppBar,
-        LandingCarousel
     }
 }
 

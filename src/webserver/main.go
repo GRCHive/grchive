@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"os"
 )
 
@@ -21,9 +20,10 @@ func main() {
 
 	// Dynamic(?) content that needs to be served by Go.
 	r.LoadHTMLGlob("src/webserver/templates/*")
-	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.tmpl", loadGlobalProps())
-	})
+	r.GET(createGetStartedUrl(), renderGettingStartedPage)
+	r.GET(createContactUsUrl(), renderContactUsPage)
+	r.GET(createHomePageUrl(), renderHomePage)
+	r.GET(createLoginUrl(), renderLoginPage)
 
 	// TODO: Configurable port?
 	r.Run(":8080")
