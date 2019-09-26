@@ -1,7 +1,7 @@
 <template>
     <section>
         <v-img
-            src="static/assets/working.jpg"
+            :src="imageUrl"
             max-height=500
             position="top center"
         >
@@ -34,7 +34,13 @@
                             justify="center"
                             class="ma-2"
                         >
-                            <v-btn class="above-overlay" color="primary">Get Started</v-btn>
+                            <v-btn 
+                                class="above-overlay"
+                                color="primary"
+                                :href="getStartedUrl"
+                            >
+                                Get Started
+                            </v-btn>
                         </v-row>
 
                     </v-col>
@@ -46,10 +52,16 @@
 
 <script lang="ts">
 
+import { createGetStartedUrl, createAssetUrl} from '../ts/url'
+
 export default {
     props: [
         'companyName'
-    ]
+    ],
+    computed:  {
+        getStartedUrl : createGetStartedUrl,
+        imageUrl: () => createAssetUrl("working.jpg")
+    }
 }
 
 </script>
