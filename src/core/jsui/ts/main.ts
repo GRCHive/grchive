@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import vuetify from  './vuetify'
-import HomePage from '../vue/HomePage.vue'
+import LandingPage from '../vue/LandingPage.vue'
 
 new Vue({
-    el: '#homepage',
+    el: '#landingpage',
     components: {
-        HomePage
+        LandingPage
     },
     vuetify
-}).$mount('#homepage')
+}).$mount('#landingpage')

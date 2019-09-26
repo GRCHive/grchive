@@ -11,6 +11,13 @@ filegroup(
 )
 
 filegroup(
+    name = "corejsui-assets",
+    srcs = glob([
+        "assets/*.jpg"
+    ])
+)
+
+filegroup(
     name = "corejsui-files",
     srcs = glob([
         "ts/*.ts",

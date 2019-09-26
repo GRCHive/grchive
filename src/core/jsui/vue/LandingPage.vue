@@ -1,21 +1,31 @@
 <template>
     <v-app>
         <landing-page-app-bar
-            :company-name="companyName">
+            :company-name="companyName"
+        >
         </landing-page-app-bar>
+
+        <v-content>
+            <landing-carousel
+                :company-name="companyName"
+            >
+            </landing-carousel>
+        </v-content>
     </v-app>
 </template>
 
 <script lang="ts">
 
-import HomePageAppBar from './HomePageAppBar.vue'
+import LandingPageAppBar from './LandingPageAppBar.vue'
+import LandingCarousel from './LandingCarousel.vue'
 
 export default {
     props: [
         'companyName'
     ],
     components: {
-        HomePageAppBar
+        LandingPageAppBar,
+        LandingCarousel
     }
 }
 

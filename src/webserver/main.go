@@ -17,6 +17,7 @@ func main() {
 	} else {
 		r.Static("/static/corejsui", "src/core/jsui/dist-smap")
 	}
+	r.Static("/static/assets", "src/core/jsui/assets")
 
 	// Dynamic(?) content that needs to be served by Go.
 	r.LoadHTMLGlob("src/webserver/templates/*")

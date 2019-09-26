@@ -1,6 +1,6 @@
 <template>
     <v-app-bar app>
-        <v-toolbar-title>{{ companyName }}</v-toolbar-title>
+        <v-toolbar-title color="primary">{{ companyName }}</v-toolbar-title>
         <div class="flex-grow-1"></div>
 
         <v-toolbar-items>
