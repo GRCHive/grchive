@@ -2,6 +2,20 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
+const cssLoaders = [
+    {
+        loader: MiniCssExtractPlugin.loader
+    },
+    'css-loader'
+]
+
+const babelLoader = {
+    loader: 'babel-loader',
+    options: {
+        presets: ['@babel/preset-env']
+    }
+}
+
 module.exports = {
     devtool: "source-map",
     entry: {
@@ -32,12 +46,13 @@ module.exports = {
                 use: 'vue-loader'
             },
             {
+                test: /\.css$/,
+                use: cssLoaders
+            },
+            {
                 test: /\.s[ac]ss$/,
                 use: [
-                    {
-                        loader: MiniCssExtractPlugin.loader
-                    },
-                    'css-loader',
+                    ...cssLoaders,
                     {
                         loader: 'sass-loader',
                         options: {
@@ -52,12 +67,7 @@ module.exports = {
             },
             {
                 test: /\.jsx?$/,
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        presets: ['@babel/preset-env']
-                    }
-                },
+                use: babelLoader,
                 exclude: [ 
                     /node_modules/,
                 ],

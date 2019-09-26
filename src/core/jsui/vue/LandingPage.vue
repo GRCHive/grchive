@@ -1,8 +1,8 @@
 <template>
     <v-app>
-        <HomePageAppBar
+        <landing-page-app-bar
             :company-name="companyName">
-        </HomePageAppBar>
+        </landing-page-app-bar>
     </v-app>
 </template>
 
