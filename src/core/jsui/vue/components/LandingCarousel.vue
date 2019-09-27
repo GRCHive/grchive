@@ -41,6 +41,14 @@
                             >
                                 Get Started
                             </v-btn>
+
+                            <v-btn 
+                                class="above-overlay"
+                                color="accent"
+                            >
+                                Learn More
+                            </v-btn>
+
                         </v-row>
 
                     </v-col>
