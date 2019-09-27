@@ -73,11 +73,3 @@ export default {
 }
 
 </script>
-
-<style scoped>
-
-.above-overlay {
-    z-index: 7;
-}
-
-</style>
