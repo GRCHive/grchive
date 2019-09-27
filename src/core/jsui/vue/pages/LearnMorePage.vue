@@ -31,7 +31,7 @@
 
                         <v-row justify="center" class="ma-4">
                             <div class="white--text subtitle-2 above-overlay" id="subtitle">
-                                {{ companyName }} is an automated audit control management solution that digitizes and simplifies your audit process.
+                                {{ companyName }} is an automated audit control management solution that digitizes and streamlines your audit process.
                                 It organizes and centralizes information about process flows and audit controls so that everyone, auditors and business managers, can obtain the information they need, faster.
                             </div>
                         </v-row>

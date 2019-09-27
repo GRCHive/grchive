@@ -29,7 +29,7 @@
                                 </v-card-title>
                                 <v-card-text class="long-text">
                                     Our engineers are hard at work getting {{ companyName }} ready for you.
-                                    Leave us your name and email address, and we will contact you with more information on how we can help you simplify your external and internal auditing processes.
+                                    Leave us your name and email address, and we will contact you with more information on how we can help you streamline your external and internal auditing processes.
                                 </v-card-text>
                                 <v-col cols=12>
                                     <collect-email :company-name="companyName"></collect-email>
