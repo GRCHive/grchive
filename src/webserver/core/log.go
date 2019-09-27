@@ -5,6 +5,10 @@ import (
 	"os"
 )
 
+func Info(args ...interface{}) {
+	glog.Infoln(args)
+}
+
 func Warning(args ...interface{}) {
 	glog.Warningln(args)
 }

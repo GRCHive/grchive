@@ -11,5 +11,5 @@ var dbConn *sqlx.DB
 func Init() {
 	envConfig := core.LoadEnvConfig()
 
-	dbConn = sqlx.MustConnect(envConfig.DatabaseDriver, envConfig.DatabaseConnString)
+	dbConn = sqlx.MustConnect("postgres", envConfig.DatabaseConnString)
 }

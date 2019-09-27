@@ -1,3 +1,2 @@
 [database]
-type = "%DB_TYPE%"
 connection = "%DB_CONN%"

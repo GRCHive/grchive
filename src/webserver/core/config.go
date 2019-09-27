@@ -13,7 +13,6 @@ type GlobalConfig struct {
 var globalConfig *GlobalConfig
 
 type EnvConfig struct {
-	DatabaseDriver     string
 	DatabaseConnString string
 }
 
@@ -41,7 +40,6 @@ func LoadEnvConfig() *EnvConfig {
 		}
 
 		envConfig = new(EnvConfig)
-		envConfig.DatabaseDriver = tomlConfig.Get("database.type").(string)
 		envConfig.DatabaseConnString = tomlConfig.Get("database.connection").(string)
 	}
 

@@ -1,3 +1,2 @@
 [database]
-type = "postgres"
 connection = "user=DEVUSER dbname=audit sslmode=disable"
