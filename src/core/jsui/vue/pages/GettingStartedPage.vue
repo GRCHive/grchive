@@ -13,7 +13,9 @@
                     class="max-height"
                 >
                         <v-card width="80%">
-                            <v-row>
+                            <v-row
+                                align="center"
+                            >
                                 <v-col cols=8>
                                     <v-card-title>
                                         Thank you for your interest!
