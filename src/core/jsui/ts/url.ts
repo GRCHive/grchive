@@ -18,6 +18,10 @@ export function createAssetUrl(asset : string) : string {
     return "/static/assets/" + asset;
 }
 
+export function createLearnMoreUrl() : string {
+    return "/learn";
+}
+
 export function createMailtoUrl(user : string, domain : string) : Object {
     const email = createEmailAddress(user, domain)
     return Object.freeze({

@@ -42,6 +42,7 @@
                         </v-card-title>
                         <v-card-text class="long-text">
                             Can't find an email address that describes your concern?
+                            Don't want to open up your email client?
                             No problem!
                             Send us a message using the form below and we will take care of it.
                         </v-card-text>

@@ -15,10 +15,7 @@
             justify="center"
             class="max-height"
         >
-            <p 
-                class="white--text display-2 font-weight-bold above-overlay"
-                id="get-started-label"
-            >
+            <p class="white--text display-2 font-weight-bold above-overlay">
                 {{ text }}
             </p>
         </v-row>

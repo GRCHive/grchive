@@ -26,7 +26,7 @@
                             <p
                                 class="white--text display-2 font-weight-bold above-overlay"
                             >
-                                Simplify your audit process with {{ companyName }}.
+                                Streamline your audit process with {{ companyName }}.
                             </p>
                         </v-row>
 
@@ -45,6 +45,7 @@
                             <v-btn 
                                 class="above-overlay ma-1"
                                 color="accent"
+                                :href="learnMoreUrl"
                             >
                                 Learn More
                             </v-btn>
@@ -60,7 +61,7 @@
 
 <script lang="ts">
 
-import { createGetStartedUrl, createAssetUrl} from '../../ts/url'
+import { createGetStartedUrl, createLearnMoreUrl, createAssetUrl} from '../../ts/url'
 
 export default {
     props: [
@@ -68,7 +69,8 @@ export default {
     ],
     computed:  {
         getStartedUrl : createGetStartedUrl,
-        imageUrl: () => createAssetUrl("working.jpg")
+        imageUrl: () => createAssetUrl("working.jpg"),
+        learnMoreUrl: createLearnMoreUrl,
     }
 }
 

@@ -15,3 +15,7 @@ func createHomePageUrl() string {
 func createLoginUrl() string {
 	return "/login"
 }
+
+func createLearnMoreUrl() string {
+	return "/learn"
+}

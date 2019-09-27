@@ -20,3 +20,7 @@ func renderHomePage(c *gin.Context) {
 func renderLoginPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.tmpl", loadGlobalProps())
 }
+
+func renderLearnMorePage(c *gin.Context) {
+	c.HTML(http.StatusOK, "learnMore.tmpl", loadGlobalProps())
+}

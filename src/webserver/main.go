@@ -24,6 +24,7 @@ func main() {
 	r.GET(createContactUsUrl(), renderContactUsPage)
 	r.GET(createHomePageUrl(), renderHomePage)
 	r.GET(createLoginUrl(), renderLoginPage)
+	r.GET(createLearnMoreUrl(), renderLearnMorePage)
 
 	// TODO: Configurable port?
 	r.Run(":8080")
