@@ -25,12 +25,12 @@
                             </div>
 
                             <div class="text--primary headline my-2">
-                                Interested in our product?&nbsp;
+                                Interested in our product?
                                 <a :href="salesEmail.mailto">{{ salesEmail.email }}</a>
                             </div>
 
                             <div class="text--primary headline my-2">
-                                Interested in working with us?&nbsp;
+                                Interested in working with us?
                                 <a :href="careerEmail.mailto">{{ careerEmail.email }}</a>
                             </div>
                         </v-card-text>
