@@ -18,7 +18,14 @@ This document will assume that the git checkout directory is an set in an enviro
     cd $SRC/external
     ./bootstrap_blaze.sh
     ```
-- Add the Blaze binary to your path (`external/bazel/output`).
+- Add the Blaze output directory to your `$PATH` (`$SRC/external/bazel/output`).
+- Download Flyway.
+
+    ```
+    cd $SRC/external
+    ./download_flyway.sh
+    ```
+- Add the Flyway directory to your `$PATH` (`$SRC/external/flyway`).
 
 ## Build and Run
 
