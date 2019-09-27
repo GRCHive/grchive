@@ -9,6 +9,7 @@ This document will assume that the git checkout directory is an set in an enviro
 - zip
 - unzip
 - go 1.13+ 
+- PostgreSQL
 
 ## Setup
 
@@ -26,6 +27,18 @@ This document will assume that the git checkout directory is an set in an enviro
     ./download_flyway.sh
     ```
 - Add the Flyway directory to your `$PATH` (`$SRC/external/flyway`).
+
+## Setup Dev Environment
+
+- Setup PostgreSQL
+    ```
+    cd $SRC/devops/database
+    ./init_dev_db.sh
+    ```
+- Create the PostgreSQL schema
+    ```
+    flyway -configFiles=./flyway/dev-flyway.conf migrate
+    ```
 
 ## Build and Run
 
