@@ -11,3 +11,7 @@
 .above-overlay {
     z-index: 7;
 }
+
+.long-text {
+    word-break: keep-all;
+}

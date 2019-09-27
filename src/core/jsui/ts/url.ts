@@ -17,3 +17,15 @@ export function createLoginUrl() : string {
 export function createAssetUrl(asset : string) : string {
     return "/static/assets/" + asset;
 }
+
+export function createMailtoUrl(user : string, domain : string) : Object {
+    const email = createEmailAddress(user, domain)
+    return Object.freeze({
+        mailto: "mailto:" + email,
+        email: email
+    });
+}
+
+export function createEmailAddress(user : string, domain : string) : string {
+    return user + "@" + domain;
+}

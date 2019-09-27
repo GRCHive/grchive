@@ -7,5 +7,6 @@ import (
 func loadGlobalProps() gin.H {
 	return gin.H{
 		"companyName": "Audit Stuff",
+		"domain":      "auditstuff.com",
 	}
 }
