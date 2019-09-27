@@ -35,7 +35,7 @@
                             class="ma-2"
                         >
                             <v-btn 
-                                class="above-overlay"
+                                class="above-overlay ma-1"
                                 color="primary"
                                 :href="getStartedUrl"
                             >
@@ -43,7 +43,7 @@
                             </v-btn>
 
                             <v-btn 
-                                class="above-overlay"
+                                class="above-overlay ma-1"
                                 color="accent"
                             >
                                 Learn More
