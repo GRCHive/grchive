@@ -11,7 +11,7 @@
             Next
         </v-btn>
 
-        <p class="body-1 ma-2">
+        <p class="body-1 my-2">
             Don't have an account?
             <a :href="getStartedUrl">Get started.</a>
         </p>
