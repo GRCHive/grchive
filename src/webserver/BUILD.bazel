@@ -8,20 +8,74 @@ filegroup(
     ])
 )
 
+genrule(
+    name = "config_files",
+    srcs = select({
+        "//:production": ["config/prod.toml"],
+        "//conditions:default": ["config/dev.toml"],
+    }),
+    outs = ["config/config.toml"],
+    cmd = "cp $< $@"
+)
+
+go_library(
+    name = "webserver_core_library",
+    srcs = [
+        "core/config.go",
+        "core/log.go",
+        "core/url.go",
+    ],
+    deps = [
+        "@com_github_golang_glog//:go_default_library",
+        "@com_github_pelletier_go_toml//:go_default_library"
+    ],
+    importpath = "gitlab.com/b3h47pte/audit-stuff/core"
+)
+
+go_library(
+    name = "webserver_database_library",
+    srcs = [
+        "database/database.go",
+        "database/gettingStartedInterest.go",
+    ],
+    deps = [
+        "@com_github_jmoiron_sqlx//:go_default_library", 
+        "@com_github_lib_pq//:go_default_library", 
+        ":webserver_core_library"
+    ],
+    importpath = "gitlab.com/b3h47pte/audit-stuff/database"
+)
+
+go_library(
+    name = "webserver_rest_library",
+    srcs = [
+        "rest/rest.go",
+        "rest/gettingStarted.go"
+    ],
+    deps = [
+        "@com_github_gin_gonic_gin//:go_default_library",
+        ":webserver_core_library",
+        ":webserver_database_library"
+    ],
+    importpath = "gitlab.com/b3h47pte/audit-stuff/rest"
+)
+
 go_binary(
     name = "webserver",
     srcs = [
         "main.go",
-        "config.go",
-        "url.go",
-        "pages.go"
+        "pages.go",
     ],
     deps = [
         "@com_github_gin_gonic_gin//:go_default_library",
+        ":webserver_core_library",
+        ":webserver_database_library",
+        ":webserver_rest_library"
     ],
     data = [
         ":templates",
-        "//src/core/jsui:corejsui-assets"
+        "//src/core/jsui:corejsui-assets",
+        ":config_files"
     ] + select({
         "//:production": ["//src/core/jsui:corejsui-nosmap"],
         "//conditions:default": ["//src/core/jsui:corejsui-smap"],

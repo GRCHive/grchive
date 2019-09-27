@@ -73,6 +73,30 @@ go_repository(
     tag = "v8.18.2"
 )
 
+go_repository(
+    name = "com_github_golang_glog",
+    importpath = "github.com/golang/glog",
+    commit = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
+)
+
+go_repository(
+    name = "com_github_jmoiron_sqlx",
+    importpath = "github.com/jmoiron/sqlx",
+    tag = "v1.2.0"
+)
+
+go_repository(
+    name = "com_github_lib_pq",
+    importpath = "github.com/lib/pq",
+    tag = "v1.2.0"
+)
+
+go_repository(
+    name = "com_github_pelletier_go_toml",
+    importpath = "github.com/pelletier/go-toml",
+    tag = "v1.4.0"
+)
+
 # NODE
 http_archive(
     name = "build_bazel_rules_nodejs",
