@@ -18,17 +18,24 @@ const (
 	LearnMorePageTemplateKey      templateKey = "LEARNMORE"
 )
 
+func defaultLoadTemplateWithBase(file string) *template.Template {
+	return template.Must(
+		template.New("").
+			Delims("[[", "]]").
+			ParseFiles("src/webserver/templates/base.tmpl", file))
+}
+
 func registerTemplates() {
 	allTemplates[GettingStartedPageTemplateKey] =
-		template.Must(template.New("").Delims("[[", "]]").ParseFiles("src/webserver/templates/gettingStarted.tmpl"))
+		defaultLoadTemplateWithBase("src/webserver/templates/gettingStarted.tmpl")
 	allTemplates[ContactUsPageTemplateKey] =
-		template.Must(template.New("").Delims("[[", "]]").ParseFiles("src/webserver/templates/contactUs.tmpl"))
+		defaultLoadTemplateWithBase("src/webserver/templates/contactUs.tmpl")
 	allTemplates[LandingPageTemplateKey] =
-		template.Must(template.New("").Delims("[[", "]]").ParseFiles("src/webserver/templates/index.tmpl"))
+		defaultLoadTemplateWithBase("src/webserver/templates/index.tmpl")
 	allTemplates[LoginPageTemplateKey] =
-		template.Must(template.New("").Delims("[[", "]]").ParseFiles("src/webserver/templates/login.tmpl"))
+		defaultLoadTemplateWithBase("src/webserver/templates/login.tmpl")
 	allTemplates[LearnMorePageTemplateKey] =
-		template.Must(template.New("").Delims("[[", "]]").ParseFiles("src/webserver/templates/learnMore.tmpl"))
+		defaultLoadTemplateWithBase("src/webserver/templates/learnMore.tmpl")
 }
 
 func retrieveTemplate(name templateKey) *template.Template {
