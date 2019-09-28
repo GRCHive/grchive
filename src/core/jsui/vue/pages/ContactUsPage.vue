@@ -33,6 +33,11 @@
                                 Interested in working with us?
                                 <a :href="careerEmail.mailto">{{ careerEmail.email }}</a>
                             </div>
+
+                            <div class="text--primary headline my-2">
+                                Need technical or audit support?
+                                <a :href="supportEmail.mailto">{{ supportEmail.email }}</a>
+                            </div>
                         </v-card-text>
                     </v-card>
 
@@ -85,6 +90,9 @@ export default Vue.extend({
         },
         careerEmail() : Object {
             return createMailtoUrl('careers', this.domain)
+        },
+        supportEmail() : Object {
+            return createMailtoUrl('support', this.domain)
         }
     }
 })
