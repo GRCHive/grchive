@@ -26,7 +26,7 @@ go_library(
         "core/url.go",
     ],
     deps = [
-        "@com_github_golang_glog//:go_default_library",
+        "@io_k8s_klog//:go_default_library",
         "@com_github_pelletier_go_toml//:go_default_library"
     ],
     importpath = "gitlab.com/b3h47pte/audit-stuff/core"
@@ -53,7 +53,7 @@ go_library(
         "rest/gettingStarted.go"
     ],
     deps = [
-        "@com_github_gin_gonic_gin//:go_default_library",
+        "@com_github_gorilla_mux//:go_default_library",
         ":webserver_core_library",
         ":webserver_database_library"
     ],
@@ -65,9 +65,10 @@ go_binary(
     srcs = [
         "main.go",
         "pages.go",
+        "templates.go"
     ],
     deps = [
-        "@com_github_gin_gonic_gin//:go_default_library",
+        "@com_github_gorilla_mux//:go_default_library",
         ":webserver_core_library",
         ":webserver_database_library",
         ":webserver_rest_library"

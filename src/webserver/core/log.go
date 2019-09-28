@@ -1,19 +1,19 @@
 package core
 
 import (
-	"github.com/golang/glog"
+	"k8s.io/klog"
 	"os"
 )
 
 func Info(args ...interface{}) {
-	glog.Infoln(args)
+	klog.Infoln(args)
 }
 
 func Warning(args ...interface{}) {
-	glog.Warningln(args)
+	klog.Warningln(args)
 }
 
 func Error(args ...interface{}) {
-	glog.Errorln(args)
+	klog.Errorln(args)
 	os.Exit(1)
 }

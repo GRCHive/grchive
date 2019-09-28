@@ -1,37 +1,66 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"fmt"
+	"github.com/gorilla/mux"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
 	"gitlab.com/b3h47pte/audit-stuff/rest"
+	"net/http"
 	"os"
+	"time"
 )
+
+func loggedRequestHandler(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		core.Info(
+			"Remote: ", r.RemoteAddr,
+			" URL: ", r.URL,
+			" Method: ", r.Method)
+		handler.ServeHTTP(w, r)
+	})
+}
 
 func main() {
 	database.Init()
+	registerTemplates()
 
-	r := gin.Default()
-	r = r.Delims("[[", "]]")
+	r := mux.NewRouter()
 
 	// Static assets that can eventually be served by Nginx.
 	_, err := os.Stat("src/core/jsui/dist-smap")
 	if os.IsNotExist(err) {
-		r.Static("/static/corejsui", "src/core/jsui/dist-nosmap")
+		r.PathPrefix("/static/corejsui/").Handler(
+			http.StripPrefix(
+				"/static/corejsui/",
+				http.FileServer(http.Dir("src/core/jsui/dist-nosmap"))))
 	} else {
-		r.Static("/static/corejsui", "src/core/jsui/dist-smap")
+		r.PathPrefix("/static/corejsui/").Handler(
+			http.StripPrefix(
+				"/static/corejsui/",
+				http.FileServer(http.Dir("src/core/jsui/dist-smap"))))
 	}
-	r.Static("/static/assets", "src/core/jsui/assets")
+	r.PathPrefix("/static/assets/").Handler(
+		http.StripPrefix(
+			"/static/assets/",
+			http.FileServer(http.Dir("src/core/jsui/assets"))))
 
 	// Dynamic(?) content that needs to be served by Go.
-	r.LoadHTMLGlob("src/webserver/templates/*")
-	r.GET(core.CreateGetStartedUrl(), renderGettingStartedPage)
-	r.GET(core.CreateContactUsUrl(), renderContactUsPage)
-	r.GET(core.CreateHomePageUrl(), renderHomePage)
-	r.GET(core.CreateLoginUrl(), renderLoginPage)
-	r.GET(core.CreateLearnMoreUrl(), renderLearnMorePage)
+	r.HandleFunc(core.CreateGetStartedUrl(), renderGettingStartedPage).Methods("GET")
+	r.HandleFunc(core.CreateContactUsUrl(), renderContactUsPage).Methods("GET")
+	r.HandleFunc(core.CreateHomePageUrl(), renderHomePage).Methods("GET")
+	r.HandleFunc(core.CreateLoginUrl(), renderLoginPage).Methods("GET")
+	r.HandleFunc(core.CreateLearnMoreUrl(), renderLearnMorePage).Methods("GET")
 	rest.RegisterPaths(r)
 
-	// TODO: Configurable port?
-	r.Run(":8080")
+	//// TODO: Configurable port?
+	srv := &http.Server{
+		Handler:      loggedRequestHandler(r),
+		Addr:         ":8080",
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+	if err = srv.ListenAndServe(); err != nil {
+		core.Error(err.Error())
+	}
 }

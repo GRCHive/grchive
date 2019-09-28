@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
 	"net/http"
@@ -13,23 +13,31 @@ type tGettingStartedInterest struct {
 	Email string `form:"email" binding:"required"`
 }
 
-func postGettingStartedInterest(c *gin.Context) {
+func postGettingStartedInterest(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
 	// Retrieve the client's name and email from the input form.
-	var data tGettingStartedInterest
-	if err := c.ShouldBind(&data); err != nil {
-		core.Warning("Failed to bind data.")
-		c.JSON(http.StatusBadRequest, struct{}{})
+	if err := r.ParseForm(); err != nil || len(r.PostForm) == 0 {
+		core.Warning("Failed to parse form data.")
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
 		return
 	}
 
-	data.Name = strings.TrimSpace(data.Name)
-	data.Name = strings.TrimSpace(data.Name)
+	nameData := r.PostForm["name"]
+	emailData := r.PostForm["email"]
 
-	if data.Name == "" || data.Email == "" {
+	if len(nameData) == 0 || len(emailData) == 0 {
 		core.Warning("Empty name or email.")
-		c.JSON(http.StatusBadRequest, struct{}{})
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
 		return
 	}
+
+	var data tGettingStartedInterest
+	data.Name = strings.TrimSpace(nameData[0])
+	data.Email = strings.TrimSpace(emailData[0])
 
 	// Save name and email to the database.
 	isDuplicate, err := database.AddNewGettingStartedInterest(data.Name, data.Email)
@@ -39,17 +47,19 @@ func postGettingStartedInterest(c *gin.Context) {
 	if err != nil {
 		if isDuplicate {
 			core.Warning("Detected duplicate entry.")
-			c.JSON(http.StatusBadRequest, struct {
+			w.WriteHeader(http.StatusBadRequest)
+			jsonWriter.Encode(struct {
 				IsDuplicate bool
 			}{
 				IsDuplicate: true,
 			})
 		} else {
 			core.Warning("Failed to add getting started interest.")
-			c.JSON(http.StatusInternalServerError, struct{}{})
+			w.WriteHeader(http.StatusInternalServerError)
+			jsonWriter.Encode(struct{}{})
 		}
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{})
+	jsonWriter.Encode(struct{}{})
 }
