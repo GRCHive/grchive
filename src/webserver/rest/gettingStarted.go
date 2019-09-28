@@ -5,6 +5,7 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
 	"net/http"
+	"strings"
 )
 
 type tGettingStartedInterest struct {
@@ -20,6 +21,9 @@ func postGettingStartedInterest(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, struct{}{})
 		return
 	}
+
+	data.Name = strings.TrimSpace(data.Name)
+	data.Name = strings.TrimSpace(data.Name)
 
 	if data.Name == "" || data.Email == "" {
 		core.Warning("Empty name or email.")
