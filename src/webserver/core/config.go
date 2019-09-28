@@ -5,12 +5,15 @@ import (
 	"io/ioutil"
 )
 
-type GlobalConfig struct {
-	CompanyName string
-	Domain      string
+var tomlConfig *toml.Tree
+
+type TemplateConfig struct {
+	CompanyName  string
+	Domain       string
+	RecaptchaKey string
 }
 
-var globalConfig *GlobalConfig
+var templateConfig *TemplateConfig
 
 type EnvConfig struct {
 	DatabaseConnString string
@@ -18,27 +21,34 @@ type EnvConfig struct {
 
 var envConfig *EnvConfig
 
-func LoadGlobalProps() *GlobalConfig {
-	if globalConfig == nil {
-		globalConfig = &GlobalConfig{
-			CompanyName: "Audit Stuff",
-			Domain:      "auditstuff.com",
-		}
-	}
-	return globalConfig
-}
-
-func LoadEnvConfig() *EnvConfig {
-	if envConfig == nil {
+func loadTomlConfig() {
+	if tomlConfig == nil {
 		dat, err := ioutil.ReadFile("src/webserver/config/config.toml")
 		if err != nil {
 			Error(err.Error())
 		}
-		tomlConfig, terr := toml.Load(string(dat))
-		if terr != nil {
+		tomlConfig, err = toml.Load(string(dat))
+		if err != nil {
 			Error(err.Error())
 		}
+	}
+}
 
+func LoadTemplateConfig() *TemplateConfig {
+	loadTomlConfig()
+	if templateConfig == nil {
+		templateConfig = &TemplateConfig{
+			CompanyName:  "Audit Stuff",
+			Domain:       "auditstuff.com",
+			RecaptchaKey: tomlConfig.Get("recaptcha.client_key").(string),
+		}
+	}
+	return templateConfig
+}
+
+func LoadEnvConfig() *EnvConfig {
+	loadTomlConfig()
+	if envConfig == nil {
 		envConfig = new(EnvConfig)
 		envConfig.DatabaseConnString = tomlConfig.Get("database.connection").(string)
 	}

@@ -119,7 +119,7 @@ export default Vue.extend({
                 }
             }).finally(() => {
                 this.$data.showSnack = true;
-            });
+            })
         },
         createContactUsUrl
     }

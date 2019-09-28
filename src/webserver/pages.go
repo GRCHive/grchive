@@ -10,7 +10,7 @@ func renderGettingStartedPage(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			core.LoadGlobalProps())
+			core.LoadTemplateConfig())
 }
 
 func renderContactUsPage(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +18,7 @@ func renderContactUsPage(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			core.LoadGlobalProps())
+			core.LoadTemplateConfig())
 }
 
 func renderHomePage(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +26,7 @@ func renderHomePage(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			core.LoadGlobalProps())
+			core.LoadTemplateConfig())
 }
 
 func renderLoginPage(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +34,7 @@ func renderLoginPage(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			core.LoadGlobalProps())
+			core.LoadTemplateConfig())
 }
 
 func renderLearnMorePage(w http.ResponseWriter, r *http.Request) {
@@ -42,5 +42,5 @@ func renderLearnMorePage(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			core.LoadGlobalProps())
+			core.LoadTemplateConfig())
 }
