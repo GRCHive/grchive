@@ -38,9 +38,8 @@ func LoadTemplateConfig() *TemplateConfig {
 	loadTomlConfig()
 	if templateConfig == nil {
 		templateConfig = &TemplateConfig{
-			CompanyName:  "Audit Stuff",
-			Domain:       "auditstuff.com",
-			RecaptchaKey: tomlConfig.Get("recaptcha.client_key").(string),
+			CompanyName: "Audit Stuff",
+			Domain:      "auditstuff.com",
 		}
 	}
 	return templateConfig

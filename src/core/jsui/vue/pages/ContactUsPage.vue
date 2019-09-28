@@ -38,9 +38,15 @@
                                 Need technical or audit support?
                                 <a :href="supportEmail.mailto">{{ supportEmail.email }}</a>
                             </div>
+
+                            <div class="text--primary headline my-2">
+                                All other inquiries:
+                                <a :href="contactEmail.mailto">{{ contactEmail.email }}</a>
+                            </div>
                         </v-card-text>
                     </v-card>
 
+                    <!-- Hide for now since I don't want to deal with doing the whole SMTP stuff.
                     <v-card width="30%" class="ma-4">
                         <v-card-title>
                             Send us a Message
@@ -56,6 +62,7 @@
                             <message-us></message-us>
                         </div>
                     </v-card>
+                    -->
                 </v-row>
             </v-container>
 
@@ -93,6 +100,9 @@ export default Vue.extend({
         },
         supportEmail() : Object {
             return createMailtoUrl('support', this.domain)
+        },
+        contactEmail() : Object {
+            return createMailtoUrl('contact', this.domain)
         }
     }
 })
