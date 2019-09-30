@@ -25,17 +25,17 @@
 
 <script lang="ts">
 
-import { createContactUsUrl, createLoginUrl, createHomePageUrl } from '../../ts/url'
+import { contactUsUrl, loginPageUrl, homePageUrl } from '../../ts/url'
 
 export default {
     props: [
         'companyName'
     ],
-    computed:  {
-        contactUsUrl: createContactUsUrl,
-        homePageUrl: createHomePageUrl,
-        loginPageUrl: createLoginUrl
-    }
+    data: () => ({
+        contactUsUrl,
+        loginPageUrl,
+        homePageUrl
+    })
 }
 
 </script>

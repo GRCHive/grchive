@@ -1,12 +1,19 @@
 <template>
-    <v-form class="ma-4">
+    <v-form class="ma-4" v-model="formValid" ref="form">
         <v-text-field
+            v-model="email"
             label="Email"
+            type="email"
             filled
+            :rules="[rules.required, rules.createMaxLength(320), rules.email]"
+            required
         ></v-text-field>
 
         <v-btn
             color="success"
+            class="my-2"
+            :disabled="!formValid || !email"
+            @click="submit"
         >
             Next
         </v-btn>
@@ -20,13 +27,23 @@
 
 <script lang="ts">
 
-import { createGetStartedUrl } from '../../ts/url'
+import { getStartedUrl } from '../../ts/url'
+import * as rules from "../../ts/formRules"
 
 export default {
-    computed: {
-        getStartedUrl() : string {
-            return createGetStartedUrl();
-        },
+    props: {
+        csrf: String
+    },
+    data: () => ({
+        getStartedUrl,
+        rules,
+        email: undefined,
+        formValid: false,
+    }),
+    methods: {
+        submit() {
+
+        }
     }
 }
 

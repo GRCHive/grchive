@@ -6,5 +6,6 @@ import (
 )
 
 func RegisterPaths(r *mux.Router) {
-	r.HandleFunc(core.CreateGetStartedUrl(), postGettingStartedInterest).Methods("POST")
+	r.HandleFunc(core.GetStartedUrl, postGettingStartedInterest).Methods("POST")
+	r.HandleFunc(core.LoginUrl, postLogin).Methods("POST")
 }

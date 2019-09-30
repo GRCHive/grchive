@@ -1,26 +1,13 @@
-export function createGetStartedUrl() : string {
-    return "/getting-started";
-}
-
-export function createContactUsUrl() : string {
-    return "/contact-us";
-}
-
-export function createHomePageUrl() : string {
-    return "/";
-}
-
-export function createLoginUrl() : string {
-    return "/login";
-}
+export const getStartedUrl : string = "/getting-started";
+export const contactUsUrl : string = "/contact-us";
+export const homePageUrl : string = "/";
+export const loginPageUrl : string = "/login";
 
 export function createAssetUrl(asset : string) : string {
     return "/static/assets/" + asset;
 }
 
-export function createLearnMoreUrl() : string {
-    return "/learn";
-}
+export const learnMoreUrl : string = "/learn";
 
 export function createMailtoUrl(user : string, domain : string) : Object {
     const email = createEmailAddress(user, domain)

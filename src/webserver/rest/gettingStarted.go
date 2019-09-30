@@ -62,7 +62,7 @@ func postGettingStartedInterest(w http.ResponseWriter, r *http.Request) {
 			jsonWriter.Encode(struct {
 				IsDuplicate bool
 			}{
-				IsDuplicate: true,
+				true,
 			})
 		} else {
 			core.Warning("Failed to add getting started interest: " + data.Email)

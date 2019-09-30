@@ -68,7 +68,7 @@
 <script lang="ts">
 
 import LandingPageAppBar from '../components/LandingPageAppBar.vue'
-import { createAssetUrl, createGetStartedUrl, createContactUsUrl } from '../../ts/url'
+import { createAssetUrl, getStartedUrl, contactUsUrl } from '../../ts/url'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -82,9 +82,7 @@ export default Vue.extend({
         bannerImageUrl() : string {
             return createAssetUrl('generic-banner4.jpg')
         },
-        getStartedUrl : createGetStartedUrl,
-        contactUsUrl : createContactUsUrl
-    }
+    },
 })
 
 </script>

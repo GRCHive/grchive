@@ -25,9 +25,16 @@ go_library(
         "core/log.go",
         "core/url.go",
         "core/validate.go",
+        "core/parser.go",
+        "core/csrf.go",
+        "core/structs.go",
+        "core/maps.go",
+        "core/session.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",
+        "@com_github_google_uuid//:go_default_library",
+        "@com_github_gorilla_sessions//:go_default_library",
         "@com_github_pelletier_go_toml//:go_default_library"
     ],
     importpath = "gitlab.com/b3h47pte/audit-stuff/core"
@@ -38,6 +45,7 @@ go_library(
     srcs = [
         "database/database.go",
         "database/gettingStartedInterest.go",
+        "database/samlIdp.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 
@@ -51,7 +59,8 @@ go_library(
     name = "webserver_rest_library",
     srcs = [
         "rest/rest.go",
-        "rest/gettingStarted.go"
+        "rest/gettingStarted.go",
+        "rest/login.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",

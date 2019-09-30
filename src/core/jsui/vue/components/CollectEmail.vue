@@ -46,7 +46,7 @@
             <v-btn
                 color="primary"
                 v-if="snackShowContact"
-                :href="createContactUsUrl()"
+                :href="contactUsUrl"
             >
                 Contact Us
             </v-btn>
@@ -64,7 +64,7 @@
 <script lang="ts">
 
 import * as rules from "../../ts/formRules"
-import { createContactUsUrl } from "../../ts/url"
+import { contactUsUrl } from "../../ts/url"
 import axios from 'axios';
 import Vue from 'vue';
 
@@ -77,6 +77,7 @@ export default Vue.extend({
         }
     },
     data: () => ({
+        contactUsUrl,
         name: undefined,
         email: undefined,
         agree: false,
@@ -118,8 +119,7 @@ export default Vue.extend({
             }).finally(() => {
                 this.$data.showSnack = true;
             })
-        },
-        createContactUsUrl
+        }
     }
 });
 

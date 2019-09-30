@@ -6,11 +6,12 @@ import (
 )
 
 func renderGettingStartedPage(w http.ResponseWriter, r *http.Request) {
+	params, _ := core.AddCSRFTokenToRequest(w, r, core.StructToMap(*core.LoadTemplateConfig()))
 	retrieveTemplate(GettingStartedPageTemplateKey).
 		ExecuteTemplate(
 			w,
 			"base",
-			core.LoadTemplateConfig())
+			params)
 }
 
 func renderContactUsPage(w http.ResponseWriter, r *http.Request) {
@@ -30,11 +31,12 @@ func renderHomePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func renderLoginPage(w http.ResponseWriter, r *http.Request) {
+	params, _ := core.AddCSRFTokenToRequest(w, r, core.StructToMap(*core.LoadTemplateConfig()))
 	retrieveTemplate(LoginPageTemplateKey).
 		ExecuteTemplate(
 			w,
 			"base",
-			core.LoadTemplateConfig())
+			params)
 }
 
 func renderLearnMorePage(w http.ResponseWriter, r *http.Request) {

@@ -19,7 +19,7 @@
                         <v-card-title>
                             Login
                         </v-card-title>
-                        <login-form></login-form>
+                        <login-form :csrf="csrf"></login-form>
                     </v-card>
                 </v-row>
             </v-container>
@@ -38,7 +38,8 @@ import { createAssetUrl } from '../../ts/url'
 
 export default {
     props: [
-        'companyName'
+        'companyName',
+        'csrf'
     ],
     components: {
         LandingPageAppBar,

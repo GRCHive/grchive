@@ -1,2 +1,18 @@
 [database]
 connection = "%DB_CONN%"
+
+[login]
+url = "https://dev-578359.okta.com/oauth2/v1/authorize"
+
+[login.params]
+client_id = "%OKTA_CLIENT_ID%"
+response_type = "code" 
+response_mode = "fragment"
+scope = "openid"
+redirect_uri = "https://auditstuff.com/authorization-code/callback"
+
+[security]
+session_keys = [
+    TODO,
+    TODO
+]

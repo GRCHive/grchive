@@ -61,16 +61,18 @@
 
 <script lang="ts">
 
-import { createGetStartedUrl, createLearnMoreUrl, createAssetUrl} from '../../ts/url'
+import { getStartedUrl, learnMoreUrl, createAssetUrl} from '../../ts/url'
 
 export default {
     props: [
         'companyName'
     ],
+    data: () => ({
+        getStartedUrl,
+        learnMoreUrl
+    }),
     computed:  {
-        getStartedUrl : createGetStartedUrl,
         imageUrl: () => createAssetUrl("working.jpg"),
-        learnMoreUrl: createLearnMoreUrl,
     }
 }
 

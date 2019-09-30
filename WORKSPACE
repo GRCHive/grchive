@@ -43,6 +43,24 @@ go_repository(
 )
 
 go_repository(
+    name = "com_github_gorilla_sessions",
+    importpath = "github.com/gorilla/Sessions",
+    tag = "v1.2.0"
+)
+
+go_repository(
+    name = "com_github_gorilla_securecookie",
+    importpath = "github.com/gorilla/securecookie",
+    tag = "v1.1.1"
+)
+
+go_repository(
+    name = "com_github_google_uuid",
+    importpath = "github.com/google/uuid",
+    tag = "v1.1.1"
+)
+
+go_repository(
     name = "io_k8s_klog",
     importpath = "k8s.io/klog",
     tag = "v1.0.0"

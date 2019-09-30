@@ -45,11 +45,11 @@ func main() {
 			http.FileServer(http.Dir("src/core/jsui/assets"))))
 
 	// Dynamic(?) content that needs to be served by Go.
-	r.HandleFunc(core.CreateGetStartedUrl(), renderGettingStartedPage).Methods("GET")
-	r.HandleFunc(core.CreateContactUsUrl(), renderContactUsPage).Methods("GET")
-	r.HandleFunc(core.CreateHomePageUrl(), renderHomePage).Methods("GET")
-	r.HandleFunc(core.CreateLoginUrl(), renderLoginPage).Methods("GET")
-	r.HandleFunc(core.CreateLearnMoreUrl(), renderLearnMorePage).Methods("GET")
+	r.HandleFunc(core.GetStartedUrl, renderGettingStartedPage).Methods("GET")
+	r.HandleFunc(core.ContactUsUrl, renderContactUsPage).Methods("GET")
+	r.HandleFunc(core.HomePageUrl, renderHomePage).Methods("GET")
+	r.HandleFunc(core.LoginUrl, renderLoginPage).Methods("GET")
+	r.HandleFunc(core.LearnMoreUrl, renderLearnMorePage).Methods("GET")
 	rest.RegisterPaths(r)
 
 	//// TODO: Configurable port?
