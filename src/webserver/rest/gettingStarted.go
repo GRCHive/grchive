@@ -39,6 +39,17 @@ func postGettingStartedInterest(w http.ResponseWriter, r *http.Request) {
 	data.Name = strings.TrimSpace(nameData[0])
 	data.Email = strings.TrimSpace(emailData[0])
 
+	// Validate email. If email validation fails then return an error.
+	// Note that the frontend should check for this so if this fails, chances
+	// are this was just a raw POST request so probably don't need to care
+	// about trying to inform the user.
+	if !core.ValidateEmailFormat(data.Email) {
+		core.Warning("Detected invalid email: " + data.Email)
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
 	// Save name and email to the database.
 	isDuplicate, err := database.AddNewGettingStartedInterest(data.Name, data.Email)
 
@@ -46,7 +57,7 @@ func postGettingStartedInterest(w http.ResponseWriter, r *http.Request) {
 	// Otherwise, our service probably failed somewhere which hopefully got logged.
 	if err != nil {
 		if isDuplicate {
-			core.Warning("Detected duplicate entry.")
+			core.Warning("Detected duplicate entry: " + data.Email)
 			w.WriteHeader(http.StatusBadRequest)
 			jsonWriter.Encode(struct {
 				IsDuplicate bool
@@ -54,7 +65,7 @@ func postGettingStartedInterest(w http.ResponseWriter, r *http.Request) {
 				IsDuplicate: true,
 			})
 		} else {
-			core.Warning("Failed to add getting started interest.")
+			core.Warning("Failed to add getting started interest: " + data.Email)
 			w.WriteHeader(http.StatusInternalServerError)
 			jsonWriter.Encode(struct{}{})
 		}

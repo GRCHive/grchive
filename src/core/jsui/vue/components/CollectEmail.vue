@@ -4,8 +4,7 @@
             v-model="name"
             label="Name"
             filled
-            counter="100"
-            :rules="[rules.required, rules.createMaxLength(100)]"
+            :rules="[rules.required, rules.createMaxLength(320)]"
             required
         ></v-text-field>
 
@@ -14,8 +13,7 @@
             label="Email"
             type="email"
             filled
-            counter="100"
-            :rules="[rules.required, rules.createMaxLength(100), rules.email]"
+            :rules="[rules.required, rules.createMaxLength(320), rules.email]"
             required
         ></v-text-field>
 

@@ -24,6 +24,7 @@ go_library(
         "core/config.go",
         "core/log.go",
         "core/url.go",
+        "core/validate.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",
