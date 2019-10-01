@@ -27,7 +27,7 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 
 	// Retrieve the email address and parse the domain.
 	if err = r.ParseForm(); err != nil || len(r.PostForm) == 0 {
-		core.Warning("Failed to parse form data.")
+		core.Warning("Failed to parse form data: " + core.ErrorString(err))
 		w.WriteHeader(http.StatusBadRequest)
 		jsonWriter.Encode(struct{}{})
 		return
@@ -44,7 +44,7 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if ok, err := core.VerifyCSRFToken(csrfToken[0], r); !ok || err != nil {
-		core.Warning("Failed CSRF check: " + err.Error())
+		core.Warning("Failed CSRF check: " + core.ErrorString(err))
 		w.WriteHeader(http.StatusBadRequest)
 		jsonWriter.Encode(struct{}{})
 		return

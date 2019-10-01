@@ -1,5 +1,5 @@
 <template>
-    <v-app>
+    <section>
         <landing-page-app-bar
             :company-name="companyName"
         >
@@ -11,7 +11,7 @@
             >
             </landing-carousel>
         </v-content>
-    </v-app>
+    </section>
 </template>
 
 <script lang="ts">

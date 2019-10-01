@@ -38,7 +38,6 @@
             v-model="showSnack"
             :color="snackIsError ? 'error' : 'success'"
             bottom
-            :style="'transform: translateY('+snackTransformY+');'"
             timeout=10000
         >
             {{ snackText }} 
@@ -65,16 +64,12 @@
 
 import * as rules from "../../ts/formRules"
 import { contactUsUrl } from "../../ts/url"
-import axios from 'axios';
+import { postFormUrlEncoded} from "../../ts/http"
 import Vue from 'vue';
 
 export default Vue.extend({
     props: {
         'companyName' : String,
-        'snackTransformY' : {
-            type: String,
-            default: "0px"
-        }
     },
     data: () => ({
         contactUsUrl,
@@ -83,12 +78,6 @@ export default Vue.extend({
         agree: false,
         rules: rules,
         formValid: false,
-
-        // Snackbar options for giving visual feedback to the user.
-        showSnack: false,
-        snackText: "",
-        snackShowContact: false,
-        snackIsError: false
     }),
     methods: {
         submit() {
@@ -96,28 +85,47 @@ export default Vue.extend({
             // to a Vuetify VForm to have TypeScript properly fin the validate function.
             // @ts-ignore
             if (!this.$refs.form.validate()) {
-                this.$data.snackText = "Oops! Something went wrong. Please refresh the page and try again.";
-                this.$data.showSnack = true;
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Please refresh the page and try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
                 return;
             }
 
-            axios.post('#', {
+            postFormUrlEncoded('#', {
                 name: this.$data.name,
                 email: this.$data.email
             }).then(() => {
-                this.$data.snackShowContact = false;
-                this.$data.snackText = "Success! We will reach out soon.";
-                this.$data.snackIsError = false;
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Success! We will reach out soon.",
+                    false,
+                    "Contact Us",
+                    contactUsUrl,
+                    false);
+
             }).catch((err) => {
-                this.$data.snackShowContact = true;
-                this.$data.snackIsError = true;
                 if (err.response.data.IsDuplicate) {
-                    this.$data.snackText = "Oops! It looks like you already gave us your email address. Contact us if you still need something.";
+                    // @ts-ignore
+                    this.$root.$refs.snackbar.showSnackBar(
+                        "Oops! It looks like you already gave us your email address. Contact us if you require assistance.",
+                        true,
+                        "Contact Us",
+                        contactUsUrl,
+                        true);
+
                 } else {
-                    this.$data.snackText = "Oops! It looks like something went wrong on our end. Try again later or get in touch directly.";
+                    // @ts-ignore
+                    this.$root.$refs.snackbar.showSnackBar(
+                        "Oops! It looks like something went wrong on our end. Try again later or get in touch directly.",
+                        true,
+                        "Contact Us",
+                        contactUsUrl,
+                        true);
                 }
-            }).finally(() => {
-                this.$data.showSnack = true;
             })
         }
     }

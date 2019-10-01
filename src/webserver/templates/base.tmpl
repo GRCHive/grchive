@@ -9,7 +9,11 @@
 
 <body>
     <div id="app">
-        [[template "app" .]]
+        <v-app>
+            [[template "app" .]]
+
+            <snack-bar ref="snackbar"></snack-bar>
+        </v-app>
     </div>
 
     <script src="static/corejsui/main.js"></script>

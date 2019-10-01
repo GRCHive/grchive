@@ -1,5 +1,5 @@
 <template>
-    <v-app>
+    <section>
         <landing-page-app-bar
             :company-name="companyName"
         >
@@ -23,10 +23,9 @@
                     </v-card>
                 </v-row>
             </v-container>
-
         </v-content>
 
-    </v-app>
+    </section>
 </template>
 
 <script lang="ts">

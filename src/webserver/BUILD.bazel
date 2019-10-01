@@ -30,6 +30,7 @@ go_library(
         "core/structs.go",
         "core/maps.go",
         "core/session.go",
+        "core/error.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",

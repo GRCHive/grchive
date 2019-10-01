@@ -19,7 +19,7 @@ func postGettingStartedInterest(w http.ResponseWriter, r *http.Request) {
 
 	// Retrieve the client's name and email from the input form.
 	if err := r.ParseForm(); err != nil || len(r.PostForm) == 0 {
-		core.Warning("Failed to parse form data.")
+		core.Warning("Failed to parse form data: " + core.ErrorString(err))
 		w.WriteHeader(http.StatusBadRequest)
 		jsonWriter.Encode(struct{}{})
 		return

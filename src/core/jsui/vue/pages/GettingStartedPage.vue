@@ -1,5 +1,5 @@
 <template>
-    <v-app>
+    <section>
         <landing-page-app-bar
             :company-name="companyName"
         >
@@ -34,7 +34,6 @@
                                 <v-col cols=12>
                                     <collect-email 
                                         :company-name="companyName"
-                                        snack-transform-y="80px"
                                     ></collect-email>
                                 </v-col>
                             </v-col>
@@ -53,7 +52,7 @@
                 </v-row>
             </v-container>
         </v-content>
-    </v-app>
+    </section>
 </template>
 
 <script lang="ts">
