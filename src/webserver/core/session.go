@@ -1,7 +1,14 @@
 package core
 
 import (
-	"github.com/gorilla/Sessions"
+	"time"
 )
 
-var SessionStore = sessions.NewCookieStore(LoadEnvConfig().SessionKeys...)
+type UserSession struct {
+	SessionId      string
+	UserId         string
+	LastActiveTime time.Time
+	ExpirationTime time.Time
+	Browser        string
+	Location       string
+}

@@ -1,11 +1,16 @@
+self_uri = TODO
+
 [database]
 connection = "%DB_CONN%"
 
 [login]
-url = "https://dev-578359.okta.com/oauth2/v1/authorize"
+url = "https://dev-578359.okta.com/oauth2/v1"
+auth_endpoint = "/authorize"
+token_endpoint = "/token"
 
 [login.params]
 client_id = "%OKTA_CLIENT_ID%"
+client_secret = "%OKTA_CLIENT_SECRET"
 response_type = "code" 
 response_mode = "fragment"
 scope = "openid"
@@ -16,3 +21,4 @@ session_keys = [
     TODO,
     TODO
 ]
+use_secure_cookies = true

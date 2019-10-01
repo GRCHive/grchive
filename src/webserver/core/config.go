@@ -17,18 +17,24 @@ type TemplateConfig struct {
 var templateConfig *TemplateConfig
 
 type LoginConfig struct {
-	BaseUrl      string
-	ClientId     string
-	ResponseType string
-	ResponseMode string
-	Scope        string
-	RedirectUrl  string
+	BaseUrl       string
+	AuthEndpoint  string
+	TokenEndpoint string
+	ClientId      string
+	ClientSecret  string
+	ResponseType  string
+	ResponseMode  string
+	Scope         string
+	RedirectUrl   string
+	GrantType     string
 }
 
 type EnvConfig struct {
+	SelfUri            string
 	DatabaseConnString string
 	Login              *LoginConfig
 	SessionKeys        [][]byte
+	UseSecureCookies   bool
 }
 
 var envConfig *EnvConfig
@@ -63,15 +69,20 @@ func LoadEnvConfig() *EnvConfig {
 	loadTomlConfig()
 	if envConfig == nil {
 		envConfig = new(EnvConfig)
+		envConfig.SelfUri = tomlConfig.Get("self_uri").(string)
 		envConfig.DatabaseConnString = tomlConfig.Get("database.connection").(string)
 
 		envConfig.Login = new(LoginConfig)
 		envConfig.Login.BaseUrl = tomlConfig.Get("login.url").(string)
+		envConfig.Login.AuthEndpoint = tomlConfig.Get("login.auth_endpoint").(string)
+		envConfig.Login.TokenEndpoint = tomlConfig.Get("login.token_endpoint").(string)
 		envConfig.Login.ClientId = tomlConfig.Get("login.params.client_id").(string)
+		envConfig.Login.ClientSecret = tomlConfig.Get("login.params.client_secret").(string)
 		envConfig.Login.ResponseType = tomlConfig.Get("login.params.response_type").(string)
 		envConfig.Login.ResponseMode = tomlConfig.Get("login.params.response_mode").(string)
 		envConfig.Login.Scope = tomlConfig.Get("login.params.scope").(string)
 		envConfig.Login.RedirectUrl = tomlConfig.Get("login.params.redirect_uri").(string)
+		envConfig.Login.GrantType = tomlConfig.Get("login.params.grant_type").(string)
 
 		tmpSessionKeys := tomlConfig.Get("security.session_keys").([]interface{})
 		envConfig.SessionKeys = make([][]byte, len(tmpSessionKeys))
@@ -81,6 +92,7 @@ func LoadEnvConfig() *EnvConfig {
 				Error(err.Error())
 			}
 		}
+		envConfig.UseSecureCookies = tomlConfig.Get("security.use_secure_cookies").(bool)
 	}
 
 	return envConfig

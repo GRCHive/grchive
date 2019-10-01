@@ -1,4 +1,4 @@
-package main
+package render
 
 import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
@@ -16,6 +16,7 @@ const (
 	LandingPageTemplateKey        templateKey = "LANDING"
 	LoginPageTemplateKey          templateKey = "LOGIN"
 	LearnMorePageTemplateKey      templateKey = "LEARNMORE"
+	GoBackTemplateKey             templateKey = "GOBACK"
 )
 
 func defaultLoadTemplateWithBase(file string) *template.Template {
@@ -25,7 +26,7 @@ func defaultLoadTemplateWithBase(file string) *template.Template {
 			ParseFiles("src/webserver/templates/base.tmpl", file))
 }
 
-func registerTemplates() {
+func RegisterTemplates() {
 	allTemplates[GettingStartedPageTemplateKey] =
 		defaultLoadTemplateWithBase("src/webserver/templates/gettingStarted.tmpl")
 	allTemplates[ContactUsPageTemplateKey] =
@@ -36,9 +37,11 @@ func registerTemplates() {
 		defaultLoadTemplateWithBase("src/webserver/templates/login.tmpl")
 	allTemplates[LearnMorePageTemplateKey] =
 		defaultLoadTemplateWithBase("src/webserver/templates/learnMore.tmpl")
+	allTemplates[GoBackTemplateKey] =
+		defaultLoadTemplateWithBase("src/webserver/templates/goBack.tmpl")
 }
 
-func retrieveTemplate(name templateKey) *template.Template {
+func RetrieveTemplate(name templateKey) *template.Template {
 	if tmpl, ok := allTemplates[name]; ok {
 		return tmpl
 	}

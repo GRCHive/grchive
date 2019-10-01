@@ -26,16 +26,14 @@ go_library(
         "core/url.go",
         "core/validate.go",
         "core/parser.go",
-        "core/csrf.go",
         "core/structs.go",
         "core/maps.go",
-        "core/session.go",
         "core/error.go",
+        "core/constants.go",
+        "core/session.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",
-        "@com_github_google_uuid//:go_default_library",
-        "@com_github_gorilla_sessions//:go_default_library",
         "@com_github_pelletier_go_toml//:go_default_library"
     ],
     importpath = "gitlab.com/b3h47pte/audit-stuff/core"
@@ -57,6 +55,38 @@ go_library(
 )
 
 go_library(
+    name = "webserver_webcore_library",
+    srcs = [
+        "webcore/auth.go",
+        "webcore/csrf.go",
+        "webcore/clientsession.go",
+        "webcore/serversession.go",
+        "webcore/jwt.go",
+    ],
+    deps = [
+        ":webserver_core_library",
+        "@io_k8s_klog//:go_default_library",
+        "@com_github_google_uuid//:go_default_library",
+        "@com_github_gorilla_securecookie//:go_default_library",
+        "@com_github_gorilla_sessions//:go_default_library",
+    ],
+    importpath = "gitlab.com/b3h47pte/audit-stuff/webcore"
+)
+
+go_library(
+    name = "webserver_render_library",
+    srcs = [
+        "render/pages.go",
+        "render/templates.go",
+    ],
+    deps = [
+        ":webserver_core_library",
+        ":webserver_webcore_library",
+    ],
+    importpath = "gitlab.com/b3h47pte/audit-stuff/render"
+)
+
+go_library(
     name = "webserver_rest_library",
     srcs = [
         "rest/rest.go",
@@ -66,7 +96,9 @@ go_library(
     deps = [
         "@com_github_gorilla_mux//:go_default_library",
         ":webserver_core_library",
-        ":webserver_database_library"
+        ":webserver_webcore_library",
+        ":webserver_database_library",
+        ":webserver_render_library",
     ],
     importpath = "gitlab.com/b3h47pte/audit-stuff/rest"
 )
@@ -75,13 +107,13 @@ go_binary(
     name = "webserver",
     srcs = [
         "main.go",
-        "pages.go",
-        "templates.go"
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",
         ":webserver_core_library",
+        ":webserver_webcore_library",
         ":webserver_database_library",
+        ":webserver_render_library",
         ":webserver_rest_library"
     ],
     data = [

@@ -4,7 +4,9 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
+	"gitlab.com/b3h47pte/audit-stuff/render"
 	"gitlab.com/b3h47pte/audit-stuff/rest"
+	"gitlab.com/b3h47pte/audit-stuff/webcore"
 	"net/http"
 	"os"
 	"time"
@@ -22,7 +24,8 @@ func loggedRequestHandler(handler http.Handler) http.Handler {
 
 func main() {
 	database.Init()
-	registerTemplates()
+	render.RegisterTemplates()
+	webcore.InitializeSessions()
 
 	r := mux.NewRouter()
 
@@ -45,11 +48,11 @@ func main() {
 			http.FileServer(http.Dir("src/core/jsui/assets"))))
 
 	// Dynamic(?) content that needs to be served by Go.
-	r.HandleFunc(core.GetStartedUrl, renderGettingStartedPage).Methods("GET")
-	r.HandleFunc(core.ContactUsUrl, renderContactUsPage).Methods("GET")
-	r.HandleFunc(core.HomePageUrl, renderHomePage).Methods("GET")
-	r.HandleFunc(core.LoginUrl, renderLoginPage).Methods("GET")
-	r.HandleFunc(core.LearnMoreUrl, renderLearnMorePage).Methods("GET")
+	r.HandleFunc(core.GetStartedUrl, render.RenderGettingStartedPage).Methods("GET")
+	r.HandleFunc(core.ContactUsUrl, render.RenderContactUsPage).Methods("GET")
+	r.HandleFunc(core.HomePageUrl, render.RenderHomePage).Methods("GET")
+	r.HandleFunc(core.LoginUrl, render.RenderLoginPage).Methods("GET")
+	r.HandleFunc(core.LearnMoreUrl, render.RenderLearnMorePage).Methods("GET")
 	rest.RegisterPaths(r)
 
 	//// TODO: Configurable port?

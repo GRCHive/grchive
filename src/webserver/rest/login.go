@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
+	"gitlab.com/b3h47pte/audit-stuff/render"
+	"gitlab.com/b3h47pte/audit-stuff/webcore"
 	"net/http"
 	"strings"
 )
@@ -43,7 +45,7 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ok, err := core.VerifyCSRFToken(csrfToken[0], r); !ok || err != nil {
+	if ok, err := webcore.VerifyCSRFToken(csrfToken[0], r); !ok || err != nil {
 		core.Warning("Failed CSRF check: " + core.ErrorString(err))
 		w.WriteHeader(http.StatusBadRequest)
 		jsonWriter.Encode(struct{}{})
@@ -81,6 +83,7 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	core.Info(core.CreateOktaLoginUrl(idpIden, csrfToken[0], csrfToken[0]))
 	jsonWriter.Encode(struct {
 		LoginUrl string
 	}{
@@ -88,4 +91,52 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 		// because why not.
 		core.CreateOktaLoginUrl(idpIden, csrfToken[0], csrfToken[0]),
 	})
+}
+
+func getSamlLoginCallbackError(prefix string, err error, w http.ResponseWriter, r *http.Request) {
+	core.Warning(prefix + " :: " + core.ErrorString(err))
+	webcore.ClearCSRFTokenFromSession(w, r)
+	render.RetrieveTemplate(render.GoBackTemplateKey).
+		ExecuteTemplate(
+			w,
+			"base",
+			core.LoadTemplateConfig())
+}
+
+func getSamlLoginCallback(w http.ResponseWriter, r *http.Request) {
+	// There are two query params: 'state' and 'code'.
+	// 'state' will contain the CSRF token. We should check this against the user's cookie.
+	// 'code' will contain the authorization code which we need to convert into a token.
+	query := r.URL.Query()
+	state, sok := query["state"]
+	code, cok := query["code"]
+
+	if !sok || !cok || len(state) == 0 || len(code) == 0 {
+		getSamlLoginCallbackError("Empty state or code.", nil, w, r)
+		return
+	}
+
+	if ok, err := webcore.VerifyCSRFToken(state[0], r); !ok || err != nil {
+		getSamlLoginCallbackError("Failed CSRF check for SAML Login Callback.", err, w, r)
+		return
+	}
+
+	var session *core.UserSession
+	var err error
+
+	// Retrieve the access/ID token from Okta and redirect if successful.
+	// Note that core.OktaObtainTokens will store the tokens where necessary.
+	if session, err = webcore.OktaObtainTokens(code[0], r); err != nil {
+		getSamlLoginCallbackError("Failed to obtain ID token.", err, w, r)
+		return
+	}
+
+	// Store session id as a cookie.
+	if err = webcore.StoreUserSessionOnClient(session, w); err != nil {
+		getSamlLoginCallbackError("Failed to store user session.", err, w, r)
+		return
+	}
+
+	webcore.ClearCSRFTokenFromSession(w, r)
+	http.Redirect(w, r, core.DashboardUrl, http.StatusFound)
 }
