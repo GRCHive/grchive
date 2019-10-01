@@ -1,5 +1,5 @@
 <template>
-    <v-form v-model="formValid" ref="form">
+    <v-form v-model="formValid" ref="form" @submit="submit" onSubmit="return false;">
         <v-text-field
             v-model="name"
             label="Name"
@@ -28,7 +28,7 @@
         <v-btn
             color="success"
             class="my-2"
-            :disabled="!formValid || !name || !email || !agree"
+            :disabled="!canSubmit"
             @click="submit"
         >
             Submit
@@ -64,7 +64,7 @@
 
 import * as rules from "../../ts/formRules"
 import { contactUsUrl } from "../../ts/url"
-import { postFormUrlEncoded} from "../../ts/http"
+import { postFormUrlEncoded } from "../../ts/http"
 import Vue from 'vue';
 
 export default Vue.extend({
@@ -79,8 +79,16 @@ export default Vue.extend({
         rules: rules,
         formValid: false,
     }),
+    computed: {
+        canSubmit() : boolean {
+            return this.$data.formValid && this.$data.name && this.$data.email && this.$data.agree;
+        }
+    },
     methods: {
         submit() {
+            if (!this.canSubmit) {
+                return;
+            }
             // ts-ignore is needed since as of Vuetify 2.0.19 we can't type assert the form
             // to a Vuetify VForm to have TypeScript properly fin the validate function.
             // @ts-ignore
@@ -108,7 +116,7 @@ export default Vue.extend({
                     false);
 
             }).catch((err) => {
-                if (err.response.data.IsDuplicate) {
+                if (!!err.response && err.response.data.IsDuplicate) {
                     // @ts-ignore
                     this.$root.$refs.snackbar.showSnackBar(
                         "Oops! It looks like you already gave us your email address. Contact us if you require assistance.",

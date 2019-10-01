@@ -1,6 +1,7 @@
 package core
 
 import (
+	"encoding/hex"
 	"github.com/pelletier/go-toml"
 	"io/ioutil"
 )
@@ -57,6 +58,8 @@ func LoadTemplateConfig() *TemplateConfig {
 }
 
 func LoadEnvConfig() *EnvConfig {
+	var err error
+
 	loadTomlConfig()
 	if envConfig == nil {
 		envConfig = new(EnvConfig)
@@ -73,7 +76,10 @@ func LoadEnvConfig() *EnvConfig {
 		tmpSessionKeys := tomlConfig.Get("security.session_keys").([]interface{})
 		envConfig.SessionKeys = make([][]byte, len(tmpSessionKeys))
 		for i := 0; i < len(tmpSessionKeys); i++ {
-			envConfig.SessionKeys[i] = []byte(tmpSessionKeys[i].(string))
+			envConfig.SessionKeys[i], err = hex.DecodeString(tmpSessionKeys[i].(string))
+			if err != nil {
+				Error(err.Error())
+			}
 		}
 	}
 

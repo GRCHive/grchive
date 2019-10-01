@@ -1,6 +1,9 @@
 package core
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 var GetStartedUrl string = "/getting-started"
 var ContactUsUrl string = "/contact-us"
@@ -13,11 +16,12 @@ func CreateOktaLoginUrl(idp string, state string, nonce string) string {
 
 	return fmt.Sprintf("%s?idp=%s&client_id=%s&response_type=%s&response_mode=%s&scope=%s&redirect_uri=%s&state=%s&=nonce=%s",
 		envConfig.Login.BaseUrl,
+		idp,
 		envConfig.Login.ClientId,
 		envConfig.Login.ResponseType,
 		envConfig.Login.ResponseMode,
 		envConfig.Login.Scope,
-		envConfig.Login.RedirectUrl,
+		url.QueryEscape(envConfig.Login.RedirectUrl),
 		state,
-		nonce)
+		url.QueryEscape(nonce))
 }

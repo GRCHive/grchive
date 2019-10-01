@@ -11,6 +11,7 @@ func AddCSRFTokenToRequest(w http.ResponseWriter, r *http.Request, pageVars map[
 	newPageVars := CopyMap(pageVars)
 	session, err := SessionStore.Get(r, "csrf")
 	if err != nil {
+		Warning("Failed to retrieve from session: " + err.Error())
 		return pageVars, err
 	}
 
@@ -21,6 +22,7 @@ func AddCSRFTokenToRequest(w http.ResponseWriter, r *http.Request, pageVars map[
 	newPageVars["Csrf"] = token
 	err = session.Save(r, w)
 	if err != nil {
+		Warning("Failed to save to session: " + err.Error())
 		return pageVars, err
 	}
 	return newPageVars, nil

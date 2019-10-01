@@ -64,6 +64,7 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 
 	// This error should only crop up if something went terribly wrong on our side.
 	if err != nil {
+		core.Warning("Find SAML IdP Error: " + err.Error() + " (" + domain + ")")
 		w.WriteHeader(http.StatusInternalServerError)
 		jsonWriter.Encode(struct{}{})
 		return
@@ -83,6 +84,8 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 	jsonWriter.Encode(struct {
 		LoginUrl string
 	}{
-		core.CreateOktaLoginUrl(idpIden, "", ""),
+		// Pass the CSRF token as the nonce as well as the state and verify both upon redirect
+		// because why not.
+		core.CreateOktaLoginUrl(idpIden, csrfToken[0], csrfToken[0]),
 	})
 }
