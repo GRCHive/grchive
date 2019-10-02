@@ -64,7 +64,6 @@ go_library(
         "webcore/context.go",
         "webcore/csrf.go",
         "webcore/clientsession.go",
-        "webcore/serversession.go",
         "webcore/jwt.go",
         "webcore/handlers.go",
     ],
