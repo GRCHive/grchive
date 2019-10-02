@@ -5,11 +5,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"github.com/google/uuid"
 	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/b3h47pte/audit-stuff/database"
 	"io/ioutil"
 	"math/big"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type OktaKey struct {
@@ -97,8 +100,35 @@ func (this OktaJWTRetriever) RetrieveKeys() (map[string][]*rsa.PublicKey, error)
 	return nil, errors.New("Failed to find 'keys' key in okta retrieve keys.")
 }
 
+// Creates a core.UserSession object and stores it into the session database.
 func CreateUserSesssionFromTokens(tokens *OktaTokens, accessJwt *RawJWT, idJwt *RawJWT, r *http.Request) (*core.UserSession, error) {
-	return nil, nil
+	if len(idJwt.Payload.Email) == 0 || len(accessJwt.Payload.Sub) == 0 {
+		return nil, errors.New("Failed to find email in ID/Access Token.")
+	}
+
+	// Is this even necessary?
+	if idJwt.Payload.Email != accessJwt.Payload.Sub {
+		return nil, errors.New("Id token Email vs Access Token sub mismatch.")
+	}
+
+	userSession := &core.UserSession{
+		SessionId:      uuid.New().String(),
+		UserEmail:      idJwt.Payload.Email,
+		LastActiveTime: time.Now(),
+		ExpirationTime: time.Unix(accessJwt.Payload.Exp, 0),
+		UserAgent:      r.UserAgent(),
+		IP:             r.RemoteAddr,
+		AccessToken:    tokens.AccessToken,
+		IdToken:        tokens.IdToken,
+		RefreshToken:   tokens.RefreshToken,
+	}
+
+	err := database.StoreUserSession(userSession)
+	if err != nil {
+		return nil, err
+	}
+
+	return userSession, nil
 }
 
 func OktaObtainTokens(code string, r *http.Request) (*core.UserSession, error) {

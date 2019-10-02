@@ -36,10 +36,12 @@ type RawJWT struct {
 	}
 
 	Payload struct {
-		Iss string `json:"iss"`
-		Cid string `json:"cid"`
-		Exp int64  `json:"exp"`
-		Aud string `json:"aud"`
+		Iss   string `json:"iss"`
+		Cid   string `json:"cid"`
+		Exp   int64  `json:"exp"`
+		Aud   string `json:"aud"`
+		Email string `json:"email"`
+		Sub   string `json:"sub"`
 	}
 }
 
@@ -160,7 +162,6 @@ func (this JWTManager) VerifyJWT(input string, isAccessToken bool) (*RawJWT, err
 			continue
 		}
 
-		core.Info("PAYLOAD:" + string(jwt.RawPayload))
 		err = jwt.verifyIss()
 		if err != nil {
 			return nil, err
