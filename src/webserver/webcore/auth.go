@@ -140,7 +140,7 @@ func OktaObtainTokens(code string, r *http.Request) (*core.UserSession, error) {
 		"redirect_uri":  []string{core.FullSamlCallbackUrl},
 		"client_id":     []string{envConfig.Login.ClientId},
 		"client_secret": []string{envConfig.Login.ClientSecret},
-		"scope":         []string{"openid"},
+		"scope":         []string{url.QueryEscape(envConfig.Login.Scope)},
 	}
 	resp, err := http.PostForm(core.OktaTokenUrl, postVals)
 	if err != nil {
