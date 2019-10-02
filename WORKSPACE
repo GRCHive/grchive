@@ -84,6 +84,18 @@ go_repository(
     tag = "v1.4.0"
 )
 
+go_repository(
+    name = "in_gopkg_square_go_jose_v2",
+    importpath = "gopkg.in/square/go-jose.v2",
+    tag = "v2.3.1"
+)
+
+go_repository(
+    name = "org_golang_x_crypto",
+    importpath = "golang.org/x/crypto",
+    commit = "f9e2070545dcd4128a854a97ddf10fbfc3c4b6e4"
+)
+
 # NODE
 http_archive(
     name = "build_bazel_rules_nodejs",

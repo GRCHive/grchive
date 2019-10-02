@@ -83,7 +83,6 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	core.Info(core.CreateOktaLoginUrl(idpIden, csrfToken[0], csrfToken[0]))
 	jsonWriter.Encode(struct {
 		LoginUrl string
 	}{

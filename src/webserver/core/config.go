@@ -20,6 +20,7 @@ type LoginConfig struct {
 	BaseUrl       string
 	AuthEndpoint  string
 	TokenEndpoint string
+	KeyEndpoint   string
 	ClientId      string
 	ClientSecret  string
 	ResponseType  string
@@ -76,6 +77,7 @@ func LoadEnvConfig() *EnvConfig {
 		envConfig.Login.BaseUrl = tomlConfig.Get("login.url").(string)
 		envConfig.Login.AuthEndpoint = tomlConfig.Get("login.auth_endpoint").(string)
 		envConfig.Login.TokenEndpoint = tomlConfig.Get("login.token_endpoint").(string)
+		envConfig.Login.KeyEndpoint = tomlConfig.Get("login.key_endpoint").(string)
 		envConfig.Login.ClientId = tomlConfig.Get("login.params.client_id").(string)
 		envConfig.Login.ClientSecret = tomlConfig.Get("login.params.client_secret").(string)
 		envConfig.Login.ResponseType = tomlConfig.Get("login.params.response_type").(string)

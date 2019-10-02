@@ -36,3 +36,8 @@ func CreateOktaLoginUrl(idp string, state string, nonce string) string {
 var OktaTokenUrl string = fmt.Sprintf("%s%s",
 	LoadEnvConfig().Login.BaseUrl,
 	LoadEnvConfig().Login.TokenEndpoint)
+
+var OktaKeyUrl string = fmt.Sprintf("%s%s?client_id=%s",
+	LoadEnvConfig().Login.BaseUrl,
+	LoadEnvConfig().Login.KeyEndpoint,
+	LoadEnvConfig().Login.ClientId)
