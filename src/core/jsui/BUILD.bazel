@@ -28,18 +28,30 @@ filegroup(
     ]) + [
         ":node_modules",
         "tsconfig.json",
-        "webpack.config.js",
+        "webpack/base.config.js",
+        "webpack/dev.config.js",
+        "webpack/prod.config.js",
         "package.json"
     ]
 )
 
-CMD = "\
-        cd src/core/jsui && npx webpack && cd ../../../ && \
+CMD_DEV = "\
+        cd src/core/jsui && npx webpack --config ./webpack/dev.config.js && cd ../../../ && \
         for X in $(OUTS); do \
             mkdir -p `dirname $$X`; \
             FNAME=\"src/core/jsui/dist/`basename $$X`\";\
             cp $$FNAME $$X; \
         done"
+
+CMD_PROD = "\
+        cd src/core/jsui && npx webpack --config ./webpack/prod.config.js && cd ../../../ && \
+        for X in $(OUTS); do \
+            mkdir -p `dirname $$X`; \
+            FNAME=\"src/core/jsui/dist/`basename $$X`\";\
+            cp $$FNAME $$X; \
+        done"
+
+
 
 genrule(
     name = "corejsui-nosmap",
@@ -48,7 +60,7 @@ genrule(
         "dist-nosmap/main.js",
         "dist-nosmap/main.css"
     ],
-    cmd = CMD,
+    cmd = CMD_PROD,
     message = "Run Webpack for corejsui (no smap)",
     local=True
 )
@@ -62,7 +74,7 @@ genrule(
         "dist-smap/main.js.map",
         "dist-smap/main.css.map"
     ],
-    cmd = CMD,
+    cmd = CMD_DEV,
     message = "Run Webpack for corejsui (with smap)",
     local=True
 )

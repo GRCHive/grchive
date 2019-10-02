@@ -19,11 +19,14 @@ const babelLoader = {
 module.exports = {
     devtool: "source-map",
     entry: {
-        main: ['./ts/main.ts', './sass/main.scss']
+        main: ['./ts/main.ts']
     },
     output: {
         filename: '[name].js',
-        path: path.resolve(__dirname, 'dist')
+        path: path.resolve(__dirname, '../dist'),
+        libraryTarget: 'umd',
+        library: 'corejsui',
+        libraryExport: 'default',
     },
     module: {
         rules: [

@@ -7,17 +7,31 @@ import GettingStartedPage from '../vue/pages/GettingStartedPage.vue'
 import LearnMorePage from '../vue/pages/LearnMorePage.vue'
 import RedirectPage from '../vue/pages/RedirectPage.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
+import '../sass/main.scss'
 
-new Vue({
-    el: '#app',
-    components: {
-        LandingPage,
-        ContactUsPage,
-        LoginPage,
-        GettingStartedPage,
-        LearnMorePage,
-        RedirectPage,
-        SnackBar
-    },
-    vuetify
-}).$mount('#app')
+function mountApp(companyName : string, domain : string) {
+    let root = new Vue({
+        el: '#app',
+        components: {
+            LandingPage,
+            ContactUsPage,
+            LoginPage,
+            GettingStartedPage,
+            LearnMorePage,
+            RedirectPage,
+            SnackBar
+        },
+        data: () => ({
+            companyName,
+            domain
+        }),
+        vuetify
+    }).$mount('#app')
+
+    console.log(root)
+    console.log(root.$props)
+}
+
+export default {
+    mountApp
+}

@@ -1,7 +1,7 @@
 <template>
     <section>
         <landing-page-app-bar
-            :company-name="companyName"
+            :company-name="this.$root.companyName"
         >
         </landing-page-app-bar>
 
@@ -25,13 +25,13 @@
                     <v-col cols=12>
                         <v-row justify="center" class="ma-4">
                             <div class="white--text display-2 font-weight-bold above-overlay">
-                                What is {{ companyName }}?
+                                What is {{ this.$root.companyName }}?
                             </div>
                         </v-row>
 
                         <v-row justify="center" class="ma-4">
                             <div class="white--text subtitle-2 above-overlay" id="subtitle">
-                                {{ companyName }} is an automated audit control management solution that digitizes and streamlines your audit process.
+                                {{ this.$root.companyName }} is an automated audit control management solution that digitizes and streamlines your audit process.
                                 It organizes and centralizes information about process flows and audit controls so that everyone, auditors and business managers, can obtain the information they need, faster.
                             </div>
                         </v-row>
@@ -72,9 +72,6 @@ import { createAssetUrl, getStartedUrl, contactUsUrl } from '../../ts/url'
 import Vue from 'vue'
 
 export default Vue.extend({
-    props: {
-        companyName: String,
-    },
     components: {
         LandingPageAppBar,
     },

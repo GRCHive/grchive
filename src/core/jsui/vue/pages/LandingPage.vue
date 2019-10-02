@@ -1,13 +1,13 @@
 <template>
     <section>
         <landing-page-app-bar
-            :company-name="companyName"
+            :company-name="this.$root.companyName"
         >
         </landing-page-app-bar>
 
         <v-content>
             <landing-carousel
-                :company-name="companyName"
+                :company-name="this.$root.companyName"
             >
             </landing-carousel>
         </v-content>
@@ -20,9 +20,6 @@ import LandingPageAppBar from '../components/LandingPageAppBar.vue'
 import LandingCarousel from '../components/LandingCarousel.vue'
 
 export default {
-    props: [
-        'companyName'
-    ],
     components: {
         LandingPageAppBar,
         LandingCarousel

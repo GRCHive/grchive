@@ -1,14 +1,14 @@
 <template>
     <section>
         <landing-page-app-bar
-            :company-name="companyName"
+            :company-name="this.$root.companyName"
         >
         </landing-page-app-bar>
 
         <v-content>
             <hero-image
                 :src="bannerImageUrl"
-                max-height=300
+                :max-height=300
                 position="center center"
                 text="Let's Talk"
             ></hero-image>
@@ -79,30 +79,32 @@ import { createAssetUrl, createMailtoUrl } from '../../ts/url'
 import Vue from 'vue'
 
 export default Vue.extend({
-    props: {
-        companyName: String,
-        domain: String
-    },
     components: {
         LandingPageAppBar,
         HeroImage,
         MessageUs
     },
+    // Note that this.$root.domain DOES exist because we make it so. It just won't be picked up
+    // by typescript.
     computed: {
         bannerImageUrl() : string {
             return createAssetUrl('generic-banner2.jpg')
         },
         salesEmail() : Object {
-            return createMailtoUrl('sales', this.domain)
+            //@ts-ignore
+            return createMailtoUrl('sales', this.$root.domain)
         },
         careerEmail() : Object {
-            return createMailtoUrl('careers', this.domain)
+            //@ts-ignore
+            return createMailtoUrl('careers', this.$root.domain)
         },
         supportEmail() : Object {
-            return createMailtoUrl('support', this.domain)
+            //@ts-ignore
+            return createMailtoUrl('support', this.$root.domain)
         },
         contactEmail() : Object {
-            return createMailtoUrl('contact', this.domain)
+            //@ts-ignore
+            return createMailtoUrl('contact', this.$root.domain)
         }
     }
 })

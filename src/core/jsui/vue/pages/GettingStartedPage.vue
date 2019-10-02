@@ -1,14 +1,14 @@
 <template>
     <section>
         <landing-page-app-bar
-            :company-name="companyName"
+            :company-name="this.$root.companyName"
         >
         </landing-page-app-bar>
 
         <v-content class="hide-overflow">
             <hero-image
                 :src="bannerImageUrl"
-                max-height=300
+                :max-height=300
                 position="center center"
                 text="Get Started"
             ></hero-image>
@@ -28,12 +28,12 @@
                                     Thank you for your interest!
                                 </v-card-title>
                                 <v-card-text class="long-text">
-                                    Our engineers are hard at work getting {{ companyName }} ready for you.
+                                    Our engineers are hard at work getting {{ this.$root.companyName }} ready for you.
                                     Leave us your name and email address, and we will contact you with more information on how we can help you streamline your external and internal auditing processes.
                                 </v-card-text>
                                 <v-col cols=12>
                                     <collect-email 
-                                        :company-name="companyName"
+                                        :company-name="this.$root.companyName"
                                     ></collect-email>
                                 </v-col>
                             </v-col>
@@ -63,9 +63,6 @@ import HeroImage from '../components/HeroImage.vue'
 import { createAssetUrl } from '../../ts/url'
 
 export default {
-    props: [
-        'companyName'
-    ],
     components: {
         LandingPageAppBar,
         CollectEmail,

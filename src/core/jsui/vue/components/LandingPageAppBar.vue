@@ -1,7 +1,7 @@
 <template>
     <v-app-bar app>
         <v-toolbar-title color="primary">
-            <a :href="homePageUrl">{{ companyName }}</a>
+            <a :href="homePageUrl">{{ this.$root.companyName }}</a>
         </v-toolbar-title>
         <div class="flex-grow-1"></div>
 
@@ -28,9 +28,6 @@
 import { contactUsUrl, loginPageUrl, homePageUrl } from '../../ts/url'
 
 export default {
-    props: [
-        'companyName'
-    ],
     data: () => ({
         contactUsUrl,
         loginPageUrl,

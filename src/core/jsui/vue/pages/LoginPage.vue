@@ -1,14 +1,14 @@
 <template>
     <section>
         <landing-page-app-bar
-            :company-name="companyName"
+            :company-name="this.$root.companyName"
         >
         </landing-page-app-bar>
 
         <v-content>
             <hero-image
                 :src="bannerImageUrl"
-                max-height=300
+                :max-height=300
                 position="center center"
                 text="Welcome Back"
             ></hero-image>
@@ -37,7 +37,6 @@ import { createAssetUrl } from '../../ts/url'
 
 export default {
     props: [
-        'companyName',
         'csrf'
     ],
     components: {

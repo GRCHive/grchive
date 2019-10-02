@@ -3,7 +3,7 @@
         v-model="showSnack"
         :color="snackIsError ? 'error' : 'success'"
         bottom
-        timeout=10000
+        :timeout="timeout"
     >
         {{ snackText }} 
 
@@ -36,7 +36,8 @@ export default Vue.extend({
         snackShowPrimaryButton: false,
         snackPrimaryButtonText: "",
         snackPrimaryUrl: "",
-        snackIsError: false
+        snackIsError: false,
+        timeout: 10000,
     }),
     methods: {
         showSnackBar(

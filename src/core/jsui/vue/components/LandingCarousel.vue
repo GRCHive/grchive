@@ -26,7 +26,7 @@
                             <p
                                 class="white--text display-2 font-weight-bold above-overlay"
                             >
-                                Streamline your audit process with {{ companyName }}.
+                                Streamline your audit process with {{ this.$root.companyName }}.
                             </p>
                         </v-row>
 
@@ -64,9 +64,6 @@
 import { getStartedUrl, learnMoreUrl, createAssetUrl} from '../../ts/url'
 
 export default {
-    props: [
-        'companyName'
-    ],
     data: () => ({
         getStartedUrl,
         learnMoreUrl

@@ -61,5 +61,4 @@ func UpdateUserSession(session *core.UserSession) error {
 	}
 	err = tx.Commit()
 	return err
-
 }

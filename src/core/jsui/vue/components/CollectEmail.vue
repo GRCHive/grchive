@@ -19,7 +19,7 @@
 
         <v-switch
             v-model="agree"
-            :label="`I agree to ${companyName} collecting and storing my personal information to send me updates about future services and products.`"
+            :label="`I agree to ${this.$root.companyName} collecting and storing my personal information to send me updates about future services and products.`"
             required
             :rules="[rules.required]"
         >
@@ -33,30 +33,6 @@
         >
             Submit
         </v-btn>
-
-        <v-snackbar 
-            v-model="showSnack"
-            :color="snackIsError ? 'error' : 'success'"
-            bottom
-            timeout=10000
-        >
-            {{ snackText }} 
-
-            <v-btn
-                color="primary"
-                v-if="snackShowContact"
-                :href="contactUsUrl"
-            >
-                Contact Us
-            </v-btn>
-
-            <v-btn
-                color="secondary"
-                @click="showSnack = false"
-            >
-                Close
-            </v-btn>
-        </v-snackbar>
     </v-form>
 </template>
 
@@ -68,16 +44,13 @@ import { postFormUrlEncoded } from "../../ts/http"
 import Vue from 'vue';
 
 export default Vue.extend({
-    props: {
-        'companyName' : String,
-    },
     data: () => ({
         contactUsUrl,
         name: undefined,
         email: undefined,
         agree: false,
         rules: rules,
-        formValid: false,
+        formValid: false
     }),
     computed: {
         canSubmit() : boolean {
