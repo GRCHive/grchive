@@ -1,12 +1,15 @@
 package webcore
 
 import (
+	"errors"
 	"github.com/gorilla/Sessions"
 	"github.com/gorilla/securecookie"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"net/http"
 	"time"
 )
+
+const SessionIdCookieName string = "userSession"
 
 var ClientShortSessionStore = sessions.NewCookieStore(core.LoadEnvConfig().SessionKeys...)
 var ClientLongSessionStore = sessions.NewCookieStore(core.LoadEnvConfig().SessionKeys...)
@@ -41,7 +44,7 @@ func StoreUserSessionOnClient(session *core.UserSession, w http.ResponseWriter) 
 		"sessionId": session.SessionId,
 	}
 
-	cookieName := "userSession"
+	cookieName := SessionIdCookieName
 
 	var encoded string
 	var err error
@@ -56,7 +59,22 @@ func StoreUserSessionOnClient(session *core.UserSession, w http.ResponseWriter) 
 		MaxAge:   int(session.ExpirationTime.Sub(time.Now()).Seconds()),
 		Secure:   core.LoadEnvConfig().UseSecureCookies,
 		HttpOnly: true,
+		Path:     core.HomePageUrl,
 	}
 	http.SetCookie(w, cookie)
 	return nil
+}
+
+func GetUserSessionOnClient(r *http.Request) (string, error) {
+	if cookie, err := r.Cookie(SessionIdCookieName); err == nil {
+		value := map[string]string{}
+		for i := 0; i < len(Cookies); i++ {
+			err = Cookies[i].Decode(SessionIdCookieName, cookie.Value, &value)
+			if err != nil {
+				continue
+			}
+			return value["sessionId"], nil
+		}
+	}
+	return "", errors.New("Failed to find or decrypt session id cookie.")
 }

@@ -24,3 +24,21 @@ func StoreUserSession(session *core.UserSession) error {
 	err = tx.Commit()
 	return err
 }
+
+func FindUserSession(sessionId string) (*core.UserSession, error) {
+	rows, err := dbConn.Queryx(`
+		SELECT * FROM user_sessions WHERE session_id = $1
+	`, sessionId)
+	if err != nil {
+		return nil, err
+	}
+
+	var session *core.UserSession = new(core.UserSession)
+	rows.Next()
+	err = rows.StructScan(&session)
+	if err != nil {
+		return nil, err
+	}
+
+	return session, nil
+}

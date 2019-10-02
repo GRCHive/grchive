@@ -171,3 +171,21 @@ func OktaObtainTokens(code string, r *http.Request) (*core.UserSession, error) {
 
 	return CreateUserSesssionFromTokens(data, accessJwt, idJwt, r)
 }
+
+// If successful, returns a new http.Request that contains
+// a context.Context with the user session. Otherwise, returns a nil
+// along with an error.
+func VerifyUserSessionAuthenticated(r *http.Request) (*http.Request, error) {
+	sessionId, err := GetUserSessionOnClient(r)
+	if err != nil {
+		return nil, err
+	}
+
+	session, err := database.FindUserSession(sessionId)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := AddSessionToContext(session, r.Context())
+	return r.Clone(ctx), nil
+}

@@ -60,10 +60,12 @@ go_library(
     name = "webserver_webcore_library",
     srcs = [
         "webcore/auth.go",
+        "webcore/context.go",
         "webcore/csrf.go",
         "webcore/clientsession.go",
         "webcore/serversession.go",
         "webcore/jwt.go",
+        "webcore/handlers.go",
     ],
     deps = [
         ":webserver_core_library",
@@ -71,6 +73,7 @@ go_library(
         "@io_k8s_klog//:go_default_library",
         "@in_gopkg_square_go_jose_v2//:go_default_library",
         "@com_github_google_uuid//:go_default_library",
+        "@com_github_gorilla_mux//:go_default_library",
         "@com_github_gorilla_securecookie//:go_default_library",
         "@com_github_gorilla_sessions//:go_default_library",
     ],
@@ -112,6 +115,7 @@ go_binary(
     name = "webserver",
     srcs = [
         "main.go",
+        "dashboard.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",

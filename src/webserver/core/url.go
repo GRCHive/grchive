@@ -16,6 +16,7 @@ var FullSamlCallbackUrl string = LoadEnvConfig().SelfUri + SamlCallbackUrl
 
 // Dashboard
 var DashboardUrl string = "/dashboard"
+var DashboardHomeUrl string = "/"
 
 func CreateOktaLoginUrl(idp string, state string, nonce string) string {
 	envConfig := LoadEnvConfig()

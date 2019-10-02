@@ -12,22 +12,12 @@ import (
 	"time"
 )
 
-func loggedRequestHandler(handler http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		core.Info(
-			"Remote: ", r.RemoteAddr,
-			" URL: ", r.URL,
-			" Method: ", r.Method)
-		handler.ServeHTTP(w, r)
-	})
-}
-
 func main() {
 	database.Init()
 	render.RegisterTemplates()
 	webcore.InitializeSessions()
 
-	r := mux.NewRouter()
+	r := mux.NewRouter().StrictSlash(true)
 
 	// Static assets that can eventually be served by Nginx.
 	_, err := os.Stat("src/core/jsui/dist-smap")
@@ -48,16 +38,18 @@ func main() {
 			http.FileServer(http.Dir("src/core/jsui/assets"))))
 
 	// Dynamic(?) content that needs to be served by Go.
+	r.Use(webcore.LoggedRequestMiddleware)
 	r.HandleFunc(core.GetStartedUrl, render.RenderGettingStartedPage).Methods("GET")
 	r.HandleFunc(core.ContactUsUrl, render.RenderContactUsPage).Methods("GET")
 	r.HandleFunc(core.HomePageUrl, render.RenderHomePage).Methods("GET")
 	r.HandleFunc(core.LoginUrl, render.RenderLoginPage).Methods("GET")
 	r.HandleFunc(core.LearnMoreUrl, render.RenderLearnMorePage).Methods("GET")
 	rest.RegisterPaths(r)
+	createDashboardSubrouter(r)
 
 	//// TODO: Configurable port?
 	srv := &http.Server{
-		Handler:      loggedRequestHandler(r),
+		Handler:      r,
 		Addr:         ":8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,

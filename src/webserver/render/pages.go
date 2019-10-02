@@ -47,3 +47,6 @@ func RenderLearnMorePage(w http.ResponseWriter, r *http.Request) {
 			"base",
 			core.LoadTemplateConfig())
 }
+
+func RenderDashboardHomePage(w http.ResponseWriter, r *http.Request) {
+}
