@@ -7,12 +7,11 @@ import (
 )
 
 func RenderGettingStartedPage(w http.ResponseWriter, r *http.Request) {
-	params, _ := webcore.AddCSRFTokenToRequest(w, r, core.StructToMap(*core.LoadTemplateConfig()))
 	RetrieveTemplate(GettingStartedPageTemplateKey).
 		ExecuteTemplate(
 			w,
 			"base",
-			params)
+			BuildTemplateParams(w, r, false))
 }
 
 func RenderContactUsPage(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +19,7 @@ func RenderContactUsPage(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			core.LoadTemplateConfig())
+			BuildTemplateParams(w, r, false))
 }
 
 func RenderHomePage(w http.ResponseWriter, r *http.Request) {
@@ -28,16 +27,22 @@ func RenderHomePage(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			core.LoadTemplateConfig())
+			BuildTemplateParams(w, r, false))
 }
 
 func RenderLoginPage(w http.ResponseWriter, r *http.Request) {
-	params, _ := webcore.AddCSRFTokenToRequest(w, r, core.StructToMap(*core.LoadTemplateConfig()))
+	// If the user has a session they can't login...go to dashboard.
+	_, err := webcore.FindSessionInContext(r.Context())
+	if err == nil {
+		http.Redirect(w, r, core.DashboardUrl, http.StatusTemporaryRedirect)
+		return
+	}
+
 	RetrieveTemplate(LoginPageTemplateKey).
 		ExecuteTemplate(
 			w,
 			"base",
-			params)
+			BuildTemplateParams(w, r, true))
 }
 
 func RenderLearnMorePage(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +50,7 @@ func RenderLearnMorePage(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			core.LoadTemplateConfig())
+			BuildTemplateParams(w, r, false))
 }
 
 func RenderDashboardHomePage(w http.ResponseWriter, r *http.Request) {

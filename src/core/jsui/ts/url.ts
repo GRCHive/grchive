@@ -8,6 +8,7 @@ export function createAssetUrl(asset : string) : string {
 }
 
 export const learnMoreUrl : string = "/learn";
+export const dashboardUrl : string = "/dashboard";
 
 export function createMailtoUrl(user : string, domain : string) : Object {
     const email = createEmailAddress(user, domain)

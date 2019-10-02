@@ -99,7 +99,7 @@ func getSamlLoginCallbackError(prefix string, err error, w http.ResponseWriter, 
 		ExecuteTemplate(
 			w,
 			"base",
-			render.CreateRedirectParams("Oops!",
+			render.CreateRedirectParams(w, r, "Oops!",
 				"Something went wrong! Please try again.",
 				core.LoginUrl))
 }

@@ -18,7 +18,11 @@
 
     <script src="/static/corejsui/main.js"></script>
     <script>
-        corejsui.mountApp([[ .CompanyName ]], [[ .Domain ]]);
+        corejsui.mountApp({
+            'companyName': '[[ .CompanyName ]]',
+            'domain': '[[ .Domain ]]',
+            'hasSession': [[ .HasSession ]]
+        });
     </script>
 </body>
 </html>

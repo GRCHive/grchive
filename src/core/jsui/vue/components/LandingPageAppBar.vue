@@ -15,23 +15,34 @@
 
             <v-btn
                 text color="primary"
+                :href="dashboardUrl"
+                v-if="this.$root.hasSession"
+            >
+                Dashboard
+            </v-btn>
+
+            <v-btn
+                text color="primary"
                 :href="loginPageUrl"
+                v-else
             >
                 Login
             </v-btn>
+
         </v-toolbar-items>
     </v-app-bar>
 </template>
 
 <script lang="ts">
 
-import { contactUsUrl, loginPageUrl, homePageUrl } from '../../ts/url'
+import { contactUsUrl, loginPageUrl, homePageUrl, dashboardUrl } from '../../ts/url'
 
 export default {
     data: () => ({
         contactUsUrl,
         loginPageUrl,
-        homePageUrl
+        homePageUrl,
+        dashboardUrl
     })
 }
 

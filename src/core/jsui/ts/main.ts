@@ -9,8 +9,8 @@ import RedirectPage from '../vue/pages/RedirectPage.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
 import '../sass/main.scss'
 
-function mountApp(companyName : string, domain : string) {
-    let root = new Vue({
+function mountApp(inData : Object) {
+    new Vue({
         el: '#app',
         components: {
             LandingPage,
@@ -21,15 +21,9 @@ function mountApp(companyName : string, domain : string) {
             RedirectPage,
             SnackBar
         },
-        data: () => ({
-            companyName,
-            domain
-        }),
+        data: () => (inData),
         vuetify
     }).$mount('#app')
-
-    console.log(root)
-    console.log(root.$props)
 }
 
 export default {
