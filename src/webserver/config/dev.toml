@@ -1,7 +1,7 @@
 self_uri = "http://localhost:8080"
 
 [database]
-connection = "user=DEVUSER dbname=audit sslmode=disable"
+connection = "user=DEVUSER dbname=audit sslmode=disable timezone=UTC"
 
 [login]
 url = "https://dev-578359.okta.com/oauth2/default"

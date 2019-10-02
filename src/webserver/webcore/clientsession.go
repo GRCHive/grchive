@@ -56,7 +56,7 @@ func StoreUserSessionOnClient(session *core.UserSession, w http.ResponseWriter) 
 		Name:     cookieName,
 		Value:    encoded,
 		Expires:  session.ExpirationTime,
-		MaxAge:   int(session.ExpirationTime.Sub(time.Now()).Seconds()),
+		MaxAge:   int(session.ExpirationTime.Sub(time.Now().UTC()).Seconds()),
 		Secure:   core.LoadEnvConfig().UseSecureCookies,
 		HttpOnly: true,
 		Path:     core.HomePageUrl,

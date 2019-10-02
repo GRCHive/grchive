@@ -1,8 +1,8 @@
 CREATE TABLE user_sessions (
     session_id  VARCHAR(36) NOT NULL UNIQUE,
     email VARCHAR(320) NOT NULL,
-    last_active_time TIMESTAMP NOT NULL,
-    expiration_time TIMESTAMP NOT NULL,
+    last_active_time TIMESTAMPTZ NOT NULL,
+    expiration_time TIMESTAMPTZ NOT NULL,
     user_agent TEXT NOT NULL,
     ip_address TEXT NOT NULL,
     access_token TEXT NOT NULL,

@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+var (
+	ExpiredJWTToken error = errors.New("Expired Token")
+)
+
 // Deals with obtaining a JSON Web Key (JWK) (and re-obtaining if necessary) and using the
 // cached keys to verify JSON Web Tokens (JWT).
 type JWTImpl interface {
@@ -69,10 +73,10 @@ func (this *RawJWT) verifyCid() error {
 }
 
 func (this *RawJWT) verifyExp() error {
-	expTime := time.Unix(this.Payload.Exp, 0)
+	expTime := time.Unix(this.Payload.Exp, 0).UTC()
 
-	if time.Now().Sub(expTime).Seconds() > core.LoadEnvConfig().Login.TimeDriftLeewaySeconds {
-		return errors.New("Invalid exp.")
+	if core.IsPastTime(expTime) {
+		return ExpiredJWTToken
 	}
 	return nil
 }

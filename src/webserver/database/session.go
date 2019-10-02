@@ -42,3 +42,24 @@ func FindUserSession(sessionId string) (*core.UserSession, error) {
 
 	return session, nil
 }
+
+func UpdateUserSession(session *core.UserSession) error {
+	tx := dbConn.MustBegin()
+	_, err := tx.NamedExec(`
+		UPDATE user_sessions
+		SET last_active_time = :last_active_time,
+			expiration_time = :expiration_time,
+			user_agent = :user_agent,
+			ip_address = :ip_address,
+			access_token = :access_token,
+			id_token = :id_token,
+			refresh_token = :refresh_token
+		WHERE session_id = :session_id
+	`, session)
+	if err != nil {
+		return err
+	}
+	err = tx.Commit()
+	return err
+
+}

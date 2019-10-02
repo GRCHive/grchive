@@ -122,19 +122,29 @@ func getSamlLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var session *core.UserSession
-	var err error
-
 	// Retrieve the access/ID token from Okta and redirect if successful.
 	// Note that core.OktaObtainTokens will store the tokens where necessary.
-	if session, err = webcore.OktaObtainTokens(code[0], r); err != nil {
-		getSamlLoginCallbackError("Failed to obtain ID token.", err, w, r)
+	tokens, err := webcore.OktaObtainTokens(code[0], false)
+	if err != nil {
+		getSamlLoginCallbackError("Failed to obtain OIDC tokens.", err, w, r)
+		return
+	}
+
+	session, err := webcore.CreateUserSessionFromTokens(tokens, r)
+	if err != nil {
+		getSamlLoginCallbackError("Failed to create user session.", err, w, r)
+		return
+	}
+
+	// Store session in the database.
+	if err = database.StoreUserSession(session); err != nil {
+		getSamlLoginCallbackError("Failed to store user session (server).", err, w, r)
 		return
 	}
 
 	// Store session id as a cookie.
 	if err = webcore.StoreUserSessionOnClient(session, w); err != nil {
-		getSamlLoginCallbackError("Failed to store user session.", err, w, r)
+		getSamlLoginCallbackError("Failed to store user session (client).", err, w, r)
 		return
 	}
 

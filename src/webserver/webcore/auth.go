@@ -23,12 +23,14 @@ type OktaKey struct {
 }
 
 type OktaTokens struct {
-	AccessToken  string  `json:"access_token"`
-	TokenType    string  `json:"token_type"`
-	ExpiresIn    float64 `json:"expires_in"`
-	Scope        string  `json:"scope"`
-	RefreshToken string  `json:"refresh_token"`
-	IdToken      string  `json:"id_token"`
+	AccessToken        string  `json:"access_token"`
+	TokenType          string  `json:"token_type"`
+	ExpiresIn          float64 `json:"expires_in"`
+	Scope              string  `json:"scope"`
+	RefreshToken       string  `json:"refresh_token"`
+	IdToken            string  `json:"id_token"`
+	DecodedAccessToken *RawJWT
+	DecodedIDToken     *RawJWT
 }
 
 type OktaJWTRetriever struct{}
@@ -100,48 +102,61 @@ func (this OktaJWTRetriever) RetrieveKeys() (map[string][]*rsa.PublicKey, error)
 	return nil, errors.New("Failed to find 'keys' key in okta retrieve keys.")
 }
 
-// Creates a core.UserSession object and stores it into the session database.
-func CreateUserSesssionFromTokens(tokens *OktaTokens, accessJwt *RawJWT, idJwt *RawJWT, r *http.Request) (*core.UserSession, error) {
+func UpdateUserSessionFromTokens(session *core.UserSession, tokens *OktaTokens, r *http.Request) error {
+	accessJwt := tokens.DecodedAccessToken
+	idJwt := tokens.DecodedIDToken
+
 	if len(idJwt.Payload.Email) == 0 || len(accessJwt.Payload.Sub) == 0 {
-		return nil, errors.New("Failed to find email in ID/Access Token.")
+		return errors.New("Failed to find email in ID/Access Token.")
 	}
 
 	// Is this even necessary?
 	if idJwt.Payload.Email != accessJwt.Payload.Sub {
-		return nil, errors.New("Id token Email vs Access Token sub mismatch.")
+		return errors.New("Id token Email vs Access Token sub mismatch.")
 	}
 
-	userSession := &core.UserSession{
+	*session = core.UserSession{
 		SessionId:      uuid.New().String(),
 		UserEmail:      idJwt.Payload.Email,
-		LastActiveTime: time.Now(),
-		ExpirationTime: time.Unix(accessJwt.Payload.Exp, 0),
+		LastActiveTime: time.Now().UTC(),
+		ExpirationTime: time.Unix(accessJwt.Payload.Exp, 0).UTC(),
 		UserAgent:      r.UserAgent(),
 		IP:             r.RemoteAddr,
 		AccessToken:    tokens.AccessToken,
 		IdToken:        tokens.IdToken,
 		RefreshToken:   tokens.RefreshToken,
 	}
+	return nil
+}
 
-	err := database.StoreUserSession(userSession)
+// Creates a core.UserSession object and stores it into the session database.
+func CreateUserSessionFromTokens(tokens *OktaTokens, r *http.Request) (*core.UserSession, error) {
+	userSession := new(core.UserSession)
+	err := UpdateUserSessionFromTokens(userSession, tokens, r)
 	if err != nil {
 		return nil, err
 	}
-
 	return userSession, nil
 }
 
-func OktaObtainTokens(code string, r *http.Request) (*core.UserSession, error) {
+func OktaObtainTokens(code string, isRefresh bool) (*OktaTokens, error) {
 	envConfig := core.LoadEnvConfig()
 
 	var postVals url.Values = url.Values{
-		"code":          []string{code},
-		"grant_type":    []string{envConfig.Login.GrantType},
 		"redirect_uri":  []string{core.FullSamlCallbackUrl},
 		"client_id":     []string{envConfig.Login.ClientId},
 		"client_secret": []string{envConfig.Login.ClientSecret},
-		"scope":         []string{url.QueryEscape(envConfig.Login.Scope)},
+		"scope":         []string{envConfig.Login.Scope},
 	}
+
+	if isRefresh {
+		postVals["refresh_token"] = []string{code}
+		postVals["grant_type"] = []string{"refresh_token"}
+	} else {
+		postVals["code"] = []string{code}
+		postVals["grant_type"] = []string{envConfig.Login.GrantType}
+	}
+
 	resp, err := http.PostForm(core.OktaTokenUrl, postVals)
 	if err != nil {
 		return nil, err
@@ -169,21 +184,61 @@ func OktaObtainTokens(code string, r *http.Request) (*core.UserSession, error) {
 		return nil, err
 	}
 
-	return CreateUserSesssionFromTokens(data, accessJwt, idJwt, r)
+	data.DecodedAccessToken = accessJwt
+	data.DecodedIDToken = idJwt
+	return data, nil
 }
 
 // If successful, returns a new http.Request that contains
-// a context.Context with the user session. Otherwise, returns a nil
-// along with an error.
-func VerifyUserSessionAuthenticated(r *http.Request) (*http.Request, error) {
+// a context.Context with the user session. Otherwise, returns the passed
+// in request along with an error. If a session was found and it can't
+// be validated, it will be deleted. If a session was found and it is
+// validated, its last active time will be updated and its access token
+// will be refreshed if necessary.
+func FindValidUserSession(r *http.Request) (*http.Request, error) {
 	sessionId, err := GetUserSessionOnClient(r)
 	if err != nil {
-		return nil, err
+		return r, err
 	}
 
 	session, err := database.FindUserSession(sessionId)
 	if err != nil {
-		return nil, err
+		return r, err
+	}
+
+	// Ensure that the access token is valid and not expired. If it is,
+	// use the corresponding refresh token to retrieve a new token.
+	// If this fails, force the user to re-login. Note that we have three
+	// sources where we check for expiration: 1) access token 2) id token and
+	// 3) our session database. All three must not be expired.
+	_, accessErr := oktaJwtManager.VerifyJWT(session.AccessToken, true)
+	_, idErr := oktaJwtManager.VerifyJWT(session.IdToken, false)
+	if core.IsPastTime(session.ExpirationTime) || idErr == ExpiredJWTToken || accessErr == ExpiredJWTToken || true {
+		newTokens, err := OktaObtainTokens(session.RefreshToken, true)
+		if err != nil {
+			return r, err
+		}
+
+		err = UpdateUserSessionFromTokens(session, newTokens, r)
+		if err != nil {
+			return r, err
+		}
+	} else if accessErr != nil {
+		return r, accessErr
+	} else if idErr != nil {
+		return r, idErr
+	}
+
+	// Update last active time and save in DB.
+	// This needs to be here because the last active time needs to be
+	// valid even if we don't refresh the token.
+	session.LastActiveTime = time.Now().UTC()
+
+	err = database.UpdateUserSession(session)
+	if err != nil {
+		// This is probably our fault so don't delete the session but keep it around
+		// until the next user request and hopefully it'll resolve itself.
+		return r, err
 	}
 
 	ctx := AddSessionToContext(session, r.Context())
