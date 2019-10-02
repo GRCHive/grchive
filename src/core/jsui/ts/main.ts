@@ -5,6 +5,7 @@ import ContactUsPage from '../vue/pages/ContactUsPage.vue'
 import LoginPage from '../vue/pages/LoginPage.vue'
 import GettingStartedPage from '../vue/pages/GettingStartedPage.vue'
 import LearnMorePage from '../vue/pages/LearnMorePage.vue'
+import RedirectPage from '../vue/pages/RedirectPage.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
 
 new Vue({
@@ -15,6 +16,7 @@ new Vue({
         LoginPage,
         GettingStartedPage,
         LearnMorePage,
+        RedirectPage,
         SnackBar
     },
     vuetify

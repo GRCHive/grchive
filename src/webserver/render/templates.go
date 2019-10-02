@@ -16,7 +16,7 @@ const (
 	LandingPageTemplateKey        templateKey = "LANDING"
 	LoginPageTemplateKey          templateKey = "LOGIN"
 	LearnMorePageTemplateKey      templateKey = "LEARNMORE"
-	GoBackTemplateKey             templateKey = "GOBACK"
+	RedirectTemplateKey           templateKey = "REDIRECT"
 )
 
 func defaultLoadTemplateWithBase(file string) *template.Template {
@@ -37,8 +37,8 @@ func RegisterTemplates() {
 		defaultLoadTemplateWithBase("src/webserver/templates/login.tmpl")
 	allTemplates[LearnMorePageTemplateKey] =
 		defaultLoadTemplateWithBase("src/webserver/templates/learnMore.tmpl")
-	allTemplates[GoBackTemplateKey] =
-		defaultLoadTemplateWithBase("src/webserver/templates/goBack.tmpl")
+	allTemplates[RedirectTemplateKey] =
+		defaultLoadTemplateWithBase("src/webserver/templates/redirect.tmpl")
 }
 
 func RetrieveTemplate(name templateKey) *template.Template {

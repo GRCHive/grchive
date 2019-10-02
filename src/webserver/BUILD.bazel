@@ -82,6 +82,7 @@ go_library(
     srcs = [
         "render/pages.go",
         "render/templates.go",
+        "render/params.go",
     ],
     deps = [
         ":webserver_core_library",

@@ -95,11 +95,13 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 func getSamlLoginCallbackError(prefix string, err error, w http.ResponseWriter, r *http.Request) {
 	core.Warning(prefix + " :: " + core.ErrorString(err))
 	webcore.ClearCSRFTokenFromSession(w, r)
-	render.RetrieveTemplate(render.GoBackTemplateKey).
+	render.RetrieveTemplate(render.RedirectTemplateKey).
 		ExecuteTemplate(
 			w,
 			"base",
-			core.LoadTemplateConfig())
+			render.CreateRedirectParams("Oops!",
+				"Something went wrong! Please try again.",
+				core.LoginUrl))
 }
 
 func getSamlLoginCallback(w http.ResponseWriter, r *http.Request) {
