@@ -4,10 +4,12 @@ self_uri = "http://localhost:8080"
 connection = "user=DEVUSER dbname=audit sslmode=disable"
 
 [login]
-url = "https://dev-578359.okta.com/oauth2/default/v1"
-auth_endpoint = "/authorize"
-token_endpoint = "/token"
-key_endpoint = "/keys"
+url = "https://dev-578359.okta.com/oauth2/default"
+auth_endpoint = "/v1/authorize"
+token_endpoint = "/v1/token"
+key_endpoint = "/v1/keys"
+auth_audience = "api://default"
+time_drift_leeway_seconds = 60
 
 [login.params]
 client_id = "0oa1g8kug3Rsscja0357"

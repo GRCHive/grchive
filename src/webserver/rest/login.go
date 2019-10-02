@@ -86,9 +86,9 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 	jsonWriter.Encode(struct {
 		LoginUrl string
 	}{
-		// Pass the CSRF token as the nonce as well as the state and verify both upon redirect
+		// Pass the CSRF token as the state and verify it upon redirect
 		// because why not.
-		core.CreateOktaLoginUrl(idpIden, csrfToken[0], csrfToken[0]),
+		core.CreateOktaLoginUrl(idpIden, csrfToken[0], "filler"),
 	})
 }
 

@@ -97,7 +97,7 @@ func (this OktaJWTRetriever) RetrieveKeys() (map[string][]*rsa.PublicKey, error)
 	return nil, errors.New("Failed to find 'keys' key in okta retrieve keys.")
 }
 
-func CreateUserSesssionFromTokens(tokens *OktaTokens, r *http.Request) (*core.UserSession, error) {
+func CreateUserSesssionFromTokens(tokens *OktaTokens, accessJwt *RawJWT, idJwt *RawJWT, r *http.Request) (*core.UserSession, error) {
 	return nil, nil
 }
 
@@ -129,13 +129,15 @@ func OktaObtainTokens(code string, r *http.Request) (*core.UserSession, error) {
 		return nil, err
 	}
 
-	if err = oktaJwtManager.Verify(data.AccessToken); err != nil {
+	accessJwt, err := oktaJwtManager.VerifyJWT(data.AccessToken, true)
+	if err != nil {
 		return nil, err
 	}
 
-	if err = oktaJwtManager.Verify(data.IdToken); err != nil {
+	idJwt, err := oktaJwtManager.VerifyJWT(data.IdToken, false)
+	if err != nil {
 		return nil, err
 	}
 
-	return CreateUserSesssionFromTokens(data, r)
+	return CreateUserSesssionFromTokens(data, accessJwt, idJwt, r)
 }

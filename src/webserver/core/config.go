@@ -17,17 +17,19 @@ type TemplateConfig struct {
 var templateConfig *TemplateConfig
 
 type LoginConfig struct {
-	BaseUrl       string
-	AuthEndpoint  string
-	TokenEndpoint string
-	KeyEndpoint   string
-	ClientId      string
-	ClientSecret  string
-	ResponseType  string
-	ResponseMode  string
-	Scope         string
-	RedirectUrl   string
-	GrantType     string
+	BaseUrl                string
+	AuthEndpoint           string
+	TokenEndpoint          string
+	KeyEndpoint            string
+	ClientId               string
+	ClientSecret           string
+	ResponseType           string
+	ResponseMode           string
+	Scope                  string
+	RedirectUrl            string
+	GrantType              string
+	AuthAudience           string
+	TimeDriftLeewaySeconds float64
 }
 
 type EnvConfig struct {
@@ -85,6 +87,8 @@ func LoadEnvConfig() *EnvConfig {
 		envConfig.Login.Scope = tomlConfig.Get("login.params.scope").(string)
 		envConfig.Login.RedirectUrl = tomlConfig.Get("login.params.redirect_uri").(string)
 		envConfig.Login.GrantType = tomlConfig.Get("login.params.grant_type").(string)
+		envConfig.Login.AuthAudience = tomlConfig.Get("login.auth_audience").(string)
+		envConfig.Login.TimeDriftLeewaySeconds = float64(tomlConfig.Get("login.time_drift_leeway_seconds").(int64))
 
 		tmpSessionKeys := tomlConfig.Get("security.session_keys").([]interface{})
 		envConfig.SessionKeys = make([][]byte, len(tmpSessionKeys))

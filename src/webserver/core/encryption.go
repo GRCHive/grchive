@@ -17,12 +17,12 @@ const (
 func VerifySignature(payload []byte, signature []byte, alg EncryptionAlgorithm, key interface{}) error {
 	switch alg {
 	case RSA256:
-		return VerifyRSASignature(payload, signature, key)
+		return VerifyRSA256Signature(payload, signature, key)
 	}
 	return errors.New("Unknown encryption algorithm.")
 }
 
-func VerifyRSASignature(payload []byte, signature []byte, key interface{}) error {
+func VerifyRSA256Signature(payload []byte, signature []byte, key interface{}) error {
 	rsaKey, ok := key.(*rsa.PublicKey)
 	if !ok {
 		return errors.New("Bad RSA PublicKey")
