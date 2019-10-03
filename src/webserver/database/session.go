@@ -35,7 +35,7 @@ func FindUserSession(sessionId string) (*core.UserSession, error) {
 
 	var session *core.UserSession = new(core.UserSession)
 	rows.Next()
-	err = rows.StructScan(&session)
+	err = rows.StructScan(session)
 	if err != nil {
 		return nil, err
 	}

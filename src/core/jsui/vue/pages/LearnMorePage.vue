@@ -80,6 +80,10 @@ export default Vue.extend({
             return createAssetUrl('generic-banner4.jpg')
         },
     },
+    data : () => ({
+        getStartedUrl,
+        contactUsUrl
+    })
 })
 
 </script>
