@@ -116,7 +116,7 @@ func UpdateUserSessionFromTokens(session *core.UserSession, tokens *OktaTokens, 
 	}
 
 	*session = core.UserSession{
-		SessionId:      uuid.New().String(),
+		SessionId:      session.SessionId,
 		UserEmail:      idJwt.Payload.Email,
 		LastActiveTime: time.Now().UTC(),
 		ExpirationTime: time.Unix(accessJwt.Payload.Exp, 0).UTC(),
@@ -126,6 +126,13 @@ func UpdateUserSessionFromTokens(session *core.UserSession, tokens *OktaTokens, 
 		IdToken:        tokens.IdToken,
 		RefreshToken:   tokens.RefreshToken,
 	}
+
+	// Create new session ID if it's empty. This allows for updated sessions (aka
+	// session with an existing session ID to not receive a new ID).
+	if len(session.SessionId) == 0 {
+		session.SessionId = uuid.New().String()
+	}
+
 	return nil
 }
 
@@ -194,8 +201,9 @@ func OktaObtainTokens(code string, isRefresh bool) (*OktaTokens, error) {
 // in request along with an error. If a session was found and it can't
 // be validated, it will be deleted. If a session was found and it is
 // validated, its last active time will be updated and its access token
-// will be refreshed if necessary.
-func FindValidUserSession(r *http.Request) (*http.Request, error) {
+// will be refreshed if necessary. Also update the user session cookie's
+// expiration time.
+func FindValidUserSession(w http.ResponseWriter, r *http.Request) (*http.Request, error) {
 	sessionId, err := GetUserSessionOnClient(r)
 	if err != nil {
 		return r, err
@@ -242,5 +250,16 @@ func FindValidUserSession(r *http.Request) (*http.Request, error) {
 	}
 
 	ctx := AddSessionToContext(session, r.Context())
-	return r.Clone(ctx), nil
+	newR := r.Clone(ctx)
+
+	// Re-store the cookie on the user side.
+	err = StoreUserSessionOnClient(session, w)
+	if err != nil {
+		// Something went wrong with storing the session cookie but
+		// we still have a valid cookie/session so just go ahead and
+		// use the session.
+		return newR, err
+	}
+
+	return newR, nil
 }

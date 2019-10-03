@@ -19,7 +19,8 @@ const babelLoader = {
 module.exports = {
     devtool: "source-map",
     entry: {
-        main: ['./ts/main.ts']
+        main: ['./ts/main.ts'],
+        dashboard: ['./ts/dashboard.ts'],
     },
     output: {
         filename: '[name].js',
@@ -79,7 +80,7 @@ module.exports = {
     },
     plugins: [
         new MiniCssExtractPlugin({
-            filename: 'main.css'
+            filename: '[name].css'
         }),
         new VueLoaderPlugin()
     ],

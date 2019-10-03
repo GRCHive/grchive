@@ -18,12 +18,12 @@ func LoggedRequestMiddleware(next http.Handler) http.Handler {
 
 func ObtainUserSessionInContextMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		newR, err := FindValidUserSession(r)
+		r, err := FindValidUserSession(w, r)
 		if err != nil {
-			core.Info("No user session: " + err.Error())
+			core.Info("Error in finding valid user session: " + err.Error())
 			next.ServeHTTP(w, r)
 		} else {
-			next.ServeHTTP(w, newR)
+			next.ServeHTTP(w, r)
 		}
 	})
 }

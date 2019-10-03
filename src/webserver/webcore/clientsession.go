@@ -52,11 +52,14 @@ func StoreUserSessionOnClient(session *core.UserSession, w http.ResponseWriter) 
 		return err
 	}
 
+	cookieMaxAgeSeconds := core.SecondsInYear
+	cookieMaxAgeSecondsDuration := time.Duration(cookieMaxAgeSeconds) * time.Second
+
 	cookie := &http.Cookie{
 		Name:     cookieName,
 		Value:    encoded,
-		Expires:  session.ExpirationTime,
-		MaxAge:   int(session.ExpirationTime.Sub(time.Now().UTC()).Seconds()),
+		Expires:  time.Now().Add(cookieMaxAgeSecondsDuration).UTC(),
+		MaxAge:   cookieMaxAgeSeconds,
 		Secure:   core.LoadEnvConfig().UseSecureCookies,
 		HttpOnly: true,
 		Path:     core.HomePageUrl,
