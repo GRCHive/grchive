@@ -40,13 +40,15 @@ func main() {
 	// Dynamic(?) content that needs to be served by Go.
 	r.Use(webcore.LoggedRequestMiddleware)
 	r.Use(webcore.ObtainUserSessionInContextMiddleware)
-	r.HandleFunc(core.GetStartedUrl, render.RenderGettingStartedPage).Methods("GET")
-	r.HandleFunc(core.ContactUsUrl, render.RenderContactUsPage).Methods("GET")
-	r.HandleFunc(core.HomePageUrl, render.RenderHomePage).Methods("GET")
-	r.HandleFunc(core.LoginUrl, render.RenderLoginPage).Methods("GET")
-	r.HandleFunc(core.LearnMoreUrl, render.RenderLearnMorePage).Methods("GET")
+	r.HandleFunc(core.GetStartedUrl, render.RenderGettingStartedPage).Methods("GET").Name(string(webcore.GettingStartedRouteName))
+	r.HandleFunc(core.ContactUsUrl, render.RenderContactUsPage).Methods("GET").Name(string(webcore.ContactUsRouteName))
+	r.HandleFunc(core.HomePageUrl, render.RenderHomePage).Methods("GET").Name(string(webcore.LandingPageRouteName))
+	r.HandleFunc(core.LoginUrl, render.RenderLoginPage).Methods("GET").Name(string(webcore.LoginRouteName))
+	r.HandleFunc(core.LearnMoreUrl, render.RenderLearnMorePage).Methods("GET").Name(string(webcore.LearnMoreRouteName))
 	rest.RegisterPaths(r)
 	createDashboardSubrouter(r)
+
+	webcore.RegisterRouter(r)
 
 	// TODO: Configurable port?
 	srv := &http.Server{

@@ -69,6 +69,7 @@ go_library(
         "webcore/jwt.go",
         "webcore/handlers.go",
         "webcore/session.go",
+        "webcore/router.go",
     ],
     deps = [
         ":webserver_core_library",

@@ -83,12 +83,13 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	core.Info(webcore.CreateOktaLoginUrl(idpIden, csrfToken[0], "filler"))
 	jsonWriter.Encode(struct {
 		LoginUrl string
 	}{
 		// Pass the CSRF token as the state and verify it upon redirect
 		// because why not.
-		core.CreateOktaLoginUrl(idpIden, csrfToken[0], "filler"),
+		webcore.CreateOktaLoginUrl(idpIden, csrfToken[0], "filler"),
 	})
 }
 
@@ -101,7 +102,7 @@ func getSamlLoginCallbackError(prefix string, err error, w http.ResponseWriter, 
 			"base",
 			render.CreateRedirectParams(w, r, "Oops!",
 				"Something went wrong! Please try again.",
-				core.LoginUrl))
+				webcore.MustGetRouteUrl(webcore.LoginRouteName)))
 }
 
 func getSamlLoginCallback(w http.ResponseWriter, r *http.Request) {
@@ -149,5 +150,5 @@ func getSamlLoginCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	webcore.ClearCSRFTokenFromSession(w, r)
-	http.Redirect(w, r, core.DashboardUrl, http.StatusFound)
+	http.Redirect(w, r, webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName), http.StatusFound)
 }

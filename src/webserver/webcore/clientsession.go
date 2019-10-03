@@ -62,7 +62,7 @@ func StoreUserSessionOnClient(session *core.UserSession, w http.ResponseWriter) 
 		MaxAge:   cookieMaxAgeSeconds,
 		Secure:   core.LoadEnvConfig().UseSecureCookies,
 		HttpOnly: true,
-		Path:     core.HomePageUrl,
+		Path:     MustGetRouteUrl(LandingPageRouteName),
 	}
 	http.SetCookie(w, cookie)
 	return nil

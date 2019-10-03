@@ -6,7 +6,7 @@ import (
 
 func FindOrganizationFromGroupId(groupId string) (*core.Organization, error) {
 	rows, err := dbConn.Queryx(`
-		SELECT * FROM organizations WHERE org_group_id = $1
+		SELECT * FROM organizations WHERE org_group_name = $1
 	`, groupId)
 	if err != nil {
 		return nil, err

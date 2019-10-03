@@ -1,7 +1,6 @@
 package render
 
 import (
-	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
 	"net/http"
 )
@@ -34,7 +33,7 @@ func RenderLoginPage(w http.ResponseWriter, r *http.Request) {
 	// If the user has a session they can't login...go to dashboard.
 	_, err := webcore.FindSessionInContext(r.Context())
 	if err == nil {
-		http.Redirect(w, r, core.DashboardUrl, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName), http.StatusTemporaryRedirect)
 		return
 	}
 
