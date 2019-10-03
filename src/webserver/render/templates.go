@@ -11,12 +11,15 @@ type templateMap map[templateKey]*template.Template
 var allTemplates templateMap = make(templateMap)
 
 const (
+	// Landing Page Keys
 	GettingStartedPageTemplateKey templateKey = "GETSTARTED"
-	ContactUsPageTemplateKey      templateKey = "CONTACT"
-	LandingPageTemplateKey        templateKey = "LANDING"
-	LoginPageTemplateKey          templateKey = "LOGIN"
-	LearnMorePageTemplateKey      templateKey = "LEARNMORE"
-	RedirectTemplateKey           templateKey = "REDIRECT"
+	ContactUsPageTemplateKey                  = "CONTACT"
+	LandingPageTemplateKey                    = "LANDING"
+	LoginPageTemplateKey                      = "LOGIN"
+	LearnMorePageTemplateKey                  = "LEARNMORE"
+	RedirectTemplateKey                       = "REDIRECT"
+	// Dashboard Keys
+	DashboardHomeTemplateKey = "DASHBOARDHOME"
 )
 
 func defaultLoadTemplateWithBase(file string) *template.Template {
@@ -26,7 +29,15 @@ func defaultLoadTemplateWithBase(file string) *template.Template {
 			ParseFiles("src/webserver/templates/base.tmpl", file))
 }
 
+func defaultLoadTemplateWithDashboardBase(file string) *template.Template {
+	return template.Must(
+		template.New("").
+			Delims("[[", "]]").
+			ParseFiles("src/webserver/templates/dashboard/dashboardBase.tmpl", file))
+}
+
 func RegisterTemplates() {
+	// Landing page templates
 	allTemplates[GettingStartedPageTemplateKey] =
 		defaultLoadTemplateWithBase("src/webserver/templates/gettingStarted.tmpl")
 	allTemplates[ContactUsPageTemplateKey] =
@@ -39,6 +50,10 @@ func RegisterTemplates() {
 		defaultLoadTemplateWithBase("src/webserver/templates/learnMore.tmpl")
 	allTemplates[RedirectTemplateKey] =
 		defaultLoadTemplateWithBase("src/webserver/templates/redirect.tmpl")
+
+	// Dashing templates
+	allTemplates[DashboardHomeTemplateKey] =
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardHome.tmpl")
 }
 
 func RetrieveTemplate(name templateKey) *template.Template {

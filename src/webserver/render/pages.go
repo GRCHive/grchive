@@ -54,4 +54,9 @@ func RenderLearnMorePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func RenderDashboardHomePage(w http.ResponseWriter, r *http.Request) {
+	RetrieveTemplate(DashboardHomeTemplateKey).
+		ExecuteTemplate(
+			w,
+			"dashboardBase",
+			BuildTemplateParams(w, r, false))
 }

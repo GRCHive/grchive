@@ -1,0 +1,26 @@
+[[define "dashboardBase"]]
+<!doctype html>
+<html lang="en">
+<head>
+    <title>[[ .CompanyName ]]</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="/static/corejsui/dashboard.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <v-app>
+            [[template "app" .]]
+
+            <snack-bar ref="snackbar"></snack-bar>
+        </v-app>
+    </div>
+
+    <script src="/static/corejsui/dashboard.js"></script>
+    <script>
+        corejsui.mountApp({
+        });
+    </script>
+</body>
+</html>
+[[end]]

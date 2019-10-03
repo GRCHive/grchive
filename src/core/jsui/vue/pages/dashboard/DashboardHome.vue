@@ -10,6 +10,11 @@
 </template>
 
 <script>
+
+import DashboardAppBar from '../../components/dashboard/DashboardAppBar.vue'
 export default {
+    components : {
+        DashboardAppBar
+    }
 }
 </script>

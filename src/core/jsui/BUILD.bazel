@@ -58,7 +58,9 @@ genrule(
     srcs = [":corejsui-files"],
     outs = [
         "dist-nosmap/main.js",
-        "dist-nosmap/main.css"
+        "dist-nosmap/main.css",
+        "dist-nosmap/dashboard.js",
+        "dist-nosmap/dashboard.css"
     ],
     cmd = CMD_PROD,
     message = "Run Webpack for corejsui (no smap)",
@@ -72,7 +74,11 @@ genrule(
         "dist-smap/main.js",
         "dist-smap/main.css",
         "dist-smap/main.js.map",
-        "dist-smap/main.css.map"
+        "dist-smap/main.css.map",
+        "dist-smap/dashboard.js",
+        "dist-smap/dashboard.css",
+        "dist-smap/dashboard.js.map",
+        "dist-smap/dashboard.css.map"
     ],
     cmd = CMD_DEV,
     message = "Run Webpack for corejsui (with smap)",
