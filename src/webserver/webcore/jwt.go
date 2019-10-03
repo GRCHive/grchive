@@ -147,7 +147,7 @@ func (this *JWTManager) GetKeysFromKid(kid string) ([]*rsa.PublicKey, error) {
 
 // Returns the decrypted payload along with an error (if there was one).
 // The error is not nil if the token can't be verified or some other error appeared.
-func (this JWTManager) VerifyJWT(input string, isAccessToken bool) (*RawJWT, error) {
+func (this *JWTManager) VerifyJWT(input string, isAccessToken bool) (*RawJWT, error) {
 	jwt, err := ReadRawJWTFromString(input)
 	if err != nil {
 		return nil, err

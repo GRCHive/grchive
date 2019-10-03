@@ -221,7 +221,7 @@ func FindValidUserSession(w http.ResponseWriter, r *http.Request) (*core.UserSes
 	// 3) our session database. All three must not be expired.
 	_, accessErr := oktaJwtManager.VerifyJWT(session.AccessToken, true)
 	_, idErr := oktaJwtManager.VerifyJWT(session.IdToken, false)
-	if core.IsPastTime(session.ExpirationTime) || idErr == ExpiredJWTToken || accessErr == ExpiredJWTToken || true {
+	if core.IsPastTime(session.ExpirationTime) || idErr == ExpiredJWTToken || accessErr == ExpiredJWTToken {
 		newTokens, err := OktaObtainTokens(session.RefreshToken, true)
 		if err != nil {
 			return nil, r, err
@@ -245,7 +245,7 @@ func FindValidUserSession(w http.ResponseWriter, r *http.Request) (*core.UserSes
 	// any errors should hopefully not point to an invalid session.
 
 	ctx := AddSessionToContext(session, r.Context())
-	newR := r.Clone(ctx)
+	newR := r.WithContext(ctx)
 
 	err = database.UpdateUserSession(session)
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 func LoggedRequestMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		core.Info(
-			"Remote: ", r.RemoteAddr,
+			"START: Remote: ", r.RemoteAddr,
 			" URL: ", r.URL,
 			" Method: ", r.Method)
 		next.ServeHTTP(w, r)
@@ -33,7 +33,7 @@ func ObtainUserSessionInContextMiddleware(next http.Handler) http.Handler {
 		}
 
 		context := AddSessionParsedDataToContext(data, newR.Context())
-		newR = newR.Clone(context)
+		newR = newR.WithContext(context)
 		next.ServeHTTP(w, newR)
 	})
 }
@@ -65,7 +65,7 @@ func ObtainOrganizationInfoInContextMiddleware(next http.Handler) http.Handler {
 		}
 
 		ctx := AddOrganizationInfoToContext(org, r.Context())
-		newR := r.Clone(ctx)
+		newR := r.WithContext(ctx)
 		next.ServeHTTP(w, newR)
 	})
 }
