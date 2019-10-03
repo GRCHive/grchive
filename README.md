@@ -1,6 +1,6 @@
 # Audit Stuff
 
-This document will assume that the git checkout directory is an set in an environment variable `$SRC`.
+This document will assume that the git checkout directory is set in an environment variable `$SRC`.
 
 ## Prerequisites
 
