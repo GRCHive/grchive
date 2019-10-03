@@ -18,13 +18,23 @@ func LoggedRequestMiddleware(next http.Handler) http.Handler {
 
 func ObtainUserSessionInContextMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r, err := FindValidUserSession(w, r)
-		if err != nil {
+		session, newR, err := FindValidUserSession(w, r)
+		if err != nil && session == nil {
 			core.Info("Error in finding valid user session: " + err.Error())
 			next.ServeHTTP(w, r)
-		} else {
-			next.ServeHTTP(w, r)
+			return
 		}
+
+		data, err := ExtractParsedDataFromSession(session)
+		if err != nil {
+			core.Info("Error in parsing user session: " + err.Error())
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		context := AddSessionParsedDataToContext(data, newR.Context())
+		newR = newR.Clone(context)
+		next.ServeHTTP(w, newR)
 	})
 }
 

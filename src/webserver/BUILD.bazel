@@ -33,6 +33,7 @@ go_library(
         "core/session.go",
         "core/encryption.go",
         "core/time.go",
+        "core/organization.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",
@@ -48,6 +49,7 @@ go_library(
         "database/gettingStartedInterest.go",
         "database/samlIdp.go",
         "database/session.go",
+        "database/organizations.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 
@@ -66,6 +68,7 @@ go_library(
         "webcore/clientsession.go",
         "webcore/jwt.go",
         "webcore/handlers.go",
+        "webcore/session.go",
     ],
     deps = [
         ":webserver_core_library",

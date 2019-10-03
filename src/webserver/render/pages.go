@@ -54,7 +54,11 @@ func RenderLearnMorePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func RenderDashboardHomePage(w http.ResponseWriter, r *http.Request) {
-	RetrieveTemplate(DashboardHomeTemplateKey).
+	// For now, redirect user to their organization home page.
+}
+
+func RenderDashboardOrgHomePage(w http.ResponseWriter, r *http.Request) {
+	RetrieveTemplate(DashboardOrgHomeTemplateKey).
 		ExecuteTemplate(
 			w,
 			"dashboardBase",

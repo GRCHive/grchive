@@ -19,7 +19,7 @@ const (
 	LearnMorePageTemplateKey                  = "LEARNMORE"
 	RedirectTemplateKey                       = "REDIRECT"
 	// Dashboard Keys
-	DashboardHomeTemplateKey = "DASHBOARDHOME"
+	DashboardOrgHomeTemplateKey = "DASHBOARDORGHOME"
 )
 
 func defaultLoadTemplateWithBase(file string) *template.Template {
@@ -52,8 +52,8 @@ func RegisterTemplates() {
 		defaultLoadTemplateWithBase("src/webserver/templates/redirect.tmpl")
 
 	// Dashing templates
-	allTemplates[DashboardHomeTemplateKey] =
-		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardHome.tmpl")
+	allTemplates[DashboardOrgHomeTemplateKey] =
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardOrgHome.tmpl")
 }
 
 func RetrieveTemplate(name templateKey) *template.Template {

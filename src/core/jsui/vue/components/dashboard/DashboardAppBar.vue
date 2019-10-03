@@ -1,5 +1,5 @@
 <template>
-    <v-app-bar app>
+    <v-app-bar app dense>
         <v-toolbar-title color="primary">
             <a href="">POOP FACE</a>
         </v-toolbar-title>

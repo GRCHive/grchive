@@ -203,15 +203,15 @@ func OktaObtainTokens(code string, isRefresh bool) (*OktaTokens, error) {
 // validated, its last active time will be updated and its access token
 // will be refreshed if necessary. Also update the user session cookie's
 // expiration time.
-func FindValidUserSession(w http.ResponseWriter, r *http.Request) (*http.Request, error) {
+func FindValidUserSession(w http.ResponseWriter, r *http.Request) (*core.UserSession, *http.Request, error) {
 	sessionId, err := GetUserSessionOnClient(r)
 	if err != nil {
-		return r, err
+		return nil, r, err
 	}
 
 	session, err := database.FindUserSession(sessionId)
 	if err != nil {
-		return r, err
+		return nil, r, err
 	}
 
 	// Ensure that the access token is valid and not expired. If it is,
@@ -224,33 +224,35 @@ func FindValidUserSession(w http.ResponseWriter, r *http.Request) (*http.Request
 	if core.IsPastTime(session.ExpirationTime) || idErr == ExpiredJWTToken || accessErr == ExpiredJWTToken || true {
 		newTokens, err := OktaObtainTokens(session.RefreshToken, true)
 		if err != nil {
-			return r, err
+			return nil, r, err
 		}
 
 		err = UpdateUserSessionFromTokens(session, newTokens, r)
 		if err != nil {
-			return r, err
+			return nil, r, err
 		}
 	} else if accessErr != nil {
-		return r, accessErr
+		return nil, r, accessErr
 	} else if idErr != nil {
-		return r, idErr
+		return nil, r, idErr
 	}
 
 	// Update last active time and save in DB.
 	// This needs to be here because the last active time needs to be
 	// valid even if we don't refresh the token.
 	session.LastActiveTime = time.Now().UTC()
+	// At this point all changes to the session should be finished and
+	// any errors should hopefully not point to an invalid session.
+
+	ctx := AddSessionToContext(session, r.Context())
+	newR := r.Clone(ctx)
 
 	err = database.UpdateUserSession(session)
 	if err != nil {
 		// This is probably our fault so don't delete the session but keep it around
 		// until the next user request and hopefully it'll resolve itself.
-		return r, err
+		return session, newR, err
 	}
-
-	ctx := AddSessionToContext(session, r.Context())
-	newR := r.Clone(ctx)
 
 	// Re-store the cookie on the user side.
 	err = StoreUserSessionOnClient(session, w)
@@ -258,8 +260,8 @@ func FindValidUserSession(w http.ResponseWriter, r *http.Request) (*http.Request
 		// Something went wrong with storing the session cookie but
 		// we still have a valid cookie/session so just go ahead and
 		// use the session.
-		return newR, err
+		return session, newR, err
 	}
 
-	return newR, nil
+	return session, newR, nil
 }

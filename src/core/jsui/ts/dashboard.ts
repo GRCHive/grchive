@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import DashboardHome from '../vue/pages/dashboard/DashboardHome.vue'
+import DashboardOrgHome from '../vue/pages/dashboard/DashboardOrgHome.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
 import vuetify from  './vuetify'
 
@@ -9,7 +9,7 @@ function mountApp(inData : Object) {
     new Vue({
         el: '#app',
         components: {
-            DashboardHome,
+            DashboardOrgHome,
             SnackBar
         },
         data: () => (inData),

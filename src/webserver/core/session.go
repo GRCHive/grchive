@@ -20,3 +20,9 @@ type UserSession struct {
 	IdToken      string `db:"id_token"`
 	RefreshToken string `db:"refresh_token"`
 }
+
+// Other data that isn't necessarily something we want to call the "UserSesssion"
+// but rather information that gets extracted out of the user session.
+type UserSessionParsedData struct {
+	Org *Organization
+}
