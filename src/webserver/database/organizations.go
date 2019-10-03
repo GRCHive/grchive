@@ -4,7 +4,7 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
-func FindOrganizationFromGroupId(groupId string) (*core.Organization, error) {
+func FindOrganizationFromGroupName(groupId string) (*core.Organization, error) {
 	rows, err := dbConn.Queryx(`
 		SELECT org_group_id, org_group_name, org_name FROM organizations WHERE org_group_name = $1
 	`, groupId)

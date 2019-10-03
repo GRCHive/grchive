@@ -1,7 +1,7 @@
 <template>
     <v-app-bar app dense>
         <v-toolbar-title color="primary">
-            <a href="">POOP FACE</a>
+            <a :href="this.$root.orgUrl">{{ this.$root.orgName }}</a>
         </v-toolbar-title>
         <div class="flex-grow-1"></div>
 

@@ -22,8 +22,8 @@ func ExtractParsedDataFromSession(session *core.UserSession) (*core.UserSessionP
 		}
 	}
 
-	groupId := idJwt.Payload.Groups[0]
-	org, err := database.FindOrganizationFromGroupId(groupId)
+	groupName := idJwt.Payload.Groups[0]
+	org, err := database.FindOrganizationFromGroupName(groupName)
 	if err != nil {
 		return nil, err
 	}

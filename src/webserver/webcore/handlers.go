@@ -51,3 +51,29 @@ func CreateAuthenticatedRequestMiddleware(failure http.HandlerFunc) mux.Middlewa
 		})
 	}
 }
+
+func ObtainOrganizationInfoInContextMiddleware(next http.Handler) http.Handler {
+	// If we can't find the organization we should direct to the dashboard home page.
+	// Note that this runs under the assumption that we won't ever have the case where
+	// the dashboard home page directs to an invalid org...
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		org, err := GetOrganizationFromRequestUrl(r)
+		if err != nil {
+			core.Info("Bad organization: " + err.Error())
+			http.Redirect(w, r, MustGetRouteUrl(DashboardHomeRouteName), http.StatusTemporaryRedirect)
+			return
+		}
+
+		ctx := AddOrganizationInfoToContext(org, r.Context())
+		newR := r.Clone(ctx)
+		next.ServeHTTP(w, newR)
+	})
+}
+
+func CreateVerifyUserHasAccessToOrganizationMiddleware(failure http.HandlerFunc) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			next.ServeHTTP(w, r)
+		})
+	}
+}

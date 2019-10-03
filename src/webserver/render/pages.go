@@ -1,6 +1,7 @@
 package render
 
 import (
+	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
 	"net/http"
 )
@@ -54,12 +55,35 @@ func RenderLearnMorePage(w http.ResponseWriter, r *http.Request) {
 
 func RenderDashboardHomePage(w http.ResponseWriter, r *http.Request) {
 	// For now, redirect user to their organization home page.
+	data, err := webcore.FindSessionParsedDataInContext(r.Context())
+	if err != nil {
+		core.Warning("Bad session parsed data: " + err.Error())
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.LandingPageRouteName),
+			http.StatusTemporaryRedirect)
+	} else {
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(
+				webcore.DashboardOrgHomeRouteName,
+				core.DashboardOrgOrgQueryId,
+				data.Org.OktaGroupName),
+			http.StatusTemporaryRedirect)
+	}
 }
 
 func RenderDashboardOrgHomePage(w http.ResponseWriter, r *http.Request) {
+	org, err := webcore.FindOrganizationInContext(r.Context())
+	if err != nil {
+		core.Warning("No organization data: " + err.Error())
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
+			http.StatusTemporaryRedirect)
+		return
+	}
+
 	RetrieveTemplate(DashboardOrgHomeTemplateKey).
 		ExecuteTemplate(
 			w,
 			"dashboardBase",
-			BuildTemplateParams(w, r, false))
+			BuildOrgTemplateParams(org, w, r, false))
 }

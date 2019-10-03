@@ -11,6 +11,7 @@ type ContextKey string
 const (
 	UserSessionContextKey           ContextKey = "SESSION"
 	UserSessionParsedDataContextKey            = "PARSEDDATA"
+	OrganizationContextKey                     = "ORGANIZATION"
 )
 
 func AddSessionToContext(session *core.UserSession, ctx context.Context) context.Context {
@@ -35,4 +36,16 @@ func FindSessionParsedDataInContext(ctx context.Context) (*core.UserSessionParse
 		return nil, errors.New("Failed to find session parsed data in context.")
 	}
 	return session, nil
+}
+
+func AddOrganizationInfoToContext(org *core.Organization, ctx context.Context) context.Context {
+	return context.WithValue(ctx, OrganizationContextKey, org)
+}
+
+func FindOrganizationInContext(ctx context.Context) (*core.Organization, error) {
+	org, ok := ctx.Value(OrganizationContextKey).(*core.Organization)
+	if !ok || org == nil {
+		return nil, errors.New("Failed to find organization in context.")
+	}
+	return org, nil
 }

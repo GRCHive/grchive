@@ -32,23 +32,23 @@ func RegisterRouter(r *mux.Router) {
 	globalRouter = r
 }
 
-func MustGetRouteUrl(r RouteName) string {
+func MustGetRouteUrl(r RouteName, params ...string) string {
 	route := globalRouter.Get(string(r))
 	if route == nil {
 		core.Warning("No Route: " + string(r))
 		return "/404"
 	}
 
-	url, err := route.URL()
+	url, err := route.URL(params...)
 	if err != nil {
-		core.Warning("Bad Route: " + string(r))
+		core.Warning("Bad Route: " + string(r) + " :: " + err.Error())
 		return "/404"
 	}
 	return url.String()
 }
 
-func MustGetRouteUrlAbsolute(r RouteName) string {
-	return core.LoadEnvConfig().SelfUri + MustGetRouteUrl(r)
+func MustGetRouteUrlAbsolute(r RouteName, params ...string) string {
+	return core.LoadEnvConfig().SelfUri + MustGetRouteUrl(r, params...)
 }
 
 func CreateOktaLoginUrl(idp string, state string, nonce string) string {

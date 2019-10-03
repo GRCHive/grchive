@@ -17,6 +17,16 @@ func BuildTemplateParams(w http.ResponseWriter, r *http.Request, needCsrf bool) 
 	return params
 }
 
+func BuildOrgTemplateParams(org *core.Organization, w http.ResponseWriter, r *http.Request, needCsrf bool) map[string]interface{} {
+	params := BuildTemplateParams(w, r, needCsrf)
+	params["OrgUrl"] = webcore.MustGetRouteUrl(
+		webcore.DashboardOrgHomeRouteName,
+		core.DashboardOrgOrgQueryId,
+		org.OktaGroupName)
+	params["OrgName"] = org.Name
+	return params
+}
+
 func CreateRedirectParams(w http.ResponseWriter, r *http.Request, title string, subtitle string, redirectUrl string) map[string]interface{} {
 	newMap := BuildTemplateParams(w, r, false)
 	newMap["Title"] = title

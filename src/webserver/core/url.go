@@ -1,5 +1,7 @@
 package core
 
+import "fmt"
+
 // Landing Page
 var GetStartedUrl string = "/getting-started"
 var ContactUsUrl string = "/contact-us"
@@ -11,4 +13,8 @@ var SamlCallbackUrl string = LoadEnvConfig().Login.RedirectUrl
 // Dashboard
 var DashboardUrl string = "/dashboard"
 var DashboardHomeUrl string = "/"
-var DashboardOrgHomeUrl string = "/org/{orgId}"
+
+// Dashboard - Organization
+var DashboardOrgOrgQueryId string = "orgId"
+var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
+var DashboardOrgHomeUrl string = "/"
