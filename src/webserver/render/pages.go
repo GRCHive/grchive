@@ -101,4 +101,21 @@ func RenderDashboardOrgHomePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func RenderDashboardUserHomePage(w http.ResponseWriter, r *http.Request) {
+	data, err := webcore.FindSessionParsedDataInContext(r.Context())
+	if err != nil {
+		core.Warning("No user data: " + err.Error())
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
+			http.StatusTemporaryRedirect)
+		return
+	}
+
+	RetrieveTemplate(DashboardUserHomeTemplateKey).
+		ExecuteTemplate(
+			w,
+			"dashboardBase",
+			core.MergeMaps(
+				BuildTemplateParams(w, r, true),
+				BuildOrgTemplateParams(data.Org),
+				BuildUserTemplateParams(data.CurrentUser)))
 }
