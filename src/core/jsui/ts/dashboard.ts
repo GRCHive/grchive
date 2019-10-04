@@ -4,6 +4,7 @@ import SnackBar from '../vue/components/SnackBar.vue'
 import vuetify from  './vuetify'
 
 import '../sass/main.scss'
+import '@mdi/font/scss/materialdesignicons.scss'
 
 function mountApp(inData : Object) {
     new Vue({

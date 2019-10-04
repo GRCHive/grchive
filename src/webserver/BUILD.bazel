@@ -34,6 +34,7 @@ go_library(
         "core/encryption.go",
         "core/time.go",
         "core/organization.go",
+        "core/user.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",

@@ -1,6 +1,7 @@
 package webcore
 
 import (
+	"errors"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
 )
@@ -18,7 +19,7 @@ func ExtractParsedDataFromSession(session *core.UserSession) (*core.UserSessionP
 		if len(idJwt.Payload.Groups) > 1 {
 			core.Warning("ID Token with more than one group: " + session.SessionId)
 		} else {
-			return nil, err
+			return nil, errors.New("Zero groups")
 		}
 	}
 
@@ -28,8 +29,17 @@ func ExtractParsedDataFromSession(session *core.UserSession) (*core.UserSessionP
 		return nil, err
 	}
 
+	user := &core.User{
+		FirstName: idJwt.Payload.FirstName,
+		LastName:  idJwt.Payload.LastName,
+		FullName:  idJwt.Payload.Name,
+		Email:     idJwt.Payload.Email,
+		ParentOrg: org,
+	}
+
 	data := &core.UserSessionParsedData{
-		Org: org,
+		Org:         org,
+		CurrentUser: user,
 	}
 	return data, nil
 }

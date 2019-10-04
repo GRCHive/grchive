@@ -16,7 +16,7 @@ client_id = "0oa1g8kug3Rsscja0357"
 client_secret = "0l7rXztFrZs4AnpuYVirn5aLaDpqcdDJLBBV4GPq"
 response_type = "code" 
 response_mode = "query"
-scope = "openid email offline_access groups"
+scope = "openid email offline_access groups profile"
 redirect_uri = "/authorization-code/callback"
 grant_type = "authorization_code"
 

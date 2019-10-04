@@ -75,6 +75,10 @@ module.exports = {
                 exclude: [ 
                     /node_modules/,
                 ],
+            },
+            {
+                test: /\.(eot|ttf|woff|woff2)$/,
+                use: 'url-loader'
             }
         ]
     },

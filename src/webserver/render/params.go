@@ -17,13 +17,19 @@ func BuildTemplateParams(w http.ResponseWriter, r *http.Request, needCsrf bool) 
 	return params
 }
 
-func BuildOrgTemplateParams(org *core.Organization, w http.ResponseWriter, r *http.Request, needCsrf bool) map[string]interface{} {
-	params := BuildTemplateParams(w, r, needCsrf)
+func BuildOrgTemplateParams(org *core.Organization) map[string]interface{} {
+	params := make(map[string]interface{})
 	params["OrgUrl"] = webcore.MustGetRouteUrl(
 		webcore.DashboardOrgHomeRouteName,
 		core.DashboardOrgOrgQueryId,
 		org.OktaGroupName)
 	params["OrgName"] = org.Name
+	return params
+}
+
+func BuildUserTemplateParams(user *core.User) map[string]interface{} {
+	params := make(map[string]interface{})
+	params["User"] = core.StructToMap(*user)
 	return params
 }
 

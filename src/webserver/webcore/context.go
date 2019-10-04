@@ -31,11 +31,11 @@ func AddSessionParsedDataToContext(data *core.UserSessionParsedData, ctx context
 }
 
 func FindSessionParsedDataInContext(ctx context.Context) (*core.UserSessionParsedData, error) {
-	session, ok := ctx.Value(UserSessionParsedDataContextKey).(*core.UserSessionParsedData)
-	if !ok || session == nil {
+	data, ok := ctx.Value(UserSessionParsedDataContextKey).(*core.UserSessionParsedData)
+	if !ok || data == nil {
 		return nil, errors.New("Failed to find session parsed data in context.")
 	}
-	return session, nil
+	return data, nil
 }
 
 func AddOrganizationInfoToContext(org *core.Organization, ctx context.Context) context.Context {
