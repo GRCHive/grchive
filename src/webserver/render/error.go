@@ -5,6 +5,7 @@ import (
 )
 
 func Render404(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
 	RetrieveTemplate(Error404TemplateKey).
 		ExecuteTemplate(
 			w,
@@ -13,6 +14,7 @@ func Render404(w http.ResponseWriter, r *http.Request) {
 }
 
 func Render403(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusForbidden)
 	RetrieveTemplate(Error403TemplateKey).
 		ExecuteTemplate(
 			w,
