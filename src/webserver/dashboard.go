@@ -15,13 +15,22 @@ func createDashboardSubrouter(r *mux.Router) {
 	}))
 	s.HandleFunc(core.DashboardHomeUrl, render.RenderDashboardHomePage).Methods("GET").Name(webcore.DashboardHomeRouteName)
 	createOrganizationSubrouter(s)
+	createUserSubrouter(s)
 }
 
 func createOrganizationSubrouter(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardOrgUrl).Subrouter()
-	s.Use(webcore.ObtainOrganizationInfoInContextMiddleware)
+	s.Use(webcore.ObtainOrganizationInfoFromRequestInContextMiddleware)
 	s.Use(webcore.CreateVerifyUserHasAccessToOrganizationMiddleware(func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName), http.StatusTemporaryRedirect)
+		render.Render403(w, r)
 	}))
 	s.HandleFunc(core.DashboardOrgHomeUrl, render.RenderDashboardOrgHomePage).Methods("GET").Name(webcore.DashboardOrgHomeRouteName)
+}
+
+func createUserSubrouter(r *mux.Router) {
+	s := r.PathPrefix(core.DashboardUserUrl).Subrouter()
+	s.Use(webcore.CreateVerifyUserHasAccessToUserMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		render.Render403(w, r)
+	}))
+	s.HandleFunc(core.DashboardUserHomeUrl, render.RenderDashboardUserHomePage).Methods("GET").Name(webcore.DashboardUserHomeRouteName)
 }

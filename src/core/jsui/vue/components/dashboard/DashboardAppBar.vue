@@ -11,6 +11,7 @@
                    :href="supportUrl.mailto"
             >
                 Support
+                <v-icon color="primary" small>mdi-email</v-icon>
             </v-btn>
             <v-menu offset-y>
 

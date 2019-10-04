@@ -20,6 +20,9 @@ const (
 	RedirectTemplateKey                       = "REDIRECT"
 	// Dashboard Keys
 	DashboardOrgHomeTemplateKey = "DASHBOARDORGHOME"
+	// Error Keys
+	Error403TemplateKey = "ERROR403"
+	Error404TemplateKey = "ERROR404"
 )
 
 func defaultLoadTemplateWithBase(file string) *template.Template {
@@ -54,6 +57,12 @@ func RegisterTemplates() {
 	// Dashing templates
 	allTemplates[DashboardOrgHomeTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardOrgHome.tmpl")
+
+	// Error templates
+	allTemplates[Error403TemplateKey] =
+		defaultLoadTemplateWithBase("src/webserver/templates/error/403.tmpl")
+	allTemplates[Error404TemplateKey] =
+		defaultLoadTemplateWithBase("src/webserver/templates/error/404.tmpl")
 }
 
 func RetrieveTemplate(name templateKey) *template.Template {

@@ -9,9 +9,11 @@ import (
 type ContextKey string
 
 const (
+	// Session (cookie)
 	UserSessionContextKey           ContextKey = "SESSION"
 	UserSessionParsedDataContextKey            = "PARSEDDATA"
-	OrganizationContextKey                     = "ORGANIZATION"
+	// From Request
+	OrganizationContextKey = "ORGANIZATION"
 )
 
 func AddSessionToContext(session *core.UserSession, ctx context.Context) context.Context {

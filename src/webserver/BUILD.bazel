@@ -92,6 +92,7 @@ go_library(
         "render/pages.go",
         "render/templates.go",
         "render/params.go",
+        "render/error.go",
     ],
     deps = [
         ":webserver_core_library",

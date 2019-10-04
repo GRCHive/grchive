@@ -21,3 +21,13 @@ func GetOrganizationFromRequestUrl(r *http.Request) (*core.Organization, error) 
 	}
 	return org, nil
 }
+
+func GetUserEmailFromRequestUrl(r *http.Request) (string, error) {
+	urlRouteVars := mux.Vars(r)
+	email, ok := urlRouteVars[core.DashboardUserQueryId]
+	if !ok {
+		return "", errors.New("No email in request URL")
+	}
+
+	return email, nil
+}

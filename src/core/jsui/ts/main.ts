@@ -6,6 +6,7 @@ import LoginPage from '../vue/pages/LoginPage.vue'
 import GettingStartedPage from '../vue/pages/GettingStartedPage.vue'
 import LearnMorePage from '../vue/pages/LearnMorePage.vue'
 import RedirectPage from '../vue/pages/RedirectPage.vue'
+import ErrorPage from '../vue/pages/ErrorPage.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
 import '../sass/main.scss'
 
@@ -19,7 +20,8 @@ function mountApp(inData : Object) {
             GettingStartedPage,
             LearnMorePage,
             RedirectPage,
-            SnackBar
+            SnackBar,
+            ErrorPage,
         },
         data: () => (inData),
         vuetify

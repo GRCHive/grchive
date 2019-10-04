@@ -53,6 +53,9 @@ func main() {
 	createDashboardSubrouter(dynamicRouter)
 	webcore.RegisterRouter(dynamicRouter)
 
+	// Custom 404
+	r.NotFoundHandler = http.HandlerFunc(render.Render404)
+
 	// TODO: Configurable port?
 	srv := &http.Server{
 		Handler:      r,

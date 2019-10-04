@@ -25,6 +25,7 @@ const (
 	SamlCallbackRouteName                 = "SamlCallback"
 	DashboardHomeRouteName                = "DashboardHome"
 	DashboardOrgHomeRouteName             = "DashboardOrgHome"
+	DashboardUserHomeRouteName            = "DashboardUserHome"
 )
 
 var globalRouter *mux.Router

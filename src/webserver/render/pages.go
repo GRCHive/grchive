@@ -99,3 +99,6 @@ func RenderDashboardOrgHomePage(w http.ResponseWriter, r *http.Request) {
 				BuildOrgTemplateParams(org),
 				BuildUserTemplateParams(data.CurrentUser)))
 }
+
+func RenderDashboardUserHomePage(w http.ResponseWriter, r *http.Request) {
+}
