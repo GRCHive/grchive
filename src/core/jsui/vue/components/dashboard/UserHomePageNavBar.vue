@@ -1,7 +1,7 @@
 <template>
     <v-navigation-drawer class="max-height">
         <v-list class="py-0">
-            <v-list-item-group v-model="model">
+            <v-list-item-group :value="selectedPage">
                 <v-list-item v-for="(item, i) in navLinks" 
                              :key="i"
                              :href="item.url"
@@ -26,6 +26,9 @@ import Vue from 'vue'
 import { createMyAccountUrl } from '../../../ts/url'
 
 export default Vue.extend({
+    props : {
+        selectedPage : Number
+    },
     data : function() {
         return {
             navLinks : [
@@ -36,8 +39,6 @@ export default Vue.extend({
                     url: createMyAccountUrl(this.$root.userEmail),
                 }
             ],
-            // TODO: Determine what page we're actually on.
-            model: 0,
         }
     }
 })
