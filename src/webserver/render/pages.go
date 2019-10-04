@@ -95,7 +95,7 @@ func RenderDashboardOrgHomePage(w http.ResponseWriter, r *http.Request) {
 			w,
 			"dashboardBase",
 			core.MergeMaps(
-				BuildTemplateParams(w, r, false),
+				BuildTemplateParams(w, r, true),
 				BuildOrgTemplateParams(org),
 				BuildUserTemplateParams(data.CurrentUser)))
 }

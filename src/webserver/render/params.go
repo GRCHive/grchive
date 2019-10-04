@@ -36,7 +36,7 @@ func BuildUserTemplateParams(user *core.User) map[string]interface{} {
 func CreateRedirectParams(w http.ResponseWriter, r *http.Request, title string, subtitle string, redirectUrl string) map[string]interface{} {
 	newMap := BuildTemplateParams(w, r, false)
 	newMap["Title"] = title
-	newMap["Subtitle"] = title
+	newMap["Subtitle"] = subtitle
 	newMap["Redirect"] = redirectUrl
 	return newMap
 }

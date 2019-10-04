@@ -8,6 +8,7 @@ url = "https://dev-578359.okta.com/oauth2/default"
 auth_endpoint = "/v1/authorize"
 token_endpoint = "/v1/token"
 key_endpoint = "/v1/keys"
+logout_endpoint = "/v1/logout"
 auth_audience = "api://default"
 time_drift_leeway_seconds = 60
 

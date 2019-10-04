@@ -14,4 +14,5 @@ func RegisterPaths(r *mux.Router) {
 	// successful login.
 	r.HandleFunc(core.LoginUrl, postLogin).Methods("POST").Name(string(webcore.LoginPostRouteName))
 	r.HandleFunc(core.SamlCallbackUrl, getSamlLoginCallback).Methods("GET").Name(string(webcore.SamlCallbackRouteName))
+	r.HandleFunc(core.LogoutUrl, getLogout).Methods("GET").Name(string(webcore.LogoutRouteName))
 }

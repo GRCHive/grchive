@@ -122,6 +122,7 @@ func getSamlLoginCallback(w http.ResponseWriter, r *http.Request) {
 		getSamlLoginCallbackError("Failed CSRF check for SAML Login Callback.", err, w, r)
 		return
 	}
+	webcore.ClearCSRFTokenFromSession(w, r)
 
 	// Retrieve the access/ID token from Okta and redirect if successful.
 	// Note that core.OktaObtainTokens will store the tokens where necessary.
@@ -149,6 +150,51 @@ func getSamlLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	webcore.ClearCSRFTokenFromSession(w, r)
 	http.Redirect(w, r, webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName), http.StatusFound)
+}
+
+func getLogoutCallbackError(prefix string, err error, w http.ResponseWriter, r *http.Request) {
+	core.Warning(prefix + " :: " + core.ErrorString(err))
+	webcore.ClearCSRFTokenFromSession(w, r)
+	render.RetrieveTemplate(render.RedirectTemplateKey).
+		ExecuteTemplate(
+			w,
+			"base",
+			render.CreateRedirectParams(w, r, "Oops!",
+				"Something went wrong! Please try again.",
+				webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName)))
+}
+
+func getLogout(w http.ResponseWriter, r *http.Request) {
+	queryVals := r.URL.Query()
+	csrfToken, ok := queryVals["csrf"]
+	if !ok || len(csrfToken) == 0 {
+		getLogoutCallbackError("Failed to logout (no csrf)", nil, w, r)
+		return
+	}
+
+	if ok, err := webcore.VerifyCSRFToken(csrfToken[0], r); !ok || err != nil {
+		getLogoutCallbackError("Failed to logout (bad csrf)", err, w, r)
+		return
+	}
+	webcore.ClearCSRFTokenFromSession(w, r)
+
+	session, err := webcore.FindSessionInContext(r.Context())
+	if err != nil {
+		getLogoutCallbackError("Failed to logout (no sess)", err, w, r)
+		return
+	}
+
+	// Need to do a few things on logout:
+	// 	1) Delete user session cookie.
+	// 	2) Delete user session in database
+	// 	3) Delete user session with Okta.
+	webcore.DeleteUserSessionOnClient(w)
+
+	if err = database.DeleteUserSession(session.SessionId); err != nil {
+		getLogoutCallbackError("Failed to logout (server)", err, w, r)
+		return
+	}
+
+	http.Redirect(w, r, webcore.CreateOktaLogoutUrl(session.IdToken), http.StatusTemporaryRedirect)
 }

@@ -40,16 +40,17 @@ type RawJWT struct {
 	}
 
 	Payload struct {
-		Iss       string   `json:"iss"`
-		Cid       string   `json:"cid"`
-		Exp       int64    `json:"exp"`
-		Aud       string   `json:"aud"`
-		Email     string   `json:"email"`
-		Sub       string   `json:"sub"`
-		Groups    []string `json:"groups"`
-		Name      string   `json:"name"`
-		FirstName string   `json:"firstName"`
-		LastName  string   `json:"lastName"`
+		Iss         string   `json:"iss"`
+		Cid         string   `json:"cid"`
+		Exp         int64    `json:"exp"`
+		Aud         string   `json:"aud"`
+		Email       string   `json:"email"`
+		Sub         string   `json:"sub"`
+		Groups      []string `json:"groups"`
+		Name        string   `json:"name"`
+		FirstName   string   `json:"firstName"`
+		LastName    string   `json:"lastName"`
+		DisplayName string   `json:"displayName"`
 	}
 }
 

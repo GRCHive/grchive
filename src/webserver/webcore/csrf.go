@@ -34,7 +34,6 @@ func VerifyCSRFToken(token string, r *http.Request) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
 	return session.Values["csrf"] == token, nil
 }
 

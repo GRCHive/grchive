@@ -17,14 +17,11 @@
                         <v-icon color="primary">mdi-menu-down</v-icon>
                     </v-btn>
                 </template>
-                <v-list>
-                    <v-list-item>
-                        <v-list-item-title>Profile</v-list-item-title>
+                <v-list dense>
+                    <v-list-item dense :href="myAccountUrl">
+                        <v-list-item-title>My Account</v-list-item-title>
                     </v-list-item>
-                    <v-list-item>
-                        <v-list-item-title>Settings</v-list-item-title>
-                    </v-list-item>
-                    <v-list-item>
+                    <v-list-item dense :href="logoutUrl">
                         <v-list-item-title>Logout</v-list-item-title>
                     </v-list-item>
                 </v-list>
@@ -37,12 +34,17 @@
 <script lang="ts">
 
 import Vue from 'vue'
+import {createLogoutUrl, createMyAccountUrl} from '../../../ts/url'
 
 export default Vue.extend({
     data: function() {
         return {
             //@ts-ignore
             fullName: this.$root.userFullName,
+            //@ts-ignore
+            logoutUrl : createLogoutUrl(this.$root.csrf),
+            //@ts-ignore
+            myAccountUrl: createMyAccountUrl(this.$root.userEmail)
         }
     }
 })
@@ -54,6 +56,10 @@ export default Vue.extend({
 a {
     text-decoration: none;
     color: black !important;
+}
+
+.v-menu__content {
+    border-radius: 0px !important;
 }
 
 </style>

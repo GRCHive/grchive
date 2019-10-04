@@ -43,6 +43,19 @@ func FindUserSession(sessionId string) (*core.UserSession, error) {
 	return session, nil
 }
 
+func DeleteUserSession(sessionId string) error {
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		DELETE FROM user_sessions
+		WHERE session_id = $1
+	`, sessionId)
+	if err != nil {
+		return err
+	}
+	err = tx.Commit()
+	return err
+}
+
 func UpdateUserSession(session *core.UserSession) error {
 	tx := dbConn.MustBegin()
 	_, err := tx.NamedExec(`

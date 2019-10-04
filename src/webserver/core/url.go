@@ -7,6 +7,7 @@ var GetStartedUrl string = "/getting-started"
 var ContactUsUrl string = "/contact-us"
 var HomePageUrl string = "/"
 var LoginUrl string = "/login"
+var LogoutUrl string = "/logout"
 var LearnMoreUrl string = "/learn"
 var SamlCallbackUrl string = LoadEnvConfig().Login.RedirectUrl
 

@@ -18,6 +18,7 @@ const (
 	ContactUsRouteName                    = "ContactUs"
 	LandingPageRouteName                  = "LandingPage"
 	LoginRouteName                        = "Login"
+	LogoutRouteName                       = "Logout"
 	LearnMoreRouteName                    = "LearnMore"
 	GettingStartedPostRouteName           = "GettingStartedPost"
 	LoginPostRouteName                    = "LoginPost"
@@ -75,3 +76,13 @@ var OktaKeyUrl string = fmt.Sprintf("%s%s?client_id=%s",
 	core.LoadEnvConfig().Login.BaseUrl,
 	core.LoadEnvConfig().Login.KeyEndpoint,
 	core.LoadEnvConfig().Login.ClientId)
+
+func CreateOktaLogoutUrl(idToken string) string {
+	envConfig := core.LoadEnvConfig()
+
+	return fmt.Sprintf("%s%s?id_token_hint=%s&post_logout_redirect_uri=%s",
+		envConfig.Login.BaseUrl,
+		envConfig.Login.LogoutEndpoint,
+		idToken,
+		url.QueryEscape(MustGetRouteUrlAbsolute(LandingPageRouteName)))
+}

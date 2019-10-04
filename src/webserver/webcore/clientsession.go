@@ -81,3 +81,20 @@ func GetUserSessionOnClient(r *http.Request) (string, error) {
 	}
 	return "", errors.New("Failed to find or decrypt session id cookie.")
 }
+
+func DeleteCookie(cookieName string, w http.ResponseWriter) {
+	cookie := &http.Cookie{
+		Name:     cookieName,
+		Value:    "",
+		Expires:  time.Now().Add(time.Hour).UTC(),
+		MaxAge:   -1,
+		Secure:   core.LoadEnvConfig().UseSecureCookies,
+		HttpOnly: true,
+		Path:     MustGetRouteUrl(LandingPageRouteName),
+	}
+	http.SetCookie(w, cookie)
+}
+
+func DeleteUserSessionOnClient(w http.ResponseWriter) {
+	DeleteCookie(SessionIdCookieName, w)
+}

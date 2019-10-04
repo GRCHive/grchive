@@ -21,3 +21,13 @@ export function createMailtoUrl(user : string, domain : string) : Object {
 export function createEmailAddress(user : string, domain : string) : string {
     return user + "@" + domain;
 }
+
+export const baseLogoutUrl : string = "/logout";
+export function createLogoutUrl(csrf : string) : string {
+    return baseLogoutUrl + "?csrf=" + csrf;
+}
+
+export const myAccountBaseUrl : string = "/dashboard/user";
+export function createMyAccountUrl(email: string) : string {
+    return myAccountBaseUrl + "/" + email;
+}
