@@ -6,8 +6,14 @@
         <div class="flex-grow-1"></div>
 
         <v-toolbar-items>
-
+            <v-btn text
+                   color="primary"
+                   :href="supportUrl.mailto"
+            >
+                Support
+            </v-btn>
             <v-menu offset-y>
+
                 <template v-slot:activator="{ on }">
                     <v-btn text
                            color="primary"
@@ -34,7 +40,7 @@
 <script lang="ts">
 
 import Vue from 'vue'
-import {createLogoutUrl, createMyAccountUrl} from '../../../ts/url'
+import {createLogoutUrl, createMyAccountUrl, createMailtoUrl } from '../../../ts/url'
 
 export default Vue.extend({
     data: function() {
@@ -44,7 +50,9 @@ export default Vue.extend({
             //@ts-ignore
             logoutUrl : createLogoutUrl(this.$root.csrf),
             //@ts-ignore
-            myAccountUrl: createMyAccountUrl(this.$root.userEmail)
+            myAccountUrl: createMyAccountUrl(this.$root.userEmail),
+            //@ts-ignore
+            supportUrl: createMailtoUrl("support", this.$root.domain),
         }
     }
 })
