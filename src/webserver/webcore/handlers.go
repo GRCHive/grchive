@@ -128,3 +128,31 @@ func CreateVerifyUserHasAccessToUserMiddleware(failure http.HandlerFunc) mux.Mid
 		})
 	}
 }
+
+func CreateVerifyCSRFMiddleware(failure http.HandlerFunc) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+// Redirect non-GET 301 and 302 to 308 and 307 respectively. The 307 and 308
+// status codes will pass the original body and method to the redirected path
+// which is desirable behavior for us whereas 301 and 302 will generally always
+// redirect to a GET.
+// See:
+// 	301: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/301
+//  302: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/302
+//  307: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/307
+//  308: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/308
+func HTTPRedirectStatusCodes(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			wr := RedirectResponseWriter{w}
+			next.ServeHTTP(wr, r)
+		} else {
+			next.ServeHTTP(w, r)
+		}
+	})
+}

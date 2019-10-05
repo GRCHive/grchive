@@ -72,6 +72,7 @@ go_library(
         "webcore/session.go",
         "webcore/router.go",
         "webcore/request.go",
+        "webcore/redirectResponseWriter.go",
     ],
     deps = [
         ":webserver_core_library",
@@ -107,6 +108,7 @@ go_library(
         "rest/rest.go",
         "rest/gettingStarted.go",
         "rest/login.go",
+        "rest/user.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",

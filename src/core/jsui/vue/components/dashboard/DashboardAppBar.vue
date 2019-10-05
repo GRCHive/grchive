@@ -1,5 +1,5 @@
 <template>
-    <v-app-bar app dense>
+    <v-app-bar app dense clipped-left>
         <v-toolbar-title color="primary">
             <a :href="this.$root.orgUrl">{{ this.$root.orgName }}</a>
         </v-toolbar-title>
@@ -47,7 +47,7 @@ export default Vue.extend({
     data: function() {
         return {
             //@ts-ignore
-            fullName: this.$root.userFullName,
+            fullName: this.$root.userFirstName + " " + this.$root.userLastName,
             //@ts-ignore
             logoutUrl : createLogoutUrl(this.$root.csrf),
             //@ts-ignore

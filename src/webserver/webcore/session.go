@@ -30,11 +30,11 @@ func ExtractParsedDataFromSession(session *core.UserSession) (*core.UserSessionP
 	}
 
 	user := &core.User{
-		FirstName: idJwt.Payload.FirstName,
-		LastName:  idJwt.Payload.LastName,
-		FullName:  idJwt.Payload.Name,
-		Email:     idJwt.Payload.Email,
-		ParentOrg: org,
+		FirstName:  idJwt.Payload.FirstName,
+		LastName:   idJwt.Payload.LastName,
+		Email:      idJwt.Payload.Email,
+		OktaUserId: idJwt.Payload.Sub,
+		ParentOrg:  org,
 	}
 
 	data := &core.UserSessionParsedData{

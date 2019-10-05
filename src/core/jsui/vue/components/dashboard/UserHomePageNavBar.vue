@@ -1,5 +1,5 @@
 <template>
-    <v-navigation-drawer class="max-height">
+    <v-navigation-drawer app clipped>
         <v-list class="py-0">
             <v-list-item-group :value="selectedPage">
                 <v-list-item v-for="(item, i) in navLinks" 

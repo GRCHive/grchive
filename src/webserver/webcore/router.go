@@ -26,6 +26,7 @@ const (
 	DashboardHomeRouteName                = "DashboardHome"
 	DashboardOrgHomeRouteName             = "DashboardOrgHome"
 	DashboardUserHomeRouteName            = "DashboardUserHome"
+	UserProfileEditRouteName              = "UserProfilePost"
 )
 
 var globalRouter *mux.Router
@@ -56,8 +57,9 @@ func MustGetRouteUrlAbsolute(r RouteName, params ...string) string {
 func CreateOktaLoginUrl(idp string, state string, nonce string) string {
 	envConfig := core.LoadEnvConfig()
 
-	return fmt.Sprintf("%s%s?idp=%s&client_id=%s&response_type=%s&response_mode=%s&scope=%s&redirect_uri=%s&state=%s&=nonce=%s",
-		envConfig.Login.BaseUrl,
+	return fmt.Sprintf("%s%s%s?idp=%s&client_id=%s&response_type=%s&response_mode=%s&scope=%s&redirect_uri=%s&state=%s&=nonce=%s",
+		envConfig.Okta.BaseUrl,
+		envConfig.Login.AuthServerEndpoint,
 		envConfig.Login.AuthEndpoint,
 		idp,
 		envConfig.Login.ClientId,
@@ -69,21 +71,34 @@ func CreateOktaLoginUrl(idp string, state string, nonce string) string {
 		url.QueryEscape(nonce))
 }
 
-var OktaTokenUrl string = fmt.Sprintf("%s%s",
-	core.LoadEnvConfig().Login.BaseUrl,
+var OktaTokenUrl string = fmt.Sprintf("%s%s%s",
+	core.LoadEnvConfig().Okta.BaseUrl,
+	core.LoadEnvConfig().Login.AuthServerEndpoint,
 	core.LoadEnvConfig().Login.TokenEndpoint)
 
-var OktaKeyUrl string = fmt.Sprintf("%s%s?client_id=%s",
-	core.LoadEnvConfig().Login.BaseUrl,
+var OktaKeyUrl string = fmt.Sprintf("%s%s%s?client_id=%s",
+	core.LoadEnvConfig().Okta.BaseUrl,
+	core.LoadEnvConfig().Login.AuthServerEndpoint,
 	core.LoadEnvConfig().Login.KeyEndpoint,
 	core.LoadEnvConfig().Login.ClientId)
 
 func CreateOktaLogoutUrl(idToken string) string {
 	envConfig := core.LoadEnvConfig()
 
-	return fmt.Sprintf("%s%s?id_token_hint=%s&post_logout_redirect_uri=%s",
-		envConfig.Login.BaseUrl,
+	return fmt.Sprintf("%s%s%s?id_token_hint=%s&post_logout_redirect_uri=%s",
+		envConfig.Okta.BaseUrl,
+		envConfig.Login.AuthServerEndpoint,
 		envConfig.Login.LogoutEndpoint,
 		idToken,
 		url.QueryEscape(MustGetRouteUrlAbsolute(LandingPageRouteName)))
+}
+
+func CreateOktaUserUpdateUrl(userId string) string {
+	envConfig := core.LoadEnvConfig()
+
+	return fmt.Sprintf("%s%s%s/%s",
+		envConfig.Okta.BaseUrl,
+		envConfig.Okta.ApiEndpoint,
+		envConfig.Okta.UsersEndpoint,
+		userId)
 }

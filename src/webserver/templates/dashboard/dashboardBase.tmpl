@@ -18,10 +18,12 @@
 
     <script src="/static/corejsui/dashboard.js"></script>
     <script>
+        // Maybe do this via AJAX instead?
         corejsui.mountApp({
             orgUrl: "[[ .OrgUrl ]]",
             orgName: "[[ .OrgName ]]",
-            userFullName: "[[ .User.FullName ]]",
+            userFirstName: "[[ .User.FirstName ]]",
+            userLastName: "[[ .User.LastName]]",
             userEmail: "[[ .User.Email ]]",
             csrf: "[[ .Csrf ]]",
             domain: '[[ .Domain ]]'

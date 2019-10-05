@@ -196,6 +196,19 @@ func OktaObtainTokens(code string, isRefresh bool) (*OktaTokens, error) {
 	return data, nil
 }
 
+func RefreshUserSession(session *core.UserSession, r *http.Request) error {
+	newTokens, err := OktaObtainTokens(session.RefreshToken, true)
+	if err != nil {
+		return err
+	}
+
+	err = UpdateUserSessionFromTokens(session, newTokens, r)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // If successful, returns a new http.Request that contains
 // a context.Context with the user session. Otherwise, returns the passed
 // in request along with an error. If a session was found and it can't
@@ -222,12 +235,7 @@ func FindValidUserSession(w http.ResponseWriter, r *http.Request) (*core.UserSes
 	_, accessErr := oktaJwtManager.VerifyJWT(session.AccessToken, true)
 	_, idErr := oktaJwtManager.VerifyJWT(session.IdToken, false)
 	if core.IsPastTime(session.ExpirationTime) || idErr == ExpiredJWTToken || accessErr == ExpiredJWTToken {
-		newTokens, err := OktaObtainTokens(session.RefreshToken, true)
-		if err != nil {
-			return nil, r, err
-		}
-
-		err = UpdateUserSessionFromTokens(session, newTokens, r)
+		err = RefreshUserSession(session, r)
 		if err != nil {
 			return nil, r, err
 		}

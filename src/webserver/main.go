@@ -18,6 +18,7 @@ func main() {
 	webcore.InitializeSessions()
 
 	r := mux.NewRouter().StrictSlash(true)
+	r.Use(webcore.HTTPRedirectStatusCodes)
 	r.Use(webcore.LoggedRequestMiddleware)
 
 	staticRouter := r.PathPrefix("/static").Subrouter()

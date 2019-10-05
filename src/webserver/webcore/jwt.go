@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"strings"
 	"time"
@@ -63,7 +64,8 @@ func (this *RawJWT) PayloadToSign() []byte {
 }
 
 func (this *RawJWT) verifyIss() error {
-	if core.LoadEnvConfig().Login.BaseUrl != this.Payload.Iss {
+	env := core.LoadEnvConfig()
+	if fmt.Sprintf("%s%s", env.Okta.BaseUrl, env.Login.AuthServerEndpoint) != this.Payload.Iss {
 		return errors.New("Iss mismatch.")
 	}
 	return nil

@@ -17,7 +17,7 @@ type TemplateConfig struct {
 var templateConfig *TemplateConfig
 
 type LoginConfig struct {
-	BaseUrl                string
+	AuthServerEndpoint     string
 	AuthEndpoint           string
 	TokenEndpoint          string
 	KeyEndpoint            string
@@ -33,10 +33,18 @@ type LoginConfig struct {
 	TimeDriftLeewaySeconds float64
 }
 
+type OktaConfig struct {
+	BaseUrl       string
+	ApiEndpoint   string
+	ApiKey        string
+	UsersEndpoint string
+}
+
 type EnvConfig struct {
 	SelfUri            string
 	DatabaseConnString string
 	Login              *LoginConfig
+	Okta               *OktaConfig
 	SessionKeys        [][]byte
 	UseSecureCookies   bool
 }
@@ -76,8 +84,14 @@ func LoadEnvConfig() *EnvConfig {
 		envConfig.SelfUri = tomlConfig.Get("self_uri").(string)
 		envConfig.DatabaseConnString = tomlConfig.Get("database.connection").(string)
 
+		envConfig.Okta = new(OktaConfig)
+		envConfig.Okta.BaseUrl = tomlConfig.Get("okta.url").(string)
+		envConfig.Okta.ApiEndpoint = tomlConfig.Get("okta.api_endpoint").(string)
+		envConfig.Okta.ApiKey = tomlConfig.Get("okta.api_key").(string)
+		envConfig.Okta.UsersEndpoint = tomlConfig.Get("okta.users_endpoint").(string)
+
 		envConfig.Login = new(LoginConfig)
-		envConfig.Login.BaseUrl = tomlConfig.Get("login.url").(string)
+		envConfig.Login.AuthServerEndpoint = tomlConfig.Get("login.authserver_endpoint").(string)
 		envConfig.Login.AuthEndpoint = tomlConfig.Get("login.auth_endpoint").(string)
 		envConfig.Login.TokenEndpoint = tomlConfig.Get("login.token_endpoint").(string)
 		envConfig.Login.KeyEndpoint = tomlConfig.Get("login.key_endpoint").(string)

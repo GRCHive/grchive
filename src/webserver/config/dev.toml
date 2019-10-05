@@ -3,8 +3,14 @@ self_uri = "http://localhost:8080"
 [database]
 connection = "user=DEVUSER dbname=audit sslmode=disable timezone=UTC"
 
+[okta]
+url = "https://dev-578359.okta.com"
+api_key = "00RTHFmUJxvorwMdg65bHy4r9d-5aaY8a2KwVprzTo"
+api_endpoint = "/api"
+users_endpoint = "/v1/users"
+
 [login]
-url = "https://dev-578359.okta.com/oauth2/default"
+authserver_endpoint = "/oauth2/default"
 auth_endpoint = "/v1/authorize"
 token_endpoint = "/v1/token"
 key_endpoint = "/v1/keys"
