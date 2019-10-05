@@ -29,6 +29,15 @@ func AddCSRFTokenToRequest(w http.ResponseWriter, r *http.Request, pageVars map[
 	return newPageVars, nil
 }
 
+func GetCSRFToken(r *http.Request) (string, error) {
+	if err := r.ParseForm(); err != nil || len(r.Form) == 0 {
+		return "", err
+	}
+
+	csrfToken := r.Form["csrf"]
+	return csrfToken[0], nil
+}
+
 func VerifyCSRFToken(token string, r *http.Request) (bool, error) {
 	session, err := ClientShortSessionStore.Get(r, "csrf")
 	if err != nil {
