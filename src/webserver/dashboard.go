@@ -25,6 +25,7 @@ func createOrganizationSubrouter(r *mux.Router) {
 		render.Render403(w, r)
 	}))
 	s.HandleFunc(core.DashboardOrgHomeUrl, render.RenderDashboardOrgHomePage).Methods("GET").Name(webcore.DashboardOrgHomeRouteName)
+	s.HandleFunc(core.DashboardOrgFlowUrl, render.RenderDashboardProcessFlowsPage).Methods("GET").Name(webcore.DashboardProcessFlowsRouteName)
 }
 
 func createUserSubrouter(r *mux.Router) {

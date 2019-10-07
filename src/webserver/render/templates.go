@@ -19,8 +19,9 @@ const (
 	LearnMorePageTemplateKey                  = "LEARNMORE"
 	RedirectTemplateKey                       = "REDIRECT"
 	// Dashboard Keys
-	DashboardOrgHomeTemplateKey  = "DASHBOARDORGHOME"
-	DashboardUserHomeTemplateKey = "DASHBOARDUSERHOME"
+	DashboardOrgHomeTemplateKey      = "DASHBOARDORGHOME"
+	DashboardProcessFlowsTemplateKey = "DASHBOARDFLOWS"
+	DashboardUserHomeTemplateKey     = "DASHBOARDUSERHOME"
 	// Error Keys
 	Error403TemplateKey = "ERROR403"
 	Error404TemplateKey = "ERROR404"
@@ -60,6 +61,8 @@ func RegisterTemplates() {
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardOrgHome.tmpl")
 	allTemplates[DashboardUserHomeTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardUserHome.tmpl")
+	allTemplates[DashboardProcessFlowsTemplateKey] =
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardProcessFlows.tmpl")
 
 	// Error templates
 	allTemplates[Error403TemplateKey] =

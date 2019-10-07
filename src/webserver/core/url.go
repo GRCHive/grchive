@@ -19,6 +19,7 @@ var DashboardHomeUrl string = "/"
 var DashboardOrgOrgQueryId string = "orgId"
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}/", DashboardOrgOrgQueryId)
 var DashboardOrgHomeUrl string = "/"
+var DashboardOrgFlowUrl string = "/flows"
 
 // Dashboard - User
 var DashboardUserQueryId string = "user"

@@ -14,19 +14,20 @@ import (
 type RouteName string
 
 const (
-	GettingStartedRouteName     RouteName = "GettingStarted"
-	ContactUsRouteName                    = "ContactUs"
-	LandingPageRouteName                  = "LandingPage"
-	LoginRouteName                        = "Login"
-	LogoutRouteName                       = "Logout"
-	LearnMoreRouteName                    = "LearnMore"
-	GettingStartedPostRouteName           = "GettingStartedPost"
-	LoginPostRouteName                    = "LoginPost"
-	SamlCallbackRouteName                 = "SamlCallback"
-	DashboardHomeRouteName                = "DashboardHome"
-	DashboardOrgHomeRouteName             = "DashboardOrgHome"
-	DashboardUserHomeRouteName            = "DashboardUserHome"
-	UserProfileEditRouteName              = "UserProfilePost"
+	GettingStartedRouteName        RouteName = "GettingStarted"
+	ContactUsRouteName                       = "ContactUs"
+	LandingPageRouteName                     = "LandingPage"
+	LoginRouteName                           = "Login"
+	LogoutRouteName                          = "Logout"
+	LearnMoreRouteName                       = "LearnMore"
+	GettingStartedPostRouteName              = "GettingStartedPost"
+	LoginPostRouteName                       = "LoginPost"
+	SamlCallbackRouteName                    = "SamlCallback"
+	DashboardHomeRouteName                   = "DashboardHome"
+	DashboardOrgHomeRouteName                = "DashboardOrgHome"
+	DashboardUserHomeRouteName               = "DashboardUserHome"
+	UserProfileEditRouteName                 = "UserProfilePost"
+	DashboardProcessFlowsRouteName           = "ProcessFlows"
 )
 
 var globalRouter *mux.Router

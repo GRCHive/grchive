@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import DashboardOrgHome from '../vue/pages/dashboard/DashboardOrgHome.vue'
+import DashboardOrgProcessFlows from '../vue/pages/dashboard/DashboardOrgProcessFlows.vue'
 import DashboardUserHome from '../vue/pages/dashboard/DashboardUserHome.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
 import vuetify from  './vuetify'
@@ -12,6 +13,7 @@ function mountApp(inData : Object) {
         el: '#app',
         components: {
             DashboardOrgHome,
+            DashboardOrgProcessFlows,
             DashboardUserHome,
             SnackBar
         },

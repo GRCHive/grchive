@@ -27,8 +27,8 @@ export default Vue.extend({
                     title: 'Process Flows',
                     icon: 'mdi-graph-outline',
                     //@ts-ignore
-                    url: '#',
-                    disabled : true
+                    url: this.$root.orgUrl + '/flows',
+                    disabled : false
                 },
                 {
                     title: 'Risks',
