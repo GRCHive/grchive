@@ -1,32 +1,17 @@
 <template>
-    <v-navigation-drawer app clipped>
-        <v-list class="py-0">
-            <v-list-item-group :value="selectedPage">
-                <v-list-item v-for="(item, i) in navLinks" 
-                             :key="i"
-                             :href="item.url"
-                             link
-                >
-                    <v-list-item-icon>
-                        <v-icon>{{ item.icon }}</v-icon>
-                    </v-list-item-icon>
-
-                    <v-list-item-title>
-                        {{ item.title }}
-                    </v-list-item-title>
-                </v-list-item>
-            </v-list-item-group>
-        </v-list>
-    </v-navigation-drawer>
+    <generic-nav-bar :selectedPage="selectedPage" :navLinks="navLinks" :mini="mini">
+    </generic-nav-bar>
 </template>
 
 <script lang="ts">
 
 import Vue from 'vue'
 import { createMyAccountUrl } from '../../../ts/url'
+import GenericNavBar from '../GenericNavBar.vue'
 
 export default Vue.extend({
     props : {
+        mini : Boolean,
         selectedPage : Number
     },
     data : function() {
@@ -40,6 +25,9 @@ export default Vue.extend({
                 }
             ],
         }
+    },
+    components: {
+        GenericNavBar
     }
 })
 

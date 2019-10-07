@@ -1,3 +1,5 @@
+// TODO: Replace this whole file with some way of getting metadata from the server
+// and just using stuff from the metadata...
 export const getStartedUrl : string = "/getting-started"
 export const contactUsUrl : string = "/contact-us"
 export const homePageUrl : string = "/"
