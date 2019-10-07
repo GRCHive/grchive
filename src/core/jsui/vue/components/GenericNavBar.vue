@@ -9,15 +9,22 @@
                              :key="i"
                              :href="item.url"
                              link
-                             color="primary"
+                             :color="item.disabled ? `secondary` : `primary`"
+                             :disabled="item.disabled"
+                             :two-line="item.disabled"
                 >
                     <v-list-item-icon>
                         <v-icon>{{ item.icon }}</v-icon>
                     </v-list-item-icon>
 
-                    <v-list-item-title>
-                        {{ item.title }}
-                    </v-list-item-title>
+                    <v-list-item-content>
+                        <v-list-item-title>
+                            {{ item.title }}
+                        </v-list-item-title>
+                        <v-list-item-subtitle v-if="item.disabled">
+                            Coming Soon.
+                        </v-list-item-subtitle>
+                    </v-list-item-content>
                 </v-list-item>
             </v-list-item-group>
         </v-list>

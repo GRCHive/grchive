@@ -17,46 +17,60 @@ export default Vue.extend({
         return {
             navLinks : [
                 {
+                    title: 'Dashboard',
+                    icon: 'mdi-home',
+                    //@ts-ignore
+                    url: this.$root.orgUrl,
+                    disabled : false
+                },
+                {
                     title: 'Process Flows',
                     icon: 'mdi-graph-outline',
                     //@ts-ignore
-                    url: this.$root.orgUrl
+                    url: '#',
+                    disabled : true
                 },
                 {
                     title: 'Risks',
                     icon: 'mdi-fire',
                     //@ts-ignore
-                    url: '#'
+                    url: '#',
+                    disabled : true
                 },
                 {
                     title: 'Controls',
                     icon: 'mdi-shield-lock-outline',
                     //@ts-ignore
-                    url: '#'
+                    url: '#',
+                    disabled : true
                 },
                 {
                     title: 'General Ledger',
                     icon: 'mdi-bank-outline',
                     //@ts-ignore
-                    url: '#'
+                    url: '#',
+                    disabled : true
                 },
                 {
                     title: 'Access Requests',
                     icon: 'mdi-key-outline',
                     //@ts-ignore
-                    url: '#'
+                    url: '#',
+                    disabled : true
                 },
                 {
                     title: 'Data Sources',
                     icon: 'mdi-database',
                     //@ts-ignore
-                    url: '#'
+                    url: '#',
+                    disabled : true
                 },
                 {
                     title: 'Settings',
                     icon: 'mdi-settings',
                     //@ts-ignore
-                    url: '#'
+                    url: '#',
+                    disabled : true
                 },
             ],
         }
