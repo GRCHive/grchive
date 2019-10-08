@@ -5,6 +5,7 @@
         :mini="false"
         :style="xOffsetStyle"
         primary-color="accent"
+        @item-change="onItemClick"
     >
         <v-list-item>
             <v-list-item-title>
@@ -51,16 +52,9 @@ interface NavLinks {
     disabled: boolean
 }
 
-interface ProcessFlowData {
-    Name : string
-    Description: string
-    CreationTime: Date
-    LastUpdatedTime: Date
-}
-
 interface ResponseData {
     data: {
-        Flows: ProcessFlowData[],
+        Flows: ProcessFlowBasicData[],
         RequestedIndex: number
     }
 }
@@ -71,9 +65,7 @@ export default Vue.extend({
         CreateNewProcessFlowForm
     },
     data : () => ({
-        navLinks: [] as NavLinks[],
-        showAddFlow: false,
-        selectedNavIndex : 0
+        showAddFlow: false
     }),
     computed: {
         xOffsetStyle() {
@@ -82,23 +74,30 @@ export default Vue.extend({
                 //@ts-ignore
                 "transform": "translateX(" + VueSetup.store.state.primaryNavBarWidth + "px)"
             }
+        },
+        selectedNavIndex() : Number {
+            return VueSetup.store.state.currentProcessFlowIndex
+        },
+        allBasicData() : ProcessFlowBasicData[] {
+            return VueSetup.store.state.allProcessFlowBasicData
+        },
+        navLinks() : NavLinks[] {
+            let navLinks : NavLinks[] = []
+            for (let data of this.allBasicData) {
+                navLinks.push({
+                    icon: '',    
+                    disabled: false,
+                    url: '',
+                    title: data.Name
+                })
+            }
+            return navLinks
         }
     },
     methods: {
-        createNavLinksFromProcessFlowData(data : ProcessFlowData[]) {
-            this.navLinks = [] as NavLinks[]
-            for (let i = 0; i < data.length; ++i) {
-                this.navLinks.push({
-                    icon: '',    
-                    disabled: false,
-                    url: '#',
-                    title: data[i].Name
-                })
-            }
-        },
         doRefresh() {
             this.refresh(-1).then((resp : ResponseData) => {
-                this.createNavLinksFromProcessFlowData(resp.data.Flows)
+                VueSetup.store.commit('setProcessFlowBasicData', resp.data.Flows)
             }).catch((err) => {
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
@@ -137,8 +136,8 @@ export default Vue.extend({
             // Refresh the list of process flows.
             // Then point ourselves to the most recently created process flow.
             this.refresh(id).then((resp : ResponseData) => {
-                this.createNavLinksFromProcessFlowData(resp.data.Flows)
-                this.selectedNavIndex = resp.data.RequestedIndex;
+                VueSetup.store.commit('setProcessFlowBasicData', resp.data.Flows)
+                VueSetup.store.commit('setCurrentProcessFlowIndex', resp.data.RequestedIndex)
             }).catch((err) => {
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
@@ -148,6 +147,9 @@ export default Vue.extend({
                     contactUsUrl,
                     true);
             })
+        },
+        onItemClick(_ : MouseEvent, idx : number) {
+            VueSetup.store.commit('setCurrentProcessFlowIndex', idx)
         }
     },
     mounted() {

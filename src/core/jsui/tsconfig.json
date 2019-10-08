@@ -17,8 +17,5 @@
     ],
     "exclude": [
         "node_modules"
-    ],
-    "files": [
-        "ts/vue-shims.d.ts"
     ]
 }

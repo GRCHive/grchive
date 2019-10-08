@@ -35,9 +35,12 @@ const DashboardUserHomeUrl string = "/"
 const ApiUrl string = "/api"
 
 // API - Process Flow
+const ProcessFlowQueryId string = "flow"
 const ApiProcessFlowUrl string = "/flows"
 const ApiProcessFlowGetAllUrl string = "/"
 const ApiProcessFlowNewUrl string = "/new"
+
+var ApiProcessFlowUpdateUrl string = fmt.Sprintf("/{%s}/update", ProcessFlowQueryId)
 
 // API - Users
 var ApiUserUrl string = fmt.Sprintf("/user/{%s}", DashboardUserQueryId)

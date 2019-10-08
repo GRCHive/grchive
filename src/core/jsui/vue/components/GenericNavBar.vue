@@ -15,6 +15,7 @@
                              :color="item.disabled ? `secondary` : primaryColor"
                              :disabled="item.disabled"
                              :two-line="item.disabled"
+                             @click="doItemClick($event, i)"
                 >
                     <v-list-item-icon v-if="item.icon != ''">
                         <v-icon>{{ item.icon }}</v-icon>
@@ -52,6 +53,11 @@ export default Vue.extend({
             default: 256
         }
     },
+    methods: {
+        doItemClick(e : MouseEvent, idx : number) {
+            this.$emit('item-change', e, idx)
+        }
+    }
 })
 
 </script>

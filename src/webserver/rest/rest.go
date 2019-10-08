@@ -43,4 +43,5 @@ func registerProcessFlowAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiProcessFlowUrl).Subrouter()
 	s.HandleFunc(core.ApiProcessFlowNewUrl, newProcessFlow).Methods("POST").Name(webcore.NewProcessFlowRouteName)
 	s.HandleFunc(core.ApiProcessFlowGetAllUrl, getAllProcessFlows).Methods("GET").Name(webcore.GetAllProcessFlowRouteName)
+	s.HandleFunc(core.ApiProcessFlowUpdateUrl, updateProcessFlow).Methods("POST").Name(webcore.UpdateProcessFlowRouteName)
 }

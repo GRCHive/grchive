@@ -5,7 +5,8 @@
 
         <dashboard-home-page-nav-bar :selected-page="1"></dashboard-home-page-nav-bar>
         <process-flows-nav-bar></process-flows-nav-bar>
-        <v-content>
+        <v-content class="ma-4">
+            <process-flow-editor></process-flow-editor>
         </v-content>
 
     </section>
@@ -16,12 +17,14 @@
 import DashboardAppBar from '../../components/dashboard/DashboardAppBar.vue'
 import DashboardHomePageNavBar from '../../components/dashboard/DashboardHomePageNavBar.vue'
 import ProcessFlowsNavBar from '../../components/dashboard/ProcessFlowsNavBar.vue'
+import ProcessFlowEditor from '../../components/dashboard/ProcessFlowEditor.vue'
 
 export default {
     components : {
         DashboardAppBar,
         DashboardHomePageNavBar,
-        ProcessFlowsNavBar
+        ProcessFlowsNavBar,
+        ProcessFlowEditor
     }
 }
 </script>

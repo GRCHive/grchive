@@ -170,3 +170,70 @@ func newProcessFlow(w http.ResponseWriter, r *http.Request) {
 		newFlow.Id,
 	})
 }
+
+func updateProcessFlow(w http.ResponseWriter, r *http.Request) {
+	// Get which process flow we want to edit, ensure user has
+	// acess to it. If update successful, returns the full process
+	// flow data structure (core.ProcessFlow) back to the user.
+	jsonWriter := json.NewEncoder(w)
+
+	flowId, err := webcore.GetProcessFlowIdFromRequest(r)
+	if err != nil {
+		core.Warning("Failed to extract flow id: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	processFlow, err := database.FindProcessFlowWithId(flowId)
+	if err != nil {
+		core.Warning("Bad process flow id: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	userData, err := webcore.FindSessionParsedDataInContext(r.Context())
+	if err != nil {
+		core.Warning("No user session context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	if userData.Org.OktaGroupId != processFlow.Org.OktaGroupId {
+		core.Warning("Permission denied.")
+		w.WriteHeader(http.StatusForbidden)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	if err = r.ParseForm(); err != nil || len(r.PostForm) == 0 {
+		core.Warning("Failed to parse form data: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	// Only expose the name and description for editing.
+	nameData := r.PostForm["name"]
+	descriptionData := r.PostForm["description"]
+	if len(nameData) == 0 || len(descriptionData) == 0 {
+		core.Warning("Empty name or description.")
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	processFlow.Name = nameData[0]
+	processFlow.Description = descriptionData[0]
+	if err = database.UpdateProcessFlow(processFlow); err != nil {
+		core.Warning("Failed to update flow: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	jsonWriter.Encode(processFlow)
+}

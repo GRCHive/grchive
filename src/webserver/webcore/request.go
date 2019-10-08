@@ -6,6 +6,7 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
 	"net/http"
+	"strconv"
 )
 
 func GetOrganizationFromRequestUrl(r *http.Request) (*core.Organization, error) {
@@ -30,4 +31,15 @@ func GetUserEmailFromRequestUrl(r *http.Request) (string, error) {
 	}
 
 	return email, nil
+}
+
+func GetProcessFlowIdFromRequest(r *http.Request) (uint32, error) {
+	urlRouteVars := mux.Vars(r)
+	id, ok := urlRouteVars[core.ProcessFlowQueryId]
+	if !ok {
+		return 0, errors.New("No process flow id in request URL")
+	}
+
+	val, err := strconv.ParseUint(id, 10, 32)
+	return uint32(val), err
 }

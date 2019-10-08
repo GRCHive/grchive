@@ -3,7 +3,58 @@ package database
 import (
 	"errors"
 	"gitlab.com/b3h47pte/audit-stuff/core"
+	"time"
 )
+
+func FindProcessFlowWithId(id uint32) (*core.ProcessFlow, error) {
+	rows, err := dbConn.Queryx(`
+		SELECT
+			pf.id,
+			pf.name,
+			org.id AS "org.id",
+			org.org_group_id AS "org.org_group_id",
+			org.org_group_name AS "org.org_group_name",
+			org.org_name AS "org.org_name",
+			pf.description,
+			pf.created_time,
+			pf.last_updated_time
+		FROM process_flows AS pf
+		INNER JOIN organizations AS org
+			ON pf.org_id = org.id
+		WHERE pf.id = $1
+	`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var flow *core.ProcessFlow = new(core.ProcessFlow)
+	flow.Org = new(core.Organization)
+
+	rows.Next()
+	err = rows.StructScan(flow)
+	if err != nil {
+		return nil, err
+	}
+
+	return flow, nil
+}
+
+func UpdateProcessFlow(flow *core.ProcessFlow) error {
+	flow.LastUpdatedTime = time.Now().UTC()
+	tx := dbConn.MustBegin()
+	_, err := tx.NamedExec(`
+		UPDATE process_flows
+		SET name = :name, description = :description
+		WHERE id = :id
+	`, flow)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Commit()
+	return err
+}
 
 func InsertNewProcessFlow(flow *core.ProcessFlow) error {
 	var err error

@@ -116,7 +116,7 @@ export default Vue.extend({
 
 </script>
 
-<style>
+<style scoped>
 
 #content {
     width: 50%

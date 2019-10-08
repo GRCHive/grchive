@@ -82,6 +82,8 @@ export default Vue.extend({
                 //@ts-ignore
                 csrf: this.$root.csrf
             }).then((resp : ResponseData) => {
+                this.name = undefined;
+                this.description = undefined;
                 this.$emit('do-save', resp.data.Name, resp.data.Id)
             }).catch((err) => {
                 if (!!err.response && err.response.data.IsDuplicate) {

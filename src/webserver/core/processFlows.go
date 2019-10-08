@@ -5,7 +5,7 @@ import (
 )
 
 type ProcessFlow struct {
-	Id              uint32        `db:"id" json:"-"`
+	Id              uint32        `db:"id"`
 	Name            string        `db:"name"`
 	Org             *Organization `db:"org" json:"-"`
 	Description     string        `db:"description"`

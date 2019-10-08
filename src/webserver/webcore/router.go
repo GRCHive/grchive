@@ -30,6 +30,7 @@ const (
 	DashboardProcessFlowsRouteName           = "ProcessFlows"
 	NewProcessFlowRouteName                  = "NewProcessFlow"
 	GetAllProcessFlowRouteName               = "GetAllProcessFlow"
+	UpdateProcessFlowRouteName               = "UpdateProcessFlow"
 )
 
 var globalRouter *mux.Router
