@@ -1,5 +1,5 @@
+import vueOpts from  './vueSetup'
 import Vue from 'vue'
-import vuetify from  './vuetify'
 import LandingPage from '../vue/pages/LandingPage.vue'
 import ContactUsPage from '../vue/pages/ContactUsPage.vue'
 import LoginPage from '../vue/pages/LoginPage.vue'
@@ -24,7 +24,7 @@ function mountApp(inData : Object) {
             ErrorPage,
         },
         data: () => (inData),
-        vuetify
+        vuetify: vueOpts.vuetify
     }).$mount('#app')
 }
 
