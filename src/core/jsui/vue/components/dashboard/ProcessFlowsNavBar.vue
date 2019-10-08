@@ -11,7 +11,7 @@
                 Process Flows
             </v-list-item-title>
             <v-list-item-action>
-                <v-btn icon class="mx-3">
+                <v-btn icon class="mx-3" @click="doRefresh">
                     <v-icon>mdi-refresh</v-icon>
                 </v-btn>
             </v-list-item-action>
@@ -95,6 +95,19 @@ export default Vue.extend({
                 })
             }
         },
+        doRefresh() {
+            this.refresh(-1).then((resp : ResponseData) => {
+                this.createNavLinksFromProcessFlowData(resp.data.Flows)
+            }).catch((err) => {
+                //@ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong, please try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
         refresh(id : Number) : Promise<ResponseData> {
             // id = -1 means that we don't need the index of the passed in 
             // process flow id in the results (save us some javascript computation time).
@@ -137,17 +150,7 @@ export default Vue.extend({
         }
     },
     mounted() {
-        this.refresh(-1).then((resp : ResponseData) => {
-            this.createNavLinksFromProcessFlowData(resp.data.Flows)
-        }).catch((err) => {
-            //@ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong, please try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
+        this.doRefresh()
     }
 })
 
