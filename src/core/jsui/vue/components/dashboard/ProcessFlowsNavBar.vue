@@ -91,7 +91,7 @@ export default Vue.extend({
                 this.navLinks.push({
                     icon: '',    
                     disabled: false,
-                    url: '',
+                    url: '#',
                     title: data[i].Name
                 })
             }

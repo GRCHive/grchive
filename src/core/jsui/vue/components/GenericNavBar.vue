@@ -7,7 +7,7 @@
     >
         <slot></slot>
         <v-list class="py-0">
-            <v-list-item-group :value="selectedPage">
+            <v-list-item-group :value="selectedPage" mandatory>
                 <v-list-item v-for="(item, i) in navLinks" 
                              :key="i"
                              :href="item.url"
