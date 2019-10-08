@@ -19,7 +19,6 @@ func main() {
 
 	r := mux.NewRouter().StrictSlash(true)
 	r.Use(webcore.HTTPRedirectStatusCodes)
-	r.Use(webcore.LoggedRequestMiddleware)
 
 	staticRouter := r.PathPrefix("/static").Subrouter()
 
@@ -59,7 +58,7 @@ func main() {
 
 	// TODO: Configurable port?
 	srv := &http.Server{
-		Handler:      r,
+		Handler:      webcore.LoggedRequestMiddleware(r),
 		Addr:         ":8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,

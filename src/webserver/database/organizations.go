@@ -14,9 +14,7 @@ func FindOrganizationFromGroupName(groupId string) (*core.Organization, error) {
 	defer rows.Close()
 
 	var org *core.Organization = new(core.Organization)
-	if !rows.Next() {
-		return nil, rows.Err()
-	}
+	rows.Next()
 	err = rows.StructScan(org)
 	if err != nil {
 		return nil, err

@@ -19,9 +19,7 @@ func InsertNewProcessFlow(flow *core.ProcessFlow) error {
 		return err
 	}
 
-	if !rows.Next() {
-		return rows.Err()
-	}
+	rows.Next()
 	err = rows.Scan(&flow.Id)
 	if err != nil {
 		tx.Rollback()
