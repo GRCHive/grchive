@@ -17,6 +17,7 @@ func AddNewGettingStartedInterest(name string, email string) (bool, error) {
 	`, name, email)
 	if err != nil {
 		core.Info(err.Error())
+		tx.Rollback()
 		return err.(*pq.Error).Code == "23505", err
 	}
 

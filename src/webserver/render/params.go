@@ -24,6 +24,7 @@ func BuildOrgTemplateParams(org *core.Organization) map[string]interface{} {
 		core.DashboardOrgOrgQueryId,
 		org.OktaGroupName)
 	params["OrgName"] = org.Name
+	params["OrgGroupId"] = org.OktaGroupName
 	return params
 }
 

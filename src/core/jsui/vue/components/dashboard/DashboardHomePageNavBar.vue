@@ -18,7 +18,7 @@ export default Vue.extend({
             navLinks : [
                 {
                     title: 'Dashboard',
-                    icon: 'mdi-home',
+                    icon: 'mdi-view-dashboard',
                     //@ts-ignore
                     url: this.$root.orgUrl,
                     disabled : false

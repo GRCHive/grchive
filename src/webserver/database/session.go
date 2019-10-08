@@ -19,6 +19,7 @@ func StoreUserSession(session *core.UserSession) error {
 			, :refresh_token)
 	`, session)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 	err = tx.Commit()
@@ -32,9 +33,12 @@ func FindUserSession(sessionId string) (*core.UserSession, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var session *core.UserSession = new(core.UserSession)
-	rows.Next()
+	if !rows.Next() {
+		return nil, rows.Err()
+	}
 	err = rows.StructScan(session)
 	if err != nil {
 		return nil, err
@@ -50,7 +54,7 @@ func DeleteUserSession(sessionId string) error {
 		WHERE session_id = $1
 	`, sessionId)
 	if err != nil {
-		return err
+		return tx.Rollback()
 	}
 	err = tx.Commit()
 	return err
@@ -70,6 +74,7 @@ func UpdateUserSession(session *core.UserSession) error {
 		WHERE session_id = :session_id
 	`, session)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 	err = tx.Commit()

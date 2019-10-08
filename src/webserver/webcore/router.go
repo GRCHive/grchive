@@ -28,6 +28,8 @@ const (
 	DashboardUserHomeRouteName               = "DashboardUserHome"
 	UserProfileEditRouteName                 = "UserProfilePost"
 	DashboardProcessFlowsRouteName           = "ProcessFlows"
+	NewProcessFlowRouteName                  = "NewProcessFlow"
+	GetAllProcessFlowRouteName               = "GetAllProcessFlow"
 )
 
 var globalRouter *mux.Router

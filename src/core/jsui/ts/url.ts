@@ -37,3 +37,6 @@ export function createMyAccountUrl(email: string) : string {
 export function createUserProfileEditAPIUrl(email : string) : string {
     return "/api/user/" + email + "/profile"
 }
+
+export const newProcessFlowAPIUrl : string = "/api/flows/new"
+export const getAllProcessFlowAPIUrl: string = "/api/flows/"

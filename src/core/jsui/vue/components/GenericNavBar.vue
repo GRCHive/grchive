@@ -2,18 +2,21 @@
     <v-navigation-drawer app clipped
         :mini-variant.sync="mini"
         mini-variant-width=50
+        :width="width"
+        permanent
     >
+        <slot></slot>
         <v-list class="py-0">
             <v-list-item-group :value="selectedPage">
                 <v-list-item v-for="(item, i) in navLinks" 
                              :key="i"
                              :href="item.url"
                              link
-                             :color="item.disabled ? `secondary` : `primary`"
+                             :color="item.disabled ? `secondary` : primaryColor"
                              :disabled="item.disabled"
                              :two-line="item.disabled"
                 >
-                    <v-list-item-icon>
+                    <v-list-item-icon v-if="item.icon != ''">
                         <v-icon>{{ item.icon }}</v-icon>
                     </v-list-item-icon>
 
@@ -39,7 +42,15 @@ export default Vue.extend({
     props : {
         mini : Boolean,
         selectedPage : Number,
-        navLinks: {}
+        navLinks: {},
+        primaryColor: {
+            type: String,
+            default: "primary"
+        },
+        width: {
+            type: Number,
+            default: 256
+        }
     },
 })
 

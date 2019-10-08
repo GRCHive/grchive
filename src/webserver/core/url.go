@@ -3,32 +3,43 @@ package core
 import "fmt"
 
 // Landing Page
-var GetStartedUrl string = "/getting-started/"
-var ContactUsUrl string = "/contact-us/"
-var HomePageUrl string = "/"
-var LoginUrl string = "/login/"
-var LogoutUrl string = "/logout/"
-var LearnMoreUrl string = "/learn/"
+const GetStartedUrl string = "/getting-started/"
+const ContactUsUrl string = "/contact-us/"
+const HomePageUrl string = "/"
+const LoginUrl string = "/login/"
+const LogoutUrl string = "/logout/"
+const LearnMoreUrl string = "/learn/"
+
 var SamlCallbackUrl string = LoadEnvConfig().Login.RedirectUrl
 
 // Dashboard
-var DashboardUrl string = "/dashboard/"
-var DashboardHomeUrl string = "/"
+const DashboardUrl string = "/dashboard/"
+const DashboardHomeUrl string = "/"
 
 // Dashboard - Organization
-var DashboardOrgOrgQueryId string = "orgId"
+const DashboardOrgOrgQueryId string = "orgId"
+
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}/", DashboardOrgOrgQueryId)
-var DashboardOrgHomeUrl string = "/"
-var DashboardOrgFlowUrl string = "/flows"
+
+const DashboardOrgHomeUrl string = "/"
+const DashboardOrgFlowUrl string = "/flows"
 
 // Dashboard - User
-var DashboardUserQueryId string = "user"
+const DashboardUserQueryId string = "user"
+
 var DashboardUserUrl string = fmt.Sprintf("/user/{%s}/", DashboardUserQueryId)
-var DashboardUserHomeUrl string = "/"
+
+const DashboardUserHomeUrl string = "/"
 
 // API
-var ApiUrl string = "/api/"
+const ApiUrl string = "/api/"
+
+// API - Process Flow
+const ApiProcessFlowUrl string = "/flows/"
+const ApiProcessFlowGetAllUrl string = "/"
+const ApiProcessFlowNewUrl string = "/new/"
 
 // API - Users
 var ApiUserUrl string = fmt.Sprintf("/user/{%s}/", DashboardUserQueryId)
-var ApiUserProfileUrl string = "/profile/"
+
+const ApiUserProfileUrl string = "/profile/"

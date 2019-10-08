@@ -14,9 +14,12 @@ func FindSAMLIdPFromDomain(domain string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer rows.Close()
 
 	var iden string
-	rows.Next()
+	if !rows.Next() {
+		return "", rows.Err()
+	}
 	err = rows.Scan(&iden)
 
 	// If err is not nil then that means that the query found no rows.

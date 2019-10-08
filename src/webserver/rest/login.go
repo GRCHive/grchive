@@ -14,8 +14,7 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	// Expect an "email" field and "nonce" field in the post data encoded as x-www-form-urlencoded.
-	// The "nonce" field is a CRSF token that will be verified twice. Once here and once after
-	// Okta redirects back to us.
+	// The "nonce" field is a CRSF token that will be verified here. TODO: Use middleware?
 	//
 	// In this function, we take the email, strip out its domain, see if it matches any IdP we know
 	// stored in our database.

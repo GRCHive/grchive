@@ -53,6 +53,7 @@ go_library(
         "database/session.go",
         "database/organizations.go",
         "database/processFlows.go",
+        "database/utility.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 
@@ -111,6 +112,7 @@ go_library(
         "rest/gettingStarted.go",
         "rest/login.go",
         "rest/user.go",
+        "rest/processFlow.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",
