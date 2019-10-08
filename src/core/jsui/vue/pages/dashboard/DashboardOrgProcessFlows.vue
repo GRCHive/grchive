@@ -3,7 +3,7 @@
         <dashboard-app-bar>
         </dashboard-app-bar>
 
-        <dashboard-home-page-nav-bar :selected-page="1" :mini="false"></dashboard-home-page-nav-bar>
+        <dashboard-home-page-nav-bar :selected-page="1"></dashboard-home-page-nav-bar>
         <process-flows-nav-bar></process-flows-nav-bar>
         <v-content>
         </v-content>

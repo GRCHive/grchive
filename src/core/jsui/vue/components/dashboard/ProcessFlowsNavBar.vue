@@ -42,6 +42,7 @@ import CreateNewProcessFlowForm from './CreateNewProcessFlowForm.vue'
 import axios from 'axios'
 import * as qs from 'query-string'
 import { contactUsUrl, getAllProcessFlowAPIUrl} from '../../../ts/url'
+import VueSetup from '../../../ts/vueSetup'
 
 interface NavLinks {
     icon : string
@@ -79,7 +80,7 @@ export default Vue.extend({
             return {
                 // TODO: This needs to change if the width of the initial nav changes
                 //@ts-ignore
-                "transform": "translateX(256px)"
+                "transform": "translateX(" + VueSetup.store.state.primaryNavBarWidth + "px)"
             }
         }
     },

@@ -6,12 +6,12 @@
 <script lang="ts">
 
 import Vue from 'vue'
+import VueSetup from '../../../ts/vueSetup'
 import { createMyAccountUrl } from '../../../ts/url'
 import GenericNavBar from '../GenericNavBar.vue'
 
 export default Vue.extend({
     props : {
-        mini : Boolean,
         selectedPage : Number
     },
     data : function() {
@@ -26,8 +26,16 @@ export default Vue.extend({
             ],
         }
     },
+    computed: {
+        mini() : boolean {
+            return VueSetup.store.state.miniMainNavBar
+        }
+    },
     components: {
         GenericNavBar
+    },
+    mounted() {
+        VueSetup.store.dispatch('mountPrimaryNavBar', this)
     }
 })
 

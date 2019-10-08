@@ -1,5 +1,6 @@
 <template>
     <v-app-bar app dense clipped-left>
+        <v-app-bar-nav-icon @click.stop="clickNav"></v-app-bar-nav-icon>
         <v-toolbar-title color="primary">
             <a :href="this.$root.orgUrl">{{ this.$root.orgName }}</a>
         </v-toolbar-title>
@@ -41,6 +42,7 @@
 <script lang="ts">
 
 import Vue from 'vue'
+import VueSetup from '../../../ts/vueSetup'
 import {createLogoutUrl, createMyAccountUrl, createMailtoUrl } from '../../../ts/url'
 
 export default Vue.extend({
@@ -54,6 +56,11 @@ export default Vue.extend({
             myAccountUrl: createMyAccountUrl(this.$root.userEmail),
             //@ts-ignore
             supportUrl: createMailtoUrl("support", this.$root.domain),
+        }
+    },
+    methods: {
+        clickNav() {
+            VueSetup.store.commit('toggleMiniNavBar')
         }
     }
 })
