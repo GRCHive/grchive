@@ -1,5 +1,5 @@
 <template>
-    <v-app-bar app dense clipped-left>
+    <v-app-bar app dense clipped-left clipped-right>
         <v-app-bar-nav-icon @click.stop="clickNav"></v-app-bar-nav-icon>
         <v-toolbar-title color="primary">
             <a :href="this.$root.orgUrl">{{ this.$root.orgName }}</a>

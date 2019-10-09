@@ -4,7 +4,7 @@
             <v-list-item-content v-if="!editMode" class="mr-2">
                 <v-list-item-title>
                     {{ basicData.Name }}
-                    <v-btn icon @click="expandDescription = !expandDescription">
+                    <v-btn icon @click="onExpandDescription">
                         <v-icon small v-if="!expandDescription" >mdi-chevron-down</v-icon>
                         <v-icon small v-else>mdi-chevron-up</v-icon>
                     </v-btn>
@@ -103,6 +103,10 @@ export default Vue.extend({
         }
     },
     methods: {
+        onExpandDescription() {
+            this.expandDescription = !this.expandDescription
+            this.$emit('on-change')
+        },
         standardFormatTime,
         cancelEdit() {
             // Note that this is valid to call when we switch to another process flow
@@ -110,6 +114,7 @@ export default Vue.extend({
             this.editMode = false
             this.editName = this.basicData.Name
             this.editDescription = this.basicData.Description
+            this.$emit('on-change')
         },
         saveEdit() {
             //@ts-ignore
@@ -148,7 +153,6 @@ export default Vue.extend({
                 return state.currentProcessFlowIndex
             },
             () => {
-                console.log(VueSetup.currentRouter.currentRoute)
                 this.cancelEdit()
             }
         )
