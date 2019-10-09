@@ -4,9 +4,9 @@
             <v-list-item-content v-if="!editMode" class="mr-2">
                 <v-list-item-title>
                     {{ basicData.Name }}
-                    <v-btn icon>
-                        <v-icon small v-if="!expandDescription" @click="expandDescription = true">mdi-chevron-down</v-icon>
-                        <v-icon small v-else @click="expandDescription = false">mdi-chevron-up</v-icon>
+                    <v-btn icon @click="expandDescription = !expandDescription">
+                        <v-icon small v-if="!expandDescription" >mdi-chevron-down</v-icon>
+                        <v-icon small v-else>mdi-chevron-up</v-icon>
                     </v-btn>
                 </v-list-item-title>
                 <v-list-item-subtitle :class="expandDescription ? `long-text` : `hide-long-text`">
