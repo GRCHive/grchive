@@ -9,6 +9,13 @@
         <v-toolbar-items>
             <v-btn text
                    color="primary"
+                   :href="feedbackUrl.mailto"
+            >
+                Feedback
+                <v-icon color="primary" small>mdi-email</v-icon>
+            </v-btn>
+            <v-btn text
+                   color="primary"
                    :href="supportUrl.mailto"
             >
                 Support
@@ -56,6 +63,8 @@ export default Vue.extend({
             myAccountUrl: createMyAccountUrl(this.$root.userEmail),
             //@ts-ignore
             supportUrl: createMailtoUrl("support", this.$root.domain),
+            //@ts-ignore
+            feedbackUrl: createMailtoUrl("feedback", this.$root.domain),
         }
     },
     methods: {
