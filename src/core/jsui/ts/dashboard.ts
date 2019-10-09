@@ -18,7 +18,7 @@ function mountApp(inData : Object) {
             SnackBar
         },
         data: () => (inData),
-        vuetify: vueOpts.vuetify
+        vuetify: vueOpts.vuetify,
     }).$mount('#app')
 }
 

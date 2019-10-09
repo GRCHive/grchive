@@ -11,6 +11,7 @@
                 <v-list-item v-for="(item, i) in navLinks" 
                              :key="i"
                              :href="item.url"
+                             :to="item.path"
                              link
                              :color="item.disabled ? `secondary` : primaryColor"
                              :disabled="item.disabled"

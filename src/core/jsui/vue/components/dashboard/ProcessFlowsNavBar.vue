@@ -48,6 +48,7 @@ import VueSetup from '../../../ts/vueSetup'
 interface NavLinks {
     icon : string
     url : string
+    path : string
     title : string
     disabled: boolean
 }
@@ -88,6 +89,7 @@ export default Vue.extend({
                     icon: '',    
                     disabled: false,
                     url: '',
+                    path: data.Id.toString(),
                     title: data.Name
                 })
             }
@@ -96,8 +98,24 @@ export default Vue.extend({
     },
     methods: {
         doRefresh() {
-            this.refresh(-1).then((resp : ResponseData) => {
+            // In the case where the URL does not specify a process flow, take the currently
+            // selected process flow for the nav bar model and change the route path to point to it.
+            // In the case where the URL does specify a process flow, make sure the refresh
+            // points to it at the end.
+            let currentProcessFlowId : number = -1
+
+            if (!!VueSetup.currentRouter.currentRoute.params.flowId) {
+                currentProcessFlowId = parseInt(VueSetup.currentRouter.currentRoute.params.flowId)
+            }
+
+            this.refresh(currentProcessFlowId).then((resp : ResponseData) => {
                 VueSetup.store.commit('setProcessFlowBasicData', resp.data.Flows)
+                if (currentProcessFlowId != -1) {
+                    VueSetup.store.commit('setCurrentProcessFlowIndex', resp.data.RequestedIndex)
+                } else {
+                    // If there's no path parameter for the route then we should manually replace the route on the router ourselves.
+                    VueSetup.currentRouter.replace(this.navLinks[VueSetup.store.state.currentProcessFlowIndex].path)
+                }
             }).catch((err) => {
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(

@@ -18,6 +18,8 @@ import DashboardAppBar from '../../components/dashboard/DashboardAppBar.vue'
 import DashboardHomePageNavBar from '../../components/dashboard/DashboardHomePageNavBar.vue'
 import ProcessFlowsNavBar from '../../components/dashboard/ProcessFlowsNavBar.vue'
 import ProcessFlowEditor from '../../components/dashboard/ProcessFlowEditor.vue'
+import VueSetup from '../../../ts/vueSetup'
+import VueRouter from 'vue-router'
 
 export default {
     components : {
@@ -25,6 +27,15 @@ export default {
         DashboardHomePageNavBar,
         ProcessFlowsNavBar,
         ProcessFlowEditor
-    }
+    },
+    router: new VueRouter({
+        base : window.location.pathname,
+        routes: [
+            { path: '/:flowId' } 
+        ]
+    }),
+    created() {
+        VueSetup.currentRouter = this.$router
+    },
 }
 </script>

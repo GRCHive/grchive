@@ -15,7 +15,7 @@ interface VuexState {
     miniMainNavBar : boolean,
     primaryNavBarWidth : number,
     allProcessFlowBasicData : ProcessFlowBasicData[],
-    currentProcessFlowIndex: number
+    currentProcessFlowIndex: number,
 }
 
 const store : StoreOptions<VuexState> = {
@@ -23,7 +23,7 @@ const store : StoreOptions<VuexState> = {
         miniMainNavBar: false,
         primaryNavBarWidth: 256,
         allProcessFlowBasicData: [],
-        currentProcessFlowIndex : 0
+        currentProcessFlowIndex : 0,
     },
     mutations: {
         toggleMiniNavBar(state) {
@@ -75,5 +75,6 @@ const store : StoreOptions<VuexState> = {
 
 export default {
     vuetify: new Vuetify(opts),
-    store: new Vuex.Store<VuexState>(store)
+    store: new Vuex.Store<VuexState>(store),
+    currentRouter: {} as VueRouter
 }

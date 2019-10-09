@@ -66,6 +66,7 @@
 
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
+import VueRouter from 'vue-router'
 import * as rules from "../../../ts/formRules"
 import { standardFormatTime } from '../../../ts/time'
 import { postFormUrlEncoded } from "../../../ts/http"
@@ -148,6 +149,7 @@ export default Vue.extend({
                 return state.currentProcessFlowIndex
             },
             () => {
+                console.log(VueSetup.currentRouter.currentRoute)
                 this.cancelEdit()
             }
         )
@@ -160,7 +162,7 @@ export default Vue.extend({
                 this.cancelEdit()
             }
         )
-    }
+    },
 })
 </script>
 
