@@ -36,6 +36,7 @@ go_library(
         "core/organization.go",
         "core/user.go",
         "core/processFlows.go",
+        "core/processFlowNodes.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",
@@ -54,6 +55,7 @@ go_library(
         "database/organizations.go",
         "database/processFlows.go",
         "database/utility.go",
+        "database/processFlowNodes.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 
@@ -113,6 +115,7 @@ go_library(
         "rest/login.go",
         "rest/user.go",
         "rest/processFlow.go",
+        "rest/processFlowNodes.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",

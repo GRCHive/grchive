@@ -40,6 +40,7 @@ export function createUserProfileEditAPIUrl(email : string) : string {
 
 export const newProcessFlowAPIUrl : string = "/api/flows/new"
 export const getAllProcessFlowAPIUrl: string = "/api/flows/"
+export const getAllProcessFlowNodeTypesAPIUrl: string = "/api/flownodes/types"
 
 export function createUpdateProcessFlowApiUrl(id : number) : string {
     return "/api/flows/" + id.toString() + "/update"

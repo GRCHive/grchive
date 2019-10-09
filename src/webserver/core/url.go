@@ -42,6 +42,10 @@ const ApiProcessFlowNewUrl string = "/new"
 
 var ApiProcessFlowUpdateUrl string = fmt.Sprintf("/{%s}/update", ProcessFlowQueryId)
 
+// API - Process Flow Nodes
+const ApiProcessFlowNodesUrl string = "/flownodes"
+const ApiProcessFlowNodesGetTypesUrl string = "/types"
+
 // API - Users
 var ApiUserUrl string = fmt.Sprintf("/user/{%s}", DashboardUserQueryId)
 

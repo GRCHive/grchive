@@ -24,11 +24,13 @@ func RegisterPaths(r *mux.Router) {
 func registerAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiUrl).Subrouter()
 	// TODO: API Key verification? For now just verify CSRF.
+	// TODO: IP rate limiting?
 	s.Use(webcore.CreateVerifyCSRFMiddleware(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 	}))
 	registerUserAPIPaths(s)
 	registerProcessFlowAPIPaths(s)
+	registerProcessFlowNodesAPIPaths(s)
 }
 
 func registerUserAPIPaths(r *mux.Router) {
@@ -44,4 +46,9 @@ func registerProcessFlowAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiProcessFlowNewUrl, newProcessFlow).Methods("POST").Name(webcore.NewProcessFlowRouteName)
 	s.HandleFunc(core.ApiProcessFlowGetAllUrl, getAllProcessFlows).Methods("GET").Name(webcore.GetAllProcessFlowRouteName)
 	s.HandleFunc(core.ApiProcessFlowUpdateUrl, updateProcessFlow).Methods("POST").Name(webcore.UpdateProcessFlowRouteName)
+}
+
+func registerProcessFlowNodesAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiProcessFlowNodesUrl).Subrouter()
+	s.HandleFunc(core.ApiProcessFlowNodesGetTypesUrl, getAllProcessFlowNodeTypes).Methods("GET").Name(webcore.GetAllProcessFlowNodeTypesRouteName)
 }

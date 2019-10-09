@@ -87,7 +87,7 @@ func FindOrganizationProcessFlows(org *core.Organization) ([]*core.ProcessFlow, 
 	result := []*core.ProcessFlow{}
 
 	err := dbConn.Select(&result, `
-		SELECT id, name, description, created_time, last_updated_time FROM process_flows WHERE org_id = $1
+		SELECT id, name, description, created_time, last_updated_time FROM process_flows WHERE org_id = $1 ORDER BY name ASC
 	`, org.Id)
 
 	if err != nil {

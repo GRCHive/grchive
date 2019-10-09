@@ -59,7 +59,7 @@ export default Vue.extend({
         attrEditorTop: 0,
         attrEditorBottom: 0,
         attrEditorLeft: 0,
-        showHideAttrEditor: false
+        showHideAttrEditor: true
     }),
     router: new VueRouter({
         base : window.location.pathname,

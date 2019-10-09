@@ -8,3 +8,9 @@ interface ProcessFlowBasicData {
 
 interface FullProcessFlowData {
 }
+
+interface ProcessFlowNodeType {
+    Id : number
+    Name : string
+    Description : string
+}

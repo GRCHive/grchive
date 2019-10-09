@@ -69,6 +69,11 @@ const store : StoreOptions<VuexState> = {
             })
             mutationObservers.push(observer)
         },
+    },
+    getters: {
+        currentProcessFlowBasicData: (state) => {
+            return state.allProcessFlowBasicData[state.currentProcessFlowIndex]
+        }
     }
 }
 
