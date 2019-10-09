@@ -4,8 +4,12 @@
             <v-list-item-content v-if="!editMode" class="mr-2">
                 <v-list-item-title>
                     {{ basicData.Name }}
+                    <v-btn icon>
+                        <v-icon small v-if="!expandDescription" @click="expandDescription = true">mdi-chevron-down</v-icon>
+                        <v-icon small v-else @click="expandDescription = false">mdi-chevron-up</v-icon>
+                    </v-btn>
                 </v-list-item-title>
-                <v-list-item-subtitle class="long-text">
+                <v-list-item-subtitle :class="expandDescription ? `long-text` : `hide-long-text`">
                     {{ basicData.Description }}
                 </v-list-item-subtitle>
             </v-list-item-content>
@@ -77,7 +81,8 @@ export default Vue.extend({
         editName : "",
         editDescription: "",
         rules,
-        formValid: false
+        formValid: false,
+        expandDescription: false
     }),
     computed: {
         basicData() : ProcessFlowBasicData {
