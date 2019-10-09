@@ -58,7 +58,6 @@
             </v-list-item-action>
 
         </v-list-item>
-        <v-divider></v-divider>
     </section>
 </template>
 
