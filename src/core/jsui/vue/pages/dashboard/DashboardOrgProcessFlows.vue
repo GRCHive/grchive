@@ -3,7 +3,10 @@
         <dashboard-app-bar ref="dashboardAppBar">
         </dashboard-app-bar>
 
-        <dashboard-home-page-nav-bar :selected-page="1"></dashboard-home-page-nav-bar>
+        <dashboard-home-page-nav-bar
+            :selected-page="1"
+            @on-size-change="recomputeProcessFlowHeaderHeight"
+        ></dashboard-home-page-nav-bar>
         <process-flows-nav-bar></process-flows-nav-bar>
         <v-content class="max-height" ref="sectionDiv">
             <div :style="contentContainerStyle">
@@ -13,6 +16,8 @@
                 <v-divider ref="headerDivider"></v-divider>
                 <process-flow-renderer :content-max-height-clip="headerClipHeight"
                                        :content-max-width-clip="attrEditorClipWidth"
+                                       :display-rect="rendererClientRect"
+                                       ref="rendererVue"
                 ></process-flow-renderer>
 
                 <process-flow-attribute-editor :custom-clip-height="headerClipHeight" 
@@ -66,7 +71,15 @@ export default Vue.extend({
         attrEditorBottom: 0,
         attrEditorLeft: 0,
         showHideAttrEditor: true,
-        attrEditorClipWidth: 256
+        attrEditorClipWidth: 256,
+        rendererClientRect: <IDOMRect>{
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            width: 0,
+            height: 0
+        }
     }),
     router: new VueRouter({
         base : window.location.pathname,
@@ -94,6 +107,25 @@ export default Vue.extend({
                     this.attrEditorClipWidth = this.$root.$el.clientWidth - this.attrEditorLeft
                 })
             })
+
+            // Spend the next second or so making sure we keep track of the total size
+            // of the rendering section.
+            let intervalId = setInterval(() => {
+                //@ts-ignore
+                const rect = this.$refs.rendererVue.$el.getBoundingClientRect()
+                this.rendererClientRect =  <IDOMRect>{
+                    top: rect.top,
+                    bottom: rect.bottom,
+                    left: rect.left,
+                    right: rect.right,
+                    width: rect.width,
+                    height: rect.height
+                }
+            }, 16)
+
+            setTimeout(function() {
+                clearInterval(intervalId)
+            }, 1000)
         },
         clickAttributePullTab() {
             this.showHideAttrEditor = !this.showHideAttrEditor

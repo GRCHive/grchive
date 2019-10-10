@@ -2,9 +2,12 @@
     <svg id="svgrenderer"
          width="100%"
          height="100%"
+         preserveAspectRatio="none"
+         :viewBox="`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`"
          @mousemove="onMouseMove"
          @mousedown="onMouseDown"
          @mouseup="onMouseUp"
+         @mouseleave="onMouseLeave"
          ref="svgrenderer"
     >
         <g id="nodes">
@@ -30,17 +33,30 @@ export default Vue.extend({
     components: {
         ProcessFlowSvgNode
     },
+    props: {
+        svgWidth: Number,
+        svgHeight: Number
+    },
     computed: {
         nodes() {
             return VueSetup.store.state.currentProcessFlowFullData.Nodes
+        },
+        viewBox() {
+            return {
+                x: 0,
+                y: 0,
+                width: this.svgWidth,
+                height: this.svgHeight
+            }
         }
     },
     data: () => ({
-        moveNodeActive: false
+        moveNodeActive: false,
+        moveViewBoxActive: false
     }),
     methods: {
-        onMouseMove(e : MouseEvent) {
-            if (!VueSetup.store.getters.isNodeSelected || !this.moveNodeActive) {
+        doMoveNode(e : MouseEvent) {
+            if (!VueSetup.store.getters.isNodeSelected) {
                 return
             }
 
@@ -50,20 +66,44 @@ export default Vue.extend({
                 ty: e.movementY
             })
         },
+        doMoveViewBox(e : MouseEvent) {
+        },
+        onMouseMove(e : MouseEvent) {
+            if (this.moveNodeActive) {
+                this.doMoveNode(e)
+            } else if (this.moveViewBoxActive) {
+                this.doMoveViewBox(e)
+            }
+        },
         onMouseDownNode(e : MouseEvent, nodeId : number) {
+            if (e.button != 0) {
+                return
+            }
+
             VueSetup.store.commit('setSelectedProcessFlowNode', nodeId)
             this.moveNodeActive = true
+            e.stopPropagation()
         },
         onMouseUpNode(e : MouseEvent, nodeId : number) {
+            if (e.button != 0) {
+                return
+            }
+
             this.moveNodeActive = false
+            e.stopPropagation()
         },
         onMouseDown(e : MouseEvent) {
             VueSetup.store.commit('setSelectedProcessFlowNode', -1)
+            this.moveViewBoxActive = true
         },
         onMouseUp(e : MouseEvent) {
-            VueSetup.store.commit('setSelectedProcessFlowNode', -1)
+            this.moveViewBoxActive = false
+        },
+        onMouseLeave(e : MouseEvent) {
+            this.moveNodeActive = false
+            this.moveViewBoxActive = false
         }
-    }
+    },
 })
 
 </script>

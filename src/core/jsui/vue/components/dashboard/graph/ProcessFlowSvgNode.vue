@@ -44,11 +44,9 @@ export default Vue.extend({
     methods : {
         onMouseDown(e: MouseEvent) {
             this.$emit("onmousedown", e, this.node.Id)
-            e.stopPropagation()
         },
         onMouseUp(e: MouseEvent) {
             this.$emit("onmouseup", e, this.node.Id)
-            e.stopPropagation()
         }
     },
     computed: {
@@ -119,6 +117,7 @@ export default Vue.extend({
 
 .no-pointer {
     pointer-events: none;
+    user-select: none;
 }
 
 .node-selected-box {

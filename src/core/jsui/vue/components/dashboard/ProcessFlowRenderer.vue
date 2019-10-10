@@ -1,7 +1,10 @@
 <template>
-    <section id="flowRenderer" class="ma-0" :style="contentStyle">
+    <section id="flowRenderer" class="ma-0" :style="contentStyle" ref="renderer">
         <section class="max-height" v-if="hasProcessFlowToRender">
-            <process-flow-svg-renderer></process-flow-svg-renderer>
+            <process-flow-svg-renderer
+                :svg-width="svgWidth"
+                :svg-height="svgHeight"
+            ></process-flow-svg-renderer>
         </section>
 
         <section class="max-height" v-else>
@@ -40,9 +43,18 @@ export default Vue.extend({
     },
     props: {
         contentMaxHeightClip: Number,
-        contentMaxWidthClip: Number
+        contentMaxWidthClip: Number,
+        displayRect: {
+            type: Object as () => IDOMRect
+        }
     },
     computed: {
+        svgHeight() : number {
+            return (<IDOMRect>this.displayRect).height
+        },
+        svgWidth(): number {
+            return (<IDOMRect>this.displayRect).width
+        },
         hasProcessFlowToRender() : boolean {
             return !isProcessFullDataEmpty(VueSetup.store.state.currentProcessFlowFullData)
         },
@@ -63,6 +75,6 @@ export default Vue.extend({
             //@ts-ignore
             VueSetup.store.dispatch('refreshCurrentProcessFlowFullData', this.$root.csrf)
         }
-    }
+    },
 })
 </script>

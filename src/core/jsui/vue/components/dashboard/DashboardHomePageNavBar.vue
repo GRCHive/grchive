@@ -85,6 +85,11 @@ export default Vue.extend({
     },
     mounted() {
         VueSetup.store.dispatch('mountPrimaryNavBar', this)
+    },
+    watch: {
+        mini() {
+            this.$emit('on-size-change')
+        }
     }
 })
 
