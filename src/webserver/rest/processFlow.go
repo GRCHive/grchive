@@ -237,3 +237,9 @@ func updateProcessFlow(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	jsonWriter.Encode(processFlow)
 }
+
+func getProcessFlowFullData(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+	jsonWriter.Encode(struct{}{})
+}

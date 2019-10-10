@@ -111,7 +111,12 @@ export default Vue.extend({
             this.refresh(currentProcessFlowId).then((resp : ResponseData) => {
                 VueSetup.store.commit('setProcessFlowBasicData', resp.data.Flows)
                 if (currentProcessFlowId != -1) {
-                    VueSetup.store.commit('setCurrentProcessFlowIndex', resp.data.RequestedIndex)
+                    //@ts-ignore
+                    VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
+                        index: resp.data.RequestedIndex,
+                        //@ts-ignore
+                        csrf: this.$root.csrf
+                    })
                 } else {
                     // If there's no path parameter for the route then we should manually replace the route on the router ourselves.
                     VueSetup.currentRouter.replace(this.navLinks[VueSetup.store.state.currentProcessFlowIndex].path)
@@ -155,7 +160,11 @@ export default Vue.extend({
             // Then point ourselves to the most recently created process flow.
             this.refresh(id).then((resp : ResponseData) => {
                 VueSetup.store.commit('setProcessFlowBasicData', resp.data.Flows)
-                VueSetup.store.commit('setCurrentProcessFlowIndex', resp.data.RequestedIndex)
+                VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
+                    index: resp.data.RequestedIndex,
+                    //@ts-ignore
+                    csrf: this.$root.csrf
+                })
             }).catch((err) => {
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
@@ -167,7 +176,11 @@ export default Vue.extend({
             })
         },
         onItemClick(_ : MouseEvent, idx : number) {
-            VueSetup.store.commit('setCurrentProcessFlowIndex', idx)
+            VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
+                index: idx,
+                //@ts-ignore
+                csrf: this.$root.csrf
+            })
         }
     },
     mounted() {

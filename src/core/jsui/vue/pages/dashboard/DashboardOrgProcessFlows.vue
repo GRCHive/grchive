@@ -1,21 +1,25 @@
 <template>
-    <section class="max-height">
-        <dashboard-app-bar>
+    <section class="max-height" id="processFlowContent">
+        <dashboard-app-bar ref="dashboardAppBar">
         </dashboard-app-bar>
 
         <dashboard-home-page-nav-bar :selected-page="1"></dashboard-home-page-nav-bar>
         <process-flows-nav-bar></process-flows-nav-bar>
         <v-content class="max-height" ref="sectionDiv">
-            <process-flow-editor @on-change="recomputeProcessFlowHeaderHeight"></process-flow-editor>
-            <v-divider></v-divider>
-            <process-flow-toolbar></process-flow-toolbar>
-            <v-divider ref="headerDivider"></v-divider>
-            <process-flow-renderer></process-flow-renderer>
+            <div :style="contentContainerStyle">
+                <process-flow-editor @on-change="recomputeProcessFlowHeaderHeight"></process-flow-editor>
+                <v-divider></v-divider>
+                <process-flow-toolbar></process-flow-toolbar>
+                <v-divider ref="headerDivider"></v-divider>
+                <process-flow-renderer :content-max-height-clip="headerClipHeight"
+                                       :content-max-width-clip="attrEditorClipWidth"
+                ></process-flow-renderer>
 
-            <process-flow-attribute-editor :custom-clip-height="headerClipHeight" 
-                                           ref="attrEditor"
-                                           :show-hide="showHideAttrEditor"
-            ></process-flow-attribute-editor>
+                <process-flow-attribute-editor :custom-clip-height="headerClipHeight" 
+                                               ref="attrEditor"
+                                               :show-hide="showHideAttrEditor"
+                ></process-flow-attribute-editor>
+            </div>
         </v-content>
 
         <v-btn color="primary"
@@ -55,11 +59,13 @@ export default Vue.extend({
         ProcessFlowAttributeEditor,
     },
     data : () => ({
+        appBarClipHeight: 0,
         headerClipHeight : 0,
         attrEditorTop: 0,
         attrEditorBottom: 0,
         attrEditorLeft: 0,
-        showHideAttrEditor: true
+        showHideAttrEditor: true,
+        attrEditorClipWidth: 256
     }),
     router: new VueRouter({
         base : window.location.pathname,
@@ -84,6 +90,7 @@ export default Vue.extend({
                     this.attrEditorTop = attrEditorRect.top
                     this.attrEditorBottom = attrEditorRect.bottom
                     this.attrEditorLeft = attrEditorRect.left
+                    this.attrEditorClipWidth = this.$root.$el.clientWidth - this.attrEditorLeft
                 })
             })
         },
@@ -120,6 +127,12 @@ export default Vue.extend({
                 "transform": `translate(${leftTranslate}px, ${topTranslate}px) translate(-50%, -100%) rotate(-90deg)`,
                 "z-index": 5
             }
+        },
+        contentContainerStyle() {
+            return {
+                "height": "100vh",
+                "maxHeight": `calc(100vh - ${this.appBarClipHeight}px)`
+            }
         }
     },
     created() {
@@ -127,6 +140,8 @@ export default Vue.extend({
     },
     mounted() {
         this.recomputeProcessFlowHeaderHeight()
+        //@ts-ignore
+        this.appBarClipHeight = this.$refs.dashboardAppBar.$el.offsetHeight
     }
 })
 </script>

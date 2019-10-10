@@ -26,7 +26,7 @@
                 <v-list dense>
                     <v-list-item v-for="(item, index) in rawTypeOptions"
                                  :key="index"
-                                 @click="createNewNode($event, index)"
+                                 @click="createNewNode($event, item.Id)"
                                  dense
                     >
                         <v-list-item-title>
@@ -51,16 +51,37 @@ import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
 import axios from 'axios'
 import * as qs from 'query-string'
-import { contactUsUrl, getAllProcessFlowNodeTypesAPIUrl } from '../../../ts/url'
+import { contactUsUrl, getAllProcessFlowNodeTypesAPIUrl, newProcessFlowNodeAPIUrl } from '../../../ts/url'
+import { postFormUrlEncoded } from '../../../ts/http'
 
 export default Vue.extend({
     data : () => ({
         rawTypeOptions: [] as ProcessFlowNodeType[]
     }),
     methods: {
-        createNewNode(_ : MouseEvent, typeIndex : number) {
-            console.log("create node: " + typeIndex)
-        }
+        createNewNode(_ : MouseEvent, nodeTypeId : number) {
+            // Create a new node of the given type.
+            postFormUrlEncoded(newProcessFlowNodeAPIUrl, {
+                nodeTypeId,
+                flowId: VueSetup.store.getters.currentProcessFlowBasicData.Id,
+                //@ts-ignore
+                csrf: this.$root.csrf
+            }).then((resp) => {
+                // TODO: Make this more efficient and just do a local adjustment of the data?
+                //       That'd require some more syncing stuff...which is fancier.
+                // Force a refresh of the data for the currently selected process flow.
+                //@ts-ignore
+                VueSetup.store.dispatch('refreshCurrentProcessFlowFullData', this.$root.csrf)
+            }).catch((err) => {
+                //@ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong, please reload the page and try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
     },
     mounted() {
         // Send out an AJAX request to get all available node types so that we don't have to
@@ -71,11 +92,7 @@ export default Vue.extend({
 
         axios.get(getAllProcessFlowNodeTypesAPIUrl+ '?' + qs.stringify(passedData)).then((resp : ResponseData) => {
             this.rawTypeOptions = resp.data
-            for (let i = 0; i < this.rawTypeOptions.length; ++i) {
-                console.log(this.rawTypeOptions[i])
-            }
         }).catch((err) => {
-            console.log(err)
             //@ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
                 "Oops! Something went wrong, please reload the page and try again.",
@@ -90,6 +107,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+
 .v-menu__content {
     border-radius: 0px !important;
 }

@@ -41,6 +41,7 @@ const ApiProcessFlowGetAllUrl string = "/"
 const ApiProcessFlowNewUrl string = "/new"
 
 var ApiProcessFlowUpdateUrl string = fmt.Sprintf("/{%s}/update", ProcessFlowQueryId)
+var ApiProcessFlowGetFullDataUrl string = fmt.Sprintf("/{%s}/full", ProcessFlowQueryId)
 
 // API - Process Flow Nodes
 const ApiProcessFlowNodesUrl string = "/flownodes"

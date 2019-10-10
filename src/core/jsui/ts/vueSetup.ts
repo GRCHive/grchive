@@ -4,18 +4,28 @@ import Vuex, { StoreOptions } from 'vuex'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import '../node_modules/vuetify/dist/vuetify.min.css'
+
 Vue.use(Vuex)
 Vue.use(VueRouter)
 Vue.use(Vuetify)
 
+import axios from 'axios'
+import {createGetProcessFlowFullDataUrl} from './url'
+import * as qs from 'query-string'
+
 let mutationObservers = []
 const opts = {}
+
+interface FullProcessFlowDataResponse {
+    data : FullProcessFlowData
+}
 
 interface VuexState {
     miniMainNavBar : boolean,
     primaryNavBarWidth : number,
     allProcessFlowBasicData : ProcessFlowBasicData[],
     currentProcessFlowIndex: number,
+    currentProcessFlowFullData: FullProcessFlowData
 }
 
 const store : StoreOptions<VuexState> = {
@@ -24,6 +34,7 @@ const store : StoreOptions<VuexState> = {
         primaryNavBarWidth: 256,
         allProcessFlowBasicData: [],
         currentProcessFlowIndex : 0,
+        currentProcessFlowFullData: {} as FullProcessFlowData
     },
     mutations: {
         toggleMiniNavBar(state) {
@@ -47,6 +58,9 @@ const store : StoreOptions<VuexState> = {
             data.LastUpdatedTime = new Date(data.LastUpdatedTime)
             state.allProcessFlowBasicData.splice(index, 1, data)
         },
+        setCurrentProcessFlowFullData(state, data) {
+            state.currentProcessFlowFullData = data
+        }
     },
     actions: {
         mountPrimaryNavBar(context, nav) {
@@ -69,6 +83,25 @@ const store : StoreOptions<VuexState> = {
             })
             mutationObservers.push(observer)
         },
+        requestSetCurrentProcessFlowIndex(context, {index, csrf}) {
+            context.commit('setCurrentProcessFlowIndex', index)
+            context.dispatch('refreshCurrentProcessFlowFullData', csrf)
+        },
+        refreshCurrentProcessFlowFullData(context, csrf) {
+            const baseUrl = createGetProcessFlowFullDataUrl(context.getters.currentProcessFlowBasicData.Id)
+            const queryParams = qs.stringify({
+                csrf
+            })
+            axios.get(baseUrl + "?" + queryParams).then(
+                (resp : FullProcessFlowDataResponse) => {
+                    context.commit('setCurrentProcessFlowFullData', resp.data)
+                }
+            ).catch(
+                (_) => {
+                    context.commit('setCurrentProcessFlowFullData', {} as FullProcessFlowData)
+                }
+            )
+        }
     },
     getters: {
         currentProcessFlowBasicData: (state) => {
@@ -76,7 +109,6 @@ const store : StoreOptions<VuexState> = {
         }
     }
 }
-
 
 export default {
     vuetify: new Vuetify(opts),
