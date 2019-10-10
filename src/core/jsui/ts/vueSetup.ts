@@ -25,7 +25,8 @@ interface VuexState {
     primaryNavBarWidth : number,
     allProcessFlowBasicData : ProcessFlowBasicData[],
     currentProcessFlowIndex: number,
-    currentProcessFlowFullData: FullProcessFlowData
+    currentProcessFlowFullData: FullProcessFlowData,
+    fullProcessFlowRequestedId: number // -1 for no process flow
 }
 
 const store : StoreOptions<VuexState> = {
@@ -34,7 +35,8 @@ const store : StoreOptions<VuexState> = {
         primaryNavBarWidth: 256,
         allProcessFlowBasicData: [],
         currentProcessFlowIndex : 0,
-        currentProcessFlowFullData: {} as FullProcessFlowData
+        currentProcessFlowFullData: {} as FullProcessFlowData,
+        fullProcessFlowRequestedId: -1
     },
     mutations: {
         toggleMiniNavBar(state) {
@@ -60,6 +62,9 @@ const store : StoreOptions<VuexState> = {
         },
         setCurrentProcessFlowFullData(state, data) {
             state.currentProcessFlowFullData = data
+        },
+        setFullProcessFlowRequestedId(state, data) {
+            state.fullProcessFlowRequestedId = data
         }
     },
     actions: {
@@ -88,17 +93,23 @@ const store : StoreOptions<VuexState> = {
             context.dispatch('refreshCurrentProcessFlowFullData', csrf)
         },
         refreshCurrentProcessFlowFullData(context, csrf) {
-            const baseUrl = createGetProcessFlowFullDataUrl(context.getters.currentProcessFlowBasicData.Id)
+            const id = context.getters.currentProcessFlowBasicData.Id
+            const baseUrl = createGetProcessFlowFullDataUrl(id)
             const queryParams = qs.stringify({
                 csrf
             })
+            context.commit('setFullProcessFlowRequestedId', id)
             axios.get(baseUrl + "?" + queryParams).then(
                 (resp : FullProcessFlowDataResponse) => {
                     context.commit('setCurrentProcessFlowFullData', resp.data)
+                    context.commit('setFullProcessFlowRequestedId', -1)
                 }
             ).catch(
                 (_) => {
+                    // TODO: Somehow display something went wrong??
+                    console.log("Failed to obtain process flow.")
                     context.commit('setCurrentProcessFlowFullData', {} as FullProcessFlowData)
+                    context.commit('setFullProcessFlowRequestedId', -1)
                 }
             )
         }
@@ -106,6 +117,9 @@ const store : StoreOptions<VuexState> = {
     getters: {
         currentProcessFlowBasicData: (state) => {
             return state.allProcessFlowBasicData[state.currentProcessFlowIndex]
+        },
+        isFullRequestInProgress: (state) => {
+            return state.fullProcessFlowRequestedId != -1
         }
     }
 }
