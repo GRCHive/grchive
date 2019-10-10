@@ -43,8 +43,8 @@ export default Vue.extend({
         },
         viewBox() {
             return {
-                x: 0,
-                y: 0,
+                x: this.viewBoxX,
+                y: this.viewBoxY,
                 width: this.svgWidth,
                 height: this.svgHeight
             }
@@ -52,7 +52,9 @@ export default Vue.extend({
     },
     data: () => ({
         moveNodeActive: false,
-        moveViewBoxActive: false
+        moveViewBoxActive: false,
+        viewBoxX: 0,
+        viewBoxY: 0
     }),
     methods: {
         doMoveNode(e : MouseEvent) {
@@ -67,6 +69,8 @@ export default Vue.extend({
             })
         },
         doMoveViewBox(e : MouseEvent) {
+            this.viewBoxX -= e.movementX
+            this.viewBoxY -= e.movementY
         },
         onMouseMove(e : MouseEvent) {
             if (this.moveNodeActive) {
@@ -93,11 +97,18 @@ export default Vue.extend({
             e.stopPropagation()
         },
         onMouseDown(e : MouseEvent) {
-            VueSetup.store.commit('setSelectedProcessFlowNode', -1)
-            this.moveViewBoxActive = true
+            if (e.button == 0) {
+                VueSetup.store.commit('setSelectedProcessFlowNode', -1)
+            }
+
+            if (e.button == 0 || e.button == 1) {
+                this.moveViewBoxActive = true
+            }
         },
         onMouseUp(e : MouseEvent) {
-            this.moveViewBoxActive = false
+            if (e.button == 0 || e.button == 1) {
+                this.moveViewBoxActive = false
+            }
         },
         onMouseLeave(e : MouseEvent) {
             this.moveNodeActive = false
