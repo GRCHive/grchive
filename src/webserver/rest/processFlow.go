@@ -51,7 +51,7 @@ func getAllProcessFlows(w http.ResponseWriter, r *http.Request) {
 	requestedId, ok := queryVals["requested"]
 
 	var flows []*core.ProcessFlow
-	var index uint32 = 0
+	var index int = 0
 
 	if !ok || len(requestedId) == 0 {
 		flows, err = database.FindOrganizationProcessFlows(organization)
@@ -62,7 +62,7 @@ func getAllProcessFlows(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		intRequestedId, err := strconv.ParseUint(requestedId[0], 10, 32)
+		intRequestedId, err := strconv.ParseInt(requestedId[0], 10, 64)
 		if err != nil {
 			core.Warning("Invalid requested id: " + err.Error())
 			w.WriteHeader(http.StatusBadRequest)
@@ -70,7 +70,7 @@ func getAllProcessFlows(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		flows, index, err = database.FindOrganizationProcessFlowsWithIndex(organization, uint32(intRequestedId))
+		flows, index, err = database.FindOrganizationProcessFlowsWithIndex(organization, int64(intRequestedId))
 		if err != nil {
 			core.Warning("Database error [1]: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -81,7 +81,7 @@ func getAllProcessFlows(w http.ResponseWriter, r *http.Request) {
 
 	jsonWriter.Encode(struct {
 		Flows          []*core.ProcessFlow
-		RequestedIndex uint32
+		RequestedIndex int
 	}{
 		Flows:          flows,
 		RequestedIndex: index,
@@ -164,7 +164,7 @@ func newProcessFlow(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	jsonWriter.Encode(struct {
 		Name string
-		Id   uint32
+		Id   int64
 	}{
 		newFlow.Name,
 		newFlow.Id,
@@ -241,5 +241,23 @@ func updateProcessFlow(w http.ResponseWriter, r *http.Request) {
 func getProcessFlowFullData(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
-	jsonWriter.Encode(struct{}{})
+
+	flowId, err := webcore.GetProcessFlowIdFromRequest(r)
+	if err != nil {
+		core.Warning("No flow id: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	graph := core.ProcessFlowGraph{}
+	graph.Nodes, err = database.FindAllNodesForProcessFlow(flowId)
+	if err != nil {
+		core.Warning("Failed to obtain nodes: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	jsonWriter.Encode(&graph)
 }

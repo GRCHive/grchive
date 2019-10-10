@@ -33,6 +33,7 @@ const (
 	UpdateProcessFlowRouteName                    = "UpdateProcessFlow"
 	GetAllProcessFlowNodeTypesRouteName           = "GetAllProcessFlowTypes"
 	GetProcessFlowFullDataRouteName               = "GetProcessFlowFullData"
+	NewProcessFlowNodeRouteName                   = "NewProcessFlowNode"
 )
 
 var globalRouter *mux.Router

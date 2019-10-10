@@ -38,7 +38,7 @@
             </v-list-item-content>
 
             <v-list-item-action v-if="!editMode">
-                <v-btn color="primary" @click="editMode = true">
+                <v-btn color="primary" @click="onEdit">
                     Edit
                 </v-btn>
             </v-list-item-action>
@@ -136,6 +136,7 @@ export default Vue.extend({
                         data: resp.data
                     })
                 this.editMode = false
+                this.$emit('on-change')
             }).catch((err) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
@@ -145,6 +146,10 @@ export default Vue.extend({
                     contactUsUrl,
                     true);
             })
+        },
+        onEdit() {
+            this.editMode = true
+            this.$emit('on-change')
         }
     },
     mounted() {

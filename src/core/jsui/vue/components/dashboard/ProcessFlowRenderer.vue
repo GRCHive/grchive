@@ -5,15 +5,15 @@
         </section>
 
         <section class="max-height" v-else>
-            <v-row class="max-height" align="center" width="100%">
-                <v-col>
-                    <v-row justify="center">
+            <v-row class="max-height ma-0" align="center" width="100%">
+                <v-col class="pa-0">
+                    <v-row justify="center" class="ma-0">
                         <p class="display-1">This process flow is empty!</p>
                     </v-row>
-                    <v-row justify="center">
+                    <v-row justify="center" class="ma-0">
                         <p class="body-1">Get started by clicking the "Add Node" button.</p>
                     </v-row>
-                    <v-row justify="center">
+                    <v-row justify="center" class="ma-0">
                         <v-btn icon @click="refreshProcessFlow"
                                     :disabled="processFlowLoading"
                                     :loading="processFlowLoading"
@@ -31,7 +31,7 @@
 
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
-import { isObjectEmpty } from '../../../ts/object'
+import { isProcessFullDataEmpty } from '../../../ts/processFlow'
 
 export default Vue.extend({
     props: {
@@ -40,7 +40,7 @@ export default Vue.extend({
     },
     computed: {
         hasProcessFlowToRender() : boolean {
-            return isObjectEmpty(VueSetup.store.state.currentProcessFlowFullData)
+            return !isProcessFullDataEmpty(VueSetup.store.state.currentProcessFlowFullData)
         },
         contentStyle() {
             return {

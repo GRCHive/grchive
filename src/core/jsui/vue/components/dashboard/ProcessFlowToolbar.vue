@@ -62,7 +62,7 @@ export default Vue.extend({
         createNewNode(_ : MouseEvent, nodeTypeId : number) {
             // Create a new node of the given type.
             postFormUrlEncoded(newProcessFlowNodeAPIUrl, {
-                nodeTypeId,
+                typeId: nodeTypeId,
                 flowId: VueSetup.store.getters.currentProcessFlowBasicData.Id,
                 //@ts-ignore
                 csrf: this.$root.csrf

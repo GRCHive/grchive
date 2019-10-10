@@ -1,4 +1,4 @@
 CREATE TABLE process_flow_controls (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     name VARCHAR(256) NOT NULL
 );

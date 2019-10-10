@@ -5,7 +5,7 @@ import (
 )
 
 type ProcessFlow struct {
-	Id              uint32        `db:"id"`
+	Id              int64         `db:"id"`
 	Name            string        `db:"name"`
 	Org             *Organization `db:"org" json:"-"`
 	Description     string        `db:"description"`
@@ -13,8 +13,9 @@ type ProcessFlow struct {
 	LastUpdatedTime time.Time     `db:"last_updated_time"`
 }
 
-type ProcessFlowNode struct {
+type ProcessFlowEdge struct {
 }
 
-type ProcessFlowEdge struct {
+type ProcessFlowGraph struct {
+	Nodes []*ProcessFlowNode
 }

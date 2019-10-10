@@ -46,6 +46,7 @@ var ApiProcessFlowGetFullDataUrl string = fmt.Sprintf("/{%s}/full", ProcessFlowQ
 // API - Process Flow Nodes
 const ApiProcessFlowNodesUrl string = "/flownodes"
 const ApiProcessFlowNodesGetTypesUrl string = "/types"
+const ApiProcessFlowNodesNewUrl string = "/new"
 
 // API - Users
 var ApiUserUrl string = fmt.Sprintf("/user/{%s}", DashboardUserQueryId)

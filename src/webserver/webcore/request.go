@@ -33,13 +33,13 @@ func GetUserEmailFromRequestUrl(r *http.Request) (string, error) {
 	return email, nil
 }
 
-func GetProcessFlowIdFromRequest(r *http.Request) (uint32, error) {
+func GetProcessFlowIdFromRequest(r *http.Request) (int64, error) {
 	urlRouteVars := mux.Vars(r)
 	id, ok := urlRouteVars[core.ProcessFlowQueryId]
 	if !ok {
 		return 0, errors.New("No process flow id in request URL")
 	}
 
-	val, err := strconv.ParseUint(id, 10, 32)
-	return uint32(val), err
+	val, err := strconv.ParseInt(id, 10, 64)
+	return val, err
 }

@@ -109,6 +109,10 @@ export default Vue.extend({
             }
 
             this.refresh(currentProcessFlowId).then((resp : ResponseData) => {
+                if (resp.data.Flows.length == 0) {
+                    // Don't make changes here...it'll cause an exception.
+                    return
+                }
                 VueSetup.store.commit('setProcessFlowBasicData', resp.data.Flows)
                 if (currentProcessFlowId != -1) {
                     //@ts-ignore
@@ -165,6 +169,7 @@ export default Vue.extend({
                     //@ts-ignore
                     csrf: this.$root.csrf
                 })
+                VueSetup.currentRouter.replace(this.navLinks[VueSetup.store.state.currentProcessFlowIndex].path)
             }).catch((err) => {
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(

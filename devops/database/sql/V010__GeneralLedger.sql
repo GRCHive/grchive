@@ -4,8 +4,8 @@ CREATE TABLE general_ledgers (
 );
 
 CREATE TABLE general_ledger_category (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     name VARCHAR(256) NOT NULL,
     ledger_id INTEGER NOT NULL REFERENCES general_ledgers(id) ON DELETE RESTRICT,
-    parent_category_id INTEGER REFERENCES general_ledger_category(id) ON DELETE RESTRICT
+    parent_category_id BIGINT REFERENCES general_ledger_category(id) ON DELETE RESTRICT
 );

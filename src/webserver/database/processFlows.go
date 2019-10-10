@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func FindProcessFlowWithId(id uint32) (*core.ProcessFlow, error) {
+func FindProcessFlowWithId(id int64) (*core.ProcessFlow, error) {
 	rows, err := dbConn.Queryx(`
 		SELECT
 			pf.id,
@@ -101,7 +101,7 @@ func FindOrganizationProcessFlows(org *core.Organization) ([]*core.ProcessFlow, 
 }
 
 // Finds all process flows and finds the result index of the specified process flow
-func FindOrganizationProcessFlowsWithIndex(org *core.Organization, processFlowId uint32) ([]*core.ProcessFlow, uint32, error) {
+func FindOrganizationProcessFlowsWithIndex(org *core.Organization, processFlowId int64) ([]*core.ProcessFlow, int, error) {
 	result, err := FindOrganizationProcessFlows(org)
 	if err != nil {
 		return nil, 0, err
@@ -109,11 +109,11 @@ func FindOrganizationProcessFlowsWithIndex(org *core.Organization, processFlowId
 
 	// TODO: speed this up somehow if/when necessary? Hopefully # of flows stays reasonable.
 	// Can't assume the result is stored in a way where we can binary search.
-	var resultIndex uint32 = 0
+	var resultIndex int = 0
 	var found bool = false
 	for i := 0; i < len(result); i++ {
 		if result[i].Id == processFlowId {
-			resultIndex = uint32(i)
+			resultIndex = i
 			found = true
 			break
 		}
