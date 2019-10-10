@@ -17,7 +17,7 @@
 
                 <process-flow-attribute-editor :custom-clip-height="headerClipHeight" 
                                                ref="attrEditor"
-                                               :show-hide="showHideAttrEditor"
+                                               :show-hide="showHideAttrEditor && isNodeSelected"
                 ></process-flow-attribute-editor>
             </div>
         </v-content>
@@ -28,6 +28,7 @@
                :style="attributePullButtonStyle"
                class="no-transition"
                @click="clickAttributePullTab"
+                v-if="isNodeSelected"
         >
             <v-icon v-if="!showHideAttrEditor">mdi-chevron-up</v-icon>
             <v-icon v-else>mdi-chevron-down</v-icon>
@@ -96,7 +97,9 @@ export default Vue.extend({
         },
         clickAttributePullTab() {
             this.showHideAttrEditor = !this.showHideAttrEditor
-
+            this.trackAttributeEditor()
+        },
+        trackAttributeEditor() {
             // Need to track the thing through its transition
             // Probably more ideal to make the button CSS
             // transition in the same way but then we have the problem
@@ -110,6 +113,9 @@ export default Vue.extend({
         }
     },
     computed: {
+        isNodeSelected() : boolean {
+            return VueSetup.store.getters.isNodeSelected
+        },
         attributePullButtonStyle() {
             let leftTranslate : string = this.attrEditorLeft.toString()
             let topTranslate : string = ((this.attrEditorTop + this.attrEditorBottom) / 2).toString()
@@ -142,6 +148,11 @@ export default Vue.extend({
         this.recomputeProcessFlowHeaderHeight()
         //@ts-ignore
         this.appBarClipHeight = this.$refs.dashboardAppBar.$el.offsetHeight
+    },
+    watch: {
+        isNodeSelected() {
+            this.trackAttributeEditor()
+        }
     }
 })
 </script>

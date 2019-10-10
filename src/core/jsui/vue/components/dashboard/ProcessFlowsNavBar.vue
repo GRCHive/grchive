@@ -124,6 +124,14 @@ export default Vue.extend({
                 } else {
                     // If there's no path parameter for the route then we should manually replace the route on the router ourselves.
                     VueSetup.currentRouter.replace(this.navLinks[VueSetup.store.state.currentProcessFlowIndex].path)
+
+                    // Force a refresh of the current index so that we also force
+                    // the full data to be pulled as well.
+                    VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
+                        index: VueSetup.store.state.currentProcessFlowIndex,
+                        //@ts-ignore
+                        csrf: this.$root.csrf
+                    })
                 }
             }).catch((err) => {
                 //@ts-ignore

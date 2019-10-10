@@ -26,10 +26,21 @@ interface ProcessFlowNode {
     Id: number,
     Name: string,
     Description: string,
+    ProcessFlowId: number,
+    NodeTypeId: number,
     Inputs: ProcessFlowInput[],
     Outputs: ProcessFlowOutput[]
 }
 
+interface ProcessFlowNodeDisplay {
+    Tx: number,
+    Ty: number
+}
+
 interface FullProcessFlowData {
     Nodes: ProcessFlowNode[]
+}
+
+interface FullProcessFlowDisplayData {
+    Nodes: Record<number, ProcessFlowNodeDisplay>
 }

@@ -1,7 +1,7 @@
 <template>
     <section id="flowRenderer" class="ma-0" :style="contentStyle">
         <section class="max-height" v-if="hasProcessFlowToRender">
-            <h1>Has Process Flow</h1>
+            <process-flow-svg-renderer></process-flow-svg-renderer>
         </section>
 
         <section class="max-height" v-else>
@@ -31,9 +31,13 @@
 
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
+import ProcessFlowSvgRenderer from './graph/ProcessFlowSvgRenderer'
 import { isProcessFullDataEmpty } from '../../../ts/processFlow'
 
 export default Vue.extend({
+    components: {
+        ProcessFlowSvgRenderer
+    },
     props: {
         contentMaxHeightClip: Number,
         contentMaxWidthClip: Number

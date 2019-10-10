@@ -26,7 +26,9 @@ interface VuexState {
     allProcessFlowBasicData : ProcessFlowBasicData[],
     currentProcessFlowIndex: number,
     currentProcessFlowFullData: FullProcessFlowData,
+    currentProcessFlowFullDisplayData: FullProcessFlowDisplayData,
     fullProcessFlowRequestedId: number // -1 for no process flow
+    selectedNodeId : number // -1 for no selection
 }
 
 const store : StoreOptions<VuexState> = {
@@ -36,7 +38,9 @@ const store : StoreOptions<VuexState> = {
         allProcessFlowBasicData: [],
         currentProcessFlowIndex : 0,
         currentProcessFlowFullData: {} as FullProcessFlowData,
-        fullProcessFlowRequestedId: -1
+        currentProcessFlowFullDisplayData: {} as FullProcessFlowDisplayData,
+        fullProcessFlowRequestedId: -1,
+        selectedNodeId: -1,
     },
     mutations: {
         toggleMiniNavBar(state) {
@@ -61,10 +65,33 @@ const store : StoreOptions<VuexState> = {
             state.allProcessFlowBasicData.splice(index, 1, data)
         },
         setCurrentProcessFlowFullData(state, data) {
+            // TODO: Fix this to make this data persist (probably on the server)
+            state.currentProcessFlowFullDisplayData = <FullProcessFlowDisplayData> {
+                Nodes: Object()
+            }
+            if (!!data.Nodes) {
+                for (let node of data.Nodes) {
+                    Vue.set(
+                        state.currentProcessFlowFullDisplayData.Nodes,
+                        node.Id, 
+                        <ProcessFlowNodeDisplay>{
+                            Tx: 0,
+                            Ty: 0,
+                        }
+                    )
+                }
+            }
             state.currentProcessFlowFullData = data
         },
         setFullProcessFlowRequestedId(state, data) {
             state.fullProcessFlowRequestedId = data
+        },
+        setSelectedProcessFlowNode(state, id) {
+            state.selectedNodeId = id
+        },
+        addNodeDisplayTranslation(state, {nodeId, tx, ty}) {
+            state.currentProcessFlowFullDisplayData.Nodes[nodeId].Tx += tx
+            state.currentProcessFlowFullDisplayData.Nodes[nodeId].Ty += ty
         }
     },
     actions: {
@@ -120,6 +147,14 @@ const store : StoreOptions<VuexState> = {
         },
         isFullRequestInProgress: (state) => {
             return state.fullProcessFlowRequestedId != -1
+        },
+        isNodeSelected: (state) => {
+            return state.selectedNodeId != -1
+        },
+        findNodeDisplayData: (state) => {
+            return (id : number) => {
+                return state.currentProcessFlowFullDisplayData.Nodes[id]
+            }
         }
     }
 }
