@@ -1,7 +1,7 @@
 INSERT INTO process_flow_node_types (name, description)
 VALUES
-    ('Manual Activity', ''),
-    ('Automated Activity', ''),
+    ('Activity (Manual)', ''),
+    ('Activity (Automated)', ''),
     ('Decision', ''),
     ('Start', ''),
     ('General Ledger Entry', ''),
