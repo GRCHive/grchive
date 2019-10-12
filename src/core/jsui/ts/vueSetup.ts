@@ -17,7 +17,7 @@ let mutationObservers = []
 const opts = {}
 
 interface FullProcessFlowDataResponse {
-    data : FullProcessFlowData
+    data : FullProcessFlowResponseData
 }
 
 interface VuexState {
@@ -70,7 +70,8 @@ const store : StoreOptions<VuexState> = {
                 Nodes: Object()
             }
             if (!!data.Nodes) {
-                for (let node of data.Nodes) {
+                for (let key of data.NodeKeys) {
+                    const node = data.Nodes[key] 
                     Vue.set(
                         state.currentProcessFlowFullDisplayData.Nodes,
                         node.Id, 
@@ -128,7 +129,16 @@ const store : StoreOptions<VuexState> = {
             context.commit('setFullProcessFlowRequestedId', id)
             axios.get(baseUrl + "?" + queryParams).then(
                 (resp : FullProcessFlowDataResponse) => {
-                    context.commit('setCurrentProcessFlowFullData', resp.data)
+                    let newData = <FullProcessFlowData>{
+                        Nodes: Object(),
+                        NumNodes: resp.data.Nodes.length,
+                        NodeKeys: [] as number[]
+                    }
+                    for (let data of resp.data.Nodes) {
+                        newData.Nodes[data.Id] = data
+                        newData.NodeKeys.push(data.Id)
+                    }
+                    context.commit('setCurrentProcessFlowFullData', newData)
                     context.commit('setFullProcessFlowRequestedId', -1)
                 }
             ).catch(
@@ -155,6 +165,12 @@ const store : StoreOptions<VuexState> = {
             return (id : number) => {
                 return state.currentProcessFlowFullDisplayData.Nodes[id]
             }
+        },
+        currentNodeInfo: (state, getters) : ProcessFlowNode  => {
+            if (!getters.isNodeSelected) {
+                return {} as ProcessFlowNode
+            }
+            return state.currentProcessFlowFullData.Nodes[state.selectedNodeId]
         }
     }
 }

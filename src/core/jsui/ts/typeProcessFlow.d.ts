@@ -37,8 +37,14 @@ interface ProcessFlowNodeDisplay {
     Ty: number
 }
 
-interface FullProcessFlowData {
+interface FullProcessFlowResponseData {
     Nodes: ProcessFlowNode[]
+}
+
+interface FullProcessFlowData {
+    Nodes: Record<number, ProcessFlowNode>,
+    NodeKeys: number[],
+    NumNodes: number
 }
 
 interface FullProcessFlowDisplayData {
