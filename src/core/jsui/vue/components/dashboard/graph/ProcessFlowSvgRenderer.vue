@@ -8,6 +8,7 @@
          @mousedown="onMouseDown"
          @mouseup="onMouseUp"
          @mouseleave="onMouseLeave"
+         @contextmenu="onContextMenu"
          ref="svgrenderer"
     >
         <g id="nodes">
@@ -113,6 +114,9 @@ export default Vue.extend({
         onMouseLeave(e : MouseEvent) {
             this.moveNodeActive = false
             this.moveViewBoxActive = false
+        },
+        onContextMenu(e : Event) {
+            e.preventDefault()
         }
     },
 })
