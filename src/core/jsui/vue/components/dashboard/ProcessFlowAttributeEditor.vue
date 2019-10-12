@@ -1,24 +1,6 @@
 <template>
     <v-navigation-drawer absolute right :style="clipStyle" ref="attrNavDrawer" :value="showHide">
-        <section v-if="enabled" class="ma-1">
-            <v-list-item class="pa-0">
-                <template v-if="canEdit" v-bind="{saveEdit, cancelEdit}">
-                    <v-btn color="error" @click="cancelEdit">
-                        Cancel
-                    </v-btn>
-                    <div class="flex-grow-1"></div>
-                    <v-btn color="success" @click="saveEdit">
-                        Save
-                    </v-btn>
-                </template>
-
-                <template v-else v-bind="startEdit">
-                    <div class="flex-grow-1"></div>
-                    <v-btn @click="startEdit">
-                        Edit
-                    </v-btn>
-                </template>
-            </v-list-item>
+        <section v-if="enabled" class="ma-1" style="max-height: calc(100% - 48px);">
             <v-form>
                 <v-text-field v-model="currentData.Name"
                       label="Name"
@@ -34,9 +16,26 @@
                 </v-textarea> 
             </v-form>
         </section>
+        <v-footer absolute padless>
+            <v-list-item class="pa-1">
+                <template v-if="canEdit" v-bind="{saveEdit, cancelEdit}">
+                    <v-btn color="error" @click="cancelEdit">
+                        Cancel
+                    </v-btn>
+                    <div class="flex-grow-1"></div>
+                    <v-btn color="success" @click="saveEdit">
+                        Save
+                    </v-btn>
+                </template>
 
-        <section v-else>
-        </section>
+                <template v-else v-bind="startEdit">
+                    <div class="flex-grow-1"></div>
+                    <v-btn color="primary" @click="startEdit">
+                        Edit
+                    </v-btn>
+                </template>
+            </v-list-item>
+        </v-footer>
     </v-navigation-drawer>
 </template>
 
@@ -81,15 +80,17 @@ export default Vue.extend({
         },
         enabled() : boolean {
             return VueSetup.store.getters.isNodeSelected
+        },
+        currentNode() : ProcessFlowNode {
+            return VueSetup.store.getters.currentNodeInfo
         }
     },
     watch : {
-        enabled(val : boolean) {
-            if (val) {
-                this.currentData = VueSetup.store.getters.currentNodeInfo
-            } else {
-                this.currentData = {} as ProcessFlowNode
-            }
+        // Do a one-way sync from the store here and then sync back
+        // when the user hits save.
+        currentNode(val : ProcessFlowNode) {
+            this.cancelEdit()
+            this.currentData = val
         }
     }
 })
