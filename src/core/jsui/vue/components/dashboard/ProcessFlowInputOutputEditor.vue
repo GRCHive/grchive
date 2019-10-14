@@ -73,14 +73,11 @@
 
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup' 
+import MetadataStore from '../../../ts/metadata'
 import axios from 'axios'
 import * as qs from 'query-string'
 import { contactUsUrl, getAllProcessFlowIOTypesAPIUrl, newProcessFlowIOAPIUrl } from '../../../ts/url'
 import { postFormUrlEncoded } from '../../../ts/http'
-
-interface GetTypeResponseData {
-    data : ProcessFlowIOType[]
-}
 
 interface NewIOResponseData {
     data : ProcessFlowInputOutput
@@ -96,7 +93,6 @@ export default Vue.extend({
         nodeId: Number
     },
     data : () => ({
-        dataTypes: [] as ProcessFlowIOType[],
         ioEditState: Object() as Record<number, IOEditState>
     }),
     computed: {
@@ -114,6 +110,9 @@ export default Vue.extend({
                 }
                 return this.ioEditState[ioId].canEdit
             }
+        },
+        dataTypes(): ProcessFlowIOType[] {
+            return MetadataStore.state.ioTypes
         }
     },
     methods: {
@@ -174,24 +173,6 @@ export default Vue.extend({
         }
     },
     mounted() {
-        // Send out an AJAX request to get all available node types so that we don't have to
-        // manually keep this in sync with the available types on the server.
-        let passedData = Object()
-        //@ts-ignore
-        passedData['csrf'] = this.$root.csrf
-
-        axios.get(getAllProcessFlowIOTypesAPIUrl + '?' + qs.stringify(passedData)).then((resp : GetTypeResponseData) => {
-            this.dataTypes = resp.data
-        }).catch((err) => {
-            //@ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong, please reload the page and try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
-        
         this.updateEditState(this.listedIO)
     }
 })
