@@ -31,6 +31,7 @@ func registerAPIPaths(r *mux.Router) {
 	registerUserAPIPaths(s)
 	registerProcessFlowAPIPaths(s)
 	registerProcessFlowNodesAPIPaths(s)
+	registerProcessFlowIOAPIPaths(s)
 }
 
 func registerUserAPIPaths(r *mux.Router) {
@@ -53,4 +54,10 @@ func registerProcessFlowNodesAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiProcessFlowNodesUrl).Subrouter()
 	s.HandleFunc(core.ApiProcessFlowNodesGetTypesUrl, getAllProcessFlowNodeTypes).Methods("GET").Name(webcore.GetAllProcessFlowNodeTypesRouteName)
 	s.HandleFunc(core.ApiProcessFlowNodesNewUrl, newProcessFlowNode).Methods("POST").Name(webcore.NewProcessFlowNodeRouteName)
+}
+
+func registerProcessFlowIOAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiProcessFlowIOUrl).Subrouter()
+	s.HandleFunc(core.ApiProcessFlowIOGetTypesUrl, getAllProcessFlowIOTypes).Methods("GET").Name(webcore.GetAllProcessFlowIOTypesRouteName)
+	s.HandleFunc(core.ApiProcessFlowIONewUrl, createNewProcessFlowIO).Methods("POST").Name(webcore.CreateNewProcessFlowIOTypesRouteName)
 }

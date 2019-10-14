@@ -12,14 +12,16 @@ interface ProcessFlowNodeType {
     Description : string
 }
 
-interface ProcessFlowInput {
+interface ProcessFlowIOType {
     Id: number
-    Name: string
+    Name : string
 }
 
-interface ProcessFlowOutput {
+interface ProcessFlowInputOutput {
     Id: number
     Name: string
+    ParentNodeId: number
+    TypeId: number
 }
 
 interface ProcessFlowNode {
@@ -28,8 +30,8 @@ interface ProcessFlowNode {
     Description: string,
     ProcessFlowId: number,
     NodeTypeId: number,
-    Inputs: ProcessFlowInput[],
-    Outputs: ProcessFlowOutput[]
+    Inputs: ProcessFlowInputOutput[],
+    Outputs: ProcessFlowInputOutput[]
 }
 
 interface ProcessFlowNodeDisplay {

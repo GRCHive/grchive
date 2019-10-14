@@ -15,9 +15,8 @@
                             :disabled="!canEdit">
                 </v-textarea> 
             </v-form>
-        </section>
-        <v-footer absolute padless>
-            <v-list-item class="pa-1">
+
+            <v-list-item class="pb-1">
                 <template v-if="canEdit" v-bind="{saveEdit, cancelEdit}">
                     <v-btn color="error" @click="cancelEdit">
                         Cancel
@@ -35,7 +34,17 @@
                     </v-btn>
                 </template>
             </v-list-item>
-        </v-footer>
+
+            <v-divider></v-divider>
+            <process-flow-input-output-editor :is-input="true"
+                                              :node-id="currentData.Id">
+            </process-flow-input-output-editor>
+
+            <v-divider></v-divider>
+            <process-flow-input-output-editor :is-input="false"
+                                              :node-id="currentData.Id">
+            </process-flow-input-output-editor>
+        </section>
     </v-navigation-drawer>
 </template>
 
@@ -44,6 +53,7 @@
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup' 
 import * as rules from "../../../ts/formRules"
+import ProcessFlowInputOutputEditor from './ProcessFlowInputOutputEditor.vue'
 
 export default Vue.extend({
     props: {
@@ -55,6 +65,9 @@ export default Vue.extend({
         currentData : {} as ProcessFlowNode,
         rules
     }),
+    components: {
+        ProcessFlowInputOutputEditor
+    },
     methods : {
         startEdit() {
             this.canEdit = true
@@ -96,3 +109,6 @@ export default Vue.extend({
 })
 
 </script>
+
+<style scoped>
+</style>

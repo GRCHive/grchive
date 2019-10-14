@@ -93,7 +93,13 @@ const store : StoreOptions<VuexState> = {
         addNodeDisplayTranslation(state, {nodeId, tx, ty}) {
             state.currentProcessFlowFullDisplayData.Nodes[nodeId].Tx += tx
             state.currentProcessFlowFullDisplayData.Nodes[nodeId].Ty += ty
-        }
+        },
+        addNodeInput(state, {nodeId, input}) {
+            state.currentProcessFlowFullData.Nodes[nodeId].Inputs.push(input)
+        },
+        addNodeOutput(state, {nodeId, output}) {
+            state.currentProcessFlowFullData.Nodes[nodeId].Outputs.push(output)
+        },
     },
     actions: {
         mountPrimaryNavBar(context, nav) {
@@ -166,11 +172,14 @@ const store : StoreOptions<VuexState> = {
                 return state.currentProcessFlowFullDisplayData.Nodes[id]
             }
         },
+        nodeInfo: (state) => (nodeId : number) : ProcessFlowNode => {
+            return state.currentProcessFlowFullData.Nodes[nodeId]
+        },
         currentNodeInfo: (state, getters) : ProcessFlowNode  => {
             if (!getters.isNodeSelected) {
                 return {} as ProcessFlowNode
             }
-            return state.currentProcessFlowFullData.Nodes[state.selectedNodeId]
+            return getters.nodeInfo(state.selectedNodeId)
         }
     }
 }

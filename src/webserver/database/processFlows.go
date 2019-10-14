@@ -26,7 +26,6 @@ func FindProcessFlowWithId(id int64) (*core.ProcessFlow, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
 	var flow *core.ProcessFlow = new(core.ProcessFlow)
 	flow.Org = new(core.Organization)
@@ -37,6 +36,7 @@ func FindProcessFlowWithId(id int64) (*core.ProcessFlow, error) {
 		return nil, err
 	}
 
+	rows.Close()
 	return flow, nil
 }
 
@@ -76,7 +76,6 @@ func InsertNewProcessFlow(flow *core.ProcessFlow) error {
 		tx.Rollback()
 		return err
 	}
-
 	rows.Close()
 
 	err = tx.Commit()

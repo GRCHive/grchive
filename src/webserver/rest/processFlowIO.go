@@ -8,13 +8,13 @@ import (
 	"strconv"
 )
 
-func getAllProcessFlowNodeTypes(w http.ResponseWriter, r *http.Request) {
+func getAllProcessFlowIOTypes(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	types, err := database.GetAllProcessFlowNodeTypes()
+	types, err := database.GetAllProcessFlowIOTypes()
 	if err != nil {
-		core.Warning("Can't get types: " + err.Error())
+		core.Warning("Can't get IO types: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		jsonWriter.Encode(struct{}{})
 		return
@@ -22,7 +22,7 @@ func getAllProcessFlowNodeTypes(w http.ResponseWriter, r *http.Request) {
 	jsonWriter.Encode(types)
 }
 
-func newProcessFlowNode(w http.ResponseWriter, r *http.Request) {
+func createNewProcessFlowIO(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -35,10 +35,12 @@ func newProcessFlowNode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	typeIdData := r.PostForm["typeId"]
-	flowIdData := r.PostForm["flowId"]
+	nodeIdData := r.PostForm["nodeId"]
+	isInputData := r.PostForm["isInput"]
+	nameData := r.PostForm["name"]
 
-	if len(typeIdData) == 0 || len(flowIdData) == 0 {
-		core.Warning("Empty type id or flow id.")
+	if len(typeIdData) == 0 || len(nodeIdData) == 0 || len(nameData) == 0 {
+		core.Warning("Empty type id or node id or name.")
 		w.WriteHeader(http.StatusBadRequest)
 		jsonWriter.Encode(struct{}{})
 		return
@@ -51,27 +53,39 @@ func newProcessFlowNode(w http.ResponseWriter, r *http.Request) {
 		jsonWriter.Encode(struct{}{})
 		return
 	}
-	flowId, err := strconv.ParseInt(flowIdData[0], 10, 64)
+
+	nodeId, err := strconv.ParseInt(nodeIdData[0], 10, 64)
 	if err != nil {
-		core.Warning("Bad flow Id: " + err.Error())
+		core.Warning("Bad node Id: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		jsonWriter.Encode(struct{}{})
 		return
 	}
 
-	// Let SQL check the two IDs for validity (foreign keys) so don't bother
-	// doing extra SQL queries to make sure the user input a valid type/flow.
-	node, err := database.CreateNewProcessFlowNodeWithTypeId(int32(typeId), flowId)
+	var isInput bool = false
+	if len(isInputData) != 0 {
+		isInput, err = strconv.ParseBool(isInputData[0])
+		if err != nil {
+			core.Warning("Bad is input : " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			jsonWriter.Encode(struct{}{})
+			return
+		}
+	}
+
+	io, err := database.CreateNewProcessFlowIO(&core.ProcessFlowInputOutput{
+		Id:           -1,
+		Name:         nameData[0],
+		ParentNodeId: nodeId,
+		TypeId:       int32(typeId),
+	}, isInput)
+
 	if err != nil {
-		core.Warning("Failed to create new process flow node: " + err.Error())
+		core.Warning("Failed to add process flow IO: " + core.ErrorString(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		jsonWriter.Encode(struct{}{})
 		return
 	}
 
-	jsonWriter.Encode(struct {
-		Node *core.ProcessFlowNode
-	}{
-		Node: node,
-	})
+	jsonWriter.Encode(io)
 }

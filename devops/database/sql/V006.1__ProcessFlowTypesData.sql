@@ -6,3 +6,8 @@ VALUES
     ('Start', ''),
     ('General Ledger Entry', ''),
     ('System', '');
+
+INSERT INTO process_flow_input_output_type(name)
+VALUES
+    ('Execution'),
+    ('Data');

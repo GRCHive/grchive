@@ -12,14 +12,21 @@ CREATE TABLE process_flow_nodes (
     node_type INTEGER NOT NULL REFERENCES process_flow_node_types(id) ON DELETE RESTRICT
 );
 
+CREATE TABLE process_flow_input_output_type (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(256) NOT NULL
+);
+
 CREATE TABLE process_flow_node_inputs (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(256) NOT NULL,
-    parent_node_id BIGINT NOT NULL REFERENCES process_flow_nodes(id)
+    parent_node_id BIGINT NOT NULL REFERENCES process_flow_nodes(id),
+    io_type_id INTEGER NOT NULL REFERENCES process_flow_input_output_type(id)
 );
 
 CREATE TABLE process_flow_node_outputs (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(256) NOT NULL,
-    parent_node_id BIGINT NOT NULL REFERENCES process_flow_nodes(id)
+    parent_node_id BIGINT NOT NULL REFERENCES process_flow_nodes(id),
+    io_type_id INTEGER NOT NULL REFERENCES process_flow_input_output_type(id)
 );
