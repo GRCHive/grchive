@@ -14,3 +14,15 @@ interface TDeleteProcessFlowIOInput {
 
 interface TDeleteProcessFlowIOOutput { 
 }
+
+interface TEditProcessFlowIOInput { 
+    csrf : string,
+    ioId: number,
+    isInput: boolean,
+    name: string,
+    type: number
+}
+
+interface TEditProcessFlowIOOutput { 
+    data: ProcessFlowInputOutput
+}

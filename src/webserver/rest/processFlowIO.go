@@ -10,9 +10,15 @@ import (
 )
 
 type DeleteProcessFlowIOInputs struct {
-	Csrf    string `webcore:"csrf"`
+	IoId    int64 `webcore:"ioId"`
+	IsInput bool  `webcore:"isInput"`
+}
+
+type EditProcessFlowIOInputs struct {
 	IoId    int64  `webcore:"ioId"`
 	IsInput bool   `webcore:"isInput"`
+	Name    string `webcore:"name"`
+	Type    int32  `webcore:"type"`
 }
 
 func getAllProcessFlowIOTypes(w http.ResponseWriter, r *http.Request) {
@@ -119,4 +125,35 @@ func deleteProcessFlowIO(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(struct{}{})
+}
+
+func editProcessFlowIO(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := EditProcessFlowIOInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	io, err := database.EditProcessFlowIO(&core.ProcessFlowInputOutput{
+		Id:   inputs.IoId,
+		Name: inputs.Name,
+		// This doesn't need a valid value since we'll assume it'll never be updated.
+		ParentNodeId: 0,
+		TypeId:       inputs.Type,
+	}, inputs.IsInput)
+
+	if err != nil {
+		core.Warning("Failed to update IO: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	jsonWriter.Encode(io)
 }

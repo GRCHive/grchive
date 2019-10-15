@@ -85,6 +85,20 @@ const store : StoreOptions<VuexState> = {
                 state.currentProcessFlowFullData.Nodes[nodeId].Outputs.splice(idx, 1)
             }
         },
+        updateNodeInputOutput(state, {nodeId, io, isInput}) {
+            let relevantArr : ProcessFlowInputOutput[] = 
+                isInput ? 
+                    state.currentProcessFlowFullData.Nodes[nodeId].Inputs :
+                    state.currentProcessFlowFullData.Nodes[nodeId].Outputs;
+
+            let idx : number = relevantArr.findIndex(
+                (ele : ProcessFlowInputOutput) => {
+                    return ele.Id == io.Id
+                })
+            if (idx != -1) {
+                Vue.set(relevantArr, idx, io)
+            }
+        }
     },
     actions: {
         mountPrimaryNavBar(context, nav) {

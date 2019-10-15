@@ -5,6 +5,14 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
+func getProcessFlowIODbName(isInput bool) string {
+	if isInput {
+		return "process_flow_node_inputs"
+	} else {
+		return "process_flow_node_outputs"
+	}
+}
+
 func GetAllProcessFlowIOTypes() ([]*core.ProcessFlowIOType, error) {
 	result := []*core.ProcessFlowIOType{}
 
@@ -15,12 +23,7 @@ func GetAllProcessFlowIOTypes() ([]*core.ProcessFlowIOType, error) {
 
 func CreateNewProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool) (*core.ProcessFlowInputOutput, error) {
 	var err error
-	var dbName string = ""
-	if isInput {
-		dbName = "process_flow_node_inputs"
-	} else {
-		dbName = "process_flow_node_outputs"
-	}
+	var dbName string = getProcessFlowIODbName(isInput)
 
 	tx := dbConn.MustBegin()
 	rows, err := tx.Queryx(fmt.Sprintf(`
@@ -47,21 +50,43 @@ func CreateNewProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool) (*cor
 }
 
 func DeleteProcessFlowIO(ioId int64, isInput bool) error {
-	var dbName string = ""
-	if isInput {
-		dbName = "process_flow_node_inputs"
-	} else {
-		dbName = "process_flow_node_outputs"
-	}
-
+	var dbName string = getProcessFlowIODbName(isInput)
 	tx := dbConn.MustBegin()
 	_, err := tx.Exec(fmt.Sprintf(`
 		DELETE FROM %s
 		WHERE id = $1
 	`, dbName), ioId)
 	if err != nil {
-		return tx.Rollback()
+		tx.Rollback()
+		return err
 	}
 	err = tx.Commit()
 	return err
+}
+
+func EditProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool) (*core.ProcessFlowInputOutput, error) {
+	var dbName string = getProcessFlowIODbName(isInput)
+	tx := dbConn.MustBegin()
+	rows, err := tx.NamedQuery(fmt.Sprintf(`
+		UPDATE %s
+		SET name = :name, io_type_id = :io_type_id
+		WHERE id = :id
+		RETURNING *
+	`, dbName), io)
+
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	rows.Next()
+	err = rows.StructScan(io)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	rows.Close()
+
+	err = tx.Commit()
+	return io, nil
 }

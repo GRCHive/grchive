@@ -54,19 +54,19 @@
             </v-list-item-content>
 
             <v-list-item-action class="ma-0" v-if="!canEdit(item.Id)">
-                <v-btn small icon class="ma-0" @click="editIO($event, item.Id)">
+                <v-btn small icon class="ma-0" @click="editIO($event, item)">
                     <v-icon small>mdi-pencil</v-icon>
                 </v-btn>
             </v-list-item-action>
 
             <v-list-item-action class="ma-0" v-if="canEdit(item.Id)">
-                <v-btn small icon class="ma-0" @click="cancelIO($event, item.Id)">
+                <v-btn small icon class="ma-0" @click="cancelIO($event, item)">
                     <v-icon small>mdi-close</v-icon>
                 </v-btn>
             </v-list-item-action>
 
             <v-list-item-action class="ma-0" v-if="canEdit(item.Id)">
-                <v-btn small icon class="ma-0" @click="saveIO($event, item.Id)">
+                <v-btn small icon class="ma-0" @click="saveIO($event, item)">
                     <v-icon small>mdi-check</v-icon>
                 </v-btn>
             </v-list-item-action>
@@ -84,14 +84,15 @@ import axios from 'axios'
 import * as qs from 'query-string'
 import { contactUsUrl, getAllProcessFlowIOTypesAPIUrl, newProcessFlowIOAPIUrl } from '../../../ts/url'
 import { postFormUrlEncoded } from '../../../ts/http'
-import { deleteProcessFlowIO } from '../../../ts/api/apiProcessFlowIO'
+import { deleteProcessFlowIO, editProcessFlowIO } from '../../../ts/api/apiProcessFlowIO'
 
 interface NewIOResponseData {
     data : ProcessFlowInputOutput
 }
 
 interface IOEditState {
-    canEdit: boolean
+    canEdit: boolean,
+    cachedData: ProcessFlowInputOutput
 }
 
 export default Vue.extend({
@@ -179,14 +180,43 @@ export default Vue.extend({
                     true);
             })
         },
-        editIO(e: MouseEvent, ioId : number) {
-            this.ioEditState[ioId].canEdit = true
+        editIO(e: MouseEvent, io : ProcessFlowInputOutput) {
+            this.ioEditState[io.Id].canEdit = true
+            this.ioEditState[io.Id].cachedData = {...io}
         },
-        saveIO(e: MouseEvent, ioId : number) {
-            this.ioEditState[ioId].canEdit = false
+        saveIO(e: MouseEvent, io : ProcessFlowInputOutput) {
+            editProcessFlowIO({
+                //@ts-ignore
+                csrf: this.$root.csrf,
+                ioId: io.Id,
+                isInput: this.isInput,
+                name: io.Name ,
+                type: io.TypeId
+            }).then((resp : TEditProcessFlowIOOutput) => {
+                this.ioEditState[io.Id].canEdit = false
+                VueSetup.store.commit('updateNodeInputOutput', {
+                    nodeId: this.nodeId,
+                    io: resp.data,
+                    isInput: this.isInput
+                })
+            }).catch((err) => {
+                console.log(err)
+                //@ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong, please reload the page and try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
         },
-        cancelIO(e: MouseEvent, ioId : number) {
-            this.ioEditState[ioId].canEdit = false
+        cancelIO(e: MouseEvent, io : ProcessFlowInputOutput) {
+            this.ioEditState[io.Id].canEdit = false
+            VueSetup.store.commit('updateNodeInputOutput', {
+                nodeId: this.nodeId,
+                io: this.ioEditState[io.Id].cachedData,
+                isInput: this.isInput
+            })
         },
         updateEditState(val : ProcessFlowInputOutput[]) {
             for (let d of val) {

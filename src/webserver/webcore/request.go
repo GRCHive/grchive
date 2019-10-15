@@ -12,6 +12,7 @@ import (
 
 var boolReflectType = reflect.TypeOf((bool)(false))
 var int64ReflectType = reflect.TypeOf((int64)(0))
+var int32ReflectType = reflect.TypeOf((int32)(0))
 var stringReflectType = reflect.TypeOf((string)(""))
 
 func GetOrganizationFromRequestUrl(r *http.Request) (*core.Organization, error) {
@@ -89,6 +90,13 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 				return err
 			}
 			dataValue = reflect.ValueOf(intValue)
+			break
+		case int32ReflectType:
+			intValue, err := strconv.ParseInt(data[0], 10, 32)
+			if err != nil {
+				return err
+			}
+			dataValue = reflect.ValueOf(int32(intValue))
 			break
 		case stringReflectType:
 			dataValue = reflect.ValueOf(data[0])

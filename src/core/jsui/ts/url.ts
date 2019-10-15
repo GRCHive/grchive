@@ -44,6 +44,7 @@ export const getAllProcessFlowNodeTypesAPIUrl: string = "/api/flownodes/types"
 export const getAllProcessFlowIOTypesAPIUrl: string = "/api/flowio/types"
 export const newProcessFlowIOAPIUrl: string = "/api/flowio/new"
 export const deleteProcessFlowIOAPIUrl: string = "/api/flowio/delete"
+export const editProcessFlowIOAPIUrl: string = "/api/flowio/edit"
 export function createGetProcessFlowFullDataUrl(id : number) : string {
     return "/api/flows/" + id.toString() + "/full"
 }

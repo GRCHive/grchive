@@ -275,9 +275,7 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
                 x: 0,
                 y: 0
             }
-            console.log(nodeId)
             let nodeLayout : NodeLayout = getters.nodeLayout(nodeId)
-            console.log(nodeLayout)
             retPoint.x += nodeLayout.transform.tx
             retPoint.y += nodeLayout.transform.ty
 

@@ -61,4 +61,5 @@ func registerProcessFlowIOAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiProcessFlowIOGetTypesUrl, getAllProcessFlowIOTypes).Methods("GET").Name(webcore.GetAllProcessFlowIOTypesRouteName)
 	s.HandleFunc(core.ApiProcessFlowIONewUrl, createNewProcessFlowIO).Methods("POST").Name(webcore.CreateNewProcessFlowIOTypesRouteName)
 	s.HandleFunc(core.ApiProcessFlowIODeleteUrl, deleteProcessFlowIO).Methods("POST").Name(webcore.DeleteProcessFlowIORouteName)
+	s.HandleFunc(core.ApiProcessFlowIOEditUrl, editProcessFlowIO).Methods("POST").Name(webcore.EditProcessFlowIORouteName)
 }
