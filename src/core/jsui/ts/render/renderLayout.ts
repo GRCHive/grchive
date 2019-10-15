@@ -241,6 +241,39 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
         nodeLayout: (state) => (nodeId : number) : NodeLayout => {
             return state.nodeLayouts[nodeId]
         },
+        getPlugLocation: (state, getters) => (nodeId : number, io : ProcessFlowInputOutput, isInput: boolean) : Point2D  => {
+            let retPoint = <Point2D>{
+                x: 0,
+                y: 0
+            }
+            console.log(nodeId)
+            let nodeLayout : NodeLayout = getters.nodeLayout(nodeId)
+            console.log(nodeLayout)
+            retPoint.x += nodeLayout.transform.tx
+            retPoint.y += nodeLayout.transform.ty
+
+            const typeId : number = io.TypeId
+            const key : string = MetadataStore.state.idToIoTypes[typeId].Name
+
+            let groupLayout : IOGroupLayout = nodeLayout.groupLayout[key]
+            retPoint.x += groupLayout.transform.tx
+            retPoint.y += groupLayout.transform.ty
+
+            let plugLayout : IOPlugLayout
+            if (isInput) {
+                plugLayout = groupLayout.inputLayouts[io.Id]
+            } else {
+                plugLayout = groupLayout.outputLayouts[io.Id]
+            }
+
+            retPoint.x += plugLayout.plugTransform.tx
+            retPoint.y += plugLayout.plugTransform.ty
+
+            // Because the SVG rect is drawn with the origin at the top left corner.
+            retPoint.x += plugWidth / 2
+            retPoint.y += plugHeight / 2
+            return retPoint
+        }
     }
 }
 

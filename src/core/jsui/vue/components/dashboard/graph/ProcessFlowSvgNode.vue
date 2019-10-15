@@ -115,16 +115,6 @@ export default Vue.extend({
             type: Object as () => ProcessFlowNode
         }
     },
-    data: () => ({
-        margins : {
-            left: 5,
-            right: 5,
-            top: 5,
-            bottom: 5
-        },
-        plugHeight: 20,
-        plugWidth: 20
-    }),
     methods : {
         onMouseDown(e: MouseEvent) {
             this.$emit("onmousedown", e, this.node.Id)
@@ -140,6 +130,12 @@ export default Vue.extend({
         },
     },
     computed: {
+        plugHeight() : number {
+            return RenderLayout.params.plugHeight
+        },
+        plugWidth() : number {
+            return RenderLayout.params.plugWidth
+        },
         ready() : boolean {
             return RenderLayout.store.state.ready
         },

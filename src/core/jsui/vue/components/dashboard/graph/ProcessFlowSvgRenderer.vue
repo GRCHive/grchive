@@ -27,8 +27,14 @@
 
         <g id="edges">
             <!-- One temporary edge that the user sees when they click and drag from one plug to another -->
-            <process-flow-svg-edge v-if="drawingEdge">
-            </process-flow-svg-edge>
+            <process-flow-svg-edge v-if="drawingEdge"
+                                   :use-prop-end="true"
+                                   :prop-end-x="tempEdgeEnd.x"
+                                   :prop-end-y="tempEdgeEnd.y"
+                                   :start-node-id="tempEdgeStart.nodeId"
+                                   :start-io="tempEdgeStart.io"
+                                   :start-is-input="tempEdgeStart.isInput"
+            ></process-flow-svg-edge>
         </g>
     </svg>
 </template>
@@ -68,11 +74,20 @@ export default Vue.extend({
         moveViewBoxActive: false,
         viewBoxX: 0,
         viewBoxY: 0,
-        drawingEdge: false
+
+        // Edge drawing properties
+        drawingEdge: false,
+        tempEdgeStart: {
+            nodeId: -1,
+            io: {} as ProcessFlowInputOutput,
+            isInput: false
+        },
+        tempEdgeEnd: {
+            x: 0,
+            y: 0
+        }
     }),
     methods: {
-        updateTemporaryEdge() {
-        },
         saveTemporaryEdge() {
             this.drawingEdge = false
         },
@@ -91,11 +106,23 @@ export default Vue.extend({
             this.viewBoxX -= e.movementX
             this.viewBoxY -= e.movementY
         },
+        doMoveTempEdgeEnd(e: MouseEvent) {
+            let svg : SVGSVGElement = <SVGSVGElement>this.$refs.svgrenderer
+            let pt : SVGPoint = svg.createSVGPoint()
+            pt.x = e.clientX
+            pt.y = e.clientY
+
+            let realPt = pt.matrixTransform(svg.getScreenCTM()!.inverse())
+            this.tempEdgeEnd.x = realPt.x
+            this.tempEdgeEnd.y = realPt.y
+        },
         onMouseMove(e : MouseEvent) {
             if (this.moveNodeActive) {
                 this.doMoveNode(e)
             } else if (this.moveViewBoxActive) {
                 this.doMoveViewBox(e)
+            } else if (this.drawingEdge) {
+                this.doMoveTempEdgeEnd(e)
             }
         },
         onMouseDownNode(e : MouseEvent, nodeId : number) {
@@ -148,6 +175,10 @@ export default Vue.extend({
 
             e.stopPropagation()
             this.drawingEdge = true
+            this.tempEdgeStart.nodeId = nodeId
+            this.tempEdgeStart.io = io
+            this.tempEdgeStart.isInput = isInput
+            this.doMoveTempEdgeEnd(e)
         },
         onPlugMouseUp(e : MouseEvent, nodeId : number, io : ProcessFlowInputOutput, isInput: boolean) {
             if (e.button != 0) {
