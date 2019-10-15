@@ -1,5 +1,6 @@
 import vueOpts from  './vueSetup'
 import MetadataStore from './metadata'
+import RenderLayout from './render/renderLayout'
 import Vue from 'vue'
 import DashboardOrgHome from '../vue/pages/dashboard/DashboardOrgHome.vue'
 import DashboardOrgProcessFlows from '../vue/pages/dashboard/DashboardOrgProcessFlows.vue'
@@ -23,6 +24,9 @@ function mountApp(inData : Object) {
         mounted() {
             //@ts-ignore
             MetadataStore.dispatch('initialize', {csrf: inData.csrf})
+
+            //@ts-ignore
+            RenderLayout.store.dispatch('initialize', {processFlowStore: vueOpts.store})
         }
     })
 }

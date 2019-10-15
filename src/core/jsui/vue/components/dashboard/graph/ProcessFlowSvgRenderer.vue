@@ -16,10 +16,19 @@
                 v-for="item in nodes"
                 :key="item.Id"
                 :node="item"
+                ref="item.Id"
                 @onmousedown="onMouseDownNode"
                 @onmouseup="onMouseUpNode"
+                @onplugmousedown="onPlugMouseDown"
+                @onplugmouseup="onPlugMouseUp"
             >
             </process-flow-svg-node>
+        </g>
+
+        <g id="edges">
+            <!-- One temporary edge that the user sees when they click and drag from one plug to another -->
+            <process-flow-svg-edge v-if="drawingEdge">
+            </process-flow-svg-edge>
         </g>
     </svg>
 </template>
@@ -28,11 +37,14 @@
 
 import Vue from 'vue'
 import VueSetup from '../../../../ts/vueSetup'
+import RenderLayout from '../../../../ts/render/renderLayout'
 import ProcessFlowSvgNode from './ProcessFlowSvgNode.vue'
+import ProcessFlowSvgEdge from './ProcessFlowSvgEdge.vue'
 
 export default Vue.extend({
     components: {
-        ProcessFlowSvgNode
+        ProcessFlowSvgNode,
+        ProcessFlowSvgEdge
     },
     props: {
         svgWidth: Number,
@@ -55,15 +67,21 @@ export default Vue.extend({
         moveNodeActive: false,
         moveViewBoxActive: false,
         viewBoxX: 0,
-        viewBoxY: 0
+        viewBoxY: 0,
+        drawingEdge: false
     }),
     methods: {
+        updateTemporaryEdge() {
+        },
+        saveTemporaryEdge() {
+            this.drawingEdge = false
+        },
         doMoveNode(e : MouseEvent) {
             if (!VueSetup.store.getters.isNodeSelected) {
                 return
             }
 
-            VueSetup.store.commit('addNodeDisplayTranslation', {
+            RenderLayout.store.commit('addNodeDisplayTranslation', {
                 nodeId: VueSetup.store.state.selectedNodeId,
                 tx: e.movementX,
                 ty: e.movementY
@@ -110,14 +128,35 @@ export default Vue.extend({
             if (e.button == 0 || e.button == 1) {
                 this.moveViewBoxActive = false
             }
+
+            if (e.button == 0) {
+                this.drawingEdge = false
+            }
         },
         onMouseLeave(e : MouseEvent) {
             this.moveNodeActive = false
             this.moveViewBoxActive = false
+            this.drawingEdge = false
         },
         onContextMenu(e : Event) {
             e.preventDefault()
-        }
+        },
+        onPlugMouseDown(e : MouseEvent, nodeId : number, io : ProcessFlowInputOutput, isInput: boolean) {
+            if (e.button != 0) {
+                return
+            }
+
+            e.stopPropagation()
+            this.drawingEdge = true
+        },
+        onPlugMouseUp(e : MouseEvent, nodeId : number, io : ProcessFlowInputOutput, isInput: boolean) {
+            if (e.button != 0) {
+                return
+            }
+
+            e.stopPropagation()
+            this.saveTemporaryEdge()
+        },
     },
 })
 

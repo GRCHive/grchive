@@ -1,16 +1,18 @@
 <template>
     <g :id="node.Id.toString()"
        :transform="`translate(${tx}, ${ty})`"
+       v-if="ready"
+       ref="basegroup"
     >
-        <rect :width="rectWidth"
-              :height="rectHeight"
+        <rect :width="nodeLayout.boxWidth"
+              :height="nodeLayout.boxHeight"
               :class="styleClass + ` ` + (isNodeSelected ? `node-selected-box` : `node-box`)"
               @mousedown="onMouseDown($event)"
               @mouseup="onMouseUp($event)"
         ></rect>
         <g ref="textgroup"
            class="no-pointer"
-           :transform="`translate(${margins.left}, ${margins.top})`"
+           :transform="`translate(${nodeLayout.titleTransform.tx}, ${nodeLayout.titleTransform.ty})`"
         >
             <text dominant-baseline="hanging"
                   :class="`title ` + styleClass + `-text`"
@@ -18,58 +20,69 @@
                   ref="title"
             >{{ node.Name }}</text> 
 
-            <g v-for="(group, index) in groupedInputOutputs" :key="index"
-               :transform="`translate(${inputOutputDisplay[index].groupTransform.tx}, ${inputOutputDisplay[index].groupTransform.ty})`">
+            <g v-for="(group, index) in nodeLayout.groupKeys" :key="index"
+               :transform="`translate(
+                ${nodeLayout.groupLayout[group].transform.tx},
+                ${nodeLayout.groupLayout[group].transform.ty})`">
                 <text dominant-baseline="hanging"
                       :class="`subtitle-1 font-weight-bold ` + styleClass + `-text`"
-                      text-rendering="optimizeLegibility">
-                    {{ group.name }}
+                      text-rendering="optimizeLegibility"
+                      :transform="`translate(
+                       ${nodeLayout.groupLayout[group].titleTransform.tx},
+                       ${nodeLayout.groupLayout[group].titleTransform.ty})`">
+                    {{ group }}
                 </text>
                 
                 <text dominant-baseline="hanging"
                       :class="`body-2 ` + styleClass + `-text`"
                       text-rendering="optimizeLegibility"
-                      v-for="(input, iIndex) in group.inputs"
+                      v-for="(input, iIndex) in nodeLayout.groupLayout[group].relevantInputs"
                       :key="`input` + iIndex.toString()"
                       :transform="`translate(
-                        ${inputOutputDisplay[index].inputTransforms[iIndex].tx},
-                        ${inputOutputDisplay[index].inputTransforms[iIndex].ty})`">
+                        ${nodeLayout.groupLayout[group].inputLayouts[input.Id].textTransform.tx},
+                        ${nodeLayout.groupLayout[group].inputLayouts[input.Id].textTransform.ty})`">
                     {{ input.Name }}
                 </text>
 
                 <text dominant-baseline="hanging"
                       :class="`body-2 ` + styleClass + `-text`"
                       text-rendering="optimizeLegibility"
-                      v-for="(output, oIndex) in group.outputs"
+                      v-for="(output, oIndex) in nodeLayout.groupLayout[group].relevantOutputs"
                       :key="`output` + oIndex.toString()"
                       :transform="`translate(
-                        ${inputOutputDisplay[index].outputTransforms[oIndex].tx},
-                        ${inputOutputDisplay[index].outputTransforms[oIndex].ty})`">
+                        ${nodeLayout.groupLayout[group].outputLayouts[output.Id].textTransform.tx},
+                        ${nodeLayout.groupLayout[group].outputLayouts[output.Id].textTransform.ty})`">
                     {{ output.Name }}
                 </text>
             </g>
         </g>
 
         <g ref="ioPlugs">
-            <g v-for="(group, index) in groupedInputOutputs" :key="index"
-               :transform="`translate(${inputOutputDisplay[index].groupTransform.tx}, ${inputOutputDisplay[index].groupTransform.ty})`">
+            <g v-for="(group, index) in nodeLayout.groupKeys" :key="index"
+               :transform="`translate(
+                ${nodeLayout.groupLayout[group].transform.tx},
+                ${nodeLayout.groupLayout[group].transform.ty})`">
                 <rect :width="plugWidth"
                       :height="plugHeight"
-                      v-for="(input, iIndex) in group.inputs"
+                      v-for="(input, iIndex) in nodeLayout.groupLayout[group].relevantInputs"
                       :key="`input` + iIndex.toString()"
                       :transform="`translate(
-                        ${inputOutputDisplay[index].inputTransforms[iIndex].tx - plugWidth},
-                        ${inputOutputDisplay[index].inputTransforms[iIndex].ty + 5}) `">
-                </rect>
+                        ${nodeLayout.groupLayout[group].inputLayouts[input.Id].plugTransform.tx},
+                        ${nodeLayout.groupLayout[group].inputLayouts[input.Id].plugTransform.ty})`"
+                      @mousedown="onPlugMouseDown($event, input, true)"
+                      @mouseup="onPlugMouseUp($event, input, true)"
+                ></rect>
 
                 <rect :width="plugWidth"
                       :height="plugHeight"
-                      v-for="(output, oIndex) in group.outputs"
-                      :key="`output` + oIndex.toString()"
+                      v-for="(output, iIndex) in nodeLayout.groupLayout[group].relevantOutputs"
+                      :key="`output` + iIndex.toString()"
                       :transform="`translate(
-                        ${rectWidth},
-                        ${inputOutputDisplay[index].outputTransforms[oIndex].ty + 5}) `">
-                </rect>
+                        ${nodeLayout.groupLayout[group].outputLayouts[output.Id].plugTransform.tx},
+                        ${nodeLayout.groupLayout[group].outputLayouts[output.Id].plugTransform.ty})`"
+                      @mousedown="onPlugMouseDown($event, output, false)"
+                      @mouseup="onPlugMouseUp($event, output, false)"
+                ></rect>
             </g>
         </g>
     </g>
@@ -94,6 +107,7 @@ interface GroupedInputOutputDisplayData {
 import Vue from 'vue'
 import VueSetup from '../../../../ts/vueSetup'
 import MetadataStore from '../../../../ts/metadata'
+import RenderLayout from '../../../../ts/render/renderLayout'
 
 export default Vue.extend({
     props: {
@@ -108,8 +122,6 @@ export default Vue.extend({
             top: 5,
             bottom: 5
         },
-        textHeight: 200,
-        textWidth: 200,
         plugHeight: 20,
         plugWidth: 20
     }),
@@ -120,135 +132,25 @@ export default Vue.extend({
         onMouseUp(e: MouseEvent) {
             this.$emit("onmouseup", e, this.node.Id)
         },
-        updateTextHeightWidth() {
-            //@ts-ignore
-            const textgroup = this.$refs.textgroup
-
-            //@ts-ignore
-            this.textWidth = textgroup.getBBox().width
-            //@ts-ignore
-            this.textHeight = textgroup.getBBox().height
-        }
+        onPlugMouseDown(e : MouseEvent, io : ProcessFlowInputOutput, isInput: boolean) {
+            this.$emit("onplugmousedown", e, this.node.Id, io, isInput)
+        },
+        onPlugMouseUp(e : MouseEvent, io : ProcessFlowInputOutput, isInput: boolean) {
+            this.$emit("onplugmouseup", e, this.node.Id, io, isInput)
+        },
     },
     computed: {
-        groupedInputOutputs() : GroupedInputOutputData[] {
-            let inputs = VueSetup.store.getters.nodeInfo(this.node.Id).Inputs
-            let outputs = VueSetup.store.getters.nodeInfo(this.node.Id).Outputs
-
-            // Sort the inputs and outputs by their type.
-            let groupMap = new Map()
-
-            function addToGroupMap(io : ProcessFlowInputOutput, isInput : boolean) {
-                const typeId : number = io.TypeId
-                const key : string = MetadataStore.state.idToIoTypes[typeId].Name
-
-                if (!groupMap.has(key)) {
-                    groupMap.set(key, <GroupedInputOutputData>{
-                        name: key,
-                        inputs: [] as ProcessFlowInputOutput[],
-                        outputs: [] as ProcessFlowInputOutput[]
-                    })
-                }
-
-                if (isInput) {
-                    groupMap.get(key).inputs.push(io)
-                } else {
-                    groupMap.get(key).outputs.push(io)
-                }
-            }
-
-            for (let i = 0; i < inputs.length; ++i) {
-                addToGroupMap(inputs[i], true)
-            }
-
-            for (let i = 0; i < outputs.length; ++i) {
-                addToGroupMap(outputs[i], false)
-            }
-
-            // Each object in the 'grouped' array will have the form: 
-            // {
-            //     name: TYPE_NAME (e.g. Execution/Data)
-            //     inputs: ProcessFlowInputOutput[]
-            //     outputs: ProcessFlowInputOutput[]
-            // }
-            let grouped = [] as GroupedInputOutputData[]
-            groupMap.forEach((value) => {
-                grouped.push(value)
-            })
-
-            return grouped
+        ready() : boolean {
+            return RenderLayout.store.state.ready
         },
-        inputOutputDisplay() : GroupedInputOutputDisplayData[] {
-            let displayData = [] as GroupedInputOutputDisplayData[]
-        
-            const titleHeight: number = 26
-            const subtitleHeight : number = 21
-            const bodyHeight: number = 19
-            const ioMargins = {
-                betweenGroups: 5,
-                betweenPlugs: 10
-            }
-            const inputOutputGap : number = 200
-
-            let startY : number = titleHeight + ioMargins.betweenGroups
-
-            // We make assumptions about the height of text for simplicity.
-            // Can we have the height of the text be reactive? It seems hard/annoying.
-            // We can probably use DOM selectors but eh. Go for hard-coded for now.
-            this.groupedInputOutputs.forEach((group, i) => {
-                let groupDisplay = <GroupedInputOutputDisplayData>{
-                    groupTransform: <TransformData>{
-                        tx: 0,
-                        ty: startY
-                    },
-                    inputTransforms: [] as TransformData[],
-                    outputTransforms: [] as TransformData[],
-                    bbox: <BoundingBox>{
-                        x: 0,
-                        y: 0,
-                        width: 0,
-                        height: 0
-                    }
-                }
-
-                let inputStartY = subtitleHeight + ioMargins.betweenPlugs
-                for (let i = 0; i < group.inputs.length; ++i) {
-                    groupDisplay.inputTransforms.push(<TransformData>{
-                        tx: 0,
-                        ty: inputStartY
-                    })
-                    inputStartY += bodyHeight + ioMargins.betweenPlugs
-                }
-
-                let outputStartY = subtitleHeight + ioMargins.betweenPlugs
-                for (let i = 0; i < group.outputs.length; ++i) {
-                    groupDisplay.outputTransforms.push(<TransformData>{
-                        tx: inputOutputGap,
-                        ty: outputStartY
-                    })
-                    outputStartY += bodyHeight + ioMargins.betweenPlugs
-                }
-
-                startY += Math.max(inputStartY, outputStartY)
-
-                displayData.push(groupDisplay)
-
-                startY += ioMargins.betweenGroups
-            })
-
-            Vue.nextTick(() => {
-                this.updateTextHeightWidth()
-            })
-            return displayData
-        },
-        nodeDisplaySettings() : ProcessFlowNodeDisplay {
-            return VueSetup.store.getters.findNodeDisplayData(this.node.Id)
+        nodeLayout() : NodeLayout {
+            return RenderLayout.store.getters.nodeLayout(this.node.Id)
         },
         tx() : number {
-            return this.nodeDisplaySettings.Tx
+            return this.nodeLayout.transform.tx
         },
         ty() : number {
-            return this.nodeDisplaySettings.Ty
+            return this.nodeLayout.transform.ty
         },
         styleClass() {
             // TODO: How do we keep this in sync with the server?
@@ -272,28 +174,23 @@ export default Vue.extend({
             }
             return ""
         },
-        rectWidth() {
-            //@ts-ignore
-            return this.margins.left + 
-            //@ts-ignore
-                this.margins.right +
-            //@ts-ignore
-                this.textWidth
-        },
-        rectHeight() {
-            //@ts-ignore
-            return this.margins.top + 
-            //@ts-ignore
-                this.margins.bottom +
-            //@ts-ignore
-                this.textHeight
-        },
         isNodeSelected() : boolean {
             return VueSetup.store.state.selectedNodeId == this.node.Id
         },
     },
-    mounted() {
-        this.updateTextHeightWidth()
+    watch: {
+        ready(val: boolean) {
+            if (!val) {
+                return
+            }
+
+            Vue.nextTick(() => {
+                RenderLayout.store.dispatch('associateNodeLayoutWithComponent', {
+                    nodeId: this.node.Id,
+                    component: this
+                })
+            })
+        }
     }
 })
 
