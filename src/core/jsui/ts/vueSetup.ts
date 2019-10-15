@@ -121,6 +121,7 @@ const store : StoreOptions<VuexState> = {
             axios.get(baseUrl + "?" + queryParams).then(
                 (resp : FullProcessFlowDataResponse) => {
                     let newData = <FullProcessFlowData>{
+                        FlowId: id,
                         Nodes: Object(),
                         NumNodes: resp.data.Nodes.length,
                         NodeKeys: [] as number[]

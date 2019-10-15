@@ -32,6 +32,7 @@ interface FullProcessFlowResponseData {
 }
 
 interface FullProcessFlowData {
+    FlowId: number
     Nodes: Record<number, ProcessFlowNode>,
     NodeKeys: number[],
     NumNodes: number

@@ -153,6 +153,15 @@ function createDefaultNodeLayout(node : ProcessFlowNode) : NodeLayout {
     return layout
 }
 
+function mergeNodeLayout(node : ProcessFlowNode, existingLayout: NodeLayout) : NodeLayout {
+    let defaultLayout : NodeLayout = createDefaultNodeLayout(node)
+    if (!existingLayout) {
+        return defaultLayout
+    }
+    defaultLayout.transform = existingLayout.transform
+    return defaultLayout
+}
+
 interface ProcessFlowRenderLayoutStoreState {
     nodeLayouts: Record<number, NodeLayout>
     ready: boolean
@@ -209,12 +218,18 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
         initialize(context, {processFlowStore}) {
             processFlowStore.watch((state : VuexState) => {
                 return state.currentProcessFlowFullData
-            }, () => {
-                context.dispatch('recomputeLayout', processFlowStore.state.currentProcessFlowFullData)
+            }, (newFlowData : FullProcessFlowData, oldFlowData: FullProcessFlowData) => {
+                    context.dispatch(
+                        oldFlowData.FlowId != newFlowData.FlowId ?
+                            'recomputeLayout' :
+                            'mergeLayout',
+                        processFlowStore.state.currentProcessFlowFullData)
             }, {
                 deep: true
             })
         },
+        // Assumes that we're looking at a new process flow and want to re-render
+        // everything from scratch.
         recomputeLayout(context, processFlow : FullProcessFlowData) {
             context.commit('resetNodeLayout')
 
@@ -228,6 +243,18 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
             context.commit('setReady')
 
             // TODO: Query server for more up-to-date settings.
+        },
+        // Assume that we already have display data for the input process flow and only
+        // want to update where necessary.
+        mergeLayout(context, processFlow : FullProcessFlowData) {
+            for (let nodeKey of processFlow.NodeKeys) {
+                context.commit('setNodeLayout', {
+                    nodeId: nodeKey,
+                    layout: mergeNodeLayout(
+                                processFlow.Nodes[nodeKey],
+                                context.state.nodeLayouts[nodeKey])
+                })
+            }
         },
         associateNodeLayoutWithComponent(context, {nodeId, component}) {
             context.commit('commitNodeLayoutWithComponent', {nodeId, component})
