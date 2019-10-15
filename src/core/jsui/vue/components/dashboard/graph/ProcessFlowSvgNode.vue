@@ -1,13 +1,13 @@
 <template>
     <g :id="node.Id.toString()"
        :transform="`translate(${tx}, ${ty})`"
-       @mousedown="onMouseDown($event)"
-       @mouseup="onMouseUp($event)"
     >
         <rect :width="rectWidth"
               :height="rectHeight"
-              :class="styleClass + ` ` + (isNodeSelected ? `node-selected-box` : `node-box`)">
-        </rect>
+              :class="styleClass + ` ` + (isNodeSelected ? `node-selected-box` : `node-box`)"
+              @mousedown="onMouseDown($event)"
+              @mouseup="onMouseUp($event)"
+        ></rect>
         <g ref="textgroup"
            class="no-pointer"
            :transform="`translate(${margins.left}, ${margins.top})`"
@@ -49,6 +49,29 @@
                 </text>
             </g>
         </g>
+
+        <g ref="ioPlugs">
+            <g v-for="(group, index) in groupedInputOutputs" :key="index"
+               :transform="`translate(${inputOutputDisplay[index].groupTransform.tx}, ${inputOutputDisplay[index].groupTransform.ty})`">
+                <rect :width="plugWidth"
+                      :height="plugHeight"
+                      v-for="(input, iIndex) in group.inputs"
+                      :key="`input` + iIndex.toString()"
+                      :transform="`translate(
+                        ${inputOutputDisplay[index].inputTransforms[iIndex].tx - plugWidth},
+                        ${inputOutputDisplay[index].inputTransforms[iIndex].ty + 5}) `">
+                </rect>
+
+                <rect :width="plugWidth"
+                      :height="plugHeight"
+                      v-for="(output, oIndex) in group.outputs"
+                      :key="`output` + oIndex.toString()"
+                      :transform="`translate(
+                        ${rectWidth},
+                        ${inputOutputDisplay[index].outputTransforms[oIndex].ty + 5}) `">
+                </rect>
+            </g>
+        </g>
     </g>
 </template>
 
@@ -87,6 +110,8 @@ export default Vue.extend({
         },
         textHeight: 200,
         textWidth: 200,
+        plugHeight: 20,
+        plugWidth: 20
     }),
     methods : {
         onMouseDown(e: MouseEvent) {
@@ -338,6 +363,5 @@ export default Vue.extend({
 .system-text {
     fill: black;
 }
-
 
 </style>
