@@ -128,6 +128,14 @@ export default Vue.extend({
         onPlugMouseUp(e : MouseEvent, io : ProcessFlowInputOutput, isInput: boolean) {
             this.$emit("onplugmouseup", e, this.node.Id, io, isInput)
         },
+        reassociateComponent() {
+            Vue.nextTick(() => {
+                RenderLayout.store.dispatch('associateNodeLayoutWithComponent', {
+                    nodeId: this.node.Id,
+                    component: this
+                })
+            })
+        }
     },
     computed: {
         plugHeight() : number {
@@ -179,13 +187,10 @@ export default Vue.extend({
             if (!val) {
                 return
             }
-
-            Vue.nextTick(() => {
-                RenderLayout.store.dispatch('associateNodeLayoutWithComponent', {
-                    nodeId: this.node.Id,
-                    component: this
-                })
-            })
+            this.reassociateComponent()
+        },
+        nodeLayout() {
+            this.reassociateComponent()
         }
     }
 })

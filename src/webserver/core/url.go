@@ -52,6 +52,7 @@ const ApiProcessFlowNodesNewUrl string = "/new"
 const ApiProcessFlowIOUrl string = "/flowio"
 const ApiProcessFlowIOGetTypesUrl string = "/types"
 const ApiProcessFlowIONewUrl string = "/new"
+const ApiProcessFlowIODeleteUrl string = "/delete"
 
 // API - Users
 var ApiUserUrl string = fmt.Sprintf("/user/{%s}", DashboardUserQueryId)

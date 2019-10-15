@@ -67,6 +67,24 @@ const store : StoreOptions<VuexState> = {
         addNodeOutput(state, {nodeId, output}) {
             state.currentProcessFlowFullData.Nodes[nodeId].Outputs.push(output)
         },
+        removeNodeInput(state, {nodeId, inputId}) {
+            let idx : number = state.currentProcessFlowFullData.Nodes[nodeId].Inputs.findIndex(
+                (ele : ProcessFlowInputOutput) => {
+                    return ele.Id == inputId
+                })
+            if (idx != -1) {
+                state.currentProcessFlowFullData.Nodes[nodeId].Inputs.splice(idx, 1)
+            }
+        },
+        removeNodeOutput(state, {nodeId, outputId}) {
+            let idx : number = state.currentProcessFlowFullData.Nodes[nodeId].Outputs.findIndex(
+                (ele : ProcessFlowInputOutput) => {
+                    return ele.Id == outputId
+                })
+            if (idx != -1) {
+                state.currentProcessFlowFullData.Nodes[nodeId].Outputs.splice(idx, 1)
+            }
+        },
     },
     actions: {
         mountPrimaryNavBar(context, nav) {

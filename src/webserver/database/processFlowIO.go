@@ -45,3 +45,23 @@ func CreateNewProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool) (*cor
 	err = tx.Commit()
 	return &outIo, err
 }
+
+func DeleteProcessFlowIO(ioId int64, isInput bool) error {
+	var dbName string = ""
+	if isInput {
+		dbName = "process_flow_node_inputs"
+	} else {
+		dbName = "process_flow_node_outputs"
+	}
+
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(fmt.Sprintf(`
+		DELETE FROM %s
+		WHERE id = $1
+	`, dbName), ioId)
+	if err != nil {
+		return tx.Rollback()
+	}
+	err = tx.Commit()
+	return err
+}

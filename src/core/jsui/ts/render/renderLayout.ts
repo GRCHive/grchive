@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Vuex, { StoreOptions, ActionContext } from 'vuex'
+import Vuex, { StoreOptions } from 'vuex'
 import MetadataStore from '../metadata'
 
 // A Vuex store to share the layout of the process flow (nodes, plugs, etc.)
@@ -211,6 +211,8 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
                 return state.currentProcessFlowFullData
             }, () => {
                 context.dispatch('recomputeLayout', processFlowStore.state.currentProcessFlowFullData)
+            }, {
+                deep: true
             })
         },
         recomputeLayout(context, processFlow : FullProcessFlowData) {

@@ -4,9 +4,16 @@ import (
 	"encoding/json"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
+	"gitlab.com/b3h47pte/audit-stuff/webcore"
 	"net/http"
 	"strconv"
 )
+
+type DeleteProcessFlowIOInputs struct {
+	Csrf    string `webcore:"csrf"`
+	IoId    int64  `webcore:"ioId"`
+	IsInput bool   `webcore:"isInput"`
+}
 
 func getAllProcessFlowIOTypes(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
@@ -88,4 +95,28 @@ func createNewProcessFlowIO(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(io)
+}
+
+func deleteProcessFlowIO(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := DeleteProcessFlowIOInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	err = database.DeleteProcessFlowIO(inputs.IoId, inputs.IsInput)
+	if err != nil {
+		core.Warning("Failed to delete IO: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	jsonWriter.Encode(struct{}{})
 }

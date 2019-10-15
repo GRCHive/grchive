@@ -28,6 +28,12 @@
         </v-list-item>
 
         <v-list-item v-for="item in listedIO" :key="item.Id" class="body-2 super-dense px-1">
+            <v-list-item-action class="ma-0" v-if="!canEdit(item.Id)">
+                <v-btn small icon class="ma-0" @click="deleteIO($event, item.Id)">
+                    <v-icon small>mdi-delete</v-icon>
+                </v-btn>
+            </v-list-item-action>
+
             <v-list-item-content class="pa-0 mr-1">
                 <input type="text" 
                        v-model="item.Name"
@@ -78,6 +84,7 @@ import axios from 'axios'
 import * as qs from 'query-string'
 import { contactUsUrl, getAllProcessFlowIOTypesAPIUrl, newProcessFlowIOAPIUrl } from '../../../ts/url'
 import { postFormUrlEncoded } from '../../../ts/http'
+import { deleteProcessFlowIO } from '../../../ts/api/apiProcessFlowIO'
 
 interface NewIOResponseData {
     data : ProcessFlowInputOutput
@@ -136,6 +143,30 @@ export default Vue.extend({
                     VueSetup.store.commit('addNodeInput', {nodeId: this.nodeId, input: resp.data})
                 } else {
                     VueSetup.store.commit('addNodeOutput', {nodeId: this.nodeId, output: resp.data})
+                }
+            }).catch((err) => {
+                console.log(err)
+                //@ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong, please reload the page and try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
+        deleteIO(e: MouseEvent, ioId : number) {
+            // Maybe we want to confirm with the user first?
+            deleteProcessFlowIO({
+                //@ts-ignore
+                csrf: this.$root.csrf,
+                ioId,
+                isInput: this.isInput
+            }).then((resp : TDeleteProcessFlowIOOutput) => {
+                if (this.isInput) {
+                    VueSetup.store.commit('removeNodeInput', {nodeId: this.nodeId, inputId: ioId})
+                } else {
+                    VueSetup.store.commit('removeNodeOutput', {nodeId: this.nodeId, outputId: ioId})
                 }
             }).catch((err) => {
                 console.log(err)
