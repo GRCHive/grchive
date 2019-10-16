@@ -5,6 +5,26 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
+func FindAllEdgesForProcessFlow(flowId int64) ([]*core.ProcessFlowEdge, error) {
+	edges := []*core.ProcessFlowEdge{}
+	err := dbConn.Select(&edges, `
+		SELECT DISTINCT edge.*
+		FROM process_flow_edges as edge
+		INNER JOIN process_flow_node_inputs AS input
+			ON edge.input_id = input.id
+		INNER JOIN process_flow_node_outputs AS output
+			ON edge.output_id = output.id
+		INNER JOIN process_flow_nodes AS node
+			ON input.parent_node_id = node.id
+				OR output.parent_node_id = node.id
+		WHERE node.process_flow_id = $1
+	`, flowId)
+	if err != nil {
+		return nil, err
+	}
+	return edges, nil
+}
+
 func CreateNewProcessFlowEdge(edge *core.ProcessFlowEdge) (*core.ProcessFlowEdge, error) {
 	if edge.InputIoId == edge.OutputIoId {
 		return nil, errors.New("Can not create an edge from a node to itself.")

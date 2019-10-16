@@ -1,5 +1,6 @@
 <template>
-    <path :d="d"
+    <path v-if="ready"
+          :d="d"
           :class="`flowEdge ` +  (usePropEnd ? `tempFlowEdge` : ``)">
     </path>
 </template>
@@ -25,6 +26,9 @@ export default Vue.extend({
         endIsInput: Boolean
     },
     computed: {
+        ready() : boolean {
+            return RenderLayout.store.state.ready
+        },
         startPoint() : Point2D {
             return RenderLayout.store.getters.getPlugLocation(this.startNodeId, this.startIo, this.startIsInput)
         },

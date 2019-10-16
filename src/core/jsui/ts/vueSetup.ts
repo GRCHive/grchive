@@ -185,6 +185,10 @@ const store : StoreOptions<VuexState> = {
                             newData.Outputs[inp.Id] = inp
                         }
                     }
+                    for (let data of resp.data.Edges) {
+                        newData.Edges[data.Id] = data
+                        newData.EdgeKeys.push(data.Id)
+                    }
                     context.commit('setCurrentProcessFlowFullData', newData)
                     context.commit('setFullProcessFlowRequestedId', -1)
                 }

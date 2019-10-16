@@ -258,6 +258,13 @@ func getProcessFlowFullData(w http.ResponseWriter, r *http.Request) {
 		jsonWriter.Encode(struct{}{})
 		return
 	}
+	graph.Edges, err = database.FindAllEdgesForProcessFlow(flowId)
+	if err != nil {
+		core.Warning("Failed to obtain edges: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
 
 	jsonWriter.Encode(&graph)
 }

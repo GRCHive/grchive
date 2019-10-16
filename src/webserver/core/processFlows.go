@@ -15,4 +15,5 @@ type ProcessFlow struct {
 
 type ProcessFlowGraph struct {
 	Nodes []*ProcessFlowNode
+	Edges []*ProcessFlowEdge
 }
