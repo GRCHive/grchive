@@ -44,6 +44,7 @@ import axios from 'axios'
 import * as qs from 'query-string'
 import { contactUsUrl, getAllProcessFlowAPIUrl} from '../../../ts/url'
 import VueSetup from '../../../ts/vueSetup'
+import RenderLayout from '../../../ts/render/renderLayout'
 
 interface NavLinks {
     icon : string
@@ -189,6 +190,9 @@ export default Vue.extend({
             })
         },
         onItemClick(_ : MouseEvent, idx : number) {
+            // Need to explicitly clear render layout to prevent rendering when we
+            // switch layouts - not sure how much I like having this here though.
+            RenderLayout.store.commit('resetNodeLayout')
             VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
                 index: idx,
                 //@ts-ignore

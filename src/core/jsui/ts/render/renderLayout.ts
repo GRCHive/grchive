@@ -272,6 +272,9 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
         }
     },
     getters: {
+        isReadyForNode: (state, getters) => (nodeId : number) : boolean => {
+            return state.ready && !!getters.nodeLayout(nodeId)
+        },
         nodeLayout: (state) => (nodeId : number) : NodeLayout => {
             return state.nodeLayouts[nodeId]
         },

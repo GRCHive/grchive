@@ -56,7 +56,12 @@ export default Vue.extend({
             return VueSetup.store.state.selectedEdgeId == this.edgeId
         },
         ready() : boolean {
-            return RenderLayout.store.state.ready
+            const inputRdy = RenderLayout.store.getters.isReadyForNode(this.startNodeId)
+            if (!this.usePropEnd) {
+                return inputRdy
+            }
+            const outputRdy = RenderLayout.store.getters.isReadyForNode(this.endNodeId)
+            return inputRdy && outputRdy
         },
         startPoint() : Point2D {
             return RenderLayout.store.getters.getPlugLocation(this.startNodeId, this.startIo, this.startIsInput)

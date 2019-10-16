@@ -150,6 +150,9 @@ export default Vue.extend({
             e.stopPropagation()
         },
         reassociateComponent() {
+            if (!this.ready) {
+                return
+            }
             Vue.nextTick(() => {
                 RenderLayout.store.dispatch('associateNodeLayoutWithComponent', {
                     nodeId: this.node.Id,
@@ -166,7 +169,7 @@ export default Vue.extend({
             return RenderLayout.params.plugWidth
         },
         ready() : boolean {
-            return RenderLayout.store.state.ready
+            return RenderLayout.store.getters.isReadyForNode(this.node.Id)
         },
         nodeLayout() : NodeLayout {
             return RenderLayout.store.getters.nodeLayout(this.node.Id)
