@@ -4,5 +4,6 @@ CREATE TABLE process_flows (
     org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,
     description TEXT,
     created_time TIMESTAMPTZ NOT NULL,
-    last_updated_time TIMESTAMPTZ NOT NULL
+    last_updated_time TIMESTAMPTZ NOT NULL,
+    UNIQUE(name, org_id)
 );
