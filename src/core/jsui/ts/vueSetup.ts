@@ -262,35 +262,48 @@ const store : StoreOptions<VuexState> = {
         
             let node : ProcessFlowNode = context.state.currentProcessFlowFullData.Nodes[nodeId]
 
-            let deleteInputSet = new Set()
+            let inputsToRemove = []
             for (let inp of node.Inputs) {
-                deleteInputSet.add(inp.Id)
-                context.commit('removeNodeInput', {
-                    nodeId: nodeId,
-                    outputId: inp.Id
-                })
+                inputsToRemove.push(inp.Id)
             }
 
-            let deleteOutputSet = new Set()
+            let outputsToRemove = []
             for (let out of node.Outputs) {
-                deleteOutputSet.add(out.Id)
-                context.commit('removeNodeOutput', {
-                    nodeId: nodeId,
-                    outputId: out.Id
-                })
+                outputsToRemove.push(out.Id)
             }
-
+            context.dispatch('deleteBatchNodeInput', {nodeId: nodeId, inputs: inputsToRemove})
+            context.dispatch('deleteBatchNodeOutput', {nodeId: nodeId, outputs: outputsToRemove})
             context.commit('deleteNodeById', nodeId)
+
+        },
+        deleteBatchNodeInput(context, {nodeId, inputs}) {
+            const set = new Set(inputs)
+            for (let i of inputs) {
+                context.commit('removeNodeInput', {nodeId: nodeId, inputId: i})
+            }
 
             for (let i = context.state.currentProcessFlowFullData.EdgeKeys.length - 1; i >= 0; --i) {
                 const edgeKey = context.state.currentProcessFlowFullData.EdgeKeys[i]
                 const edge = context.state.currentProcessFlowFullData.Edges[edgeKey]
-                if (deleteInputSet.has(edge.InputIoId) || deleteOutputSet.has(edge.OutputIoId)) {
+                if (set.has(edge.InputIoId)) {
                     context.commit('deleteEdgeById', edge.Id)
                 }
             }
-        }
+        },
+        deleteBatchNodeOutput(context, {nodeId, outputs}) {
+            const set = new Set(outputs)
+            for (let i of outputs) {
+                context.commit('removeNodeOutput', {nodeId: nodeId, outputId: i})
+            }
 
+            for (let i = context.state.currentProcessFlowFullData.EdgeKeys.length - 1; i >= 0; --i) {
+                const edgeKey = context.state.currentProcessFlowFullData.EdgeKeys[i]
+                const edge = context.state.currentProcessFlowFullData.Edges[edgeKey]
+                if (set.has(edge.OutputIoId)) {
+                    context.commit('deleteEdgeById', edge.Id)
+                }
+            }
+        },
     },
     getters: {
         currentProcessFlowBasicData: (state) => {

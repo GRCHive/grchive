@@ -165,9 +165,9 @@ export default Vue.extend({
                 isInput: this.isInput
             }).then((resp : TDeleteProcessFlowIOOutput) => {
                 if (this.isInput) {
-                    VueSetup.store.commit('removeNodeInput', {nodeId: this.nodeId, inputId: ioId})
+                    VueSetup.store.dispatch('deleteBatchNodeInput', {nodeId: this.nodeId, inputs: [ioId]})
                 } else {
-                    VueSetup.store.commit('removeNodeOutput', {nodeId: this.nodeId, outputId: ioId})
+                    VueSetup.store.dispatch('deleteBatchNodeOutput', {nodeId: this.nodeId, outputs: [ioId]})
                 }
             }).catch((err) => {
                 console.log(err)
