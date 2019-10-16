@@ -13,7 +13,6 @@ export default Vue.extend({
         usePropEnd: Boolean,
         propEndX: Number,
         propEndY: Number,
-
         startNodeId: Number,
         startIo: {
             type: Object as () => ProcessFlowInputOutput,

@@ -63,9 +63,17 @@ const store : StoreOptions<VuexState> = {
         },
         addNodeInput(state, {nodeId, input}) {
             state.currentProcessFlowFullData.Nodes[nodeId].Inputs.push(input)
+            Vue.set(
+                state.currentProcessFlowFullData.Inputs,
+                input.Id,
+                input)
         },
         addNodeOutput(state, {nodeId, output}) {
             state.currentProcessFlowFullData.Nodes[nodeId].Outputs.push(output)
+            Vue.set(
+                state.currentProcessFlowFullData.Outputs,
+                output.Id,
+                output)
         },
         removeNodeInput(state, {nodeId, inputId}) {
             let idx : number = state.currentProcessFlowFullData.Nodes[nodeId].Inputs.findIndex(
@@ -74,6 +82,9 @@ const store : StoreOptions<VuexState> = {
                 })
             if (idx != -1) {
                 state.currentProcessFlowFullData.Nodes[nodeId].Inputs.splice(idx, 1)
+                Vue.delete(
+                    state.currentProcessFlowFullData.Inputs,
+                    inputId)
             }
         },
         removeNodeOutput(state, {nodeId, outputId}) {
@@ -83,6 +94,9 @@ const store : StoreOptions<VuexState> = {
                 })
             if (idx != -1) {
                 state.currentProcessFlowFullData.Nodes[nodeId].Outputs.splice(idx, 1)
+                Vue.delete(
+                    state.currentProcessFlowFullData.Outputs,
+                    outputId)
             }
         },
         updateNodeInputOutput(state, {nodeId, io, isInput}) {
@@ -105,6 +119,16 @@ const store : StoreOptions<VuexState> = {
             currentNodeData.Description = node.Description
             currentNodeData.NodeTypeId = node.NodeTypeId
             Vue.set(state.currentProcessFlowFullData.Nodes, nodeId, currentNodeData)
+        },
+        addNewEdge(state, {edge}) {
+            if (edge.Id in state.currentProcessFlowFullData.Edges) {
+                return
+            }
+            state.currentProcessFlowFullData.EdgeKeys.push(edge.Id)
+            Vue.set(
+                state.currentProcessFlowFullData.Edges,
+                edge.Id,
+                edge)
         }
     },
     actions: {
@@ -144,12 +168,22 @@ const store : StoreOptions<VuexState> = {
                     let newData = <FullProcessFlowData>{
                         FlowId: id,
                         Nodes: Object(),
-                        NumNodes: resp.data.Nodes.length,
-                        NodeKeys: [] as number[]
+                        NodeKeys: [] as number[],
+                        Edges: Object(),
+                        EdgeKeys: [] as number[],
+                        Inputs: Object(),
+                        Outputs: Object()
                     }
                     for (let data of resp.data.Nodes) {
                         newData.Nodes[data.Id] = data
                         newData.NodeKeys.push(data.Id)
+                        for (let inp of data.Inputs) {
+                            newData.Inputs[inp.Id] = inp
+                        }
+
+                        for (let inp of data.Outputs) {
+                            newData.Outputs[inp.Id] = inp
+                        }
                     }
                     context.commit('setCurrentProcessFlowFullData', newData)
                     context.commit('setFullProcessFlowRequestedId', -1)

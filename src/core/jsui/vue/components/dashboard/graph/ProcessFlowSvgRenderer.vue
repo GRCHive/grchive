@@ -13,10 +13,10 @@
     >
         <g id="nodes">
             <process-flow-svg-node
-                v-for="item in nodes"
-                :key="item.Id"
-                :node="item"
-                ref="item.Id"
+                v-for="key in nodeKeys"
+                :key="nodes[key].Id"
+                :node="nodes[key]"
+                ref="nodes[key].Id"
                 @onnodemousedown="onMouseDownNode"
                 @onnodemouseup="onMouseUpNode"
                 @onplugmousedown="onMouseDownPlug"
@@ -34,6 +34,18 @@
                                    :start-node-id="tempEdgeStart.nodeId"
                                    :start-io="tempEdgeStart.io"
                                    :start-is-input="tempEdgeStart.isInput"
+            ></process-flow-svg-edge>
+
+            <process-flow-svg-edge 
+                :use-prop-end="false"
+                v-for="key in edgeKeys"
+                :key="key"
+                :start-node-id="getInputOutputFromId(edges[key].InputIoId, true).ParentNodeId"
+                :start-io="getInputOutputFromId(edges[key].InputIoId, true)"
+                :start-is-input="true"
+                :end-node-id="getInputOutputFromId(edges[key].OutputIoId, false).ParentNodeId"
+                :end-io="getInputOutputFromId(edges[key].OutputIoId, false)"
+                :end-is-input="false"
             ></process-flow-svg-edge>
         </g>
     </svg>
@@ -62,6 +74,15 @@ export default Vue.extend({
         nodes() {
             return VueSetup.store.state.currentProcessFlowFullData.Nodes
         },
+        edges() {
+            return VueSetup.store.state.currentProcessFlowFullData.Edges
+        },
+        nodeKeys() {
+            return VueSetup.store.state.currentProcessFlowFullData.NodeKeys
+        },
+        edgeKeys() {
+            return VueSetup.store.state.currentProcessFlowFullData.EdgeKeys
+        },
         viewBox() {
             return {
                 x: this.viewBoxX,
@@ -89,6 +110,13 @@ export default Vue.extend({
         }
     }),
     methods: {
+        getInputOutputFromId(ioId : number, isInput: boolean): ProcessFlowInputOutput {
+            if (isInput) {
+                return VueSetup.store.state.currentProcessFlowFullData.Inputs[ioId]
+            } else {
+                return VueSetup.store.state.currentProcessFlowFullData.Outputs[ioId]
+            }
+        },
         saveTemporaryEdge(endIo: ProcessFlowInputOutput, endIsInput: boolean) {
             // Need to make sure we connect an input to an output
             if (endIsInput == this.tempEdgeStart.isInput) {
@@ -117,11 +145,13 @@ export default Vue.extend({
             newProcessFlowEdge(<TNewProcessFlowEdgeInput>{
                 //@ts-ignore
                 csrf: this.$root.csrf,
-                inputIoId: this.tempEdgeStart.io.Id,
-                outputIoId: endIo.Id
+                inputIoId: endIsInput ? endIo.Id : this.tempEdgeStart.io.Id,
+                outputIoId: endIsInput ? this.tempEdgeStart.io.Id : endIo.Id
             }).then((resp : TNewProcessFlowEdgeOutput) => {
                 this.drawingEdge = false
+                VueSetup.store.commit('addNewEdge', {edge: resp.data})
             }).catch((err) => {
+                console.log(err)
                 this.drawingEdge = false
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(

@@ -34,14 +34,18 @@ interface ProcessFlowNodeDisplay {
 }
 
 interface FullProcessFlowResponseData {
-    Nodes: ProcessFlowNode[]
+    Nodes: ProcessFlowNode[],
+    Edges: ProcessFlowEdge[]
 }
 
 interface FullProcessFlowData {
     FlowId: number
     Nodes: Record<number, ProcessFlowNode>,
     NodeKeys: number[],
-    NumNodes: number
+    Edges: Record<number, ProcessFlowEdge>,
+    EdgeKeys: number[],
+    Inputs: Record<number, ProcessFlowInputOutput>,
+    Outputs: Record<number, ProcessFlowInputOutput>
 }
 
 interface FullProcessFlowDisplayData {

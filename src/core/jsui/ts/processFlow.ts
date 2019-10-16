@@ -3,7 +3,7 @@ export function isProcessFullDataEmpty(data : FullProcessFlowData) : boolean {
         return true
     }
 
-    if (!data.Nodes || data.NumNodes == 0) {
+    if (!data.Nodes || data.NodeKeys.length == 0) {
         return true
     }
 
