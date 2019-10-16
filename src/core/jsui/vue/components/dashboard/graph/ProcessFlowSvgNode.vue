@@ -213,6 +213,11 @@ export default Vue.extend({
         nodeLayout() {
             this.reassociateComponent()
         }
+    },
+    mounted() {
+        if (this.ready) {
+            this.reassociateComponent()
+        }
     }
 })
 
