@@ -56,7 +56,7 @@ function processIOGroupLayout(layout : IOGroupLayout, initialTransform: Transfor
     for (let output of layout.relevantOutputs) {
         let outputLayout = <IOPlugLayout>{
             textTransform: <TransformData>{
-                tx: outputStartTransform.tx + inputOutputGap,
+                tx: inputOutputGap,
                 ty: outputStartTransform.ty
             },
             plugTransform: <TransformData>{
@@ -181,6 +181,11 @@ function onUpdateAssociatedNode(layout : NodeLayout) {
         let groupLayout = layout.groupLayout[groupKey]
         for (let output of groupLayout.relevantOutputs) {
             groupLayout.outputLayouts[output.Id].plugTransform.tx = layout.boxWidth
+
+            // Also update textTransform for outputs since the box might actually be
+            // longer than the input output gap.
+            groupLayout.outputLayouts[output.Id].textTransform.tx = 
+                Math.max(layout.textWidth, groupLayout.outputLayouts[output.Id].textTransform.tx)
         }
     }
 }

@@ -47,6 +47,7 @@
                 <text dominant-baseline="hanging"
                       :class="`body-2 ` + styleClass + `-text`"
                       text-rendering="optimizeLegibility"
+                      text-anchor="end"
                       v-for="(output, oIndex) in nodeLayout.groupLayout[group].relevantOutputs"
                       :key="`output` + oIndex.toString()"
                       :transform="`translate(
