@@ -5,7 +5,7 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
-func DeleteEdgeFromId(edgeId int64) error {
+func DeleteProcessFlowEdgeFromId(edgeId int64) error {
 	tx := dbConn.MustBegin()
 	_, err := tx.Exec(`
 		DELETE FROM process_flow_edges

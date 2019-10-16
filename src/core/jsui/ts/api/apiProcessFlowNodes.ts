@@ -1,6 +1,8 @@
 import axios from 'axios'
 import * as qs from 'query-string'
-import { getAllProcessFlowNodeTypesAPIUrl, editProcessFlowNodeAPIUrl } from '../url'
+import { getAllProcessFlowNodeTypesAPIUrl,
+         editProcessFlowNodeAPIUrl,
+         deleteProcessFlowNodeAPIUrl } from '../url'
 import { postFormUrlEncoded } from '../http'
 
 export function getProcessFlowNodeTypes(inp : TGetProcessFlowNodeTypesInput) : 
@@ -11,4 +13,9 @@ export function getProcessFlowNodeTypes(inp : TGetProcessFlowNodeTypesInput) :
 export function editProcessFlowNode(inp : TEditProcessFlowNodeInput) : 
         Promise<TEditProcessFlowNodeOutput> {
     return postFormUrlEncoded<TEditProcessFlowNodeOutput>(editProcessFlowNodeAPIUrl, inp)
+}
+
+export function deleteProcessFlowNode(inp : TDeleteProcessFlowNodeInput) :
+        Promise<TDeleteProcessFlowNodeOutput> {
+    return postFormUrlEncoded<TDeleteProcessFlowNodeOutput>(deleteProcessFlowNodeAPIUrl, inp)
 }

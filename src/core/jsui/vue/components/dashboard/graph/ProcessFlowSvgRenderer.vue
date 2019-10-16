@@ -213,6 +213,7 @@ export default Vue.extend({
             }
 
             this.moveNodeActive = false
+            this.drawingEdge = false
         },
         onMouseDown(e : MouseEvent) {
             if (e.button == 0) {

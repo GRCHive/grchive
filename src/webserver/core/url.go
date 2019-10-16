@@ -48,6 +48,7 @@ const ApiProcessFlowNodesUrl string = "/flownodes"
 const ApiProcessFlowNodesGetTypesUrl string = "/types"
 const ApiProcessFlowNodesNewUrl string = "/new"
 const ApiProcessFlowNodesEditUrl string = "/edit"
+const ApiProcessFlowNodesDeleteUrl string = "/delete"
 
 // API - Process Flow Edges
 const ApiProcessFlowEdgesUrl string = "/flowedges"

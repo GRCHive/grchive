@@ -20,13 +20,13 @@ CREATE TABLE process_flow_input_output_type (
 CREATE TABLE process_flow_node_inputs (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(256) NOT NULL,
-    parent_node_id BIGINT NOT NULL REFERENCES process_flow_nodes(id),
-    io_type_id INTEGER NOT NULL REFERENCES process_flow_input_output_type(id)
+    parent_node_id BIGINT NOT NULL REFERENCES process_flow_nodes(id) ON DELETE CASCADE,
+    io_type_id INTEGER NOT NULL REFERENCES process_flow_input_output_type(id) ON DELETE CASCADE
 );
 
 CREATE TABLE process_flow_node_outputs (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(256) NOT NULL,
-    parent_node_id BIGINT NOT NULL REFERENCES process_flow_nodes(id),
-    io_type_id INTEGER NOT NULL REFERENCES process_flow_input_output_type(id)
+    parent_node_id BIGINT NOT NULL REFERENCES process_flow_nodes(id) ON DELETE CASCADE,
+    io_type_id INTEGER NOT NULL REFERENCES process_flow_input_output_type(id) ON DELETE CASCADE
 );

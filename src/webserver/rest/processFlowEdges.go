@@ -58,7 +58,7 @@ func deleteProcessFlowEdge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.DeleteEdgeFromId(inputs.EdgeId)
+	err = database.DeleteProcessFlowEdgeFromId(inputs.EdgeId)
 	if err != nil {
 		core.Warning("Failed to delete edge: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

@@ -13,6 +13,7 @@ import axios from 'axios'
 import {createGetProcessFlowFullDataUrl} from './url'
 import * as qs from 'query-string'
 import { deleteProcessFlowEdge } from './api/apiProcessFlowEdges'
+import { deleteProcessFlowNode } from './api/apiProcessFlowNodes'
 
 let mutationObservers = []
 const opts = {}
@@ -146,6 +147,19 @@ const store : StoreOptions<VuexState> = {
             Vue.delete(
                 state.currentProcessFlowFullData.Edges,
                 edgeId)
+        },
+        deleteNodeById(state, nodeId) {
+            if (!(nodeId in state.currentProcessFlowFullData.Nodes)) {
+                return
+            }
+
+            state.currentProcessFlowFullData.NodeKeys.splice(
+                state.currentProcessFlowFullData.NodeKeys.findIndex(
+                    (ele) => { ele == nodeId},
+                1))
+            Vue.delete(
+                state.currentProcessFlowFullData.Nodes,
+                nodeId)
         }
     },
     actions: {
@@ -231,9 +245,52 @@ const store : StoreOptions<VuexState> = {
             }
 
             if (context.state.selectedNodeId != -1) {
-                context.commit('setSelectedProcessFlowNode', -1)
+                let nodeId = context.state.selectedNodeId
+                deleteProcessFlowNode({
+                    csrf: csrf,
+                    nodeId: nodeId
+                }).then(() => {
+                    context.dispatch('deleteNodeById', nodeId)
+                    context.commit('setSelectedProcessFlowNode', -1)
+                })
+            }
+        },
+        deleteNodeById(context, nodeId) {
+            if (!(nodeId in context.state.currentProcessFlowFullData.Nodes)) {
+                return
+            }
+        
+            let node : ProcessFlowNode = context.state.currentProcessFlowFullData.Nodes[nodeId]
+
+            let deleteInputSet = new Set()
+            for (let inp of node.Inputs) {
+                deleteInputSet.add(inp.Id)
+                context.commit('removeNodeInput', {
+                    nodeId: nodeId,
+                    outputId: inp.Id
+                })
+            }
+
+            let deleteOutputSet = new Set()
+            for (let out of node.Outputs) {
+                deleteOutputSet.add(out.Id)
+                context.commit('removeNodeOutput', {
+                    nodeId: nodeId,
+                    outputId: out.Id
+                })
+            }
+
+            context.commit('deleteNodeById', nodeId)
+
+            for (let i = context.state.currentProcessFlowFullData.EdgeKeys.length - 1; i >= 0; --i) {
+                const edgeKey = context.state.currentProcessFlowFullData.EdgeKeys[i]
+                const edge = context.state.currentProcessFlowFullData.Edges[edgeKey]
+                if (deleteInputSet.has(edge.InputIoId) || deleteOutputSet.has(edge.OutputIoId)) {
+                    context.commit('deleteEdgeById', edge.Id)
+                }
             }
         }
+
     },
     getters: {
         currentProcessFlowBasicData: (state) => {

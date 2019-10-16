@@ -16,6 +16,10 @@ type EditProcessFlowNodeInputs struct {
 	Type        int32  `webcore:"type"`
 }
 
+type DeleteProcessFlowNodeInputs struct {
+	NodeId int64 `webcore:"nodeId"`
+}
+
 func getAllProcessFlowNodeTypes(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -115,4 +119,28 @@ func editProcessFlowNode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(node)
+}
+
+func deleteProcessFlowNode(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := DeleteProcessFlowNodeInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	err = database.DeleteProcessFlowNodeFromId(inputs.NodeId)
+	if err != nil {
+		core.Warning("Failed to delete node: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	jsonWriter.Encode(struct{}{})
 }

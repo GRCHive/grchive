@@ -17,3 +17,11 @@ interface TEditProcessFlowNodeInput {
 interface TEditProcessFlowNodeOutput { 
     data: ProcessFlowNode
 }
+
+interface TDeleteProcessFlowNodeInput { 
+    csrf : string,
+    nodeId: number
+}
+
+interface TDeleteProcessFlowNodeOutput { 
+}

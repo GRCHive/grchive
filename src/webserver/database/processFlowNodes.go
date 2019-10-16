@@ -4,6 +4,20 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
+func DeleteProcessFlowNodeFromId(nodeId int64) error {
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		DELETE FROM process_flow_nodes
+		WHERE id = $1
+	`, nodeId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Commit()
+	return err
+}
+
 func GetAllProcessFlowNodeTypes() ([]*core.ProcessFlowNodeType, error) {
 	result := []*core.ProcessFlowNodeType{}
 
