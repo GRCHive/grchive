@@ -7,3 +7,11 @@ interface TNewProcessFlowEdgeInput {
 interface TNewProcessFlowEdgeOutput {
     data: ProcessFlowEdge
 }
+
+interface TDeleteProcessFlowEdgeInput {
+    csrf: string
+    edgeId: number
+}
+
+interface TDeleteProcessFlowEdgeOutput {
+}

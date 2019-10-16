@@ -12,6 +12,7 @@ Vue.use(Vuetify)
 import axios from 'axios'
 import {createGetProcessFlowFullDataUrl} from './url'
 import * as qs from 'query-string'
+import { deleteProcessFlowEdge } from './api/apiProcessFlowEdges'
 
 let mutationObservers = []
 const opts = {}
@@ -133,6 +134,18 @@ const store : StoreOptions<VuexState> = {
                 state.currentProcessFlowFullData.Edges,
                 edge.Id,
                 edge)
+        },
+        deleteEdgeById(state, edgeId) {
+            if (!(edgeId in state.currentProcessFlowFullData.Edges)) {
+                return
+            }
+            state.currentProcessFlowFullData.EdgeKeys.splice(
+                state.currentProcessFlowFullData.EdgeKeys.findIndex(
+                    (ele) => { ele == edgeId },
+                1))
+            Vue.delete(
+                state.currentProcessFlowFullData.Edges,
+                edgeId)
         }
     },
     actions: {
@@ -204,6 +217,22 @@ const store : StoreOptions<VuexState> = {
                     context.commit('setFullProcessFlowRequestedId', -1)
                 }
             )
+        },
+        requestDeletionOfSelection(context, {csrf}) {
+            if (context.state.selectedEdgeId != -1) {
+                let edgeId = context.state.selectedEdgeId
+                deleteProcessFlowEdge({
+                    csrf: csrf,
+                    edgeId: edgeId
+                }).then(() => {
+                    context.commit('deleteEdgeById', edgeId)
+                    context.commit('setSelectedProcessFlowEdge', -1)
+                })
+            }
+
+            if (context.state.selectedNodeId != -1) {
+                context.commit('setSelectedProcessFlowNode', -1)
+            }
         }
     },
     getters: {

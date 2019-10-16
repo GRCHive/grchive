@@ -83,7 +83,19 @@ export default Vue.extend({
                     true);
             })
         },
+        handleHotkeys(e : KeyboardEvent) {
+            if (e.code == "Delete") {
+                VueSetup.store.dispatch('requestDeletionOfSelection', {
+                    //@ts-ignore
+                    csrf: this.$root.csrf
+                })
+                e.stopPropagation()
+            }
+        }
     },
+    mounted() {
+        document.addEventListener('keydown', this.handleHotkeys)
+    }
 })
 
 </script>

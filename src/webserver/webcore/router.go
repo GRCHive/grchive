@@ -40,6 +40,7 @@ const (
 	EditProcessFlowIORouteName                     = "EditProcessFlowIO"
 	EditProcessFlowNodeRouteName                   = "EditProcessFlowNode"
 	CreateNewProcessFlowEdgeRouteName              = "CreateNewProcessFlowEdge"
+	DeleteProcessFlowEdgeRouteName                 = "DeleteProcessFlowEdge"
 )
 
 var globalRouter *mux.Router

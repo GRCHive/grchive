@@ -57,3 +57,4 @@ export function createUpdateProcessFlowApiUrl(id : number) : string {
 }
 
 export const newProcessFlowEdgeAPIUrl: string = "/api/flowedges/new"
+export const deleteProcessFlowEdgeAPIUrl: string = "/api/flowedges/delete"

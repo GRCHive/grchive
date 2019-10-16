@@ -5,6 +5,20 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
+func DeleteEdgeFromId(edgeId int64) error {
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		DELETE FROM process_flow_edges
+		WHERE id = $1
+	`, edgeId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Commit()
+	return err
+}
+
 func FindAllEdgesForProcessFlow(flowId int64) ([]*core.ProcessFlowEdge, error) {
 	edges := []*core.ProcessFlowEdge{}
 	err := dbConn.Select(&edges, `
