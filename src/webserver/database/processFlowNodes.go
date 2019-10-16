@@ -87,3 +87,29 @@ func FindAllNodesForProcessFlow(flowId int64) ([]*core.ProcessFlowNode, error) {
 
 	return nodes, err
 }
+
+func EditProcessFlowNode(node *core.ProcessFlowNode) (*core.ProcessFlowNode, error) {
+	tx := dbConn.MustBegin()
+	rows, err := tx.NamedQuery(`
+		UPDATE process_flow_nodes
+		SET name = :name, description = :description, node_type = :node_type
+		WHERE id = :id
+		RETURNING *
+	`, node)
+
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	rows.Next()
+	err = rows.StructScan(node)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	rows.Close()
+
+	err = tx.Commit()
+	return node, nil
+}

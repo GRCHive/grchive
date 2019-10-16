@@ -4,9 +4,17 @@ import (
 	"encoding/json"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
+	"gitlab.com/b3h47pte/audit-stuff/webcore"
 	"net/http"
 	"strconv"
 )
+
+type EditProcessFlowNodeInputs struct {
+	NodeId      int64  `webcore:"nodeId"`
+	Name        string `webcore:"name"`
+	Description string `webcore:"description"`
+	Type        int32  `webcore:"type"`
+}
 
 func getAllProcessFlowNodeTypes(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
@@ -74,4 +82,37 @@ func newProcessFlowNode(w http.ResponseWriter, r *http.Request) {
 	}{
 		Node: node,
 	})
+}
+
+func editProcessFlowNode(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := EditProcessFlowNodeInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	node, err := database.EditProcessFlowNode(&core.ProcessFlowNode{
+		Id:            inputs.NodeId,
+		Name:          inputs.Name,
+		ProcessFlowId: 0,
+		Description:   inputs.Description,
+		NodeTypeId:    inputs.Type,
+		Inputs:        nil,
+		Outputs:       nil,
+	})
+
+	if err != nil {
+		core.Warning("Failed to edit node: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	jsonWriter.Encode(node)
 }

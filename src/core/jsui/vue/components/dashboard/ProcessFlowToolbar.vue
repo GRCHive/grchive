@@ -49,15 +49,16 @@ interface ResponseData {
 
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
-import axios from 'axios'
-import * as qs from 'query-string'
-import { contactUsUrl, getAllProcessFlowNodeTypesAPIUrl, newProcessFlowNodeAPIUrl } from '../../../ts/url'
+import MetadataStore from '../../../ts/metadata'
+import { contactUsUrl, newProcessFlowNodeAPIUrl } from '../../../ts/url'
 import { postFormUrlEncoded } from '../../../ts/http'
 
 export default Vue.extend({
-    data : () => ({
-        rawTypeOptions: [] as ProcessFlowNodeType[]
-    }),
+    computed: {
+        rawTypeOptions() : ProcessFlowNodeType[] {
+            return MetadataStore.state.nodeTypes
+        }
+    },
     methods: {
         createNewNode(_ : MouseEvent, nodeTypeId : number) {
             // Create a new node of the given type.
@@ -83,25 +84,6 @@ export default Vue.extend({
             })
         },
     },
-    mounted() {
-        // Send out an AJAX request to get all available node types so that we don't have to
-        // manually keep this in sync with the available types on the server.
-        let passedData = Object()
-        //@ts-ignore
-        passedData['csrf'] = this.$root.csrf
-
-        axios.get(getAllProcessFlowNodeTypesAPIUrl+ '?' + qs.stringify(passedData)).then((resp : ResponseData) => {
-            this.rawTypeOptions = resp.data
-        }).catch((err) => {
-            //@ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong, please reload the page and try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
-    }
 })
 
 </script>

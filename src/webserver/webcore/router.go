@@ -38,6 +38,7 @@ const (
 	CreateNewProcessFlowIOTypesRouteName           = "CreateNewProcessFlowIOTypes"
 	DeleteProcessFlowIORouteName                   = "DeleteProcessFlowIO"
 	EditProcessFlowIORouteName                     = "EditProcessFlowIO"
+	EditProcessFlowNodeRouteName                   = "EditProcessFlowNode"
 )
 
 var globalRouter *mux.Router

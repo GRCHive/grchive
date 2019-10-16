@@ -98,6 +98,13 @@ const store : StoreOptions<VuexState> = {
             if (idx != -1) {
                 Vue.set(relevantArr, idx, io)
             }
+        },
+        updateNodePartial(state, {nodeId, node}) {
+            let currentNodeData = {...state.currentProcessFlowFullData.Nodes[nodeId]}
+            currentNodeData.Name = node.Name
+            currentNodeData.Description = node.Description
+            currentNodeData.NodeTypeId = node.NodeTypeId
+            Vue.set(state.currentProcessFlowFullData.Nodes, nodeId, currentNodeData)
         }
     },
     actions: {

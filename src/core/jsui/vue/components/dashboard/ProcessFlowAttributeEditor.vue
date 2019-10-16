@@ -2,22 +2,29 @@
     <v-navigation-drawer absolute right :style="clipStyle" ref="attrNavDrawer" :value="showHide">
         <section v-if="enabled" class="ma-1" style="max-height: calc(100% - 48px);">
             <v-form>
-                <v-text-field v-model="currentData.Name"
+                <v-text-field v-model="currentNode.Name"
                       label="Name"
-                      :disabled="!canEdit"
+                      :disabled="!canEditAttr"
                       filled
                       :rules="[rules.required, rules.createMaxLength(256)]"
                 ></v-text-field>
 
-                <v-textarea v-model="currentData.Description"
+                <v-textarea v-model="currentNode.Description"
                             label="Description"
                             filled
-                            :disabled="!canEdit">
+                            :disabled="!canEditAttr">
                 </v-textarea> 
+
+                <v-select v-model="currentNode.NodeTypeId"
+                          :items="nodeTypeItems"
+                          filled
+                          :disabled="!canEditAttr"
+                          label="Type">
+                </v-select>
             </v-form>
 
             <v-list-item class="pb-1">
-                <template v-if="canEdit" v-bind="{saveEdit, cancelEdit}">
+                <template v-if="canEditAttr" v-bind="{saveEdit, cancelEdit}">
                     <v-btn color="error" @click="cancelEdit">
                         Cancel
                     </v-btn>
@@ -37,12 +44,12 @@
 
             <v-divider></v-divider>
             <process-flow-input-output-editor :is-input="true"
-                                              :node-id="currentData.Id">
+                                              :node-id="currentNode.Id">
             </process-flow-input-output-editor>
 
             <v-divider></v-divider>
             <process-flow-input-output-editor :is-input="false"
-                                              :node-id="currentData.Id">
+                                              :node-id="currentNode.Id">
             </process-flow-input-output-editor>
         </section>
     </v-navigation-drawer>
@@ -54,40 +61,66 @@ import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup' 
 import * as rules from "../../../ts/formRules"
 import ProcessFlowInputOutputEditor from './ProcessFlowInputOutputEditor.vue'
+import { editProcessFlowNode } from '../../../ts/api/apiProcessFlowNodes'
+import { contactUsUrl } from '../../../ts/url'
+import MetadataStore from '../../../ts/metadata'
 
 export default Vue.extend({
+    data : () => ({
+        canEditAttr: false,
+        cachedData : {} as ProcessFlowNode,
+        rules,
+    }),
     props: {
         customClipHeight : Number,
         showHide : Boolean
     },
-    data : () => ({
-        canEdit : false,
-        currentData : {} as ProcessFlowNode,
-        rules
-    }),
     components: {
         ProcessFlowInputOutputEditor
     },
     methods : {
         startEdit() {
-            this.canEdit = true
+            this.canEditAttr = true
+            this.cachedData = {...this.currentNode}
         },
         cancelEdit() {
-            this.canEdit = false
+            this.canEditAttr = false
+            VueSetup.store.commit('updateNodePartial', {
+                nodeId: this.currentNode.Id,
+                node: this.cachedData
+            })
         },
         saveEdit() {
-            this.canEdit = false
+            editProcessFlowNode({
+                //@ts-ignore
+                csrf: this.$root.csrf,
+                nodeId: this.currentNode.Id,
+                name: this.currentNode.Name,
+                description: this.currentNode.Description,
+                type: this.currentNode.NodeTypeId
+            }).then((resp : TEditProcessFlowNodeOutput) => {
+                VueSetup.store.commit('updateNodePartial', {
+                    nodeId: resp.data.Id,
+                    node: resp.data
+                })
+                this.canEditAttr = false
+            }).catch((err) => {
+                console.log(err)
+                //@ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong, please reload the page and try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
         }
     },
     computed: {
-        clipStyle() {
+        clipStyle() : any {
             return {
-                //"transform": "translateX(0%)",
-                //"width": "256px",
                 "height":  "100vh !important",
-                //@ts-ignore
                 "max-height": "calc(100% - " + this.customClipHeight.toString()  + "px) !important",
-                //@ts-ignore
                 "top" : this.customClipHeight.toString() + "px"
             }
         },
@@ -96,19 +129,18 @@ export default Vue.extend({
         },
         currentNode() : ProcessFlowNode {
             return VueSetup.store.getters.currentNodeInfo
+        },
+        nodeTypeItems() : any[] {
+            let retItems = [] as any[]
+            for (let types of MetadataStore.state.nodeTypes) {
+                retItems.push({
+                    text: types.Name,
+                    value: types.Id
+                })
+            }
+            return retItems
         }
     },
-    watch : {
-        // Do a one-way sync from the store here and then sync back
-        // when the user hits save.
-        currentNode(val : ProcessFlowNode) {
-            this.cancelEdit()
-            this.currentData = val
-        }
-    }
 })
 
 </script>
-
-<style scoped>
-</style>

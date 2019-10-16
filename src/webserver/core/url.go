@@ -47,6 +47,7 @@ var ApiProcessFlowGetFullDataUrl string = fmt.Sprintf("/{%s}/full", ProcessFlowQ
 const ApiProcessFlowNodesUrl string = "/flownodes"
 const ApiProcessFlowNodesGetTypesUrl string = "/types"
 const ApiProcessFlowNodesNewUrl string = "/new"
+const ApiProcessFlowNodesEditUrl string = "/edit"
 
 // API - Process Flow IO
 const ApiProcessFlowIOUrl string = "/flowio"
