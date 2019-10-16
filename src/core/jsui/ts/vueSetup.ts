@@ -29,6 +29,7 @@ const store : StoreOptions<VuexState> = {
         currentProcessFlowFullData: {} as FullProcessFlowData,
         fullProcessFlowRequestedId: -1,
         selectedNodeId: -1,
+        selectedEdgeId: -1
     },
     mutations: {
         toggleMiniNavBar(state) {
@@ -60,6 +61,9 @@ const store : StoreOptions<VuexState> = {
         },
         setSelectedProcessFlowNode(state, id) {
             state.selectedNodeId = id
+        },
+        setSelectedProcessFlowEdge(state, id) {
+            state.selectedEdgeId = id
         },
         addNodeInput(state, {nodeId, input}) {
             state.currentProcessFlowFullData.Nodes[nodeId].Inputs.push(input)

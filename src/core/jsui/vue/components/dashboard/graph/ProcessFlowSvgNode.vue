@@ -205,10 +205,6 @@ export default Vue.extend({
 
 <style scoped>
 
-.node {
-    z-index: 2;
-}
-
 .no-pointer {
     pointer-events: none;
     user-select: none;

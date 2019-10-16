@@ -1,13 +1,25 @@
 <template>
-    <path v-if="ready"
-          :d="d"
-          :class="`flowEdge ` +  (usePropEnd ? `tempFlowEdge` : ``)">
-    </path>
+    <g v-if="ready">
+        <path v-if="isEdgeSelected"
+              :d="d"
+              class="selectedFlowEdge"> 
+        </path>
+
+        <path :d="d"
+              class="flowEdge">
+        </path>
+
+        <path :d="d"
+              class="clickEdge"
+              @click="onClick"> 
+        </path>
+    </g>
 </template>
 
 <script lang="ts">
 
 import Vue from 'vue'
+import VueSetup from '../../../../ts/vueSetup.ts'
 import RenderLayout from '../../../../ts/render/renderLayout'
 export default Vue.extend({
     props: {
@@ -23,9 +35,16 @@ export default Vue.extend({
         endIo: {
             type: Object as () => ProcessFlowInputOutput,
         },
-        endIsInput: Boolean
+        endIsInput: Boolean,
+        edgeId: {
+            type: Number,
+            default: -1
+        }
     },
     computed: {
+        isEdgeSelected(): boolean {
+            return VueSetup.store.state.selectedEdgeId == this.edgeId
+        },
         ready() : boolean {
             return RenderLayout.store.state.ready
         },
@@ -60,6 +79,11 @@ export default Vue.extend({
                       ${cPoint2.x} ${cPoint2.y},
                       ${this.endPoint.x} ${this.endPoint.y}`
         }
+    },
+    methods: {
+        onClick(e : MouseEvent){ 
+            this.$emit("onedgeclick", e)
+        }
     }
 })
 </script>
@@ -70,7 +94,18 @@ export default Vue.extend({
     stroke: black;
     stroke-width: 2px;
     fill: transparent;
-    z-index: 1;
+}
+
+.selectedFlowEdge {
+    stroke: red;
+    stroke-width: 4px;
+    fill: transparent;
+}
+
+.clickEdge {
+    stroke-opacity: 0%;
+    stroke-width: 6px;
+    fill: transparent;
 }
 
 .tempFlowEdge {

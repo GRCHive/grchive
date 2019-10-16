@@ -11,20 +11,6 @@
          @contextmenu="onContextMenu"
          ref="svgrenderer"
     >
-        <g id="nodes">
-            <process-flow-svg-node
-                v-for="key in nodeKeys"
-                :key="nodes[key].Id"
-                :node="nodes[key]"
-                ref="nodes[key].Id"
-                @onnodemousedown="onMouseDownNode"
-                @onnodemouseup="onMouseUpNode"
-                @onplugmousedown="onMouseDownPlug"
-                @onplugmouseup="onMouseUpPlug"
-            >
-            </process-flow-svg-node>
-        </g>
-
         <g id="edges">
             <!-- One temporary edge that the user sees when they click and drag from one plug to another -->
             <process-flow-svg-edge v-if="drawingEdge"
@@ -46,7 +32,23 @@
                 :end-node-id="getInputOutputFromId(edges[key].OutputIoId, false).ParentNodeId"
                 :end-io="getInputOutputFromId(edges[key].OutputIoId, false)"
                 :end-is-input="false"
+                :edge-id="key"
+                @onedgeclick="onEdgeClick(arguments[0], key)"
             ></process-flow-svg-edge>
+        </g>
+
+        <g id="nodes">
+            <process-flow-svg-node
+                v-for="key in nodeKeys"
+                :key="nodes[key].Id"
+                :node="nodes[key]"
+                ref="nodes[key].Id"
+                @onnodemousedown="onMouseDownNode"
+                @onnodemouseup="onMouseUpNode"
+                @onplugmousedown="onMouseDownPlug"
+                @onplugmouseup="onMouseUpPlug"
+            >
+            </process-flow-svg-node>
         </g>
     </svg>
 </template>
@@ -202,6 +204,7 @@ export default Vue.extend({
             }
 
             VueSetup.store.commit('setSelectedProcessFlowNode', nodeId)
+            VueSetup.store.commit('setSelectedProcessFlowEdge', -1)
             this.moveNodeActive = true
         },
         onMouseUpNode(e : MouseEvent, nodeId : number) {
@@ -214,6 +217,7 @@ export default Vue.extend({
         onMouseDown(e : MouseEvent) {
             if (e.button == 0) {
                 VueSetup.store.commit('setSelectedProcessFlowNode', -1)
+                VueSetup.store.commit('setSelectedProcessFlowEdge', -1)
             }
 
             if (e.button == 0 || e.button == 1) {
@@ -242,6 +246,7 @@ export default Vue.extend({
                 return
             }
 
+            VueSetup.store.commit('setSelectedProcessFlowEdge', -1)
             this.drawingEdge = true
             this.tempEdgeStart.nodeId = nodeId
             this.tempEdgeStart.io = io
@@ -255,6 +260,11 @@ export default Vue.extend({
 
             this.saveTemporaryEdge(io, isInput)
         },
+        onEdgeClick(e : MouseEvent, edgeId: number) {
+            VueSetup.store.commit('setSelectedProcessFlowEdge', edgeId)
+            VueSetup.store.commit('setSelectedProcessFlowNode', -1)
+            e.stopPropagation()
+        }
     },
 })
 
