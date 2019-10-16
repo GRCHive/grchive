@@ -118,6 +118,7 @@ export default Vue.extend({
             }
         },
         saveTemporaryEdge(endIo: ProcessFlowInputOutput, endIsInput: boolean) {
+            this.drawingEdge = false
             // Need to make sure we connect an input to an output
             if (endIsInput == this.tempEdgeStart.isInput) {
                 //@ts-ignore
@@ -152,7 +153,6 @@ export default Vue.extend({
                 VueSetup.store.commit('addNewEdge', {edge: resp.data})
             }).catch((err) => {
                 console.log(err)
-                this.drawingEdge = false
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
                     "Oops! Something went wrong, please reload the page and try again.",
