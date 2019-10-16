@@ -1,17 +1,24 @@
 <template>
     <g v-if="ready">
+        <path v-if="hoverEdge"
+              :d="d"
+              class="highlightEdge"> 
+        </path>
+
         <path v-if="isEdgeSelected"
               :d="d"
               class="selectedFlowEdge"> 
         </path>
 
-        <path :d="d"
+       <path :d="d"
               class="flowEdge">
         </path>
 
         <path :d="d"
               class="clickEdge"
-              @click="onClick"> 
+              @click="onClick"
+              @mouseenter="hoverEdge = true"
+              @mouseleave="hoverEdge = false">
         </path>
     </g>
 </template>
@@ -41,6 +48,9 @@ export default Vue.extend({
             default: -1
         }
     },
+    data: () => ({
+        hoverEdge: false
+    }),
     computed: {
         isEdgeSelected(): boolean {
             return VueSetup.store.state.selectedEdgeId == this.edgeId
@@ -99,6 +109,12 @@ export default Vue.extend({
 .selectedFlowEdge {
     stroke: red;
     stroke-width: 4px;
+    fill: transparent;
+}
+
+.highlightEdge {
+    stroke-width: 4px;
+    stroke: orange;
     fill: transparent;
 }
 

@@ -7,9 +7,13 @@
     >
         <rect :width="nodeLayout.boxWidth"
               :height="nodeLayout.boxHeight"
-              :class="styleClass + ` ` + (isNodeSelected ? `node-selected-box` : `node-box`)"
+              :class="styleClass + ` ` + 
+                (isNodeSelected ? `node-selected-box` : 
+                    (hoverNode ? `highlight` : `node-box`))"
               @mousedown="onMouseDownNode($event)"
               @mouseup="onMouseUpNode($event)"
+              @mouseenter="hoverNode = true"
+              @mouseleave="hoverNode = false"
         ></rect>
         <g ref="textgroup"
            class="no-pointer"
@@ -73,6 +77,9 @@
                         ${nodeLayout.groupLayout[group].inputLayouts[input.Id].plugTransform.ty})`"
                       @mousedown="onMouseDownPlug($event, input, true)"
                       @mouseup="onMouseUpPlug($event, input, true)"
+                      @mouseenter="hoverInputPlugId = input.Id"
+                      @mouseleave="hoverInputPlugId = -1"
+                      :class="(hoverInputPlugId == input.Id ? `highlight` : ``)"
                 ></rect>
 
                 <rect :width="plugWidth"
@@ -84,6 +91,9 @@
                         ${nodeLayout.groupLayout[group].outputLayouts[output.Id].plugTransform.ty})`"
                       @mousedown="onMouseDownPlug($event, output, false)"
                       @mouseup="onMouseUpPlug($event, output, false)"
+                      @mouseenter="hoverOutputPlugId = output.Id"
+                      @mouseleave="hoverOutputPlugId = -1"
+                      :class="(hoverOutputPlugId == output.Id ? `highlight` : ``)"
                 ></rect>
             </g>
         </g>
@@ -117,6 +127,11 @@ export default Vue.extend({
             type: Object as () => ProcessFlowNode
         }
     },
+    data: () => ({
+        hoverNode: false,
+        hoverInputPlugId: -1,
+        hoverOutputPlugId: -1
+    }),
     methods : {
         onMouseDownNode(e: MouseEvent) {
             this.$emit("onnodemousedown", e, this.node.Id)
@@ -204,6 +219,11 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+
+.highlight {
+    stroke-width: 3px;
+    stroke: orange;
+}
 
 .no-pointer {
     pointer-events: none;
