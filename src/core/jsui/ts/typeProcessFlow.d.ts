@@ -22,6 +22,12 @@ interface ProcessFlowNode {
     Outputs: ProcessFlowInputOutput[]
 }
 
+interface ProcessFlowEdge {
+    Id: number,
+    InputIoId: number,
+    OutputIoId: number
+}
+
 interface ProcessFlowNodeDisplay {
     Tx: number,
     Ty: number

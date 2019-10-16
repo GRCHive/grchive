@@ -1,6 +1,6 @@
 <template>
     <path :d="d"
-          class="flowEdge">
+          :class="`flowEdge ` +  (usePropEnd ? `tempFlowEdge` : ``)">
     </path>
 </template>
 
@@ -65,7 +65,14 @@ export default Vue.extend({
 
 .flowEdge {
     stroke: black;
+    stroke-width: 2px;
     fill: transparent;
+    z-index: 1;
+}
+
+.tempFlowEdge {
+    pointer-events: none;
+    user-select: none;
 }
 
 </style>

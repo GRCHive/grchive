@@ -17,10 +17,10 @@
                 :key="item.Id"
                 :node="item"
                 ref="item.Id"
-                @onmousedown="onMouseDownNode"
-                @onmouseup="onMouseUpNode"
-                @onplugmousedown="onPlugMouseDown"
-                @onplugmouseup="onPlugMouseUp"
+                @onnodemousedown="onMouseDownNode"
+                @onnodemouseup="onMouseUpNode"
+                @onplugmousedown="onMouseDownPlug"
+                @onplugmouseup="onMouseUpPlug"
             >
             </process-flow-svg-node>
         </g>
@@ -46,6 +46,8 @@ import VueSetup from '../../../../ts/vueSetup'
 import RenderLayout from '../../../../ts/render/renderLayout'
 import ProcessFlowSvgNode from './ProcessFlowSvgNode.vue'
 import ProcessFlowSvgEdge from './ProcessFlowSvgEdge.vue'
+import { newProcessFlowEdge } from '../../../../ts/api/apiProcessFlowEdges'
+import { contactUsUrl } from '../../../../ts/url'
 
 export default Vue.extend({
     components: {
@@ -74,7 +76,6 @@ export default Vue.extend({
         moveViewBoxActive: false,
         viewBoxX: 0,
         viewBoxY: 0,
-
         // Edge drawing properties
         drawingEdge: false,
         tempEdgeStart: {
@@ -88,8 +89,48 @@ export default Vue.extend({
         }
     }),
     methods: {
-        saveTemporaryEdge() {
-            this.drawingEdge = false
+        saveTemporaryEdge(endIo: ProcessFlowInputOutput, endIsInput: boolean) {
+            // Need to make sure we connect an input to an output
+            if (endIsInput == this.tempEdgeStart.isInput) {
+                //@ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "You must connect an input to an output.",
+                    false,
+                    "",
+                    "",
+                    true);
+                return
+            }
+
+            // Can't connect to the same node
+            if (endIo.ParentNodeId == this.tempEdgeStart.nodeId) {
+                //@ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "You can not connect an edge from a node to itself.",
+                    false,
+                    "",
+                    "",
+                    true);
+                return
+            }
+
+            newProcessFlowEdge(<TNewProcessFlowEdgeInput>{
+                //@ts-ignore
+                csrf: this.$root.csrf,
+                inputIoId: this.tempEdgeStart.io.Id,
+                outputIoId: endIo.Id
+            }).then((resp : TNewProcessFlowEdgeOutput) => {
+                this.drawingEdge = false
+            }).catch((err) => {
+                this.drawingEdge = false
+                //@ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong, please reload the page and try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
         },
         doMoveNode(e : MouseEvent) {
             if (!VueSetup.store.getters.isNodeSelected) {
@@ -132,7 +173,6 @@ export default Vue.extend({
 
             VueSetup.store.commit('setSelectedProcessFlowNode', nodeId)
             this.moveNodeActive = true
-            e.stopPropagation()
         },
         onMouseUpNode(e : MouseEvent, nodeId : number) {
             if (e.button != 0) {
@@ -140,7 +180,6 @@ export default Vue.extend({
             }
 
             this.moveNodeActive = false
-            e.stopPropagation()
         },
         onMouseDown(e : MouseEvent) {
             if (e.button == 0) {
@@ -168,25 +207,23 @@ export default Vue.extend({
         onContextMenu(e : Event) {
             e.preventDefault()
         },
-        onPlugMouseDown(e : MouseEvent, nodeId : number, io : ProcessFlowInputOutput, isInput: boolean) {
+        onMouseDownPlug(e : MouseEvent, nodeId : number, io : ProcessFlowInputOutput, isInput: boolean) {
             if (e.button != 0) {
                 return
             }
 
-            e.stopPropagation()
             this.drawingEdge = true
             this.tempEdgeStart.nodeId = nodeId
             this.tempEdgeStart.io = io
             this.tempEdgeStart.isInput = isInput
             this.doMoveTempEdgeEnd(e)
         },
-        onPlugMouseUp(e : MouseEvent, nodeId : number, io : ProcessFlowInputOutput, isInput: boolean) {
+        onMouseUpPlug(e : MouseEvent, nodeId : number, io : ProcessFlowInputOutput, isInput: boolean) {
             if (e.button != 0) {
                 return
             }
 
-            e.stopPropagation()
-            this.saveTemporaryEdge()
+            this.saveTemporaryEdge(io, isInput)
         },
     },
 })

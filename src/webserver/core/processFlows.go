@@ -13,9 +13,6 @@ type ProcessFlow struct {
 	LastUpdatedTime time.Time     `db:"last_updated_time"`
 }
 
-type ProcessFlowEdge struct {
-}
-
 type ProcessFlowGraph struct {
 	Nodes []*ProcessFlowNode
 }

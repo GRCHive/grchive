@@ -38,6 +38,7 @@ go_library(
         "core/processFlows.go",
         "core/processFlowNodes.go",
         "core/processFlowInputOutput.go",
+        "core/processFlowEdges.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",
@@ -58,6 +59,7 @@ go_library(
         "database/utility.go",
         "database/processFlowNodes.go",
         "database/processFlowIO.go",
+        "database/processFlowEdges.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 
@@ -119,6 +121,7 @@ go_library(
         "rest/processFlow.go",
         "rest/processFlowNodes.go",
         "rest/processFlowIO.go",
+        "rest/processFlowEdges.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",

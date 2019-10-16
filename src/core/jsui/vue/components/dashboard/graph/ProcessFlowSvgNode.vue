@@ -3,12 +3,13 @@
        :transform="`translate(${tx}, ${ty})`"
        v-if="ready"
        ref="basegroup"
+       class="node"
     >
         <rect :width="nodeLayout.boxWidth"
               :height="nodeLayout.boxHeight"
               :class="styleClass + ` ` + (isNodeSelected ? `node-selected-box` : `node-box`)"
-              @mousedown="onMouseDown($event)"
-              @mouseup="onMouseUp($event)"
+              @mousedown="onMouseDownNode($event)"
+              @mouseup="onMouseUpNode($event)"
         ></rect>
         <g ref="textgroup"
            class="no-pointer"
@@ -70,8 +71,8 @@
                       :transform="`translate(
                         ${nodeLayout.groupLayout[group].inputLayouts[input.Id].plugTransform.tx},
                         ${nodeLayout.groupLayout[group].inputLayouts[input.Id].plugTransform.ty})`"
-                      @mousedown="onPlugMouseDown($event, input, true)"
-                      @mouseup="onPlugMouseUp($event, input, true)"
+                      @mousedown="onMouseDownPlug($event, input, true)"
+                      @mouseup="onMouseUpPlug($event, input, true)"
                 ></rect>
 
                 <rect :width="plugWidth"
@@ -81,8 +82,8 @@
                       :transform="`translate(
                         ${nodeLayout.groupLayout[group].outputLayouts[output.Id].plugTransform.tx},
                         ${nodeLayout.groupLayout[group].outputLayouts[output.Id].plugTransform.ty})`"
-                      @mousedown="onPlugMouseDown($event, output, false)"
-                      @mouseup="onPlugMouseUp($event, output, false)"
+                      @mousedown="onMouseDownPlug($event, output, false)"
+                      @mouseup="onMouseUpPlug($event, output, false)"
                 ></rect>
             </g>
         </g>
@@ -117,17 +118,21 @@ export default Vue.extend({
         }
     },
     methods : {
-        onMouseDown(e: MouseEvent) {
-            this.$emit("onmousedown", e, this.node.Id)
+        onMouseDownNode(e: MouseEvent) {
+            this.$emit("onnodemousedown", e, this.node.Id)
+            e.stopPropagation()
         },
-        onMouseUp(e: MouseEvent) {
-            this.$emit("onmouseup", e, this.node.Id)
+        onMouseUpNode(e: MouseEvent) {
+            this.$emit("onnodemouseup", e, this.node.Id)
+            e.stopPropagation()
         },
-        onPlugMouseDown(e : MouseEvent, io : ProcessFlowInputOutput, isInput: boolean) {
+        onMouseDownPlug(e : MouseEvent, io : ProcessFlowInputOutput, isInput: boolean) {
             this.$emit("onplugmousedown", e, this.node.Id, io, isInput)
+            e.stopPropagation()
         },
-        onPlugMouseUp(e : MouseEvent, io : ProcessFlowInputOutput, isInput: boolean) {
+        onMouseUpPlug(e : MouseEvent, io : ProcessFlowInputOutput, isInput: boolean) {
             this.$emit("onplugmouseup", e, this.node.Id, io, isInput)
+            e.stopPropagation()
         },
         reassociateComponent() {
             Vue.nextTick(() => {
@@ -199,6 +204,10 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+
+.node {
+    z-index: 2;
+}
 
 .no-pointer {
     pointer-events: none;

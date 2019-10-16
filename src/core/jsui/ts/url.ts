@@ -55,3 +55,5 @@ export const editProcessFlowNodeAPIUrl: string = "/api/flownodes/edit"
 export function createUpdateProcessFlowApiUrl(id : number) : string {
     return "/api/flows/" + id.toString() + "/update"
 }
+
+export const newProcessFlowEdgeAPIUrl: string = "/api/flowedges/new"
