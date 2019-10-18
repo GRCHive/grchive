@@ -50,6 +50,7 @@
 
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
+import LocalStorage from '../../../ts/localSettings'
 import {createLogoutUrl, createMyAccountUrl, createMailtoUrl } from '../../../ts/url'
 
 export default Vue.extend({
@@ -69,7 +70,7 @@ export default Vue.extend({
     },
     methods: {
         clickNav() {
-            VueSetup.store.commit('toggleMiniNavBar')
+            LocalStorage.commit('setMiniNavBar', !LocalStorage.state.miniNavBar)
         }
     }
 })

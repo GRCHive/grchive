@@ -24,7 +24,6 @@ interface FullProcessFlowDataResponse {
 
 const store : StoreOptions<VuexState> = {
     state: {
-        miniMainNavBar: false,
         primaryNavBarWidth: 256,
         allProcessFlowBasicData: [],
         currentProcessFlowIndex : 0,
@@ -34,9 +33,6 @@ const store : StoreOptions<VuexState> = {
         selectedEdgeId: -1
     },
     mutations: {
-        toggleMiniNavBar(state) {
-            state.miniMainNavBar = !state.miniMainNavBar
-        },
         changePrimaryNavBarWidth(state, width) {
             state.primaryNavBarWidth = width
         },
@@ -164,6 +160,7 @@ const store : StoreOptions<VuexState> = {
     },
     actions: {
         mountPrimaryNavBar(context, nav) {
+            context.commit('changePrimaryNavBarWidth', parseInt(nav.$el.style.width, 10))
             let observer = new MutationObserver(function(records : MutationRecord[], _: MutationObserver) {
                 for (let mutation of records) {
                     if (mutation.type == "attributes" && mutation.attributeName == "style") {

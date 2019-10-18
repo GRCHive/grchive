@@ -1,5 +1,4 @@
 interface VuexState {
-    miniMainNavBar : boolean,
     primaryNavBarWidth : number,
     allProcessFlowBasicData : ProcessFlowBasicData[],
     currentProcessFlowIndex: number,

@@ -53,6 +53,7 @@ import ProcessFlowAttributeEditor from '../../components/dashboard/ProcessFlowAt
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
 import VueRouter from 'vue-router'
+import LocalSettings from '../../../ts/localSettings'
 
 export default Vue.extend({
     components : {
@@ -70,7 +71,6 @@ export default Vue.extend({
         attrEditorTop: 0,
         attrEditorBottom: 0,
         attrEditorLeft: 0,
-        showHideAttrEditor: true,
         attrEditorClipWidth: 256,
         rendererClientRect: <IDOMRect>{
             top: 0,
@@ -128,7 +128,7 @@ export default Vue.extend({
             }, 1000)
         },
         clickAttributePullTab() {
-            this.showHideAttrEditor = !this.showHideAttrEditor
+            LocalSettings.commit('setShowHideAttributeEditor', !this.showHideAttrEditor)
             this.trackAttributeEditor()
         },
         trackAttributeEditor() {
@@ -145,6 +145,9 @@ export default Vue.extend({
         }
     },
     computed: {
+        showHideAttrEditor() {
+            return LocalSettings.state.showHideAttributeEditor
+        },
         isNodeSelected() : boolean {
             return VueSetup.store.getters.isNodeSelected
         },

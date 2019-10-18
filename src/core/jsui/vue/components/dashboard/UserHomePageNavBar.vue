@@ -7,6 +7,7 @@
 
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
+import LocalSettings from '../../../ts/localSettings'
 import { createMyAccountUrl } from '../../../ts/url'
 import GenericNavBar from '../GenericNavBar.vue'
 
@@ -28,7 +29,7 @@ export default Vue.extend({
     },
     computed: {
         mini() : boolean {
-            return VueSetup.store.state.miniMainNavBar
+            return LocalSettings.state.miniNavBar
         }
     },
     components: {
