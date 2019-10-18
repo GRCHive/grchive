@@ -14,6 +14,7 @@ func BuildTemplateParams(w http.ResponseWriter, r *http.Request, needCsrf bool) 
 
 	_, err := webcore.FindSessionInContext(r.Context())
 	params["HasSession"] = (err == nil)
+	params["Host"] = r.Host
 	return params
 }
 

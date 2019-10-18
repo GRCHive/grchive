@@ -164,6 +164,12 @@ export default Vue.extend({
                     true);
             })
         },
+        endMoveNode(nodeId: number) {
+            if (this.moveNodeActive && nodeId != -1) {
+                RenderLayout.store.dispatch('syncNodeTransform', {nodeId})
+            }
+            this.moveNodeActive = false
+        },
         doMoveNode(e : MouseEvent) {
             if (!VueSetup.store.getters.isNodeSelected) {
                 return
@@ -212,7 +218,7 @@ export default Vue.extend({
                 return
             }
 
-            this.moveNodeActive = false
+            this.endMoveNode(nodeId)
             this.drawingEdge = false
         },
         onMouseDown(e : MouseEvent) {
@@ -235,7 +241,7 @@ export default Vue.extend({
             }
         },
         onMouseLeave(e : MouseEvent) {
-            this.moveNodeActive = false
+            this.endMoveNode(VueSetup.store.state.selectedNodeId) 
             this.moveViewBoxActive = false
             this.drawingEdge = false
         },

@@ -10,7 +10,7 @@ import (
 
 var upgrader = websocket.Upgrader{}
 
-type WebsocketHandler = func(conn *websocket.Conn)
+type WebsocketHandler = func(conn *websocket.Conn, r *http.Request)
 type HTTPHandler = func(w http.ResponseWriter, r *http.Request)
 
 func RegisterPaths(r *mux.Router) {
@@ -32,6 +32,6 @@ func createWebsocketWrapper(handler WebsocketHandler) HTTPHandler {
 		}
 
 		defer c.Close()
-		handler(c)
+		handler(c, r)
 	}
 }

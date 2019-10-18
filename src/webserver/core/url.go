@@ -69,4 +69,5 @@ const ApiUserProfileUrl string = "/profile"
 
 // Websocket
 const WebsocketPrefix string = "/ws"
-const WebsocketProcessFlowNodeDisplaySettingsEndpoint = "/flownodedisp"
+
+var WebsocketProcessFlowNodeDisplaySettingsEndpoint = fmt.Sprintf("/flownodedisp/{%s}", ProcessFlowQueryId)

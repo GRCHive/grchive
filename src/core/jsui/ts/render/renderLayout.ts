@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex, { StoreOptions } from 'vuex'
 import MetadataStore from '../metadata'
+import { connectProcessFlowNodeDisplaySettingsWebsocket } from '../websocket/processFlowNodeDisplaySettings'
 
 // A Vuex store to share the layout of the process flow (nodes, plugs, etc.)
 // across the entire application.
@@ -22,6 +23,8 @@ const bodyHeight: number = 19
 const inputOutputGap : number = 200
 const plugWidth : number = 20
 const plugHeight: number = 20
+
+let websocketConnection : WebSocket
 
 function processIOGroupLayout(layout : IOGroupLayout, initialTransform: TransformData) {
     let groupStartTransform = {...initialTransform}
@@ -190,6 +193,18 @@ function onUpdateAssociatedNode(layout : NodeLayout) {
     }
 }
 
+function sendWebsocketUpdate(nodeId: number, layout: NodeLayout) {
+    let data : Object = {...layout}
+    // Remove associatedNode since JSON can't serialize it.
+    //@ts-ignore
+    delete data.associatedNode
+
+    websocketConnection.send(JSON.stringify({
+        NodeId: nodeId,
+        Settings: data
+    }))
+}
+
 const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
     state: {
         nodeLayouts : Object() as Record<number, NodeLayout>,
@@ -200,12 +215,30 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
             state.ready = false
             state.nodeLayouts = Object() as Record<number, NodeLayout>
         },
-        setNodeLayout(state, {nodeId, layout}) {
+        setNodeLayout(state, {nodeId, layout, isDefault}) {
             Vue.set(state.nodeLayouts, nodeId, layout)
+            if (!isDefault) {
+                sendWebsocketUpdate(nodeId, layout)
+            }
         },
         addNodeDisplayTranslation(state, {nodeId, tx, ty}) {
+            // Don't send websocket update every time this happens
+            // since you'll get some noticeable lag.
+            // Have the UI send a separate update once the user finishes
+            // moving the element around.
             state.nodeLayouts[nodeId].transform.tx += tx
             state.nodeLayouts[nodeId].transform.ty += ty
+        },
+        setNodeDisplayTranslation(state, {nodeId, tx, ty, sendUpdate}) {
+            // Don't send websocket update every time this happens
+            // since you'll get some noticeable lag.
+            // Have the UI send a separate update once the user finishes
+            // moving the element around.
+            state.nodeLayouts[nodeId].transform.tx = tx
+            state.nodeLayouts[nodeId].transform.ty = ty
+            if (sendUpdate) {
+                sendWebsocketUpdate(nodeId, state.nodeLayouts[nodeId])
+            }
         },
         setReady(state) {
             state.ready = true
@@ -220,15 +253,39 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
     actions: {
         // initialize should be called as late as possible to ensure that the
         // metadata datastore has already been fully initialized.
-        initialize(context, {processFlowStore}) {
+        initialize(context, {host, csrf, processFlowStore}) {
             processFlowStore.watch((state : VuexState) => {
                 return state.currentProcessFlowFullData
             }, (newFlowData : FullProcessFlowData, oldFlowData: FullProcessFlowData) => {
+                    let newFlow : boolean = oldFlowData.FlowId != newFlowData.FlowId
                     context.dispatch(
-                        oldFlowData.FlowId != newFlowData.FlowId ?
+                         newFlow ?
                             'recomputeLayout' :
                             'mergeLayout',
                         processFlowStore.state.currentProcessFlowFullData)
+
+                    if (newFlow) {
+                        if (!!websocketConnection && websocketConnection.readyState == WebSocket.OPEN) {
+                            websocketConnection.close()
+                        }
+
+                        websocketConnection = connectProcessFlowNodeDisplaySettingsWebsocket(host, csrf, processFlowStore.state.currentProcessFlowFullData.FlowId)
+                        websocketConnection.onclose = () => {
+                            // TODO Need to notify user of the close and tell them to refresh when relevant?
+                        }
+                        websocketConnection.onmessage = (e : MessageEvent) => {
+                            // For now only grab the node's transform since everything else
+                            // can just be computed.
+                            let data : { NodeId: number, Settings: NodeLayout }= JSON.parse(e.data)
+                            context.commit('setNodeDisplayTranslation', {
+                                nodeId: data.NodeId,
+                                tx: data.Settings.transform.tx,
+                                ty: data.Settings.transform.ty,
+                                sendUpdate: false  
+                            })
+                        }
+                    }
+
             }, {
                 deep: true
             })
@@ -242,12 +299,11 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
             for (let nodeKey of processFlow.NodeKeys) {
                 context.commit('setNodeLayout', {
                     nodeId: nodeKey,
-                    layout: createDefaultNodeLayout(processFlow.Nodes[nodeKey])
+                    layout: createDefaultNodeLayout(processFlow.Nodes[nodeKey]),
+                    isDefault: true
                 })
             }
             context.commit('setReady')
-
-            // TODO: Query server for more up-to-date settings.
         },
         // Assume that we already have display data for the input process flow and only
         // want to update where necessary.
@@ -257,7 +313,8 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
                     nodeId: nodeKey,
                     layout: mergeNodeLayout(
                                 processFlow.Nodes[nodeKey],
-                                context.state.nodeLayouts[nodeKey])
+                                context.state.nodeLayouts[nodeKey]),
+                    isDefault: false
                 })
             }
         },
@@ -269,6 +326,9 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
             Vue.nextTick(() => {
                 context.commit('updateNodeLayoutWithComponent', nodeId)
             })
+        },
+        syncNodeTransform(context, {nodeId}) {
+            sendWebsocketUpdate(nodeId, context.state.nodeLayouts[nodeId])
         }
     },
     getters: {

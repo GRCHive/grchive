@@ -26,7 +26,12 @@ function mountApp(inData : Object) {
             MetadataStore.dispatch('initialize', {csrf: inData.csrf})
 
             //@ts-ignore
-            RenderLayout.store.dispatch('initialize', {processFlowStore: vueOpts.store})
+            RenderLayout.store.dispatch('initialize', {
+                //@ts-ignore
+                host: inData.host,
+                //@ts-ignore
+                csrf: inData.csrf,
+                processFlowStore: vueOpts.store})
         }
     })
 }

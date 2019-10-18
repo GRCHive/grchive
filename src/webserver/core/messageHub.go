@@ -11,27 +11,33 @@ import (
 // running instances of the webserver.
 
 type MessageType uint
+type MessageSubtype string
 type MessagePayload interface{}
 
 const (
 	UpdateDisplaySettingsForProcessFlowNode MessageType = iota
 )
 
-type ListenerMap map[MessageType]*list.List
+type ListenerMap map[MessageType]map[MessageSubtype]*list.List
 
 var registeredListeners = make(ListenerMap)
 var registerMutex sync.RWMutex
 
-func SendMessage(typ MessageType, payload MessagePayload) {
+func SendMessage(typ MessageType, subtyp MessageSubtype, payload MessagePayload) {
 	// TODO: Make this work for multiple instances (e.g. Cloud PubSub?)
-	ReceiveMessage(typ, payload)
+	ReceiveMessage(typ, subtyp, payload)
 }
 
-func ReceiveMessage(typ MessageType, payload MessagePayload) {
+func ReceiveMessage(typ MessageType, subtyp MessageSubtype, payload MessagePayload) {
 	registerMutex.RLock()
 	defer registerMutex.RUnlock()
 
-	listeners, ok := registeredListeners[typ]
+	subtypeListeners, ok := registeredListeners[typ]
+	if !ok {
+		return
+	}
+
+	listeners, ok := subtypeListeners[subtyp]
 	if !ok {
 		return
 	}
@@ -42,24 +48,35 @@ func ReceiveMessage(typ MessageType, payload MessagePayload) {
 	}
 }
 
-func RegisterListener(typ MessageType, c chan MessagePayload) *list.Element {
+func RegisterListener(typ MessageType, subtyp MessageSubtype, c chan MessagePayload) *list.Element {
 	registerMutex.Lock()
 	defer registerMutex.Unlock()
 
-	listeners, ok := registeredListeners[typ]
+	subtypeListeners, ok := registeredListeners[typ]
 	if !ok {
-		registeredListeners[typ] = list.New()
-		listeners = registeredListeners[typ]
+		registeredListeners[typ] = make(map[MessageSubtype]*list.List)
+		subtypeListeners = registeredListeners[typ]
+	}
+
+	listeners, ok := subtypeListeners[subtyp]
+	if !ok {
+		subtypeListeners[subtyp] = list.New()
+		listeners = subtypeListeners[subtyp]
 	}
 
 	return listeners.PushBack(c)
 }
 
-func UnregisterListener(typ MessageType, e *list.Element) {
+func UnregisterListener(typ MessageType, subtyp MessageSubtype, e *list.Element) {
 	registerMutex.Lock()
 	defer registerMutex.Unlock()
 
-	listeners, ok := registeredListeners[typ]
+	subtypeListeners, ok := registeredListeners[typ]
+	if !ok {
+		return
+	}
+
+	listeners, ok := subtypeListeners[subtyp]
 	if !ok {
 		return
 	}
