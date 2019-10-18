@@ -7,6 +7,7 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/render"
 	"gitlab.com/b3h47pte/audit-stuff/rest"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
+	"gitlab.com/b3h47pte/audit-stuff/websocket"
 	"net/http"
 	"os"
 	"time"
@@ -50,6 +51,7 @@ func main() {
 	dynamicRouter.HandleFunc(core.LoginUrl, render.RenderLoginPage).Methods("GET").Name(string(webcore.LoginRouteName))
 	dynamicRouter.HandleFunc(core.LearnMoreUrl, render.RenderLearnMorePage).Methods("GET").Name(string(webcore.LearnMoreRouteName))
 	rest.RegisterPaths(dynamicRouter)
+	websocket.RegisterPaths(dynamicRouter)
 	createDashboardSubrouter(dynamicRouter)
 	webcore.RegisterRouter(dynamicRouter)
 

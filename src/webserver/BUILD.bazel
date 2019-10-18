@@ -39,6 +39,7 @@ go_library(
         "core/processFlowNodes.go",
         "core/processFlowInputOutput.go",
         "core/processFlowEdges.go",
+        "core/messageHub.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",
@@ -60,9 +61,11 @@ go_library(
         "database/processFlowNodes.go",
         "database/processFlowIO.go",
         "database/processFlowEdges.go",
+        "database/processFlowNodeDisplaySettings.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 
+        "@com_github_jmoiron_sqlx_types//:go_default_library", 
         "@com_github_lib_pq//:go_default_library", 
         ":webserver_core_library"
     ],
@@ -112,6 +115,22 @@ go_library(
 )
 
 go_library(
+    name = "webserver_websocket_library",
+    srcs = [
+        "websocket/websocket.go",
+        "websocket/processFlowNodeDisplaySettings.go"
+    ],
+    deps = [
+        ":webserver_core_library",
+        ":webserver_database_library",
+        ":webserver_webcore_library",
+        "@com_github_gorilla_mux//:go_default_library",
+        "@com_github_gorilla_websocket//:go_default_library",
+    ],
+    importpath = "gitlab.com/b3h47pte/audit-stuff/websocket"
+)
+
+go_library(
     name = "webserver_rest_library",
     srcs = [
         "rest/rest.go",
@@ -145,7 +164,8 @@ go_binary(
         ":webserver_webcore_library",
         ":webserver_database_library",
         ":webserver_render_library",
-        ":webserver_rest_library"
+        ":webserver_rest_library",
+        ":webserver_websocket_library",
     ],
     data = [
         ":templates",

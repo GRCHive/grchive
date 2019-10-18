@@ -66,3 +66,7 @@ const ApiProcessFlowIOEditUrl string = "/edit"
 var ApiUserUrl string = fmt.Sprintf("/user/{%s}", DashboardUserQueryId)
 
 const ApiUserProfileUrl string = "/profile"
+
+// Websocket
+const WebsocketPrefix string = "/ws"
+const WebsocketProcessFlowNodeDisplaySettingsEndpoint = "/flownodedisp"

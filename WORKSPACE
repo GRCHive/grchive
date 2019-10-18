@@ -73,6 +73,14 @@ go_repository(
 )
 
 go_repository(
+    name = "com_github_jmoiron_sqlx_types",
+    importpath = "github.com/jmoiron/sqlx/types",
+    urls = ["https://github.com/jmoiron/sqlx/archive/v1.2.0.zip"],
+    strip_prefix = "sqlx-1.2.0/types",
+    type = "zip",
+)
+
+go_repository(
     name = "com_github_lib_pq",
     importpath = "github.com/lib/pq",
     tag = "v1.2.0"
@@ -94,6 +102,12 @@ go_repository(
     name = "org_golang_x_crypto",
     importpath = "golang.org/x/crypto",
     commit = "f9e2070545dcd4128a854a97ddf10fbfc3c4b6e4"
+)
+
+go_repository(
+    name = "com_github_gorilla_websocket",
+    importpath = "github.com/gorilla/websocket",
+    tag = "v1.4.1"
 )
 
 # NODE
