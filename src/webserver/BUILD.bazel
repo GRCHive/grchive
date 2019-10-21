@@ -40,6 +40,7 @@ go_library(
         "core/processFlowInputOutput.go",
         "core/processFlowEdges.go",
         "core/messageHub.go",
+        "core/risks.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",
@@ -62,6 +63,7 @@ go_library(
         "database/processFlowIO.go",
         "database/processFlowEdges.go",
         "database/processFlowNodeDisplaySettings.go",
+        "database/risks.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 
@@ -141,6 +143,7 @@ go_library(
         "rest/processFlowNodes.go",
         "rest/processFlowIO.go",
         "rest/processFlowEdges.go",
+        "rest/risks.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",

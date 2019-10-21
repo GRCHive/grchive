@@ -67,6 +67,10 @@ var ApiUserUrl string = fmt.Sprintf("/user/{%s}", DashboardUserQueryId)
 
 const ApiUserProfileUrl string = "/profile"
 
+// API - Risks
+const ApiRiskPrefix string = "/risk"
+const ApiNewRiskEndpoint string = "/new"
+
 // Websocket
 const WebsocketPrefix string = "/ws"
 

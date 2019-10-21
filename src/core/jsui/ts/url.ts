@@ -63,3 +63,5 @@ export const deleteProcessFlowEdgeAPIUrl: string = "/api/flowedges/delete"
 export function createProcessFlowNodeDisplaySettingsWebsocket(host : string, csrf : string, flowId: number) : string {
     return `ws://${host}/ws/flownodedisp/${flowId.toString()}?csrf=${csrf}`
 }
+
+export const newRiskAPIUrl : string = "/api/risk/new"
