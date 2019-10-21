@@ -7,13 +7,15 @@
                       :disabled="!canEditAttr"
                       filled
                       :rules="[rules.required, rules.createMaxLength(256)]"
+                      v-on:keydown.stop
                 ></v-text-field>
 
                 <v-textarea v-model="currentNode.Description"
                             label="Description"
                             filled
-                            :disabled="!canEditAttr">
-                </v-textarea> 
+                            :disabled="!canEditAttr"
+                            v-on:keydown.stop
+                ></v-textarea> 
 
                 <v-select v-model="currentNode.NodeTypeId"
                           :items="nodeTypeItems"

@@ -16,11 +16,13 @@
 
             <v-list-item-content v-else class="mr-2">
                 <v-form ref="editForm" v-model="formValid">
-                    <v-text-field v-model="editName" label="Name" filled :rules="[rules.required, rules.createMaxLength(256)]" dense class="title">
-                    </v-text-field>
+                    <v-text-field v-model="editName" label="Name" filled :rules="[rules.required, rules.createMaxLength(256)]" dense class="title"
+                                  v-on:keydown.stop
+                    ></v-text-field>
 
-                    <v-textarea v-model="editDescription" label="Description" filled dense class="subtitle-1">
-                    </v-textarea> 
+                    <v-textarea v-model="editDescription" label="Description" filled dense class="subtitle-1"
+                                v-on:keydown.stop
+                    ></v-textarea> 
                 </v-form>
             </v-list-item-content>
 
