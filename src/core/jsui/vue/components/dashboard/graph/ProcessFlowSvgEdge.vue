@@ -145,8 +145,9 @@ export default Vue.extend({
 }
 
 .clickEdge {
+    stroke: transparent;
     stroke-opacity: 0%;
-    stroke-width: 6px;
+    stroke-width: 10px;
     fill: transparent;
 }
 
