@@ -138,8 +138,8 @@ const store : StoreOptions<VuexState> = {
             }
             state.currentProcessFlowFullData.EdgeKeys.splice(
                 state.currentProcessFlowFullData.EdgeKeys.findIndex(
-                    (ele) => { ele == edgeId },
-                1))
+                    (ele) => { ele == edgeId }),
+                1)
             Vue.delete(
                 state.currentProcessFlowFullData.Edges,
                 edgeId)
@@ -151,8 +151,8 @@ const store : StoreOptions<VuexState> = {
 
             state.currentProcessFlowFullData.NodeKeys.splice(
                 state.currentProcessFlowFullData.NodeKeys.findIndex(
-                    (ele) => { ele == nodeId},
-                1))
+                    (ele) => { ele == nodeId}),
+                1)
             Vue.delete(
                 state.currentProcessFlowFullData.Nodes,
                 nodeId)
@@ -236,8 +236,8 @@ const store : StoreOptions<VuexState> = {
                     csrf: csrf,
                     edgeId: edgeId
                 }).then(() => {
-                    context.commit('deleteEdgeById', edgeId)
                     context.commit('setSelectedProcessFlowEdge', -1)
+                    context.commit('deleteEdgeById', edgeId)
                 })
             }
 
@@ -247,8 +247,8 @@ const store : StoreOptions<VuexState> = {
                     csrf: csrf,
                     nodeId: nodeId
                 }).then(() => {
-                    context.dispatch('deleteNodeById', nodeId)
                     context.commit('setSelectedProcessFlowNode', -1)
+                    context.dispatch('deleteNodeById', nodeId)
                 })
             }
         },
