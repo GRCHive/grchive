@@ -57,7 +57,7 @@ export default Vue.extend({
         },
         ready() : boolean {
             const inputRdy = RenderLayout.store.getters.isReadyForNode(this.startNodeId)
-            if (!this.usePropEnd) {
+            if (this.usePropEnd) {
                 return inputRdy
             }
             const outputRdy = RenderLayout.store.getters.isReadyForNode(this.endNodeId)
@@ -80,13 +80,16 @@ export default Vue.extend({
             // Compute bezier control points.
             // The controls points just point directly left/right for simplicity.
             let halfwayX : number = (this.startPoint.x + this.endPoint.x) / 2.0
+            let cPoint1x : number = this.computeControlPointX(this.startPoint.x, halfwayX, this.startIsInput)
+            let cPoint2x : number = this.computeControlPointX(this.endPoint.x, halfwayX, this.endIsInput)
+
             let cPoint1 = <Point2D>{
-                x: halfwayX,
+                x: cPoint1x,
                 y: this.startPoint.y
             }
 
             let cPoint2 = <Point2D>{
-                x: halfwayX,
+                x: cPoint2x,
                 y: this.endPoint.y
             }
             return `M ${this.startPoint.x} ${this.startPoint.y}
@@ -98,6 +101,24 @@ export default Vue.extend({
     methods: {
         onClick(e : MouseEvent){ 
             this.$emit("onedgeclick", e)
+        },
+        // Computes the proper control point X so that the edge is visible connecting into the 
+        // plug even when the input is to the left of the output. I don't particularly like
+        // the math in here since it will create extra long curves if the two nodes are very far apart...
+        computeControlPointX(plugX : number, desiredX : number, isInput : boolean) : number {
+            if (isInput) {
+                if (plugX < desiredX) {
+                    return plugX - (desiredX - plugX)
+                } else {
+                    return desiredX
+                }
+            } else {
+                if (plugX > desiredX) {
+                    return plugX + (plugX - desiredX)
+                } else {
+                    return desiredX
+                }
+            }
         }
     }
 })

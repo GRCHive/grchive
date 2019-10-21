@@ -3,11 +3,11 @@ VALUES
     ('Activity (Manual)', ''),
     ('Activity (Automated)', ''),
     ('Decision', ''),
-    ('Start', ''),
-    ('General Ledger Entry', ''),
+    ('Event', ''),
+    ('General Ledger', ''),
     ('System', '');
 
 INSERT INTO process_flow_input_output_type(name)
 VALUES
-    ('Execution'),
+    ('Flow'),
     ('Data');

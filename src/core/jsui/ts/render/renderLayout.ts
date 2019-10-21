@@ -133,9 +133,9 @@ function createDefaultNodeLayout(node : ProcessFlowNode) : NodeLayout {
         addIOToGroupLayout(layout, output, false)
     }
 
-    // Sort groups alphabetically and pull 'Execution' to the front.
+    // Sort groups alphabetically and pull 'Flow' to the front.
     layout.groupKeys.sort()
-    const executionKey = 'Execution'
+    const executionKey = 'Flow'
     const executionIdx = layout.groupKeys.findIndex((ele) => ele == executionKey)
     if (executionIdx != -1) {
         layout.groupKeys.splice(executionIdx, 1)
