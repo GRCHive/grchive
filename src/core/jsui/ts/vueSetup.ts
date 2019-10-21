@@ -138,7 +138,7 @@ const store : StoreOptions<VuexState> = {
             }
             state.currentProcessFlowFullData.EdgeKeys.splice(
                 state.currentProcessFlowFullData.EdgeKeys.findIndex(
-                    (ele) => { ele == edgeId }),
+                    (ele) => { return ele === edgeId }),
                 1)
             Vue.delete(
                 state.currentProcessFlowFullData.Edges,
@@ -151,7 +151,7 @@ const store : StoreOptions<VuexState> = {
 
             state.currentProcessFlowFullData.NodeKeys.splice(
                 state.currentProcessFlowFullData.NodeKeys.findIndex(
-                    (ele) => { ele == nodeId}),
+                    (ele) => { return ele == nodeId}),
                 1)
             Vue.delete(
                 state.currentProcessFlowFullData.Nodes,
