@@ -250,6 +250,14 @@ func getProcessFlowFullData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	org, err := webcore.FindOrganizationInContext(r.Context())
+	if err != nil {
+		core.Warning("Can't find organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
 	graph := core.ProcessFlowGraph{}
 	graph.Nodes, err = database.FindAllNodesForProcessFlow(flowId)
 	if err != nil {
@@ -265,7 +273,7 @@ func getProcessFlowFullData(w http.ResponseWriter, r *http.Request) {
 		jsonWriter.Encode(struct{}{})
 		return
 	}
-	graph.Risks, err = database.FindAllRisksForProcessFlow(flowId)
+	graph.Risks, err = database.FindAllRiskForOrganization(org)
 	if err != nil {
 		core.Warning("Failed to obtain risks: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

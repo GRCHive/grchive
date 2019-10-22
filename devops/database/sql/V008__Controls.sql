@@ -1,6 +1,7 @@
 CREATE TABLE process_flow_controls (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(256) NOT NULL
+    name VARCHAR(256) NOT NULL,
+    org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE
 );
 
 CREATE TABLE process_flow_control_node (

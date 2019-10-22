@@ -202,6 +202,12 @@ const store : StoreOptions<VuexState> = {
                 let arr = state.currentProcessFlowFullData.Risks[riskId].RelevantNodeIds
                 arr.splice(arr.findIndex((ele) => ele == nodeId), 1)
             }
+        },
+        addRisksToNode(state, {nodeId, riskIds}) {
+            state.currentProcessFlowFullData.Nodes[nodeId].RiskIds.push(...riskIds)
+            for (let id of riskIds) {
+                state.currentProcessFlowFullData.Risks[id].RelevantNodeIds.push(nodeId)
+            }
         }
     },
     actions: {

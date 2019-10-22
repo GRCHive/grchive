@@ -18,3 +18,12 @@ interface TDeleteRiskInput {
 
 interface TDeleteRiskOutput {
 }
+
+interface TAddExistingRiskInput {
+    csrf: string
+    nodeId: number
+    riskIds: number[]
+}
+
+interface TAddExistingRiskOutput {
+}

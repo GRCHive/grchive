@@ -28,6 +28,10 @@ func registerAPIPaths(r *mux.Router) {
 	s.Use(webcore.CreateVerifyCSRFMiddleware(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 	}))
+	s.Use(webcore.CreateObtainOrganizationInfoFromUserInContextMiddleware(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	}))
+
 	registerUserAPIPaths(s)
 	registerProcessFlowAPIPaths(s)
 	registerProcessFlowNodesAPIPaths(s)
@@ -78,4 +82,5 @@ func registerRiskAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiRiskPrefix).Subrouter()
 	s.HandleFunc(core.ApiNewRiskEndpoint, createNewRisk).Methods("POST").Name(webcore.NewRiskRouteName)
 	s.HandleFunc(core.ApiDeleteRiskEndpoint, deleteRisks).Methods("POST").Name(webcore.DeleteRiskRouteName)
+	s.HandleFunc(core.ApiAddRiskToNodeEndpoint, addRisksToNode).Methods("POST").Name(webcore.AddRiskToNodeRouteName)
 }

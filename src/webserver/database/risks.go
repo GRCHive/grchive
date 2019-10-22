@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"strings"
 )
@@ -47,6 +48,22 @@ func DeleteRisks(nodeId int64, riskIds []int64, global bool) error {
 	return err
 }
 
+func AddRisksToNode(riskIds []int64, nodeId int64) error {
+	tx := dbConn.MustBegin()
+	for _, id := range riskIds {
+		_, err := tx.Exec(`
+			INSERT INTO process_flow_risk_node (risk_id, node_id)
+			VALUES ($1, $2)
+		`, id, nodeId)
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
 func InsertNewRisk(risk *core.Risk) error {
 	if len(risk.RelevantNodeIds) == 0 {
 		return errors.New("No relevant node IDs")
@@ -56,8 +73,8 @@ func InsertNewRisk(risk *core.Risk) error {
 
 	tx := dbConn.MustBegin()
 	rows, err := tx.NamedQuery(`
-		INSERT INTO process_flow_risks (name, description)
-		VALUES (:name, :description)
+		INSERT INTO process_flow_risks (name, description, org_id)
+		VALUES (:name, :description, :org.id)
 		RETURNING id
 	`, risk)
 	if err != nil {
@@ -95,20 +112,9 @@ func InsertNewRisk(risk *core.Risk) error {
 	return err
 }
 
-func FindAllRisksForProcessFlow(flowId int64) ([]*core.Risk, error) {
+func findAllRisksFromDbHelper(stmt *sqlx.Stmt, args ...interface{}) ([]*core.Risk, error) {
 	risks := []*core.Risk{}
-	rows, err := dbConn.Queryx(`
-		SELECT 
-			risk.*,
-			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(DISTINCT node.id), null)) AS node
-		FROM process_flow_risks as risk
-		INNER JOIN process_flow_risk_node AS risknode
-			ON risknode.risk_id = risk.id
-		INNER JOIN process_flow_nodes AS node
-			ON risknode.node_id = node.id
-		WHERE node.process_flow_id = $1
-		GROUP BY risk.id
-	`, flowId)
+	rows, err := stmt.Queryx(args...)
 	if err != nil {
 		return nil, err
 	}
@@ -135,4 +141,44 @@ func FindAllRisksForProcessFlow(flowId int64) ([]*core.Risk, error) {
 	}
 
 	return risks, nil
+}
+
+func FindAllRisksForProcessFlow(flowId int64) ([]*core.Risk, error) {
+	stmt, err := dbConn.Preparex(`
+		SELECT 
+			risk.*,
+			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(DISTINCT node.id), null)) AS node
+		FROM process_flow_risks as risk
+		INNER JOIN process_flow_risk_node AS risknode
+			ON risknode.risk_id = risk.id
+		INNER JOIN process_flow_nodes AS node
+			ON risknode.node_id = node.id
+		WHERE node.process_flow_id = $1
+		GROUP BY risk.id
+	`)
+	if err != nil {
+		return nil, err
+	}
+
+	return findAllRisksFromDbHelper(stmt, flowId)
+}
+
+func FindAllRiskForOrganization(org *core.Organization) ([]*core.Risk, error) {
+	stmt, err := dbConn.Preparex(`
+		SELECT 
+			risk.*,
+			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(DISTINCT node.id), null)) AS node
+		FROM process_flow_risks as risk
+		LEFT JOIN process_flow_risk_node AS risknode
+			ON risknode.risk_id = risk.id
+		LEFT JOIN process_flow_nodes AS node
+			ON risknode.node_id = node.id
+		WHERE risk.org_id = $1
+		GROUP BY risk.id
+	`)
+	if err != nil {
+		return nil, err
+	}
+
+	return findAllRisksFromDbHelper(stmt, org.Id)
 }

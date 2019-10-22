@@ -56,9 +56,18 @@
 
         <v-list-item class="pa-1">
             <v-list-item-action class="ma-1">
-                <v-btn color="primary">
-                    Add Existing
-                </v-btn>
+                <v-dialog v-model="showHideAddExistingRisk" persistent max-width="40%">
+                    <template v-slot:activator="{ on }">
+                        <v-btn color="primary" v-on="on">
+                            Add Existing
+                        </v-btn>
+                    </template>
+                    <add-existing-risk-form
+                        :preselected-risks="risksForNode"
+                        @do-select="addExistingRisk"
+                        @do-cancel="cancelAddRisk">
+                    </add-existing-risk-form>
+                </v-dialog>
             </v-list-item-action>
             <v-list-item-action class="ma-1">
                 <v-dialog v-model="showHideCreateNewRisk" persistent max-width="40%">
@@ -84,19 +93,22 @@
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup' 
 import CreateNewRiskForm from './CreateNewRiskForm.vue'
+import AddExistingRiskForm from './AddExistingRiskForm.vue'
 import DeleteRiskForm from './DeleteRiskForm.vue'
-import { deleteRisk } from '../../../ts/api/apiRisks'
+import { deleteRisk, addExistingRisk } from '../../../ts/api/apiRisks'
 import { contactUsUrl } from '../../../ts/url'
 
 export default Vue.extend({
     data : () => ({
         showHideDeleteRisk : false,
         showHideCreateNewRisk : false,
+        showHideAddExistingRisk : false,
         selectedRisks : [] as ProcessFlowRisk[]
     }),
     components : {
         CreateNewRiskForm,
-        DeleteRiskForm
+        DeleteRiskForm,
+        AddExistingRiskForm
     },
     computed : {
         hasSelected() : boolean {
@@ -128,6 +140,42 @@ export default Vue.extend({
         },
         cancelNewRisk() {
             this.showHideCreateNewRisk = false
+        },
+        addExistingRisk(selectedRisks : ProcessFlowRisk[]) {
+            let riskIds = [] as number[]
+            for (let r of selectedRisks) {
+                riskIds.push(r.Id)
+            }
+
+            if (riskIds.length == 0) {
+                this.showHideAddExistingRisk = false
+                return
+            }
+
+            let currentNodeId = this.currentNode.Id
+            addExistingRisk(<TAddExistingRiskInput>{
+                //@ts-ignore
+                csrf: this.$root.csrf,
+                nodeId: currentNodeId,
+                riskIds: riskIds
+            }).then((resp : TAddExistingRiskOutput) => {
+                VueSetup.store.commit('addRisksToNode', {
+                    nodeId: currentNodeId,
+                    riskIds: riskIds
+                })
+                this.showHideAddExistingRisk = false
+            }).catch((err) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
+        cancelAddRisk() {
+            this.showHideAddExistingRisk = false
         },
         toggleSelection() {
             if (this.hasSelected) {

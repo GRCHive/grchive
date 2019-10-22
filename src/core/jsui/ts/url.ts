@@ -66,3 +66,4 @@ export function createProcessFlowNodeDisplaySettingsWebsocket(host : string, csr
 
 export const newRiskAPIUrl : string = "/api/risk/new"
 export const deleteRiskAPIUrl : string = "/api/risk/delete"
+export const addExistingRiskAPIUrl : string = "/api/risk/add"

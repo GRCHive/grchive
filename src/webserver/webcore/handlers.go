@@ -70,6 +70,23 @@ func ObtainOrganizationInfoFromRequestInContextMiddleware(next http.Handler) htt
 	})
 }
 
+func CreateObtainOrganizationInfoFromUserInContextMiddleware(failure http.HandlerFunc) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			currentData, err := FindSessionParsedDataInContext(r.Context())
+			if err != nil {
+				core.Info("No current user: " + err.Error())
+				failure.ServeHTTP(w, r)
+				return
+			}
+
+			ctx := AddOrganizationInfoToContext(currentData.Org, r.Context())
+			newR := r.WithContext(ctx)
+			next.ServeHTTP(w, newR)
+		})
+	}
+}
+
 func CreateVerifyUserHasAccessToOrganizationMiddleware(failure http.HandlerFunc) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
