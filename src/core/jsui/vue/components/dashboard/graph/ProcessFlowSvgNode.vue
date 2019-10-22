@@ -5,6 +5,14 @@
        ref="basegroup"
        class="node"
     >
+        <g>
+            <process-flow-svg-risk-control-dropdown
+                :node="node"
+                :parent-width="nodeLayout.boxWidth"
+                :parent-height="nodeLayout.boxHeight">
+            </process-flow-svg-risk-control-dropdown>
+        </g>
+
         <rect :width="nodeLayout.boxWidth"
               :height="nodeLayout.boxHeight"
               :class="styleClass + ` ` + 
@@ -120,12 +128,16 @@ import Vue from 'vue'
 import VueSetup from '../../../../ts/vueSetup'
 import MetadataStore from '../../../../ts/metadata'
 import RenderLayout from '../../../../ts/render/renderLayout'
+import ProcessFlowSvgRiskControlDropdown from './ProcessFlowSvgRiskControlDropdown.vue'
 
 export default Vue.extend({
     props: {
         node: {
             type: Object as () => ProcessFlowNode
         }
+    },
+    components: {
+        ProcessFlowSvgRiskControlDropdown
     },
     data: () => ({
         hoverNode: false,
