@@ -1,7 +1,16 @@
+CREATE TABLE process_flow_control_types (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(256) NOT NULL UNIQUE,
+    description TEXT
+);
+
 CREATE TABLE process_flow_controls (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(256) NOT NULL,
-    org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE
+    description TEXT,
+    control_type NOT NULL REFERENCES process_flow_control_types(id) ON DELETE RESTRICT,
+    org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    frequency TEXT
 );
 
 CREATE TABLE process_flow_control_node (
