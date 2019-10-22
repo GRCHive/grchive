@@ -52,7 +52,8 @@ func DeleteUserSession(sessionId string) error {
 		WHERE session_id = $1
 	`, sessionId)
 	if err != nil {
-		return tx.Rollback()
+		tx.Rollback()
+		return err
 	}
 	err = tx.Commit()
 	return err

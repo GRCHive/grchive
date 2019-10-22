@@ -38,3 +38,12 @@ func readProcessFlowInputOutputArray(data []uint8) ([]core.ProcessFlowInputOutpu
 	}
 	return retArr, nil
 }
+
+func readInt64Array(data []uint8) ([]int64, error) {
+	retArr := make([]int64, 0)
+	err := json.Unmarshal([]byte(data), &retArr)
+	if err != nil {
+		return nil, err
+	}
+	return retArr, err
+}

@@ -14,6 +14,7 @@ var boolReflectType = reflect.TypeOf((bool)(false))
 var int64ReflectType = reflect.TypeOf((int64)(0))
 var int32ReflectType = reflect.TypeOf((int32)(0))
 var stringReflectType = reflect.TypeOf((string)(""))
+var int64ArrayReflectType = reflect.TypeOf(([]int64)([]int64{}))
 
 func GetOrganizationFromRequestUrl(r *http.Request) (*core.Organization, error) {
 	urlRouteVars := mux.Vars(r)
@@ -100,6 +101,17 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 			break
 		case stringReflectType:
 			dataValue = reflect.ValueOf(data[0])
+			break
+		case int64ArrayReflectType:
+			arr := make([]int64, len(data))
+			for idx, val := range data {
+				intValue, err := strconv.ParseInt(val, 10, 64)
+				if err != nil {
+					return err
+				}
+				arr[idx] = int64(intValue)
+			}
+			dataValue = reflect.ValueOf(arr)
 			break
 		default:
 			return errors.New("Unsupported type: " + fieldType.Name)

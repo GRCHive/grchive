@@ -2,6 +2,60 @@
     <section>
         <v-list-item class="pa-1">
             <v-list-item-action class="ma-1">
+                <v-btn icon @click="toggleSelection">
+                    <v-icon v-if="!hasSelected">mdi-checkbox-blank-outline</v-icon>
+                    <v-icon v-else>mdi-minus-box-outline</v-icon>
+                </v-btn>
+            </v-list-item-action>
+            <div class="flex-grow-1"></div>
+            <v-list-item-action class="ma-1">
+                <v-dialog v-model="showHideDeleteRisk" persistent max-width="40%">
+                    <template v-slot:activator="{ on }">
+                        <v-btn color="error" :disabled="!hasSelected" v-on="on">
+                            Delete
+                            <v-icon small>mdi-delete</v-icon>
+                        </v-btn>
+                    </template>
+                    <delete-risk-form
+                        :risks-to-delete="selectedRisks"
+                        v-on:do-cancel="showHideDeleteRisk = false"
+                        v-on:do-delete="deleteSelectedRisks">
+                    </delete-risk-form>
+                </v-dialog>
+            </v-list-item-action>
+        </v-list-item>
+
+        <v-list two-line>
+            <v-list-item-group multiple v-model="selectedRisks">
+                <section v-for="(item, index) in risksForNode"
+                         :key="index">
+                    <v-list-item :key="index" class="pa-1" :value="item">
+                        <template v-slot:default="{active, toggle}">
+                            <v-list-item-action class="ma-1">
+                                <v-checkbox :input-value="active"
+                                            @true-value="item"
+                                            @click="toggle">
+                                </v-checkbox>
+                            </v-list-item-action>
+
+                            <v-list-item-content>
+                                <v-list-item-title>
+                                    {{ item.Name }}
+                                </v-list-item-title>
+
+                                <v-list-item-subtitle>
+                                    {{ item.Description }}
+                                </v-list-item-subtitle>
+                            </v-list-item-content>
+                        </template>
+                    </v-list-item>
+                    <v-divider></v-divider>
+                </section>
+            </v-list-item-group>
+        </v-list>
+
+        <v-list-item class="pa-1">
+            <v-list-item-action class="ma-1">
                 <v-btn color="primary">
                     Add Existing
                 </v-btn>
@@ -30,25 +84,87 @@
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup' 
 import CreateNewRiskForm from './CreateNewRiskForm.vue'
+import DeleteRiskForm from './DeleteRiskForm.vue'
+import { deleteRisk } from '../../../ts/api/apiRisks'
+import { contactUsUrl } from '../../../ts/url'
 
 export default Vue.extend({
     data : () => ({
-        showHideCreateNewRisk : false
+        showHideDeleteRisk : false,
+        showHideCreateNewRisk : false,
+        selectedRisks : [] as ProcessFlowRisk[]
     }),
     components : {
-        CreateNewRiskForm
+        CreateNewRiskForm,
+        DeleteRiskForm
     },
     computed : {
+        hasSelected() : boolean {
+            return this.selectedRisks.length > 0
+        },
         currentNode() : ProcessFlowNode {
             return VueSetup.store.getters.currentNodeInfo
         },
+        risksForNode() : ProcessFlowRisk[] {
+            let ids = this.currentNode.RiskIds
+            let risks = []
+            for (let i of ids) {
+                risks.push(VueSetup.store.state.currentProcessFlowFullData.Risks[i])
+            }
+            return risks
+        },
+        selectedRiskIds() : number[] {
+            let riskIds = [] as number[]
+            for (let risk of this.selectedRisks) {
+                riskIds.push(risk.Id)
+            }
+            return riskIds
+        }
     },
     methods : {
-        saveNewRisk() {
+        saveNewRisk(risk : ProcessFlowRisk) {
+            VueSetup.store.commit('setRisk', risk)
             this.showHideCreateNewRisk = false
         },
         cancelNewRisk() {
             this.showHideCreateNewRisk = false
+        },
+        toggleSelection() {
+            if (this.hasSelected) {
+                this.selectedRisks = []
+            } else {
+                this.selectedRisks = this.risksForNode
+            }
+        },
+        deleteSelectedRisks(global : boolean) {
+            let currentNodeId = this.currentNode.Id
+            deleteRisk(<TDeleteRiskInput>{
+                //@ts-ignore
+                csrf: this.$root.csrf,
+                nodeId: currentNodeId,
+                riskIds: this.selectedRiskIds,
+                global: global
+            }).then((resp : TDeleteRiskOutput) => {
+                VueSetup.store.dispatch('deleteBatchRisks', {
+                    nodeId: currentNodeId,
+                    riskIds: this.selectedRiskIds,
+                    global: global
+                })
+                this.showHideDeleteRisk = false
+            }).catch((err) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        }
+    },
+    watch : {
+        currentNode() {
+            this.selectedRisks = []
         }
     }
 })

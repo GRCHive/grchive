@@ -14,6 +14,12 @@ type NewRiskInputs struct {
 	NodeId      int64  `webcore:"nodeId"`
 }
 
+type DeleteRiskInputs struct {
+	NodeId  int64   `webcore:"nodeId"`
+	RiskIds []int64 `webcore:"riskIds"`
+	Global  bool    `webcore:"global"`
+}
+
 func createNewRisk(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -27,11 +33,9 @@ func createNewRisk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newRisk := core.RiskForNode{
-		Risk: core.Risk{
-			Name:        inputs.Name,
-			Description: inputs.Description,
-		},
+	newRisk := core.Risk{
+		Name:            inputs.Name,
+		Description:     inputs.Description,
 		RelevantNodeIds: []int64{inputs.NodeId},
 	}
 
@@ -44,4 +48,28 @@ func createNewRisk(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(newRisk)
+}
+
+func deleteRisks(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := DeleteRiskInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	err = database.DeleteRisks(inputs.NodeId, inputs.RiskIds, inputs.Global)
+	if err != nil {
+		core.Warning("Could not delete risks: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	jsonWriter.Encode(struct{}{})
 }

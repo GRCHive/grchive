@@ -70,6 +70,7 @@ const ApiUserProfileUrl string = "/profile"
 // API - Risks
 const ApiRiskPrefix string = "/risk"
 const ApiNewRiskEndpoint string = "/new"
+const ApiDeleteRiskEndpoint string = "/delete"
 
 // Websocket
 const WebsocketPrefix string = "/ws"

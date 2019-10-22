@@ -6,5 +6,15 @@ interface TNewRiskInput {
 }
 
 interface TNewRiskOutput {
-    data: number
+    data: ProcessFlowRisk
+}
+
+interface TDeleteRiskInput {
+    csrf: string
+    nodeId: number
+    riskIds: number[]
+    global: boolean
+}
+
+interface TDeleteRiskOutput {
 }

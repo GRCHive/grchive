@@ -265,6 +265,13 @@ func getProcessFlowFullData(w http.ResponseWriter, r *http.Request) {
 		jsonWriter.Encode(struct{}{})
 		return
 	}
+	graph.Risks, err = database.FindAllRisksForProcessFlow(flowId)
+	if err != nil {
+		core.Warning("Failed to obtain risks: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
 
 	jsonWriter.Encode(&graph)
 }

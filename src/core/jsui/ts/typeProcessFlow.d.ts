@@ -12,6 +12,13 @@ interface ProcessFlowNodeType {
     Description : string
 }
 
+interface ProcessFlowRisk {
+    Id : number
+    Name : string
+    Description: string
+    RelevantNodeIds: number[]
+}
+
 interface ProcessFlowNode {
     Id: number,
     Name: string,
@@ -19,7 +26,8 @@ interface ProcessFlowNode {
     ProcessFlowId: number,
     NodeTypeId: number,
     Inputs: ProcessFlowInputOutput[],
-    Outputs: ProcessFlowInputOutput[]
+    Outputs: ProcessFlowInputOutput[],
+    RiskIds: number[]
 }
 
 interface ProcessFlowEdge {
@@ -35,7 +43,8 @@ interface ProcessFlowNodeDisplay {
 
 interface FullProcessFlowResponseData {
     Nodes: ProcessFlowNode[],
-    Edges: ProcessFlowEdge[]
+    Edges: ProcessFlowEdge[],
+    Risks: ProcessFlowRisk[]
 }
 
 interface FullProcessFlowData {
@@ -45,7 +54,9 @@ interface FullProcessFlowData {
     Edges: Record<number, ProcessFlowEdge>,
     EdgeKeys: number[],
     Inputs: Record<number, ProcessFlowInputOutput>,
-    Outputs: Record<number, ProcessFlowInputOutput>
+    Outputs: Record<number, ProcessFlowInputOutput>,
+    Risks: Record<number, ProcessFlowRisk>
+    RiskKeys: number[]
 }
 
 interface FullProcessFlowDisplayData {

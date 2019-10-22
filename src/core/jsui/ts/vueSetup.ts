@@ -156,6 +156,46 @@ const store : StoreOptions<VuexState> = {
             Vue.delete(
                 state.currentProcessFlowFullData.Nodes,
                 nodeId)
+        },
+        setRisk(state, risk : ProcessFlowRisk) {
+            if (!(risk.Id in state.currentProcessFlowFullData.Risks)) {
+                state.currentProcessFlowFullData.RiskKeys.push(risk.Id)
+            }
+
+            Vue.set(state.currentProcessFlowFullData.Risks, risk.Id, risk)
+            for (let nodeId of risk.RelevantNodeIds) {
+                // TODO: This is slow since we have to O(n) search through the list of
+                // risk IDs to ensure we aren't adding a duplicate.
+                if (!state.currentProcessFlowFullData.Nodes[nodeId].RiskIds.includes(risk.Id)) {
+                    state.currentProcessFlowFullData.Nodes[nodeId].RiskIds.push(risk.Id)
+                }
+            }
+        },
+        deleteRiskFromNode(state, {nodeId, riskIds}) {
+            let checkSet = new Set(riskIds)
+            let arr = state.currentProcessFlowFullData.Nodes[nodeId].RiskIds
+            for (let i = arr.length - 1; i >= 0; --i) {
+                if (!checkSet.has(arr[i])) {
+                    continue
+                }
+                arr.splice(i, 1)
+            }
+
+            for (let riskId of riskIds) {
+                if (!(riskId in state.currentProcessFlowFullData.Risks)) {
+                    continue
+                }
+                let nodeArr = state.currentProcessFlowFullData.Risks[riskId].RelevantNodeIds
+                nodeArr.splice(nodeArr.findIndex((ele) => ele == nodeId), 1)
+            }
+        },
+        deleteRiskGlobal(state, riskIds) {
+            for (let id of riskIds) {
+                Vue.delete(state.currentProcessFlowFullData.Risks, id)
+                state.currentProcessFlowFullData.RiskKeys.splice(
+                    state.currentProcessFlowFullData.RiskKeys.findIndex((ele) => ele == id),
+                    1)
+            }
         }
     },
     actions: {
@@ -200,7 +240,9 @@ const store : StoreOptions<VuexState> = {
                         Edges: Object(),
                         EdgeKeys: [] as number[],
                         Inputs: Object(),
-                        Outputs: Object()
+                        Outputs: Object(),
+                        Risks: Object(),
+                        RiskKeys: [] as number[]
                     }
                     for (let data of resp.data.Nodes) {
                         newData.Nodes[data.Id] = data
@@ -216,6 +258,10 @@ const store : StoreOptions<VuexState> = {
                     for (let data of resp.data.Edges) {
                         newData.Edges[data.Id] = data
                         newData.EdgeKeys.push(data.Id)
+                    }
+                    for (let data of resp.data.Risks) {
+                        newData.Risks[data.Id] = data
+                        newData.RiskKeys.push(data.Id)
                     }
                     context.commit('setCurrentProcessFlowFullData', newData)
                     context.commit('setFullProcessFlowRequestedId', -1)
@@ -301,6 +347,27 @@ const store : StoreOptions<VuexState> = {
                 }
             }
         },
+        deleteBatchRisks(context, {nodeId, riskIds, global}) {
+            context.commit('deleteRiskFromNode', {nodeId, riskIds})
+            if (global) {
+                let otherNodes = new Set()
+                for (let riskId of riskIds) {
+                    if (!(riskId in context.state.currentProcessFlowFullData.Risks)) {
+                        continue
+                    }
+                    let nodeArr = context.state.currentProcessFlowFullData.Risks[riskId].RelevantNodeIds
+                    for (let node of nodeArr) {
+                        otherNodes.add(node)
+                    }
+                }
+
+                for (const nodeId of otherNodes) {
+                    context.commit('deleteRiskFromNode', {nodeId, riskIds})
+                }
+
+                context.commit('deleteRiskGlobal', riskIds)
+            }
+        }
     },
     getters: {
         currentProcessFlowBasicData: (state) => {

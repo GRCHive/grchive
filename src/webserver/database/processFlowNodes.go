@@ -60,12 +60,17 @@ func FindAllNodesForProcessFlow(flowId int64) ([]*core.ProcessFlowNode, error) {
 		SELECT 
 			node.*,
 			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(DISTINCT inp.*), null)) AS inputs,
-			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(DISTINCT out.*), null)) AS outputs
+			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(DISTINCT out.*), null)) AS outputs,
+			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(DISTINCT risk.id), null)) AS risks
 		FROM process_flow_nodes AS node
 		LEFT JOIN process_flow_node_inputs AS inp
 			ON inp.parent_node_id = node.id
 		LEFT JOIN process_flow_node_outputs AS out
 			ON out.parent_node_id = node.id
+		LEFT JOIN process_flow_risk_node AS risknode
+			ON risknode.node_id = node.id
+		LEFT JOIN process_flow_risks AS risk
+			ON risknode.risk_id = risk.id
 		WHERE node.process_flow_id = $1
 		GROUP BY node.id
 	`, flowId)
@@ -93,6 +98,10 @@ func FindAllNodesForProcessFlow(flowId int64) ([]*core.ProcessFlowNode, error) {
 			return nil, err
 		}
 		newNode.Outputs, err = readProcessFlowInputOutputArray(dataMap["outputs"].([]uint8))
+		if err != nil {
+			return nil, err
+		}
+		newNode.RiskIds, err = readInt64Array(dataMap["risks"].([]uint8))
 		if err != nil {
 			return nil, err
 		}

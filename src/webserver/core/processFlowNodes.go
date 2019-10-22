@@ -14,4 +14,5 @@ type ProcessFlowNode struct {
 	NodeTypeId    int32  `db:"node_type"`
 	Inputs        []ProcessFlowInputOutput
 	Outputs       []ProcessFlowInputOutput
+	RiskIds       []int64
 }

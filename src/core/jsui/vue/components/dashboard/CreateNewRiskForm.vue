@@ -59,8 +59,13 @@ export default Vue.extend({
         }
     },
     methods: {
+        clearForm() {
+            this.name = ""
+            this.description = ""
+        },
         cancel() {
             this.$emit('do-cancel')
+            this.clearForm()
         },
         save() {
             //@ts-ignore
@@ -75,7 +80,8 @@ export default Vue.extend({
                 description: this.description,
                 nodeId: this.nodeId
             }).then((resp : TNewRiskOutput) => {
-                this.$emit('do-save')
+                this.clearForm()
+                this.$emit('do-save', resp.data)
             }).catch((err) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
