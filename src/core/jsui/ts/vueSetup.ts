@@ -233,6 +233,8 @@ const store : StoreOptions<VuexState> = {
             mutationObservers.push(observer)
         },
         requestSetCurrentProcessFlowIndex(context, {index, csrf}) {
+            context.commit('setSelectedProcessFlowEdge', -1)
+            context.commit('setSelectedProcessFlowNode', -1)
             context.commit('setCurrentProcessFlowIndex', index)
             context.dispatch('refreshCurrentProcessFlowFullData', csrf)
         },
