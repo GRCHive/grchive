@@ -11,8 +11,7 @@
             <v-list-item-group multiple v-model="selectedRisks">
                 <v-list-item v-for="(item, index) in allRisks"
                              :key="index" class="pa-1" :value="item">
-                    <template v-slot:default="{active, toggle}"
-                              v-if="!preselectedSet.has(item.Id)">
+                    <template v-slot:default="{active, toggle}">
                         <v-list-item-action class="ma-1">
                             <v-checkbox :input-value="active"
                                         @true-value="item"
@@ -67,6 +66,9 @@ export default Vue.extend({
         allRisks() : ProcessFlowRisk[] {
             let risks : ProcessFlowRisk[] = []
             for (let riskId of VueSetup.store.state.currentProcessFlowFullData.RiskKeys) {
+                if (this.preselectedSet.has(riskId)) {
+                    continue
+                }
                 risks.push(VueSetup.store.state.currentProcessFlowFullData.Risks[riskId])
             }
             return risks
