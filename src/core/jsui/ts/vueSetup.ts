@@ -196,6 +196,12 @@ const store : StoreOptions<VuexState> = {
                     state.currentProcessFlowFullData.RiskKeys.findIndex((ele) => ele == id),
                     1)
             }
+        },
+        deleteNodeFromRisks(state, nodeId) {
+            for (let riskId of riskIds) {
+                let arr = state.currentProcessFlowFullData.Risks[riskId].RelevantNodeIds
+                arr.splice(arr.findIndex((ele) => ele == nodeId), 1)
+            }
         }
     },
     actions: {
@@ -317,6 +323,7 @@ const store : StoreOptions<VuexState> = {
             context.dispatch('deleteBatchNodeInput', {nodeId: nodeId, inputs: inputsToRemove})
             context.dispatch('deleteBatchNodeOutput', {nodeId: nodeId, outputs: outputsToRemove})
             context.commit('deleteNodeById', nodeId)
+            context.commit('deleteNodeFromRisks', nodeId)
 
         },
         deleteBatchNodeInput(context, {nodeId, inputs}) {
