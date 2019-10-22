@@ -47,6 +47,7 @@ type RawJWT struct {
 		Aud         string   `json:"aud"`
 		Email       string   `json:"email"`
 		Sub         string   `json:"sub"`
+		Idp         string   `json:"idp"`
 		Groups      []string `json:"groups"`
 		Name        string   `json:"name"`
 		FirstName   string   `json:"firstName"`
@@ -104,6 +105,10 @@ func (this *RawJWT) verifyAud(isAccessToken bool) error {
 func ReadRawJWTFromString(input string) (*RawJWT, error) {
 	var err error
 	data := strings.Split(input, ".")
+	if len(data) < 3 {
+		return nil, errors.New("Bad JWT data")
+	}
+
 	retData := &RawJWT{}
 
 	retData.RawHeader, err = base64EncodingNoPadding.DecodeString(data[0])

@@ -7,9 +7,6 @@ import (
 type UserSession struct {
 	SessionId string `db:"session_id"`
 
-	// This should be the user's email as well as the email in the OIDC ID Token.
-	UserEmail string `db:"email"`
-
 	LastActiveTime time.Time `db:"last_active_time"`
 	ExpirationTime time.Time `db:"expiration_time"`
 
@@ -19,6 +16,8 @@ type UserSession struct {
 	AccessToken  string `db:"access_token"`
 	IdToken      string `db:"id_token"`
 	RefreshToken string `db:"refresh_token"`
+
+	UserId int64 `db:"user_id"`
 }
 
 // Other data that isn't necessarily something we want to call the "UserSesssion"

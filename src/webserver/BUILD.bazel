@@ -64,6 +64,7 @@ go_library(
         "database/processFlowEdges.go",
         "database/processFlowNodeDisplaySettings.go",
         "database/risks.go",
+        "database/users.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 

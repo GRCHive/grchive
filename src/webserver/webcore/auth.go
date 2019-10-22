@@ -102,22 +102,25 @@ func (this OktaJWTRetriever) RetrieveKeys() (map[string][]*rsa.PublicKey, error)
 	return nil, errors.New("Failed to find 'keys' key in okta retrieve keys.")
 }
 
-func UpdateUserSessionFromTokens(session *core.UserSession, tokens *OktaTokens, r *http.Request) error {
+// Returns the old session ID
+func UpdateUserSessionFromTokens(session *core.UserSession, tokens *OktaTokens, r *http.Request) (string, error) {
 	accessJwt := tokens.DecodedAccessToken
 	idJwt := tokens.DecodedIDToken
 
 	if len(idJwt.Payload.Email) == 0 || len(accessJwt.Payload.Sub) == 0 {
-		return errors.New("Failed to find email in ID/Access Token.")
+		return "", errors.New("Failed to find email in ID/Access Token.")
 	}
 
 	// Is this even necessary?
 	if idJwt.Payload.Email != accessJwt.Payload.Sub {
-		return errors.New("Id token Email vs Access Token sub mismatch.")
+		return "", errors.New("Id token Email vs Access Token sub mismatch.")
 	}
 
+	oldSessionId := session.SessionId
+
+	// Always create a new UUID to help prevent session hijacking.
 	*session = core.UserSession{
-		SessionId:      session.SessionId,
-		UserEmail:      idJwt.Payload.Email,
+		SessionId:      uuid.New().String(),
 		LastActiveTime: time.Now().UTC(),
 		ExpirationTime: time.Unix(accessJwt.Payload.Exp, 0).UTC(),
 		UserAgent:      r.UserAgent(),
@@ -125,21 +128,50 @@ func UpdateUserSessionFromTokens(session *core.UserSession, tokens *OktaTokens, 
 		AccessToken:    tokens.AccessToken,
 		IdToken:        tokens.IdToken,
 		RefreshToken:   tokens.RefreshToken,
+		UserId:         session.UserId,
 	}
 
-	// Create new session ID if it's empty. This allows for updated sessions (aka
-	// session with an existing session ID to not receive a new ID).
-	if len(session.SessionId) == 0 {
-		session.SessionId = uuid.New().String()
-	}
+	return oldSessionId, nil
+}
 
-	return nil
+func createUserFromIdToken(idJwt *RawJWT, orgId int32) *core.User {
+	user := core.User{
+		FirstName:  idJwt.Payload.FirstName,
+		LastName:   idJwt.Payload.LastName,
+		Email:      idJwt.Payload.Email,
+		OktaUserId: idJwt.Payload.Sub,
+		OrgId:      orgId,
+	}
+	return &user
 }
 
 // Creates a core.UserSession object and stores it into the session database.
 func CreateUserSessionFromTokens(tokens *OktaTokens, r *http.Request) (*core.UserSession, error) {
 	userSession := new(core.UserSession)
-	err := UpdateUserSessionFromTokens(userSession, tokens, r)
+
+	org, err := database.FindOrganizationFromSamlIdP(tokens.DecodedIDToken.Payload.Idp)
+	if err != nil {
+		return nil, err
+	}
+
+	// See if the user exists - if not, create a new user using the data
+	// found in the ID token.
+	newUser := createUserFromIdToken(tokens.DecodedIDToken, org.Id)
+	dbUser, err := database.FindUserFromOktaId(newUser.OktaUserId)
+	if err != nil {
+		// Assume that the first error indicates that we can't find the user.
+		// In that case, try to create the user.
+		err = database.CreateNewUser(newUser)
+		if err != nil {
+			return nil, err
+		}
+
+		dbUser = newUser
+	}
+
+	userSession.UserId = dbUser.Id
+
+	_, err = UpdateUserSessionFromTokens(userSession, tokens, r)
 	if err != nil {
 		return nil, err
 	}
@@ -196,17 +228,17 @@ func OktaObtainTokens(code string, isRefresh bool) (*OktaTokens, error) {
 	return data, nil
 }
 
-func RefreshUserSession(session *core.UserSession, r *http.Request) error {
+func RefreshUserSession(session *core.UserSession, r *http.Request) (string, error) {
 	newTokens, err := OktaObtainTokens(session.RefreshToken, true)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	err = UpdateUserSessionFromTokens(session, newTokens, r)
+	oldSessId, err := UpdateUserSessionFromTokens(session, newTokens, r)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return oldSessId, nil
 }
 
 // If successful, returns a new http.Request that contains
@@ -234,11 +266,13 @@ func FindValidUserSession(w http.ResponseWriter, r *http.Request) (*core.UserSes
 	// 3) our session database. All three must not be expired.
 	_, accessErr := oktaJwtManager.VerifyJWT(session.AccessToken, true)
 	_, idErr := oktaJwtManager.VerifyJWT(session.IdToken, false)
+	currentSessionId := session.SessionId
 	if core.IsPastTime(session.ExpirationTime) || idErr == ExpiredJWTToken || accessErr == ExpiredJWTToken {
-		err = RefreshUserSession(session, r)
+		oldSessionId, err := RefreshUserSession(session, r)
 		if err != nil {
 			return nil, r, err
 		}
+		currentSessionId = oldSessionId
 	} else if accessErr != nil {
 		return nil, r, accessErr
 	} else if idErr != nil {
@@ -255,7 +289,7 @@ func FindValidUserSession(w http.ResponseWriter, r *http.Request) (*core.UserSes
 	ctx := AddSessionToContext(session, r.Context())
 	newR := r.WithContext(ctx)
 
-	err = database.UpdateUserSession(session)
+	err = database.UpdateUserSession(session, currentSessionId)
 	if err != nil {
 		// This is probably our fault so don't delete the session but keep it around
 		// until the next user request and hopefully it'll resolve itself.

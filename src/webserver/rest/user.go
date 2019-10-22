@@ -81,11 +81,11 @@ func updateUserProfile(w http.ResponseWriter, r *http.Request) {
 	// information gets updated. The client will have to refresh on their own.
 	session, err := webcore.FindSessionInContext(r.Context())
 	if err == nil {
-		err = webcore.RefreshUserSession(session, r)
+		oldSessionId, err := webcore.RefreshUserSession(session, r)
 		if err != nil {
 			core.Warning("Failed refresh session: " + err.Error())
 		} else {
-			err = database.UpdateUserSession(session)
+			err = database.UpdateUserSession(session, oldSessionId)
 			if err != nil {
 				core.Warning("Failed update session: " + err.Error())
 			}
