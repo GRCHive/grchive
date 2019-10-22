@@ -198,7 +198,7 @@ const store : StoreOptions<VuexState> = {
             }
         },
         deleteNodeFromRisks(state, nodeId) {
-            for (let riskId of riskIds) {
+            for (let riskId of state.currentProcessFlowFullData.RiskKeys) {
                 let arr = state.currentProcessFlowFullData.Risks[riskId].RelevantNodeIds
                 arr.splice(arr.findIndex((ele) => ele == nodeId), 1)
             }
