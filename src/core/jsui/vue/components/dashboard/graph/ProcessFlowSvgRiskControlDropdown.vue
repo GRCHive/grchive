@@ -1,5 +1,6 @@
 <template>
-    <g :transform="`translate(0, ${parentHeight})`">
+    <g :transform="`translate(0, ${parentHeight})`"
+       :visibility="hasRiskControl ? `visible` : `hidden`">
         <rect :width="currentWidth"
               :height="expandedHeight + 2 * dropdownButtonMargin + dropdownButtonHeight"
               class="dropdown-rect"
@@ -70,6 +71,9 @@ export default Vue.extend({
         riskTextWidth: 200
     }),
     computed: {
+        hasRiskControl() : boolean {
+            return this.risks.length > 0
+        },
         risks() : ProcessFlowRisk[] {
             let nodeRisks = [] as ProcessFlowRisk[]
             for (let id of this.node.RiskIds) {
@@ -144,7 +148,7 @@ export default Vue.extend({
     watch : {
         risks() {
             this.recomputeRiskControlTextLayout()
-        }
+        },
     }
 })
 </script>
