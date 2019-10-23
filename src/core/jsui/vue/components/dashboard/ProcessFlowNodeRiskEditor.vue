@@ -130,7 +130,14 @@ export default Vue.extend({
     },
     methods : {
         saveNewRisk(risk : ProcessFlowRisk) {
+            let currentNodeId = this.currentNode.Id
+
             VueSetup.store.commit('setRisk', risk)
+            VueSetup.store.commit('addRisksToNode', {
+                nodeId: currentNodeId,
+                riskIds: [risk.Id]
+            })
+
             this.showHideCreateNewRisk = false
         },
         cancelNewRisk() {
