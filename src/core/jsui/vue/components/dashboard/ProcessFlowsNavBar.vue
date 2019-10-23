@@ -190,14 +190,16 @@ export default Vue.extend({
             })
         },
         onItemClick(_ : MouseEvent, idx : number) {
-            // Need to explicitly clear render layout to prevent rendering when we
-            // switch layouts - not sure how much I like having this here though.
-            RenderLayout.store.commit('resetNodeLayout')
-            VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
-                index: idx,
-                //@ts-ignore
-                csrf: this.$root.csrf
-            })
+            if (idx != VueSetup.store.state.currentProcessFlowIndex) {
+                // Need to explicitly clear render layout to prevent rendering when we
+                // switch layouts - not sure how much I like having this here though.
+                RenderLayout.store.commit('resetNodeLayout')
+                VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
+                    index: idx,
+                    //@ts-ignore
+                    csrf: this.$root.csrf
+                })
+            }
         }
     },
     mounted() {
