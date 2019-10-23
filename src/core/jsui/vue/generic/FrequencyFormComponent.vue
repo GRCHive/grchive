@@ -1,21 +1,26 @@
 <template>
     <section id="freq">
         <v-checkbox
-            v-model="isManual"
-            label="Is Manually Run">
+            label="Is Manually Run"
+            :value="isManual"
+            @change="changeManual">
         </v-checkbox>
         <v-text-field
             label="Interval"
             prefix="Repeat every"
             outlined
             type="number"
-            v-model="freqInterval"
             :rules="[rules.numeric]"
             v-if="!isManual"
+            :value="freqInterval"
+            @change="changeInterval"
         >
             <template v-slot:append-outer v-bind:freqType="freqType">
                 <section id="choices">
-                    <v-select :items="frequencyChoices" outlined v-model="freqType">
+                    <v-select :items="frequencyChoices"
+                              outlined
+                              :value="freqType"
+                              @change="changeType">
                     </v-select>
                 </section>
             </template>
@@ -30,10 +35,12 @@ import { frequencyTypes } from '../../ts/frequency'
 import * as rules from "../../ts/formRules"
 
 export default Vue.extend({
-    data : () => ({
-        isManual : false,
-        freqInterval : 0,
-        freqType: 0,
+    props: {
+        isManual : Boolean,
+        freqInterval : Number,
+        freqType: Number,
+    },
+    data: () => ({
         rules
     }),
     computed: {
@@ -49,6 +56,17 @@ export default Vue.extend({
                 counter += 1
             }
             return items
+        }
+    },
+    methods: {
+        changeInterval(val : string) {
+            this.$emit('update:freqInterval', parseInt(val, 10))
+        },
+        changeManual(val: boolean) {
+            this.$emit('update:isManual', val)
+        },
+        changeType(val : number) {
+            this.$emit('update:freqType', val)
         }
     }
 })

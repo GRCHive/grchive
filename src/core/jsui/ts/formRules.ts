@@ -19,5 +19,5 @@ export function email(v : string) : boolean | string {
 }
 
 export function numeric(v : string) : boolean | string {
-    return isNaN(Number(v)) || "Must be numeric."
+    return !isNaN(Number(v)) || "Must be numeric."
 }

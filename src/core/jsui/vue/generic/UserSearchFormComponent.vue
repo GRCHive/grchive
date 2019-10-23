@@ -8,6 +8,8 @@
         hide-no-data
         hide-selected
         clearable
+        :value="user"
+        @change="changeUser"
     ></v-autocomplete>
 </template>
 
@@ -20,20 +22,26 @@ import { contactUsUrl } from '../../ts/url'
 
 export default Vue.extend({
     props: {
-        label: String
+        label: String,
+        user: {
+            type: Object as () => User
+        }
     },
     data : () => ({
         loading: false,
         visibleUsers: [] as User[]
     }),
     computed: {
-        displayItems() : string[] {
-            let displayText = [] as string[]
+        displayItems() : Object[] {
+            let displayText = [] as Object[]
             for (let user of this.visibleUsers) {
-                displayText.push(createUserString(user))
+                displayText.push({
+                    text: createUserString(user),
+                    value: user
+                })
             }
             return displayText
-        }
+        },
     },
     methods: {
         loadAvailableUsers() {
@@ -56,6 +64,9 @@ export default Vue.extend({
                     contactUsUrl,
                     true);
             })
+        },
+        changeUser(val : User) {
+            this.$emit('update:user', val)
         }
     },
     mounted() {

@@ -14,8 +14,15 @@
         <v-textarea v-model="description" label="Description" filled>
         </v-textarea> 
 
-        <user-search-form-component label="Control Owner"></user-search-form-component>
-        <frequency-form-component></frequency-form-component>
+        <user-search-form-component
+            label="Control Owner"
+            v-bind:user.sync="controlOwner"
+        ></user-search-form-component>
+        <frequency-form-component
+            v-bind:isManual.sync="frequencyData.isManual"
+            v-bind:freqInterval.sync="frequencyData.freqInterval"
+            v-bind:freqType.sync="frequencyData.freqType"
+        ></frequency-form-component>
 
     </v-form>
 
@@ -58,7 +65,13 @@ export default Vue.extend({
         name: "",
         description: "",
         rules,
-        formValid: false
+        formValid: false,
+        frequencyData : {
+            isManual : false,
+            freqInterval : 0,
+            freqType: 0
+        },
+        controlOwner: Object() as User
     }),
     computed: {
         canSubmit() : boolean {
