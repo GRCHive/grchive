@@ -13,8 +13,27 @@ type ProcessFlow struct {
 	LastUpdatedTime time.Time     `db:"last_updated_time"`
 }
 
+type NodeRiskRelationship struct {
+	NodeId int64 `db:"node_id"`
+	RiskId int64 `db:"risk_id"`
+}
+
+type NodeControlRelationship struct {
+	NodeId    int64 `db:"node_id"`
+	ControlId int64 `db:"control_id"`
+}
+
+type RiskControlRelationship struct {
+	RiskId    int64 `db:"risk_id"`
+	ControlId int64 `db:"control_id"`
+}
+
 type ProcessFlowGraph struct {
-	Nodes []*ProcessFlowNode
-	Edges []*ProcessFlowEdge
-	Risks []*Risk
+	Nodes       []*ProcessFlowNode
+	Edges       []*ProcessFlowEdge
+	Risks       []*Risk
+	Controls    []*Control
+	NodeRisk    []*NodeRiskRelationship
+	NodeControl []*NodeControlRelationship
+	RiskControl []*RiskControlRelationship
 }

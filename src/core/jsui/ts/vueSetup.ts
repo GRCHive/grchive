@@ -14,6 +14,9 @@ import {createGetProcessFlowFullDataUrl} from './url'
 import * as qs from 'query-string'
 import { deleteProcessFlowEdge } from './api/apiProcessFlowEdges'
 import { deleteProcessFlowNode } from './api/apiProcessFlowNodes'
+import RelationshipMap from './relationship'
+import { FullProcessFlowData } from './processFlow'
+import VuexState from './processFlowState'
 
 let mutationObservers = []
 const opts = {}
@@ -163,50 +166,37 @@ const store : StoreOptions<VuexState> = {
             }
 
             Vue.set(state.currentProcessFlowFullData.Risks, risk.Id, risk)
-            for (let nodeId of risk.RelevantNodeIds) {
-                // TODO: This is slow since we have to O(n) search through the list of
-                // risk IDs to ensure we aren't adding a duplicate.
-                if (!state.currentProcessFlowFullData.Nodes[nodeId].RiskIds.includes(risk.Id)) {
-                    state.currentProcessFlowFullData.Nodes[nodeId].RiskIds.push(risk.Id)
-                }
-            }
         },
         deleteRiskFromNode(state, {nodeId, riskIds}) {
-            let checkSet = new Set(riskIds)
-            let arr = state.currentProcessFlowFullData.Nodes[nodeId].RiskIds
-            for (let i = arr.length - 1; i >= 0; --i) {
-                if (!checkSet.has(arr[i])) {
-                    continue
-                }
-                arr.splice(i, 1)
-            }
-
             for (let riskId of riskIds) {
-                if (!(riskId in state.currentProcessFlowFullData.Risks)) {
-                    continue
-                }
-                let nodeArr = state.currentProcessFlowFullData.Risks[riskId].RelevantNodeIds
-                nodeArr.splice(nodeArr.findIndex((ele) => ele == nodeId), 1)
+                state.currentProcessFlowFullData.NodeRiskRelationships.delete(
+                    state.currentProcessFlowFullData.Nodes[nodeId],
+                    state.currentProcessFlowFullData.Risks[riskId])
             }
         },
         deleteRiskGlobal(state, riskIds) {
             for (let id of riskIds) {
+                state.currentProcessFlowFullData.NodeRiskRelationships.deleteB(
+                    state.currentProcessFlowFullData.Risks[id]
+                )
                 Vue.delete(state.currentProcessFlowFullData.Risks, id)
                 state.currentProcessFlowFullData.RiskKeys.splice(
                     state.currentProcessFlowFullData.RiskKeys.findIndex((ele) => ele == id),
                     1)
+
             }
         },
         deleteNodeFromRisks(state, nodeId) {
-            for (let riskId of state.currentProcessFlowFullData.RiskKeys) {
-                let arr = state.currentProcessFlowFullData.Risks[riskId].RelevantNodeIds
-                arr.splice(arr.findIndex((ele) => ele == nodeId), 1)
-            }
+            state.currentProcessFlowFullData.NodeRiskRelationships.deleteA(
+                state.currentProcessFlowFullData.Nodes[nodeId]
+            )
         },
         addRisksToNode(state, {nodeId, riskIds}) {
-            state.currentProcessFlowFullData.Nodes[nodeId].RiskIds.push(...riskIds)
             for (let id of riskIds) {
-                state.currentProcessFlowFullData.Risks[id].RelevantNodeIds.push(nodeId)
+                state.currentProcessFlowFullData.NodeRiskRelationships.add(
+                    state.currentProcessFlowFullData.Nodes[nodeId],
+                    state.currentProcessFlowFullData.Risks[id]
+                )
             }
         }
     },
@@ -256,7 +246,10 @@ const store : StoreOptions<VuexState> = {
                         Inputs: Object(),
                         Outputs: Object(),
                         Risks: Object(),
-                        RiskKeys: [] as number[]
+                        RiskKeys: [] as number[],
+                        Controls: Object(),
+                        ControlKeys: [] as number[],
+                        NodeRiskRelationships: Vue.observable(new RelationshipMap<ProcessFlowNode,ProcessFlowRisk>())
                     }
                     for (let data of resp.data.Nodes) {
                         newData.Nodes[data.Id] = data
@@ -273,17 +266,30 @@ const store : StoreOptions<VuexState> = {
                         newData.Edges[data.Id] = data
                         newData.EdgeKeys.push(data.Id)
                     }
+
                     for (let data of resp.data.Risks) {
                         newData.Risks[data.Id] = data
                         newData.RiskKeys.push(data.Id)
                     }
+
+                    for (let data of resp.data.Controls) {
+                        newData.Controls[data.Id] = data
+                        newData.ControlKeys.push(data.Id)
+                    }
+
+                    for (let data of resp.data.NodeRisk) {
+                        newData.NodeRiskRelationships.add(
+                            newData.Nodes[data.NodeId],
+                            newData.Risks[data.RiskId])
+                    }
+                    
                     context.commit('setCurrentProcessFlowFullData', newData)
                     context.commit('setFullProcessFlowRequestedId', -1)
                 }
             ).catch(
-                (_) => {
+                (err) => {
                     // TODO: Somehow display something went wrong??
-                    console.log("Failed to obtain process flow.")
+                    console.log("Failed to obtain process flow.", err)
                     context.commit('setCurrentProcessFlowFullData', {} as FullProcessFlowData)
                     context.commit('setFullProcessFlowRequestedId', -1)
                 }
@@ -365,21 +371,6 @@ const store : StoreOptions<VuexState> = {
         deleteBatchRisks(context, {nodeId, riskIds, global}) {
             context.commit('deleteRiskFromNode', {nodeId, riskIds})
             if (global) {
-                let otherNodes = new Set()
-                for (let riskId of riskIds) {
-                    if (!(riskId in context.state.currentProcessFlowFullData.Risks)) {
-                        continue
-                    }
-                    let nodeArr = context.state.currentProcessFlowFullData.Risks[riskId].RelevantNodeIds
-                    for (let node of nodeArr) {
-                        otherNodes.add(node)
-                    }
-                }
-
-                for (const nodeId of otherNodes) {
-                    context.commit('deleteRiskFromNode', {nodeId, riskIds})
-                }
-
                 context.commit('deleteRiskGlobal', riskIds)
             }
         }
@@ -402,6 +393,12 @@ const store : StoreOptions<VuexState> = {
                 return {} as ProcessFlowNode
             }
             return getters.nodeInfo(state.selectedNodeId)
+        },
+        risksForNode: (state) => (nodeId : number) : ProcessFlowRisk[] => {
+            return state.currentProcessFlowFullData.NodeRiskRelationships.changed &&
+                state.currentProcessFlowFullData.NodeRiskRelationships.getB(
+                    state.currentProcessFlowFullData.Nodes[nodeId]
+                )
         }
     }
 }

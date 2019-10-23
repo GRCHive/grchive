@@ -71,12 +71,7 @@ export default Vue.extend({
             return VueSetup.store.getters.currentNodeInfo
         },
         risksForNode() : ProcessFlowRisk[] {
-            let ids = this.currentNode.RiskIds
-            let risks = []
-            for (let i of ids) {
-                risks.push(VueSetup.store.state.currentProcessFlowFullData.Risks[i])
-            }
-            return risks
+            return VueSetup.store.getters.risksForNode(this.currentNode.Id)
         },
     },
     methods : {

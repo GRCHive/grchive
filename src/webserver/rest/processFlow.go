@@ -280,6 +280,20 @@ func getProcessFlowFullData(w http.ResponseWriter, r *http.Request) {
 		jsonWriter.Encode(struct{}{})
 		return
 	}
+	graph.Controls, err = database.FindAllControlsForOrganization(org)
+	if err != nil {
+		core.Warning("Failed to obtain controls: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+	graph.NodeRisk, err = database.FindNodeRiskRelationships(flowId)
+	if err != nil {
+		core.Warning("Failed to obtain node-risk relationships: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
 
 	jsonWriter.Encode(&graph)
 }

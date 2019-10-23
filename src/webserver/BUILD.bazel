@@ -64,6 +64,7 @@ go_library(
         "database/processFlowIO.go",
         "database/processFlowEdges.go",
         "database/processFlowNodeDisplaySettings.go",
+        "database/processFlowRelationships.go",
         "database/risks.go",
         "database/users.go",
         "database/controls.go",

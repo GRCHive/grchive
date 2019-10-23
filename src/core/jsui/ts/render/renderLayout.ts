@@ -2,6 +2,8 @@ import Vue from 'vue'
 import Vuex, { StoreOptions } from 'vuex'
 import MetadataStore from '../metadata'
 import { connectProcessFlowNodeDisplaySettingsWebsocket } from '../websocket/processFlowNodeDisplaySettings'
+import { FullProcessFlowData } from '../processFlow'
+import VuexState from '../processFlowState'
 
 // A Vuex store to share the layout of the process flow (nodes, plugs, etc.)
 // across the entire application.

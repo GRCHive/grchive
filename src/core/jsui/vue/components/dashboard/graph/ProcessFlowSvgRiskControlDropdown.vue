@@ -75,11 +75,7 @@ export default Vue.extend({
             return this.risks.length > 0
         },
         risks() : ProcessFlowRisk[] {
-            let nodeRisks = [] as ProcessFlowRisk[]
-            for (let id of this.node.RiskIds) {
-                nodeRisks.push(VueSetup.store.state.currentProcessFlowFullData.Risks[id])
-            }
-            return nodeRisks
+            return VueSetup.store.getters.risksForNode(this.node.Id)
         },
         expandedHeight() : number {
             if (!this.isExpanded) {

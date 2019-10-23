@@ -1,7 +1,6 @@
 package database
 
 import (
-	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/b3h47pte/audit-stuff/core"
@@ -65,10 +64,6 @@ func AddRisksToNode(riskIds []int64, nodeId int64) error {
 }
 
 func InsertNewRisk(risk *core.Risk) error {
-	if len(risk.RelevantNodeIds) == 0 {
-		return errors.New("No relevant node IDs")
-	}
-
 	var err error
 
 	tx := dbConn.MustBegin()
@@ -89,24 +84,6 @@ func InsertNewRisk(risk *core.Risk) error {
 		return err
 	}
 	rows.Close()
-
-	valueConstruct := make([]string, 0)
-	params := append(make([]interface{}, 0), risk.Id)
-	for i, id := range risk.RelevantNodeIds {
-		valueConstruct = append(valueConstruct, fmt.Sprintf("($1, $%d)", i+2))
-		params = append(params, id)
-	}
-
-	riskNodeInsertStmt := fmt.Sprintf(`
-		INSERT INTO process_flow_risk_node (risk_id, node_id)
-		VALUES %s`,
-		strings.Join(valueConstruct, ","))
-
-	_, err = tx.Exec(riskNodeInsertStmt, params...)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
 
 	err = tx.Commit()
 	return err
@@ -132,7 +109,6 @@ func findAllRisksFromDbHelper(stmt *sqlx.Stmt, args ...interface{}) ([]*core.Ris
 		newRisk.Id = dataMap["id"].(int64)
 		newRisk.Name = dataMap["name"].(string)
 		newRisk.Description = dataMap["description"].(string)
-		newRisk.RelevantNodeIds, err = readInt64Array(dataMap["node"].([]uint8))
 		if err != nil {
 			return nil, err
 		}
@@ -146,8 +122,7 @@ func findAllRisksFromDbHelper(stmt *sqlx.Stmt, args ...interface{}) ([]*core.Ris
 func FindAllRisksForProcessFlow(flowId int64) ([]*core.Risk, error) {
 	stmt, err := dbConn.Preparex(`
 		SELECT 
-			risk.*,
-			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(DISTINCT node.id), null)) AS node
+			risk.*
 		FROM process_flow_risks as risk
 		INNER JOIN process_flow_risk_node AS risknode
 			ON risknode.risk_id = risk.id
@@ -166,15 +141,9 @@ func FindAllRisksForProcessFlow(flowId int64) ([]*core.Risk, error) {
 func FindAllRiskForOrganization(org *core.Organization) ([]*core.Risk, error) {
 	stmt, err := dbConn.Preparex(`
 		SELECT 
-			risk.*,
-			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(DISTINCT node.id), null)) AS node
+			risk.*
 		FROM process_flow_risks as risk
-		LEFT JOIN process_flow_risk_node AS risknode
-			ON risknode.risk_id = risk.id
-		LEFT JOIN process_flow_nodes AS node
-			ON risknode.node_id = node.id
 		WHERE risk.org_id = $1
-		GROUP BY risk.id
 	`)
 	if err != nil {
 		return nil, err

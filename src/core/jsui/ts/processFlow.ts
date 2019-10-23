@@ -1,3 +1,20 @@
+import RelationshipMap from './relationship'
+
+export interface FullProcessFlowData {
+    FlowId: number
+    Nodes: Record<number, ProcessFlowNode>
+    NodeKeys: number[]
+    Edges: Record<number, ProcessFlowEdge>
+    EdgeKeys: number[]
+    Inputs: Record<number, ProcessFlowInputOutput>
+    Outputs: Record<number, ProcessFlowInputOutput>
+    Risks: Record<number, ProcessFlowRisk>
+    RiskKeys: number[]
+    Controls: Record<number, ProcessFlowControl>
+    ControlKeys: number[]
+    NodeRiskRelationships: RelationshipMap<ProcessFlowNode, ProcessFlowRisk>
+}
+
 export function isProcessFullDataEmpty(data : FullProcessFlowData) : boolean {
     if (!data) {
         return true

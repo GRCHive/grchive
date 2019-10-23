@@ -16,7 +16,6 @@ interface ProcessFlowRisk {
     Id : number
     Name : string
     Description: string
-    RelevantNodeIds: number[]
 }
 
 interface ProcessFlowControlType {
@@ -32,50 +31,40 @@ interface ProcessFlowControl {
     Frequency: number
     Interval: number
     ProcessOwner: User
-    RelevantRiskIds: number[]
-    RelevantNodeIds: number[]
 }
 
 interface ProcessFlowNode {
-    Id: number,
-    Name: string,
-    Description: string,
-    ProcessFlowId: number,
-    NodeTypeId: number,
-    Inputs: ProcessFlowInputOutput[],
-    Outputs: ProcessFlowInputOutput[],
-    RiskIds: number[]
+    Id: number
+    Name: string
+    Description: string
+    ProcessFlowId: number
+    NodeTypeId: number
+    Inputs: ProcessFlowInputOutput[]
+    Outputs: ProcessFlowInputOutput[]
 }
 
 interface ProcessFlowEdge {
-    Id: number,
-    InputIoId: number,
+    Id: number
+    InputIoId: number
     OutputIoId: number
 }
 
 interface ProcessFlowNodeDisplay {
-    Tx: number,
+    Tx: number
     Ty: number
 }
 
-interface FullProcessFlowResponseData {
-    Nodes: ProcessFlowNode[],
-    Edges: ProcessFlowEdge[],
-    Risks: ProcessFlowRisk[]
+interface NodeRiskRelationship {
+    NodeId: number
+    RiskId: number
 }
 
-interface FullProcessFlowData {
-    FlowId: number
-    Nodes: Record<number, ProcessFlowNode>,
-    NodeKeys: number[],
-    Edges: Record<number, ProcessFlowEdge>,
-    EdgeKeys: number[],
-    Inputs: Record<number, ProcessFlowInputOutput>,
-    Outputs: Record<number, ProcessFlowInputOutput>,
-    Risks: Record<number, ProcessFlowRisk>
-    RiskKeys: number[],
-    Controls: Record<number, ProcessFlowControl>,
-    ControlKeys: number[]
+interface FullProcessFlowResponseData {
+    Nodes: ProcessFlowNode[]
+    Edges: ProcessFlowEdge[]
+    Risks: ProcessFlowRisk[]
+    Controls: ProcessFlowControl[]
+    NodeRisk: NodeRiskRelationship[]
 }
 
 interface FullProcessFlowDisplayData {

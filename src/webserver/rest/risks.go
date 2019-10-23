@@ -47,10 +47,9 @@ func createNewRisk(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newRisk := core.Risk{
-		Name:            inputs.Name,
-		Description:     inputs.Description,
-		Org:             org,
-		RelevantNodeIds: []int64{inputs.NodeId},
+		Name:        inputs.Name,
+		Description: inputs.Description,
+		Org:         org,
 	}
 
 	err = database.InsertNewRisk(&newRisk)

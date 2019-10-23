@@ -1,3 +1,5 @@
+import { FullProcessFlowData } from './processFlow'
+
 interface VuexState {
     primaryNavBarWidth : number,
     allProcessFlowBasicData : ProcessFlowBasicData[],
@@ -7,3 +9,5 @@ interface VuexState {
     selectedNodeId : number // -1 for no selection
     selectedEdgeId: number // -1 for no selection
 }
+
+export default VuexState
