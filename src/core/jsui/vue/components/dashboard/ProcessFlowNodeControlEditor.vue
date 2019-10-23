@@ -1,8 +1,9 @@
 <template>
-    <section class="ma-1">
+    <section>
         <v-dialog v-model="showHideNewControl" persistent max-width="40%">
             <create-new-control-form
                 :node-id="currentNode.Id"
+                :risk-id="currentRelevantRiskId"
                 @do-cancel="onCancelNewControl"
                 @do-save="onSaveNewControl">
             </create-new-control-form>
@@ -25,10 +26,10 @@
                                 </v-btn>
                             </template>
                             <v-list dense>
-                                <v-list-item @click="showHideNewControl = true">
+                                <v-list-item @click="showNewControlDialog(item.Id)">
                                     New Control
                                 </v-list-item>
-                                <v-list-item @click="showHideExistingControl = true">
+                                <v-list-item @click="showExistingControlDialog(item.Id)">
                                     Existing Control
                                 </v-list-item>
                             </v-list>
@@ -59,7 +60,8 @@ import CreateNewControlForm from './CreateNewControlForm.vue'
 export default Vue.extend({
     data : () => ({
         showHideNewControl : false,
-        showHideExistingControl : false
+        showHideExistingControl : false,
+        currentRelevantRiskId : -1
     }),
     components : {
         CreateNewControlForm
@@ -78,6 +80,14 @@ export default Vue.extend({
         },
     },
     methods : {
+        showNewControlDialog(riskId : number) {
+            this.currentRelevantRiskId = riskId
+            this.showHideNewControl = true
+        },
+        showExistingControlDialog(riskId : number) {
+            this.currentRelevantRiskId = riskId
+            this.showHideExistingControl = true
+        },
         onCancelNewControl() {
             this.showHideNewControl = false
         },

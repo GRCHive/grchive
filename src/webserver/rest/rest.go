@@ -39,6 +39,7 @@ func registerAPIPaths(r *mux.Router) {
 	registerProcessFlowIOAPIPaths(s)
 	registerProcessFlowEdgesAPIPaths(s)
 	registerRiskAPIPaths(s)
+	registerControlAPIPaths(s)
 }
 
 func registerUserAPIPaths(r *mux.Router) {
@@ -92,4 +93,10 @@ func registerRiskAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiNewRiskEndpoint, createNewRisk).Methods("POST").Name(webcore.NewRiskRouteName)
 	s.HandleFunc(core.ApiDeleteRiskEndpoint, deleteRisks).Methods("POST").Name(webcore.DeleteRiskRouteName)
 	s.HandleFunc(core.ApiAddRiskToNodeEndpoint, addRisksToNode).Methods("POST").Name(webcore.AddRiskToNodeRouteName)
+}
+
+func registerControlAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiControlPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewControlEndpoint, newControl).Methods("POST").Name(webcore.NewControlRouteName)
+	s.HandleFunc(core.ApiGetControlTypesEndpoint, getControlTypes).Methods("GET").Name(webcore.ControlTypesRouteName)
 }

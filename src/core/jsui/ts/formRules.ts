@@ -5,7 +5,7 @@ export function createMaxLength(len : number) : (_: string) => boolean | string 
 }
 
 export function required(v : any) : boolean | string {
-    return !!v || "Input required.";
+    return (!!v && v != Object()) || "Input required.";
 }
 
 export function email(v : string) : boolean | string {

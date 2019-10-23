@@ -78,6 +78,11 @@ const ApiNewRiskEndpoint string = "/new"
 const ApiDeleteRiskEndpoint string = "/delete"
 const ApiAddRiskToNodeEndpoint string = "/add"
 
+// API - Controls
+const ApiControlPrefix string = "/control"
+const ApiNewControlEndpoint string = "/new"
+const ApiGetControlTypesEndpoint string = "/types"
+
 // Websocket
 const WebsocketPrefix string = "/ws"
 

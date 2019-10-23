@@ -71,3 +71,6 @@ export const addExistingRiskAPIUrl : string = "/api/risk/add"
 export function createGetAllOrgUsersAPIUrl(org : string) : string {
     return `/api/org/${org}/users`
 }
+
+export const getControlTypesUrl : string = "/api/control/types"
+export const newControlUrl : string = "/api/control/new"
