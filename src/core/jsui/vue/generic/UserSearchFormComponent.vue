@@ -7,6 +7,7 @@
         :loading="loading"
         hide-no-data
         hide-selected
+        clearable
     ></v-autocomplete>
 </template>
 

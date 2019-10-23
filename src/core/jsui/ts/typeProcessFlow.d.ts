@@ -1,7 +1,3 @@
-interface FrequencyData {
-
-}
-
 interface ProcessFlowBasicData {
     Id : number
     Name : string
@@ -33,8 +29,9 @@ interface ProcessFlowControl {
     Name : string
     Description : string
     Type: ProcessFlowControlType
-    Frequency: FrequencyData
-    ProcessOwner: string
+    Frequency: number
+    Interval: number
+    ProcessOwner: User
     RelevantRiskIds: number[]
     RelevantNodeIds: number[]
 }

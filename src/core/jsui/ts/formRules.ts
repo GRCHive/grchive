@@ -17,3 +17,7 @@ export function email(v : string) : boolean | string {
     const match = v.match(regex);
     return !!match || "A valid email is required.";
 }
+
+export function numeric(v : string) : boolean | string {
+    return isNaN(Number(v)) || "Must be numeric."
+}

@@ -12,6 +12,7 @@ CREATE TABLE process_flow_risk_node (
 );
 
 CREATE TABLE process_flow_risk_control (
-    risk_id BIGINT NOT NULL REFERENCES process_flow_risks(id) ON DELETE CASCADE
+    risk_id BIGINT NOT NULL REFERENCES process_flow_risks(id) ON DELETE CASCADE,
     control_id BIGINT NOT NULL REFERENCES process_flow_controls(id) ON DELETE CASCADE,
+    UNIQUE(risk_id, control_id)
 );
