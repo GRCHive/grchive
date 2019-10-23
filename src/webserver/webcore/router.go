@@ -45,6 +45,7 @@ const (
 	NewRiskRouteName                               = "NewRisk"
 	DeleteRiskRouteName                            = "DeleteRisk"
 	AddRiskToNodeRouteName                         = "AddRiskToNodeRisk"
+	GetAllOrgUsersRouteName                        = "GetAllOrgUsers"
 )
 
 var globalRouter *mux.Router

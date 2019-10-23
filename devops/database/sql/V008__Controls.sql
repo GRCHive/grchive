@@ -10,7 +10,8 @@ CREATE TABLE process_flow_controls (
     description TEXT,
     control_type INTEGER NOT NULL REFERENCES process_flow_control_types(id) ON DELETE RESTRICT,
     org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-    frequency TEXT,
+    frequency_type INTEGER NOT NULL,
+    frequency_interval INTEGER NOT NULL,
     owner_id BIGINT REFERENCES users(id) ON DELETE NO ACTION
 );
 

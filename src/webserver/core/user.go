@@ -5,6 +5,6 @@ type User struct {
 	FirstName  string `db:"first_name"`
 	LastName   string `db:"last_name"`
 	Email      string `db:"email"`
-	OktaUserId string `db:"okta_id"`
+	OktaUserId string `db:"okta_id" json:"-"`
 	OrgId      int32  `db:"org_id"`
 }

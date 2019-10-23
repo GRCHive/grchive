@@ -145,6 +145,7 @@ go_library(
         "rest/processFlowIO.go",
         "rest/processFlowEdges.go",
         "rest/risks.go",
+        "rest/organization.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",

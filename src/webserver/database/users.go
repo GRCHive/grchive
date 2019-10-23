@@ -4,6 +4,21 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
+func FindAllUsersInOrganization(orgId int32) ([]*core.User, error) {
+	users := make([]*core.User, 0)
+
+	err := dbConn.Select(&users, `
+		SELECT * FROM users
+		WHERE org_id = $1
+	`, orgId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func FindUserFromOktaId(oktaId string) (*core.User, error) {
 	user := core.User{}
 

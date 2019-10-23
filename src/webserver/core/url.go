@@ -67,6 +67,11 @@ var ApiUserUrl string = fmt.Sprintf("/user/{%s}", DashboardUserQueryId)
 
 const ApiUserProfileUrl string = "/profile"
 
+// API - Organization
+var ApiOrgPrefix string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
+
+const ApiOrgUsersEndpoint string = "/users"
+
 // API - Risks
 const ApiRiskPrefix string = "/risk"
 const ApiNewRiskEndpoint string = "/new"

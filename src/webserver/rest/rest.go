@@ -33,6 +33,7 @@ func registerAPIPaths(r *mux.Router) {
 	}))
 
 	registerUserAPIPaths(s)
+	registerOrgAPIPaths(s)
 	registerProcessFlowAPIPaths(s)
 	registerProcessFlowNodesAPIPaths(s)
 	registerProcessFlowIOAPIPaths(s)
@@ -46,6 +47,14 @@ func registerUserAPIPaths(r *mux.Router) {
 		w.WriteHeader(http.StatusForbidden)
 	}))
 	s.HandleFunc(core.ApiUserProfileUrl, updateUserProfile).Methods("POST").Name(webcore.UserProfileEditRouteName)
+}
+
+func registerOrgAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiOrgPrefix).Subrouter()
+	s.Use(webcore.CreateVerifyUserHasAccessToOrganizationMiddleware(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	}))
+	s.HandleFunc(core.ApiOrgUsersEndpoint, getAllUsersInOrganization).Methods("GET").Name(webcore.GetAllOrgUsersRouteName)
 }
 
 func registerProcessFlowAPIPaths(r *mux.Router) {
