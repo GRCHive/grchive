@@ -25,7 +25,7 @@ func FindAllControlsForOrganization(org *core.Organization) ([]*core.Control, er
 	return controls, err
 }
 
-func InsertNewControl(control *core.Control, nodeId int64, riskId int64) error {
+func InsertNewControl(control *core.Control) error {
 	var err error
 
 	tx := dbConn.MustBegin()
@@ -46,23 +46,74 @@ func InsertNewControl(control *core.Control, nodeId int64, riskId int64) error {
 		return err
 	}
 	rows.Close()
+	return tx.Commit()
+}
 
-	_, err = tx.Exec(`
-		INSERT INTO process_flow_control_node (control_id, node_id)
-		VALUES ($1, $2)
-	`, control.Id, nodeId)
-	if err != nil {
-		tx.Rollback()
-		return err
+func DeleteControls(nodeId int64, controlIds []int64, riskIds []int64, global bool) error {
+	tx := dbConn.MustBegin()
+	// Always delete the control relationship between the node and the control
+	// as well as the control and the specified risk.
+	for idx, id := range controlIds {
+		_, err := tx.Exec(`
+			DELETE FROM process_flow_control_node
+			WHERE node_id = $1 AND control_id = $2
+		`, nodeId, id)
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		_, err = tx.Exec(`
+			DELETE FROM process_flow_risk_control
+			WHERE risk_id = $1 AND control_id = $2
+		`, riskIds[idx], id)
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
-	_, err = tx.Exec(`
-		INSERT INTO process_flow_risk_control (risk_id, control_id)
-		VALUES ($1, $2)
-	`, riskId, control.Id)
-	if err != nil {
-		tx.Rollback()
-		return err
+	// If global, delete the itself control (the relationships will be deleted by cascade).
+	if global {
+		for _, id := range controlIds {
+			_, err := tx.Exec(`
+				DELETE FROM process_flow_controls
+				WHERE id = $1
+			`, id)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+
+	return tx.Commit()
+}
+
+func AddControlsToNodeRisk(nodeId int64, riskId int64, controlIds []int64) error {
+	var err error
+	tx := dbConn.MustBegin()
+
+	for _, controlId := range controlIds {
+		_, err = tx.Exec(`
+			INSERT INTO process_flow_control_node (control_id, node_id)
+			VALUES ($1, $2)
+		`, controlId, nodeId)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		_, err = tx.Exec(`
+			INSERT INTO process_flow_risk_control (risk_id, control_id)
+			VALUES ($1, $2)
+		`, riskId, controlId)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	return tx.Commit()

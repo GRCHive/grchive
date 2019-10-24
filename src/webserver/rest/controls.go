@@ -19,6 +19,19 @@ type NewControlInputs struct {
 	RiskId            int64  `webcore:"riskId"`
 }
 
+type DeleteControlInputs struct {
+	NodeId     int64   `webcore:"nodeId"`
+	RiskIds    []int64 `webcore:"riskIds"`
+	ControlIds []int64 `webcore:"controlIds"`
+	Global     bool    `webcore:"global"`
+}
+
+type AddControlInputs struct {
+	NodeId     int64   `webcore:"nodeId"`
+	RiskId     int64   `webcore:"riskId"`
+	ControlIds []int64 `webcore:"controlIds"`
+}
+
 func newControl(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -50,9 +63,17 @@ func newControl(w http.ResponseWriter, r *http.Request) {
 		OwnerId:           inputs.OwnerId,
 	}
 
-	err = database.InsertNewControl(&control, inputs.NodeId, inputs.RiskId)
+	err = database.InsertNewControl(&control)
 	if err != nil {
 		core.Warning("Failed to insert new control: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	err = database.AddControlsToNodeRisk(inputs.NodeId, inputs.RiskId, []int64{control.Id})
+	if err != nil {
+		core.Warning("Failed to add control to node/risk relationship: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		jsonWriter.Encode(struct{}{})
 		return
@@ -74,4 +95,52 @@ func getControlTypes(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(types)
+}
+
+func deleteControls(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := DeleteControlInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = database.DeleteControls(
+		inputs.NodeId,
+		inputs.ControlIds,
+		inputs.RiskIds,
+		inputs.Global)
+	if err != nil {
+		core.Warning("Failed to delete controls: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	jsonWriter.Encode(struct{}{})
+}
+
+func addControls(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := AddControlInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = database.AddControlsToNodeRisk(inputs.NodeId, inputs.RiskId, inputs.ControlIds)
+	if err != nil {
+		core.Warning("Can't add existing controls: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(struct{}{})
 }

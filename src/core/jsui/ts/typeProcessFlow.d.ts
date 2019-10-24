@@ -82,3 +82,8 @@ interface FullProcessFlowResponseData {
 interface FullProcessFlowDisplayData {
     Nodes: Record<number, ProcessFlowNodeDisplay>
 }
+
+interface RiskControl {
+    risk: ProcessFlowRisk
+    control: ProcessFlowControl
+}

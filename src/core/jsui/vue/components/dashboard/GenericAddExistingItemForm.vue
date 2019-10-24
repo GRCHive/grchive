@@ -2,14 +2,14 @@
 
 <v-card>
     <v-card-title>
-        Add Existing Risk
+        Add Existing {{ itemName }}
     </v-card-title>
     <v-divider></v-divider>
 
     <section class="ma-2">
         <v-list two-line>
-            <v-list-item-group multiple v-model="selectedRisks">
-                <v-list-item v-for="(item, index) in allRisks"
+            <v-list-item-group multiple v-model="selectedItems">
+                <v-list-item v-for="(item, index) in selectableItems"
                              :key="index" class="pa-1" :value="item">
                     <template v-slot:default="{active, toggle}">
                         <v-list-item-action class="ma-1">
@@ -57,36 +57,20 @@ import { newRisk } from "../../../ts/api/apiRisks"
 
 export default Vue.extend({
     props: {
-        preselectedRisks: Array
+        itemName : String,
+        selectableItems : Array
     },
     data: () => ({
-        selectedRisks : [] as ProcessFlowRisk[]
+        selectedItems: [] as any[]
     }),
-    computed: {
-        allRisks() : ProcessFlowRisk[] {
-            let risks : ProcessFlowRisk[] = []
-            for (let riskId of VueSetup.store.state.currentProcessFlowFullData.RiskKeys) {
-                if (this.preselectedSet.has(riskId)) {
-                    continue
-                }
-                risks.push(VueSetup.store.state.currentProcessFlowFullData.Risks[riskId])
-            }
-            return risks
-        },
-        preselectedSet() : Set<number> {
-            let newSet = new Set<number>()
-            for (let r of this.preselectedRisks) {
-                newSet.add((<ProcessFlowRisk>r).Id)
-            }
-            return newSet
-        }
-    },
     methods: {
         onCancel() {
+            this.selectedItems = []
             this.$emit('do-cancel')
         },
         onSelect() {
-            this.$emit('do-select', this.selectedRisks)
+            this.$emit('do-select', this.selectedItems)
+            this.selectedItems = []
         }
     }
 })

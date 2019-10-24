@@ -1,7 +1,9 @@
 import axios from 'axios'
 import * as qs from 'query-string'
 import { getControlTypesUrl,
-         newControlUrl } from '../url'
+         newControlUrl,
+         addControlUrl,
+         deleteControlUrl } from '../url'
 import { postFormUrlEncoded } from '../http'
 
 export function getControlTypes(inp : TGetControlTypesInput) : Promise<TGetControlTypesOutput> {
@@ -10,4 +12,35 @@ export function getControlTypes(inp : TGetControlTypesInput) : Promise<TGetContr
 
 export function newControl(inp: TNewControlInput) : Promise<TNewControlOutput> {
     return postFormUrlEncoded<TNewControlOutput>(newControlUrl, inp)
+}
+
+export interface TDeleteControlInput {
+    csrf: string
+    nodeId: number
+    riskIds: number[]
+    controlIds: number[]
+    global: boolean
+}
+
+export interface TDeleteControlOutput {
+}
+
+export function deleteControls(inp : TDeleteControlInput): Promise<TDeleteControlOutput> {
+    return postFormUrlEncoded<TDeleteControlOutput>(deleteControlUrl, inp)
+}
+
+
+export interface TExistingControlInput {
+    csrf: string
+    nodeId: number
+    riskId: number
+    controlIds: number[]
+}
+
+export interface TExistingControlOutput {
+}
+
+
+export function addExistingControls(inp : TExistingControlInput): Promise<TExistingControlOutput> {
+    return postFormUrlEncoded<TExistingControlOutput>(addControlUrl, inp)
 }

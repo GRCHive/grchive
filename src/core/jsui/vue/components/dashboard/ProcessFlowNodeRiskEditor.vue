@@ -16,11 +16,14 @@
                             <v-icon small>mdi-delete</v-icon>
                         </v-btn>
                     </template>
-                    <delete-risk-form
-                        :risks-to-delete="selectedRisks"
+                    
+                    <generic-delete-confirmation-form
+                        item-name="risks"
+                        :items-to-delete="risksForDeletionConfirmation"
                         v-on:do-cancel="showHideDeleteRisk = false"
-                        v-on:do-delete="deleteSelectedRisks">
-                    </delete-risk-form>
+                        v-on:do-delete="deleteSelectedRisks"
+                        :use-global-deletion="true">
+                    </generic-delete-confirmation-form>
                 </v-dialog>
             </v-list-item-action>
         </v-list-item>
@@ -47,6 +50,12 @@
                                     {{ item.Description }}
                                 </v-list-item-subtitle>
                             </v-list-item-content>
+
+                            <v-list-item-action>
+                                <v-btn icon @click.stop="editRisk(item)" @mousedown.stop>
+                                    <v-icon>mdi-pencil</v-icon>
+                                </v-btn>
+                            </v-list-item-action>
                         </template>
                     </v-list-item>
                     <v-divider></v-divider>
@@ -62,11 +71,12 @@
                             Add Existing
                         </v-btn>
                     </template>
-                    <add-existing-risk-form
-                        :preselected-risks="risksForNode"
+                    <generic-add-existing-item-form
+                        item-name="Risks"
+                        :selectable-items="unselectedRisksForNode"
                         @do-select="addExistingRisk"
                         @do-cancel="cancelAddRisk">
-                    </add-existing-risk-form>
+                    </generic-add-existing-item-form>
                 </v-dialog>
             </v-list-item-action>
             <v-list-item-action class="ma-1">
@@ -93,8 +103,9 @@
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup' 
 import CreateNewRiskForm from './CreateNewRiskForm.vue'
-import AddExistingRiskForm from './AddExistingRiskForm.vue'
 import DeleteRiskForm from './DeleteRiskForm.vue'
+import GenericAddExistingItemForm from './GenericAddExistingItemForm.vue'
+import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import { deleteRisk, addExistingRisk } from '../../../ts/api/apiRisks'
 import { contactUsUrl } from '../../../ts/url'
 
@@ -107,8 +118,8 @@ export default Vue.extend({
     }),
     components : {
         CreateNewRiskForm,
-        DeleteRiskForm,
-        AddExistingRiskForm
+        GenericDeleteConfirmationForm,
+        GenericAddExistingItemForm
     },
     computed : {
         hasSelected() : boolean {
@@ -120,12 +131,22 @@ export default Vue.extend({
         risksForNode() : ProcessFlowRisk[] {
             return VueSetup.store.getters.risksForNode(this.currentNode.Id)
         },
+        unselectedRisksForNode() : ProcessFlowRisk[] {
+            let allRisks = VueSetup.store.state.currentProcessFlowFullData.RiskKeys.map(
+                ele => VueSetup.store.state.currentProcessFlowFullData.Risks[ele])
+
+            let alreadySelected = new Set<number>(this.risksForNode.map(ele => ele.Id))
+            return allRisks.filter(ele => !alreadySelected.has(ele.Id))
+        },
         selectedRiskIds() : number[] {
             let riskIds = [] as number[]
             for (let risk of this.selectedRisks) {
                 riskIds.push(risk.Id)
             }
             return riskIds
+        },
+        risksForDeletionConfirmation() : string[] {
+            return this.selectedRisks.map(ele => ele.Name)
         }
     },
     methods : {
@@ -200,6 +221,7 @@ export default Vue.extend({
                     riskIds: this.selectedRiskIds,
                     global: global
                 })
+                this.selectedRisks = []
                 this.showHideDeleteRisk = false
             }).catch((err) => {
                 // @ts-ignore
@@ -210,6 +232,8 @@ export default Vue.extend({
                     contactUsUrl,
                     true);
             })
+        },
+        editRisk(risk : ProcessFlowRisk) {
         }
     },
     watch : {

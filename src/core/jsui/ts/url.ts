@@ -74,3 +74,5 @@ export function createGetAllOrgUsersAPIUrl(org : string) : string {
 
 export const getControlTypesUrl : string = "/api/control/types"
 export const newControlUrl : string = "/api/control/new"
+export const deleteControlUrl : string = "/api/control/delete"
+export const addControlUrl : string = "/api/control/add"

@@ -48,6 +48,8 @@ const (
 	GetAllOrgUsersRouteName                        = "GetAllOrgUsers"
 	NewControlRouteName                            = "NewControl"
 	ControlTypesRouteName                          = "ControlTypes"
+	DeleteControlRouteName                         = "DeleteControl"
+	AddControlRouteName                            = "AddControl"
 )
 
 var globalRouter *mux.Router

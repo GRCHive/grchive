@@ -200,11 +200,52 @@ const store : StoreOptions<VuexState> = {
             }
         },
         addControl(state, {control}) {
+            if (control.Id in state.currentProcessFlowFullData.Controls) {
+                return
+            }
+            Vue.set(
+                state.currentProcessFlowFullData.Controls,
+                control.Id,
+                control)
+            state.currentProcessFlowFullData.ControlKeys.push(control.Id)
         },
         addControlToNode(state, {controlId, nodeId}) {
+            state.currentProcessFlowFullData.NodeControlRelationships.add(
+                state.currentProcessFlowFullData.Nodes[nodeId],
+                state.currentProcessFlowFullData.Controls[controlId]
+            )
         },
         addControlToRisk(state, {controlId, riskId}) {
+            state.currentProcessFlowFullData.RiskControlRelationships.add(
+                state.currentProcessFlowFullData.Risks[riskId],
+                state.currentProcessFlowFullData.Controls[controlId]
+            )
         },
+        deleteControlFromRiskNode(state, {controlId, nodeId, riskId}) {
+            state.currentProcessFlowFullData.NodeControlRelationships.delete(
+                state.currentProcessFlowFullData.Nodes[nodeId],
+                state.currentProcessFlowFullData.Controls[controlId]
+            )
+
+            state.currentProcessFlowFullData.RiskControlRelationships.delete(
+                state.currentProcessFlowFullData.Risks[riskId],
+                state.currentProcessFlowFullData.Controls[controlId]
+            )
+        },
+        deleteControlGlobal(state, {controlId}) {
+            state.currentProcessFlowFullData.NodeControlRelationships.deleteB(
+                state.currentProcessFlowFullData.Controls[controlId]
+            )
+
+            state.currentProcessFlowFullData.RiskControlRelationships.deleteB(
+                state.currentProcessFlowFullData.Controls[controlId]
+            )
+
+            Vue.delete(state.currentProcessFlowFullData.Controls, controlId)
+            state.currentProcessFlowFullData.ControlKeys.splice(
+                state.currentProcessFlowFullData.ControlKeys.findIndex((ele) => ele == controlId),
+                1)
+        }
     },
     actions: {
         mountPrimaryNavBar(context, nav) {
@@ -292,14 +333,12 @@ const store : StoreOptions<VuexState> = {
                     }
 
                     for (let data of resp.data.NodeControl) {
-                        console.log(data.NodeId, data.ControlId)
                         newData.NodeControlRelationships.add(
                             newData.Nodes[data.NodeId],
                             newData.Controls[data.ControlId])
                     }
 
                     for (let data of resp.data.RiskControl) {
-                        console.log(data.RiskId, data.ControlId)
                         newData.RiskControlRelationships.add(
                             newData.Risks[data.RiskId],
                             newData.Controls[data.ControlId])
@@ -395,6 +434,19 @@ const store : StoreOptions<VuexState> = {
             if (global) {
                 context.commit('deleteRiskGlobal', riskIds)
             }
+        },
+        deleteBatchControls(context, {nodeId, controlIds, riskIds, global}) {
+            for (let i = 0; i < controlIds.length; ++i) {
+                context.commit('deleteControlFromRiskNode', {
+                    controlId: controlIds[i],
+                    nodeId: nodeId,
+                    riskIds: riskIds[i]
+                })
+
+                if (global) {
+                    context.commit('deleteControlGlobal', {controlId: controlIds[i]})
+                }
+            }
         }
     },
     getters: {
@@ -422,7 +474,7 @@ const store : StoreOptions<VuexState> = {
                     state.currentProcessFlowFullData.Nodes[nodeId]
                 )
         },
-        controlsForRiskNode: (state) => (riskId : number, nodeId : number) : ProcessFlowControl[] => {
+        controlsForRiskNode: (state) => (riskId : number, nodeId : number) : RiskControl[] => {
             let controlsForNode = 
                 state.currentProcessFlowFullData.NodeControlRelationships.changed && 
                 state.currentProcessFlowFullData.NodeControlRelationships.getB(
@@ -433,7 +485,11 @@ const store : StoreOptions<VuexState> = {
                 state.currentProcessFlowFullData.RiskControlRelationships.getB(
                     state.currentProcessFlowFullData.Risks[riskId]
                 )
-            return controlsForNode.filter(val => controlsForRisk.includes(val))
+
+            return controlsForNode.filter(val => controlsForRisk.includes(val)).map(ele => ({
+                risk: state.currentProcessFlowFullData.Risks[riskId],
+                control: ele
+            }))
         }
     }
 }

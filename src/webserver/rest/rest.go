@@ -99,4 +99,6 @@ func registerControlAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiControlPrefix).Subrouter()
 	s.HandleFunc(core.ApiNewControlEndpoint, newControl).Methods("POST").Name(webcore.NewControlRouteName)
 	s.HandleFunc(core.ApiGetControlTypesEndpoint, getControlTypes).Methods("GET").Name(webcore.ControlTypesRouteName)
+	s.HandleFunc(core.ApiDeleteControlEndpoint, deleteControls).Methods("POST").Name(webcore.DeleteControlRouteName)
+	s.HandleFunc(core.ApiAddControlEndpoint, addControls).Methods("POST").Name(webcore.AddControlRouteName)
 }
