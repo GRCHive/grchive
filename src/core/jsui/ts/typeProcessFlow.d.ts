@@ -59,12 +59,24 @@ interface NodeRiskRelationship {
     RiskId: number
 }
 
+interface NodeControlRelationship {
+    NodeId: number
+    ControlId: number
+}
+
+interface RiskControlRelationship {
+    RiskId: number
+    ControlId: number
+}
+
 interface FullProcessFlowResponseData {
     Nodes: ProcessFlowNode[]
     Edges: ProcessFlowEdge[]
     Risks: ProcessFlowRisk[]
     Controls: ProcessFlowControl[]
     NodeRisk: NodeRiskRelationship[]
+    NodeControl: NodeControlRelationship[]
+    RiskControl: RiskControlRelationship[]
 }
 
 interface FullProcessFlowDisplayData {

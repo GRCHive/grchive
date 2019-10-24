@@ -132,7 +132,7 @@ export default Vue.extend({
                 nodeId: this.nodeId,
                 riskId: this.riskId
             }).then((resp : TNewControlOutput) => {
-                this.$emit('do-save', resp.data)
+                this.$emit('do-save', resp.data, this.riskId)
             }).catch((err) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(

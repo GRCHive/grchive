@@ -198,7 +198,13 @@ const store : StoreOptions<VuexState> = {
                     state.currentProcessFlowFullData.Risks[id]
                 )
             }
-        }
+        },
+        addControl(state, {control}) {
+        },
+        addControlToNode(state, {controlId, nodeId}) {
+        },
+        addControlToRisk(state, {controlId, riskId}) {
+        },
     },
     actions: {
         mountPrimaryNavBar(context, nav) {
@@ -249,7 +255,9 @@ const store : StoreOptions<VuexState> = {
                         RiskKeys: [] as number[],
                         Controls: Object(),
                         ControlKeys: [] as number[],
-                        NodeRiskRelationships: Vue.observable(new RelationshipMap<ProcessFlowNode,ProcessFlowRisk>())
+                        NodeRiskRelationships: Vue.observable(new RelationshipMap<ProcessFlowNode,ProcessFlowRisk>()),
+                        NodeControlRelationships: Vue.observable(new RelationshipMap<ProcessFlowNode,ProcessFlowControl>()),
+                        RiskControlRelationships: Vue.observable(new RelationshipMap<ProcessFlowRisk,ProcessFlowControl>()),
                     }
                     for (let data of resp.data.Nodes) {
                         newData.Nodes[data.Id] = data
@@ -281,6 +289,20 @@ const store : StoreOptions<VuexState> = {
                         newData.NodeRiskRelationships.add(
                             newData.Nodes[data.NodeId],
                             newData.Risks[data.RiskId])
+                    }
+
+                    for (let data of resp.data.NodeControl) {
+                        console.log(data.NodeId, data.ControlId)
+                        newData.NodeControlRelationships.add(
+                            newData.Nodes[data.NodeId],
+                            newData.Controls[data.ControlId])
+                    }
+
+                    for (let data of resp.data.RiskControl) {
+                        console.log(data.RiskId, data.ControlId)
+                        newData.RiskControlRelationships.add(
+                            newData.Risks[data.RiskId],
+                            newData.Controls[data.ControlId])
                     }
                     
                     context.commit('setCurrentProcessFlowFullData', newData)
@@ -399,6 +421,19 @@ const store : StoreOptions<VuexState> = {
                 state.currentProcessFlowFullData.NodeRiskRelationships.getB(
                     state.currentProcessFlowFullData.Nodes[nodeId]
                 )
+        },
+        controlsForRiskNode: (state) => (riskId : number, nodeId : number) : ProcessFlowControl[] => {
+            let controlsForNode = 
+                state.currentProcessFlowFullData.NodeControlRelationships.changed && 
+                state.currentProcessFlowFullData.NodeControlRelationships.getB(
+                    state.currentProcessFlowFullData.Nodes[nodeId]
+                )
+            let controlsForRisk = 
+                state.currentProcessFlowFullData.RiskControlRelationships.changed && 
+                state.currentProcessFlowFullData.RiskControlRelationships.getB(
+                    state.currentProcessFlowFullData.Risks[riskId]
+                )
+            return controlsForNode.filter(val => controlsForRisk.includes(val))
         }
     }
 }

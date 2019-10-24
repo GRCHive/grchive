@@ -31,7 +31,7 @@ func InsertNewControl(control *core.Control, nodeId int64, riskId int64) error {
 	tx := dbConn.MustBegin()
 	rows, err := tx.NamedQuery(`
 		INSERT INTO process_flow_controls (name, description, control_type, org_id, freq_type, freq_interval, owner_id)
-		VALUES (:name, :description, :control_type.id, :org.id, :freq_type, :freq_interval, :owner.id)
+		VALUES (:name, :description, :control_type, :org_id, :freq_type, :freq_interval, :owner_id)
 		RETURNING id
 	`, control)
 	if err != nil {

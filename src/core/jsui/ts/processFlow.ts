@@ -13,6 +13,8 @@ export interface FullProcessFlowData {
     Controls: Record<number, ProcessFlowControl>
     ControlKeys: number[]
     NodeRiskRelationships: RelationshipMap<ProcessFlowNode, ProcessFlowRisk>
+    NodeControlRelationships: RelationshipMap<ProcessFlowNode, ProcessFlowControl>
+    RiskControlRelationships: RelationshipMap<ProcessFlowRisk, ProcessFlowControl>
 }
 
 export function isProcessFullDataEmpty(data : FullProcessFlowData) : boolean {

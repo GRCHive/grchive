@@ -46,6 +46,20 @@
                         </v-list-item-subtitle>
                     </v-list-item-content>
                 </template>
+
+                <v-list-item two-line
+                             v-for="(controlItem, controlIndex) in controlsForRiskNode(item.Id)"
+                             :key="controlIndex">
+                    <v-list-item-content>
+                        <v-list-item-title>
+                            {{ controlItem.Name }}
+                        </v-list-item-title>
+
+                        <v-list-item-subtitle>
+                            {{ controlItem.Description }}
+                        </v-list-item-subtitle>
+                    </v-list-item-content>
+                </v-list-item>
             </v-list-group>
         </v-list>
     </section>
@@ -73,6 +87,13 @@ export default Vue.extend({
         risksForNode() : ProcessFlowRisk[] {
             return VueSetup.store.getters.risksForNode(this.currentNode.Id)
         },
+        controlsForRiskNode() : (riskId : number) => ProcessFlowControl[] {
+            return (riskId: number) : ProcessFlowControl[] => {
+                return VueSetup.store.getters.controlsForRiskNode(
+                    riskId,
+                    this.currentNode.Id)
+            }
+        }
     },
     methods : {
         showNewControlDialog(riskId : number) {
@@ -86,7 +107,16 @@ export default Vue.extend({
         onCancelNewControl() {
             this.showHideNewControl = false
         },
-        onSaveNewControl() {
+        onSaveNewControl(control : ProcessFlowControl, riskId : number) {
+            VueSetup.store.commit('addControl', {control})
+            VueSetup.store.commit('addControlToNode', {
+                controlId: control.Id,
+                nodeId: this.currentNode.Id
+            })
+            VueSetup.store.commit('addControlToRisk', {
+                controlId: control.Id,
+                riskId: riskId
+            })
             this.showHideNewControl = false
         }
     }
