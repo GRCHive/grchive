@@ -10,12 +10,20 @@
            :visibility="isExpanded ? `visible` : `hidden`">
 
             <text dominant-baseline="hanging"
-                  class="body-2 dropdown-text no-pointer"
+                  class="body-2 dropdown-text no-pointer font-weight-bold"
                   text-rendering="optimizeLegibility"
-                  text-anchor="middle"
-                  :transform="`translate(${currentWidth / 2}, ${dropdownButtonMargin})`"
+                  text-anchor="start"
+                  :transform="`translate(${dropdownButtonMargin}, ${dropdownButtonMargin})`"
                   ref="riskTitle"
             >RISKS</text> 
+
+            <text dominant-baseline="hanging"
+                  class="body-2 dropdown-text no-pointer font-weight-bold"
+                  text-rendering="optimizeLegibility"
+                  text-anchor="end"
+                  :transform="`translate(${currentWidth - dropdownButtonMargin}, ${dropdownButtonMargin})`"
+                  ref="controlTitle"
+            >CONTROLS</text> 
 
             <g ref="riskText">
                 <text dominant-baseline="hanging"
@@ -30,20 +38,39 @@
             </g>
 
             <g ref="controlText">
+                <g v-for="risk in risks"
+                   :key="risk.Id"
+                >
+                    <text dominant-baseline="hanging"
+                          class="body-2 dropdown-text no-pointer"
+                          text-rendering="optimizeLegibility"
+                          text-anchor="end"
+                          v-for="(control, cindex) in controls[risk.Id]"
+                          :key="cindex"
+                          :transform="`translate(
+                            ${currentWidth - getControlLayout(control.control.Id).tx},
+                            ${getControlLayout(control.control.Id).ty})`"
+                    >{{ control.control.Name }}</text> 
+                </g>
             </g>
         </g>
 
-        <g ref="dropdown"
-           :transform="`translate(0, ${expandedHeight})`"
+        <g :transform="`translate(0, ${expandedHeight})`"
            @mousedown.stop
            @click.stop="toggleExpand"
            cursor="pointer"
         >
+            <rect :width="currentWidth"
+                  :height="dropdownButtonHeight + 2 * dropdownButtonMargin"
+                  class="button-rect"
+            ></rect>
+
             <text dominant-baseline="hanging"
-                  class="body-2 dropdown-text no-pointer"
+                  class="body-2 dropdown-text no-pointer font-weight-bold"
                   text-rendering="optimizeLegibility"
                   text-anchor="middle"
                   :transform="`translate(${currentWidth / 2}, ${dropdownButtonMargin})`"
+                  ref="dropdown"
             >{{ !isExpanded ? "RISKS AND CONTROLS" : "COLLAPSE" }}</text> 
         </g>
     </g>
@@ -68,7 +95,9 @@ export default Vue.extend({
         riskControlTextHeight: 200,
         isExpanded: false,
         riskTransformLayout: new Map<number, TransformData>(),
-        riskTextWidth: 200
+        riskTextWidth: 200,
+        controlTextWidth: 200,
+        controlTransformLayout: new Map<number, TransformData>()
     }),
     computed: {
         hasRiskControl() : boolean {
@@ -76,6 +105,15 @@ export default Vue.extend({
         },
         risks() : ProcessFlowRisk[] {
             return VueSetup.store.getters.risksForNode(this.node.Id)
+        },
+        controls() : Record<number, RiskControl[]> {
+            let groupedControls = Object() as Record<number, RiskControl[]>
+            for (let risk of this.risks) {
+                groupedControls[risk.Id] = VueSetup.store.getters.controlsForRiskNode(
+                    risk.Id,
+                    this.node.Id)
+            }
+            return groupedControls
         },
         expandedHeight() : number {
             if (!this.isExpanded) {
@@ -88,37 +126,55 @@ export default Vue.extend({
             if (!this.isExpanded) {
                 return this.parentWidth
             } else {
-                return Math.max(this.parentWidth, this.riskTextWidth)
+                return Math.max(this.parentWidth, this.riskTextWidth + this.controlTextWidth + 50)
             }
         }
     },
     methods: {
         recomputeRiskControlTextLayout() {
-            const itemSpacingMargin : number = 5
+            const itemSpacingMargin : number = 9
 
             //@ts-ignore
             const riskTitle: SVGGraphicsElement = this.$refs.riskTitle
-            let riskStartY = riskTitle.getBBox().y + riskTitle.getBBox().height
+            let currentY = riskTitle.getBBox().y + riskTitle.getBBox().height
 
             this.riskTransformLayout = new Map<number, TransformData>()
             for (let r of this.risks) {
-                riskStartY += itemSpacingMargin
+                currentY += itemSpacingMargin
                 this.riskTransformLayout.set(r.Id, <TransformData>{
                     tx: itemSpacingMargin,
-                    ty: riskStartY
+                    ty: currentY
                 })
+
+                if (r.Id in this.controls && this.controls[r.Id].length > 0) {
+                    for (let c of this.controls[r.Id]) {
+                        this.controlTransformLayout.set(c.control.Id, <TransformData>{
+                            tx: itemSpacingMargin,
+                            ty: currentY
+                        })
+
+                        currentY += itemSpacingMargin + riskTitle.getBBox().height
+                    }
+                    currentY -= riskTitle.getBBox().height
+                }
                 // This is OK since we don't actually change the font
-                riskStartY += riskTitle.getBBox().height
+                currentY += riskTitle.getBBox().height
             }
 
             Vue.nextTick(() => {
                 //@ts-ignore
-                const totalGroup: SVGGraphicsElement = this.$refs.riskControlTextGroup
-                this.riskControlTextHeight = totalGroup.getBBox().height
-
-                //@ts-ignore
                 const riskText : SVGGraphicsElement = this.$refs.riskText
                 this.riskTextWidth = riskText.getBBox().width + 2 * itemSpacingMargin
+
+                //@ts-ignore
+                const controlText : SVGGraphicsElement = this.$refs.controlText
+                this.controlTextWidth = controlText.getBBox().width + 2 * itemSpacingMargin
+
+                Vue.nextTick(() => {
+                    //@ts-ignore
+                    const totalGroup: SVGGraphicsElement = this.$refs.riskControlTextGroup
+                    this.riskControlTextHeight = totalGroup.getBBox().height
+                })
             })
         },
         toggleExpand() {
@@ -133,6 +189,16 @@ export default Vue.extend({
             } else {
                 return this.riskTransformLayout.get(riskId)!
             }
+        },
+        getControlLayout(controlId: number) : TransformData {
+            if (!this.controlTransformLayout.has(controlId)) {
+                return <TransformData>{
+                    tx: 0,
+                    ty: 0
+                }
+            } else {
+                return this.controlTransformLayout.get(controlId)!
+            }
         }
     },
     mounted() {
@@ -145,11 +211,18 @@ export default Vue.extend({
         risks() {
             this.recomputeRiskControlTextLayout()
         },
+        controls() {
+            this.recomputeRiskControlTextLayout()
+        }
     }
 })
 </script>
 
 <style scoped>
+
+.button-rect {
+    fill: transparent;
+}
 
 .dropdown-rect {
     fill: black;
