@@ -64,6 +64,7 @@ func registerProcessFlowAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiProcessFlowGetAllUrl, getAllProcessFlows).Methods("GET").Name(webcore.GetAllProcessFlowRouteName)
 	s.HandleFunc(core.ApiProcessFlowUpdateUrl, updateProcessFlow).Methods("POST").Name(webcore.UpdateProcessFlowRouteName)
 	s.HandleFunc(core.ApiProcessFlowGetFullDataUrl, getProcessFlowFullData).Methods("GET").Name(webcore.GetProcessFlowFullDataRouteName)
+	s.HandleFunc(core.ApiProcessFlowDeleteEndpoint, deleteProcessFlow).Methods("POST").Name(webcore.DeleteProcessFlowRouteName)
 }
 
 func registerProcessFlowNodesAPIPaths(r *mux.Router) {

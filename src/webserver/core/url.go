@@ -39,6 +39,7 @@ const ProcessFlowQueryId string = "flow"
 const ApiProcessFlowUrl string = "/flows"
 const ApiProcessFlowGetAllUrl string = "/"
 const ApiProcessFlowNewUrl string = "/new"
+const ApiProcessFlowDeleteEndpoint string = "/delete"
 
 var ApiProcessFlowUpdateUrl string = fmt.Sprintf("/{%s}/update", ProcessFlowQueryId)
 var ApiProcessFlowGetFullDataUrl string = fmt.Sprintf("/{%s}/full", ProcessFlowQueryId)

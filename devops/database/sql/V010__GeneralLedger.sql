@@ -1,11 +1,11 @@
 CREATE TABLE general_ledgers (
     id SERIAL PRIMARY KEY,
-    org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT
+    org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE
 );
 
 CREATE TABLE general_ledger_category (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(256) NOT NULL,
-    ledger_id INTEGER NOT NULL REFERENCES general_ledgers(id) ON DELETE RESTRICT,
-    parent_category_id BIGINT REFERENCES general_ledger_category(id) ON DELETE RESTRICT
+    ledger_id INTEGER NOT NULL REFERENCES general_ledgers(id) ON DELETE CASCADE,
+    parent_category_id BIGINT REFERENCES general_ledger_category(id) ON DELETE NO ACTION
 );

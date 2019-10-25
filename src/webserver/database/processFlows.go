@@ -124,3 +124,17 @@ func FindOrganizationProcessFlowsWithIndex(org *core.Organization, processFlowId
 
 	return result, resultIndex, nil
 }
+
+func DeleteProcessFlow(flowId int64) error {
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		DELETE FROM process_flows
+		WHERE id = $1
+	`, flowId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Commit()
+	return err
+}

@@ -36,6 +36,19 @@ const store : StoreOptions<VuexState> = {
         selectedEdgeId: -1
     },
     mutations: {
+        deleteProcessFlow(state, flowId) {
+            if (state.currentProcessFlowIndex == flowId) {
+                state.currentProcessFlowIndex = 0
+                state.currentProcessFlowFullData = {} as FullProcessFlowData
+                state.selectedNodeId = -1
+                state.selectedEdgeId = -1
+            }
+
+            state.allProcessFlowBasicData.splice(
+                state.allProcessFlowBasicData.findIndex(
+                    (ele) => ele.Id == flowId),
+                1)
+        },
         changePrimaryNavBarWidth(state, width) {
             state.primaryNavBarWidth = width
         },

@@ -77,7 +77,7 @@ export default Vue.extend({
     router: new VueRouter({
         base : window.location.pathname,
         routes: [
-            { path: '/:flowId' } 
+            { path: '/:flowId?' } 
         ]
     }),
     methods: {

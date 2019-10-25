@@ -30,6 +30,12 @@
                             Coming Soon.
                         </v-list-item-subtitle>
                     </v-list-item-content>
+
+                    <v-list-item-action v-if="!!item.action">
+                        <v-btn icon @click.stop="item.action.fn" @mousedown.stop>
+                            <v-icon>{{ item.action.icon }}</v-icon>
+                        </v-btn>
+                    </v-list-item-action>
                 </v-list-item>
             </v-list-item-group>
         </v-list>

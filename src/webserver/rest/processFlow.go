@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+type DeleteProcessFlowInputs struct {
+	FlowId int64 `webcore:"flowId"`
+}
+
 func getAllProcessFlows(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -310,4 +314,26 @@ func getProcessFlowFullData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(&graph)
+}
+
+func deleteProcessFlow(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := DeleteProcessFlowInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = database.DeleteProcessFlow(inputs.FlowId)
+	if err != nil {
+		core.Warning("Can't delete flow: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(struct{}{})
 }

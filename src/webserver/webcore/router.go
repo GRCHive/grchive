@@ -29,6 +29,7 @@ const (
 	UserProfileEditRouteName                       = "UserProfilePost"
 	DashboardProcessFlowsRouteName                 = "ProcessFlows"
 	NewProcessFlowRouteName                        = "NewProcessFlow"
+	DeleteProcessFlowRouteName                     = "DeleteProcessFlow"
 	GetAllProcessFlowRouteName                     = "GetAllProcessFlow"
 	UpdateProcessFlowRouteName                     = "UpdateProcessFlow"
 	GetAllProcessFlowNodeTypesRouteName            = "GetAllProcessFlowNodeTypes"

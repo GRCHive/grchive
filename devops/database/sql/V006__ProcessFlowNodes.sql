@@ -7,7 +7,7 @@ CREATE TABLE process_flow_node_types (
 CREATE TABLE process_flow_nodes (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(256),
-    process_flow_id BIGINT NOT NULL REFERENCES process_flows(id) ON DELETE RESTRICT,
+    process_flow_id BIGINT NOT NULL REFERENCES process_flows(id) ON DELETE CASCADE,
     description TEXT,
     node_type INTEGER NOT NULL REFERENCES process_flow_node_types(id) ON DELETE RESTRICT
 );

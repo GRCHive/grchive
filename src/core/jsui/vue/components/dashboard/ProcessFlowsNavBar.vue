@@ -43,6 +43,7 @@ import CreateNewProcessFlowForm from './CreateNewProcessFlowForm.vue'
 import axios from 'axios'
 import * as qs from 'query-string'
 import { contactUsUrl, getAllProcessFlowAPIUrl} from '../../../ts/url'
+import { deleteProcessFlow, TDeleteProcessFlowInput, TDeleteProcessFlowOutput } from '../../../ts/api/apiProcessFlow'
 import VueSetup from '../../../ts/vueSetup'
 import RenderLayout from '../../../ts/render/renderLayout'
 
@@ -52,6 +53,10 @@ interface NavLinks {
     path : string
     title : string
     disabled: boolean
+    action: {
+        icon: string,
+        fn: () => void
+    }
 }
 
 interface ResponseData {
@@ -91,13 +96,37 @@ export default Vue.extend({
                     disabled: false,
                     url: '',
                     path: data.Id.toString(),
-                    title: data.Name
+                    title: data.Name,
+                    action: {
+                        icon: "mdi-delete",
+                        fn: () => {
+                            this.onDeleteProcessFlow(data)
+                        }
+                    }
                 })
             }
             return navLinks
         }
     },
     methods: {
+        onDeleteProcessFlow(processFlow : ProcessFlowBasicData) {
+            deleteProcessFlow(<TDeleteProcessFlowInput>{
+                //@ts-ignore
+                csrf: this.$root.csrf,
+                flowId: processFlow.Id
+            }).then((resp : TDeleteProcessFlowOutput) => {
+                VueSetup.store.commit('deleteProcessFlow', processFlow.Id)
+                VueSetup.currentRouter.replace('/')
+            }).catch((err) => {
+                //@ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong, please try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
         doRefresh() {
             // In the case where the URL does not specify a process flow, take the currently
             // selected process flow for the nav bar model and change the route path to point to it.
