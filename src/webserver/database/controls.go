@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/jmoiron/sqlx"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
@@ -27,13 +28,22 @@ func FindAllControlsForOrganization(org *core.Organization) ([]*core.Control, er
 
 func InsertNewControl(control *core.Control) error {
 	var err error
+	var rows *sqlx.Rows
 
 	tx := dbConn.MustBegin()
-	rows, err := tx.NamedQuery(`
-		INSERT INTO process_flow_controls (name, description, control_type, org_id, freq_type, freq_interval, owner_id)
-		VALUES (:name, :description, :control_type, :org_id, :freq_type, :freq_interval, :owner_id)
-		RETURNING id
-	`, control)
+	if control.OwnerId != -1 {
+		rows, err = tx.NamedQuery(`
+			INSERT INTO process_flow_controls (name, description, control_type, org_id, freq_type, freq_interval, owner_id)
+			VALUES (:name, :description, :control_type, :org_id, :freq_type, :freq_interval, :owner_id)
+			RETURNING id
+		`, control)
+	} else {
+		rows, err = tx.NamedQuery(`
+			INSERT INTO process_flow_controls (name, description, control_type, org_id, freq_type, freq_interval)
+			VALUES (:name, :description, :control_type, :org_id, :freq_type, :freq_interval)
+			RETURNING id
+		`, control)
+	}
 	if err != nil {
 		tx.Rollback()
 		return err

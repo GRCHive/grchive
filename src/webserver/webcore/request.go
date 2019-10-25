@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 var boolReflectType = reflect.TypeOf((bool)(false))
@@ -63,15 +64,28 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 		fieldType := interfaceType.Field(i)
 		fieldValue := interfaceValue.Field(i)
 
-		// TODO: Allow optional fields?
-		requestParamName, ok := fieldType.Tag.Lookup("webcore")
+		var requestParamName string
+		var optional bool
+
+		tag, ok := fieldType.Tag.Lookup("webcore")
 		if !ok {
 			requestParamName = fieldType.Name
+			optional = false
+		} else {
+			splitTag := strings.Split(tag, ",")
+			requestParamName = splitTag[0]
+			// This probably needs to be more flexible instead of just assuming
+			// that the optional tag will come as the 2nd parameter?
+			optional = len(splitTag) > 1 && splitTag[1] == "optional"
 		}
 
 		data := r.Form[requestParamName]
 		if len(data) == 0 {
-			return errors.New("Could not find request param: " + requestParamName)
+			if !optional {
+				return errors.New("Could not find request param: " + requestParamName)
+			} else {
+				continue
+			}
 		}
 
 		var dataValue reflect.Value

@@ -14,7 +14,7 @@ type NewControlInputs struct {
 	ControlTypeId     int32  `webcore:"controlType"`
 	FrequencyType     int32  `webcore:"frequencyType"`
 	FrequencyInterval int32  `webcore:"frequencyInterval"`
-	OwnerId           int64  `webcore:"ownerId"`
+	OwnerId           int64  `webcore:"ownerId,optional"`
 	NodeId            int64  `webcore:"nodeId"`
 	RiskId            int64  `webcore:"riskId"`
 }
@@ -36,7 +36,9 @@ func newControl(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	inputs := NewControlInputs{}
+	inputs := NewControlInputs{
+		OwnerId: -1,
+	}
 	err := webcore.UnmarshalRequestForm(r, &inputs)
 	if err != nil {
 		core.Warning("Can't parse inputs: " + err.Error())
