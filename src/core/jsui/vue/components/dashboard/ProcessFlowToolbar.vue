@@ -11,11 +11,29 @@
                 </template>
 
                 <v-list dense>
+                    <v-list-item dense>
+                        <v-list-item-action>
+                            <v-btn icon @click.stop="decreaseZoom">
+                                <v-icon small>mdi-minus</v-icon>
+                            </v-btn>
+                        </v-list-item-action>
+                        <v-list-item-title>
+                            Zoom: {{ zoomPercentage }}%
+                        </v-list-item-title>
+                        <v-list-item-action>
+                            <v-btn icon @click.stop="increaseZoom">
+                                <v-icon small>mdi-plus</v-icon>
+                            </v-btn>
+                        </v-list-item-action>
+                    </v-list-item>
+                    <v-divider></v-divider>
                     <v-list-item dense @click="resetView">
                         <v-list-item-title>
                             Reset View
                         </v-list-item-title>
                     </v-list-item>
+                    <v-divider></v-divider>
+
                 </v-list>
             </v-menu>
             <v-divider vertical></v-divider>
@@ -57,6 +75,7 @@ interface ResponseData {
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
 import MetadataStore from '../../../ts/metadata'
+import RenderLayout from '../../../ts/render/renderLayout'
 import LocalSettings from '../../../ts/localSettings'
 import { contactUsUrl, newProcessFlowNodeAPIUrl } from '../../../ts/url'
 import { postFormUrlEncoded } from '../../../ts/http'
@@ -65,6 +84,10 @@ export default Vue.extend({
     computed: {
         rawTypeOptions() : ProcessFlowNodeType[] {
             return MetadataStore.state.nodeTypes
+        },
+        zoomPercentage() : number {
+            let zoom : number = LocalSettings.state.viewBoxZoom
+            return Math.round(zoom * 100.0)
         }
     },
     methods: {
@@ -100,12 +123,35 @@ export default Vue.extend({
                 e.stopPropagation()
             }
         },
+        handleScroll(e : WheelEvent) {
+            if (e.deltaY > 0.0) {
+                this.increaseZoom()
+            } else {
+                this.decreaseZoom()
+            }
+        },
         resetView() {
             LocalSettings.commit('setViewBoxTransform', { tx: 0, ty : 0 })
+            LocalSettings.commit('setViewBoxZoom', 1.0)
+        },
+        increaseZoom() {
+            if (!RenderLayout.store.state.ready) {
+                return
+            }
+
+            LocalSettings.commit('setViewBoxZoom', LocalSettings.state.viewBoxZoom - 0.05)
+        },
+        decreaseZoom() {
+            if (!RenderLayout.store.state.ready) {
+                return
+            }
+
+            LocalSettings.commit('setViewBoxZoom', LocalSettings.state.viewBoxZoom + 0.05)
         }
     },
     mounted() {
         document.addEventListener('keydown', this.handleHotkeys)
+        document.addEventListener('wheel', this.handleScroll)
     }
 })
 

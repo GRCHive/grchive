@@ -63,6 +63,7 @@ import ProcessFlowSvgEdge from './ProcessFlowSvgEdge.vue'
 import { newProcessFlowEdge } from '../../../../ts/api/apiProcessFlowEdges'
 import { contactUsUrl } from '../../../../ts/url'
 import LocalSettings from '../../../../ts/localSettings'
+import { convertClientPointToSvg, convertClientDeltaToSvg } from '../../../../ts/svg'
 
 export default Vue.extend({
     components: {
@@ -92,12 +93,15 @@ export default Vue.extend({
         viewBoxY() : number {
             return LocalSettings.state.viewBoxTransform.ty
         },
+        viewBoxZoom() : number {
+            return LocalSettings.state.viewBoxZoom
+        },
         viewBox() : BoundingBox {
             return {
                 x: this.viewBoxX,
                 y: this.viewBoxY,
-                width: this.svgWidth,
-                height: this.svgHeight
+                width: this.svgWidth / this.viewBoxZoom,
+                height: this.svgHeight / this.viewBoxZoom
             }
         }
     },
@@ -180,25 +184,26 @@ export default Vue.extend({
                 return
             }
 
+            let svg : SVGSVGElement = <SVGSVGElement>this.$refs.svgrenderer
+            let delta : SVGPoint = convertClientDeltaToSvg(svg, e.movementX, e.movementY)
+
             RenderLayout.store.commit('addNodeDisplayTranslation', {
                 nodeId: VueSetup.store.state.selectedNodeId,
-                tx: e.movementX,
-                ty: e.movementY
+                tx: delta.x,
+                ty: delta.y
             })
         },
         doMoveViewBox(e : MouseEvent) {
+            let svg : SVGSVGElement = <SVGSVGElement>this.$refs.svgrenderer
+            let delta : SVGPoint = convertClientDeltaToSvg(svg, e.movementX, e.movementY)
             LocalSettings.commit('setViewBoxTransform', {
-                tx: this.viewBoxX - e.movementX,
-                ty: this.viewBoxY - e.movementY,
+                tx: this.viewBoxX - delta.x,
+                ty: this.viewBoxY - delta.y,
             })
         },
         doMoveTempEdgeEnd(e: MouseEvent) {
             let svg : SVGSVGElement = <SVGSVGElement>this.$refs.svgrenderer
-            let pt : SVGPoint = svg.createSVGPoint()
-            pt.x = e.clientX
-            pt.y = e.clientY
-
-            let realPt = pt.matrixTransform(svg.getScreenCTM()!.inverse())
+            let realPt = convertClientPointToSvg(svg, e.clientX, e.clientY)
             this.tempEdgeEnd.x = realPt.x
             this.tempEdgeEnd.y = realPt.y
         },

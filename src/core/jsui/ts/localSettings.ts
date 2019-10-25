@@ -4,11 +4,13 @@ interface LocalSettingsStoreState {
     miniNavBar: boolean
     showHideAttributeEditor: boolean
     viewBoxTransform: TransformData
+    viewBoxZoom: number
 }
 
 const MiniNavBarLocalStorageKey : string = "miniNavBar"
 const ShowHideAttributeEditorLocalStorageKey : string = "showHideAttributeEditor"
 const ViewBoxTransformLocalStorageKey : string = "viewBoxTransform"
+const ViewBoxZoomLocalStorageKey : string = "viewBoxZoom"
 
 const localSettingStore: StoreOptions<LocalSettingsStoreState> = {
     state: {
@@ -17,7 +19,8 @@ const localSettingStore: StoreOptions<LocalSettingsStoreState> = {
         viewBoxTransform: {
             tx: 0,
             ty: 0
-        }
+        },
+        viewBoxZoom: 1.0
     },
     mutations: {
         setMiniNavBar(state, val) {
@@ -33,6 +36,10 @@ const localSettingStore: StoreOptions<LocalSettingsStoreState> = {
         setViewBoxTransform(state, val) {
             state.viewBoxTransform = val
             window.localStorage.setItem(ViewBoxTransformLocalStorageKey, JSON.stringify(val))
+        },
+        setViewBoxZoom(state, val) {
+            state.viewBoxZoom = val
+            window.localStorage.setItem(ViewBoxZoomLocalStorageKey, val)
         }
     },
 }
@@ -53,6 +60,11 @@ if (showHideAttrEditor != null) {
 let viewBoxTransform = window.localStorage.getItem(ViewBoxTransformLocalStorageKey)
 if (viewBoxTransform != null) {
     store.commit('setViewBoxTransform', JSON.parse(viewBoxTransform))
+}
+
+let viewBoxZoom = window.localStorage.getItem(ViewBoxZoomLocalStorageKey)
+if (viewBoxZoom != null) {
+    store.commit('setViewBoxZoom', Number(viewBoxZoom))
 }
 
 export default store
