@@ -140,7 +140,8 @@ func AddControlsToNodeRisk(nodeId int64, riskId int64, controlIds []int64) error
 			INSERT INTO process_flow_risk_control (risk_id, control_id)
 			VALUES ($1, $2)
 		`, riskId, controlId)
-		if err != nil {
+		// It's OK if we fail to add this if it's a duplicate.
+		if err != nil && !IsDuplicateDBEntry(err) {
 			tx.Rollback()
 			return err
 		}
