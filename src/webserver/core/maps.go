@@ -1,5 +1,16 @@
 package core
 
+func CreateMapFromKeyValues(keys []string, values []interface{}) map[string]interface{} {
+	retMap := make(map[string]interface{})
+	for idx, key := range keys {
+		if idx >= len(values) {
+			break
+		}
+		retMap[key] = values[idx]
+	}
+	return retMap
+}
+
 func CopyMap(input map[string]interface{}) map[string]interface{} {
 	retMap := make(map[string]interface{})
 	for k, v := range input {

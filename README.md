@@ -46,3 +46,8 @@ This document will assume that the git checkout directory is set in an environme
 - `cd $SRC`
 - `bazel build //src/webserver:webserver`
 - `bazel run //src/webserver:webserver`
+
+## Run Tests
+
+- `cd $SRC`
+- `bazel test --test_output=errors //...`

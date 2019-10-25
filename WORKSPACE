@@ -110,6 +110,26 @@ go_repository(
     tag = "v1.4.1"
 )
 
+go_repository(
+    name = "com_github_stretchr_testify_assert",
+    importpath = "github.com/stretchr/testify/assert",
+    urls = ["https://github.com/stretchr/testify/archive/v1.4.0.zip"],
+    strip_prefix = "testify-1.4.0/assert",
+    type= "zip"
+)
+
+go_repository(
+    name = "in_gopkg_yaml_v2",
+    importpath = "gopkg.in/yaml.v2",
+    tag = "v2.2.4"    
+)
+
+go_repository(
+    name = "com_github_davecgh_go_spew",
+    importpath = "github.com/davecgh/go-spew",
+    tag = "v1.1.1"    
+)
+
 # NODE
 http_archive(
     name = "build_bazel_rules_nodejs",
