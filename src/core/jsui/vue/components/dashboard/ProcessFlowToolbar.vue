@@ -27,6 +27,12 @@
                         </v-list-item-action>
                     </v-list-item>
                     <v-divider></v-divider>
+                    <v-list-item dense @click="resetZoom">
+                        <v-list-item-title>
+                            Reset Zoom
+                        </v-list-item-title>
+                    </v-list-item>
+                    <v-divider></v-divider>
                     <v-list-item dense @click="resetView">
                         <v-list-item-title>
                             Reset View
@@ -134,6 +140,9 @@ export default Vue.extend({
             } else {
                 this.decreaseZoom()
             }
+        },
+        resetZoom() {
+            LocalSettings.commit('setViewBoxZoom', 1.0)
         },
         resetView() {
             LocalSettings.commit('setViewBoxTransform', { tx: 0, ty : 0 })
