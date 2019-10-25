@@ -4,6 +4,7 @@ import MetadataStore from '../metadata'
 import { connectProcessFlowNodeDisplaySettingsWebsocket } from '../websocket/processFlowNodeDisplaySettings'
 import { FullProcessFlowData } from '../processFlow'
 import VuexState from '../processFlowState'
+import LocalSettings from '../localSettings'
 
 // A Vuex store to share the layout of the process flow (nodes, plugs, etc.)
 // across the entire application.
@@ -109,10 +110,7 @@ function addIOToGroupLayout(layout: NodeLayout, io : ProcessFlowInputOutput, isI
 
 function createDefaultNodeLayout(node : ProcessFlowNode) : NodeLayout {
     let layout = <NodeLayout>{
-        transform: <TransformData>{
-            tx: 0,
-            ty: 0
-        },
+        transform: {...LocalSettings.state.viewBoxTransform},
         titleTransform: <TransformData>{
             tx: NodeMargins.left,
             ty: NodeMargins.top
