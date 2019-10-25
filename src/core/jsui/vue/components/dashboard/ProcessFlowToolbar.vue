@@ -2,15 +2,22 @@
     <v-toolbar flat height="30px">
         <v-toolbar-items>
             <v-divider vertical></v-divider>
-            <v-btn text color="accent">
-                File
-                <v-icon small color="accent">mdi-chevron-down</v-icon>
-            </v-btn>
-            <v-divider vertical></v-divider>
-            <v-btn text color="accent">
-                View
-                <v-icon small color="accent">mdi-chevron-down</v-icon>
-            </v-btn>
+            <v-menu offset-y>
+                <template v-slot:activator="{ on }">
+                    <v-btn text color="accent" v-on="on">
+                        View
+                        <v-icon small color="accent">mdi-chevron-down</v-icon>
+                    </v-btn>
+                </template>
+
+                <v-list dense>
+                    <v-list-item dense @click="resetView">
+                        <v-list-item-title>
+                            Reset View
+                        </v-list-item-title>
+                    </v-list-item>
+                </v-list>
+            </v-menu>
             <v-divider vertical></v-divider>
         </v-toolbar-items>
         <div class="flex-grow-1"></div>
@@ -50,6 +57,7 @@ interface ResponseData {
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
 import MetadataStore from '../../../ts/metadata'
+import LocalSettings from '../../../ts/localSettings'
 import { contactUsUrl, newProcessFlowNodeAPIUrl } from '../../../ts/url'
 import { postFormUrlEncoded } from '../../../ts/http'
 
@@ -91,6 +99,9 @@ export default Vue.extend({
                 })
                 e.stopPropagation()
             }
+        },
+        resetView() {
+            LocalSettings.commit('setViewBoxTransform', { tx: 0, ty : 0 })
         }
     },
     mounted() {
