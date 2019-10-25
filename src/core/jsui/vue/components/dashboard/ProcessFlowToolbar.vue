@@ -12,15 +12,15 @@
 
                 <v-list dense>
                     <v-list-item dense>
-                        <v-list-item-action>
+                        <v-list-item-action class="ma-0">
                             <v-btn icon @click.stop="decreaseZoom">
                                 <v-icon small>mdi-minus</v-icon>
                             </v-btn>
                         </v-list-item-action>
-                        <v-list-item-title>
+                        <v-list-item-title class="text-center">
                             Zoom: {{ zoomPercentage }}%
                         </v-list-item-title>
-                        <v-list-item-action>
+                        <v-list-item-action class="ma-0">
                             <v-btn icon @click.stop="increaseZoom">
                                 <v-icon small>mdi-plus</v-icon>
                             </v-btn>
@@ -33,7 +33,12 @@
                         </v-list-item-title>
                     </v-list-item>
                     <v-divider></v-divider>
-
+                    <v-list-item dense @click="fitToGraph">
+                        <v-list-item-title>
+                            Fit to Graph
+                        </v-list-item-title>
+                    </v-list-item>
+                    <v-divider></v-divider>
                 </v-list>
             </v-menu>
             <v-divider vertical></v-divider>
@@ -124,7 +129,7 @@ export default Vue.extend({
             }
         },
         handleScroll(e : WheelEvent) {
-            if (e.deltaY > 0.0) {
+            if (e.deltaY < 0.0) {
                 this.increaseZoom()
             } else {
                 this.decreaseZoom()
@@ -139,14 +144,22 @@ export default Vue.extend({
                 return
             }
 
-            LocalSettings.commit('setViewBoxZoom', LocalSettings.state.viewBoxZoom - 0.05)
+            LocalSettings.commit('setViewBoxZoom', LocalSettings.state.viewBoxZoom + 0.05)
         },
         decreaseZoom() {
             if (!RenderLayout.store.state.ready) {
                 return
             }
 
-            LocalSettings.commit('setViewBoxZoom', LocalSettings.state.viewBoxZoom + 0.05)
+            LocalSettings.commit('setViewBoxZoom', LocalSettings.state.viewBoxZoom - 0.05)
+        },
+        fitToGraph() {
+            let graphBbox = (<SVGSVGElement>RenderLayout.store.state.fullGraph).getBBox()
+            LocalSettings.commit('setViewBoxTransform', { tx: graphBbox.x, ty : graphBbox.y })
+
+            let zoomX = RenderLayout.store.state.rendererRect.width / graphBbox.width
+            let zoomY = RenderLayout.store.state.rendererRect.height / graphBbox.height
+            LocalSettings.commit('setViewBoxZoom', Math.min(zoomX, zoomY))
         }
     },
     mounted() {

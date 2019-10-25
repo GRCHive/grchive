@@ -54,6 +54,7 @@ import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
 import VueRouter from 'vue-router'
 import LocalSettings from '../../../ts/localSettings'
+import RenderLayout from '../../../ts/render/renderLayout'
 
 export default Vue.extend({
     components : {
@@ -72,14 +73,6 @@ export default Vue.extend({
         attrEditorBottom: 0,
         attrEditorLeft: 0,
         attrEditorClipWidth: 256,
-        rendererClientRect: <IDOMRect>{
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            width: 0,
-            height: 0
-        }
     }),
     router: new VueRouter({
         base : window.location.pathname,
@@ -91,7 +84,7 @@ export default Vue.extend({
         updateClientRect() {
             //@ts-ignore
             const rect = this.$refs.rendererVue.$el.getBoundingClientRect()
-            this.rendererClientRect =  <IDOMRect>{
+            const rendererClientRect =  <IDOMRect>{
                 top: rect.top,
                 bottom: rect.bottom,
                 left: rect.left,
@@ -99,6 +92,7 @@ export default Vue.extend({
                 width: rect.width,
                 height: rect.height
             }
+            RenderLayout.store.commit('setRendererRect', rendererClientRect)
         },
         recomputeProcessFlowHeaderHeight() {
             Vue.nextTick(() => {
@@ -148,6 +142,9 @@ export default Vue.extend({
         }
     },
     computed: {
+        rendererClientRect() : IDOMRect {
+            return RenderLayout.store.state.rendererRect
+        },
         showHideAttrEditor() {
             return LocalSettings.state.showHideAttributeEditor
         },

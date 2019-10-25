@@ -168,6 +168,8 @@ function mergeNodeLayout(node : ProcessFlowNode, existingLayout: NodeLayout) : N
 interface ProcessFlowRenderLayoutStoreState {
     nodeLayouts: Record<number, NodeLayout>
     ready: boolean
+    fullGraph: Object
+    rendererRect: IDOMRect
 }
 
 function onUpdateAssociatedNode(layout : NodeLayout) {
@@ -208,9 +210,21 @@ function sendWebsocketUpdate(nodeId: number, layout: NodeLayout) {
 const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
     state: {
         nodeLayouts : Object() as Record<number, NodeLayout>,
-        ready: false
+        ready: false,
+        fullGraph: Object(),
+        rendererRect: <IDOMRect>{
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            width: 0,
+            height: 0
+        }
     },
     mutations: {
+        setRendererRect(state, val) {
+            state.rendererRect = val
+        },
         resetNodeLayout(state) {
             state.ready = false
             state.nodeLayouts = Object() as Record<number, NodeLayout>
@@ -248,6 +262,9 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
         },
         updateNodeLayoutWithComponent(state, nodeId) {
             onUpdateAssociatedNode(state.nodeLayouts[nodeId])
+        },
+        updateFullGraphComponent(state, obj) {
+            state.fullGraph = obj
         }
     },
     actions: {

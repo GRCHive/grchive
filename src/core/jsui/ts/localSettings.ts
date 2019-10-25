@@ -12,6 +12,9 @@ const ShowHideAttributeEditorLocalStorageKey : string = "showHideAttributeEditor
 const ViewBoxTransformLocalStorageKey : string = "viewBoxTransform"
 const ViewBoxZoomLocalStorageKey : string = "viewBoxZoom"
 
+const MinZoom = 0.1
+const MaxZoom = 10.00
+
 const localSettingStore: StoreOptions<LocalSettingsStoreState> = {
     state: {
         miniNavBar : false,
@@ -38,7 +41,13 @@ const localSettingStore: StoreOptions<LocalSettingsStoreState> = {
             window.localStorage.setItem(ViewBoxTransformLocalStorageKey, JSON.stringify(val))
         },
         setViewBoxZoom(state, val) {
-            state.viewBoxZoom = val
+            // If we cross 100%, clamp to 100% for convenience.
+            if ((val < 1.0 && state.viewBoxZoom > 1.0) ||
+                (val > 1.0 && state.viewBoxZoom < 1.0)) {
+                val = 1.0
+            }
+
+            state.viewBoxZoom = Math.min(Math.max(val, MinZoom), MaxZoom)
             window.localStorage.setItem(ViewBoxZoomLocalStorageKey, val)
         }
     },

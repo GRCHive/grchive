@@ -11,44 +11,46 @@
          @contextmenu="onContextMenu"
          ref="svgrenderer"
     >
-        <g id="edges">
-            <!-- One temporary edge that the user sees when they click and drag from one plug to another -->
-            <process-flow-svg-edge v-if="drawingEdge"
-                                   :use-prop-end="true"
-                                   :prop-end-x="tempEdgeEnd.x"
-                                   :prop-end-y="tempEdgeEnd.y"
-                                   :start-node-id="tempEdgeStart.nodeId"
-                                   :start-io="tempEdgeStart.io"
-                                   :start-is-input="tempEdgeStart.isInput"
-            ></process-flow-svg-edge>
+        <g id="fullgraph" ref="fullgraph">
+            <g id="edges">
+                <!-- One temporary edge that the user sees when they click and drag from one plug to another -->
+                <process-flow-svg-edge v-if="drawingEdge"
+                                       :use-prop-end="true"
+                                       :prop-end-x="tempEdgeEnd.x"
+                                       :prop-end-y="tempEdgeEnd.y"
+                                       :start-node-id="tempEdgeStart.nodeId"
+                                       :start-io="tempEdgeStart.io"
+                                       :start-is-input="tempEdgeStart.isInput"
+                ></process-flow-svg-edge>
 
-            <process-flow-svg-edge 
-                :use-prop-end="false"
-                v-for="key in edgeKeys"
-                :key="key"
-                :start-node-id="getInputOutputFromId(edges[key].InputIoId, true).ParentNodeId"
-                :start-io="getInputOutputFromId(edges[key].InputIoId, true)"
-                :start-is-input="true"
-                :end-node-id="getInputOutputFromId(edges[key].OutputIoId, false).ParentNodeId"
-                :end-io="getInputOutputFromId(edges[key].OutputIoId, false)"
-                :end-is-input="false"
-                :edge-id="key"
-                @onedgeclick="onEdgeClick(arguments[0], key)"
-            ></process-flow-svg-edge>
-        </g>
+                <process-flow-svg-edge 
+                    :use-prop-end="false"
+                    v-for="key in edgeKeys"
+                    :key="key"
+                    :start-node-id="getInputOutputFromId(edges[key].InputIoId, true).ParentNodeId"
+                    :start-io="getInputOutputFromId(edges[key].InputIoId, true)"
+                    :start-is-input="true"
+                    :end-node-id="getInputOutputFromId(edges[key].OutputIoId, false).ParentNodeId"
+                    :end-io="getInputOutputFromId(edges[key].OutputIoId, false)"
+                    :end-is-input="false"
+                    :edge-id="key"
+                    @onedgeclick="onEdgeClick(arguments[0], key)"
+                ></process-flow-svg-edge>
+            </g>
 
-        <g id="nodes">
-            <process-flow-svg-node
-                v-for="key in nodeKeys"
-                :key="nodes[key].Id"
-                :node="nodes[key]"
-                ref="nodes[key].Id"
-                @onnodemousedown="onMouseDownNode"
-                @onnodemouseup="onMouseUpNode"
-                @onplugmousedown="onMouseDownPlug"
-                @onplugmouseup="onMouseUpPlug"
-            >
-            </process-flow-svg-node>
+            <g id="nodes">
+                <process-flow-svg-node
+                    v-for="key in nodeKeys"
+                    :key="nodes[key].Id"
+                    :node="nodes[key]"
+                    ref="nodes[key].Id"
+                    @onnodemousedown="onMouseDownNode"
+                    @onnodemouseup="onMouseUpNode"
+                    @onplugmousedown="onMouseDownPlug"
+                    @onplugmouseup="onMouseUpPlug"
+                >
+                </process-flow-svg-node>
+            </g>
         </g>
     </svg>
 </template>
@@ -285,6 +287,9 @@ export default Vue.extend({
             e.stopPropagation()
         }
     },
+    mounted() {
+        RenderLayout.store.commit('updateFullGraphComponent', this.$refs.fullgraph)
+    }
 })
 
 </script>
