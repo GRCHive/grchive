@@ -62,6 +62,7 @@ import ProcessFlowSvgNode from './ProcessFlowSvgNode.vue'
 import ProcessFlowSvgEdge from './ProcessFlowSvgEdge.vue'
 import { newProcessFlowEdge } from '../../../../ts/api/apiProcessFlowEdges'
 import { contactUsUrl } from '../../../../ts/url'
+import LocalSettings from '../../../../ts/localSettings'
 
 export default Vue.extend({
     components: {
@@ -73,19 +74,25 @@ export default Vue.extend({
         svgHeight: Number
     },
     computed: {
-        nodes() {
+        nodes() : Record<number,ProcessFlowNode> {
             return VueSetup.store.state.currentProcessFlowFullData.Nodes
         },
-        edges() {
+        edges() : Record<number, ProcessFlowEdge> {
             return VueSetup.store.state.currentProcessFlowFullData.Edges
         },
-        nodeKeys() {
+        nodeKeys() : number[] {
             return VueSetup.store.state.currentProcessFlowFullData.NodeKeys
         },
-        edgeKeys() {
+        edgeKeys() : number[] {
             return VueSetup.store.state.currentProcessFlowFullData.EdgeKeys
         },
-        viewBox() {
+        viewBoxX() : number {
+            return LocalSettings.state.viewBoxTransform.tx
+        },
+        viewBoxY() : number {
+            return LocalSettings.state.viewBoxTransform.ty
+        },
+        viewBox() : BoundingBox {
             return {
                 x: this.viewBoxX,
                 y: this.viewBoxY,
@@ -97,8 +104,6 @@ export default Vue.extend({
     data: () => ({
         moveNodeActive: false,
         moveViewBoxActive: false,
-        viewBoxX: 0,
-        viewBoxY: 0,
         // Edge drawing properties
         drawingEdge: false,
         tempEdgeStart: {
@@ -182,8 +187,10 @@ export default Vue.extend({
             })
         },
         doMoveViewBox(e : MouseEvent) {
-            this.viewBoxX -= e.movementX
-            this.viewBoxY -= e.movementY
+            LocalSettings.commit('setViewBoxTransform', {
+                tx: this.viewBoxX - e.movementX,
+                ty: this.viewBoxY - e.movementY,
+            })
         },
         doMoveTempEdgeEnd(e: MouseEvent) {
             let svg : SVGSVGElement = <SVGSVGElement>this.$refs.svgrenderer
