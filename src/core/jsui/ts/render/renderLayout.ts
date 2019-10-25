@@ -270,6 +270,9 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
                         }
 
                         websocketConnection = connectProcessFlowNodeDisplaySettingsWebsocket(host, csrf, processFlowStore.state.currentProcessFlowFullData.FlowId)
+                        websocketConnection.onopen = () => {
+                            this.commit('setReady')
+                        }
                         websocketConnection.onclose = () => {
                             // TODO Need to notify user of the close and tell them to refresh when relevant?
                         }
@@ -303,7 +306,6 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
                     isDefault: true
                 })
             }
-            context.commit('setReady')
         },
         // Assume that we already have display data for the input process flow and only
         // want to update where necessary.

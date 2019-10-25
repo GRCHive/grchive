@@ -4,7 +4,19 @@
             <process-flow-svg-renderer
                 :svg-width="svgWidth"
                 :svg-height="svgHeight"
+                v-if="renderReady"
             ></process-flow-svg-renderer>
+
+            <section class="max-height" v-else>
+                <v-row class="max-height ma-0" align="center" width="100%">
+                    <v-col class="pa-0">
+                        <v-row justify="center" class="ma-0">
+                            <v-btn x-large icon :loading="true">
+                            </v-btn>
+                        </v-row>
+                    </v-col>
+                </v-row>
+            </section>
         </section>
 
         <section class="max-height" v-else>
@@ -36,6 +48,7 @@ import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
 import ProcessFlowSvgRenderer from './graph/ProcessFlowSvgRenderer'
 import { isProcessFullDataEmpty } from '../../../ts/processFlow'
+import RenderLayout from '../../../ts/render/renderLayout'
 
 export default Vue.extend({
     components: {
@@ -49,6 +62,9 @@ export default Vue.extend({
         }
     },
     computed: {
+        renderReady() : boolean {
+            return RenderLayout.store.state.ready
+        },
         svgHeight() : number {
             return (<IDOMRect>this.displayRect).height
         },
