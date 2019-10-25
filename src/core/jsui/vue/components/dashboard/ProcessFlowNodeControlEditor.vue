@@ -1,5 +1,18 @@
 <template>
     <section>
+
+        <v-dialog v-model="showHideEditControl" persistent max-width="40%">
+            <create-new-control-form
+                ref="editControl"
+                :edit-mode="true"
+                :node-id="currentNode.Id"
+                :risk-id="currentEditRiskId"
+                :control-id="currentEditControlId"
+                @do-save="finishEditControl"
+                @do-cancel="cancelEditControl">
+            </create-new-control-form>
+        </v-dialog>
+
         <v-list-item class="pa-1">
             <v-list-item-action class="ma-1">
                 <v-btn icon @click="toggleSelection">
@@ -132,8 +145,11 @@ export default Vue.extend({
         showHideDeleteControl : false,
         showHideNewControl : false,
         showHideExistingControl : false,
+        showHideEditControl: false,
         currentRelevantRiskId : -1,
-        selectedControls : [] as RiskControl[]
+        selectedControls : [] as RiskControl[],
+        currentEditRiskId: -1,
+        currentEditControlId : -1
     }),
     components : {
         CreateNewControlForm,
@@ -200,7 +216,7 @@ export default Vue.extend({
             this.showHideNewControl = false
         },
         onSaveNewControl(control : ProcessFlowControl, riskId : number) {
-            VueSetup.store.commit('addControl', {control})
+            VueSetup.store.commit('setControl', {control})
             VueSetup.store.commit('addControlToNode', {
                 controlId: control.Id,
                 nodeId: this.currentNode.Id
@@ -259,6 +275,13 @@ export default Vue.extend({
             }
         },
         editControl(control : RiskControl) {
+            this.currentEditRiskId = control.risk.Id
+            this.currentEditControlId = control.control.Id
+            this.showHideEditControl = true
+            Vue.nextTick(() => {
+                //@ts-ignore
+                this.$refs.editControl.clearForm()
+            })
         },
         deleteSelectedControls(global : boolean) {
             let currentNodeId = this.currentNode.Id
@@ -290,6 +313,13 @@ export default Vue.extend({
                     true);
             })
         },
+        finishEditControl(control : ProcessFlowControl, riskId : number) {
+            VueSetup.store.commit('setControl', {control})
+            this.showHideEditControl = false
+        },
+        cancelEditControl() {
+            this.showHideEditControl = false
+        }
     },
     watch : {
         currentNode() {

@@ -94,6 +94,10 @@ class RelationshipMap<A=any, B=any, T=void> {
         }
         return Array.from(this.bToA.get(b)!)
     }
+
+    touch() {
+        this.changed += 1
+    }
 }
 
 export default RelationshipMap

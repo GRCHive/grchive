@@ -23,7 +23,7 @@ function mountApp(inData : Object) {
         vuetify: vueOpts.vuetify,
         mounted() {
             //@ts-ignore
-            MetadataStore.dispatch('initialize', {csrf: inData.csrf})
+            MetadataStore.dispatch('initialize', inData)
 
             //@ts-ignore
             RenderLayout.store.dispatch('initialize', {

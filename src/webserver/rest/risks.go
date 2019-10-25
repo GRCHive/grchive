@@ -14,6 +14,13 @@ type NewRiskInputs struct {
 	NodeId      int64  `webcore:"nodeId"`
 }
 
+type EditRiskInputs struct {
+	Name        string `webcore:"name"`
+	Description string `webcore:"description"`
+	NodeId      int64  `webcore:"nodeId"`
+	RiskId      int64  `webcore:"riskId"`
+}
+
 type DeleteRiskInputs struct {
 	NodeId  int64   `webcore:"nodeId"`
 	RiskIds []int64 `webcore:"riskIds"`
@@ -23,6 +30,39 @@ type DeleteRiskInputs struct {
 type AddRisksToNodeInputs struct {
 	NodeId  int64   `webcore:"nodeId"`
 	RiskIds []int64 `webcore:"riskIds"`
+}
+
+func editRisk(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := EditRiskInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	risk := core.Risk{
+		Id:          inputs.RiskId,
+		Name:        inputs.Name,
+		Description: inputs.Description,
+	}
+	err = database.EditRisk(&risk)
+	if err != nil {
+		core.Warning("Couldn't edit  risk: " + err.Error())
+		if database.IsDuplicateDBEntry(err) {
+			w.WriteHeader(http.StatusBadRequest)
+			jsonWriter.Encode(database.DuplicateEntryJson)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			jsonWriter.Encode(struct{}{})
+		}
+		return
+	}
+	jsonWriter.Encode(risk)
 }
 
 func createNewRisk(w http.ResponseWriter, r *http.Request) {

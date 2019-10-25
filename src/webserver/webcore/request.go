@@ -1,6 +1,7 @@
 package webcore
 
 import (
+	"database/sql"
 	"errors"
 	"github.com/gorilla/mux"
 	"gitlab.com/b3h47pte/audit-stuff/core"
@@ -13,6 +14,7 @@ import (
 
 var boolReflectType = reflect.TypeOf((bool)(false))
 var int64ReflectType = reflect.TypeOf((int64)(0))
+var nullInt64ReflectType = reflect.TypeOf(core.NullInt64{})
 var int32ReflectType = reflect.TypeOf((int32)(0))
 var stringReflectType = reflect.TypeOf((string)(""))
 var int64ArrayReflectType = reflect.TypeOf(([]int64)([]int64{}))
@@ -105,6 +107,18 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 				return err
 			}
 			dataValue = reflect.ValueOf(intValue)
+			break
+		case nullInt64ReflectType:
+			intValue, err := strconv.ParseInt(data[0], 10, 64)
+			if err != nil {
+				return err
+			}
+			dataValue = reflect.ValueOf(core.NullInt64{
+				sql.NullInt64{
+					Int64: intValue,
+					Valid: true,
+				},
+			})
 			break
 		case int32ReflectType:
 			intValue, err := strconv.ParseInt(data[0], 10, 32)

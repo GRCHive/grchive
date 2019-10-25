@@ -76,6 +76,7 @@ const ApiOrgUsersEndpoint string = "/users"
 const ApiRiskPrefix string = "/risk"
 const ApiNewRiskEndpoint string = "/new"
 const ApiDeleteRiskEndpoint string = "/delete"
+const ApiEditRiskEndpoint string = "/edit"
 const ApiAddRiskToNodeEndpoint string = "/add"
 
 // API - Controls
@@ -83,6 +84,7 @@ const ApiControlPrefix string = "/control"
 const ApiNewControlEndpoint string = "/new"
 const ApiGetControlTypesEndpoint string = "/types"
 const ApiDeleteControlEndpoint string = "/delete"
+const ApiEditControlEndpoint string = "/edit"
 const ApiAddControlEndpoint string = "/add"
 
 // Websocket

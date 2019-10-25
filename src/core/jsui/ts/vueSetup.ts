@@ -163,9 +163,11 @@ const store : StoreOptions<VuexState> = {
         setRisk(state, risk : ProcessFlowRisk) {
             if (!(risk.Id in state.currentProcessFlowFullData.Risks)) {
                 state.currentProcessFlowFullData.RiskKeys.push(risk.Id)
+                Vue.set(state.currentProcessFlowFullData.Risks, risk.Id, risk)
+            } else {
+                state.currentProcessFlowFullData.Risks[risk.Id].Name = risk.Name
+                state.currentProcessFlowFullData.Risks[risk.Id].Description = risk.Description
             }
-
-            Vue.set(state.currentProcessFlowFullData.Risks, risk.Id, risk)
         },
         deleteRiskFromNode(state, {nodeId, riskIds}) {
             for (let riskId of riskIds) {
@@ -199,15 +201,22 @@ const store : StoreOptions<VuexState> = {
                 )
             }
         },
-        addControl(state, {control}) {
+        setControl(state, {control}) {
             if (control.Id in state.currentProcessFlowFullData.Controls) {
-                return
+                state.currentProcessFlowFullData.Controls[control.Id].Id = control.Id
+                state.currentProcessFlowFullData.Controls[control.Id].Name = control.Name
+                state.currentProcessFlowFullData.Controls[control.Id].Description = control.Description
+                state.currentProcessFlowFullData.Controls[control.Id].ControlTypeId = control.ControlTypeId
+                state.currentProcessFlowFullData.Controls[control.Id].FrequencyType = control.FrequencyType
+                state.currentProcessFlowFullData.Controls[control.Id].FrequencyInterval = control.FrequencyInterval
+                state.currentProcessFlowFullData.Controls[control.Id].OwnerId = control.OwnerId
+            } else {
+                Vue.set(
+                    state.currentProcessFlowFullData.Controls,
+                    control.Id,
+                    control)
+                state.currentProcessFlowFullData.ControlKeys.push(control.Id)
             }
-            Vue.set(
-                state.currentProcessFlowFullData.Controls,
-                control.Id,
-                control)
-            state.currentProcessFlowFullData.ControlKeys.push(control.Id)
         },
         addControlToNode(state, {controlId, nodeId}) {
             state.currentProcessFlowFullData.NodeControlRelationships.add(

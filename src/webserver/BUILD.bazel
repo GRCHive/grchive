@@ -42,6 +42,7 @@ go_library(
         "core/messageHub.go",
         "core/risks.go",
         "core/controls.go",
+        "core/types.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",

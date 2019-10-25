@@ -36,7 +36,6 @@ import * as rules from "../../ts/formRules"
 
 export default Vue.extend({
     props: {
-        isManual : Boolean,
         freqInterval : Number,
         freqType: Number,
     },
@@ -44,6 +43,9 @@ export default Vue.extend({
         rules
     }),
     computed: {
+        isManual() : boolean {
+            return (this.freqType == -1)
+        },
         frequencyChoices() : Object[] {
             let items = [] as Object[]
             let counter = 0
@@ -63,7 +65,11 @@ export default Vue.extend({
             this.$emit('update:freqInterval', parseInt(val, 10))
         },
         changeManual(val: boolean) {
-            this.$emit('update:isManual', val)
+            if (val) {
+                this.changeType(-1)
+            } else {
+                this.changeType(0)
+            }
         },
         changeType(val : number) {
             this.$emit('update:freqType', val)

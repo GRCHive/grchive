@@ -17,8 +17,7 @@
 
 import Vue from 'vue'
 import { createUserString } from '../../ts/users'
-import { getAllOrgUsers } from '../../ts/api/apiUsers'
-import { contactUsUrl } from '../../ts/url'
+import Metadata from '../../ts/metadata'
 
 export default Vue.extend({
     props: {
@@ -29,12 +28,11 @@ export default Vue.extend({
     },
     data : () => ({
         loading: false,
-        visibleUsers: [] as User[]
     }),
     computed: {
         displayItems() : Object[] {
             let displayText = [] as Object[]
-            for (let user of this.visibleUsers) {
+            for (let user of Metadata.state.availableUsers) {
                 displayText.push({
                     text: createUserString(user),
                     value: user
@@ -44,33 +42,9 @@ export default Vue.extend({
         },
     },
     methods: {
-        loadAvailableUsers() {
-            // TODO: Put this in metadata?
-            this.loading = true
-            getAllOrgUsers(<TGetAllOrgUsersInput>{
-                //@ts-ignore
-                csrf: this.$root.csrf,
-                //@ts-ignore
-                org: this.$root.orgGroupId
-            }).then((resp : TGetAllOrgUsersOutput) => {
-                this.visibleUsers = resp.data
-                this.loading = false
-            }).catch((err) => {
-                // @ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong. Please refresh the page and try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
-            })
-        },
         changeUser(val : User) {
             this.$emit('update:user', val)
         }
-    },
-    mounted() {
-        this.loadAvailableUsers()
     },
 })
 </script>

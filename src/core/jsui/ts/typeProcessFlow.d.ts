@@ -27,10 +27,10 @@ interface ProcessFlowControl {
     Id : number
     Name : string
     Description : string
-    Type: ProcessFlowControlType
-    Frequency: number
-    Interval: number
-    ProcessOwner: User
+    ControlTypeId: number
+    FrequencyType: number
+    FrequencyInterval: number 
+    OwnerId: number | null
 }
 
 interface ProcessFlowNode {

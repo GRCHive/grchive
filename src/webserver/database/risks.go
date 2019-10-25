@@ -7,6 +7,20 @@ import (
 	"strings"
 )
 
+func EditRisk(risk *core.Risk) error {
+	tx := dbConn.MustBegin()
+	_, err := tx.NamedExec(`
+		UPDATE process_flow_risks
+		SET name = :name, description = :description
+		WHERE id = :id
+	`, risk)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
 func DeleteRisks(nodeId int64, riskIds []int64, global bool) error {
 	if len(riskIds) == 0 {
 		return nil

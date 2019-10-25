@@ -1,5 +1,18 @@
 <template>
     <section>
+        <v-dialog v-model="showHideEditRisk" persistent max-width="40%">
+            <create-new-risk-form
+                ref="editRisk"
+                :edit-mode="true"
+                :node-id="currentNode.Id"
+                :risk-id="editRiskData.Id"
+                :default-name="editRiskData.Name"
+                :default-description="editRiskData.Description"
+                @do-save="finishEditRisk"
+                @do-cancel="cancelEditRisk">
+            </create-new-risk-form>
+        </v-dialog>
+
         <v-list-item class="pa-1">
             <v-list-item-action class="ma-1">
                 <v-btn icon @click="toggleSelection">
@@ -114,7 +127,13 @@ export default Vue.extend({
         showHideDeleteRisk : false,
         showHideCreateNewRisk : false,
         showHideAddExistingRisk : false,
-        selectedRisks : [] as ProcessFlowRisk[]
+        showHideEditRisk : false,
+        selectedRisks : [] as ProcessFlowRisk[],
+        editRiskData: <ProcessFlowRisk>{
+            Id: -1,
+            Name: "",
+            Description: ""
+        }
     }),
     components : {
         CreateNewRiskForm,
@@ -234,6 +253,19 @@ export default Vue.extend({
             })
         },
         editRisk(risk : ProcessFlowRisk) {
+            this.editRiskData = {...risk}
+            this.showHideEditRisk = true
+            Vue.nextTick(() => {
+                //@ts-ignore
+                this.$refs.editRisk.clearForm()
+            })
+        },
+        cancelEditRisk() {
+            this.showHideEditRisk = false
+        },
+        finishEditRisk(risk : ProcessFlowRisk) {
+            VueSetup.store.commit('setRisk', risk)
+            this.showHideEditRisk = false
         }
     },
     watch : {

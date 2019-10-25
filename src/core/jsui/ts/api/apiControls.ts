@@ -3,6 +3,7 @@ import * as qs from 'query-string'
 import { getControlTypesUrl,
          newControlUrl,
          addControlUrl,
+         editControlUrl,
          deleteControlUrl } from '../url'
 import { postFormUrlEncoded } from '../http'
 
@@ -43,4 +44,16 @@ export interface TExistingControlOutput {
 
 export function addExistingControls(inp : TExistingControlInput): Promise<TExistingControlOutput> {
     return postFormUrlEncoded<TExistingControlOutput>(addControlUrl, inp)
+}
+
+export interface TEditControlInput extends TNewControlInput {
+    controlId: number
+}
+
+export interface TEditControlOutput {
+    data: ProcessFlowControl
+}
+
+export function editControl(inp: TEditControlInput) : Promise<TEditControlOutput> {
+    return postFormUrlEncoded<TEditControlOutput>(editControlUrl, inp)
 }

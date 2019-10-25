@@ -2,7 +2,7 @@
 
 <v-card>
     <v-card-title>
-        New Control
+        {{ editMode ? "Edit" : "New" }} Control
     </v-card-title>
 
     <v-divider></v-divider>
@@ -27,7 +27,6 @@
             v-bind:user.sync="controlOwner"
         ></user-search-form-component>
         <frequency-form-component
-            v-bind:isManual.sync="frequencyData.isManual"
             v-bind:freqInterval.sync="frequencyData.freqInterval"
             v-bind:freqType.sync="frequencyData.freqType"
         ></frequency-form-component>
@@ -57,17 +56,29 @@
 <script lang="ts">
 
 import Vue from 'vue'
+import VueSetup from '../../../ts/vueSetup'
 import * as rules from "../../../ts/formRules"
 import FrequencyFormComponent from "../../generic/FrequencyFormComponent.vue"
 import UserSearchFormComponent from "../../generic/UserSearchFormComponent.vue"
 import Metadata from "../../../ts/metadata"
-import { newControl } from "../../../ts/api/apiControls"
+import { newControl, 
+         editControl,
+         TEditControlInput,
+         TEditControlOutput } from "../../../ts/api/apiControls"
 import { contactUsUrl } from "../../../ts/url"
 
 export default Vue.extend({
     props : {
         nodeId: Number,
-        riskId: Number
+        riskId: Number,
+        editMode: {
+            type: Boolean,
+            default: false
+        },
+        controlId: {
+            type: Number,
+            default: -1
+        }
     },
     components: {
         FrequencyFormComponent,
@@ -79,7 +90,6 @@ export default Vue.extend({
         rules,
         formValid: false,
         frequencyData : {
-            isManual : false,
             freqInterval : 0,
             freqType: 0
         },
@@ -103,12 +113,26 @@ export default Vue.extend({
     },
     methods: {
         clearForm() {
-            this.name = ""
-            this.description = ""
-            this.frequencyData.isManual = false
-            this.frequencyData.freqInterval = 0
-            this.frequencyData.freqType = 0
-            this.controlOwner = Object() as User
+            if (this.editMode) {
+                let control : ProcessFlowControl = VueSetup.store.state.currentProcessFlowFullData.Controls[this.controlId]
+                this.name = control.Name
+                this.description = control.Description
+                this.frequencyData.freqType = control.FrequencyType
+                this.frequencyData.freqInterval = control.FrequencyInterval
+                if (control.OwnerId != null && control.OwnerId in Metadata.state.idToUsers ) {
+                    this.controlOwner = Metadata.state.idToUsers[control.OwnerId]
+                } else {
+                    this.controlOwner = Object() as User
+                }
+                this.controlType = Metadata.state.idToControlTypes[control.ControlTypeId]
+            } else {
+                this.name = ""
+                this.description = ""
+                this.frequencyData.freqInterval = 0
+                this.frequencyData.freqType = 0
+                this.controlOwner = Object() as User
+                this.refreshDefaultControlType()
+            }
         },
         cancel() {
             this.$emit('do-cancel')
@@ -120,6 +144,42 @@ export default Vue.extend({
                 return;
             }
 
+            if (this.editMode) {
+                this.doEdit()
+            } else {
+                this.doSave()
+            }
+        },
+        refreshDefaultControlType() {
+            if (this.controlTypeItems.length > 0) {
+                this.controlType = Metadata.state.controlTypes[0]
+            } else {
+                this.controlType = Object() as ProcessFlowControlType
+            }
+        },
+        onSuccess(control : ProcessFlowControl) {
+            this.$emit('do-save', control, this.riskId)
+        },
+        onError(err : any) {
+            if (!!err.response && err.response.data.IsDuplicate) {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "A control with this name exists already. Pick another name.",
+                    false,
+                    "",
+                    contactUsUrl,
+                    true);
+            } else {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            }
+        },
+        doSave() {
             newControl(<TNewControlInput>{
                 //@ts-ignore
                 csrf: this.$root.csrf,
@@ -128,37 +188,33 @@ export default Vue.extend({
                 controlType: this.controlType.Id,
                 frequencyType : this.frequencyData.freqType,
                 frequencyInterval : this.frequencyData.freqInterval,
-                ownerId : this.controlOwner.Id,
+                ownerId : !!this.controlOwner ? this.controlOwner.Id : undefined,
                 nodeId: this.nodeId,
                 riskId: this.riskId
             }).then((resp : TNewControlOutput) => {
-                this.$emit('do-save', resp.data, this.riskId)
-            }).catch((err) => {
-                if (!!err.response && err.response.data.IsDuplicate) {
-                    // @ts-ignore
-                    this.$root.$refs.snackbar.showSnackBar(
-                        "A control with this name exists already. Pick another name.",
-                        false,
-                        "",
-                        contactUsUrl,
-                        true);
-                } else {
-                    // @ts-ignore
-                    this.$root.$refs.snackbar.showSnackBar(
-                        "Oops! Something went wrong. Try again.",
-                        true,
-                        "Contact Us",
-                        contactUsUrl,
-                        true);
-                }
+                this.onSuccess(resp.data)
+            }).catch((err : any) => {
+                this.onError(err)
             })
         },
-        refreshDefaultControlType() {
-            if (this.controlTypeItems.length > 0) {
-                this.controlType = Metadata.state.controlTypes[0]
-            } else {
-                this.controlType = Object() as ProcessFlowControlType
-            }
+        doEdit() {
+            editControl(<TEditControlInput>{
+                //@ts-ignore
+                csrf: this.$root.csrf,
+                name: this.name,
+                description: this.description,
+                controlType: this.controlType.Id,
+                frequencyType : this.frequencyData.freqType,
+                frequencyInterval : this.frequencyData.freqInterval,
+                ownerId : !!this.controlOwner ? this.controlOwner.Id : undefined,
+                nodeId: this.nodeId,
+                riskId: this.riskId,
+                controlId: this.controlId
+            }).then((resp : TEditControlOutput) => {
+                this.onSuccess(resp.data)
+            }).catch((err : any) => {
+                this.onError(err)
+            })
         }
     },
     watch : {

@@ -26,12 +26,32 @@ func FindAllControlsForOrganization(org *core.Organization) ([]*core.Control, er
 	return controls, err
 }
 
+func EditControl(control *core.Control) error {
+	tx := dbConn.MustBegin()
+	_, err := tx.NamedExec(`
+		UPDATE process_flow_controls
+		SET name = :name, 
+			description = :description,
+			control_type = :control_type,
+			freq_type = :freq_type,
+			freq_interval = :freq_interval,
+			owner_id = :owner_id
+		WHERE id = :id
+	`, control)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+
+}
+
 func InsertNewControl(control *core.Control) error {
 	var err error
 	var rows *sqlx.Rows
 
 	tx := dbConn.MustBegin()
-	if control.OwnerId != -1 {
+	if control.OwnerId.Valid {
 		rows, err = tx.NamedQuery(`
 			INSERT INTO process_flow_controls (name, description, control_type, org_id, freq_type, freq_interval, owner_id)
 			VALUES (:name, :description, :control_type, :org_id, :freq_type, :freq_interval, :owner_id)

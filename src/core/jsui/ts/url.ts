@@ -66,6 +66,7 @@ export function createProcessFlowNodeDisplaySettingsWebsocket(host : string, csr
 
 export const newRiskAPIUrl : string = "/api/risk/new"
 export const deleteRiskAPIUrl : string = "/api/risk/delete"
+export const editRiskAPIUrl : string = "/api/risk/edit"
 export const addExistingRiskAPIUrl : string = "/api/risk/add"
 
 export function createGetAllOrgUsersAPIUrl(org : string) : string {
@@ -76,3 +77,4 @@ export const getControlTypesUrl : string = "/api/control/types"
 export const newControlUrl : string = "/api/control/new"
 export const deleteControlUrl : string = "/api/control/delete"
 export const addControlUrl : string = "/api/control/add"
+export const editControlUrl : string = "/api/control/edit"

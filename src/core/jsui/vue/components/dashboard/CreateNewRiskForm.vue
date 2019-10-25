@@ -2,7 +2,7 @@
 
 <v-card>
     <v-card-title>
-        New Risk
+        {{ editMode ? "Edit" : "New" }} Risk
     </v-card-title>
 
     <v-divider></v-divider>
@@ -41,11 +41,27 @@
 import Vue from 'vue'
 import * as rules from "../../../ts/formRules"
 import { contactUsUrl } from "../../../ts/url"
-import { newRisk } from "../../../ts/api/apiRisks"
+import { newRisk, editRisk, TEditRiskInput, TEditRiskOutput } from "../../../ts/api/apiRisks"
 
 export default Vue.extend({
     props : {
-        nodeId: Number
+        nodeId: Number,
+        editMode: {
+            type: Boolean,
+            default: false
+        },
+        defaultName: {
+            type: String,
+            default: ""
+        },
+        defaultDescription: {
+            type: String,
+            default: ""
+        },
+        riskId: {
+            type: Number,
+            default: -1
+        }
     },
     data: () => ({
         name: "",
@@ -60,8 +76,8 @@ export default Vue.extend({
     },
     methods: {
         clearForm() {
-            this.name = ""
-            this.description = ""
+            this.name = this.defaultName
+            this.description = this.defaultDescription
         },
         cancel() {
             this.$emit('do-cancel')
@@ -73,6 +89,36 @@ export default Vue.extend({
                 return;
             }
 
+            if (this.editMode) {
+                this.doEdit()
+            } else {
+                this.doSave()
+            }
+        },
+        onSuccess(risk : ProcessFlowRisk) {
+            this.clearForm()
+            this.$emit('do-save', risk)
+        },
+        onError( err: any) {
+            if (!!err.response && err.response.data.IsDuplicate) {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "A risk with this name exists already. Pick another name.",
+                    false,
+                    "",
+                    contactUsUrl,
+                    true);
+            } else {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            }
+        },
+        doSave() {
             newRisk(<TNewRiskInput>{
                 //@ts-ignore
                 csrf : this.$root.csrf,
@@ -80,29 +126,26 @@ export default Vue.extend({
                 description: this.description,
                 nodeId: this.nodeId
             }).then((resp : TNewRiskOutput) => {
-                this.clearForm()
-                this.$emit('do-save', resp.data)
-            }).catch((err) => {
-                if (!!err.response && err.response.data.IsDuplicate) {
-                    // @ts-ignore
-                    this.$root.$refs.snackbar.showSnackBar(
-                        "A risk with this name exists already. Pick another name.",
-                        false,
-                        "",
-                        contactUsUrl,
-                        true);
-                } else {
-                    // @ts-ignore
-                    this.$root.$refs.snackbar.showSnackBar(
-                        "Oops! Something went wrong. Try again.",
-                        true,
-                        "Contact Us",
-                        contactUsUrl,
-                        true);
-                }
+                this.onSuccess(resp.data)
+            }).catch((err : any) => {
+                this.onError(err)
+            })
+        },
+        doEdit() {
+            editRisk(<TEditRiskInput>{
+                //@ts-ignore
+                csrf : this.$root.csrf,
+                name : this.name,
+                description: this.description,
+                nodeId: this.nodeId,
+                riskId: this.riskId
+            }).then((resp : TEditRiskOutput) => {
+                this.onSuccess(resp.data)
+            }).catch((err : any) => {
+                this.onError(err)
             })
         }
-    }
+    },
 })
 
 </script>

@@ -3,6 +3,7 @@ import Vuex, { StoreOptions } from 'vuex'
 import { getProcessFlowIOTypes } from './api/apiProcessFlowIO'
 import { getProcessFlowNodeTypes } from './api/apiProcessFlowNodes'
 import { getControlTypes } from './api/apiControls'
+import { getAllOrgUsers } from './api/apiUsers'
 
 interface MetadataStoreState {
     ioTypes: ProcessFlowIOType[],
@@ -10,7 +11,9 @@ interface MetadataStoreState {
     nodeTypes: ProcessFlowNodeType[],
     idToNodeTypes: Record<number, ProcessFlowNodeType>,
     controlTypes: ProcessFlowControlType[],
-    idToControlTypes: Record<number, ProcessFlowControlType>
+    idToControlTypes: Record<number, ProcessFlowControlType>,
+    availableUsers: User[],
+    idToUsers: Record<number, User>
 }
 
 const metaDataStore: StoreOptions<MetadataStoreState> = {
@@ -20,7 +23,9 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
         nodeTypes: [] as ProcessFlowNodeType[],
         idToNodeTypes: Object() as Record<number, ProcessFlowNodeType>,
         controlTypes: [] as ProcessFlowControlType[],
-        idToControlTypes: Object() as Record<number, ProcessFlowControlType>
+        idToControlTypes: Object() as Record<number, ProcessFlowControlType>,
+        availableUsers: [] as User[],
+        idToUsers: Object() as Record<number, User>
     },
     mutations: {
         setIoTypes(state, inTypes : ProcessFlowIOType[]) {
@@ -43,6 +48,13 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
             for (let typ of inTypes) {
                 Vue.set(state.idToControlTypes, typ.Id, typ)
             }
+        },
+        setUsers(state, inUsers : User[]) {
+            state.availableUsers = inUsers
+            state.idToUsers = Object() as Record<number, User>
+            for (let user of inUsers) {
+                Vue.set(state.idToUsers, user.Id, user)
+            }
         }
     },
     actions: {
@@ -51,6 +63,7 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
             context.dispatch('initializeProcessFlowIOTypes', data)
             context.dispatch('initializeProcessFlowNodeTypes', data)
             context.dispatch('initializeProcessFlowControlTypes', data)
+            context.dispatch('initializeUsers', data)
         },
         initializeProcessFlowIOTypes(context, {csrf}) {
             getProcessFlowIOTypes({csrf}).then((resp : TGetProcessFlowIOTypesOutput) => {
@@ -65,6 +78,14 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
         initializeProcessFlowControlTypes(context, {csrf}) {
             getControlTypes({csrf}).then((resp : TGetControlTypesOutput) => {
                 context.commit('setControlTypes', resp.data)
+            })
+        },
+        initializeUsers(context, {csrf, orgGroupId}) {
+            getAllOrgUsers(<TGetAllOrgUsersInput>{
+                csrf: csrf,
+                org: orgGroupId
+            }).then((resp : TGetAllOrgUsersOutput) => {
+                context.commit('setUsers', resp.data)
             })
         }
     }
