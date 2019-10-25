@@ -88,6 +88,18 @@ export default Vue.extend({
         ]
     }),
     methods: {
+        updateClientRect() {
+            //@ts-ignore
+            const rect = this.$refs.rendererVue.$el.getBoundingClientRect()
+            this.rendererClientRect =  <IDOMRect>{
+                top: rect.top,
+                bottom: rect.bottom,
+                left: rect.left,
+                right: rect.right,
+                width: rect.width,
+                height: rect.height
+            }
+        },
         recomputeProcessFlowHeaderHeight() {
             Vue.nextTick(() => {
                 //@ts-ignore
@@ -111,16 +123,7 @@ export default Vue.extend({
             // Spend the next second or so making sure we keep track of the total size
             // of the rendering section.
             let intervalId = setInterval(() => {
-                //@ts-ignore
-                const rect = this.$refs.rendererVue.$el.getBoundingClientRect()
-                this.rendererClientRect =  <IDOMRect>{
-                    top: rect.top,
-                    bottom: rect.bottom,
-                    left: rect.left,
-                    right: rect.right,
-                    width: rect.width,
-                    height: rect.height
-                }
+                this.updateClientRect()
             }, 16)
 
             setTimeout(function() {
@@ -183,6 +186,8 @@ export default Vue.extend({
         this.recomputeProcessFlowHeaderHeight()
         //@ts-ignore
         this.appBarClipHeight = this.$refs.dashboardAppBar.$el.offsetHeight
+
+        window.addEventListener('resize', this.updateClientRect)
     },
     watch: {
         isNodeSelected() {
