@@ -6,6 +6,10 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
+var DuplicateEntryJson = struct{ IsDuplicate bool }{
+	IsDuplicate: true,
+}
+
 // Checks whether the error indicates a duplicate entry on INSERT.
 func IsDuplicateDBEntry(err error) bool {
 	if err == nil {

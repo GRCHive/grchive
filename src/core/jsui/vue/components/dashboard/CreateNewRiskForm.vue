@@ -83,13 +83,23 @@ export default Vue.extend({
                 this.clearForm()
                 this.$emit('do-save', resp.data)
             }).catch((err) => {
-                // @ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong. Try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
+                if (!!err.response && err.response.data.IsDuplicate) {
+                    // @ts-ignore
+                    this.$root.$refs.snackbar.showSnackBar(
+                        "A risk with this name exists already. Pick another name.",
+                        false,
+                        "",
+                        contactUsUrl,
+                        true);
+                } else {
+                    // @ts-ignore
+                    this.$root.$refs.snackbar.showSnackBar(
+                        "Oops! Something went wrong. Try again.",
+                        true,
+                        "Contact Us",
+                        contactUsUrl,
+                        true);
+                }
             })
         }
     }

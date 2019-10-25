@@ -134,13 +134,23 @@ export default Vue.extend({
             }).then((resp : TNewControlOutput) => {
                 this.$emit('do-save', resp.data, this.riskId)
             }).catch((err) => {
-                // @ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong. Try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
+                if (!!err.response && err.response.data.IsDuplicate) {
+                    // @ts-ignore
+                    this.$root.$refs.snackbar.showSnackBar(
+                        "A control with this name exists already. Pick another name.",
+                        false,
+                        "",
+                        contactUsUrl,
+                        true);
+                } else {
+                    // @ts-ignore
+                    this.$root.$refs.snackbar.showSnackBar(
+                        "Oops! Something went wrong. Try again.",
+                        true,
+                        "Contact Us",
+                        contactUsUrl,
+                        true);
+                }
             })
         },
         refreshDefaultControlType() {

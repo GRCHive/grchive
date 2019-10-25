@@ -2,7 +2,8 @@ CREATE TABLE process_flow_risks (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(256) NOT NULL,
     description TEXT,
-    org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE
+    org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    UNIQUE(name, org_id)
 );
 
 CREATE TABLE process_flow_risk_node (

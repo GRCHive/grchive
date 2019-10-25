@@ -66,8 +66,13 @@ func newControl(w http.ResponseWriter, r *http.Request) {
 	err = database.InsertNewControl(&control)
 	if err != nil {
 		core.Warning("Failed to insert new control: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		jsonWriter.Encode(struct{}{})
+		if database.IsDuplicateDBEntry(err) {
+			w.WriteHeader(http.StatusBadRequest)
+			jsonWriter.Encode(database.DuplicateEntryJson)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			jsonWriter.Encode(struct{}{})
+		}
 		return
 	}
 

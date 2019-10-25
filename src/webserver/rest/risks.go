@@ -55,8 +55,13 @@ func createNewRisk(w http.ResponseWriter, r *http.Request) {
 	err = database.InsertNewRisk(&newRisk)
 	if err != nil {
 		core.Warning("Couldn't insert new risk: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		jsonWriter.Encode(struct{}{})
+		if database.IsDuplicateDBEntry(err) {
+			w.WriteHeader(http.StatusBadRequest)
+			jsonWriter.Encode(database.DuplicateEntryJson)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			jsonWriter.Encode(struct{}{})
+		}
 		return
 	}
 
