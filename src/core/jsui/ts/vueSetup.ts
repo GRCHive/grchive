@@ -37,7 +37,7 @@ const store : StoreOptions<VuexState> = {
     },
     mutations: {
         deleteProcessFlow(state, flowId) {
-            if (state.currentProcessFlowIndex == flowId) {
+            if (state.currentProcessFlowFullData.FlowId == flowId) {
                 state.currentProcessFlowIndex = 0
                 state.currentProcessFlowFullData = {} as FullProcessFlowData
                 state.selectedNodeId = -1

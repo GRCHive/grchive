@@ -274,6 +274,11 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
             processFlowStore.watch((state : VuexState) => {
                 return state.currentProcessFlowFullData
             }, (newFlowData : FullProcessFlowData, oldFlowData: FullProcessFlowData) => {
+                    if (!newFlowData.FlowId) {
+                        context.commit('resetNodeLayout')
+                        return
+                    }
+
                     let newFlow : boolean = oldFlowData.FlowId != newFlowData.FlowId
                     context.dispatch(
                          newFlow ?
