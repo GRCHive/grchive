@@ -173,7 +173,12 @@ func (this *JWTManager) VerifyJWT(input string, isAccessToken bool) (*RawJWT, er
 	for i := 0; i < len(keys); i++ {
 		// Assume RSA256 for now. May want to expand to different options in the future.
 		// That or use a JWT library. Heh.
-		err = core.VerifySignature(payload, jwt.RawSignature, core.RSA256, keys[0])
+		err = core.VerifySignature(
+			core.DefaultEncryptionInterface,
+			payload,
+			jwt.RawSignature,
+			core.RSA256,
+			keys[0])
 		if err != nil {
 			continue
 		}
