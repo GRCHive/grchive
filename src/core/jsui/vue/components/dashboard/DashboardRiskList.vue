@@ -28,11 +28,9 @@
         >
             <v-list-item two-line :href="generateRiskUrl(item.Id)">
                 <v-list-item-content>
-                    <v-list-item-title>
-                        {{ item.Name }}
+                    <v-list-item-title v-html="highlightText(item.Name)">
                     </v-list-item-title>
-                    <v-list-item-subtitle>
-                        {{ item.Description }}
+                    <v-list-item-subtitle v-html="highlightText(item.Description)">
                     </v-list-item-subtitle>
                 </v-list-item-content>
                 <v-spacer></v-spacer>
@@ -51,7 +49,7 @@
 import Vue from 'vue'
 import { getAllRisks, TAllRiskInput, TAllRiskOutput } from '../../../ts/api/apiRisks'
 import { contactUsUrl, createRiskUrl } from '../../../ts/url'
-import { replaceWithMark } from '../../../ts/text'
+import { replaceWithMark, sanitizeTextForHTML } from '../../../ts/text'
 
 export default Vue.extend({
     data : () => ({
@@ -71,6 +69,14 @@ export default Vue.extend({
         }
     },
     methods: {
+        highlightText(input : string) : string {
+            const safeInput = sanitizeTextForHTML(input)
+            const useFilter = this.filterText.trim()
+            if (useFilter.length == 0) {
+                return safeInput
+            }
+            return replaceWithMark(safeInput, useFilter)
+        },
         generateRiskUrl(riskId : number) : string {
             //@ts-ignore
             return createRiskUrl(this.$root.orgGroupId, riskId)
