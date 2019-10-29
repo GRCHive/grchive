@@ -2,6 +2,7 @@ package render
 
 import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/b3h47pte/audit-stuff/database"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
 	"net/http"
 )
@@ -176,4 +177,70 @@ func RenderDashboardRisksPage(w http.ResponseWriter, r *http.Request) {
 				BuildTemplateParams(w, r, true),
 				BuildOrgTemplateParams(org),
 				BuildUserTemplateParams(data.CurrentUser)))
+}
+
+func RenderDashboardSingleRiskPage(w http.ResponseWriter, r *http.Request) {
+	org, err := webcore.FindOrganizationInContext(r.Context())
+	if err != nil {
+		core.Warning("No organization data: " + err.Error())
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
+			http.StatusTemporaryRedirect)
+		return
+	}
+
+	data, err := webcore.FindSessionParsedDataInContext(r.Context())
+	if err != nil {
+		core.Warning("No user data: " + err.Error())
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
+			http.StatusTemporaryRedirect)
+		return
+	}
+
+	risk, err := webcore.GetRiskFromRequestUrl(r)
+	if err != nil {
+		core.Warning("No risk data: " + err.Error())
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.DashboardRisksRouteName),
+			http.StatusTemporaryRedirect)
+		return
+	}
+
+	nodes, err := database.FindNodesRelatedToRisk(risk.Id)
+	if err != nil {
+		core.Warning("Failed to get node risk: " + err.Error())
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.DashboardRisksRouteName),
+			http.StatusTemporaryRedirect)
+		return
+	}
+
+	controls, err := database.FindControlsRelatedToRisk(risk.Id)
+	if err != nil {
+		core.Warning("Failed to get risk control: " + err.Error())
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.DashboardRisksRouteName),
+			http.StatusTemporaryRedirect)
+		return
+	}
+
+	riskParams, err := BuildFullRiskTemplateParams(risk, nodes, controls)
+	if err != nil {
+		core.Warning("Failed to create risk params: " + err.Error())
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.DashboardRisksRouteName),
+			http.StatusTemporaryRedirect)
+		return
+	}
+
+	RetrieveTemplate(DashboardSingleRiskTemplateKey).
+		ExecuteTemplate(
+			w,
+			"dashboardBase",
+			core.MergeMaps(
+				BuildTemplateParams(w, r, true),
+				BuildOrgTemplateParams(org),
+				BuildUserTemplateParams(data.CurrentUser),
+				riskParams))
 }

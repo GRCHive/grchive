@@ -19,6 +19,20 @@ var int32ReflectType = reflect.TypeOf((int32)(0))
 var stringReflectType = reflect.TypeOf((string)(""))
 var int64ArrayReflectType = reflect.TypeOf(([]int64)([]int64{}))
 
+func GetRiskFromRequestUrl(r *http.Request) (*core.Risk, error) {
+	urlRouteVars := mux.Vars(r)
+	riskIdStr, ok := urlRouteVars[core.DashboardOrgRiskQueryId]
+	if !ok {
+		return nil, errors.New("No risk in request URL")
+	}
+
+	riskId, err := strconv.ParseInt(riskIdStr, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	return database.FindRisk(riskId)
+}
+
 func GetOrganizationFromRequestUrl(r *http.Request) (*core.Organization, error) {
 	urlRouteVars := mux.Vars(r)
 	orgGroupName, ok := urlRouteVars[core.DashboardOrgOrgQueryId]

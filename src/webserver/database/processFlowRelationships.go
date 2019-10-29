@@ -18,6 +18,18 @@ func FindNodeRiskRelationships(flowId int64) ([]*core.NodeRiskRelationship, erro
 	return relationships, err
 }
 
+func FindNodesRelatedToRisk(riskId int64) ([]*core.ProcessFlowNode, error) {
+	nodes := make([]*core.ProcessFlowNode, 0)
+	err := dbConn.Select(&nodes, `
+		SELECT DISTINCT node.*
+		FROM process_flow_risk_node AS risknode
+		INNER JOIN process_flow_nodes AS node
+			ON node.id = risknode.node_id
+		WHERE risknode.risk_id = $1
+	`, riskId)
+	return nodes, err
+}
+
 func FindNodeControlRelationships(flowId int64) ([]*core.NodeControlRelationship, error) {
 	relationships := make([]*core.NodeControlRelationship, 0)
 	err := dbConn.Select(&relationships, `
@@ -45,4 +57,16 @@ func FindRiskControlRelationships(orgId int32) ([]*core.RiskControlRelationship,
 			AND control.org_id = $1
 	`, orgId)
 	return relationships, err
+}
+
+func FindControlsRelatedToRisk(riskId int64) ([]*core.Control, error) {
+	controls := make([]*core.Control, 0)
+	err := dbConn.Select(&controls, `
+		SELECT DISTINCT control.*
+		FROM process_flow_risk_control AS riskcontrol
+		INNER JOIN process_flow_controls AS control
+			ON control.id = riskcontrol.control_id
+		WHERE riskcontrol.risk_id = $1
+	`, riskId)
+	return controls, err
 }

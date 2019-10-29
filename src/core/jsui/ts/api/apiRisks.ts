@@ -23,7 +23,6 @@ export interface TEditRiskInput {
     csrf: string
     name: string
     description : string
-    nodeId: number
     riskId: number
 }
 

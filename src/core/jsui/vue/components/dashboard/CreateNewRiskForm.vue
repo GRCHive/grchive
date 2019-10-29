@@ -8,10 +8,17 @@
     <v-divider></v-divider>
 
     <v-form class="ma-4" ref="form" v-model="formValid">
-        <v-text-field v-model="name" label="Name" filled :rules="[rules.required, rules.createMaxLength(256)]">
+        <v-text-field v-model="name"
+                      label="Name"
+                      filled
+                      :rules="[rules.required, rules.createMaxLength(256)]"
+                      :disabled="!canEdit">
         </v-text-field>
 
-        <v-textarea v-model="description" label="Description" filled>
+        <v-textarea v-model="description"
+                    label="Description"
+                    filled
+                    :disabled="!canEdit">
         </v-textarea> 
 
     </v-form>
@@ -20,6 +27,7 @@
         <v-btn
             color="error"
             @click="cancel"
+            v-if="canEdit"
         >
             Cancel
         </v-btn>
@@ -28,8 +36,17 @@
             color="success"
             @click="save"
             :disabled="!canSubmit"
+            v-if="canEdit"
         >
             Save
+        </v-btn>
+
+        <v-btn
+            color="success"
+            @click="edit"
+            v-if="!canEdit"
+        >
+            Edit
         </v-btn>
     </v-card-actions>
 </v-card>
@@ -61,13 +78,18 @@ export default Vue.extend({
         riskId: {
             type: Number,
             default: -1
+        },
+        stagedEdits: {
+            type: Boolean,
+            default: false
         }
     },
     data: () => ({
         name: "",
         description: "",
         rules,
-        formValid: false
+        formValid: false,
+        canEdit: false
     }),
     computed: {
         canSubmit() : boolean {
@@ -79,7 +101,13 @@ export default Vue.extend({
             this.name = this.defaultName
             this.description = this.defaultDescription
         },
+        edit() {
+            this.canEdit = true
+        },
         cancel() {
+            if (this.stagedEdits) {
+                this.canEdit = false
+            }
             this.$emit('do-cancel')
             this.clearForm()
         },
@@ -87,6 +115,10 @@ export default Vue.extend({
             //@ts-ignore
             if (!this.canSubmit) {
                 return;
+            }
+
+            if (this.stagedEdits) {
+                this.canEdit = false
             }
 
             if (this.editMode) {
@@ -137,7 +169,6 @@ export default Vue.extend({
                 csrf : this.$root.csrf,
                 name : this.name,
                 description: this.description,
-                nodeId: this.nodeId,
                 riskId: this.riskId
             }).then((resp : TEditRiskOutput) => {
                 this.onSuccess(resp.data)
@@ -146,6 +177,9 @@ export default Vue.extend({
             })
         }
     },
+    mounted() {
+        this.canEdit = (!this.stagedEdits && this.editMode)
+    }
 })
 
 </script>

@@ -166,3 +166,13 @@ func FindAllRiskForOrganization(org *core.Organization) ([]*core.Risk, error) {
 
 	return findAllRisksFromDbHelper(stmt, org.Id)
 }
+
+func FindRisk(riskId int64) (*core.Risk, error) {
+	risk := core.Risk{}
+	err := dbConn.Get(&risk, `
+		SELECT risk.id, risk.name, risk.description
+		FROM process_flow_risks AS risk
+		WHERE id = $1
+	`, riskId)
+	return &risk, err
+}

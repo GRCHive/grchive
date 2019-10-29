@@ -17,7 +17,6 @@ type NewRiskInputs struct {
 type EditRiskInputs struct {
 	Name        string `webcore:"name"`
 	Description string `webcore:"description"`
-	NodeId      int64  `webcore:"nodeId"`
 	RiskId      int64  `webcore:"riskId"`
 }
 
