@@ -75,7 +75,9 @@ export default Vue.extend({
             if (useFilter.length == 0) {
                 return safeInput
             }
-            return replaceWithMark(safeInput, useFilter)
+            return replaceWithMark(
+                safeInput,
+                sanitizeTextForHTML(useFilter))
         },
         generateRiskUrl(riskId : number) : string {
             //@ts-ignore
