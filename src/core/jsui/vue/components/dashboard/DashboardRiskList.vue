@@ -62,7 +62,8 @@ export default Vue.extend({
         filter() : (a : ProcessFlowRisk) => boolean {
             const filterText = this.filterText.trim()
             return (ele : ProcessFlowRisk) : boolean => {
-                return ele.Name.toLocaleLowerCase().includes(filterText.toLocaleLowerCase())
+                return ele.Name.toLocaleLowerCase().includes(filterText.toLocaleLowerCase()) ||
+                    ele.Description.toLocaleLowerCase().includes(filterText.toLocaleLowerCase())
             }
         },
         filteredRisks() : ProcessFlowRisk[] {
