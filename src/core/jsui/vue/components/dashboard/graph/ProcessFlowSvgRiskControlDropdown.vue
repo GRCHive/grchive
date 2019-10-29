@@ -34,6 +34,8 @@
                       :transform="`translate(
                         ${getRiskLayout(item.Id).tx},
                         ${getRiskLayout(item.Id).ty})`"
+                      @click="goToRisk(item)"
+                      cursor="pointer"
                 >{{ item.Name }}</text> 
             </g>
 
@@ -80,6 +82,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import VueSetup from '../../../../ts/vueSetup'
+import { createRiskUrl } from '../../../../ts/url'
 
 export default Vue.extend({
     props: {
@@ -199,6 +202,12 @@ export default Vue.extend({
             } else {
                 return this.controlTransformLayout.get(controlId)!
             }
+        },
+        goToRisk(risk : ProcessFlowRisk) {
+            window.location.assign(createRiskUrl(
+                //@ts-ignore
+                this.$root.orgGroupId,
+                risk.Id))
         }
     },
     mounted() {
