@@ -26,22 +26,24 @@ func DeleteRisks(nodeId int64, riskIds []int64, global bool) error {
 		return nil
 	}
 
-	riskIdQuery := make([]string, 0)
-	riskIdParams := append(make([]interface{}, 0), nodeId)
-	for idx, id := range riskIds {
-		riskIdParams = append(riskIdParams, id)
-		riskIdQuery = append(riskIdQuery, fmt.Sprintf("$%d", idx+2))
-	}
-
 	tx := dbConn.MustBegin()
-	_, err := tx.Exec(fmt.Sprintf(`
-		DELETE FROM process_flow_risk_node
-		WHERE node_id = $1
-			AND risk_id IN (%s)
-	`, strings.Join(riskIdQuery, ",")), riskIdParams...)
-	if err != nil {
-		tx.Rollback()
-		return err
+	if nodeId != -1 {
+		riskIdQuery := make([]string, 0)
+		riskIdParams := append(make([]interface{}, 0), nodeId)
+		for idx, id := range riskIds {
+			riskIdParams = append(riskIdParams, id)
+			riskIdQuery = append(riskIdQuery, fmt.Sprintf("$%d", idx+2))
+		}
+
+		_, err := tx.Exec(fmt.Sprintf(`
+			DELETE FROM process_flow_risk_node
+			WHERE node_id = $1
+				AND risk_id IN (%s)
+		`, strings.Join(riskIdQuery, ",")), riskIdParams...)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	if global {
@@ -57,8 +59,7 @@ func DeleteRisks(nodeId int64, riskIds []int64, global bool) error {
 		}
 	}
 
-	err = tx.Commit()
-	return err
+	return tx.Commit()
 }
 
 func AddRisksToNode(riskIds []int64, nodeId int64) error {

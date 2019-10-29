@@ -1,5 +1,16 @@
 <template>
     <section class="ma-4">
+        <v-dialog v-model="showHideDeleteRisk" persistent max-width="40%">
+            <generic-delete-confirmation-form
+                item-name="risks"
+                :items-to-delete="currentRisksToDelete"
+                v-on:do-cancel="showHideDeleteRisk = false"
+                v-on:do-delete="deleteSelectedRisks"
+                :use-global-deletion="true"
+                :force-global-deletion="true">
+            </generic-delete-confirmation-form>
+        </v-dialog>
+
         <v-list-item class="pa-0">
             <v-list-item-content class="disable-flex mr-4">
                 <v-list-item-title class="title">
@@ -35,7 +46,7 @@
             :key="index"
             class="my-2"
         >
-            <v-list-item two-line :href="generateRiskUrl(item.Id)">
+            <v-list-item two-line @click="goToRisk(item.Id)">
                 <v-list-item-content>
                     <v-list-item-title v-html="highlightText(item.Name)">
                     </v-list-item-title>
@@ -44,7 +55,7 @@
                 </v-list-item-content>
                 <v-spacer></v-spacer>
                 <v-list-item-action>
-                    <v-btn icon @click.stop @mousedown.stop>
+                    <v-btn icon @click.stop="doDeleteRisk(item)" @mousedown.stop @mouseup.stop>
                         <v-icon>mdi-delete</v-icon>
                     </v-btn>
                 </v-list-item-action>
@@ -57,18 +68,23 @@
 
 import Vue from 'vue'
 import { getAllRisks, TAllRiskInput, TAllRiskOutput } from '../../../ts/api/apiRisks'
+import { deleteRisk } from '../../../ts/api/apiRisks'
 import { contactUsUrl, createRiskUrl } from '../../../ts/url'
 import { replaceWithMark, sanitizeTextForHTML } from '../../../ts/text'
 import CreateNewRiskForm from './CreateNewRiskForm.vue'
+import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 
 export default Vue.extend({
     data : () => ({
         allRisks: [] as ProcessFlowRisk[],
         filterText : "",
-        showHideCreateNewRisk: false
+        showHideCreateNewRisk: false,
+        showHideDeleteRisk: false,
+        currentDeleteRisk : Object() as ProcessFlowRisk
     }),
     components: {
-        CreateNewRiskForm
+        CreateNewRiskForm,
+        GenericDeleteConfirmationForm
     },
     computed: {
         filter() : (a : ProcessFlowRisk) => boolean {
@@ -80,6 +96,12 @@ export default Vue.extend({
         },
         filteredRisks() : ProcessFlowRisk[] {
             return this.allRisks.filter(this.filter)
+        },
+        currentRisksToDelete() : string[] {
+            if (!this.showHideDeleteRisk) {
+                return []
+            }
+            return [this.currentDeleteRisk.Name]
         }
     },
     methods: {
@@ -120,6 +142,49 @@ export default Vue.extend({
         cancelNewRisk() {
             this.showHideCreateNewRisk = false
         },
+        goToRisk(riskId : number) {
+            window.location.assign(this.generateRiskUrl(riskId))
+        },
+        doDeleteRisk(risk : ProcessFlowRisk) {
+            this.currentDeleteRisk = risk
+            this.showHideDeleteRisk = true
+        },
+        deleteSelectedRisks(global : boolean, items : string[]) {
+            // assumption: global is true, items has length 1
+            const idx = this.allRisks.findIndex(
+                (ele) => items.includes(ele.Name))
+            if (idx == -1) {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+                return // ???
+            }
+
+            const risk = this.allRisks[idx]
+
+            deleteRisk(<TDeleteRiskInput>{
+                //@ts-ignore
+                csrf: this.$root.csrf,
+                nodeId: -1,
+                riskIds: [risk.Id],
+                global: true
+            }).then((resp : TDeleteRiskOutput) => {
+                this.allRisks.splice(idx, 1)
+                this.showHideDeleteRisk = false
+            }).catch((err) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        }
     },
     mounted() {
         this.refreshRisks()

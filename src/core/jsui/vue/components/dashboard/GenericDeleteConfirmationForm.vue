@@ -21,6 +21,7 @@
                         color="error"
                         class="subtitle-1"
                         label="Global Deletion?"
+                        :disabled="forceGlobalDeletion"
             >
             </v-checkbox>
             <p class="subtitle-2 red--text" v-if="globalDelete">
@@ -50,7 +51,11 @@ export default Vue.extend({
     props: {
         itemName : String,
         itemsToDelete : Array,
-        useGlobalDeletion: Boolean
+        useGlobalDeletion: Boolean,
+        forceGlobalDeletion: {
+            type: Boolean,
+            default: false
+        }
     },
     data : () => ({
         globalDelete: false,
@@ -60,7 +65,12 @@ export default Vue.extend({
             this.$emit('do-cancel')
         },
         onDelete() {
-            this.$emit('do-delete', this.globalDelete)
+            this.$emit('do-delete', this.globalDelete, this.itemsToDelete)
+        }
+    },
+    mounted() {
+        if (this.forceGlobalDeletion) {
+            this.globalDelete = true
         }
     }
 })
