@@ -129,6 +129,7 @@ import VueSetup from '../../../../ts/vueSetup'
 import MetadataStore from '../../../../ts/metadata'
 import RenderLayout from '../../../../ts/render/renderLayout'
 import ProcessFlowSvgRiskControlDropdown from './ProcessFlowSvgRiskControlDropdown.vue'
+import { nodeTypeToClass } from '../../../../ts/render/nodeCssUtils'
 
 export default Vue.extend({
     props: {
@@ -193,26 +194,7 @@ export default Vue.extend({
             return this.nodeLayout.transform.ty
         },
         styleClass() {
-            // TODO: How do we keep this in sync with the server?
-            //       Maybe it should get queried along with the types.
-            const typeId = (this.node as ProcessFlowNode).NodeTypeId
-            switch(typeId){
-                case 1:
-                    return "activity-manual"
-                case 2:
-                    return "activity-automated"
-                case 3:
-                    return "decision"
-                case 4:
-                    return "start"
-                case 5:
-                    return "general-ledger-entry"
-                case 6:
-                    return "system"
-                default:
-                    break;
-            }
-            return ""
+            return nodeTypeToClass(this.node.NodeTypeId)
         },
         isNodeSelected() : boolean {
             return VueSetup.store.state.selectedNodeId == this.node.Id
@@ -258,54 +240,6 @@ export default Vue.extend({
 .node-box {
     stroke-width: 1px;
     stroke: black;
-}
-
-.activity-manual {
-    fill: #001F3F;
-}
-
-.activity-automated {
-    fill: #0074D9;
-}
-
-.decision {
-    fill: #7FDBFF;
-}
-
-.start {
-    fill: #39CCCC;
-}
-
-.general-ledger-entry {
-    fill: #3D9970;
-}
-
-.system {
-    fill: #2ECC40;
-}
-
-.activity-manual-text {
-    fill: white;
-}
-
-.activity-automated-text {
-    fill: white;
-}
-
-.decision-text {
-    fill: black;
-}
-
-.start-text {
-    fill: black;
-}
-
-.general-ledger-entry-text {
-    fill: white;
-}
-
-.system-text {
-    fill: black;
 }
 
 </style>

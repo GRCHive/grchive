@@ -65,6 +65,11 @@
                                  @click="createNewNode($event, item.Id)"
                                  dense
                     >
+                        <v-list-item-action>
+                            <span :class="`colorBox ${nodeTypeToClass(item.Id)}`">
+                            </span>
+                        </v-list-item-action>
+
                         <v-list-item-title>
                             {{ item.Name }}
                         </v-list-item-title>
@@ -90,6 +95,7 @@ import RenderLayout from '../../../ts/render/renderLayout'
 import LocalSettings from '../../../ts/localSettings'
 import { contactUsUrl, newProcessFlowNodeAPIUrl } from '../../../ts/url'
 import { postFormUrlEncoded } from '../../../ts/http'
+import { nodeTypeToClass } from '../../../ts/render/nodeCssUtils'
 
 export default Vue.extend({
     computed: {
@@ -102,6 +108,7 @@ export default Vue.extend({
         }
     },
     methods: {
+        nodeTypeToClass: nodeTypeToClass,
         createNewNode(_ : MouseEvent, nodeTypeId : number) {
             // Create a new node of the given type.
             postFormUrlEncoded(newProcessFlowNodeAPIUrl, {
@@ -183,6 +190,15 @@ export default Vue.extend({
 
 .v-menu__content {
     border-radius: 0px !important;
+}
+
+.colorBox {
+    width: 16px;
+    height: 16px;
+    display: block;
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
 }
 
 </style>

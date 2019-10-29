@@ -1,0 +1,60 @@
+$activity-manual-color: #001F3f;
+$activity-automated-color: #0074D9;
+$decision-color: #7FDBFF;
+$start-color: #39CCCC;
+$general-ledger-entry-color: #3D9970;
+$system-color: #2ECC40;
+
+.activity-manual {
+    fill: $activity-manual-color;
+    background-color: $activity-manual-color;
+}
+
+.activity-automated {
+    fill: $activity-automated-color;
+    background-color: $activity-automated-color;
+}
+
+.decision {
+    fill: $decision-color;
+    background-color: $decision-color;
+}
+
+.start {
+    fill: $start-color;
+    background-color: $start-color;
+}
+
+.general-ledger-entry {
+    fill: $general-ledger-entry-color;
+    background-color: $general-ledger-entry-color;
+}
+
+.system {
+    fill: $system-color;
+    background-color: $system-color;
+}
+
+.activity-manual-text {
+    fill: white;
+}
+
+.activity-automated-text {
+    fill: white;
+}
+
+.decision-text {
+    fill: black;
+}
+
+.start-text {
+    fill: black;
+}
+
+.general-ledger-entry-text {
+    fill: white;
+}
+
+.system-text {
+    fill: black;
+}
