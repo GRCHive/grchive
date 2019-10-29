@@ -163,3 +163,26 @@ func addRisksToNode(w http.ResponseWriter, r *http.Request) {
 
 	jsonWriter.Encode(struct{}{})
 }
+
+func getAllRisks(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	userParsedData, err := webcore.FindSessionParsedDataInContext(r.Context())
+	if err != nil {
+		core.Warning("No user session data: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	risks, err := database.FindAllRiskForOrganization(userParsedData.Org)
+	if err != nil {
+		core.Warning("Could not find risks: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	jsonWriter.Encode(risks)
+}

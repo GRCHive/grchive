@@ -22,6 +22,7 @@ const (
 	DashboardOrgHomeTemplateKey      = "DASHBOARDORGHOME"
 	DashboardProcessFlowsTemplateKey = "DASHBOARDFLOWS"
 	DashboardUserHomeTemplateKey     = "DASHBOARDUSERHOME"
+	DashboardRisksTemplateKey        = "DASHBOARDRISKS"
 	// Error Keys
 	Error403TemplateKey = "ERROR403"
 	Error404TemplateKey = "ERROR404"
@@ -63,6 +64,8 @@ func RegisterTemplates() {
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardUserHome.tmpl")
 	allTemplates[DashboardProcessFlowsTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardProcessFlows.tmpl")
+	allTemplates[DashboardRisksTemplateKey] =
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardRisks.tmpl")
 
 	// Error templates
 	allTemplates[Error403TemplateKey] =

@@ -34,6 +34,10 @@ export function createMyAccountUrl(email: string) : string {
     return myAccountBaseUrl + "/" + email
 }
 
+export function createRiskUrl(org : string, risk : number) : string {
+    return `/dashboard/org/${org}/risks/${risk}`
+}
+
 export function createUserProfileEditAPIUrl(email : string) : string {
     return "/api/user/" + email + "/profile"
 }
@@ -69,6 +73,7 @@ export const newRiskAPIUrl : string = "/api/risk/new"
 export const deleteRiskAPIUrl : string = "/api/risk/delete"
 export const editRiskAPIUrl : string = "/api/risk/edit"
 export const addExistingRiskAPIUrl : string = "/api/risk/add"
+export const allRiskAPIUrl : string = "/api/risk/"
 
 export function createGetAllOrgUsersAPIUrl(org : string) : string {
     return `/api/org/${org}/users`

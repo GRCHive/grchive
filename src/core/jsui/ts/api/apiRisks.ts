@@ -1,5 +1,11 @@
+import axios from 'axios'
+import * as qs from 'query-string'
 import { postFormUrlEncoded } from '../http'
-import { newRiskAPIUrl, deleteRiskAPIUrl, addExistingRiskAPIUrl, editRiskAPIUrl } from '../url'
+import { newRiskAPIUrl,
+         deleteRiskAPIUrl,
+         addExistingRiskAPIUrl,
+         editRiskAPIUrl,
+         allRiskAPIUrl } from '../url'
 
 export function newRisk(inp : TNewRiskInput) : Promise<TNewRiskOutput> {
     return postFormUrlEncoded<TNewRiskOutput>(newRiskAPIUrl, inp)
@@ -27,4 +33,17 @@ export interface TEditRiskOutput {
 
 export function editRisk(inp : TEditRiskInput) : Promise<TEditRiskOutput> {
     return postFormUrlEncoded<TEditRiskOutput>(editRiskAPIUrl, inp)
+}
+
+
+export interface TAllRiskInput {
+    csrf: string
+}
+
+export interface TAllRiskOutput {
+    data: ProcessFlowRisk[]
+}
+
+export function getAllRisks(inp : TAllRiskInput) : Promise<TAllRiskOutput> {
+    return axios.get(allRiskAPIUrl + '?' + qs.stringify(inp))
 }

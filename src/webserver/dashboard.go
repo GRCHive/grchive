@@ -26,6 +26,8 @@ func createOrganizationSubrouter(r *mux.Router) {
 	}))
 	s.HandleFunc(core.DashboardOrgHomeUrl, render.RenderDashboardOrgHomePage).Methods("GET").Name(webcore.DashboardOrgHomeRouteName)
 	s.PathPrefix(core.DashboardOrgFlowUrl).Handler(http.HandlerFunc(render.RenderDashboardProcessFlowsPage)).Methods("GET").Name(webcore.DashboardProcessFlowsRouteName)
+	s.HandleFunc(core.DashboardOrgAllRiskEndpoint, render.RenderDashboardRisksPage).Methods("GET").Name(webcore.DashboardRisksRouteName)
+	s.HandleFunc(core.DashboardOrgRiskEndpoint, render.RenderDashboardRisksPage).Methods("GET").Name(webcore.DashboardSingleRiskRouteName)
 }
 
 func createUserSubrouter(r *mux.Router) {

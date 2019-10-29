@@ -18,11 +18,16 @@ const DashboardHomeUrl string = "/"
 
 // Dashboard - Organization
 const DashboardOrgOrgQueryId string = "orgId"
+const DashboardOrgRiskQueryId string = "risk"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 
 const DashboardOrgHomeUrl string = "/"
 const DashboardOrgFlowUrl string = "/flows"
+
+const DashboardOrgAllRiskEndpoint string = "/risks"
+
+var DashboardOrgRiskEndpoint string = fmt.Sprintf("/risks/{%s}", DashboardOrgRiskQueryId)
 
 // Dashboard - User
 const DashboardUserQueryId string = "user"
@@ -79,6 +84,7 @@ const ApiNewRiskEndpoint string = "/new"
 const ApiDeleteRiskEndpoint string = "/delete"
 const ApiEditRiskEndpoint string = "/edit"
 const ApiAddRiskToNodeEndpoint string = "/add"
+const ApiGetAllRisksEndpoint string = "/"
 
 // API - Controls
 const ApiControlPrefix string = "/control"

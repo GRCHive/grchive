@@ -4,6 +4,7 @@ import RenderLayout from './render/renderLayout'
 import Vue from 'vue'
 import DashboardOrgHome from '../vue/pages/dashboard/DashboardOrgHome.vue'
 import DashboardOrgProcessFlows from '../vue/pages/dashboard/DashboardOrgProcessFlows.vue'
+import DashboardOrgRisks from '../vue/pages/dashboard/DashboardOrgRisks.vue'
 import DashboardUserHome from '../vue/pages/dashboard/DashboardUserHome.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
 
@@ -16,6 +17,7 @@ function mountApp(inData : Object) {
         components: {
             DashboardOrgHome,
             DashboardOrgProcessFlows,
+            DashboardOrgRisks,
             DashboardUserHome,
             SnackBar
         },

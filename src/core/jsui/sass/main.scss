@@ -23,3 +23,7 @@
     white-space: nowrap !important;
     text-overflow: ellipsis !important;
 }
+
+.disable-flex {
+    flex: none !important;
+}

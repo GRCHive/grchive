@@ -35,8 +35,8 @@ export default Vue.extend({
                     title: 'Risks',
                     icon: 'mdi-fire',
                     //@ts-ignore
-                    url: '#',
-                    disabled : true
+                    url: this.$root.orgUrl + '/risks',
+                    disabled : false
                 },
                 {
                     title: 'Controls',

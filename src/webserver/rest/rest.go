@@ -95,6 +95,7 @@ func registerRiskAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiDeleteRiskEndpoint, deleteRisks).Methods("POST").Name(webcore.DeleteRiskRouteName)
 	s.HandleFunc(core.ApiEditRiskEndpoint, editRisk).Methods("POST").Name(webcore.EditRiskRouteName)
 	s.HandleFunc(core.ApiAddRiskToNodeEndpoint, addRisksToNode).Methods("POST").Name(webcore.AddRiskToNodeRouteName)
+	s.HandleFunc(core.ApiGetAllRisksEndpoint, getAllRisks).Methods("GET").Name(webcore.GetAllRiskRouteName)
 }
 
 func registerControlAPIPaths(r *mux.Router) {
