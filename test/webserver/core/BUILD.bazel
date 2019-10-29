@@ -61,3 +61,28 @@ go_test(
         "//src/webserver:config_files"
     ]
 )
+
+go_test(
+    name = "structs_test",
+    srcs = ["structs_test.go"],
+    deps = [
+        "//src/webserver/core:webserver_core_library",
+        "@com_github_stretchr_testify_assert//:go_default_library",
+    ],
+    data = [
+        "//src/webserver:config_files"
+    ]
+)
+
+
+go_test(
+    name = "time_test",
+    srcs = ["time_test.go"],
+    deps = [
+        "//src/webserver/core:webserver_core_library",
+        "@com_github_stretchr_testify_assert//:go_default_library",
+    ],
+    data = [
+        "//src/webserver:config_files"
+    ]
+)

@@ -82,7 +82,7 @@ func (this *RawJWT) verifyCid() error {
 func (this *RawJWT) verifyExp() error {
 	expTime := time.Unix(this.Payload.Exp, 0).UTC()
 
-	if core.IsPastTime(expTime) {
+	if core.IsPastTime(time.Now(), expTime) {
 		return ExpiredJWTToken
 	}
 	return nil

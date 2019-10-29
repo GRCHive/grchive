@@ -13,15 +13,15 @@ func TestStructToMap(t *testing.T) {
 	}{
 		{
 			struct {
-				attr1 int
-				attr2 string
+				Attr1 int
+				Attr2 string
 			}{
-				attr1: 32,
-				attr2: "bob",
+				Attr1: 32,
+				Attr2: "bob",
 			},
 			map[string]interface{}{
-				"attr1": 32,
-				"attr2": "bob",
+				"Attr1": 32,
+				"Attr2": "bob",
 			},
 		},
 		{
@@ -31,8 +31,8 @@ func TestStructToMap(t *testing.T) {
 		},
 	} {
 		testMap := core.StructToMap(test.refStruct)
-		assert.Equal(t, len(refMap), len(testMap))
-		for rk, rv := range refMap {
+		assert.Equal(t, len(test.refMap), len(testMap))
+		for rk, rv := range test.refMap {
 			tv, ok := testMap[rk]
 			assert.True(t, ok)
 			assert.Equal(t, rv, tv)
