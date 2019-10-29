@@ -53,7 +53,7 @@
             </g>
         </g>
 
-        <g :transform="`translate(${viewBox.x + 5}, ${viewBox.y + 5})`"
+        <g :transform="`translate(${topLeftCorner.tx}, ${topLeftCorner.ty}) scale(${1.0 / viewBoxZoom}) `"
            v-if="showLegend">
             <process-flow-node-type-legend></process-flow-node-type-legend>
         </g>
@@ -115,6 +115,28 @@ export default Vue.extend({
                 width: this.svgWidth / this.viewBoxZoom,
                 height: this.svgHeight / this.viewBoxZoom
             }
+        },
+        topLeftCorner() : TransformData {
+            let svg : SVGSVGElement = <SVGSVGElement>this.$refs.svgrenderer
+
+            // Allows us to forcibly update this computed property
+            // when we know the SVG renderer is available.
+            void(this.forceUpdate)
+
+            if (!svg) {
+                //@ts-ignore
+                return {
+                    tx: this.viewBox.x,
+                    ty: this.viewBox.y
+                }
+            }
+
+            let delta : SVGPoint = convertClientDeltaToSvg(svg, 5, 5)
+            //@ts-ignore
+            return {
+                tx: this.viewBox.x + delta.x,
+                ty: this.viewBox.y + delta.y
+            }
         }
     },
     data: () => ({
@@ -130,7 +152,8 @@ export default Vue.extend({
         tempEdgeEnd: {
             x: 0,
             y: 0
-        }
+        },
+        forceUpdate: 1
     }),
     methods: {
         getInputOutputFromId(ioId : number, isInput: boolean): ProcessFlowInputOutput {
@@ -299,6 +322,9 @@ export default Vue.extend({
     },
     mounted() {
         RenderLayout.store.commit('updateFullGraphComponent', this.$refs.fullgraph)
+        Vue.nextTick(() => {
+            this.forceUpdate += 1
+        })
     }
 })
 

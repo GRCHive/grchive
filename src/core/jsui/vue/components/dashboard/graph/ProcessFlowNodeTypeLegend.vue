@@ -5,7 +5,7 @@
               class="bg-rect"
         ></rect>
 
-        <g ref="legendContent"
+        <g id="legendContent" ref="legendContent"
            :transform="`translate(${margins.left}, ${margins.top})`">
             <g v-for="(item, index) in rawTypeOptions"
                :key="index"
@@ -74,6 +74,10 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+
+#legend-content {
+    user-select: none;
+}
 
 .legend-box {
     stroke: white;
