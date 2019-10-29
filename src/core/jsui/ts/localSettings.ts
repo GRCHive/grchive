@@ -26,7 +26,7 @@ const localSettingStore: StoreOptions<LocalSettingsStoreState> = {
             ty: 0
         },
         viewBoxZoom: 1.0,
-        showHideLegend : false
+        showHideLegend : true
     },
     mutations: {
         setMiniNavBar(state, val) {
