@@ -5,12 +5,14 @@ interface LocalSettingsStoreState {
     showHideAttributeEditor: boolean
     viewBoxTransform: TransformData
     viewBoxZoom: number
+    showHideLegend: boolean
 }
 
 const MiniNavBarLocalStorageKey : string = "miniNavBar"
 const ShowHideAttributeEditorLocalStorageKey : string = "showHideAttributeEditor"
 const ViewBoxTransformLocalStorageKey : string = "viewBoxTransform"
 const ViewBoxZoomLocalStorageKey : string = "viewBoxZoom"
+const ShowHideLegendLocalStorageKey : string = "showHideLegend"
 
 const MinZoom = 0.1
 const MaxZoom = 10.00
@@ -23,7 +25,8 @@ const localSettingStore: StoreOptions<LocalSettingsStoreState> = {
             tx: 0,
             ty: 0
         },
-        viewBoxZoom: 1.0
+        viewBoxZoom: 1.0,
+        showHideLegend : false
     },
     mutations: {
         setMiniNavBar(state, val) {
@@ -49,6 +52,11 @@ const localSettingStore: StoreOptions<LocalSettingsStoreState> = {
 
             state.viewBoxZoom = Math.min(Math.max(val, MinZoom), MaxZoom)
             window.localStorage.setItem(ViewBoxZoomLocalStorageKey, val)
+        },
+        setShowHideLegend(state, val) {
+            state.showHideLegend = val
+            window.localStorage.setItem(ShowHideLegendLocalStorageKey,
+                val ? "true" : "false")
         }
     },
 }
@@ -74,6 +82,11 @@ if (viewBoxTransform != null) {
 let viewBoxZoom = window.localStorage.getItem(ViewBoxZoomLocalStorageKey)
 if (viewBoxZoom != null) {
     store.commit('setViewBoxZoom', Number(viewBoxZoom))
+}
+
+let showHideLegend = window.localStorage.getItem(ShowHideLegendLocalStorageKey)
+if (showHideLegend != null) {
+    store.commit('setShowHideLegend', showHideLegend == "true")
 }
 
 export default store

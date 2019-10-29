@@ -52,6 +52,11 @@
                 </process-flow-svg-node>
             </g>
         </g>
+
+        <g :transform="`translate(${viewBox.x + 5}, ${viewBox.y + 5})`"
+           v-if="showLegend">
+            <process-flow-node-type-legend></process-flow-node-type-legend>
+        </g>
     </svg>
 </template>
 
@@ -62,6 +67,7 @@ import VueSetup from '../../../../ts/vueSetup'
 import RenderLayout from '../../../../ts/render/renderLayout'
 import ProcessFlowSvgNode from './ProcessFlowSvgNode.vue'
 import ProcessFlowSvgEdge from './ProcessFlowSvgEdge.vue'
+import ProcessFlowNodeTypeLegend from './ProcessFlowNodeTypeLegend.vue'
 import { newProcessFlowEdge } from '../../../../ts/api/apiProcessFlowEdges'
 import { contactUsUrl } from '../../../../ts/url'
 import LocalSettings from '../../../../ts/localSettings'
@@ -70,13 +76,17 @@ import { convertClientPointToSvg, convertClientDeltaToSvg } from '../../../../ts
 export default Vue.extend({
     components: {
         ProcessFlowSvgNode,
-        ProcessFlowSvgEdge
+        ProcessFlowSvgEdge,
+        ProcessFlowNodeTypeLegend
     },
     props: {
         svgWidth: Number,
         svgHeight: Number
     },
     computed: {
+        showLegend() : boolean {
+            return LocalSettings.state.showHideLegend
+        },
         nodes() : Record<number,ProcessFlowNode> {
             return VueSetup.store.state.currentProcessFlowFullData.Nodes
         },

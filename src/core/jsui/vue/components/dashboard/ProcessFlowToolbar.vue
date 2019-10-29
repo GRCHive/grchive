@@ -11,6 +11,16 @@
                 </template>
 
                 <v-list dense>
+                    <v-list-item dense @click="toggleLegend">
+                        <v-list-item-action>
+                            <v-checkbox :input-value="showHideLegend">
+                            </v-checkbox>
+                        </v-list-item-action>
+                        <v-list-item-title>
+                            Show Legend
+                        </v-list-item-title>
+                    </v-list-item>
+                    <v-divider></v-divider>
                     <v-list-item dense>
                         <v-list-item-action class="ma-0">
                             <v-btn icon @click.stop="decreaseZoom">
@@ -105,6 +115,9 @@ export default Vue.extend({
         zoomPercentage() : number {
             let zoom : number = LocalSettings.state.viewBoxZoom
             return Math.round(zoom * 100.0)
+        },
+        showHideLegend() : boolean {
+            return LocalSettings.state.showHideLegend
         }
     },
     methods: {
@@ -147,6 +160,9 @@ export default Vue.extend({
             } else {
                 this.decreaseZoom()
             }
+        },
+        toggleLegend() {
+            LocalSettings.commit('setShowHideLegend', !LocalSettings.state.showHideLegend)
         },
         resetZoom() {
             LocalSettings.commit('setViewBoxZoom', 1.0)
