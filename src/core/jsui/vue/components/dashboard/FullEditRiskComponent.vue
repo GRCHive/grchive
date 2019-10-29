@@ -38,13 +38,19 @@
                         </v-card-title>
                         <v-divider></v-divider>
 
-                        <v-list>
+                        <v-list two-line>
                             <v-list-item v-for="(item, index) in fullRiskData.Nodes"
                                          :key="index"
                             >
-                                <v-list-item-title>
-                                    {{ item.Name }}
-                                </v-list-item-title>
+                                <v-list-item-content>
+                                    <v-list-item-title>
+                                        {{ item.Name }}
+                                    </v-list-item-title>
+
+                                    <v-list-item-subtitle>
+                                        {{ item.Description }}
+                                    </v-list-item-subtitle>
+                                </v-list-item-content>
                             </v-list-item>
                         </v-list>
                     </v-card>
@@ -55,14 +61,19 @@
                         </v-card-title>
                         <v-divider></v-divider>
 
-                        <v-list>
-
+                        <v-list two-line>
                             <v-list-item v-for="(item, index) in fullRiskData.Controls"
                                          :key="index"
                             >
-                                <v-list-item-title>
-                                    {{ item.Name }}
-                                </v-list-item-title>
+                                <v-list-item-content>
+                                    <v-list-item-title>
+                                        {{ item.Name }}
+                                    </v-list-item-title>
+
+                                    <v-list-item-subtitle>
+                                        {{ item.Description }}
+                                    </v-list-item-subtitle>
+                                </v-list-item-content>
                             </v-list-item>
                         </v-list>
                     </v-card>
