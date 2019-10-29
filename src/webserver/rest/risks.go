@@ -105,12 +105,14 @@ func createNewRisk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.AddRisksToNode([]int64{newRisk.Id}, inputs.NodeId)
-	if err != nil {
-		core.Warning("Couldn't add risk-node relationship: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		jsonWriter.Encode(struct{}{})
-		return
+	if inputs.NodeId != -1 {
+		err = database.AddRisksToNode([]int64{newRisk.Id}, inputs.NodeId)
+		if err != nil {
+			core.Warning("Couldn't add risk-node relationship: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			jsonWriter.Encode(struct{}{})
+			return
+		}
 	}
 
 	jsonWriter.Encode(newRisk)

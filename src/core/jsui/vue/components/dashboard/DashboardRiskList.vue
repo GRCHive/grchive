@@ -15,9 +15,18 @@
             </v-list-item-action>
             <v-spacer></v-spacer>
             <v-list-item-action>
-                <v-btn class="primary">
-                    Add
-                </v-btn>
+                <v-dialog v-model="showHideCreateNewRisk" persistent max-width="40%">
+                    <template v-slot:activator="{ on }">
+                        <v-btn class="primary" v-on="on">
+                            Create New
+                        </v-btn>
+                    </template>
+                    <create-new-risk-form
+                        :node-id="-1"
+                        @do-save="saveNewRisk"
+                        @do-cancel="cancelNewRisk">
+                    </create-new-risk-form>
+                </v-dialog>
             </v-list-item-action>
         </v-list-item>
         <v-divider></v-divider>
@@ -50,12 +59,17 @@ import Vue from 'vue'
 import { getAllRisks, TAllRiskInput, TAllRiskOutput } from '../../../ts/api/apiRisks'
 import { contactUsUrl, createRiskUrl } from '../../../ts/url'
 import { replaceWithMark, sanitizeTextForHTML } from '../../../ts/text'
+import CreateNewRiskForm from './CreateNewRiskForm.vue'
 
 export default Vue.extend({
     data : () => ({
         allRisks: [] as ProcessFlowRisk[],
-        filterText : ""
+        filterText : "",
+        showHideCreateNewRisk: false
     }),
+    components: {
+        CreateNewRiskForm
+    },
     computed: {
         filter() : (a : ProcessFlowRisk) => boolean {
             const filterText = this.filterText.trim()
@@ -98,7 +112,14 @@ export default Vue.extend({
                     contactUsUrl,
                     true);
             })
-        }
+        },
+        saveNewRisk(risk : ProcessFlowRisk) {
+            this.allRisks.push(risk)
+            this.showHideCreateNewRisk = false
+        },
+        cancelNewRisk() {
+            this.showHideCreateNewRisk = false
+        },
     },
     mounted() {
         this.refreshRisks()
