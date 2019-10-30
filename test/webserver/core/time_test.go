@@ -9,6 +9,7 @@ import (
 
 func TestIsPastTime(t *testing.T) {
 	utcLoc, _ := time.LoadLocation("UTC")
+	nyLoc, _ := time.LoadLocation("America/New_York")
 
 	var leeway = int(core.LoadEnvConfig().Login.TimeDriftLeewaySeconds)
 	for _, test := range []struct {
@@ -28,6 +29,16 @@ func TestIsPastTime(t *testing.T) {
 		},
 		{
 			time.Date(2000, time.January, 1, 1, 1, 2+leeway, 1, utcLoc),
+			time.Date(2000, time.January, 1, 1, 1, 1, 1, utcLoc),
+			true,
+		},
+		{
+			time.Date(2000, time.January, 1, 1, 1, 1, 1, utcLoc),
+			time.Date(2000, time.January, 1, 1, 1, 1, 1, nyLoc),
+			false,
+		},
+		{
+			time.Date(2000, time.January, 1, 1, 1, 1, 1, nyLoc),
 			time.Date(2000, time.January, 1, 1, 1, 1, 1, utcLoc),
 			true,
 		},
