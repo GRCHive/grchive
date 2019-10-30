@@ -136,12 +136,24 @@ func newControl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.AddControlsToNodeRisk(inputs.NodeId, inputs.RiskId, []int64{control.Id})
-	if err != nil {
-		core.Warning("Failed to add control to node/risk relationship: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		jsonWriter.Encode(struct{}{})
-		return
+	if inputs.NodeId != -1 {
+		err = database.AddControlsToNode(inputs.NodeId, []int64{control.Id})
+		if err != nil {
+			core.Warning("Failed to add control to node relationship: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			jsonWriter.Encode(struct{}{})
+			return
+		}
+	}
+
+	if inputs.RiskId != -1 {
+		err = database.AddControlsToRisk(inputs.RiskId, []int64{control.Id})
+		if err != nil {
+			core.Warning("Failed to add control to risk relationship: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			jsonWriter.Encode(struct{}{})
+			return
+		}
 	}
 
 	jsonWriter.Encode(control)
@@ -200,11 +212,24 @@ func addControls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.AddControlsToNodeRisk(inputs.NodeId, inputs.RiskId, inputs.ControlIds)
-	if err != nil {
-		core.Warning("Can't add existing controls: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	if inputs.NodeId != -1 {
+		err = database.AddControlsToNode(inputs.NodeId, inputs.ControlIds)
+		if err != nil {
+			core.Warning("Failed to add control to node relationship: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			jsonWriter.Encode(struct{}{})
+			return
+		}
+	}
+
+	if inputs.RiskId != -1 {
+		err = database.AddControlsToRisk(inputs.RiskId, inputs.ControlIds)
+		if err != nil {
+			core.Warning("Failed to add control to risk relationship: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			jsonWriter.Encode(struct{}{})
+			return
+		}
 	}
 
 	jsonWriter.Encode(struct{}{})

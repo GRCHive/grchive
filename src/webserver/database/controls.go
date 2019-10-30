@@ -84,24 +84,28 @@ func DeleteControls(nodeId int64, controlIds []int64, riskIds []int64, global bo
 	// Always delete the control relationship between the node and the control
 	// as well as the control and the specified risk.
 	for idx, id := range controlIds {
-		_, err := tx.Exec(`
-			DELETE FROM process_flow_control_node
-			WHERE node_id = $1 AND control_id = $2
-		`, nodeId, id)
+		if nodeId != -1 {
+			_, err := tx.Exec(`
+				DELETE FROM process_flow_control_node
+				WHERE node_id = $1 AND control_id = $2
+			`, nodeId, id)
 
-		if err != nil {
-			tx.Rollback()
-			return err
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
 		}
 
-		_, err = tx.Exec(`
-			DELETE FROM process_flow_risk_control
-			WHERE risk_id = $1 AND control_id = $2
-		`, riskIds[idx], id)
+		if idx < len(riskIds) && riskIds[idx] != -1 {
+			_, err := tx.Exec(`
+				DELETE FROM process_flow_risk_control
+				WHERE risk_id = $1 AND control_id = $2
+			`, riskIds[idx], id)
 
-		if err != nil {
-			tx.Rollback()
-			return err
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
 		}
 	}
 
@@ -122,7 +126,26 @@ func DeleteControls(nodeId int64, controlIds []int64, riskIds []int64, global bo
 	return tx.Commit()
 }
 
-func AddControlsToNodeRisk(nodeId int64, riskId int64, controlIds []int64) error {
+func AddControlsToRisk(riskId int64, controlIds []int64) error {
+	var err error
+	tx := dbConn.MustBegin()
+
+	for _, controlId := range controlIds {
+		_, err = tx.Exec(`
+			INSERT INTO process_flow_risk_control (risk_id, control_id)
+			VALUES ($1, $2)
+		`, riskId, controlId)
+		// It's OK if we fail to add this if it's a duplicate.
+		if err != nil && !IsDuplicateDBEntry(err) {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
+func AddControlsToNode(nodeId int64, controlIds []int64) error {
 	var err error
 	tx := dbConn.MustBegin()
 
@@ -132,16 +155,6 @@ func AddControlsToNodeRisk(nodeId int64, riskId int64, controlIds []int64) error
 			VALUES ($1, $2)
 		`, controlId, nodeId)
 		if err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		_, err = tx.Exec(`
-			INSERT INTO process_flow_risk_control (risk_id, control_id)
-			VALUES ($1, $2)
-		`, riskId, controlId)
-		// It's OK if we fail to add this if it's a duplicate.
-		if err != nil && !IsDuplicateDBEntry(err) {
 			tx.Rollback()
 			return err
 		}
