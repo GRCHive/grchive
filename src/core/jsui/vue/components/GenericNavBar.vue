@@ -17,6 +17,7 @@
                              :disabled="item.disabled"
                              :two-line="item.disabled"
                              @click="doItemClick($event, i)"
+                             :style="!!item.hidden ? `display: none;` : ``"
                 >
                     <v-list-item-icon v-if="item.icon != ''">
                         <v-icon>{{ item.icon }}</v-icon>

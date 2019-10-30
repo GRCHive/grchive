@@ -22,7 +22,8 @@ export default Vue.extend({
                     icon: 'mdi-view-dashboard',
                     //@ts-ignore
                     url: this.$root.orgUrl,
-                    disabled : false
+                    disabled : false,
+                    hidden: true
                 },
                 {
                     title: 'Process Flows',
