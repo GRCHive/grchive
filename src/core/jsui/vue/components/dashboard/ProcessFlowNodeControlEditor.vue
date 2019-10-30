@@ -1,13 +1,12 @@
 <template>
     <section>
-
         <v-dialog v-model="showHideEditControl" persistent max-width="40%">
             <create-new-control-form
                 ref="editControl"
                 :edit-mode="true"
                 :node-id="currentNode.Id"
                 :risk-id="currentEditRiskId"
-                :control-id="currentEditControlId"
+                :control="currentEditControl"
                 @do-save="finishEditControl"
                 @do-cancel="cancelEditControl">
             </create-new-control-form>
@@ -149,7 +148,7 @@ export default Vue.extend({
         currentRelevantRiskId : -1,
         selectedControls : [] as RiskControl[],
         currentEditRiskId: -1,
-        currentEditControlId : -1
+        currentEditControl : Object() as ProcessFlowControl
     }),
     components : {
         CreateNewControlForm,
@@ -276,7 +275,7 @@ export default Vue.extend({
         },
         editControl(control : RiskControl) {
             this.currentEditRiskId = control.risk.Id
-            this.currentEditControlId = control.control.Id
+            this.currentEditControl = control.control
             this.showHideEditControl = true
             Vue.nextTick(() => {
                 //@ts-ignore

@@ -257,3 +257,41 @@ func getAllControls(w http.ResponseWriter, r *http.Request) {
 
 	jsonWriter.Encode(controls)
 }
+
+func getSingleControl(w http.ResponseWriter, r *http.Request) {
+	var err error
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	type FullControlData struct {
+		Control *core.Control
+		Nodes   []*core.ProcessFlowNode
+		Risks   []*core.Risk
+	}
+	data := FullControlData{}
+	data.Control, err = webcore.GetControlFromRequestUrl(r)
+	if err != nil {
+		core.Warning("No control data: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	data.Nodes, err = database.FindNodesRelatedToControl(data.Control.Id)
+	if err != nil {
+		core.Warning("Failed to get nodes data: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	data.Risks, err = database.FindRisksRelatedToControl(data.Control.Id)
+	if err != nil {
+		core.Warning("Failed to get risks data: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	jsonWriter.Encode(data)
+}

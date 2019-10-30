@@ -8,10 +8,15 @@
     <v-divider></v-divider>
 
     <v-form class="ma-4" ref="form" v-model="formValid">
-        <v-text-field v-model="name" label="Name" filled :rules="[rules.required, rules.createMaxLength(256)]">
+        <v-text-field v-model="name"
+                      label="Name"
+                      filled
+                      :rules="[rules.required, rules.createMaxLength(256)]"
+                      :disabled="!canEdit">
         </v-text-field>
 
-        <v-textarea v-model="description" label="Description" filled>
+        <v-textarea v-model="description" label="Description" filled
+                    :disabled="!canEdit">
         </v-textarea> 
 
         <v-select
@@ -20,15 +25,18 @@
             v-model="controlType"
             :items="controlTypeItems"
             :rules="[rules.required]"
+            :disabled="!canEdit"
         ></v-select>
 
         <user-search-form-component
             label="Control Owner"
             v-bind:user.sync="controlOwner"
+            :disabled="!canEdit"
         ></user-search-form-component>
         <frequency-form-component
             v-bind:freqInterval.sync="frequencyData.freqInterval"
             v-bind:freqType.sync="frequencyData.freqType"
+            :disabled="!canEdit"
         ></frequency-form-component>
 
     </v-form>
@@ -37,6 +45,7 @@
         <v-btn
             color="error"
             @click="cancel"
+            v-if="canEdit"
         >
             Cancel
         </v-btn>
@@ -45,9 +54,19 @@
             color="success"
             @click="save"
             :disabled="!canSubmit"
+            v-if="canEdit"
         >
             Save
         </v-btn>
+
+        <v-btn
+            color="primary"
+            @click="canEdit = true"
+            v-if="!canEdit"
+        >
+            Edit
+        </v-btn>
+
     </v-card-actions>
 </v-card>
     
@@ -56,7 +75,6 @@
 <script lang="ts">
 
 import Vue from 'vue'
-import VueSetup from '../../../ts/vueSetup'
 import * as rules from "../../../ts/formRules"
 import FrequencyFormComponent from "../../generic/FrequencyFormComponent.vue"
 import UserSearchFormComponent from "../../generic/UserSearchFormComponent.vue"
@@ -75,9 +93,13 @@ export default Vue.extend({
             type: Boolean,
             default: false
         },
-        controlId: {
-            type: Number,
-            default: -1
+        control: {
+            type: Object as () => ProcessFlowControl,
+            default: Object() as ProcessFlowControl
+        },
+        stagedEdits: {
+            type: Boolean,
+            default: false
         }
     },
     components: {
@@ -94,7 +116,8 @@ export default Vue.extend({
             freqType: 0
         },
         controlType: Object() as ProcessFlowControlType,
-        controlOwner: Object() as User
+        controlOwner: Object() as User,
+        canEdit: true
     }),
     computed: {
         canSubmit() : boolean {
@@ -114,7 +137,7 @@ export default Vue.extend({
     methods: {
         clearForm() {
             if (this.editMode) {
-                let control : ProcessFlowControl = VueSetup.store.state.currentProcessFlowFullData.Controls[this.controlId]
+                let control : ProcessFlowControl = this.control
                 this.name = control.Name
                 this.description = control.Description
                 this.frequencyData.freqType = control.FrequencyType
@@ -135,6 +158,9 @@ export default Vue.extend({
             }
         },
         cancel() {
+            if (this.stagedEdits) {
+                this.canEdit = false
+            }
             this.$emit('do-cancel')
             this.clearForm()
         },
@@ -142,6 +168,10 @@ export default Vue.extend({
             //@ts-ignore
             if (!this.canSubmit) {
                 return;
+            }
+
+            if (this.stagedEdits) {
+                this.canEdit = false
             }
 
             if (this.editMode) {
@@ -209,7 +239,7 @@ export default Vue.extend({
                 ownerId : !!this.controlOwner ? this.controlOwner.Id : undefined,
                 nodeId: this.nodeId,
                 riskId: this.riskId,
-                controlId: this.controlId
+                controlId: this.control.Id
             }).then((resp : TEditControlOutput) => {
                 this.onSuccess(resp.data)
             }).catch((err : any) => {
@@ -223,6 +253,7 @@ export default Vue.extend({
         }
     },
     mounted() {
+        this.canEdit = (!this.stagedEdits && this.editMode)
         this.refreshDefaultControlType()
     }
 })

@@ -60,6 +60,7 @@ const (
 	AddControlRouteName                            = "AddControl"
 	EditControlRouteName                           = "EditControl"
 	GetAllControlRouteName                         = "GetAllControl"
+	GetSingleControlRouteName                      = "GetSingleControl"
 )
 
 var globalRouter *mux.Router

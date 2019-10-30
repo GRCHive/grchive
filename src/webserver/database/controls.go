@@ -162,3 +162,13 @@ func AddControlsToNode(nodeId int64, controlIds []int64) error {
 
 	return tx.Commit()
 }
+
+func FindControl(controlId int64) (*core.Control, error) {
+	control := core.Control{}
+	err := dbConn.Get(&control, `
+		SELECT ctrl.*
+		FROM process_flow_controls AS ctrl
+		WHERE id = $1
+	`, controlId)
+	return &control, err
+}

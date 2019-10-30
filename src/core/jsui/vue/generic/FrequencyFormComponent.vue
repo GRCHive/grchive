@@ -3,6 +3,7 @@
         <v-checkbox
             label="Is Manually Run"
             :value="isManual"
+            :disabled="disabled"
             @change="changeManual">
         </v-checkbox>
         <v-text-field
@@ -13,6 +14,7 @@
             :rules="[rules.numeric]"
             v-if="!isManual"
             :value="freqInterval"
+            :disabled="disabled"
             @change="changeInterval"
         >
             <template v-slot:append-outer v-bind:freqType="freqType">
@@ -38,6 +40,10 @@ export default Vue.extend({
     props: {
         freqInterval : Number,
         freqType: Number,
+        disabled: {
+            type: Boolean,
+            default: false
+        }
     },
     data: () => ({
         rules

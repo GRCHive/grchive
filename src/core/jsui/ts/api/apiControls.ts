@@ -5,8 +5,10 @@ import { getControlTypesUrl,
          addControlUrl,
          editControlUrl,
          deleteControlUrl,
-         allControlAPIUrl } from '../url'
+         allControlAPIUrl,
+         createSingleControlAPIUrl } from '../url'
 import { postFormUrlEncoded } from '../http'
+import { FullControlData } from '../controls'
 
 export function getControlTypes(inp : TGetControlTypesInput) : Promise<TGetControlTypesOutput> {
     return axios.get(getControlTypesUrl + '?' + qs.stringify(inp))
@@ -69,4 +71,17 @@ export interface TAllControlOutput {
 
 export function getAllControls(inp : TAllControlInput) : Promise<TAllControlOutput> {
     return axios.get(allControlAPIUrl + '?' + qs.stringify(inp))
+}
+
+export interface TSingleControlInput {
+    csrf: string
+    controlId: number
+}
+
+export interface TSingleControlOutput {
+    data: FullControlData
+}
+
+export function getSingleControl(inp : TSingleControlInput) : Promise<TSingleControlOutput> {
+    return axios.get(createSingleControlAPIUrl(inp.controlId) + '?' + qs.stringify(inp))
 }

@@ -8,7 +8,7 @@
             <v-list-item two-line class="pa-0">
                 <v-list-item-content>
                     <v-list-item-title class="title">
-                        Risk: {{ fullRiskData.Risk.Name }}
+                        Control: {{ fullControlData.Control.Name }}
                         <v-btn icon @click="expandDescription = !expandDescription">
                             <v-icon small v-if="!expandDescription" >mdi-chevron-down</v-icon>
                             <v-icon small v-else>mdi-chevron-up</v-icon>
@@ -16,7 +16,7 @@
                     </v-list-item-title>
 
                     <v-list-item-subtitle :class="expandDescription ? `long-text` : `hide-long-text`">
-                        {{ fullRiskData.Risk.Description }}
+                        {{ fullControlData.Control.Description }}
                     </v-list-item-subtitle>
                 </v-list-item-content>
             </v-list-item>
@@ -25,15 +25,14 @@
             <v-container fluid>
                 <v-row>
                     <v-col cols="8">
-                        <create-new-risk-form ref="editRisk"
-                                              :node-id="-1"
-                                              :edit-mode="true"
-                                              :default-name="fullRiskData.Risk.Name"
-                                              :default-description="fullRiskData.Risk.Description"
-                                              :risk-id="fullRiskData.Risk.Id"
-                                              :staged-edits="true"
-                                              @do-save="onEditRisk">
-                        </create-new-risk-form>
+                        <create-new-control-form ref="editControl"
+                                                 :node-id="-1"
+                                                 :risk-id="-1"
+                                                 :edit-mode="true"
+                                                 :control="fullControlData.Control"
+                                                 :staged-edits="true"
+                                                 @do-save="onEditControl">
+                        </create-new-control-form>
                     </v-col>
 
                     <v-col cols="4">
@@ -44,7 +43,7 @@
                             <v-divider></v-divider>
 
                             <v-list two-line>
-                                <v-list-item v-for="(item, index) in fullRiskData.Nodes"
+                                <v-list-item v-for="(item, index) in fullControlData.Nodes"
                                              :key="index"
                                 >
                                     <v-list-item-content>
@@ -62,12 +61,12 @@
 
                         <v-card>
                             <v-card-title>
-                                Related Controls
+                                Related Risks
                             </v-card-title>
                             <v-divider></v-divider>
 
                             <v-list two-line>
-                                <v-list-item v-for="(item, index) in fullRiskData.Controls"
+                                <v-list-item v-for="(item, index) in fullControlData.Risks"
                                              :key="index"
                                 >
                                     <v-list-item-content>
@@ -92,52 +91,56 @@
 <script lang="ts">
 
 import Vue from 'vue'
-import { FullRiskData } from '../../../ts/risks'
-import { getSingleRisk, TSingleRiskInput, TSingleRiskOutput} from '../../../ts/api/apiRisks'
-import CreateNewRiskForm from './CreateNewRiskForm.vue'
+import CreateNewControlForm from './CreateNewControlForm'
+import { FullControlData } from '../../../ts/controls'
+import { getSingleControl, TSingleControlInput, TSingleControlOutput } from '../../../ts/api/apiControls'
 
 export default Vue.extend({
     data: () => ({
         expandDescription: false,
         ready: false,
-        fullRiskData: Object() as FullRiskData
+        fullControlData: Object() as FullControlData
     }),
     methods: {
-        onEditRisk(risk : ProcessFlowRisk) {
-            this.fullRiskData.Risk.Name = risk.Name
-            this.fullRiskData.Risk.Description = risk.Description
-
-            Vue.nextTick(() => {
-                //@ts-ignore
-                this.$refs.editRisk.clearForm()
-            })
-        },
-        refreshRiskData() {
+        refreshData() {
             let data = window.location.pathname.split('/')
-            let riskId = Number(data[data.length - 1])
+            let controlId = Number(data[data.length - 1])
 
-            getSingleRisk(<TSingleRiskInput>{
+            getSingleControl(<TSingleControlInput>{
                 //@ts-ignore
                 csrf: this.$root.csrf,
-                riskId: riskId,
-            }).then((resp : TSingleRiskOutput) => {
-                this.fullRiskData = resp.data
+                controlId: controlId
+            }).then((resp : TSingleControlOutput) => {
+                this.fullControlData = resp.data
                 this.ready = true
 
                 Vue.nextTick(() => {
                     //@ts-ignore
-                    this.$refs.editRisk.clearForm()
+                    this.$refs.editControl.clearForm()
                 })
             }).catch((err : any) => {
                 window.location.replace('/404')
             })
+        },
+        onEditControl(control : ProcessFlowControl) {
+            this.fullControlData.Control.Name = control.Name
+            this.fullControlData.Control.Description = control.Description
+            this.fullControlData.Control.ControlTypeId = control.ControlTypeId
+            this.fullControlData.Control.FrequencyType = control.FrequencyType
+            this.fullControlData.Control.FrequencyInterval = control.FrequencyInterval
+            this.fullControlData.Control.OwnerId = control.OwnerId
+
+            Vue.nextTick(() => {
+                //@ts-ignore
+                this.$refs.editControl.clearForm()
+            })
         }
     },
     components: {
-        CreateNewRiskForm
+        CreateNewControlForm
     },
     mounted() {
-        this.refreshRiskData()
+        this.refreshData()
     }
 })
 

@@ -100,6 +100,8 @@ const ApiEditControlEndpoint string = "/edit"
 const ApiAddControlEndpoint string = "/add"
 const ApiGetAllControlEndpoint string = "/"
 
+var ApiGetSingleControlEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgControlQueryId)
+
 // Websocket
 const WebsocketPrefix string = "/ws"
 

@@ -10,6 +10,7 @@
         clearable
         :value="user"
         @change="changeUser"
+        :disabled="disabled"
     ></v-autocomplete>
 </template>
 
@@ -24,6 +25,10 @@ export default Vue.extend({
         label: String,
         user: {
             type: Object as () => User
+        },
+        disabled: {
+            type: Boolean,
+            default: false
         }
     },
     data : () => ({

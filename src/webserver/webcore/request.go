@@ -33,6 +33,20 @@ func GetRiskFromRequestUrl(r *http.Request) (*core.Risk, error) {
 	return database.FindRisk(riskId)
 }
 
+func GetControlFromRequestUrl(r *http.Request) (*core.Control, error) {
+	urlRouteVars := mux.Vars(r)
+	controlIdStr, ok := urlRouteVars[core.DashboardOrgControlQueryId]
+	if !ok {
+		return nil, errors.New("No control in request URL")
+	}
+
+	controlId, err := strconv.ParseInt(controlIdStr, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	return database.FindControl(controlId)
+}
+
 func GetOrganizationFromRequestUrl(r *http.Request) (*core.Organization, error) {
 	urlRouteVars := mux.Vars(r)
 	orgGroupName, ok := urlRouteVars[core.DashboardOrgOrgQueryId]
