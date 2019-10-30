@@ -119,6 +119,13 @@
                                     <v-icon>mdi-pencil</v-icon>
                                 </v-btn>
                             </v-list-item-action>
+
+                            <v-list-item-action>
+                                <v-btn icon @click.stop @mousedown.stop :href="generateControlUrl(controlItem.control)" target="_blank">
+                                    <v-icon>mdi-open-in-new</v-icon>
+                                </v-btn>
+                            </v-list-item-action>
+
                         </template>
 
                     </v-list-item>
@@ -137,7 +144,7 @@ import GenericAddExistingItemForm from './GenericAddExistingItemForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import {TDeleteControlInput, TDeleteControlOutput, deleteControls} from '../../../ts/api/apiControls'
 import {TExistingControlInput, TExistingControlOutput, addExistingControls} from '../../../ts/api/apiControls'
-import {contactUsUrl} from '../../../ts/url'
+import { contactUsUrl, createControlUrl } from '../../../ts/url'
 
 export default Vue.extend({
     data : () => ({
@@ -203,6 +210,12 @@ export default Vue.extend({
         }
     },
     methods : {
+        generateControlUrl(control : ProcessFlowControl) {
+            return createControlUrl(
+                //@ts-ignore
+                this.$root.orgGroupId,
+                control.Id)
+        },
         showNewControlDialog(riskId : number) {
             this.currentRelevantRiskId = riskId
             this.showHideNewControl = true
