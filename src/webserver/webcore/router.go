@@ -30,6 +30,7 @@ const (
 	DashboardProcessFlowsRouteName                 = "ProcessFlows"
 	DashboardRisksRouteName                        = "Risks"
 	DashboardSingleRiskRouteName                   = "SingleRisk"
+	DashboardControlsRouteName                     = "Controls"
 	NewProcessFlowRouteName                        = "NewProcessFlow"
 	DeleteProcessFlowRouteName                     = "DeleteProcessFlow"
 	GetAllProcessFlowRouteName                     = "GetAllProcessFlow"
@@ -56,6 +57,7 @@ const (
 	DeleteControlRouteName                         = "DeleteControl"
 	AddControlRouteName                            = "AddControl"
 	EditControlRouteName                           = "EditControl"
+	GetAllControlRouteName                         = "GetAllControl"
 )
 
 var globalRouter *mux.Router

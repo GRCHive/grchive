@@ -4,7 +4,8 @@ import { getControlTypesUrl,
          newControlUrl,
          addControlUrl,
          editControlUrl,
-         deleteControlUrl } from '../url'
+         deleteControlUrl,
+         allControlAPIUrl } from '../url'
 import { postFormUrlEncoded } from '../http'
 
 export function getControlTypes(inp : TGetControlTypesInput) : Promise<TGetControlTypesOutput> {
@@ -56,4 +57,16 @@ export interface TEditControlOutput {
 
 export function editControl(inp: TEditControlInput) : Promise<TEditControlOutput> {
     return postFormUrlEncoded<TEditControlOutput>(editControlUrl, inp)
+}
+
+export interface TAllControlInput {
+    csrf: string
+}
+
+export interface TAllControlOutput {
+    data: ProcessFlowControl[]
+}
+
+export function getAllControls(inp : TAllControlInput) : Promise<TAllControlOutput> {
+    return axios.get(allControlAPIUrl + '?' + qs.stringify(inp))
 }

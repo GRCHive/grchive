@@ -34,7 +34,6 @@ export function editRisk(inp : TEditRiskInput) : Promise<TEditRiskOutput> {
     return postFormUrlEncoded<TEditRiskOutput>(editRiskAPIUrl, inp)
 }
 
-
 export interface TAllRiskInput {
     csrf: string
 }

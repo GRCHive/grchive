@@ -26,6 +26,7 @@ const DashboardOrgHomeUrl string = "/"
 const DashboardOrgFlowUrl string = "/flows"
 
 const DashboardOrgAllRiskEndpoint string = "/risks"
+const DashboardOrgAllControlsEndpoint string = "/controls"
 
 var DashboardOrgRiskEndpoint string = fmt.Sprintf("/risks/{%s}", DashboardOrgRiskQueryId)
 
@@ -93,6 +94,7 @@ const ApiGetControlTypesEndpoint string = "/types"
 const ApiDeleteControlEndpoint string = "/delete"
 const ApiEditControlEndpoint string = "/edit"
 const ApiAddControlEndpoint string = "/add"
+const ApiGetAllControlEndpoint string = "/"
 
 // Websocket
 const WebsocketPrefix string = "/ws"

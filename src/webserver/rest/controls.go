@@ -209,3 +209,26 @@ func addControls(w http.ResponseWriter, r *http.Request) {
 
 	jsonWriter.Encode(struct{}{})
 }
+
+func getAllControls(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	userParsedData, err := webcore.FindSessionParsedDataInContext(r.Context())
+	if err != nil {
+		core.Warning("No user session data: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	controls, err := database.FindAllControlsForOrganization(userParsedData.Org)
+	if err != nil {
+		core.Warning("Could not find controls: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	jsonWriter.Encode(controls)
+}

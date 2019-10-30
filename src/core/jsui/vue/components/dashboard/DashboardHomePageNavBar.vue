@@ -43,8 +43,8 @@ export default Vue.extend({
                     title: 'Controls',
                     icon: 'mdi-shield-lock-outline',
                     //@ts-ignore
-                    url: '#',
-                    disabled : true
+                    url: this.$root.orgUrl + '/controls',
+                    disabled : false
                 },
                 {
                     title: 'General Ledger',
