@@ -38,6 +38,10 @@ export function createRiskUrl(org : string, risk : number) : string {
     return `/dashboard/org/${org}/risks/${risk}`
 }
 
+export function createControlUrl(org : string, control : number) : string {
+    return `/dashboard/org/${org}/controls/${control}`
+}
+
 export function createUserProfileEditAPIUrl(email : string) : string {
     return "/api/user/" + email + "/profile"
 }

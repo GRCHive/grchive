@@ -7,6 +7,7 @@ import DashboardOrgProcessFlows from '../vue/pages/dashboard/DashboardOrgProcess
 import DashboardOrgRisks from '../vue/pages/dashboard/DashboardOrgRisks.vue'
 import DashboardOrgSingleRisk from '../vue/pages/dashboard/DashboardOrgSingleRisk.vue'
 import DashboardOrgControls from '../vue/pages/dashboard/DashboardOrgControls.vue'
+import DashboardOrgSingleControl from '../vue/pages/dashboard/DashboardOrgSingleControl.vue'
 import DashboardUserHome from '../vue/pages/dashboard/DashboardUserHome.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
 
@@ -22,6 +23,7 @@ function mountApp(inData : Object) {
             DashboardOrgRisks,
             DashboardOrgSingleRisk,
             DashboardOrgControls,
+            DashboardOrgSingleControl,
             DashboardUserHome,
             SnackBar
         },

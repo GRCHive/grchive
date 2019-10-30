@@ -120,7 +120,7 @@ import Vue from 'vue'
 import { getAllControls, TAllControlInput, TAllControlOutput} from '../../../ts/api/apiControls'
 import { deleteControls, TDeleteControlInput, TDeleteControlOutput} from '../../../ts/api/apiControls'
 import { replaceWithMark, sanitizeTextForHTML } from '../../../ts/text'
-import { contactUsUrl } from '../../../ts/url'
+import { contactUsUrl, createControlUrl } from '../../../ts/url'
 import { createFrequencyDisplayString } from '../../../ts/frequency'
 import CreateNewControlForm from './CreateNewControlForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
@@ -184,6 +184,10 @@ export default Vue.extend({
             })
         },
         goToControl(controlId : number) {
+            window.location.assign(createControlUrl(
+                //@ts-ignore
+                this.$root.orgGroupId,
+                controlId))
         },
         deleteSelectedControls() {
             deleteControls(<TDeleteControlInput>{

@@ -279,3 +279,32 @@ func RenderDashboardControlsPage(w http.ResponseWriter, r *http.Request) {
 				BuildOrgTemplateParams(org),
 				BuildUserTemplateParams(data.CurrentUser)))
 }
+
+func RenderDashboardSingleControlPage(w http.ResponseWriter, r *http.Request) {
+	org, err := webcore.FindOrganizationInContext(r.Context())
+	if err != nil {
+		core.Warning("No organization data: " + err.Error())
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
+			http.StatusTemporaryRedirect)
+		return
+	}
+
+	data, err := webcore.FindSessionParsedDataInContext(r.Context())
+	if err != nil {
+		core.Warning("No user data: " + err.Error())
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
+			http.StatusTemporaryRedirect)
+		return
+	}
+
+	RetrieveTemplate(DashboardSingleControlTemplateKey).
+		ExecuteTemplate(
+			w,
+			"dashboardBase",
+			core.MergeMaps(
+				BuildTemplateParams(w, r, true),
+				BuildOrgTemplateParams(org),
+				BuildUserTemplateParams(data.CurrentUser)))
+}
