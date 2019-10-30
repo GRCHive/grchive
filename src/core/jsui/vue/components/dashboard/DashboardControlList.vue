@@ -42,6 +42,39 @@
             </v-list-item-action>
         </v-list-item>
         <v-divider></v-divider>
+        <v-list-item class="headerItem">
+            <v-list-item-content class="font-weight-bold pa-0">
+                <v-list-item-title>
+                    Control
+                </v-list-item-title>
+            </v-list-item-content>
+            <v-spacer></v-spacer>
+
+            <v-list-item-content class="font-weight-bold pa-0">
+                <v-list-item-title>
+                    Type
+                </v-list-item-title>
+            </v-list-item-content>
+            <v-spacer></v-spacer>
+
+            <v-list-item-content class="font-weight-bold pa-0">
+                <v-list-item-title>
+                    Owner
+                </v-list-item-title>
+            </v-list-item-content>
+            <v-spacer></v-spacer>
+
+            <v-list-item-content class="font-weight-bold pa-0">
+                <v-list-item-title>
+                    Frequency
+                </v-list-item-title>
+            </v-list-item-content>
+            <v-spacer></v-spacer>
+
+            <v-list-item-action>
+                <v-btn icon></v-btn>
+            </v-list-item-action>
+        </v-list-item>
         <v-card
             v-for="(item, index) in filteredRisks"
             :key="index"
@@ -66,6 +99,11 @@
                 </v-list-item-content>
                 <v-spacer></v-spacer>
 
+                <v-list-item-content>
+                    {{ createFrequencyDisplayString(item.FrequencyType, item.FrequencyInterval) }}
+                </v-list-item-content>
+                <v-spacer></v-spacer>
+
                 <v-list-item-action>
                     <v-btn icon @click.stop="doDeleteControl(item)" @mousedown.stop @mouseup.stop>
                         <v-icon>mdi-delete</v-icon>
@@ -83,6 +121,7 @@ import { getAllControls, TAllControlInput, TAllControlOutput} from '../../../ts/
 import { deleteControls, TDeleteControlInput, TDeleteControlOutput} from '../../../ts/api/apiControls'
 import { replaceWithMark, sanitizeTextForHTML } from '../../../ts/text'
 import { contactUsUrl } from '../../../ts/url'
+import { createFrequencyDisplayString } from '../../../ts/frequency'
 import CreateNewControlForm from './CreateNewControlForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import MetadataStore from '../../../ts/metadata'
@@ -188,7 +227,6 @@ export default Vue.extend({
             return MetadataStore.state.idToControlTypes[typeId].Name
         },
         getUserName(userId : number | null) : string {
-            console.log(userId)
             if (userId == null) {
                 return "No Owner"
             }
@@ -198,10 +236,20 @@ export default Vue.extend({
             }
 
             return `${MetadataStore.state.idToUsers[userId].FirstName} ${MetadataStore.state.idToUsers[userId].LastName} [${MetadataStore.state.idToUsers[userId].Email}]`
-        }
+        },
+        createFrequencyDisplayString: createFrequencyDisplayString
     },
     mounted() {
         this.refreshControls()
     }
 })
 </script>
+
+<style scoped>
+
+.headerItem {
+    max-height: 30px !important;
+    min-height: 30px !important;
+}
+
+</style>
