@@ -96,3 +96,5 @@ export const allControlAPIUrl : string = "/api/control/"
 export function createSingleControlAPIUrl(controlId : number) : string {
     return `/api/control/${controlId}`
 }
+
+export const newControlDocCatUrl : string = "/api/documentation/newcat"

@@ -6,6 +6,13 @@ type ControlType struct {
 	Description string `db:"description"`
 }
 
+type ControlDocumentationCategory struct {
+	Id          int64  `db:"id"`
+	Name        string `db:"name"`
+	Description string `db:"description"`
+	ControlId   int64  `db:"control_id"`
+}
+
 type Control struct {
 	Id                int64     `db:"id"`
 	Name              string    `db:"name"`

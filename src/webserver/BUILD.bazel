@@ -36,6 +36,7 @@ go_library(
         "database/risks.go",
         "database/users.go",
         "database/controls.go",
+        "database/controlDocumentation.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 
@@ -118,6 +119,7 @@ go_library(
         "rest/risks.go",
         "rest/organization.go",
         "rest/controls.go",
+        "rest/controlDocumentation.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",

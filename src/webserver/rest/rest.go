@@ -40,6 +40,7 @@ func registerAPIPaths(r *mux.Router) {
 	registerProcessFlowEdgesAPIPaths(s)
 	registerRiskAPIPaths(s)
 	registerControlAPIPaths(s)
+	registerControlDocumentationAPIPaths(s)
 }
 
 func registerUserAPIPaths(r *mux.Router) {
@@ -108,4 +109,9 @@ func registerControlAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiEditControlEndpoint, editControl).Methods("POST").Name(webcore.EditControlRouteName)
 	s.HandleFunc(core.ApiGetAllControlEndpoint, getAllControls).Methods("GET").Name(webcore.GetAllControlRouteName)
 	s.HandleFunc(core.ApiGetSingleControlEndpoint, getSingleControl).Methods("GET").Name(webcore.GetSingleControlRouteName)
+}
+
+func registerControlDocumentationAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiControlDocumentationPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewControlDocumentationCategoryEndpoint, newControlDocumentationCategory).Methods("POST").Name(webcore.NewControlDocCatRouteName)
 }
