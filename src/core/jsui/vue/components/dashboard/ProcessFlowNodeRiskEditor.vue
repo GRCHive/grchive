@@ -69,6 +69,13 @@
                                     <v-icon>mdi-pencil</v-icon>
                                 </v-btn>
                             </v-list-item-action>
+
+                            <v-list-item-action>
+                                <v-btn icon @click.stop @mousedown.stop :href="generateRiskUrl(item)" target="_blank">
+                                    <v-icon>mdi-open-in-new</v-icon>
+                                </v-btn>
+                            </v-list-item-action>
+
                         </template>
                     </v-list-item>
                     <v-divider></v-divider>
@@ -120,7 +127,7 @@ import DeleteRiskForm from './DeleteRiskForm.vue'
 import GenericAddExistingItemForm from './GenericAddExistingItemForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import { deleteRisk, addExistingRisk } from '../../../ts/api/apiRisks'
-import { contactUsUrl } from '../../../ts/url'
+import { contactUsUrl, createRiskUrl } from '../../../ts/url'
 
 export default Vue.extend({
     data : () => ({
@@ -169,6 +176,12 @@ export default Vue.extend({
         }
     },
     methods : {
+        generateRiskUrl(risk : ProcessFlowRisk) {
+            return createRiskUrl(
+                //@ts-ignore
+                this.$root.orgGroupId,
+                risk.Id)
+        },
         saveNewRisk(risk : ProcessFlowRisk) {
             let currentNodeId = this.currentNode.Id
 
