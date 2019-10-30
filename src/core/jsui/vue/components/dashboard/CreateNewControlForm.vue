@@ -79,6 +79,7 @@ import * as rules from "../../../ts/formRules"
 import FrequencyFormComponent from "../../generic/FrequencyFormComponent.vue"
 import UserSearchFormComponent from "../../generic/UserSearchFormComponent.vue"
 import Metadata from "../../../ts/metadata"
+import { lazyGetUserFromId, lazyGetControlTypeFromId } from '../../../ts/metadataUtils.ts'
 import { newControl, 
          editControl,
          TEditControlInput,
@@ -142,12 +143,13 @@ export default Vue.extend({
                 this.description = control.Description
                 this.frequencyData.freqType = control.FrequencyType
                 this.frequencyData.freqInterval = control.FrequencyInterval
-                if (control.OwnerId != null && control.OwnerId in Metadata.state.idToUsers ) {
-                    this.controlOwner = Metadata.state.idToUsers[control.OwnerId]
-                } else {
-                    this.controlOwner = Object() as User
-                }
-                this.controlType = Metadata.state.idToControlTypes[control.ControlTypeId]
+                lazyGetUserFromId(control.OwnerId).then((user : User) => {
+                    this.controlOwner = user
+                })
+
+                lazyGetControlTypeFromId(control.ControlTypeId).then((typ : ProcessFlowControlType) => {
+                    this.controlType = typ
+                })
             } else {
                 this.name = ""
                 this.description = ""

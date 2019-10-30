@@ -6,14 +6,16 @@ import { getControlTypes } from './api/apiControls'
 import { getAllOrgUsers } from './api/apiUsers'
 
 interface MetadataStoreState {
-    ioTypes: ProcessFlowIOType[],
-    idToIoTypes: Record<number, ProcessFlowIOType>,
-    nodeTypes: ProcessFlowNodeType[],
-    idToNodeTypes: Record<number, ProcessFlowNodeType>,
-    controlTypes: ProcessFlowControlType[],
-    idToControlTypes: Record<number, ProcessFlowControlType>,
-    availableUsers: User[],
+    ioTypes: ProcessFlowIOType[]
+    idToIoTypes: Record<number, ProcessFlowIOType>
+    nodeTypes: ProcessFlowNodeType[]
+    idToNodeTypes: Record<number, ProcessFlowNodeType>
+    controlTypes: ProcessFlowControlType[]
+    idToControlTypes: Record<number, ProcessFlowControlType>
+    controlTypeInitialized: boolean
+    availableUsers: User[]
     idToUsers: Record<number, User>
+    usersInitialized: boolean
 }
 
 const metaDataStore: StoreOptions<MetadataStoreState> = {
@@ -24,8 +26,10 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
         idToNodeTypes: Object() as Record<number, ProcessFlowNodeType>,
         controlTypes: [] as ProcessFlowControlType[],
         idToControlTypes: Object() as Record<number, ProcessFlowControlType>,
+        controlTypeInitialized: false,
         availableUsers: [] as User[],
-        idToUsers: Object() as Record<number, User>
+        idToUsers: Object() as Record<number, User>,
+        usersInitialized: false
     },
     mutations: {
         setIoTypes(state, inTypes : ProcessFlowIOType[]) {
@@ -48,6 +52,7 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
             for (let typ of inTypes) {
                 Vue.set(state.idToControlTypes, typ.Id, typ)
             }
+            state.controlTypeInitialized = true
         },
         setUsers(state, inUsers : User[]) {
             state.availableUsers = inUsers
@@ -55,6 +60,7 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
             for (let user of inUsers) {
                 Vue.set(state.idToUsers, user.Id, user)
             }
+            state.usersInitialized = true
         }
     },
     actions: {
@@ -88,7 +94,7 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
                 context.commit('setUsers', resp.data)
             })
         }
-    }
+    },
 }
 
 let store = new Vuex.Store<MetadataStoreState>(metaDataStore)
