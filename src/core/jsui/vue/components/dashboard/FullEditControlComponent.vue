@@ -68,6 +68,7 @@
                             <v-list two-line>
                                 <v-list-item v-for="(item, index) in fullControlData.Risks"
                                              :key="index"
+                                             :href="generateRiskUrl(item.Id)"
                                 >
                                     <v-list-item-content>
                                         <v-list-item-title>
@@ -94,6 +95,7 @@ import Vue from 'vue'
 import CreateNewControlForm from './CreateNewControlForm'
 import { FullControlData } from '../../../ts/controls'
 import { getSingleControl, TSingleControlInput, TSingleControlOutput } from '../../../ts/api/apiControls'
+import { createRiskUrl } from '../../../ts/url'
 
 export default Vue.extend({
     data: () => ({
@@ -134,6 +136,12 @@ export default Vue.extend({
                 //@ts-ignore
                 this.$refs.editControl.clearForm()
             })
+        },
+        generateRiskUrl(riskId : number) : string {
+            return createRiskUrl(
+                //@ts-ignore
+                this.$root.orgGroupId,
+                riskId)
         }
     },
     components: {
