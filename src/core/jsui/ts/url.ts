@@ -79,6 +79,10 @@ export const editRiskAPIUrl : string = "/api/risk/edit"
 export const addExistingRiskAPIUrl : string = "/api/risk/add"
 export const allRiskAPIUrl : string = "/api/risk/"
 
+export function createSingleRiskAPIUrl(riskId : number) : string {
+    return `/api/risk/${riskId}`
+}
+
 export function createGetAllOrgUsersAPIUrl(org : string) : string {
     return `/api/org/${org}/users`
 }

@@ -5,7 +5,9 @@ import { newRiskAPIUrl,
          deleteRiskAPIUrl,
          addExistingRiskAPIUrl,
          editRiskAPIUrl,
-         allRiskAPIUrl } from '../url'
+         allRiskAPIUrl,
+         createSingleRiskAPIUrl } from '../url'
+import { FullRiskData } from '../risks'
 
 export function newRisk(inp : TNewRiskInput) : Promise<TNewRiskOutput> {
     return postFormUrlEncoded<TNewRiskOutput>(newRiskAPIUrl, inp)
@@ -44,4 +46,17 @@ export interface TAllRiskOutput {
 
 export function getAllRisks(inp : TAllRiskInput) : Promise<TAllRiskOutput> {
     return axios.get(allRiskAPIUrl + '?' + qs.stringify(inp))
+}
+
+export interface TSingleRiskInput {
+    csrf: string
+    riskId: number
+}
+
+export interface TSingleRiskOutput {
+    data: FullRiskData
+}
+
+export function getSingleRisk(inp : TSingleRiskInput) : Promise<TSingleRiskOutput> {
+    return axios.get(createSingleRiskAPIUrl(inp.riskId) + '?' + qs.stringify(inp))
 }

@@ -52,6 +52,7 @@ const (
 	EditRiskRouteName                              = "EditRisk"
 	AddRiskToNodeRouteName                         = "AddRiskToNodeRisk"
 	GetAllRiskRouteName                            = "GetAllRisk"
+	GetSingleRiskRouteName                         = "GetSingleRisk"
 	GetAllOrgUsersRouteName                        = "GetAllOrgUsers"
 	NewControlRouteName                            = "NewControl"
 	ControlTypesRouteName                          = "ControlTypes"

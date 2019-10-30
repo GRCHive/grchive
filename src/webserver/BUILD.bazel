@@ -83,7 +83,6 @@ go_library(
     ],
     deps = [
         "//src/webserver/core:webserver_core_library",
-        ":webserver_database_library",
         ":webserver_webcore_library",
     ],
     importpath = "gitlab.com/b3h47pte/audit-stuff/render"
