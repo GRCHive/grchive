@@ -26,33 +26,39 @@
             >CONTROLS</text> 
 
             <g ref="riskText">
-                <text dominant-baseline="hanging"
-                      class="body-2 dropdown-text no-pointer"
-                      text-rendering="optimizeLegibility"
-                      v-for="(item, index) in risks"
-                      :key="index"
-                      :transform="`translate(
-                        ${getRiskLayout(item.Id).tx},
-                        ${getRiskLayout(item.Id).ty})`"
-                      @click="goToRisk(item)"
-                      cursor="pointer"
-                >{{ item.Name }}</text> 
+                <a v-for="(item, index) in risks"
+                   :key="index"
+                   :href="generateRiskUrl(item)"
+                   target="_blank"
+                >
+                    <text dominant-baseline="hanging"
+                          class="body-2 dropdown-text no-pointer"
+                          text-rendering="optimizeLegibility"
+                          :transform="`translate(
+                            ${getRiskLayout(item.Id).tx},
+                            ${getRiskLayout(item.Id).ty})`"
+                    >{{ item.Name }}</text> 
+                </a>
             </g>
 
             <g ref="controlText">
                 <g v-for="risk in risks"
                    :key="risk.Id"
                 >
-                    <text dominant-baseline="hanging"
-                          class="body-2 dropdown-text no-pointer"
-                          text-rendering="optimizeLegibility"
-                          text-anchor="end"
-                          v-for="(control, cindex) in controls[risk.Id]"
-                          :key="cindex"
-                          :transform="`translate(
-                            ${currentWidth - getControlLayout(control.control.Id).tx},
-                            ${getControlLayout(control.control.Id).ty})`"
-                    >{{ control.control.Name }}</text> 
+                    <a v-for="(control, cindex) in controls[risk.Id]"
+                       :key="cindex"
+                       :href="generateControlUrl(control.control)"
+                       target="_blank"
+                    >
+                        <text dominant-baseline="hanging"
+                              class="body-2 dropdown-text no-pointer"
+                              text-rendering="optimizeLegibility"
+                              text-anchor="end"
+                              :transform="`translate(
+                                ${currentWidth - getControlLayout(control.control.Id).tx},
+                                ${getControlLayout(control.control.Id).ty})`"
+                        >{{ control.control.Name }}</text> 
+                    </a>
                 </g>
             </g>
         </g>
@@ -82,7 +88,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import VueSetup from '../../../../ts/vueSetup'
-import { createRiskUrl } from '../../../../ts/url'
+import { createRiskUrl, createControlUrl } from '../../../../ts/url'
 
 export default Vue.extend({
     props: {
@@ -203,11 +209,17 @@ export default Vue.extend({
                 return this.controlTransformLayout.get(controlId)!
             }
         },
-        goToRisk(risk : ProcessFlowRisk) {
-            window.location.assign(createRiskUrl(
+        generateRiskUrl(risk : ProcessFlowRisk) {
+            return createRiskUrl(
                 //@ts-ignore
                 this.$root.orgGroupId,
-                risk.Id))
+                risk.Id)
+        },
+        generateControlUrl(control : ProcessFlowControl) {
+            return createControlUrl(
+                //@ts-ignore
+                this.$root.orgGroupId,
+                control.Id)
         }
     },
     mounted() {
