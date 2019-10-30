@@ -72,7 +72,7 @@
             <v-spacer></v-spacer>
 
             <v-list-item-action>
-                <v-btn icon></v-btn>
+                <v-btn icon disabled></v-btn>
             </v-list-item-action>
         </v-list-item>
         <v-card
