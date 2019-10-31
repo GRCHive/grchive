@@ -8,13 +8,10 @@ import (
 
 var TomlConfig *toml.Tree
 
-type TemplateConfigData struct {
-	CompanyName  string
-	Domain       string
-	RecaptchaKey string
+type CompanyConfig struct {
+	CompanyName string
+	Domain      string
 }
-
-var TemplateConfig *TemplateConfigData
 
 type LoginConfig struct {
 	AuthServerEndpoint     string
@@ -47,6 +44,7 @@ type EnvConfigData struct {
 	Okta               *OktaConfig
 	SessionKeys        [][]byte
 	UseSecureCookies   bool
+	Company            *CompanyConfig
 }
 
 var EnvConfig *EnvConfigData
@@ -61,14 +59,6 @@ func loadTomlConfig() *toml.Tree {
 		Error(err.Error())
 	}
 	return tomlConfig
-}
-
-func loadTemplateConfig() *TemplateConfigData {
-	templateConfig := &TemplateConfigData{
-		CompanyName: "Audit Stuff",
-		Domain:      "auditstuff.com",
-	}
-	return templateConfig
 }
 
 func loadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
@@ -109,11 +99,15 @@ func loadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 		}
 	}
 	envConfig.UseSecureCookies = tomlConfig.Get("security.use_secure_cookies").(bool)
+
+	envConfig.Company = new(CompanyConfig)
+	envConfig.Company.CompanyName = tomlConfig.Get("company.company_name").(string)
+	envConfig.Company.Domain = tomlConfig.Get("company.domain").(string)
+
 	return envConfig
 }
 
 func InitializeConfig() {
 	TomlConfig = loadTomlConfig()
-	TemplateConfig = loadTemplateConfig()
 	EnvConfig = loadEnvConfig(TomlConfig)
 }

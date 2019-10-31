@@ -1,5 +1,9 @@
 self_uri = "http://localhost:8080"
 
+[company]
+company_name = "Audit Stuff"
+domain = "auditstuff.com"
+
 [database]
 connection = "user=DEVUSER dbname=audit sslmode=disable timezone=UTC"
 
