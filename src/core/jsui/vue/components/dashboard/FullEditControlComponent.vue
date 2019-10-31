@@ -82,7 +82,12 @@
                                 <v-tab v-for="(item, index) in fullControlData.DocumentCategories"
                                        :key="index"
                                 >
-                                    {{ item.Name }}
+                                    <v-tooltip bottom>
+                                        <template v-slot:activator="{on}">
+                                            <span v-on="on">{{ item.Name }}</span>
+                                        </template>
+                                        {{ item.Description }}
+                                    </v-tooltip>
                                 </v-tab>
 
                                 <v-tab-item
