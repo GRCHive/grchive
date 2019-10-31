@@ -107,6 +107,8 @@ var ApiGetSingleControlEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgContro
 // API - Control Documentation
 const ApiControlDocumentationPrefix string = "/documentation"
 const ApiNewControlDocumentationCategoryEndpoint string = "/newcat"
+const ApiEditControlDocumentationCategoryEndpoint string = "/editcat"
+const ApiDeleteControlDocumentationCategoryEndpoint string = "/deletecat"
 
 // Websocket
 const WebsocketPrefix string = "/ws"

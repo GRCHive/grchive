@@ -51,6 +51,7 @@ import Vue from 'vue'
 import * as rules from "../../../ts/formRules"
 import { contactUsUrl } from "../../../ts/url"
 import { newControlDocCat, TNewControlDocCatInput, TNewControlDocCatOutput } from '../../../ts/api/apiControlDocumentation'
+import { editControlDocCat, TEditControlDocCatInput, TEditControlDocCatOutput } from '../../../ts/api/apiControlDocumentation'
 import { ControlDocumentationCategory } from '../../../ts/controls'
 
 export default Vue.extend({
@@ -69,6 +70,10 @@ export default Vue.extend({
         defaultDescription: {
             type: String,
             default: ""
+        },
+        catId: {
+            type: Number,
+            default: -1
         },
     },
     data: () => ({
@@ -140,6 +145,19 @@ export default Vue.extend({
             })
         },
         doEdit() {
+            editControlDocCat(<TEditControlDocCatInput>{
+                //@ts-ignore
+                csrf: this.$root.csrf,
+                controlId: this.control.Id,
+                catId: this.catId,
+                name: this.name,
+                description: this.description
+            }).then((resp : TEditControlDocCatOutput) => {
+                this.onSuccess(resp.data)
+            }).catch((err : any) => {
+                this.onError(err)
+            })
+
         }
     },
 })

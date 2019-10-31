@@ -27,6 +27,21 @@ func NewControlDocumentationCategory(cat *core.ControlDocumentationCategory) err
 	return tx.Commit()
 }
 
+func EditControlDocumentationCategory(cat *core.ControlDocumentationCategory) error {
+	tx := dbConn.MustBegin()
+	_, err := tx.NamedExec(`
+		UPDATE process_flow_control_documentation_categories
+		SET name = :name, 
+			description = :description
+		WHERE id = :id
+	`, cat)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
 func FindControlDocumentCategoriesForControl(controlId int64) ([]*core.ControlDocumentationCategory, error) {
 	retArr := make([]*core.ControlDocumentationCategory, 0)
 
@@ -36,4 +51,17 @@ func FindControlDocumentCategoriesForControl(controlId int64) ([]*core.ControlDo
 		WHERE cat.control_id = $1
 	`, controlId)
 	return retArr, err
+}
+
+func DeleteControlDocumentationCategory(catId int64) error {
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		DELETE FROM process_flow_control_documentation_categories
+		WHERE id = $1
+	`, catId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
 }

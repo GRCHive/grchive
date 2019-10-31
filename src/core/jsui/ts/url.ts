@@ -98,3 +98,5 @@ export function createSingleControlAPIUrl(controlId : number) : string {
 }
 
 export const newControlDocCatUrl : string = "/api/documentation/newcat"
+export const editControlDocCatUrl : string = "/api/documentation/editcat"
+export const deleteControlDocCatUrl : string = "/api/documentation/deletecat"

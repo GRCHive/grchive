@@ -43,7 +43,6 @@ func EditControl(control *core.Control) error {
 		return err
 	}
 	return tx.Commit()
-
 }
 
 func InsertNewControl(control *core.Control) error {

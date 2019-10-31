@@ -4,6 +4,30 @@
             <v-progress-circular indeterminate size="64"></v-progress-circular>
         </v-overlay>
 
+        <v-dialog v-model="showHideEditCat" persistent max-width="40%">
+            <create-new-control-documentation-category-form
+                ref="editControlDocCat"
+                :control="fullControlData.Control"
+                :edit-mode="true"
+                :cat-id="currentDocumentCategory.Id"
+                :default-name="currentDocumentCategory.Name"
+                :default-description="currentDocumentCategory.Description"
+                @do-cancel="cancelEditControlDocCategory"
+                @do-save="saveEditControlDocCategory">
+            </create-new-control-documentation-category-form>
+        </v-dialog>
+
+        <v-dialog v-model="showHideDeleteCat" persistent max-width="40%">
+            <generic-delete-confirmation-form
+                item-name="documentation categories"
+                :items-to-delete="[currentDocumentCategory.Name]"
+                v-on:do-cancel="showHideDeleteCat = false"
+                v-on:do-delete="deleteSelectedCategories"
+                :use-global-deletion="false"
+                :force-global-deletion="true">
+            </generic-delete-confirmation-form>
+        </v-dialog>
+
         <div v-if="ready">
             <v-list-item two-line class="pa-0">
                 <v-list-item-content>
@@ -69,6 +93,16 @@
                                     </documentation-category-viewer>
                                 </v-tab-item>
                             </v-tabs>
+
+                            <v-card-actions v-if="fullControlData.DocumentCategories.length > 0">
+                                <v-btn icon @click="doEditControlDocCat">
+                                    <v-icon small>mdi-pencil</v-icon>
+                                </v-btn>
+
+                                <v-btn icon @click="doDeleteControlDocCat">
+                                    <v-icon small>mdi-delete</v-icon>
+                                </v-btn>
+                            </v-card-actions>
                         </v-card>
 
                         <v-card class="mb-4">
@@ -133,8 +167,10 @@ import CreateNewControlDocumentationCategoryForm from './CreateNewControlDocumen
 import DocumentationCategoryViewer from './DocumentationCategoryViewer.vue'
 import { FullControlData } from '../../../ts/controls'
 import { getSingleControl, TSingleControlInput, TSingleControlOutput } from '../../../ts/api/apiControls'
-import { createRiskUrl } from '../../../ts/url'
+import { createRiskUrl, contactUsUrl } from '../../../ts/url'
 import { ControlDocumentationCategory } from '../../../ts/controls'
+import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
+import { deleteControlDocCat, TDeleteControlDocCatInput, TDeleteControlDocCatOutput } from '../../../ts/api/apiControlDocumentation'
 
 export default Vue.extend({
     data: () => ({
@@ -143,7 +179,17 @@ export default Vue.extend({
         fullControlData: Object() as FullControlData,
         showHideNewCat: false,
         docTab: 0,
+        showHideEditCat : false,
+        showHideDeleteCat : false
     }),
+    computed: {
+        currentDocumentCategory() : ControlDocumentationCategory {
+            if (!this.fullControlData.DocumentCategories || this.fullControlData.DocumentCategories.length  == 0) {
+                return Object() as ControlDocumentationCategory
+            }
+            return this.fullControlData.DocumentCategories[this.docTab]
+        }
+    },
     methods: {
         refreshData() {
             let data = window.location.pathname.split('/')
@@ -185,18 +231,58 @@ export default Vue.extend({
                 riskId)
         },
         saveNewControlDocCategory(cat : ControlDocumentationCategory) {
-            console.log("NEW CAT: ", cat)
             this.showHideNewCat = false
             this.fullControlData.DocumentCategories.push(cat)
         },
         cancelNewControlDocCategory() {
             this.showHideNewCat = false
+        },
+        doEditControlDocCat() {
+            this.showHideEditCat = true
+            Vue.nextTick(() => {
+                //@ts-ignore
+                this.$refs.editControlDocCat.clearForm()
+            })
+        },
+        cancelEditControlDocCategory() {
+            this.showHideEditCat = false
+        },
+        saveEditControlDocCategory(cat : ControlDocumentationCategory) {
+            this.showHideEditCat = false
+            this.currentDocumentCategory.Name = cat.Name
+            this.currentDocumentCategory.Description = cat.Description
+        },
+        doDeleteControlDocCat() {
+            this.showHideDeleteCat = true
+        },
+        deleteSelectedCategories() {
+            deleteControlDocCat(<TDeleteControlDocCatInput>{
+                //@ts-ignore
+                csrf: this.$root.csrf,
+                catId: this.currentDocumentCategory.Id,
+            }).then(() => {
+                this.showHideDeleteCat = false
+                this.fullControlData.DocumentCategories.splice(
+                    this.fullControlData.DocumentCategories.findIndex((ele) => 
+                        ele.Name == this.currentDocumentCategory.Name),
+                    1)
+                this.docTab = 0
+            }).catch(() => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
         }
     },
     components: {
         CreateNewControlForm,
         CreateNewControlDocumentationCategoryForm,
         DocumentationCategoryViewer,
+        GenericDeleteConfirmationForm,
     },
     mounted() {
         this.refreshData()
