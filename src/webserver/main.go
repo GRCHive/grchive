@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	core.InitializeConfig()
+	core.InitializeConfig(core.DefaultConfigLocation)
 	database.Init()
 	render.RegisterTemplates()
 	webcore.InitializeWebcore()

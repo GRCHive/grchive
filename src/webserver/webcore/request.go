@@ -12,13 +12,6 @@ import (
 	"strings"
 )
 
-var boolReflectType = reflect.TypeOf((bool)(false))
-var int64ReflectType = reflect.TypeOf((int64)(0))
-var nullInt64ReflectType = reflect.TypeOf(core.NullInt64{})
-var int32ReflectType = reflect.TypeOf((int32)(0))
-var stringReflectType = reflect.TypeOf((string)(""))
-var int64ArrayReflectType = reflect.TypeOf(([]int64)([]int64{}))
-
 func GetRiskFromRequestUrl(r *http.Request) (*core.Risk, error) {
 	urlRouteVars := mux.Vars(r)
 	riskIdStr, ok := urlRouteVars[core.DashboardOrgRiskQueryId]
@@ -122,21 +115,21 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 		// Convert the string to the proper type.
 		// Only handle the case for now where a single parameter value is passed in.
 		switch fieldType.Type {
-		case boolReflectType:
+		case core.BoolReflectType:
 			boolValue, err := strconv.ParseBool(data[0])
 			if err != nil {
 				return err
 			}
 			dataValue = reflect.ValueOf(boolValue)
 			break
-		case int64ReflectType:
+		case core.Int64ReflectType:
 			intValue, err := strconv.ParseInt(data[0], 10, 64)
 			if err != nil {
 				return err
 			}
 			dataValue = reflect.ValueOf(intValue)
 			break
-		case nullInt64ReflectType:
+		case core.NullInt64ReflectType:
 			intValue, err := strconv.ParseInt(data[0], 10, 64)
 			if err != nil {
 				return err
@@ -148,17 +141,17 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 				},
 			})
 			break
-		case int32ReflectType:
+		case core.Int32ReflectType:
 			intValue, err := strconv.ParseInt(data[0], 10, 32)
 			if err != nil {
 				return err
 			}
 			dataValue = reflect.ValueOf(int32(intValue))
 			break
-		case stringReflectType:
+		case core.StringReflectType:
 			dataValue = reflect.ValueOf(data[0])
 			break
-		case int64ArrayReflectType:
+		case core.Int64ArrayReflectType:
 			arr := make([]int64, len(data))
 			for idx, val := range data {
 				intValue, err := strconv.ParseInt(val, 10, 64)

@@ -8,10 +8,11 @@ import (
 )
 
 func TestIsPastTime(t *testing.T) {
+	core.InitializeConfig("../../../src/webserver/config/config.toml")
 	utcLoc, _ := time.LoadLocation("UTC")
 	nyLoc, _ := time.LoadLocation("America/New_York")
 
-	var leeway = int(core.LoadEnvConfig().Login.TimeDriftLeewaySeconds)
+	var leeway = int(core.EnvConfig.Login.TimeDriftLeewaySeconds)
 	for _, test := range []struct {
 		nowTime       time.Time
 		thresholdTime time.Time

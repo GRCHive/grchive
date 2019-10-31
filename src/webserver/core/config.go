@@ -49,8 +49,13 @@ type EnvConfigData struct {
 
 var EnvConfig *EnvConfigData
 
-func loadTomlConfig() *toml.Tree {
-	dat, err := ioutil.ReadFile("src/webserver/config/config.toml")
+// I think there might be a Bazel bug here where
+// bazel run puts us into the runfile/workspace_name folder
+// instead of the runfile folder?
+var DefaultConfigLocation = "src/webserver/config/config.toml"
+
+func LoadTomlConfig(configLoc string) *toml.Tree {
+	dat, err := ioutil.ReadFile(configLoc)
 	if err != nil {
 		Error(err.Error())
 	}
@@ -61,7 +66,7 @@ func loadTomlConfig() *toml.Tree {
 	return tomlConfig
 }
 
-func loadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
+func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	var err error
 
 	envConfig := new(EnvConfigData)
@@ -107,7 +112,7 @@ func loadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	return envConfig
 }
 
-func InitializeConfig() {
-	TomlConfig = loadTomlConfig()
-	EnvConfig = loadEnvConfig(TomlConfig)
+func InitializeConfig(configLoc string) {
+	TomlConfig = LoadTomlConfig(configLoc)
+	EnvConfig = LoadEnvConfig(TomlConfig)
 }
