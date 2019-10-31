@@ -10,7 +10,9 @@ const LoginUrl string = "/login"
 const LogoutUrl string = "/logout"
 const LearnMoreUrl string = "/learn"
 
-var SamlCallbackUrl string = LoadEnvConfig().Login.RedirectUrl
+func CreateSamlCallbackUrl() string {
+	return EnvConfig.Login.RedirectUrl
+}
 
 // Dashboard
 const DashboardUrl string = "/dashboard"

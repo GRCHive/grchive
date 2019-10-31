@@ -11,10 +11,10 @@ func RegisterPaths(r *mux.Router) {
 	r.HandleFunc(core.GetStartedUrl, postGettingStartedInterest).Methods("POST").Name(string(webcore.GettingStartedPostRouteName))
 
 	// core.LoginURL is the POST request the user will send with just their email.
-	// core.SamlCallbackUrl is the GET request the user's SAML IdP will redirect to upon
+	// core.CreateSamlCallbackUrl() is the GET request the user's SAML IdP will redirect to upon
 	// successful login.
 	r.HandleFunc(core.LoginUrl, postLogin).Methods("POST").Name(string(webcore.LoginPostRouteName))
-	r.HandleFunc(core.SamlCallbackUrl, getSamlLoginCallback).Methods("GET").Name(string(webcore.SamlCallbackRouteName))
+	r.HandleFunc(core.CreateSamlCallbackUrl(), getSamlLoginCallback).Methods("GET").Name(string(webcore.SamlCallbackRouteName))
 	r.HandleFunc(core.LogoutUrl, getLogout).Methods("GET").Name(string(webcore.LogoutRouteName))
 
 	// REST API

@@ -8,7 +8,7 @@ import (
 )
 
 func BuildTemplateParams(w http.ResponseWriter, r *http.Request, needCsrf bool) map[string]interface{} {
-	params := core.StructToMap(*core.LoadTemplateConfig())
+	params := core.StructToMap(*core.TemplateConfig)
 	if needCsrf {
 		params, _ = webcore.AddCSRFTokenToRequest(w, r, params)
 	}

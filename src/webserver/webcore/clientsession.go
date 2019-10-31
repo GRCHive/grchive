@@ -11,24 +11,26 @@ import (
 
 const SessionIdCookieName string = "userSession"
 
-var ClientShortSessionStore = sessions.NewCookieStore(core.LoadEnvConfig().SessionKeys...)
-var ClientLongSessionStore = sessions.NewCookieStore(core.LoadEnvConfig().SessionKeys...)
+var ClientShortSessionStore *sessions.CookieStore
+var ClientLongSessionStore *sessions.CookieStore
 
 // The first object in the slice is used to encrypt all cookies. The other objects are there
 // to handle the case of key rotation.
 var Cookies = make([]*securecookie.SecureCookie, 0)
 
-func InitializeSessions() {
+func initializeSessions() {
+	ClientShortSessionStore = sessions.NewCookieStore(core.EnvConfig.SessionKeys...)
 	ClientShortSessionStore.Options.HttpOnly = true
-	ClientShortSessionStore.Options.Secure = core.LoadEnvConfig().UseSecureCookies
+	ClientShortSessionStore.Options.Secure = core.EnvConfig.UseSecureCookies
 	ClientShortSessionStore.Options.MaxAge = 0
 
+	ClientLongSessionStore = sessions.NewCookieStore(core.EnvConfig.SessionKeys...)
 	ClientLongSessionStore.Options.HttpOnly = true
-	ClientLongSessionStore.Options.Secure = core.LoadEnvConfig().UseSecureCookies
+	ClientLongSessionStore.Options.Secure = core.EnvConfig.UseSecureCookies
 	ClientLongSessionStore.Options.MaxAge = core.SecondsInDay * 30
 
 	// Create a new SecureCookie object for every session key pair.
-	encryptKeys := core.LoadEnvConfig().SessionKeys
+	encryptKeys := core.EnvConfig.SessionKeys
 	for i := 0; i < len(encryptKeys)/2; i++ {
 		hashKey := encryptKeys[i*2]
 		blockKey := encryptKeys[i*2+1]
@@ -60,7 +62,7 @@ func StoreUserSessionOnClient(session *core.UserSession, w http.ResponseWriter) 
 		Value:    encoded,
 		Expires:  time.Now().Add(cookieMaxAgeSecondsDuration).UTC(),
 		MaxAge:   cookieMaxAgeSeconds,
-		Secure:   core.LoadEnvConfig().UseSecureCookies,
+		Secure:   core.EnvConfig.UseSecureCookies,
 		HttpOnly: true,
 		Path:     MustGetRouteUrl(LandingPageRouteName),
 	}
@@ -88,7 +90,7 @@ func DeleteCookie(cookieName string, w http.ResponseWriter) {
 		Value:    "",
 		Expires:  time.Now().Add(time.Hour).UTC(),
 		MaxAge:   -1,
-		Secure:   core.LoadEnvConfig().UseSecureCookies,
+		Secure:   core.EnvConfig.UseSecureCookies,
 		HttpOnly: true,
 		Path:     MustGetRouteUrl(LandingPageRouteName),
 	}

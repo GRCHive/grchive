@@ -14,9 +14,10 @@ import (
 )
 
 func main() {
+	core.InitializeConfig()
 	database.Init()
 	render.RegisterTemplates()
-	webcore.InitializeSessions()
+	webcore.InitializeWebcore()
 
 	r := mux.NewRouter().StrictSlash(true)
 	r.Use(webcore.HTTPRedirectStatusCodes)

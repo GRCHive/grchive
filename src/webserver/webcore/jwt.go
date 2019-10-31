@@ -65,7 +65,7 @@ func (this *RawJWT) PayloadToSign() []byte {
 }
 
 func (this *RawJWT) verifyIss() error {
-	env := core.LoadEnvConfig()
+	env := core.EnvConfig
 	if fmt.Sprintf("%s%s", env.Okta.BaseUrl, env.Login.AuthServerEndpoint) != this.Payload.Iss {
 		return errors.New("Iss mismatch.")
 	}
@@ -73,7 +73,7 @@ func (this *RawJWT) verifyIss() error {
 }
 
 func (this *RawJWT) verifyCid() error {
-	if core.LoadEnvConfig().Login.ClientId != this.Payload.Cid {
+	if core.EnvConfig.Login.ClientId != this.Payload.Cid {
 		return errors.New("Cid mismatch.")
 	}
 	return nil
@@ -90,12 +90,12 @@ func (this *RawJWT) verifyExp() error {
 
 func (this *RawJWT) verifyAud(isAccessToken bool) error {
 	if isAccessToken {
-		if core.LoadEnvConfig().Login.AuthAudience != this.Payload.Aud {
+		if core.EnvConfig.Login.AuthAudience != this.Payload.Aud {
 			return errors.New("Aud mismatch.")
 		}
 
 	} else {
-		if core.LoadEnvConfig().Login.ClientId != this.Payload.Aud {
+		if core.EnvConfig.Login.ClientId != this.Payload.Aud {
 			return errors.New("Aud mismatch.")
 		}
 	}

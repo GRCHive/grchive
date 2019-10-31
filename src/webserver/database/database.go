@@ -9,7 +9,5 @@ import (
 var dbConn *sqlx.DB
 
 func Init() {
-	envConfig := core.LoadEnvConfig()
-
-	dbConn = sqlx.MustConnect("postgres", envConfig.DatabaseConnString)
+	dbConn = sqlx.MustConnect("postgres", core.EnvConfig.DatabaseConnString)
 }

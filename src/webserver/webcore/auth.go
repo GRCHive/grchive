@@ -39,7 +39,7 @@ var oktaJwtRetriever *OktaJWTRetriever = new(OktaJWTRetriever)
 var oktaJwtManager *JWTManager = &JWTManager{impl: oktaJwtRetriever}
 
 func (this OktaJWTRetriever) RetrieveKeys() (map[string][]*rsa.PublicKey, error) {
-	resp, err := http.Get(OktaKeyUrl)
+	resp, err := http.Get(CreateOktaKeyUrl())
 	if err != nil {
 		return nil, err
 	}
@@ -179,13 +179,11 @@ func CreateUserSessionFromTokens(tokens *OktaTokens, r *http.Request) (*core.Use
 }
 
 func OktaObtainTokens(code string, isRefresh bool) (*OktaTokens, error) {
-	envConfig := core.LoadEnvConfig()
-
 	var postVals url.Values = url.Values{
 		"redirect_uri":  []string{MustGetRouteUrlAbsolute(SamlCallbackRouteName)},
-		"client_id":     []string{envConfig.Login.ClientId},
-		"client_secret": []string{envConfig.Login.ClientSecret},
-		"scope":         []string{envConfig.Login.Scope},
+		"client_id":     []string{core.EnvConfig.Login.ClientId},
+		"client_secret": []string{core.EnvConfig.Login.ClientSecret},
+		"scope":         []string{core.EnvConfig.Login.Scope},
 	}
 
 	if isRefresh {
@@ -193,10 +191,10 @@ func OktaObtainTokens(code string, isRefresh bool) (*OktaTokens, error) {
 		postVals["grant_type"] = []string{"refresh_token"}
 	} else {
 		postVals["code"] = []string{code}
-		postVals["grant_type"] = []string{envConfig.Login.GrantType}
+		postVals["grant_type"] = []string{core.EnvConfig.Login.GrantType}
 	}
 
-	resp, err := http.PostForm(OktaTokenUrl, postVals)
+	resp, err := http.PostForm(CreateOktaTokenUrl(), postVals)
 	if err != nil {
 		return nil, err
 	}

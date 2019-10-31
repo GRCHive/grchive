@@ -60,6 +60,7 @@ go_library(
         "webcore/router.go",
         "webcore/request.go",
         "webcore/redirectResponseWriter.go",
+        "webcore/webcore.go",
     ],
     deps = [
         "//src/webserver/core:webserver_core_library",

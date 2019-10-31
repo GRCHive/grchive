@@ -53,7 +53,7 @@ func updateUserProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "SSWS "+core.LoadEnvConfig().Okta.ApiKey)
+	request.Header.Set("Authorization", "SSWS "+core.EnvConfig.Okta.ApiKey)
 
 	resp, err := http.DefaultClient.Do(request)
 	if err != nil {

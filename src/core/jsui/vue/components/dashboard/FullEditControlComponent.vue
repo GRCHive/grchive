@@ -65,6 +65,8 @@
                                     v-for="(item, index) in fullControlData.DocumentCategories"
                                     :key="index"
                                 >
+                                    <documentation-category-viewer>
+                                    </documentation-category-viewer>
                                 </v-tab-item>
                             </v-tabs>
                         </v-card>
@@ -126,8 +128,9 @@
 <script lang="ts">
 
 import Vue from 'vue'
-import CreateNewControlForm from './CreateNewControlForm'
+import CreateNewControlForm from './CreateNewControlForm.vue'
 import CreateNewControlDocumentationCategoryForm from './CreateNewControlDocumentationCategoryForm.vue'
+import DocumentationCategoryViewer from './DocumentationCategoryViewer.vue'
 import { FullControlData } from '../../../ts/controls'
 import { getSingleControl, TSingleControlInput, TSingleControlOutput } from '../../../ts/api/apiControls'
 import { createRiskUrl } from '../../../ts/url'
@@ -192,7 +195,8 @@ export default Vue.extend({
     },
     components: {
         CreateNewControlForm,
-        CreateNewControlDocumentationCategoryForm
+        CreateNewControlDocumentationCategoryForm,
+        DocumentationCategoryViewer,
     },
     mounted() {
         this.refreshData()

@@ -86,11 +86,11 @@ func MustGetRouteUrl(r RouteName, params ...string) string {
 }
 
 func MustGetRouteUrlAbsolute(r RouteName, params ...string) string {
-	return core.LoadEnvConfig().SelfUri + MustGetRouteUrl(r, params...)
+	return core.EnvConfig.SelfUri + MustGetRouteUrl(r, params...)
 }
 
 func CreateOktaLoginUrl(idp string, state string, nonce string) string {
-	envConfig := core.LoadEnvConfig()
+	envConfig := core.EnvConfig
 
 	return fmt.Sprintf("%s%s%s?idp=%s&client_id=%s&response_type=%s&response_mode=%s&scope=%s&redirect_uri=%s&state=%s&=nonce=%s",
 		envConfig.Okta.BaseUrl,
@@ -106,19 +106,23 @@ func CreateOktaLoginUrl(idp string, state string, nonce string) string {
 		url.QueryEscape(nonce))
 }
 
-var OktaTokenUrl string = fmt.Sprintf("%s%s%s",
-	core.LoadEnvConfig().Okta.BaseUrl,
-	core.LoadEnvConfig().Login.AuthServerEndpoint,
-	core.LoadEnvConfig().Login.TokenEndpoint)
+func CreateOktaTokenUrl() string {
+	return fmt.Sprintf("%s%s%s",
+		core.EnvConfig.Okta.BaseUrl,
+		core.EnvConfig.Login.AuthServerEndpoint,
+		core.EnvConfig.Login.TokenEndpoint)
+}
 
-var OktaKeyUrl string = fmt.Sprintf("%s%s%s?client_id=%s",
-	core.LoadEnvConfig().Okta.BaseUrl,
-	core.LoadEnvConfig().Login.AuthServerEndpoint,
-	core.LoadEnvConfig().Login.KeyEndpoint,
-	core.LoadEnvConfig().Login.ClientId)
+func CreateOktaKeyUrl() string {
+	return fmt.Sprintf("%s%s%s?client_id=%s",
+		core.EnvConfig.Okta.BaseUrl,
+		core.EnvConfig.Login.AuthServerEndpoint,
+		core.EnvConfig.Login.KeyEndpoint,
+		core.EnvConfig.Login.ClientId)
+}
 
 func CreateOktaLogoutUrl(idToken string) string {
-	envConfig := core.LoadEnvConfig()
+	envConfig := core.EnvConfig
 
 	return fmt.Sprintf("%s%s%s?id_token_hint=%s&post_logout_redirect_uri=%s",
 		envConfig.Okta.BaseUrl,
@@ -129,7 +133,7 @@ func CreateOktaLogoutUrl(idToken string) string {
 }
 
 func CreateOktaUserUpdateUrl(userId string) string {
-	envConfig := core.LoadEnvConfig()
+	envConfig := core.EnvConfig
 
 	return fmt.Sprintf("%s%s%s/%s",
 		envConfig.Okta.BaseUrl,
