@@ -126,6 +126,13 @@ func deleteControlDocumentationCategory(w http.ResponseWriter, r *http.Request) 
 }
 
 func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
+	parsedUserData, err := webcore.FindSessionParsedDataInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to find parsed user data: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	b2Auth, err := backblaze.B2Auth(core.EnvConfig.Backblaze.Key)
 	if err != nil {
 		core.Warning("Could not auth with Backblaze: " + err.Error())
@@ -209,7 +216,10 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b2File, err := backblaze.UploadFile(*b2Auth, core.EnvConfig.Backblaze.ControlDocBucketId, encryptedFile)
+	b2File, err := backblaze.UploadFile(b2Auth,
+		core.EnvConfig.Backblaze.ControlDocBucketId,
+		parsedUserData.Org.OktaGroupName+"/"+transitKey,
+		encryptedFile)
 	if err != nil {
 		tx.Rollback()
 		core.Warning("Could not upload file: " + err.Error())

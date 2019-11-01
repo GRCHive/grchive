@@ -40,7 +40,7 @@ use_secure_cookies = false
 
 [vault]
 url = "http://localhost:8081"
-token = "s.0Elp15F398zrPUydDUtz1jez"
+token = "s.zh4T09G59SxrFygE7qJWrTa5"
 
 [backblaze]
 control_doc_bucket = "bb0980597ea911e162ed011e"
