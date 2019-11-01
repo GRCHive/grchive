@@ -255,7 +255,7 @@ export default Vue.extend({
         }
     },
     mounted() {
-        this.canEdit = (!this.stagedEdits && this.editMode)
+        this.canEdit = (!this.stagedEdits || !this.editMode)
         this.refreshDefaultControlType()
     }
 })

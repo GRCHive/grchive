@@ -61,6 +61,7 @@ go_library(
         "webcore/request.go",
         "webcore/redirectResponseWriter.go",
         "webcore/webcore.go",
+        "webcore/constants.go",
     ],
     deps = [
         "//src/webserver/core:webserver_core_library",
@@ -125,6 +126,8 @@ go_library(
     deps = [
         "@com_github_gorilla_mux//:go_default_library",
         "//src/webserver/core:webserver_core_library",
+        "//src/webserver/security:webserver_security_library",
+        "//src/backblaze_api/golang:backblaze_golang_api",
         ":webserver_webcore_library",
         ":webserver_database_library",
         ":webserver_render_library",

@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/hex"
 	"github.com/pelletier/go-toml"
+	"gitlab.com/b3h47pte/audit-stuff/backblaze_api"
 	"io/ioutil"
 )
 
@@ -37,6 +38,16 @@ type OktaConfig struct {
 	UsersEndpoint string
 }
 
+type VaultConfig struct {
+	Url   string
+	Token string
+}
+
+type BackblazeConfig struct {
+	Key                backblaze.B2Key
+	ControlDocBucketId string
+}
+
 type EnvConfigData struct {
 	SelfUri            string
 	DatabaseConnString string
@@ -45,6 +56,8 @@ type EnvConfigData struct {
 	SessionKeys        [][]byte
 	UseSecureCookies   bool
 	Company            *CompanyConfig
+	Vault              *VaultConfig
+	Backblaze          *BackblazeConfig
 }
 
 var EnvConfig *EnvConfigData
@@ -108,6 +121,15 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.Company = new(CompanyConfig)
 	envConfig.Company.CompanyName = tomlConfig.Get("company.company_name").(string)
 	envConfig.Company.Domain = tomlConfig.Get("company.domain").(string)
+
+	envConfig.Vault = new(VaultConfig)
+	envConfig.Vault.Url = tomlConfig.Get("vault.url").(string)
+	envConfig.Vault.Token = tomlConfig.Get("vault.token").(string)
+
+	envConfig.Backblaze = new(BackblazeConfig)
+	envConfig.Backblaze.ControlDocBucketId = tomlConfig.Get("backblaze.control_doc_bucket").(string)
+	envConfig.Backblaze.Key.Id = tomlConfig.Get("backblaze.keyId").(string)
+	envConfig.Backblaze.Key.Key = tomlConfig.Get("backblaze.key").(string)
 
 	return envConfig
 }

@@ -94,7 +94,8 @@
                                     v-for="(item, index) in fullControlData.DocumentCategories"
                                     :key="index"
                                 >
-                                    <documentation-category-viewer>
+                                    <documentation-category-viewer
+                                        :cat-id="item.Id">
                                     </documentation-category-viewer>
                                 </v-tab-item>
                             </v-tabs>

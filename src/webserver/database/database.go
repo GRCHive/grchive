@@ -11,3 +11,7 @@ var dbConn *sqlx.DB
 func Init() {
 	dbConn = sqlx.MustConnect("postgres", core.EnvConfig.DatabaseConnString)
 }
+
+func CreateTx() *sqlx.Tx {
+	return dbConn.MustBegin()
+}

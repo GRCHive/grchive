@@ -50,9 +50,11 @@ func getNestedField(val reflect.Value, field string) reflect.Value {
 func generateTestToml(config GenerateTomlConfig) (*toml.Tree, *core.EnvConfigData) {
 	newTree, _ := toml.TreeFromMap(map[string]interface{}{})
 	newData := core.EnvConfigData{
-		Okta:    new(core.OktaConfig),
-		Login:   new(core.LoginConfig),
-		Company: new(core.CompanyConfig),
+		Okta:      new(core.OktaConfig),
+		Login:     new(core.LoginConfig),
+		Company:   new(core.CompanyConfig),
+		Vault:     new(core.VaultConfig),
+		Backblaze: new(core.BackblazeConfig),
 	}
 
 	newDataVal := reflect.ValueOf(&newData).Elem()
@@ -115,6 +117,10 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"UseSecureCookies", "security.use_secure_cookies", true, nil},
 					{"Company.CompanyName", "company.company_name", "company_name", nil},
 					{"Company.Domain", "company.domain", "domain", nil},
+					{"Vault.Url", "vault.url", "url", nil},
+					{"Vault.Token", "vault.token", "token", nil},
+					{"Backblaze.Key.Id", "backblaze.keyId", "keyId", nil},
+					{"Backblaze.Key.Key", "backblaze.key", "key", nil},
 				},
 			},
 			parseError: false,

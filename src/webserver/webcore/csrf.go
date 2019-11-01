@@ -1,7 +1,6 @@
 package webcore
 
 import (
-	"errors"
 	"github.com/google/uuid"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"net/http"
@@ -31,15 +30,8 @@ func AddCSRFTokenToRequest(w http.ResponseWriter, r *http.Request, pageVars map[
 }
 
 func GetCSRFToken(r *http.Request) (string, error) {
-	if err := r.ParseForm(); err != nil || len(r.Form) == 0 {
-		return "", err
-	}
-
-	csrfToken, ok := r.Form["csrf"]
-	if !ok {
-		return "", errors.New("No csrf")
-	}
-	return csrfToken[0], nil
+	csrfToken := r.FormValue("csrf")
+	return csrfToken, nil
 }
 
 func VerifyCSRFToken(token string, r *http.Request) (bool, error) {

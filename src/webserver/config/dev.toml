@@ -37,3 +37,12 @@ session_keys = [
     "7d0c32642cf37e8fedf87e706919b9f4395b911fdf79b451b4cad74b51b946cf"
 ]
 use_secure_cookies = false
+
+[vault]
+url = "http://localhost:8081"
+token = "s.0Elp15F398zrPUydDUtz1jez"
+
+[backblaze]
+control_doc_bucket = "bb0980597ea911e162ed011e"
+keyId = "000b909e9112d1e0000000002"
+key = "K000CqPXF9PgSIcGA+B8P0lvRW/6h3M"

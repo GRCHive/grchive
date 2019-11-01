@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"reflect"
+	"time"
 )
 
 type NullInt64 struct {
@@ -24,3 +25,4 @@ var NullInt64ReflectType = reflect.TypeOf(NullInt64{})
 var Int32ReflectType = reflect.TypeOf((int32)(0))
 var StringReflectType = reflect.TypeOf((string)(""))
 var Int64ArrayReflectType = reflect.TypeOf(([]int64)([]int64{}))
+var TimeReflectType = reflect.TypeOf(time.Time{})

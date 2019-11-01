@@ -109,6 +109,7 @@ const ApiControlDocumentationPrefix string = "/documentation"
 const ApiNewControlDocumentationCategoryEndpoint string = "/newcat"
 const ApiEditControlDocumentationCategoryEndpoint string = "/editcat"
 const ApiDeleteControlDocumentationCategoryEndpoint string = "/deletecat"
+const ApiUploadControlDocumentationEndpoint string = "/upload"
 
 // Websocket
 const WebsocketPrefix string = "/ws"

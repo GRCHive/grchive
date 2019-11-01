@@ -64,6 +64,7 @@ const (
 	NewControlDocCatRouteName                      = "NewControlDocCat"
 	EditControlDocCatRouteName                     = "EditControlDocCat"
 	DeleteControlDocCatRouteName                   = "DeleteControlDocCat"
+	UploadControlDocRouteName                      = "UploadControlDoc"
 )
 
 var globalRouter *mux.Router

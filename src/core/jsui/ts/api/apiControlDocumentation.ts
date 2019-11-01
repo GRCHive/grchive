@@ -1,6 +1,6 @@
-import { postFormUrlEncoded } from '../http'
+import { postFormUrlEncoded, postFormMultipart } from '../http'
 import { ControlDocumentationCategory } from '../controls'
-import { newControlDocCatUrl, editControlDocCatUrl, deleteControlDocCatUrl } from '../url'
+import { newControlDocCatUrl, editControlDocCatUrl, deleteControlDocCatUrl, uploadControlDocUrl } from '../url'
 
 export interface TNewControlDocCatInput {
     csrf: string
@@ -42,4 +42,13 @@ export interface TDeleteControlDocCatOutput {
 
 export function deleteControlDocCat(inp : TDeleteControlDocCatInput): Promise<TDeleteControlDocCatOutput> {
     return postFormUrlEncoded<TDeleteControlDocCatOutput>(deleteControlDocCatUrl, inp)
+}
+
+
+export interface TUploadControlDocOutput {
+    data: any
+}
+
+export function uploadControlDoc(inp : FormData): Promise<TUploadControlDocOutput> {
+    return postFormMultipart<TUploadControlDocOutput>(uploadControlDocUrl, inp)
 }

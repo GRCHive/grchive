@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/jmoiron/sqlx"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
@@ -64,4 +65,28 @@ func DeleteControlDocumentationCategory(catId int64) error {
 		return err
 	}
 	return tx.Commit()
+}
+
+func CreateControlDocumentationFileWithTx(file *core.ControlDocumentationFile, tx *sqlx.Tx) error {
+	rows, err := tx.NamedQuery(`
+		INSERT INTO process_flow_control_documentation_file (storage_name, relevant_time, upload_time, category_id)
+		VALUES (:storage_name, :relevant_time, :upload_time, :category_id)
+		RETURNING id
+	`, file)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	rows.Next()
+	err = rows.Scan(&file.Id)
+	if err != nil {
+		return err
+	}
+	rows.Close()
+	return nil
+}
+
+func UpdateControlDocumentation(file *core.ControlDocumentationFile, tx *sqlx.Tx) error {
+	return nil
 }

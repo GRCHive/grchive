@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func GetRiskFromRequestUrl(r *http.Request) (*core.Risk, error) {
@@ -75,9 +76,21 @@ func GetProcessFlowIdFromRequest(r *http.Request) (int64, error) {
 	return val, err
 }
 
+func IsRequestMultipartForm(r *http.Request) bool {
+	header := r.Header
+	contentType := header.Get("Content-Type")
+	return contentType == "multipart/form-data"
+}
+
 func UnmarshalRequestForm(r *http.Request, output interface{}) error {
-	if err := r.ParseForm(); err != nil {
-		return err
+	if IsRequestMultipartForm(r) {
+		if err := r.ParseMultipartForm(MaxMultipartFormMemoryBytes); err != nil {
+			return err
+		}
+	} else {
+		if err := r.ParseForm(); err != nil {
+			return err
+		}
 	}
 
 	interfaceType := reflect.TypeOf(output).Elem()
@@ -161,6 +174,13 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 				arr[idx] = int64(intValue)
 			}
 			dataValue = reflect.ValueOf(arr)
+			break
+		case core.TimeReflectType:
+			inputDate, err := time.Parse(time.RFC3339, data[0])
+			if err != nil {
+				return err
+			}
+			dataValue = reflect.ValueOf(inputDate)
 			break
 		default:
 			return errors.New("Unsupported type: " + fieldType.Name)
