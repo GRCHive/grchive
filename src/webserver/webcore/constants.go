@@ -1,4 +1,4 @@
 package webcore
 
-const MaxMultipartFormMemoryBytes int64 = 32000
-const MaxFileSizeBytes int64 = 32000
+const MaxMultipartFormMemoryBytes int64 = 64000
+const MaxFileSizeBytes int64 = 32000000

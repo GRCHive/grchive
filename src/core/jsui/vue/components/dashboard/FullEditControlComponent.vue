@@ -312,4 +312,8 @@ export default Vue.extend({
     display: none !important;
 }
 
+>>>.v-tabs .v-slide-group {
+    display: none !important;
+}
+
 </style>

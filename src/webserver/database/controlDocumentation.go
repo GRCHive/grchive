@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/b3h47pte/audit-stuff/core"
+	"math"
 )
 
 func NewControlDocumentationCategory(cat *core.ControlDocumentationCategory) error {
@@ -88,5 +89,42 @@ func CreateControlDocumentationFileWithTx(file *core.ControlDocumentationFile, t
 }
 
 func UpdateControlDocumentation(file *core.ControlDocumentationFile, tx *sqlx.Tx) error {
-	return nil
+	_, err := tx.NamedExec(`
+		UPDATE process_flow_control_documentation_file
+		SET bucket_id = :bucket_id,
+			storage_id = :storage_id
+		WHERE id = :id
+	`, file)
+	return err
+}
+
+func GetControlDocumentation(catId int64, pageSize int, pageOffset int) ([]*core.ControlDocumentationFile, error) {
+	retArr := make([]*core.ControlDocumentationFile, 0)
+
+	err := dbConn.Select(&retArr, `
+		SELECT *
+		FROM process_flow_control_documentation_file
+		WHERE category_id = $1
+			AND bucket_id IS NOT NULL
+			AND storage_id IS NOT NULL
+		ORDER BY relevant_time DESC
+		LIMIT $2
+		OFFSET $3
+	`, catId, pageSize, pageOffset)
+
+	return retArr, err
+}
+
+func GetTotalControlDocumentationPages(catId int64, pageSize int) (int, error) {
+	count := 0
+
+	err := dbConn.Get(&count, `
+		SELECT COUNT(*)
+		FROM process_flow_control_documentation_file
+		WHERE category_id = $1
+			AND bucket_id IS NOT NULL
+			AND storage_id IS NOT NULL
+	`, catId)
+
+	return int(math.Ceil(float64(count) / float64(pageSize))), err
 }

@@ -142,6 +142,13 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 			}
 			dataValue = reflect.ValueOf(intValue)
 			break
+		case core.IntReflectType:
+			intValue, err := strconv.ParseInt(data[0], 10, 64)
+			if err != nil {
+				return err
+			}
+			dataValue = reflect.ValueOf(int(intValue))
+			break
 		case core.NullInt64ReflectType:
 			intValue, err := strconv.ParseInt(data[0], 10, 64)
 			if err != nil {

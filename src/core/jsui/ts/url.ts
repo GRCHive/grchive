@@ -102,3 +102,4 @@ export const editControlDocCatUrl : string = "/api/documentation/editcat"
 export const deleteControlDocCatUrl : string = "/api/documentation/deletecat"
 
 export const uploadControlDocUrl : string = "/api/documentation/upload"
+export const getControlDocUrl : string = "/api/documentation/get"

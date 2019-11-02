@@ -1,6 +1,12 @@
+import axios from 'axios'
+import * as qs from 'query-string'
 import { postFormUrlEncoded, postFormMultipart } from '../http'
-import { ControlDocumentationCategory } from '../controls'
-import { newControlDocCatUrl, editControlDocCatUrl, deleteControlDocCatUrl, uploadControlDocUrl } from '../url'
+import { ControlDocumentationCategory, ControlDocumentationFile } from '../controls'
+import { newControlDocCatUrl,
+         editControlDocCatUrl,
+         deleteControlDocCatUrl,
+         uploadControlDocUrl,
+         getControlDocUrl } from '../url'
 
 export interface TNewControlDocCatInput {
     csrf: string
@@ -46,9 +52,28 @@ export function deleteControlDocCat(inp : TDeleteControlDocCatInput): Promise<TD
 
 
 export interface TUploadControlDocOutput {
-    data: any
+    data: ControlDocumentationFile
 }
 
 export function uploadControlDoc(inp : FormData): Promise<TUploadControlDocOutput> {
     return postFormMultipart<TUploadControlDocOutput>(uploadControlDocUrl, inp)
+}
+
+export interface TGetControlDocumentsInput {
+    csrf: string
+    catId: number
+    page: number
+    needPages: boolean
+}
+
+export interface TGetControlDocumentsOutput {
+    data: {
+        Files: ControlDocumentationFile[]
+        TotalPages: number
+        CurrentPage: number
+    }
+}
+
+export function getControlDocuments(inp: TGetControlDocumentsInput) : Promise<TGetControlDocumentsOutput> {
+    return axios.get(getControlDocUrl + '?' + qs.stringify(inp))
 }

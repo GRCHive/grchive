@@ -1,5 +1,8 @@
 <template>
     <v-card>
+        <v-overlay :value="progressOverlay">
+            <v-progress-circular indeterminate size="64"></v-progress-circular>
+        </v-overlay>
         <v-card-title>
             Upload Documentation
         </v-card-title>
@@ -50,7 +53,8 @@ export default Vue.extend({
         dateString: new Date().toISOString().substr(0, 10),
         file: null as File | null,
         rules,
-        formValid: false
+        formValid: false,
+        progressOverlay: false
     }),
     computed : {
         csrf() : string {
@@ -69,6 +73,7 @@ export default Vue.extend({
             if (!this.canSubmit) {
                 return
             }
+            this.progressOverlay = true
             // We need to do this conversion so that when we go into UTC, we're still at the right
             // day for the local time zone.
             let currentDate : Date = new Date(this.dateString)
@@ -81,8 +86,10 @@ export default Vue.extend({
             data.set('relevantTime', currentDate.toISOString())
 
             uploadControlDoc(data).then((resp : TUploadControlDocOutput) => {
+                this.progressOverlay = false
                 this.$emit('do-save', resp.data)
             }).catch((err : any) => {
+                this.progressOverlay = false
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
                     "Oops! Something went wrong. Try again.",

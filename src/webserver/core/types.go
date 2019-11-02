@@ -20,6 +20,7 @@ func (v NullInt64) MarshalJSON() ([]byte, error) {
 }
 
 var BoolReflectType = reflect.TypeOf((bool)(false))
+var IntReflectType = reflect.TypeOf((int)(0))
 var Int64ReflectType = reflect.TypeOf((int64)(0))
 var NullInt64ReflectType = reflect.TypeOf(NullInt64{})
 var Int32ReflectType = reflect.TypeOf((int32)(0))

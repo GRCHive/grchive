@@ -117,4 +117,5 @@ func registerControlDocumentationAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiEditControlDocumentationCategoryEndpoint, editControlDocumentationCategory).Methods("POST").Name(webcore.EditControlDocCatRouteName)
 	s.HandleFunc(core.ApiDeleteControlDocumentationCategoryEndpoint, deleteControlDocumentationCategory).Methods("POST").Name(webcore.DeleteControlDocCatRouteName)
 	s.HandleFunc(core.ApiUploadControlDocumentationEndpoint, uploadControlDocumentation).Methods("POST").Name(webcore.UploadControlDocRouteName)
+	s.HandleFunc(core.ApiGetControlDocumentationEndpoint, getControlDocumentation).Methods("GET").Name(webcore.UploadControlDocRouteName)
 }

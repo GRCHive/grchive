@@ -35,6 +35,12 @@ type UploadControlDocInputs struct {
 	RelevantTime time.Time `webcore:"relevantTime"`
 }
 
+type GetControlDocInputs struct {
+	CatId     int64 `webcore:"catId"`
+	Page      int   `webcore:"page"`
+	NeedPages bool  `webcore:"needPages"`
+}
+
 func newControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -170,7 +176,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	if fileHeader.Size > webcore.MaxFileSizeBytes {
-		core.Warning("File too large." + err.Error())
+		core.Warning("File too large.")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -247,4 +253,47 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(internalFile)
+}
+
+func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := GetControlDocInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	type DataOutput struct {
+		Files       []*core.ControlDocumentationFile
+		TotalPages  int
+		CurrentPage int
+	}
+	output := DataOutput{
+		CurrentPage: inputs.Page,
+	}
+
+	const controlDocPageSize int = 10
+	controlDocPageOffset := controlDocPageSize * inputs.Page
+
+	output.Files, err = database.GetControlDocumentation(inputs.CatId, controlDocPageSize, controlDocPageOffset)
+	if err != nil {
+		core.Warning("Can't get files: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if inputs.NeedPages {
+		output.TotalPages, err = database.GetTotalControlDocumentationPages(inputs.CatId, controlDocPageSize)
+		if err != nil {
+			core.Warning("Can't total pages: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
+	jsonWriter.Encode(output)
 }
