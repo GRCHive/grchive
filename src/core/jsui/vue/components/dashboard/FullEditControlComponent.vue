@@ -74,12 +74,12 @@
                                     class="pa-0 ma-0">
 
                                     <template v-slot:prepend>
-                                        <v-btn small color="error" @click="doDeleteControlDocCat">
+                                        <v-btn small color="error" @click="doDeleteControlDocCat" :disabled="!hasCategories">
                                             Delete
                                         </v-btn>
                                     </template>
                                     <template v-slot:append-outer>
-                                        <v-btn small color="warning" @click="doEditControlDocCat" class="mr-2">
+                                        <v-btn small color="warning" @click="doEditControlDocCat" class="mr-2" :disabled="!hasCategories">
                                             Edit
                                         </v-btn>
 
@@ -195,6 +195,9 @@ export default Vue.extend({
                 text: ele.Name,
                 value: ele
             }))
+        },
+        hasCategories() : boolean {
+            return this.fullControlData.DocumentCategories.length > 0
         }
     },
     methods: {

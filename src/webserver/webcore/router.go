@@ -66,6 +66,8 @@ const (
 	DeleteControlDocCatRouteName                   = "DeleteControlDocCat"
 	UploadControlDocRouteName                      = "UploadControlDoc"
 	GetControlDocRouteName                         = "GetControlDoc"
+	DeleteControlDocRouteName                      = "DeleteControlDoc"
+	DownloadControlDocRouteName                    = "DownloadControlDoc"
 )
 
 var globalRouter *mux.Router

@@ -79,9 +79,22 @@
                 </v-btn>
             </v-list-item-action>
 
-            <v-btn color="error" @click="deleteSelectedFiles">
-                Delete
-            </v-btn>
+            <v-dialog v-model="showHideDeleteFiles" persistent max-width="40%">
+                <template v-slot:activator="{on}">
+                    <v-btn color="error" v-on="on">
+                        Delete
+                    </v-btn>
+                </template>
+
+                <generic-delete-confirmation-form
+                    item-name="documents"
+                    :items-to-delete="selectedFileNames"
+                    v-on:do-cancel="showHideDeleteFiles = false"
+                    v-on:do-delete="deleteSelectedFiles"
+                    :use-global-deletion="false"
+                    :force-global-deletion="true">
+                </generic-delete-confirmation-form>
+            </v-dialog>
 
             <v-spacer></v-spacer>
             <v-btn color="success" @click="downloadSelectedFiles">
@@ -112,6 +125,8 @@ import UploadDocumentationForm from './UploadDocumentationForm.vue'
 import { contactUsUrl } from '../../../ts/url'
 import { ControlDocumentationFile } from '../../../ts/controls'
 import { TGetControlDocumentsInput, TGetControlDocumentsOutput, getControlDocuments } from '../../../ts/api/apiControlDocumentation'
+import { TDeleteControlDocumentsInput, TDeleteControlDocumentsOutput, deleteControlDocuments } from '../../../ts/api/apiControlDocumentation'
+import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 
 export default Vue.extend({
     props : {
@@ -123,9 +138,11 @@ export default Vue.extend({
         totalPages: 0,
         files: [] as ControlDocumentationFile[],
         selectedFiles: [] as ControlDocumentationFile[],
+        showHideDeleteFiles: false,
     }),
     components : {
-        UploadDocumentationForm
+        UploadDocumentationForm,
+        GenericDeleteConfirmationForm
     },
     computed : {
         hasSelected() : boolean {
@@ -136,6 +153,9 @@ export default Vue.extend({
                 return 0
             }
             return this.pageNum + 1
+        },
+        selectedFileNames() : string[] {
+            return this.selectedFiles.map((ele) => ele.StorageName)
         }
     },
     methods: {
@@ -188,6 +208,28 @@ export default Vue.extend({
             }
         },
         deleteSelectedFiles() {
+            deleteControlDocuments(<TDeleteControlDocumentsInput>{
+                //@ts-ignore
+                csrf: this.$root.csrf,
+                fileIds: this.selectedFiles.map((ele) => ele.Id)
+            }).then(() => {
+                let selectedFileSet = new Set(this.selectedFiles)
+                for (let i = this.files.length - 1; i >= 0; --i) {
+                    if (selectedFileSet.has(this.files[i])) {
+                        this.files.splice(i, 1)
+                    }
+                }
+                this.selectedFiles = []
+                this.showHideDeleteFiles = false
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
         },
         downloadSelectedFiles() {
         },
@@ -195,6 +237,7 @@ export default Vue.extend({
             if (this.pageNumOneIndex == newPage) {
                 return
             }
+            this.selectedFiles = []
             this.refreshData(newPage - 1, false)
         },
     },

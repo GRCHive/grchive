@@ -27,3 +27,7 @@ func (file ControlDocumentationFile) UniqueKey() string {
 	// the file ID is the only thing we control so it's probably safe only to use that.
 	return fmt.Sprintf("controlDocFile-%d", file.Id)
 }
+
+func (file ControlDocumentationFile) StorageFilename(session *UserSessionParsedData) string {
+	return session.Org.OktaGroupName + "/" + file.UniqueKey()
+}

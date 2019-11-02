@@ -75,9 +75,11 @@ func sendBackblazeApiEndpoint(auth *B2AuthToken, method string, endpoint string,
 		return err
 	}
 
-	err = json.Unmarshal(respBodyData, outInt)
-	if err != nil {
-		return err
+	if outInt != nil {
+		err = json.Unmarshal(respBodyData, outInt)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

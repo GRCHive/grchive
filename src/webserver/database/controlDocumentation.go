@@ -98,7 +98,34 @@ func UpdateControlDocumentation(file *core.ControlDocumentationFile, tx *sqlx.Tx
 	return err
 }
 
-func GetControlDocumentation(catId int64, pageSize int, pageOffset int) ([]*core.ControlDocumentationFile, error) {
+func DeleteBatchControlDocumentation(fileIds []int64) error {
+	tx := dbConn.MustBegin()
+	for _, id := range fileIds {
+		_, err := tx.Exec(`
+			DELETE FROM process_flow_control_documentation_file
+			WHERE id = $1
+		`, id)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
+func GetControlDocumentation(fileId int64) (*core.ControlDocumentationFile, error) {
+	retFile := core.ControlDocumentationFile{}
+
+	err := dbConn.Get(&retFile, `
+		SELECT *
+		FROM process_flow_control_documentation_file
+		WHERE id = $1
+	`, fileId)
+
+	return &retFile, err
+}
+
+func GetControlDocumentationForCategory(catId int64, pageSize int, pageOffset int) ([]*core.ControlDocumentationFile, error) {
 	retArr := make([]*core.ControlDocumentationFile, 0)
 
 	err := dbConn.Select(&retArr, `

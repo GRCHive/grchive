@@ -6,7 +6,8 @@ import { newControlDocCatUrl,
          editControlDocCatUrl,
          deleteControlDocCatUrl,
          uploadControlDocUrl,
-         getControlDocUrl } from '../url'
+         getControlDocUrl,
+         deleteControlDocUrl } from '../url'
 
 export interface TNewControlDocCatInput {
     csrf: string
@@ -76,4 +77,16 @@ export interface TGetControlDocumentsOutput {
 
 export function getControlDocuments(inp: TGetControlDocumentsInput) : Promise<TGetControlDocumentsOutput> {
     return axios.get(getControlDocUrl + '?' + qs.stringify(inp))
+}
+
+export interface TDeleteControlDocumentsInput {
+    csrf: string
+    fileIds: number[]
+}
+
+export interface TDeleteControlDocumentsOutput {
+}
+
+export function deleteControlDocuments(inp: TDeleteControlDocumentsInput) : Promise<TDeleteControlDocumentsOutput> {
+    return postFormUrlEncoded<TDeleteControlDocumentsOutput>(deleteControlDocUrl, inp)
 }

@@ -41,6 +41,14 @@ type GetControlDocInputs struct {
 	NeedPages bool  `webcore:"needPages"`
 }
 
+type DeleteControlDocInputs struct {
+	FileIds []int64 `webcore:"fileIds"`
+}
+
+type DownloadControlDocInputs struct {
+	FileId int64 `webcore:"fileId"`
+}
+
 func newControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -222,9 +230,11 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	b2Filename := internalFile.StorageFilename(parsedUserData)
+
 	b2File, err := backblaze.UploadFile(b2Auth,
 		core.EnvConfig.Backblaze.ControlDocBucketId,
-		parsedUserData.Org.OktaGroupName+"/"+transitKey,
+		b2Filename,
 		encryptedFile)
 	if err != nil {
 		tx.Rollback()
@@ -238,7 +248,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	err = database.UpdateControlDocumentation(&internalFile, tx)
 	if err != nil {
 		tx.Rollback()
-		backblaze.DeleteFile(b2File)
+		backblaze.DeleteFile(b2Auth, internalFile.StorageFilename(parsedUserData), b2File)
 
 		core.Warning("Failed to update control documentation: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -279,7 +289,7 @@ func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	const controlDocPageSize int = 10
 	controlDocPageOffset := controlDocPageSize * inputs.Page
 
-	output.Files, err = database.GetControlDocumentation(inputs.CatId, controlDocPageSize, controlDocPageOffset)
+	output.Files, err = database.GetControlDocumentationForCategory(inputs.CatId, controlDocPageSize, controlDocPageOffset)
 	if err != nil {
 		core.Warning("Can't get files: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -296,4 +306,73 @@ func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(output)
+}
+
+func deleteControlDocumentation(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := DeleteControlDocInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	parsedUserData, err := webcore.FindSessionParsedDataInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to find parsed user data: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// If we fail in deleting anything from Backblaze just log and continue.
+	// TODO: We'll need to develop a utility that runs periodically to
+	// clean up things that failed here.
+	b2Auth, err := backblaze.B2Auth(core.EnvConfig.Backblaze.Key)
+	if err != nil {
+		core.Warning("Could not auth with Backblaze: " + err.Error())
+	} else {
+		for _, id := range inputs.FileIds {
+			file, err := database.GetControlDocumentation(id)
+			if err != nil {
+				core.Warning("Failed to find control documentation: " + err.Error())
+				continue
+			}
+
+			// Need to store actual storage filename on the database
+			err = backblaze.DeleteFile(b2Auth, file.StorageFilename(parsedUserData), backblaze.B2File{
+				BucketId: file.BucketId,
+				FileId:   file.StorageId,
+			})
+
+			if err != nil {
+				core.Warning("Failed to delete control documentation: " + err.Error())
+				continue
+			}
+		}
+	}
+
+	err = database.DeleteBatchControlDocumentation(inputs.FileIds)
+	if err != nil {
+		core.Warning("Can't delete database files: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(struct{}{})
+}
+
+func downloadControlDocumentation(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := DownloadControlDocInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 }

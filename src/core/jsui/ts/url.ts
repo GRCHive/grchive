@@ -103,3 +103,4 @@ export const deleteControlDocCatUrl : string = "/api/documentation/deletecat"
 
 export const uploadControlDocUrl : string = "/api/documentation/upload"
 export const getControlDocUrl : string = "/api/documentation/get"
+export const deleteControlDocUrl : string = "/api/documentation/delete"
