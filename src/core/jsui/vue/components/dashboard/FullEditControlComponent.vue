@@ -62,53 +62,54 @@
                     <v-col cols="4">
                         <v-card class="mb-4">
                             <v-card-title>
-                                Documentation
+                                <span class="mr-2">
+                                    Documentation
+                                </span>
                                 <v-spacer></v-spacer>
-                                <v-dialog v-model="showHideNewCat" persistent max-width="40%">
-                                    <template v-slot:activator="{ on }">
-                                        <v-btn small color="primary" v-on="on">
-                                            New Category
+                                <v-select
+                                    max-width="50%"
+                                    :hide-details="true"
+                                    :items="categoriesForSelect"
+                                    v-model="currentDocumentCategory"
+                                    class="pa-0 ma-0">
+
+                                    <template v-slot:prepend>
+                                        <v-btn small color="error" @click="doDeleteControlDocCat">
+                                            Delete
                                         </v-btn>
                                     </template>
-                                    <create-new-control-documentation-category-form
-                                        :control="fullControlData.Control"
-                                        @do-cancel="cancelNewControlDocCategory"
-                                        @do-save="saveNewControlDocCategory">
-                                    </create-new-control-documentation-category-form>
-                                </v-dialog>
+                                    <template v-slot:append-outer>
+                                        <v-btn small color="warning" @click="doEditControlDocCat" class="mr-2">
+                                            Edit
+                                        </v-btn>
+
+                                        <v-dialog v-model="showHideNewCat" persistent max-width="40%">
+                                            <template v-slot:activator="{ on }">
+                                                <v-btn small color="primary" v-on="on">
+                                                    New
+                                                </v-btn>
+                                            </template>
+                                            <create-new-control-documentation-category-form
+                                                :control="fullControlData.Control"
+                                                @do-cancel="cancelNewControlDocCategory"
+                                                @do-save="saveNewControlDocCategory">
+                                            </create-new-control-documentation-category-form>
+                                        </v-dialog>
+                                    </template>
+                                </v-select>
                             </v-card-title>
                             <v-divider></v-divider>
-                            <v-tabs v-model="docTab">
-                                <v-tab v-for="(item, index) in fullControlData.DocumentCategories"
-                                       :key="index"
-                                >
-                                    <v-tooltip bottom>
-                                        <template v-slot:activator="{on}">
-                                            <span v-on="on">{{ item.Name }}</span>
-                                        </template>
-                                        {{ item.Description }}
-                                    </v-tooltip>
-                                </v-tab>
-
+                            <v-tabs :value="currentDocumentCategory">
                                 <v-tab-item
                                     v-for="(item, index) in fullControlData.DocumentCategories"
                                     :key="index"
+                                    :value="item"
                                 >
                                     <documentation-category-viewer
                                         :cat-id="item.Id">
                                     </documentation-category-viewer>
                                 </v-tab-item>
                             </v-tabs>
-
-                            <v-card-actions v-if="fullControlData.DocumentCategories.length > 0">
-                                <v-btn icon @click="doEditControlDocCat">
-                                    <v-icon small>mdi-pencil</v-icon>
-                                </v-btn>
-
-                                <v-btn icon @click="doDeleteControlDocCat">
-                                    <v-icon small>mdi-delete</v-icon>
-                                </v-btn>
-                            </v-card-actions>
                         </v-card>
 
                         <v-card class="mb-4">
@@ -184,19 +185,26 @@ export default Vue.extend({
         ready: false,
         fullControlData: Object() as FullControlData,
         showHideNewCat: false,
-        docTab: 0,
         showHideEditCat : false,
-        showHideDeleteCat : false
+        showHideDeleteCat : false,
+        currentDocumentCategory: Object() as ControlDocumentationCategory
     }),
     computed: {
-        currentDocumentCategory() : ControlDocumentationCategory {
-            if (!this.fullControlData.DocumentCategories || this.fullControlData.DocumentCategories.length  == 0) {
-                return Object() as ControlDocumentationCategory
-            }
-            return this.fullControlData.DocumentCategories[this.docTab]
+        categoriesForSelect() : Object[] {
+            return this.fullControlData.DocumentCategories.map((ele) => ({
+                text: ele.Name,
+                value: ele
+            }))
         }
     },
     methods: {
+        resetSelectedCategory() {
+            if (this.fullControlData.DocumentCategories.length > 0) {
+                this.currentDocumentCategory = this.fullControlData.DocumentCategories[0]
+            } else {
+                this.currentDocumentCategory = Object() as ControlDocumentationCategory
+            }
+        },
         refreshData() {
             let data = window.location.pathname.split('/')
             let controlId = Number(data[data.length - 1])
@@ -208,6 +216,7 @@ export default Vue.extend({
             }).then((resp : TSingleControlOutput) => {
                 this.fullControlData = resp.data
                 this.ready = true
+                this.resetSelectedCategory()
 
                 Vue.nextTick(() => {
                     //@ts-ignore
@@ -272,7 +281,7 @@ export default Vue.extend({
                     this.fullControlData.DocumentCategories.findIndex((ele) => 
                         ele.Name == this.currentDocumentCategory.Name),
                     1)
-                this.docTab = 0
+                this.resetSelectedCategory()
             }).catch(() => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
@@ -296,3 +305,11 @@ export default Vue.extend({
 })
 
 </script>
+
+<style scoped>
+
+>>>.v-select__selections input {
+    display: none !important;
+}
+
+</style>
