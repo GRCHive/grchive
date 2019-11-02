@@ -9,6 +9,7 @@ go_library(
         "delete.go",
         "file.go",
         "backblaze.go",
+        "download.go",
     ],
     deps = [
     ],

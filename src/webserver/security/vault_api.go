@@ -13,6 +13,7 @@ import (
 
 const TransitCreateKeyEndpoint string = "/v1/transit/keys/"
 const TransitEncryptEndpoint string = "/v1/transit/encrypt/"
+const TransitDecryptEndpoint string = "/v1/transit/decrypt/"
 
 func sendVaultRequest(method string, endpoint string, data interface{}) (map[string]*json.RawMessage, error) {
 	body := &bytes.Buffer{}
@@ -104,5 +105,29 @@ func TransitEncrypt(path string, data []byte) ([]byte, error) {
 }
 
 func TransitDecrypt(path string, data []byte) ([]byte, error) {
-	return nil, nil
+	reqData := map[string]string{
+		"ciphertext": string(data),
+	}
+
+	respData, err := sendVaultRequest("POST", TransitDecryptEndpoint+path, reqData)
+	if err != nil {
+		return nil, err
+	}
+
+	dataBlock, ok := respData["data"]
+	if !ok {
+		return nil, errors.New("No data in encryption response")
+	}
+
+	type ParsedData struct {
+		Plaintext string `json:"plaintext"`
+	}
+	parsed := ParsedData{}
+	err = json.Unmarshal(*dataBlock, &parsed)
+	if err != nil {
+		return nil, err
+	}
+
+	ret, err := base64.StdEncoding.DecodeString(parsed.Plaintext)
+	return ret, err
 }

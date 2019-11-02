@@ -81,7 +81,7 @@
 
             <v-dialog v-model="showHideDeleteFiles" persistent max-width="40%">
                 <template v-slot:activator="{on}">
-                    <v-btn color="error" v-on="on">
+                    <v-btn color="error" v-on="on" :disabled="!hasSelected">
                         Delete
                     </v-btn>
                 </template>
@@ -97,7 +97,7 @@
             </v-dialog>
 
             <v-spacer></v-spacer>
-            <v-btn color="success" @click="downloadSelectedFiles">
+            <v-btn color="success" @click="downloadSelectedFiles" :disabled="!hasSelected">
                 Download
             </v-btn>
 
@@ -126,7 +126,9 @@ import { contactUsUrl } from '../../../ts/url'
 import { ControlDocumentationFile } from '../../../ts/controls'
 import { TGetControlDocumentsInput, TGetControlDocumentsOutput, getControlDocuments } from '../../../ts/api/apiControlDocumentation'
 import { TDeleteControlDocumentsInput, TDeleteControlDocumentsOutput, deleteControlDocuments } from '../../../ts/api/apiControlDocumentation'
+import { TDownloadControlDocumentsInput, TDownloadControlDocumentsOutput, downloadControlDocuments } from '../../../ts/api/apiControlDocumentation'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
+import { saveAs } from 'file-saver'
 
 export default Vue.extend({
     props : {
@@ -232,6 +234,23 @@ export default Vue.extend({
             })
         },
         downloadSelectedFiles() {
+            // Download each file individually from the webserver and then
+            // ZIP them together before saving the final ZIP to disk.
+            downloadControlDocuments(<TDownloadControlDocumentsInput>{
+                //@ts-ignore
+                csrf: this.$root.csrf,
+                files: this.selectedFiles
+            }).then((resp : TDownloadControlDocumentsOutput) => {
+                saveAs(resp.data, "download.zip")
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
         },
         changePage(newPage : number) {
             if (this.pageNumOneIndex == newPage) {

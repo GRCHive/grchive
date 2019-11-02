@@ -7,7 +7,9 @@ import { newControlDocCatUrl,
          deleteControlDocCatUrl,
          uploadControlDocUrl,
          getControlDocUrl,
-         deleteControlDocUrl } from '../url'
+         deleteControlDocUrl,
+         downloadControlDocUrl } from '../url'
+import JSZip from 'jszip'
 
 export interface TNewControlDocCatInput {
     csrf: string
@@ -89,4 +91,40 @@ export interface TDeleteControlDocumentsOutput {
 
 export function deleteControlDocuments(inp: TDeleteControlDocumentsInput) : Promise<TDeleteControlDocumentsOutput> {
     return postFormUrlEncoded<TDeleteControlDocumentsOutput>(deleteControlDocUrl, inp)
+}
+
+export interface TDownloadControlDocumentsInput {
+    csrf: string
+    files: ControlDocumentationFile[]
+}
+
+export interface TDownloadControlDocumentsOutput {
+    data: Blob
+}
+
+export function downloadControlDocuments(inp: TDownloadControlDocumentsInput) : Promise<TDownloadControlDocumentsOutput> {
+    return new Promise(async (resolve, reject) => {
+        let zip = new JSZip()
+        for (let file of inp.files) {
+            try {
+                let blobData = await axios.get<Blob>(downloadControlDocUrl + '?' + qs.stringify({
+                    csrf: inp.csrf,
+                    fileId: file.Id
+                }), {
+                    responseType: "blob"
+                })
+
+                zip.folder(file.RelevantTime.toDateString()).file(`${file.Id}-${file.StorageName}`, blobData.data)
+            } catch (e) {
+                reject(e)
+                return
+            }
+        }
+
+        zip.generateAsync({
+            type:"blob"
+        }).then((blob : Blob) => {
+            resolve({ data: blob })
+        })
+    })
 }

@@ -365,14 +365,46 @@ func deleteControlDocumentation(w http.ResponseWriter, r *http.Request) {
 }
 
 func downloadControlDocumentation(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/octet-stream")
+
+	b2Auth, err := backblaze.B2Auth(core.EnvConfig.Backblaze.Key)
+	if err != nil {
+		core.Warning("Could not auth with Backblaze: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	inputs := DownloadControlDocInputs{}
-	err := webcore.UnmarshalRequestForm(r, &inputs)
+	err = webcore.UnmarshalRequestForm(r, &inputs)
 	if err != nil {
 		core.Warning("Can't parse inputs: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
+	dbFile, err := database.GetControlDocumentation(inputs.FileId)
+	if err != nil {
+		core.Warning("Can't get file db data: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	encryptedBytes, err := backblaze.DownloadFile(b2Auth, backblaze.B2File{
+		BucketId: dbFile.BucketId,
+		FileId:   dbFile.StorageId,
+	})
+	if err != nil {
+		core.Warning("Can't get file from Backblaze: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	decryptedBytes, err := security.TransitDecrypt(dbFile.UniqueKey(), encryptedBytes)
+	if err != nil {
+		core.Warning("Can't decrypt file: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(decryptedBytes)
 }

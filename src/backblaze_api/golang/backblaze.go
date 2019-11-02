@@ -13,6 +13,8 @@ import (
 	"net/url"
 )
 
+// TODO: Collapse the common parts of the 3 send functions
+
 type B2ApiResponse map[string]*json.RawMessage
 
 func SetAuthorizationHeaderWithAppKey(r *http.Request, key B2Key) {
@@ -83,6 +85,48 @@ func sendBackblazeApiEndpoint(auth *B2AuthToken, method string, endpoint string,
 	}
 
 	return nil
+}
+
+func sendBackblazeDownload(auth *B2AuthToken, file B2File) ([]byte, error) {
+	rawBody, err := json.Marshal(map[string]string{
+		"fileId": file.FileId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	body := bytes.NewBuffer(rawBody)
+
+	const downloadEndpoint = "/b2api/v2/b2_download_file_by_id"
+	req, err := http.NewRequest("POST", auth.DownloadUrl+downloadEndpoint, body)
+	if err != nil {
+		return nil, err
+	}
+	SetAuthorizationHeaderWithToken(req, auth.Token)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	respBodyData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		rootObj := B2ApiResponse{}
+		err = json.Unmarshal(respBodyData, &rootObj)
+		if err != nil {
+			return nil, err
+		}
+
+		if err = handleBackblazeError(resp, rootObj); err != nil {
+			return nil, err
+		}
+	}
+
+	return respBodyData, nil
 }
 
 func sendBackblazeUpload(uploadToken UploadFileToken, filename string, data []byte, outInt interface{}) error {
