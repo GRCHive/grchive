@@ -250,6 +250,9 @@ export default Vue.extend({
         },
         saveNewControlDocCategory(cat : ControlDocumentationCategory) {
             this.showHideNewCat = false
+            if (!this.hasCategories) {
+                this.currentDocumentCategory = cat
+            }
             this.fullControlData.DocumentCategories.push(cat)
         },
         cancelNewControlDocCategory() {
