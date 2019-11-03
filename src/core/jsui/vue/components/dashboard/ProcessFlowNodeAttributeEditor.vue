@@ -64,6 +64,7 @@ import ProcessFlowInputOutputEditor from './ProcessFlowInputOutputEditor.vue'
 import { editProcessFlowNode } from '../../../ts/api/apiProcessFlowNodes'
 import { contactUsUrl } from '../../../ts/url'
 import MetadataStore from '../../../ts/metadata'
+import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     data : () => ({
@@ -92,8 +93,7 @@ export default Vue.extend({
         },
         saveEdit() {
             editProcessFlowNode({
-                //@ts-ignore
-                csrf: this.$root.csrf,
+                csrf: getCurrentCSRF(),
                 nodeId: this.currentNode.Id,
                 name: this.currentNode.Name,
                 description: this.currentNode.Description,

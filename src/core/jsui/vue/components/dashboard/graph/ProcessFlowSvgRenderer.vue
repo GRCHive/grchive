@@ -72,6 +72,7 @@ import { newProcessFlowEdge } from '../../../../ts/api/apiProcessFlowEdges'
 import { contactUsUrl } from '../../../../ts/url'
 import LocalSettings from '../../../../ts/localSettings'
 import { convertClientPointToSvg, convertClientDeltaToSvg } from '../../../../ts/svg'
+import { getCurrentCSRF } from '../../../../ts/csrf'
 
 export default Vue.extend({
     components: {
@@ -190,8 +191,7 @@ export default Vue.extend({
             }
 
             newProcessFlowEdge(<TNewProcessFlowEdgeInput>{
-                //@ts-ignore
-                csrf: this.$root.csrf,
+                csrf: getCurrentCSRF(),
                 inputIoId: endIsInput ? endIo.Id : this.tempEdgeStart.io.Id,
                 outputIoId: endIsInput ? this.tempEdgeStart.io.Id : endIo.Id
             }).then((resp : TNewProcessFlowEdgeOutput) => {

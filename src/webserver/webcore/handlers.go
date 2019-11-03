@@ -146,6 +146,17 @@ func CreateVerifyUserHasAccessToUserMiddleware(failure http.HandlerFunc) mux.Mid
 	}
 }
 
+func GrantCSRFMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := AddCSRFTokenToRequest(w, r); err != nil {
+			core.Info("Failed to add CSRF: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func CreateVerifyCSRFMiddleware(failure http.HandlerFunc) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

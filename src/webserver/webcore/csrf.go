@@ -6,27 +6,28 @@ import (
 	"net/http"
 )
 
-// Add the CSRF token to the session (cookie) and also adds it to the input map[string]interface{}
-// so that the templating engine/frontend can add it to the HTML/JS as needed for verification.
-func AddCSRFTokenToRequest(w http.ResponseWriter, r *http.Request, pageVars map[string]interface{}) (map[string]interface{}, error) {
-	newPageVars := core.CopyMap(pageVars)
+// Add the CSRF token to the secure session (cookie) as well as an unencrypted cookie.
+// The unencrypted cookie is for the client to obtain the CSRF token so they can send it
+// back to us for the double submit pattern.
+func AddCSRFTokenToRequest(w http.ResponseWriter, r *http.Request) error {
 	session, err := ClientShortSessionStore.Get(r, "csrf")
 	if err != nil {
 		core.Warning("Failed to retrieve from session: " + err.Error())
-		return pageVars, err
+		return err
 	}
 
 	// This is probably ok to use instead of uuid.NewRandom. I don't think we'll
 	// encounter where uuid.Must will fail? Famous last words.
 	token := uuid.New().String()
 	session.Values["csrf"] = token
-	newPageVars["Csrf"] = token
 	err = session.Save(r, w)
 	if err != nil {
 		core.Warning("Failed to save to session: " + err.Error())
-		return pageVars, err
+		return err
 	}
-	return newPageVars, nil
+
+	http.SetCookie(w, CreateCookie("client-csrf", token, 0, false))
+	return nil
 }
 
 func GetCSRFToken(r *http.Request) (string, error) {

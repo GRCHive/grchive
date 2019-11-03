@@ -7,12 +7,8 @@ import (
 	"net/http"
 )
 
-func BuildTemplateParams(w http.ResponseWriter, r *http.Request, needCsrf bool) map[string]interface{} {
+func BuildTemplateParams(w http.ResponseWriter, r *http.Request) map[string]interface{} {
 	params := core.StructToMap(*core.EnvConfig.Company)
-	if needCsrf {
-		params, _ = webcore.AddCSRFTokenToRequest(w, r, params)
-	}
-
 	_, err := webcore.FindSessionInContext(r.Context())
 	params["HasSession"] = (err == nil)
 	params["Host"] = r.Host
@@ -57,7 +53,7 @@ func BuildFullRiskTemplateParams(risk *core.Risk, relevantNodes []*core.ProcessF
 }
 
 func CreateRedirectParams(w http.ResponseWriter, r *http.Request, title string, subtitle string, redirectUrl string) map[string]interface{} {
-	newMap := BuildTemplateParams(w, r, false)
+	newMap := BuildTemplateParams(w, r)
 	newMap["Title"] = title
 	newMap["Subtitle"] = subtitle
 	newMap["Redirect"] = redirectUrl

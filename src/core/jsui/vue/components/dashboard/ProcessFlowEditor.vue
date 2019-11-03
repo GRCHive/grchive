@@ -73,6 +73,7 @@ import { standardFormatTime } from '../../../ts/time'
 import { postFormUrlEncoded } from "../../../ts/http"
 import { contactUsUrl, createUpdateProcessFlowApiUrl } from "../../../ts/url"
 
+import { getCurrentCSRF } from '../../../ts/csrf'
 interface ResponseData {
     data : ProcessFlowBasicData
 }
@@ -105,6 +106,7 @@ export default Vue.extend({
         }
     },
     methods: {
+        getCurrentCSRF,
         onExpandDescription() {
             this.expandDescription = !this.expandDescription
             this.$emit('on-change')
@@ -128,8 +130,7 @@ export default Vue.extend({
             postFormUrlEncoded<ResponseData>(createUpdateProcessFlowApiUrl(this.basicData.Id), {
                 name: this.editName,
                 description: this.editDescription,
-                //@ts-ignore
-                csrf: this.$root.csrf
+                csrf: this.getCurrentCSRF()
             }).then((resp : ResponseData) => {
                 VueSetup.store.commit(
                     "setIndividualProcessFlowBasicData", 

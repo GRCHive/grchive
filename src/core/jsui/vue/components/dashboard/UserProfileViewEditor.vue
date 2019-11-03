@@ -47,6 +47,7 @@ import * as rules from "../../../ts/formRules"
 import { contactUsUrl, createUserProfileEditAPIUrl } from "../../../ts/url"
 import { postFormUrlEncoded } from "../../../ts/http"
 import Vue from 'vue'
+import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     data: function() {
@@ -89,8 +90,7 @@ export default Vue.extend({
             postFormUrlEncoded<void>(createUserProfileEditAPIUrl(this.$root.userEmail), {
                 firstName: this.formData.firstName,
                 lastName: this.formData.lastName,
-                //@ts-ignore
-                csrf: this.$root.csrf
+                csrf: getCurrentCSRF()
             }).then((resp : void) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(

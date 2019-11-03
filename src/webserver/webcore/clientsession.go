@@ -18,6 +18,17 @@ var ClientLongSessionStore *sessions.CookieStore
 // to handle the case of key rotation.
 var Cookies = make([]*securecookie.SecureCookie, 0)
 
+func CreateCookie(name string, value string, maxAge int, httpOnly bool) *http.Cookie {
+	return &http.Cookie{
+		Name:     name,
+		Value:    value,
+		MaxAge:   maxAge,
+		Secure:   core.EnvConfig.UseSecureCookies,
+		HttpOnly: httpOnly,
+		Path:     MustGetRouteUrl(LandingPageRouteName),
+	}
+}
+
 func initializeSessions() {
 	ClientShortSessionStore = sessions.NewCookieStore(core.EnvConfig.SessionKeys...)
 	ClientShortSessionStore.Options.HttpOnly = true
@@ -55,17 +66,7 @@ func StoreUserSessionOnClient(session *core.UserSession, w http.ResponseWriter) 
 	}
 
 	cookieMaxAgeSeconds := core.SecondsInYear
-	cookieMaxAgeSecondsDuration := time.Duration(cookieMaxAgeSeconds) * time.Second
-
-	cookie := &http.Cookie{
-		Name:     cookieName,
-		Value:    encoded,
-		Expires:  time.Now().Add(cookieMaxAgeSecondsDuration).UTC(),
-		MaxAge:   cookieMaxAgeSeconds,
-		Secure:   core.EnvConfig.UseSecureCookies,
-		HttpOnly: true,
-		Path:     MustGetRouteUrl(LandingPageRouteName),
-	}
+	cookie := CreateCookie(cookieName, encoded, cookieMaxAgeSeconds, true)
 	http.SetCookie(w, cookie)
 	return nil
 }

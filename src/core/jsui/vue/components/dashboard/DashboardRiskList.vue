@@ -73,6 +73,7 @@ import { contactUsUrl, createRiskUrl } from '../../../ts/url'
 import { replaceWithMark, sanitizeTextForHTML } from '../../../ts/text'
 import CreateNewRiskForm from './CreateNewRiskForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
+import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     data : () => ({
@@ -121,8 +122,7 @@ export default Vue.extend({
         },
         refreshRisks() {
             getAllRisks(<TAllRiskInput>{
-                //@ts-ignore
-                csrf: this.$root.csrf
+                csrf: getCurrentCSRF()
             }).then((resp : TAllRiskOutput) => {
                 this.allRisks = resp.data
             }).catch((err) => {
@@ -167,8 +167,7 @@ export default Vue.extend({
             const risk = this.allRisks[idx]
 
             deleteRisk(<TDeleteRiskInput>{
-                //@ts-ignore
-                csrf: this.$root.csrf,
+                csrf: getCurrentCSRF(),
                 nodeId: -1,
                 riskIds: [risk.Id],
                 global: true

@@ -46,14 +46,20 @@ func main() {
 
 	// Dynamic(?) content that needs to be served by Go.
 	dynamicRouter.Use(webcore.ObtainUserSessionInContextMiddleware)
-	dynamicRouter.HandleFunc(core.GetStartedUrl, render.RenderGettingStartedPage).Methods("GET").Name(string(webcore.GettingStartedRouteName))
-	dynamicRouter.HandleFunc(core.ContactUsUrl, render.RenderContactUsPage).Methods("GET").Name(string(webcore.ContactUsRouteName))
-	dynamicRouter.HandleFunc(core.HomePageUrl, render.RenderHomePage).Methods("GET").Name(string(webcore.LandingPageRouteName))
-	dynamicRouter.HandleFunc(core.LoginUrl, render.RenderLoginPage).Methods("GET").Name(string(webcore.LoginRouteName))
-	dynamicRouter.HandleFunc(core.LearnMoreUrl, render.RenderLearnMorePage).Methods("GET").Name(string(webcore.LearnMoreRouteName))
+
+	pageRouter := dynamicRouter.Methods("GET").Subrouter()
+	pageRouter.Use(webcore.GrantCSRFMiddleware)
+	pageRouter.HandleFunc(core.GetStartedUrl, render.RenderGettingStartedPage).Name(string(webcore.GettingStartedRouteName))
+	pageRouter.HandleFunc(core.ContactUsUrl, render.RenderContactUsPage).Name(string(webcore.ContactUsRouteName))
+	pageRouter.HandleFunc(core.HomePageUrl, render.RenderHomePage).Name(string(webcore.LandingPageRouteName))
+	pageRouter.HandleFunc(core.LoginUrl, render.RenderLoginPage).Name(string(webcore.LoginRouteName))
+	pageRouter.HandleFunc(core.LearnMoreUrl, render.RenderLearnMorePage).Name(string(webcore.LearnMoreRouteName))
+	createDashboardSubrouter(pageRouter)
+
 	rest.RegisterPaths(dynamicRouter)
 	websocket.RegisterPaths(dynamicRouter)
-	createDashboardSubrouter(dynamicRouter)
+
+	// Should be last?
 	webcore.RegisterRouter(dynamicRouter)
 
 	// Custom 404

@@ -11,7 +11,7 @@ func RenderGettingStartedPage(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			BuildTemplateParams(w, r, false))
+			BuildTemplateParams(w, r))
 }
 
 func RenderContactUsPage(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +19,7 @@ func RenderContactUsPage(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			BuildTemplateParams(w, r, false))
+			BuildTemplateParams(w, r))
 }
 
 func RenderHomePage(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +27,7 @@ func RenderHomePage(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			BuildTemplateParams(w, r, false))
+			BuildTemplateParams(w, r))
 }
 
 func RenderLoginPage(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +42,7 @@ func RenderLoginPage(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			BuildTemplateParams(w, r, true))
+			BuildTemplateParams(w, r))
 }
 
 func RenderLearnMorePage(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +50,7 @@ func RenderLearnMorePage(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			BuildTemplateParams(w, r, false))
+			BuildTemplateParams(w, r))
 }
 
 func RenderDashboardHomePage(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +95,7 @@ func RenderDashboardOrgHomePage(w http.ResponseWriter, r *http.Request) {
 	//		w,
 	//		"dashboardBase",
 	//		core.MergeMaps(
-	//			BuildTemplateParams(w, r, true),
+	//			BuildTemplateParams(w, r),
 	//			BuildOrgTemplateParams(org),
 	//			BuildUserTemplateParams(data.CurrentUser)))
 
@@ -121,7 +121,7 @@ func RenderDashboardUserHomePage(w http.ResponseWriter, r *http.Request) {
 			w,
 			"dashboardBase",
 			core.MergeMaps(
-				BuildTemplateParams(w, r, true),
+				BuildTemplateParams(w, r),
 				BuildOrgTemplateParams(data.Org),
 				BuildUserTemplateParams(data.CurrentUser)))
 }
@@ -150,7 +150,7 @@ func RenderDashboardProcessFlowsPage(w http.ResponseWriter, r *http.Request) {
 			w,
 			"dashboardBase",
 			core.MergeMaps(
-				BuildTemplateParams(w, r, true),
+				BuildTemplateParams(w, r),
 				BuildOrgTemplateParams(org),
 				BuildUserTemplateParams(data.CurrentUser)))
 }
@@ -179,7 +179,7 @@ func RenderDashboardRisksPage(w http.ResponseWriter, r *http.Request) {
 			w,
 			"dashboardBase",
 			core.MergeMaps(
-				BuildTemplateParams(w, r, true),
+				BuildTemplateParams(w, r),
 				BuildOrgTemplateParams(org),
 				BuildUserTemplateParams(data.CurrentUser)))
 }
@@ -208,7 +208,7 @@ func RenderDashboardSingleRiskPage(w http.ResponseWriter, r *http.Request) {
 			w,
 			"dashboardBase",
 			core.MergeMaps(
-				BuildTemplateParams(w, r, true),
+				BuildTemplateParams(w, r),
 				BuildOrgTemplateParams(org),
 				BuildUserTemplateParams(data.CurrentUser)))
 }
@@ -237,7 +237,7 @@ func RenderDashboardControlsPage(w http.ResponseWriter, r *http.Request) {
 			w,
 			"dashboardBase",
 			core.MergeMaps(
-				BuildTemplateParams(w, r, true),
+				BuildTemplateParams(w, r),
 				BuildOrgTemplateParams(org),
 				BuildUserTemplateParams(data.CurrentUser)))
 }
@@ -266,7 +266,7 @@ func RenderDashboardSingleControlPage(w http.ResponseWriter, r *http.Request) {
 			w,
 			"dashboardBase",
 			core.MergeMaps(
-				BuildTemplateParams(w, r, true),
+				BuildTemplateParams(w, r),
 				BuildOrgTemplateParams(org),
 				BuildUserTemplateParams(data.CurrentUser)))
 }

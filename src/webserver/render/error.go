@@ -10,7 +10,7 @@ func Render404(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			BuildTemplateParams(w, r, false))
+			BuildTemplateParams(w, r))
 }
 
 func Render403(w http.ResponseWriter, r *http.Request) {
@@ -19,5 +19,5 @@ func Render403(w http.ResponseWriter, r *http.Request) {
 		ExecuteTemplate(
 			w,
 			"base",
-			BuildTemplateParams(w, r, false))
+			BuildTemplateParams(w, r))
 }

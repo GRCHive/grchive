@@ -10,6 +10,7 @@ import DashboardOrgControls from '../vue/pages/dashboard/DashboardOrgControls.vu
 import DashboardOrgSingleControl from '../vue/pages/dashboard/DashboardOrgSingleControl.vue'
 import DashboardUserHome from '../vue/pages/dashboard/DashboardUserHome.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
+import { getCurrentCSRF } from './csrf'
 
 import '../sass/main.scss'
 import '@mdi/font/scss/materialdesignicons.scss'
@@ -31,14 +32,16 @@ function mountApp(inData : Object) {
         vuetify: vueOpts.vuetify,
         mounted() {
             //@ts-ignore
-            MetadataStore.dispatch('initialize', inData)
+            MetadataStore.dispatch('initialize', {
+                ...inData,
+                csrf: getCurrentCSRF()
+            })
 
             //@ts-ignore
             RenderLayout.store.dispatch('initialize', {
                 //@ts-ignore
                 host: inData.host,
-                //@ts-ignore
-                csrf: inData.csrf,
+                csrf: getCurrentCSRF(),
                 processFlowStore: vueOpts.store})
         }
     })

@@ -53,6 +53,7 @@ import { contactUsUrl } from "../../../ts/url"
 import { newControlDocCat, TNewControlDocCatInput, TNewControlDocCatOutput } from '../../../ts/api/apiControlDocumentation'
 import { editControlDocCat, TEditControlDocCatInput, TEditControlDocCatOutput } from '../../../ts/api/apiControlDocumentation'
 import { ControlDocumentationCategory } from '../../../ts/controls'
+import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     props : {
@@ -133,8 +134,7 @@ export default Vue.extend({
         },
         doSave() {
             newControlDocCat(<TNewControlDocCatInput>{
-                //@ts-ignore
-                csrf: this.$root.csrf,
+                csrf: getCurrentCSRF(),
                 controlId: this.control.Id,
                 name: this.name,
                 description: this.description
@@ -146,8 +146,7 @@ export default Vue.extend({
         },
         doEdit() {
             editControlDocCat(<TEditControlDocCatInput>{
-                //@ts-ignore
-                csrf: this.$root.csrf,
+                csrf: getCurrentCSRF(),
                 controlId: this.control.Id,
                 catId: this.catId,
                 name: this.name,

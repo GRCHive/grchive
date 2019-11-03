@@ -46,6 +46,7 @@ import { contactUsUrl, getAllProcessFlowAPIUrl} from '../../../ts/url'
 import { deleteProcessFlow, TDeleteProcessFlowInput, TDeleteProcessFlowOutput } from '../../../ts/api/apiProcessFlow'
 import VueSetup from '../../../ts/vueSetup'
 import RenderLayout from '../../../ts/render/renderLayout'
+import { getCurrentCSRF } from '../../../ts/csrf'
 
 interface NavLinks {
     icon : string
@@ -111,8 +112,7 @@ export default Vue.extend({
     methods: {
         onDeleteProcessFlow(processFlow : ProcessFlowBasicData) {
             deleteProcessFlow(<TDeleteProcessFlowInput>{
-                //@ts-ignore
-                csrf: this.$root.csrf,
+                csrf: getCurrentCSRF(),
                 flowId: processFlow.Id
             }).then((resp : TDeleteProcessFlowOutput) => {
                 VueSetup.store.commit('deleteProcessFlow', processFlow.Id)
@@ -148,8 +148,7 @@ export default Vue.extend({
                     //@ts-ignore
                     VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
                         index: resp.data.RequestedIndex,
-                        //@ts-ignore
-                        csrf: this.$root.csrf
+                        csrf: getCurrentCSRF()
                     })
                 } else {
                     // If there's no path parameter for the route then we should manually replace the route on the router ourselves.
@@ -159,8 +158,7 @@ export default Vue.extend({
                     // the full data to be pulled as well.
                     VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
                         index: VueSetup.store.state.currentProcessFlowIndex,
-                        //@ts-ignore
-                        csrf: this.$root.csrf
+                        csrf: getCurrentCSRF()
                     })
                 }
             }).catch((err) => {
@@ -180,8 +178,7 @@ export default Vue.extend({
             if (id >= 0) {
                 passedData['requested'] = id
             }
-            //@ts-ignore
-            passedData['csrf'] = this.$root.csrf
+            passedData['csrf'] = getCurrentCSRF()
             //@ts-ignore
             passedData['organization'] = this.$root.orgGroupId
 
@@ -204,8 +201,7 @@ export default Vue.extend({
                 VueSetup.store.commit('setProcessFlowBasicData', resp.data.Flows)
                 VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
                     index: resp.data.RequestedIndex,
-                    //@ts-ignore
-                    csrf: this.$root.csrf
+                    csrf: getCurrentCSRF()
                 })
                 VueSetup.currentRouter.replace(this.navLinks[VueSetup.store.state.currentProcessFlowIndex].path)
             }).catch((err) => {
@@ -225,8 +221,7 @@ export default Vue.extend({
                 RenderLayout.store.commit('resetNodeLayout')
                 VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
                     index: idx,
-                    //@ts-ignore
-                    csrf: this.$root.csrf
+                    csrf: getCurrentCSRF()
                 })
             }
         }

@@ -42,6 +42,7 @@ import Vue from 'vue'
 import * as rules from "../../../ts/formRules"
 import { postFormUrlEncoded } from "../../../ts/http"
 import { contactUsUrl, newProcessFlowAPIUrl } from "../../../ts/url"
+import { getCurrentCSRF } from '../../../ts/csrf'
 
 interface ResponseData {
     data: {
@@ -79,8 +80,7 @@ export default Vue.extend({
                 description: this.description || "",
                 //@ts-ignore
                 organization: this.$root.orgGroupId,
-                //@ts-ignore
-                csrf: this.$root.csrf
+                csrf: getCurrentCSRF()
             }).then((resp : ResponseData) => {
                 this.name = undefined;
                 this.description = undefined;

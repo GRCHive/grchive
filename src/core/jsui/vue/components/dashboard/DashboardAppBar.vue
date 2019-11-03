@@ -52,14 +52,14 @@ import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
 import LocalStorage from '../../../ts/localSettings'
 import {createLogoutUrl, createMyAccountUrl, createMailtoUrl } from '../../../ts/url'
+import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     data: function() {
         return {
             //@ts-ignore
             fullName: this.$root.userFirstName + " " + this.$root.userLastName,
-            //@ts-ignore
-            logoutUrl : createLogoutUrl(this.$root.csrf),
+            logoutUrl : createLogoutUrl(getCurrentCSRF()),
             //@ts-ignore
             myAccountUrl: createMyAccountUrl(this.$root.userEmail),
             //@ts-ignore

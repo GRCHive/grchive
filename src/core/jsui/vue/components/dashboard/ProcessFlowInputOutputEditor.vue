@@ -85,6 +85,7 @@ import * as qs from 'query-string'
 import { contactUsUrl, getAllProcessFlowIOTypesAPIUrl, newProcessFlowIOAPIUrl } from '../../../ts/url'
 import { postFormUrlEncoded } from '../../../ts/http'
 import { deleteProcessFlowIO, editProcessFlowIO } from '../../../ts/api/apiProcessFlowIO'
+import { getCurrentCSRF } from '../../../ts/csrf'
 
 interface NewIOResponseData {
     data : ProcessFlowInputOutput
@@ -137,8 +138,7 @@ export default Vue.extend({
                 typeId: type.Id,
                 isInput: this.isInput,
                 name,
-                //@ts-ignore
-                csrf: this.$root.csrf
+                csrf: getCurrentCSRF()
             }).then((resp : NewIOResponseData) => {
                 if (this.isInput) {
                     VueSetup.store.commit('addNodeInput', {nodeId: this.nodeId, input: resp.data})
@@ -159,8 +159,7 @@ export default Vue.extend({
         deleteIO(e: MouseEvent, ioId : number) {
             // Maybe we want to confirm with the user first?
             deleteProcessFlowIO({
-                //@ts-ignore
-                csrf: this.$root.csrf,
+                csrf: getCurrentCSRF(),
                 ioId,
                 isInput: this.isInput
             }).then((resp : TDeleteProcessFlowIOOutput) => {
@@ -186,8 +185,7 @@ export default Vue.extend({
         },
         saveIO(e: MouseEvent, io : ProcessFlowInputOutput) {
             editProcessFlowIO({
-                //@ts-ignore
-                csrf: this.$root.csrf,
+                csrf: getCurrentCSRF(),
                 ioId: io.Id,
                 isInput: this.isInput,
                 name: io.Name ,

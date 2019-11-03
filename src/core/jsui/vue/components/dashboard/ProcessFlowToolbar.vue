@@ -106,6 +106,7 @@ import LocalSettings from '../../../ts/localSettings'
 import { contactUsUrl, newProcessFlowNodeAPIUrl } from '../../../ts/url'
 import { postFormUrlEncoded } from '../../../ts/http'
 import { nodeTypeToClass } from '../../../ts/render/nodeCssUtils'
+import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     computed: {
@@ -127,14 +128,12 @@ export default Vue.extend({
             postFormUrlEncoded(newProcessFlowNodeAPIUrl, {
                 typeId: nodeTypeId,
                 flowId: VueSetup.store.getters.currentProcessFlowBasicData.Id,
-                //@ts-ignore
-                csrf: this.$root.csrf
+                csrf: getCurrentCSRF()
             }).then((resp) => {
                 // TODO: Make this more efficient and just do a local adjustment of the data?
                 //       That'd require some more syncing stuff...which is fancier.
                 // Force a refresh of the data for the currently selected process flow.
-                //@ts-ignore
-                VueSetup.store.dispatch('refreshCurrentProcessFlowFullData', this.$root.csrf)
+                VueSetup.store.dispatch('refreshCurrentProcessFlowFullData', getCurrentCSRF())
             }).catch((err) => {
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
@@ -148,8 +147,7 @@ export default Vue.extend({
         handleHotkeys(e : KeyboardEvent) {
             if (e.code == "Delete") {
                 VueSetup.store.dispatch('requestDeletionOfSelection', {
-                    //@ts-ignore
-                    csrf: this.$root.csrf
+                    csrf: getCurrentCSRF()
                 })
                 e.stopPropagation()
             }
