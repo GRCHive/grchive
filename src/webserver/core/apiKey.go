@@ -10,7 +10,6 @@ type RawApiKey string
 type ApiKey struct {
 	Id             int64     `db:"id"`
 	HashedKey      []byte    `db:"hashed_api_key"`
-	Salt           string    `db:"salt"`
 	ExpirationDate time.Time `db:"expiration_date"`
 	UserId         int64     `db:"user_id"`
 }
@@ -19,13 +18,13 @@ type ApiKey struct {
 // since it's just being used to store Api keys. Realistically,
 // if any attackers gets this far they probably already have
 // access to whatever this API key could give them...
-func (key RawApiKey) HashWithSalt(salt string) []byte {
-	hash := sha512.Sum512([]byte(string(key) + salt))
+func (key RawApiKey) Hash() []byte {
+	hash := sha512.Sum512([]byte(key))
 	return hash[:]
 }
 
 func (key ApiKey) Matches(rawKey RawApiKey) bool {
-	hashedRawKey := rawKey.HashWithSalt(key.Salt)
+	hashedRawKey := rawKey.Hash()
 
 	if key.HashedKey == nil || hashedRawKey == nil {
 		return false

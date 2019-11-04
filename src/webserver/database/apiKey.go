@@ -7,10 +7,9 @@ import (
 func StoreApiKey(key *core.ApiKey) error {
 	tx := dbConn.MustBegin()
 	_, err := tx.NamedExec(`
-		INSERT INTO api_keys ( hashed_api_key, salt, expiration_date, user_id )
+		INSERT INTO api_keys ( hashed_api_key, expiration_date, user_id )
 		VALUES (
 			:hashed_api_key,
-			:salt,
 			:expiration_date,
 			:user_id
 		)
@@ -28,7 +27,6 @@ func UpdateApiKey(key *core.ApiKey) error {
 	_, err := tx.NamedExec(`
 		UPDATE api_keys
 		SET hashed_api_key = :hashed_api_key,
-			salt = :salt,
 			expiration_date = :expiration_date
 		WHERE user_id = :user_id
 	`, key)

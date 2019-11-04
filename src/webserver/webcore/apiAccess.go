@@ -11,12 +11,10 @@ import (
 // Returns the raw unhashed API key, the database entry, and an error if any.
 func GenerateTemporaryAPIKeyForUser(userId int64) (core.RawApiKey, *core.ApiKey) {
 	rawKey := core.RawApiKey(uuid.New().String())
-	salt := uuid.New().String()
-	hashedKey := rawKey.HashWithSalt(salt)
+	hashedKey := rawKey.Hash()
 
 	key := core.ApiKey{
 		HashedKey:      hashedKey,
-		Salt:           salt,
 		ExpirationDate: time.Now().Add(time.Hour).UTC(),
 		UserId:         userId,
 	}
