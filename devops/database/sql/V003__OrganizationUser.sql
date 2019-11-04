@@ -17,3 +17,5 @@ CREATE TABLE users (
     last_name VARCHAR(256) NOT NULL,
     email VARCHAR(320) NOT NULL UNIQUE
 );
+
+CREATE UNIQUE INDEX users_id_org_index ON users (id, org_id);

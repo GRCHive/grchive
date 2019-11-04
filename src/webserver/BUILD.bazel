@@ -64,6 +64,7 @@ go_library(
         "webcore/webcore.go",
         "webcore/constants.go",
         "webcore/apiAccess.go",
+        "webcore/accessControl.go",
     ],
     deps = [
         "//src/webserver/core:webserver_core_library",
