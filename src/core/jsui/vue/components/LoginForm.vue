@@ -30,6 +30,7 @@
 import { getStartedUrl, contactUsUrl } from '../../ts/url'
 import * as rules from "../../ts/formRules"
 import { postFormUrlEncoded } from "../../ts/http"
+import { getCurrentCSRF } from "../../ts/csrf"
 import Vue from 'vue';
 
 interface ResponseData {
@@ -39,9 +40,6 @@ interface ResponseData {
 }
 
 export default Vue.extend({
-    props: {
-        csrf: String
-    },
     data: () => ({
         getStartedUrl,
         rules,
@@ -74,7 +72,7 @@ export default Vue.extend({
 
             postFormUrlEncoded<ResponseData>('#', {
                 email: this.$data.email,
-                csrf: this.$props.csrf
+                csrf: getCurrentCSRF(),
             }).then((resp : ResponseData) => {
                 window.location.assign(resp.data.LoginUrl);
             }).catch((err) => {

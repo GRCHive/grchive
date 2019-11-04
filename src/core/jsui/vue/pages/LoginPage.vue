@@ -19,7 +19,7 @@
                         <v-card-title>
                             Login
                         </v-card-title>
-                        <login-form :csrf="csrf"></login-form>
+                        <login-form></login-form>
                     </v-card>
                 </v-row>
             </v-container>
@@ -36,9 +36,6 @@ import LoginForm from '../components/LoginForm.vue'
 import { createAssetUrl } from '../../ts/url'
 
 export default {
-    props: [
-        'csrf'
-    ],
     components: {
         LandingPageAppBar,
         HeroImage,
