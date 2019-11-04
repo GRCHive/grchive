@@ -146,6 +146,26 @@ func CreateVerifyUserHasAccessToUserMiddleware(failure http.HandlerFunc) mux.Mid
 	}
 }
 
+func GrantAPIKeyMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userParsedData, err := FindSessionParsedDataInContext(r.Context())
+		if err != nil {
+			core.Info("Failed to add find user for API key: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		err = RefreshGrantAPIKey(userParsedData.CurrentUser.Id, w, r)
+		if err != nil {
+			core.Info("Failed to grant API key: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func GrantCSRFMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := AddCSRFTokenToRequest(w, r); err != nil {

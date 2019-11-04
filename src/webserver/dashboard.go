@@ -13,6 +13,8 @@ func createDashboardSubrouter(r *mux.Router) {
 	s.Use(webcore.CreateAuthenticatedRequestMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, webcore.MustGetRouteUrl(webcore.LoginRouteName), http.StatusTemporaryRedirect)
 	}))
+	s.Use(webcore.GrantAPIKeyMiddleware)
+
 	s.HandleFunc(core.DashboardHomeUrl, render.RenderDashboardHomePage).Name(webcore.DashboardHomeRouteName)
 	createOrganizationSubrouter(s)
 	createUserSubrouter(s)

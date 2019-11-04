@@ -27,6 +27,7 @@ go_library(
         "controls.go",
         "controlDocumentation.go",
         "types.go",
+        "apiKey.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",

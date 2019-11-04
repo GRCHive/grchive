@@ -37,6 +37,7 @@ go_library(
         "database/users.go",
         "database/controls.go",
         "database/controlDocumentation.go",
+        "database/apiKey.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 
@@ -62,6 +63,7 @@ go_library(
         "webcore/redirectResponseWriter.go",
         "webcore/webcore.go",
         "webcore/constants.go",
+        "webcore/apiAccess.go",
     ],
     deps = [
         "//src/webserver/core:webserver_core_library",
