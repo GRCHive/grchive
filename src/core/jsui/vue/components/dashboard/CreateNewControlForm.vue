@@ -82,6 +82,8 @@ import Metadata from "../../../ts/metadata"
 import { lazyGetUserFromId, lazyGetControlTypeFromId } from '../../../ts/metadataUtils.ts'
 import { newControl, 
          editControl,
+         TNewControlInput,
+         TNewControlOutput,
          TEditControlInput,
          TEditControlOutput } from "../../../ts/api/apiControls"
 import { contactUsUrl } from "../../../ts/url"
@@ -222,7 +224,9 @@ export default Vue.extend({
                 frequencyInterval : this.frequencyData.freqInterval,
                 ownerId : !!this.controlOwner ? this.controlOwner.Id : undefined,
                 nodeId: this.nodeId,
-                riskId: this.riskId
+                riskId: this.riskId,
+                //@ts-ignore
+                orgName: this.$root.orgGroupId
             }).then((resp : TNewControlOutput) => {
                 this.onSuccess(resp.data)
             }).catch((err : any) => {
@@ -240,7 +244,9 @@ export default Vue.extend({
                 ownerId : !!this.controlOwner ? this.controlOwner.Id : undefined,
                 nodeId: this.nodeId,
                 riskId: this.riskId,
-                controlId: this.control.Id
+                controlId: this.control.Id,
+                //@ts-ignore
+                orgName: this.$root.orgGroupId
             }).then((resp : TEditControlOutput) => {
                 this.onSuccess(resp.data)
             }).catch((err : any) => {

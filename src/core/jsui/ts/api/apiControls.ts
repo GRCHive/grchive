@@ -15,6 +15,23 @@ export function getControlTypes(inp : TGetControlTypesInput) : Promise<TGetContr
     return axios.get(getControlTypesUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
 }
 
+export interface TNewControlInput {
+    csrf : string
+    name : string 
+    description: string
+    controlType : number
+    frequencyType : number
+    frequencyInterval : number
+    ownerId : number
+    nodeId:  number
+    riskId : number
+    orgName : string
+}
+
+export interface TNewControlOutput {
+    data: ProcessFlowControl
+}
+
 export function newControl(inp: TNewControlInput) : Promise<TNewControlOutput> {
     return postFormUrlEncoded<TNewControlOutput>(newControlUrl, inp, getAPIRequestConfig())
 }
@@ -64,6 +81,7 @@ export function editControl(inp: TEditControlInput) : Promise<TEditControlOutput
 
 export interface TAllControlInput {
     csrf: string
+    orgName: string
 }
 
 export interface TAllControlOutput {

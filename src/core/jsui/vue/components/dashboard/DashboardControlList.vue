@@ -170,7 +170,9 @@ export default Vue.extend({
         },
         refreshControls() {
             getAllControls(<TAllControlInput>{
-                csrf: getCurrentCSRF()
+                csrf: getCurrentCSRF(),
+                //@ts-ignore
+                orgName: this.$root.orgGroupId
             }).then((resp : TAllControlOutput) => {
                 this.allControls = resp.data
             }).catch((err : any) => {

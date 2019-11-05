@@ -122,7 +122,9 @@ export default Vue.extend({
         },
         refreshRisks() {
             getAllRisks(<TAllRiskInput>{
-                csrf: getCurrentCSRF()
+                csrf: getCurrentCSRF(),
+                //@ts-ignore
+                orgName: this.$root.orgGroupId
             }).then((resp : TAllRiskOutput) => {
                 this.allRisks = resp.data
             }).catch((err) => {

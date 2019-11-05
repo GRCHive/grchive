@@ -10,6 +10,18 @@ import { newRiskAPIUrl,
 import { FullRiskData } from '../risks'
 import { getAPIRequestConfig } from './apiUtility'
 
+export interface TNewRiskInput {
+    csrf: string
+    name: string
+    description : string
+    nodeId: number
+    orgName: string
+}
+
+export interface TNewRiskOutput {
+    data: ProcessFlowRisk
+}
+
 export function newRisk(inp : TNewRiskInput) : Promise<TNewRiskOutput> {
     return postFormUrlEncoded<TNewRiskOutput>(newRiskAPIUrl, inp, getAPIRequestConfig())
 }
@@ -27,6 +39,7 @@ export interface TEditRiskInput {
     name: string
     description : string
     riskId: number
+    orgName: string
 }
 
 export interface TEditRiskOutput {
@@ -39,6 +52,7 @@ export function editRisk(inp : TEditRiskInput) : Promise<TEditRiskOutput> {
 
 export interface TAllRiskInput {
     csrf: string
+    orgName: string
 }
 
 export interface TAllRiskOutput {

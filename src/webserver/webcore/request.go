@@ -85,7 +85,7 @@ func GetProcessFlowIdFromRequest(r *http.Request) (int64, error) {
 func IsRequestMultipartForm(r *http.Request) bool {
 	header := r.Header
 	contentType := header.Get("Content-Type")
-	return contentType == "multipart/form-data"
+	return strings.Contains(contentType, "multipart/form-data")
 }
 
 func UnmarshalRequestForm(r *http.Request, output interface{}) error {

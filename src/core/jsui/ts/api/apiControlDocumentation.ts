@@ -45,6 +45,7 @@ export function editControlDocCat(inp : TEditControlDocCatInput): Promise<TEditC
 export interface TDeleteControlDocCatInput {
     csrf: string
     catId: number
+    orgGroupName: string
 }
 
 export interface TDeleteControlDocCatOutput {
@@ -112,6 +113,7 @@ export function downloadControlDocuments(inp: TDownloadControlDocumentsInput) : 
                     csrf: inp.csrf,
                     fileId: file.Id
                 }), {
+                    ...getAPIRequestConfig(),
                     responseType: "blob"
                 })
 

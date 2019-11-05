@@ -58,7 +58,8 @@
 import Vue from 'vue'
 import * as rules from "../../../ts/formRules"
 import { contactUsUrl } from "../../../ts/url"
-import { newRisk, editRisk, TEditRiskInput, TEditRiskOutput } from "../../../ts/api/apiRisks"
+import { editRisk, TEditRiskInput, TEditRiskOutput } from "../../../ts/api/apiRisks"
+import { newRisk, TNewRiskInput, TNewRiskOutput } from "../../../ts/api/apiRisks"
 import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
@@ -156,7 +157,9 @@ export default Vue.extend({
                 csrf : getCurrentCSRF(),
                 name : this.name,
                 description: this.description,
-                nodeId: this.nodeId
+                nodeId: this.nodeId,
+                //@ts-ignore
+                orgName: this.$root.orgGroupId
             }).then((resp : TNewRiskOutput) => {
                 this.onSuccess(resp.data)
             }).catch((err : any) => {
@@ -168,7 +171,9 @@ export default Vue.extend({
                 csrf : getCurrentCSRF(),
                 name : this.name,
                 description: this.description,
-                riskId: this.riskId
+                riskId: this.riskId,
+                //@ts-ignore
+                orgName: this.$root.orgGroupId
             }).then((resp : TEditRiskOutput) => {
                 this.onSuccess(resp.data)
             }).catch((err : any) => {

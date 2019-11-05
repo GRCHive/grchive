@@ -212,6 +212,8 @@ export default Vue.extend({
         deleteSelectedFiles() {
             deleteControlDocuments(<TDeleteControlDocumentsInput>{
                 csrf: getCurrentCSRF(),
+                //@ts-ignore,
+                orgGroupName: this.$root.orgGroupId,
                 fileIds: this.selectedFiles.map((ele) => ele.Id)
             }).then(() => {
                 let selectedFileSet = new Set(this.selectedFiles)
