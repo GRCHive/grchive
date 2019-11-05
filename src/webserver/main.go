@@ -45,9 +45,8 @@ func main() {
 	dynamicRouter := r.PathPrefix("/").Subrouter()
 
 	// Dynamic(?) content that needs to be served by Go.
-	dynamicRouter.Use(webcore.ObtainUserSessionInContextMiddleware)
-
 	pageRouter := dynamicRouter.Methods("GET").Subrouter()
+	pageRouter.Use(webcore.ObtainUserSessionInContextMiddleware)
 	pageRouter.Use(webcore.GrantCSRFMiddleware)
 	pageRouter.HandleFunc(core.GetStartedUrl, render.RenderGettingStartedPage).Name(string(webcore.GettingStartedRouteName))
 	pageRouter.HandleFunc(core.ContactUsUrl, render.RenderContactUsPage).Name(string(webcore.ContactUsRouteName))
@@ -60,7 +59,7 @@ func main() {
 	websocket.RegisterPaths(dynamicRouter)
 
 	// Should be last?
-	webcore.RegisterRouter(dynamicRouter)
+	webcore.RegisterRouter(r)
 
 	// Custom 404
 	r.NotFoundHandler = http.HandlerFunc(render.Render404)

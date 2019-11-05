@@ -9,20 +9,32 @@ type AccessType struct {
 	CanManage bool
 }
 
-type Permissions struct {
-	// In the case of manage, allows giving/revoking a role from a user.
-	OrgRoles AccessType
-	// In this case, the editing the process flow includes adding/creating nodes.
+type ResourceType int
+
+const (
 	// Managing is merely for deleting/creating new process flows.
-	ProcessFlows         AccessType
-	Controls             AccessType
-	ControlDocumentation AccessType
-	Risks                AccessType
+	OrgRoles ResourceType = iota
+	// In the case of manage, allows giving/revoking a role from a user.
+	// In this case, the editing the process flow includes adding/creating nodes.
+	ProcessFlows
+	Controls
+	ControlDocumentation
+	Risks
+)
+
+type PermissionsMap map[ResourceType]AccessType
+
+type RoleMetadata struct {
+	Id          int64  `db:"id"`
+	Name        string `db:"name"`
+	Description string `db:"description"`
+	IsDefault   bool   `db:"is_default_role"`
+	OrgId       int32  `db:"org_id"`
 }
 
 type Role struct {
-	UserId           int64
-	OrgToPermissions map[int32]Permissions
+	Id          int64          `db:"id"`
+	Permissions PermissionsMap `db:"permissions"`
 }
 
 func CreateOwnerAccessType() AccessType {
@@ -33,12 +45,21 @@ func CreateOwnerAccessType() AccessType {
 	}
 }
 
-func CreateAllAccessPermission() Permissions {
-	return Permissions{
+func CreateAllAccessPermission() PermissionsMap {
+	return PermissionsMap{
 		OrgRoles:             CreateOwnerAccessType(),
 		ProcessFlows:         CreateOwnerAccessType(),
 		Controls:             CreateOwnerAccessType(),
 		ControlDocumentation: CreateOwnerAccessType(),
 		Risks:                CreateOwnerAccessType(),
+	}
+}
+
+func CreateDefaultRoleMetadata(orgId int32) RoleMetadata {
+	return RoleMetadata{
+		Name:        "Default",
+		Description: "Default role granted to all users in the organization.",
+		IsDefault:   true,
+		OrgId:       orgId,
 	}
 }

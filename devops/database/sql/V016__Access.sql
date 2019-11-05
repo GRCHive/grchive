@@ -21,7 +21,7 @@ CREATE TABLE user_roles (
     role_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     org_id INTEGER NOT NULL,
-    UNIQUE(user_id, role_id),
+    UNIQUE(user_id, org_id),
     CONSTRAINT role_org_key
         FOREIGN KEY(role_id, org_id)
         REFERENCES organization_available_roles(id, org_id)

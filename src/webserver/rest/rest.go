@@ -4,7 +4,6 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
-	"net/http"
 )
 
 func RegisterPaths(r *mux.Router) {
@@ -23,14 +22,7 @@ func RegisterPaths(r *mux.Router) {
 
 func registerAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiUrl).Subrouter()
-	// TODO: API Key verification? For now just verify CSRF.
-	// TODO: IP rate limiting?
-	s.Use(webcore.CreateVerifyCSRFMiddleware(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusForbidden)
-	}))
-	s.Use(webcore.CreateObtainOrganizationInfoFromUserInContextMiddleware(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusForbidden)
-	}))
+	s.Use(webcore.ObtainAPIKeyRoleInContextMiddleware)
 
 	registerUserAPIPaths(s)
 	registerOrgAPIPaths(s)
@@ -45,17 +37,11 @@ func registerAPIPaths(r *mux.Router) {
 
 func registerUserAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiUserUrl).Subrouter()
-	s.Use(webcore.CreateVerifyUserHasAccessToUserMiddleware(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusForbidden)
-	}))
 	s.HandleFunc(core.ApiUserProfileUrl, updateUserProfile).Methods("POST").Name(webcore.UserProfileEditRouteName)
 }
 
 func registerOrgAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiOrgPrefix).Subrouter()
-	s.Use(webcore.CreateVerifyUserHasAccessToOrganizationMiddleware(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusForbidden)
-	}))
 	s.HandleFunc(core.ApiOrgUsersEndpoint, getAllUsersInOrganization).Methods("GET").Name(webcore.GetAllOrgUsersRouteName)
 }
 
