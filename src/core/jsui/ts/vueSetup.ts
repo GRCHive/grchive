@@ -9,21 +9,15 @@ Vue.use(Vuex)
 Vue.use(VueRouter)
 Vue.use(Vuetify)
 
-import axios from 'axios'
-import {createGetProcessFlowFullDataUrl} from './url'
-import * as qs from 'query-string'
 import { deleteProcessFlowEdge } from './api/apiProcessFlowEdges'
 import { deleteProcessFlowNode } from './api/apiProcessFlowNodes'
 import RelationshipMap from './relationship'
 import { FullProcessFlowData } from './processFlow'
 import VuexState from './processFlowState'
+import { getFullProcessFlow, TGetFullProcessFlowInput, TGetFullProcessFlowOutput } from './api/apiProcessFlow'
 
 let mutationObservers = []
 const opts = {}
-
-interface FullProcessFlowDataResponse {
-    data : FullProcessFlowResponseData
-}
 
 const store : StoreOptions<VuexState> = {
     state: {
@@ -299,13 +293,11 @@ const store : StoreOptions<VuexState> = {
         },
         refreshCurrentProcessFlowFullData(context, csrf) {
             const id = context.getters.currentProcessFlowBasicData.Id
-            const baseUrl = createGetProcessFlowFullDataUrl(id)
-            const queryParams = qs.stringify({
-                csrf
-            })
             context.commit('setFullProcessFlowRequestedId', id)
-            axios.get(baseUrl + "?" + queryParams).then(
-                (resp : FullProcessFlowDataResponse) => {
+            getFullProcessFlow(id, <TGetFullProcessFlowInput>{
+                csrf: csrf
+            }).then(
+                (resp : TGetFullProcessFlowOutput) => {
                     let newData = <FullProcessFlowData>{
                         FlowId: id,
                         Nodes: Object(),
@@ -370,7 +362,7 @@ const store : StoreOptions<VuexState> = {
                     context.commit('setFullProcessFlowRequestedId', -1)
                 }
             ).catch(
-                (err) => {
+                (err : any) => {
                     // TODO: Somehow display something went wrong??
                     console.log("Failed to obtain process flow.", err)
                     context.commit('setCurrentProcessFlowFullData', {} as FullProcessFlowData)

@@ -3,7 +3,8 @@ import * as qs from 'query-string'
 import { deleteProcessFlowAPIUrl,
          createUpdateProcessFlowApiUrl,
          newProcessFlowAPIUrl,
-         getAllProcessFlowAPIUrl } from '../url'
+         getAllProcessFlowAPIUrl,
+         createGetProcessFlowFullDataUrl } from '../url'
 import { postFormUrlEncoded } from '../http'
 import { getAPIRequestConfig } from './apiUtility'
 
@@ -70,4 +71,17 @@ export interface TGetAllProcessFlowOutput {
 export function getAllProcessFlow(inp : TGetAllProcessFlowInput) : 
         Promise<TGetAllProcessFlowOutput> {
     return axios.get(getAllProcessFlowAPIUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+}
+
+export interface TGetFullProcessFlowInput {
+    csrf: string
+}
+
+export interface TGetFullProcessFlowOutput {
+    data: FullProcessFlowResponseData
+}
+
+export function getFullProcessFlow(id : number, inp : TGetFullProcessFlowInput) : 
+        Promise<TGetFullProcessFlowOutput> {
+    return axios.get(createGetProcessFlowFullDataUrl(id) + '?' + qs.stringify(inp), getAPIRequestConfig())
 }
