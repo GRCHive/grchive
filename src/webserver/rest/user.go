@@ -9,7 +9,6 @@ import (
 )
 
 type UpdateUserProfileInputs struct {
-	UserId    int64  `webcore:"userId"`
 	FirstName string `webcore:"firstName"`
 	LastName  string `webcore:"lastName"`
 }
@@ -17,12 +16,6 @@ type UpdateUserProfileInputs struct {
 func updateUserProfile(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
-
-	if err := r.ParseForm(); err != nil || len(r.PostForm) == 0 {
-		core.Warning("Failed to parse form data: " + core.ErrorString(err))
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
 
 	inputs := UpdateUserProfileInputs{}
 	err := webcore.UnmarshalRequestForm(r, &inputs)
@@ -32,13 +25,20 @@ func updateUserProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := core.User{
-		Id:        inputs.UserId,
-		FirstName: inputs.FirstName,
-		LastName:  inputs.LastName,
+	email, err := webcore.GetUserEmailFromRequestUrl(r)
+	if err != nil {
+		core.Warning("Can't find user email: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
-	err = database.UpdateUser(&user)
+	user := core.User{
+		FirstName: inputs.FirstName,
+		LastName:  inputs.LastName,
+		Email:     email,
+	}
+
+	err = database.UpdateUserFromEmail(&user)
 	if err != nil {
 		core.Warning("Can't update user: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

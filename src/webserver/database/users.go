@@ -107,13 +107,13 @@ func FindUserFromIdWithOrganization(id int64) (*core.User, *core.Organization, e
 	return &result.User, &result.Org, nil
 }
 
-func UpdateUser(user *core.User) error {
+func UpdateUserFromEmail(user *core.User) error {
 	tx := dbConn.MustBegin()
 	rows, err := tx.NamedQuery(`
 		UPDATE users
 		SET first_name = :first_name,
 			last_name = :last_name
-		WHERE id = :id
+		WHERE email = :email
 		RETURNING *
 	`, user)
 	if err != nil {
@@ -128,5 +128,6 @@ func UpdateUser(user *core.User) error {
 		return err
 	}
 
+	rows.Close()
 	return tx.Commit()
 }
