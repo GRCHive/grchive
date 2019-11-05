@@ -11,12 +11,18 @@ import { postFormUrlEncoded } from '../http'
 import { FullControlData } from '../controls'
 import { getAPIRequestConfig } from './apiUtility'
 
+export interface TGetControlTypesInput {
+}
+
+export interface TGetControlTypesOutput {
+    data: ProcessFlowControlType[]
+}
+
 export function getControlTypes(inp : TGetControlTypesInput) : Promise<TGetControlTypesOutput> {
     return axios.get(getControlTypesUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
 }
 
 export interface TNewControlInput {
-    csrf : string
     name : string 
     description: string
     controlType : number
@@ -37,8 +43,6 @@ export function newControl(inp: TNewControlInput) : Promise<TNewControlOutput> {
 }
 
 export interface TDeleteControlInput {
-    csrf: string
-    nodeId: number
     riskIds: number[]
     controlIds: number[]
     global: boolean
@@ -53,7 +57,6 @@ export function deleteControls(inp : TDeleteControlInput): Promise<TDeleteContro
 
 
 export interface TExistingControlInput {
-    csrf: string
     nodeId: number
     riskId: number
     controlIds: number[]
@@ -80,7 +83,6 @@ export function editControl(inp: TEditControlInput) : Promise<TEditControlOutput
 }
 
 export interface TAllControlInput {
-    csrf: string
     orgName: string
 }
 
@@ -93,7 +95,6 @@ export function getAllControls(inp : TAllControlInput) : Promise<TAllControlOutp
 }
 
 export interface TSingleControlInput {
-    csrf: string
     controlId: number
 }
 

@@ -43,7 +43,6 @@ import Vue from 'vue'
 import { TUploadControlDocOutput, uploadControlDoc } from '../../../ts/api/apiControlDocumentation'
 import { contactUsUrl } from '../../../ts/url'
 import * as rules from '../../../ts/formRules'
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     props : {
@@ -77,7 +76,6 @@ export default Vue.extend({
             currentDate = new Date(currentDate.getTime() + currentDate.getTimezoneOffset() * 60000)
 
             let data = new FormData()
-            data.set('csrf', getCurrentCSRF())
             data.set('catId', this.catId.toString())
             data.set('file', this.file!)
             data.set('relevantTime', currentDate.toISOString())

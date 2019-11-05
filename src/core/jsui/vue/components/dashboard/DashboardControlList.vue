@@ -125,7 +125,6 @@ import { createFrequencyDisplayString } from '../../../ts/frequency'
 import CreateNewControlForm from './CreateNewControlForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import MetadataStore from '../../../ts/metadata'
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     data : () => ({
@@ -170,7 +169,6 @@ export default Vue.extend({
         },
         refreshControls() {
             getAllControls(<TAllControlInput>{
-                csrf: getCurrentCSRF(),
                 //@ts-ignore
                 orgName: this.$root.orgGroupId
             }).then((resp : TAllControlOutput) => {
@@ -193,7 +191,6 @@ export default Vue.extend({
         },
         deleteSelectedControls() {
             deleteControls(<TDeleteControlInput>{
-                csrf: getCurrentCSRF(),
                 nodeId: -1,
                 riskIds: [-1],
                 controlIds: [this.currentDeleteControl.Id],

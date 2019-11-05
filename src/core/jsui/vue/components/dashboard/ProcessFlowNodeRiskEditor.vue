@@ -126,9 +126,13 @@ import CreateNewRiskForm from './CreateNewRiskForm.vue'
 import DeleteRiskForm from './DeleteRiskForm.vue'
 import GenericAddExistingItemForm from './GenericAddExistingItemForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
-import { deleteRisk, addExistingRisk } from '../../../ts/api/apiRisks'
+import { deleteRisk, 
+         TDeleteRiskInput,
+         TDeleteRiskOutput,
+         addExistingRisk,
+         TAddExistingRiskInput,
+         TAddExistingRiskOutput } from '../../../ts/api/apiRisks'
 import { contactUsUrl, createRiskUrl } from '../../../ts/url'
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     data : () => ({
@@ -210,7 +214,6 @@ export default Vue.extend({
 
             let currentNodeId = this.currentNode.Id
             addExistingRisk(<TAddExistingRiskInput>{
-                csrf: getCurrentCSRF(),
                 nodeId: currentNodeId,
                 riskIds: riskIds
             }).then((resp : TAddExistingRiskOutput) => {
@@ -242,7 +245,6 @@ export default Vue.extend({
         deleteSelectedRisks(global : boolean) {
             let currentNodeId = this.currentNode.Id
             deleteRisk(<TDeleteRiskInput>{
-                csrf: getCurrentCSRF(),
                 nodeId: currentNodeId,
                 riskIds: this.selectedRiskIds,
                 global: global

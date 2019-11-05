@@ -7,14 +7,39 @@ import { getAllProcessFlowNodeTypesAPIUrl,
 import { postFormUrlEncoded } from '../http'
 import { getAPIRequestConfig } from './apiUtility'
 
+export interface TGetProcessFlowNodeTypesInput { 
+}
+
+export interface TGetProcessFlowNodeTypesOutput { 
+    data : ProcessFlowNodeType[]
+}
+
 export function getProcessFlowNodeTypes(inp : TGetProcessFlowNodeTypesInput) : 
         Promise<TGetProcessFlowNodeTypesOutput> {
     return axios.get(getAllProcessFlowNodeTypesAPIUrl+ '?' + qs.stringify(inp), getAPIRequestConfig())
 }
 
+export interface TEditProcessFlowNodeInput { 
+    nodeId: number,
+    name: string,
+    description: string,
+    type: number
+}
+
+export interface TEditProcessFlowNodeOutput { 
+    data: ProcessFlowNode
+}
+
 export function editProcessFlowNode(inp : TEditProcessFlowNodeInput) : 
         Promise<TEditProcessFlowNodeOutput> {
     return postFormUrlEncoded<TEditProcessFlowNodeOutput>(editProcessFlowNodeAPIUrl, inp, getAPIRequestConfig())
+}
+
+export interface TDeleteProcessFlowNodeInput { 
+    nodeId: number
+}
+
+export interface TDeleteProcessFlowNodeOutput { 
 }
 
 export function deleteProcessFlowNode(inp : TDeleteProcessFlowNodeInput) :
@@ -23,7 +48,6 @@ export function deleteProcessFlowNode(inp : TDeleteProcessFlowNodeInput) :
 }
 
 export interface TNewProcessFlowNodeInput {
-    csrf: string
     typeId: number
     flowId: number
 }

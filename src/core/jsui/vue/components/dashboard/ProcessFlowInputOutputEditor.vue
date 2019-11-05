@@ -81,9 +81,9 @@ import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup' 
 import MetadataStore from '../../../ts/metadata'
 import { contactUsUrl } from '../../../ts/url'
-import { deleteProcessFlowIO, editProcessFlowIO } from '../../../ts/api/apiProcessFlowIO'
+import { TDeleteProcessFlowIOInput, TDeleteProcessFlowIOOutput, deleteProcessFlowIO } from '../../../ts/api/apiProcessFlowIO'
+import { TEditProcessFlowIOInput, TEditProcessFlowIOOutput, editProcessFlowIO } from '../../../ts/api/apiProcessFlowIO'
 import { TNewProcessFlowIOInput, TNewProcessFlowIOOutput, newProcessFlowIO } from '../../../ts/api/apiProcessFlowIO'
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 interface IOEditState {
     canEdit: boolean,
@@ -132,7 +132,6 @@ export default Vue.extend({
                 typeId: type.Id,
                 isInput: this.isInput,
                 name,
-                csrf: getCurrentCSRF()
             }).then((resp : TNewProcessFlowIOOutput) => {
                 if (this.isInput) {
                     VueSetup.store.commit('addNodeInput', {nodeId: this.nodeId, input: resp.data})
@@ -153,7 +152,6 @@ export default Vue.extend({
         deleteIO(e: MouseEvent, ioId : number) {
             // Maybe we want to confirm with the user first?
             deleteProcessFlowIO({
-                csrf: getCurrentCSRF(),
                 ioId,
                 isInput: this.isInput
             }).then((resp : TDeleteProcessFlowIOOutput) => {
@@ -179,7 +177,6 @@ export default Vue.extend({
         },
         saveIO(e: MouseEvent, io : ProcessFlowInputOutput) {
             editProcessFlowIO({
-                csrf: getCurrentCSRF(),
                 ioId: io.Id,
                 isInput: this.isInput,
                 name: io.Name ,

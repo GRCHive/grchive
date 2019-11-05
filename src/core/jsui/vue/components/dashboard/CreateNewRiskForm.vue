@@ -60,7 +60,6 @@ import * as rules from "../../../ts/formRules"
 import { contactUsUrl } from "../../../ts/url"
 import { editRisk, TEditRiskInput, TEditRiskOutput } from "../../../ts/api/apiRisks"
 import { newRisk, TNewRiskInput, TNewRiskOutput } from "../../../ts/api/apiRisks"
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     props : {
@@ -154,7 +153,6 @@ export default Vue.extend({
         },
         doSave() {
             newRisk(<TNewRiskInput>{
-                csrf : getCurrentCSRF(),
                 name : this.name,
                 description: this.description,
                 nodeId: this.nodeId,
@@ -168,7 +166,6 @@ export default Vue.extend({
         },
         doEdit() {
             editRisk(<TEditRiskInput>{
-                csrf : getCurrentCSRF(),
                 name : this.name,
                 description: this.description,
                 riskId: this.riskId,

@@ -4,12 +4,19 @@ import { createGetAllOrgUsersAPIUrl, createUserProfileEditAPIUrl } from '../url'
 import { getAPIRequestConfig } from './apiUtility'
 import { postFormUrlEncoded } from '../http'
 
+export interface TGetAllOrgUsersInput {
+    org : string
+}
+
+export interface TGetAllOrgUsersOutput {
+    data: User[]
+}
+
 export function getAllOrgUsers(inp : TGetAllOrgUsersInput) : Promise<TGetAllOrgUsersOutput> {
     return axios.get(createGetAllOrgUsersAPIUrl(inp.org) + '?' + qs.stringify(inp), getAPIRequestConfig())
 }
 
 export interface TEditUserProfileInput {
-    csrf: string
     firstName : string
     lastName : string
 }

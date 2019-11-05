@@ -11,7 +11,6 @@ import { FullRiskData } from '../risks'
 import { getAPIRequestConfig } from './apiUtility'
 
 export interface TNewRiskInput {
-    csrf: string
     name: string
     description : string
     nodeId: number
@@ -26,8 +25,25 @@ export function newRisk(inp : TNewRiskInput) : Promise<TNewRiskOutput> {
     return postFormUrlEncoded<TNewRiskOutput>(newRiskAPIUrl, inp, getAPIRequestConfig())
 }
 
+export interface TDeleteRiskInput {
+    nodeId: number
+    riskIds: number[]
+    global: boolean
+}
+
+export interface TDeleteRiskOutput {
+}
+
 export function deleteRisk(inp : TDeleteRiskInput) : Promise<TDeleteRiskOutput> {
     return postFormUrlEncoded<TDeleteRiskOutput>(deleteRiskAPIUrl, inp, getAPIRequestConfig())
+}
+
+export interface TAddExistingRiskInput {
+    nodeId: number
+    riskIds: number[]
+}
+
+export interface TAddExistingRiskOutput {
 }
 
 export function addExistingRisk(inp : TAddExistingRiskInput) : Promise<TAddExistingRiskOutput> {
@@ -35,7 +51,6 @@ export function addExistingRisk(inp : TAddExistingRiskInput) : Promise<TAddExist
 }
 
 export interface TEditRiskInput {
-    csrf: string
     name: string
     description : string
     riskId: number
@@ -51,7 +66,6 @@ export function editRisk(inp : TEditRiskInput) : Promise<TEditRiskOutput> {
 }
 
 export interface TAllRiskInput {
-    csrf: string
     orgName: string
 }
 
@@ -64,7 +78,6 @@ export function getAllRisks(inp : TAllRiskInput) : Promise<TAllRiskOutput> {
 }
 
 export interface TSingleRiskInput {
-    csrf: string
     riskId: number
 }
 

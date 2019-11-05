@@ -97,7 +97,6 @@ import { FullRiskData } from '../../../ts/risks'
 import { getSingleRisk, TSingleRiskInput, TSingleRiskOutput} from '../../../ts/api/apiRisks'
 import { createControlUrl } from '../../../ts/url'
 import CreateNewRiskForm from './CreateNewRiskForm.vue'
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     data: () => ({
@@ -120,7 +119,6 @@ export default Vue.extend({
             let riskId = Number(data[data.length - 1])
 
             getSingleRisk(<TSingleRiskInput>{
-                csrf: getCurrentCSRF(),
                 riskId: riskId,
             }).then((resp : TSingleRiskOutput) => {
                 this.fullRiskData = resp.data

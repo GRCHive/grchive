@@ -49,7 +49,6 @@ import VueSetup from '../../../ts/vueSetup'
 import ProcessFlowSvgRenderer from './graph/ProcessFlowSvgRenderer'
 import { isProcessFullDataEmpty } from '../../../ts/processFlow'
 import RenderLayout from '../../../ts/render/renderLayout'
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     components: {
@@ -89,7 +88,7 @@ export default Vue.extend({
     },
     methods: {
         refreshProcessFlow() {
-            VueSetup.store.dispatch('refreshCurrentProcessFlowFullData', getCurrentCSRF())
+            VueSetup.store.dispatch('refreshCurrentProcessFlowFullData')
         }
     },
 })

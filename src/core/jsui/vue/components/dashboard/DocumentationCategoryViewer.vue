@@ -129,7 +129,6 @@ import { TDeleteControlDocumentsInput, TDeleteControlDocumentsOutput, deleteCont
 import { TDownloadControlDocumentsInput, TDownloadControlDocumentsOutput, downloadControlDocuments } from '../../../ts/api/apiControlDocumentation'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import { saveAs } from 'file-saver'
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     props : {
@@ -178,7 +177,6 @@ export default Vue.extend({
         },
         refreshData(page : number, needPages : boolean) {
             getControlDocuments(<TGetControlDocumentsInput>{
-                csrf: getCurrentCSRF(),
                 catId: this.catId,
                 page: page,
                 needPages: needPages,
@@ -211,7 +209,6 @@ export default Vue.extend({
         },
         deleteSelectedFiles() {
             deleteControlDocuments(<TDeleteControlDocumentsInput>{
-                csrf: getCurrentCSRF(),
                 //@ts-ignore,
                 orgGroupName: this.$root.orgGroupId,
                 fileIds: this.selectedFiles.map((ele) => ele.Id)
@@ -238,7 +235,6 @@ export default Vue.extend({
             // Download each file individually from the webserver and then
             // ZIP them together before saving the final ZIP to disk.
             downloadControlDocuments(<TDownloadControlDocumentsInput>{
-                csrf: getCurrentCSRF(),
                 files: this.selectedFiles
             }).then((resp : TDownloadControlDocumentsOutput) => {
                 saveAs(resp.data, "download.zip")

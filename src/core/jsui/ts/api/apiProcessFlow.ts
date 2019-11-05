@@ -9,7 +9,6 @@ import { postFormUrlEncoded } from '../http'
 import { getAPIRequestConfig } from './apiUtility'
 
 export interface TDeleteProcessFlowInput {
-    csrf: string
     flowId: number
 }
 
@@ -22,7 +21,6 @@ export function deleteProcessFlow(inp : TDeleteProcessFlowInput) :
 }
 
 export interface TUpdateProcessFlowInput {
-    csrf: string
     name: string
     description: string
 }
@@ -37,7 +35,6 @@ export function updateProcessFlow(id : number, inp : TUpdateProcessFlowInput) :
 }
 
 export interface TNewProcessFlowInput {
-    csrf: string
     name: string
     description: string
     organization: string
@@ -56,7 +53,6 @@ export function newProcessFlow(inp : TNewProcessFlowInput) :
 }
 
 export interface TGetAllProcessFlowInput {
-    csrf: string
     requested: number | null
     organization: string
 }
@@ -74,7 +70,6 @@ export function getAllProcessFlow(inp : TGetAllProcessFlowInput) :
 }
 
 export interface TGetFullProcessFlowInput {
-    csrf: string
 }
 
 export interface TGetFullProcessFlowOutput {

@@ -41,7 +41,6 @@
 import Vue from 'vue'
 import * as rules from "../../../ts/formRules"
 import { contactUsUrl } from "../../../ts/url"
-import { getCurrentCSRF } from '../../../ts/csrf'
 import { TNewProcessFlowInput, TNewProcessFlowOutput, newProcessFlow }  from '../../../ts/api/apiProcessFlow'
 
 export default Vue.extend({
@@ -71,7 +70,6 @@ export default Vue.extend({
                 description: this.description || "",
                 //@ts-ignore
                 organization: this.$root.orgGroupId,
-                csrf: getCurrentCSRF()
             }).then((resp : TNewProcessFlowOutput ) => {
                 this.name = undefined;
                 this.description = undefined;

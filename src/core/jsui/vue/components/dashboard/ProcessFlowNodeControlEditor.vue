@@ -145,7 +145,6 @@ import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import {TDeleteControlInput, TDeleteControlOutput, deleteControls} from '../../../ts/api/apiControls'
 import {TExistingControlInput, TExistingControlOutput, addExistingControls} from '../../../ts/api/apiControls'
 import { contactUsUrl, createControlUrl } from '../../../ts/url'
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     data : () => ({
@@ -248,7 +247,6 @@ export default Vue.extend({
             let currentRiskId = this.currentRelevantRiskId
 
             addExistingControls(<TExistingControlInput>{
-                csrf: getCurrentCSRF(),
                 nodeId: currentNodeId,
                 riskId: currentRiskId,
                 controlIds: selectedControls.map(ele => ele.Id)
@@ -300,12 +298,11 @@ export default Vue.extend({
             let riskIds = this.filteredRiskControl.map(ele => ele.risk.Id)
             let controlIds = this.filteredRiskControl.map(ele => ele.control.Id)
             deleteControls(<TDeleteControlInput>{
-                csrf: getCurrentCSRF(),
                 nodeId: currentNodeId,
                 riskIds: riskIds,
                 controlIds: controlIds,
                 global: global
-            }).then((resp : TDeleteRiskOutput) => {
+            }).then((resp : TDeleteControlOutput) => {
                 this.selectedControls = []
                 this.showHideDeleteControl = false
                 VueSetup.store.dispatch('deleteBatchControls', {

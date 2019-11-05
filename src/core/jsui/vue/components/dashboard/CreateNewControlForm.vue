@@ -87,7 +87,6 @@ import { newControl,
          TEditControlInput,
          TEditControlOutput } from "../../../ts/api/apiControls"
 import { contactUsUrl } from "../../../ts/url"
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     props : {
@@ -216,7 +215,6 @@ export default Vue.extend({
         },
         doSave() {
             newControl(<TNewControlInput>{
-                csrf: getCurrentCSRF(),
                 name: this.name,
                 description: this.description,
                 controlType: this.controlType.Id,
@@ -235,7 +233,6 @@ export default Vue.extend({
         },
         doEdit() {
             editControl(<TEditControlInput>{
-                csrf: getCurrentCSRF(),
                 name: this.name,
                 description: this.description,
                 controlType: this.controlType.Id,

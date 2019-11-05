@@ -178,7 +178,6 @@ import { createRiskUrl, contactUsUrl } from '../../../ts/url'
 import { ControlDocumentationCategory } from '../../../ts/controls'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import { deleteControlDocCat, TDeleteControlDocCatInput, TDeleteControlDocCatOutput } from '../../../ts/api/apiControlDocumentation'
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     data: () => ({
@@ -214,7 +213,6 @@ export default Vue.extend({
             let controlId = Number(data[data.length - 1])
 
             getSingleControl(<TSingleControlInput>{
-                csrf: getCurrentCSRF(),
                 controlId: controlId
             }).then((resp : TSingleControlOutput) => {
                 this.fullControlData = resp.data
@@ -278,8 +276,7 @@ export default Vue.extend({
         },
         deleteSelectedCategories() {
             deleteControlDocCat(<TDeleteControlDocCatInput>{
-                csrf: getCurrentCSRF(),
-                catId: this.currentDocumentCategory.Id,
+                catId: this.currentDocumentCategory.Id
             }).then(() => {
                 this.showHideDeleteCat = false
                 this.fullControlData.DocumentCategories.splice(

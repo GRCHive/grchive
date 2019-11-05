@@ -45,7 +45,6 @@ import { deleteProcessFlow, TDeleteProcessFlowInput, TDeleteProcessFlowOutput } 
 import { getAllProcessFlow, TGetAllProcessFlowInput, TGetAllProcessFlowOutput } from '../../../ts/api/apiProcessFlow'
 import VueSetup from '../../../ts/vueSetup'
 import RenderLayout from '../../../ts/render/renderLayout'
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 interface NavLinks {
     icon : string
@@ -111,7 +110,6 @@ export default Vue.extend({
     methods: {
         onDeleteProcessFlow(processFlow : ProcessFlowBasicData) {
             deleteProcessFlow(<TDeleteProcessFlowInput>{
-                csrf: getCurrentCSRF(),
                 flowId: processFlow.Id
             }).then((resp : TDeleteProcessFlowOutput) => {
                 VueSetup.store.commit('deleteProcessFlow', processFlow.Id)
@@ -138,7 +136,6 @@ export default Vue.extend({
             }
 
             getAllProcessFlow(<TGetAllProcessFlowInput>{
-                csrf: getCurrentCSRF(),
                 requested: currentProcessFlowId,
                 //@ts-ignore
                 organization: this.$root.orgGroupId
@@ -152,7 +149,6 @@ export default Vue.extend({
                     //@ts-ignore
                     VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
                         index: resp.data.RequestedIndex,
-                        csrf: getCurrentCSRF()
                     })
                 } else {
                     // If there's no path parameter for the route then we should manually replace the route on the router ourselves.
@@ -162,7 +158,6 @@ export default Vue.extend({
                     // the full data to be pulled as well.
                     VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
                         index: VueSetup.store.state.currentProcessFlowIndex,
-                        csrf: getCurrentCSRF()
                     })
                 }
             }).catch((err) => {
@@ -181,7 +176,6 @@ export default Vue.extend({
             // Refresh the list of process flows.
             // Then point ourselves to the most recently created process flow.
             getAllProcessFlow(<TGetAllProcessFlowInput>{
-                csrf: getCurrentCSRF(),
                 requested: id,
                 //@ts-ignore
                 organization: this.$root.orgGroupId
@@ -189,7 +183,6 @@ export default Vue.extend({
                 VueSetup.store.commit('setProcessFlowBasicData', resp.data.Flows)
                 VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
                     index: resp.data.RequestedIndex,
-                    csrf: getCurrentCSRF()
                 })
                 VueSetup.currentRouter.replace(this.navLinks[VueSetup.store.state.currentProcessFlowIndex].path)
             }).catch((err) => {
@@ -209,7 +202,6 @@ export default Vue.extend({
                 RenderLayout.store.commit('resetNodeLayout')
                 VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
                     index: idx,
-                    csrf: getCurrentCSRF()
                 })
             }
         }

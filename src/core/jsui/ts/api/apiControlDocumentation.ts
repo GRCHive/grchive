@@ -13,7 +13,6 @@ import JSZip from 'jszip'
 import { getAPIRequestConfig } from './apiUtility'
 
 export interface TNewControlDocCatInput {
-    csrf: string
     controlId: number
     name: string
     description: string
@@ -28,7 +27,6 @@ export function newControlDocCat(inp : TNewControlDocCatInput): Promise<TNewCont
 }
 
 export interface TEditControlDocCatInput {
-    csrf: string
     catId: number
     name: string
     description: string
@@ -43,9 +41,7 @@ export function editControlDocCat(inp : TEditControlDocCatInput): Promise<TEditC
 }
 
 export interface TDeleteControlDocCatInput {
-    csrf: string
     catId: number
-    orgGroupName: string
 }
 
 export interface TDeleteControlDocCatOutput {
@@ -65,7 +61,6 @@ export function uploadControlDoc(inp : FormData): Promise<TUploadControlDocOutpu
 }
 
 export interface TGetControlDocumentsInput {
-    csrf: string
     catId: number
     page: number
     needPages: boolean
@@ -84,7 +79,6 @@ export function getControlDocuments(inp: TGetControlDocumentsInput) : Promise<TG
 }
 
 export interface TDeleteControlDocumentsInput {
-    csrf: string
     fileIds: number[]
 }
 
@@ -96,7 +90,6 @@ export function deleteControlDocuments(inp: TDeleteControlDocumentsInput) : Prom
 }
 
 export interface TDownloadControlDocumentsInput {
-    csrf: string
     files: ControlDocumentationFile[]
 }
 
@@ -110,7 +103,6 @@ export function downloadControlDocuments(inp: TDownloadControlDocumentsInput) : 
         for (let file of inp.files) {
             try {
                 let blobData = await axios.get<Blob>(downloadControlDocUrl + '?' + qs.stringify({
-                    csrf: inp.csrf,
                     fileId: file.Id
                 }), {
                     ...getAPIRequestConfig(),

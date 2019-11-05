@@ -68,11 +68,10 @@ import RenderLayout from '../../../../ts/render/renderLayout'
 import ProcessFlowSvgNode from './ProcessFlowSvgNode.vue'
 import ProcessFlowSvgEdge from './ProcessFlowSvgEdge.vue'
 import ProcessFlowNodeTypeLegend from './ProcessFlowNodeTypeLegend.vue'
-import { newProcessFlowEdge } from '../../../../ts/api/apiProcessFlowEdges'
+import { newProcessFlowEdge, TNewProcessFlowEdgeInput, TNewProcessFlowEdgeOutput } from '../../../../ts/api/apiProcessFlowEdges'
 import { contactUsUrl } from '../../../../ts/url'
 import LocalSettings from '../../../../ts/localSettings'
 import { convertClientPointToSvg, convertClientDeltaToSvg } from '../../../../ts/svg'
-import { getCurrentCSRF } from '../../../../ts/csrf'
 
 export default Vue.extend({
     components: {
@@ -191,7 +190,6 @@ export default Vue.extend({
             }
 
             newProcessFlowEdge(<TNewProcessFlowEdgeInput>{
-                csrf: getCurrentCSRF(),
                 inputIoId: endIsInput ? endIo.Id : this.tempEdgeStart.io.Id,
                 outputIoId: endIsInput ? this.tempEdgeStart.io.Id : endIo.Id
             }).then((resp : TNewProcessFlowEdgeOutput) => {

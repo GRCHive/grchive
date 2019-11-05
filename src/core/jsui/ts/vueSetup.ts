@@ -9,8 +9,8 @@ Vue.use(Vuex)
 Vue.use(VueRouter)
 Vue.use(Vuetify)
 
-import { deleteProcessFlowEdge } from './api/apiProcessFlowEdges'
-import { deleteProcessFlowNode } from './api/apiProcessFlowNodes'
+import { deleteProcessFlowEdge, TDeleteProcessFlowEdgeInput, TDeleteProcessFlowEdgeOutput } from './api/apiProcessFlowEdges'
+import { deleteProcessFlowNode, TDeleteProcessFlowNodeInput, TDeleteProcessFlowNodeOutput } from './api/apiProcessFlowNodes'
 import RelationshipMap from './relationship'
 import { FullProcessFlowData } from './processFlow'
 import VuexState from './processFlowState'
@@ -126,11 +126,10 @@ const store : StoreOptions<VuexState> = {
             }
         },
         updateNodePartial(state, {nodeId, node}) {
-            let currentNodeData = {...state.currentProcessFlowFullData.Nodes[nodeId]}
+            let currentNodeData = state.currentProcessFlowFullData.Nodes[nodeId]
             currentNodeData.Name = node.Name
             currentNodeData.Description = node.Description
             currentNodeData.NodeTypeId = node.NodeTypeId
-            Vue.set(state.currentProcessFlowFullData.Nodes, nodeId, currentNodeData)
         },
         addNewEdge(state, {edge}) {
             if (edge.Id in state.currentProcessFlowFullData.Edges) {
@@ -285,17 +284,16 @@ const store : StoreOptions<VuexState> = {
             })
             mutationObservers.push(observer)
         },
-        requestSetCurrentProcessFlowIndex(context, {index, csrf}) {
+        requestSetCurrentProcessFlowIndex(context, {index}) {
             context.commit('setSelectedProcessFlowEdge', -1)
             context.commit('setSelectedProcessFlowNode', -1)
             context.commit('setCurrentProcessFlowIndex', index)
-            context.dispatch('refreshCurrentProcessFlowFullData', csrf)
+            context.dispatch('refreshCurrentProcessFlowFullData')
         },
-        refreshCurrentProcessFlowFullData(context, csrf) {
+        refreshCurrentProcessFlowFullData(context) {
             const id = context.getters.currentProcessFlowBasicData.Id
             context.commit('setFullProcessFlowRequestedId', id)
             getFullProcessFlow(id, <TGetFullProcessFlowInput>{
-                csrf: csrf
             }).then(
                 (resp : TGetFullProcessFlowOutput) => {
                     let newData = <FullProcessFlowData>{
@@ -370,11 +368,10 @@ const store : StoreOptions<VuexState> = {
                 }
             )
         },
-        requestDeletionOfSelection(context, {csrf}) {
+        requestDeletionOfSelection(context) {
             if (context.state.selectedEdgeId != -1) {
                 let edgeId = context.state.selectedEdgeId
                 deleteProcessFlowEdge({
-                    csrf: csrf,
                     edgeId: edgeId
                 }).then(() => {
                     context.commit('setSelectedProcessFlowEdge', -1)
@@ -385,7 +382,6 @@ const store : StoreOptions<VuexState> = {
             if (context.state.selectedNodeId != -1) {
                 let nodeId = context.state.selectedNodeId
                 deleteProcessFlowNode({
-                    csrf: csrf,
                     nodeId: nodeId
                 }).then(() => {
                     context.commit('setSelectedProcessFlowNode', -1)

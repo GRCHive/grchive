@@ -47,7 +47,6 @@ import * as rules from "../../../ts/formRules"
 import { contactUsUrl } from "../../../ts/url"
 import { TEditUserProfileInput, TEditUserProfileOutput, editUserProfile } from '../../../ts/api/apiUsers'
 import Vue from 'vue'
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     data: function() {
@@ -89,8 +88,7 @@ export default Vue.extend({
             //@ts-ignore
             editUserProfile(this.$root.userEmail, <TEditUserProfileInput>{
                 firstName: this.formData.firstName,
-                lastName: this.formData.lastName,
-                csrf: getCurrentCSRF()
+                lastName: this.formData.lastName
             }).then((resp : TEditUserProfileOutput) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(

@@ -105,7 +105,6 @@ import RenderLayout from '../../../ts/render/renderLayout'
 import LocalSettings from '../../../ts/localSettings'
 import { contactUsUrl } from '../../../ts/url'
 import { nodeTypeToClass } from '../../../ts/render/nodeCssUtils'
-import { getCurrentCSRF } from '../../../ts/csrf'
 import { TNewProcessFlowNodeInput, TNewProcessFlowNodeOutput, newProcessFlowNode } from '../../../ts/api/apiProcessFlowNodes'
 
 export default Vue.extend({
@@ -128,12 +127,11 @@ export default Vue.extend({
             newProcessFlowNode(<TNewProcessFlowNodeInput>{
                 typeId: nodeTypeId,
                 flowId: VueSetup.store.getters.currentProcessFlowBasicData.Id,
-                csrf: getCurrentCSRF()
             }).then((resp : TNewProcessFlowNodeOutput) => {
                 // TODO: Make this more efficient and just do a local adjustment of the data?
                 //       That'd require some more syncing stuff...which is fancier.
                 // Force a refresh of the data for the currently selected process flow.
-                VueSetup.store.dispatch('refreshCurrentProcessFlowFullData', getCurrentCSRF())
+                VueSetup.store.dispatch('refreshCurrentProcessFlowFullData')
             }).catch((err : any) => {
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
@@ -146,9 +144,7 @@ export default Vue.extend({
         },
         handleHotkeys(e : KeyboardEvent) {
             if (e.code == "Delete") {
-                VueSetup.store.dispatch('requestDeletionOfSelection', {
-                    csrf: getCurrentCSRF()
-                })
+                VueSetup.store.dispatch('requestDeletionOfSelection')
                 e.stopPropagation()
             }
         },

@@ -72,7 +72,6 @@ import * as rules from "../../../ts/formRules"
 import { standardFormatTime } from '../../../ts/time'
 import { contactUsUrl } from "../../../ts/url"
 
-import { getCurrentCSRF } from '../../../ts/csrf'
 import { TUpdateProcessFlowInput, TUpdateProcessFlowOutput, updateProcessFlow } from '../../../ts/api/apiProcessFlow'
 
 
@@ -104,7 +103,6 @@ export default Vue.extend({
         }
     },
     methods: {
-        getCurrentCSRF,
         onExpandDescription() {
             this.expandDescription = !this.expandDescription
             this.$emit('on-change')
@@ -127,8 +125,7 @@ export default Vue.extend({
             //@ts-ignore
             updateProcessFlow(this.basicData.Id, <TUpdateProcessFlowInput>{
                 name: this.editName,
-                description: this.editDescription,
-                csrf: this.getCurrentCSRF()
+                description: this.editDescription
             }).then((resp : TUpdateProcessFlowOutput) => {
                 VueSetup.store.commit(
                     "setIndividualProcessFlowBasicData", 

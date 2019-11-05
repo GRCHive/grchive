@@ -61,10 +61,9 @@ import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup' 
 import * as rules from "../../../ts/formRules"
 import ProcessFlowInputOutputEditor from './ProcessFlowInputOutputEditor.vue'
-import { editProcessFlowNode } from '../../../ts/api/apiProcessFlowNodes'
+import { editProcessFlowNode, TEditProcessFlowNodeInput, TEditProcessFlowNodeOutput } from '../../../ts/api/apiProcessFlowNodes'
 import { contactUsUrl } from '../../../ts/url'
 import MetadataStore from '../../../ts/metadata'
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     data : () => ({
@@ -92,8 +91,7 @@ export default Vue.extend({
             })
         },
         saveEdit() {
-            editProcessFlowNode({
-                csrf: getCurrentCSRF(),
+            editProcessFlowNode(<TEditProcessFlowNodeInput>{
                 nodeId: this.currentNode.Id,
                 name: this.currentNode.Name,
                 description: this.currentNode.Description,

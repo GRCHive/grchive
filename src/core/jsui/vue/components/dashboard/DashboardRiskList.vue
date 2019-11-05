@@ -68,12 +68,11 @@
 
 import Vue from 'vue'
 import { getAllRisks, TAllRiskInput, TAllRiskOutput } from '../../../ts/api/apiRisks'
-import { deleteRisk } from '../../../ts/api/apiRisks'
+import { deleteRisk, TDeleteRiskInput, TDeleteRiskOutput } from '../../../ts/api/apiRisks'
 import { contactUsUrl, createRiskUrl } from '../../../ts/url'
 import { replaceWithMark, sanitizeTextForHTML } from '../../../ts/text'
 import CreateNewRiskForm from './CreateNewRiskForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
-import { getCurrentCSRF } from '../../../ts/csrf'
 
 export default Vue.extend({
     data : () => ({
@@ -122,7 +121,6 @@ export default Vue.extend({
         },
         refreshRisks() {
             getAllRisks(<TAllRiskInput>{
-                csrf: getCurrentCSRF(),
                 //@ts-ignore
                 orgName: this.$root.orgGroupId
             }).then((resp : TAllRiskOutput) => {
@@ -169,7 +167,6 @@ export default Vue.extend({
             const risk = this.allRisks[idx]
 
             deleteRisk(<TDeleteRiskInput>{
-                csrf: getCurrentCSRF(),
                 nodeId: -1,
                 riskIds: [risk.Id],
                 global: true

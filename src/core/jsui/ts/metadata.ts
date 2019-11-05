@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import Vuex, { StoreOptions } from 'vuex'
-import { getProcessFlowIOTypes } from './api/apiProcessFlowIO'
-import { getProcessFlowNodeTypes } from './api/apiProcessFlowNodes'
-import { getControlTypes } from './api/apiControls'
-import { getAllOrgUsers } from './api/apiUsers'
+import { getProcessFlowIOTypes, TGetProcessFlowIOTypesInput, TGetProcessFlowIOTypesOutput } from './api/apiProcessFlowIO'
+import { getProcessFlowNodeTypes, TGetProcessFlowNodeTypesInput, TGetProcessFlowNodeTypesOutput } from './api/apiProcessFlowNodes'
+import { getControlTypes, TGetControlTypesInput, TGetControlTypesOutput } from './api/apiControls'
+import { getAllOrgUsers, TGetAllOrgUsersInput, TGetAllOrgUsersOutput } from './api/apiUsers'
 
 interface MetadataStoreState {
     ioTypes: ProcessFlowIOType[]
@@ -66,29 +66,31 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
     actions: {
         // Initialization functions
         initialize(context, data) {
-            context.dispatch('initializeProcessFlowIOTypes', data)
-            context.dispatch('initializeProcessFlowNodeTypes', data)
-            context.dispatch('initializeProcessFlowControlTypes', data)
+            context.dispatch('initializeProcessFlowIOTypes')
+            context.dispatch('initializeProcessFlowNodeTypes')
+            context.dispatch('initializeProcessFlowControlTypes')
             context.dispatch('initializeUsers', data)
         },
-        initializeProcessFlowIOTypes(context, {csrf}) {
-            getProcessFlowIOTypes({csrf}).then((resp : TGetProcessFlowIOTypesOutput) => {
+        initializeProcessFlowIOTypes(context) {
+            getProcessFlowIOTypes(<TGetProcessFlowIOTypesInput>{
+            }).then((resp : TGetProcessFlowIOTypesOutput) => {
                 context.commit('setIoTypes', resp.data)
             })
         },
-        initializeProcessFlowNodeTypes(context, {csrf}) {
-            getProcessFlowNodeTypes({csrf}).then((resp : TGetProcessFlowNodeTypesOutput) => {
+        initializeProcessFlowNodeTypes(context) {
+            getProcessFlowNodeTypes(<TGetProcessFlowNodeTypesInput>{
+            }).then((resp : TGetProcessFlowNodeTypesOutput) => {
                 context.commit('setNodeTypes', resp.data)
             })
         },
-        initializeProcessFlowControlTypes(context, {csrf}) {
-            getControlTypes({csrf}).then((resp : TGetControlTypesOutput) => {
+        initializeProcessFlowControlTypes(context) {
+            getControlTypes(<TGetControlTypesInput>{
+            }).then((resp : TGetControlTypesOutput) => {
                 context.commit('setControlTypes', resp.data)
             })
         },
-        initializeUsers(context, {csrf, orgGroupId}) {
+        initializeUsers(context, {orgGroupId}) {
             getAllOrgUsers(<TGetAllOrgUsersInput>{
-                csrf: csrf,
                 org: orgGroupId
             }).then((resp : TGetAllOrgUsersOutput) => {
                 context.commit('setUsers', resp.data)
