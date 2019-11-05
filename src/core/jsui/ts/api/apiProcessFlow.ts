@@ -56,7 +56,7 @@ export function newProcessFlow(inp : TNewProcessFlowInput) :
 
 export interface TGetAllProcessFlowInput {
     csrf: string
-    requested: number
+    requested: number | null
     organization: string
 }
 

@@ -6,9 +6,13 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/database"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
 	"net/http"
-	"strconv"
 	"time"
 )
+
+type GetAllProcessFlowInputs struct {
+	RequestedIndex int64  `webcore:"requested"`
+	OrgName        string `webcore:"organization"`
+}
 
 type DeleteProcessFlowInputs struct {
 	FlowId int64 `webcore:"flowId"`
@@ -18,17 +22,15 @@ func getAllProcessFlows(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	queryVals := r.URL.Query()
-
-	organizationName, ok := queryVals["organization"]
-	if !ok || len(organizationName) == 0 {
-		core.Warning("Failed to get process flows (no organization)")
+	inputs := GetAllProcessFlowInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
-		jsonWriter.Encode(struct{}{})
 		return
 	}
 
-	organization, err := database.FindOrganizationFromGroupName(organizationName[0])
+	organization, err := database.FindOrganizationFromGroupName(inputs.OrgName)
 	if err != nil {
 		core.Warning("No organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -36,12 +38,10 @@ func getAllProcessFlows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	requestedId, ok := queryVals["requested"]
-
 	var flows []*core.ProcessFlow
 	var index int = 0
 
-	if !ok || len(requestedId) == 0 {
+	if inputs.RequestedIndex == -1 {
 		flows, err = database.FindOrganizationProcessFlows(organization)
 		if err != nil {
 			core.Warning("Database error [0]: " + err.Error())
@@ -50,15 +50,7 @@ func getAllProcessFlows(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		intRequestedId, err := strconv.ParseInt(requestedId[0], 10, 64)
-		if err != nil {
-			core.Warning("Invalid requested id: " + err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			jsonWriter.Encode(struct{}{})
-			return
-		}
-
-		flows, index, err = database.FindOrganizationProcessFlowsWithIndex(organization, int64(intRequestedId))
+		flows, index, err = database.FindOrganizationProcessFlowsWithIndex(organization, inputs.RequestedIndex)
 		if err != nil {
 			core.Warning("Database error [1]: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
