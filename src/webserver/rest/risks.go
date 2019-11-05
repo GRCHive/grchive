@@ -31,6 +31,10 @@ type AddRisksToNodeInputs struct {
 	RiskIds []int64 `webcore:"riskIds"`
 }
 
+type GetAllRisksInput struct {
+	OrgName string `webcore:"orgName"`
+}
+
 func editRisk(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -169,15 +173,23 @@ func getAllRisks(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	userParsedData, err := webcore.FindSessionParsedDataInContext(r.Context())
+	inputs := GetAllRisksInput{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
 	if err != nil {
-		core.Warning("No user session data: " + err.Error())
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromGroupName(inputs.OrgName)
+	if err != nil {
+		core.Warning("No organization data: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		jsonWriter.Encode(struct{}{})
 		return
 	}
 
-	risks, err := database.FindAllRiskForOrganization(userParsedData.Org)
+	risks, err := database.FindAllRiskForOrganization(org)
 	if err != nil {
 		core.Warning("Could not find risks: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

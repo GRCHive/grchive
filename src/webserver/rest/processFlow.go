@@ -36,22 +36,6 @@ func getAllProcessFlows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Ensure that the user has access to this organization.
-	userParsedData, err := webcore.FindSessionParsedDataInContext(r.Context())
-	if err != nil {
-		core.Warning("No user session data: " + err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		jsonWriter.Encode(struct{}{})
-		return
-	}
-
-	if userParsedData.Org.OktaGroupId != organization.OktaGroupId {
-		core.Warning("Unauthorized access")
-		w.WriteHeader(http.StatusBadRequest)
-		jsonWriter.Encode(struct{}{})
-		return
-	}
-
 	requestedId, ok := queryVals["requested"]
 
 	var flows []*core.ProcessFlow
@@ -123,22 +107,6 @@ func newProcessFlow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Ensure that the user has access to this organization.
-	userParsedData, err := webcore.FindSessionParsedDataInContext(r.Context())
-	if err != nil {
-		core.Warning("No user session data: " + err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		jsonWriter.Encode(struct{}{})
-		return
-	}
-
-	if userParsedData.Org.OktaGroupId != org.OktaGroupId {
-		core.Warning("Unauthorized access")
-		w.WriteHeader(http.StatusBadRequest)
-		jsonWriter.Encode(struct{}{})
-		return
-	}
-
 	newFlow := core.ProcessFlow{
 		Name:            nameData[0],
 		Org:             org,
@@ -193,21 +161,6 @@ func updateProcessFlow(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		core.Warning("Bad process flow id: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
-		jsonWriter.Encode(struct{}{})
-		return
-	}
-
-	userData, err := webcore.FindSessionParsedDataInContext(r.Context())
-	if err != nil {
-		core.Warning("No user session context: " + err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		jsonWriter.Encode(struct{}{})
-		return
-	}
-
-	if userData.Org.OktaGroupId != processFlow.Org.OktaGroupId {
-		core.Warning("Permission denied.")
-		w.WriteHeader(http.StatusForbidden)
 		jsonWriter.Encode(struct{}{})
 		return
 	}

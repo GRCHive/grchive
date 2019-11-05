@@ -14,6 +14,7 @@ const (
 	UserSessionParsedDataContextKey            = "PARSEDDATA"
 	// From Request
 	OrganizationContextKey = "ORGANIZATION"
+	ApiKeyContextKey       = "APIKEY"
 )
 
 func AddSessionToContext(session *core.UserSession, ctx context.Context) context.Context {
@@ -50,4 +51,8 @@ func FindOrganizationInContext(ctx context.Context) (*core.Organization, error) 
 		return nil, errors.New("Failed to find organization in context.")
 	}
 	return org, nil
+}
+
+func AddApiKeyToContext(key *core.ApiKey, ctx context.Context) context.Context {
+	return context.WithValue(ctx, ApiKeyContextKey, key)
 }

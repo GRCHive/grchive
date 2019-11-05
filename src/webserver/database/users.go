@@ -106,3 +106,27 @@ func FindUserFromIdWithOrganization(id int64) (*core.User, *core.Organization, e
 
 	return &result.User, &result.Org, nil
 }
+
+func UpdateUser(user *core.User) error {
+	tx := dbConn.MustBegin()
+	rows, err := tx.NamedQuery(`
+		UPDATE users
+		SET first_name = :first_name,
+			last_name = :last_name
+		WHERE id = :id
+		RETURNING *
+	`, user)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	rows.Next()
+	err = rows.StructScan(user)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}

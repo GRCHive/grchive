@@ -33,6 +33,7 @@ type DeleteControlDocCatInputs struct {
 type UploadControlDocInputs struct {
 	CatId        int64     `webcore:"catId"`
 	RelevantTime time.Time `webcore:"relevantTime"`
+	OrgGroupName string    `webcore:"orgGroupName"`
 }
 
 type GetControlDocInputs struct {
@@ -42,7 +43,8 @@ type GetControlDocInputs struct {
 }
 
 type DeleteControlDocInputs struct {
-	FileIds []int64 `webcore:"fileIds"`
+	FileIds      []int64 `webcore:"fileIds"`
+	OrgGroupName string  `webcore:"orgGroupName"`
 }
 
 type DownloadControlDocInputs struct {
@@ -140,13 +142,6 @@ func deleteControlDocumentationCategory(w http.ResponseWriter, r *http.Request) 
 }
 
 func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
-	parsedUserData, err := webcore.FindSessionParsedDataInContext(r.Context())
-	if err != nil {
-		core.Warning("Failed to find parsed user data: " + core.ErrorString(err))
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	b2Auth, err := backblaze.B2Auth(core.EnvConfig.Backblaze.Key)
 	if err != nil {
 		core.Warning("Could not auth with Backblaze: " + err.Error())
@@ -171,6 +166,13 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	err = webcore.UnmarshalRequestForm(r, &inputs)
 	if err != nil {
 		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromGroupName(inputs.OrgGroupName)
+	if err != nil {
+		core.Warning("Can't find organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -230,7 +232,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b2Filename := internalFile.StorageFilename(parsedUserData)
+	b2Filename := internalFile.StorageFilename(org)
 
 	b2File, err := backblaze.UploadFile(b2Auth,
 		core.EnvConfig.Backblaze.ControlDocBucketId,
@@ -248,7 +250,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	err = database.UpdateControlDocumentation(&internalFile, tx)
 	if err != nil {
 		tx.Rollback()
-		backblaze.DeleteFile(b2Auth, internalFile.StorageFilename(parsedUserData), b2File)
+		backblaze.DeleteFile(b2Auth, internalFile.StorageFilename(org), b2File)
 
 		core.Warning("Failed to update control documentation: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -320,9 +322,9 @@ func deleteControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	parsedUserData, err := webcore.FindSessionParsedDataInContext(r.Context())
+	org, err := database.FindOrganizationFromGroupName(inputs.OrgGroupName)
 	if err != nil {
-		core.Warning("Failed to find parsed user data: " + core.ErrorString(err))
+		core.Warning("Can't find organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -342,7 +344,7 @@ func deleteControlDocumentation(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Need to store actual storage filename on the database
-			err = backblaze.DeleteFile(b2Auth, file.StorageFilename(parsedUserData), backblaze.B2File{
+			err = backblaze.DeleteFile(b2Auth, file.StorageFilename(org), backblaze.B2File{
 				BucketId: file.BucketId,
 				FileId:   file.StorageId,
 			})

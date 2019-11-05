@@ -31,6 +31,10 @@ type EditControlInputs struct {
 	ControlId         int64          `webcore:"controlId"`
 }
 
+type GetAllControlsInputs struct {
+	OrgName string `webcore:"orgName"`
+}
+
 type DeleteControlInputs struct {
 	NodeId     int64   `webcore:"nodeId"`
 	RiskIds    []int64 `webcore:"riskIds"`
@@ -239,15 +243,23 @@ func getAllControls(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	userParsedData, err := webcore.FindSessionParsedDataInContext(r.Context())
+	inputs := GetAllControlsInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
 	if err != nil {
-		core.Warning("No user session data: " + err.Error())
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromGroupName(inputs.OrgName)
+	if err != nil {
+		core.Warning("No organization data: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		jsonWriter.Encode(struct{}{})
 		return
 	}
 
-	controls, err := database.FindAllControlsForOrganization(userParsedData.Org)
+	controls, err := database.FindAllControlsForOrganization(org)
 	if err != nil {
 		core.Warning("Could not find controls: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

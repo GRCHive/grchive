@@ -28,6 +28,6 @@ func (file ControlDocumentationFile) UniqueKey() string {
 	return fmt.Sprintf("controlDocFile-%d", file.Id)
 }
 
-func (file ControlDocumentationFile) StorageFilename(session *UserSessionParsedData) string {
-	return session.Org.OktaGroupName + "/" + file.UniqueKey()
+func (file ControlDocumentationFile) StorageFilename(org *Organization) string {
+	return org.OktaGroupName + "/" + file.UniqueKey()
 }

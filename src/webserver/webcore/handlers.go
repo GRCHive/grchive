@@ -18,14 +18,16 @@ func LoggedRequestMiddleware(next http.Handler) http.Handler {
 
 func ObtainAPIKeyRoleInContextMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, err := GetAPIKeyFromRequest(r)
+		apiKey, err := GetAPIKeyFromRequest(r)
 		if err != nil {
 			core.Warning("Failed to find API Key: " + err.Error())
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		context := AddApiKeyToContext(apiKey, r.Context())
+		newR := r.WithContext(context)
+		next.ServeHTTP(w, newR)
 	})
 }
 
