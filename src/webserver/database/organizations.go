@@ -60,3 +60,15 @@ func FindOrganizationFromSamlIdP(samlIdp string) (*core.Organization, error) {
 
 	return org, nil
 }
+
+func FindOrganizationFromProcessFlowId(flowId int64) (*core.Organization, error) {
+	org := core.Organization{}
+	err := dbConn.Get(&org, `
+		SELECT org.*
+		FROM process_flows AS pf
+		INNER JOIN organizations AS org
+			ON org.id = pf.org_id
+		WHERE pf.id = $1
+	`, flowId)
+	return &org, err
+}

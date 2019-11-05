@@ -12,6 +12,7 @@ type NewRiskInputs struct {
 	Name        string `webcore:"name"`
 	Description string `webcore:"description"`
 	NodeId      int64  `webcore:"nodeId"`
+	OrgName     string `webcore:"orgName"`
 }
 
 type EditRiskInputs struct {
@@ -81,7 +82,7 @@ func createNewRisk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := webcore.FindOrganizationInContext(r.Context())
+	org, err := database.FindOrganizationFromGroupName(inputs.OrgName)
 	if err != nil {
 		core.Warning("Can't find organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)

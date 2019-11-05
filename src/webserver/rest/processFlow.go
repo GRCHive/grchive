@@ -199,7 +199,7 @@ func getProcessFlowFullData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := webcore.FindOrganizationInContext(r.Context())
+	org, err := database.FindOrganizationFromProcessFlowId(flowId)
 	if err != nil {
 		core.Warning("Can't find organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)

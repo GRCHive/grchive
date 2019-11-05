@@ -17,6 +17,7 @@ type NewControlInputs struct {
 	OwnerId           core.NullInt64 `webcore:"ownerId,optional"`
 	NodeId            int64          `webcore:"nodeId"`
 	RiskId            int64          `webcore:"riskId"`
+	OrgName           string         `webcore:"orgName"`
 }
 
 type EditControlInputs struct {
@@ -29,6 +30,7 @@ type EditControlInputs struct {
 	NodeId            int64          `webcore:"nodeId"`
 	RiskId            int64          `webcore:"riskId"`
 	ControlId         int64          `webcore:"controlId"`
+	OrgName           string         `webcore:"orgName"`
 }
 
 type GetAllControlsInputs struct {
@@ -61,7 +63,7 @@ func editControl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := webcore.FindOrganizationInContext(r.Context())
+	org, err := database.FindOrganizationFromGroupName(inputs.OrgName)
 	if err != nil {
 		core.Warning("Can't find organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -109,7 +111,7 @@ func newControl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := webcore.FindOrganizationInContext(r.Context())
+	org, err := database.FindOrganizationFromGroupName(inputs.OrgName)
 	if err != nil {
 		core.Warning("Can't find organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
