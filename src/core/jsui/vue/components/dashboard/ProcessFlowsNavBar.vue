@@ -40,10 +40,9 @@
 import Vue from 'vue'
 import GenericNavBar from '../GenericNavBar.vue'
 import CreateNewProcessFlowForm from './CreateNewProcessFlowForm.vue'
-import axios from 'axios'
-import * as qs from 'query-string'
-import { contactUsUrl, getAllProcessFlowAPIUrl} from '../../../ts/url'
+import { contactUsUrl } from '../../../ts/url'
 import { deleteProcessFlow, TDeleteProcessFlowInput, TDeleteProcessFlowOutput } from '../../../ts/api/apiProcessFlow'
+import { getAllProcessFlow, TGetAllProcessFlowInput, TGetAllProcessFlowOutput } from '../../../ts/api/apiProcessFlow'
 import VueSetup from '../../../ts/vueSetup'
 import RenderLayout from '../../../ts/render/renderLayout'
 import { getCurrentCSRF } from '../../../ts/csrf'
@@ -138,7 +137,12 @@ export default Vue.extend({
                 currentProcessFlowId = parseInt(VueSetup.currentRouter.currentRoute.params.flowId)
             }
 
-            this.refresh(currentProcessFlowId).then((resp : ResponseData) => {
+            getAllProcessFlow(<TGetAllProcessFlowInput>{
+                csrf: getCurrentCSRF(),
+                requested: currentProcessFlowId,
+                //@ts-ignore
+                organization: this.$root.orgGroupId
+            }).then((resp : ResponseData) => {
                 if (resp.data.Flows.length == 0) {
                     // Don't make changes here...it'll cause an exception.
                     return
@@ -171,33 +175,17 @@ export default Vue.extend({
                     true);
             })
         },
-        refresh(id : Number) : Promise<ResponseData> {
-            // id = -1 means that we don't need the index of the passed in 
-            // process flow id in the results (save us some javascript computation time).
-            let passedData = Object()
-            if (id >= 0) {
-                passedData['requested'] = id
-            }
-            passedData['csrf'] = getCurrentCSRF()
-            //@ts-ignore
-            passedData['organization'] = this.$root.orgGroupId
-
-            return new Promise<ResponseData>(function(resolve, reject){
-                axios.get(getAllProcessFlowAPIUrl + '?' + qs.stringify(passedData)).then((resp : ResponseData) => {
-                    // 
-                    resolve(resp)
-                }).catch((err) => {
-                    //
-                    reject(err)
-                })
-            })
-        },
         save(name : String, id : Number) {
             this.showAddFlow = false;
 
             // Refresh the list of process flows.
             // Then point ourselves to the most recently created process flow.
-            this.refresh(id).then((resp : ResponseData) => {
+            getAllProcessFlow(<TGetAllProcessFlowInput>{
+                csrf: getCurrentCSRF(),
+                requested: id,
+                //@ts-ignore
+                organization: this.$root.orgGroupId
+            }).then((resp : ResponseData) => {
                 VueSetup.store.commit('setProcessFlowBasicData', resp.data.Flows)
                 VueSetup.store.dispatch('requestSetCurrentProcessFlowIndex', {
                     index: resp.data.RequestedIndex,

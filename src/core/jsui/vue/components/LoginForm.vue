@@ -73,7 +73,7 @@ export default Vue.extend({
             postFormUrlEncoded<ResponseData>('#', {
                 email: this.$data.email,
                 csrf: getCurrentCSRF(),
-            }).then((resp : ResponseData) => {
+            }, {}).then((resp : ResponseData) => {
                 window.location.assign(resp.data.LoginUrl);
             }).catch((err) => {
                 if (!!err.response && err.response.data.CanNotFindIdP) {

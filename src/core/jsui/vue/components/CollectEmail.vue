@@ -79,7 +79,7 @@ export default Vue.extend({
             postFormUrlEncoded('#', {
                 name: this.$data.name,
                 email: this.$data.email
-            }).then(() => {
+            }, {}).then(() => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
                     "Success! We will reach out soon.",

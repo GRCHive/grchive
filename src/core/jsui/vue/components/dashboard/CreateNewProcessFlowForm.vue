@@ -40,16 +40,9 @@
 
 import Vue from 'vue'
 import * as rules from "../../../ts/formRules"
-import { postFormUrlEncoded } from "../../../ts/http"
-import { contactUsUrl, newProcessFlowAPIUrl } from "../../../ts/url"
+import { contactUsUrl } from "../../../ts/url"
 import { getCurrentCSRF } from '../../../ts/csrf'
-
-interface ResponseData {
-    data: {
-        Name: string,
-        Id: number
-    }
-}
+import { TNewProcessFlowInput, TNewProcessFlowOutput, newProcessFlow }  from '../../../ts/api/apiProcessFlow'
 
 export default Vue.extend({
     data: () => ({
@@ -68,24 +61,22 @@ export default Vue.extend({
             this.$emit('do-cancel')
         },
         save() {
-            //@ts-ignore
             if (!this.canSubmit) {
                 return;
             }
 
             // Post request: name, description, csrf, organization.
-            //@ts-ignore
-            postFormUrlEncoded<ResponseData>(newProcessFlowAPIUrl, {
-                name: this.name,
+            newProcessFlow(<TNewProcessFlowInput>{
+                name: this.name || "",
                 description: this.description || "",
                 //@ts-ignore
                 organization: this.$root.orgGroupId,
                 csrf: getCurrentCSRF()
-            }).then((resp : ResponseData) => {
+            }).then((resp : TNewProcessFlowOutput ) => {
                 this.name = undefined;
                 this.description = undefined;
                 this.$emit('do-save', resp.data.Name, resp.data.Id)
-            }).catch((err) => {
+            }).catch((err : any) => {
                 if (!!err.response && err.response.data.IsDuplicate) {
                     // @ts-ignore
                     this.$root.$refs.snackbar.showSnackBar(

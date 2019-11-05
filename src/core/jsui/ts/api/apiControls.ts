@@ -9,13 +9,14 @@ import { getControlTypesUrl,
          createSingleControlAPIUrl } from '../url'
 import { postFormUrlEncoded } from '../http'
 import { FullControlData } from '../controls'
+import { getAPIRequestConfig } from './apiUtility'
 
 export function getControlTypes(inp : TGetControlTypesInput) : Promise<TGetControlTypesOutput> {
-    return axios.get(getControlTypesUrl + '?' + qs.stringify(inp))
+    return axios.get(getControlTypesUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
 }
 
 export function newControl(inp: TNewControlInput) : Promise<TNewControlOutput> {
-    return postFormUrlEncoded<TNewControlOutput>(newControlUrl, inp)
+    return postFormUrlEncoded<TNewControlOutput>(newControlUrl, inp, getAPIRequestConfig())
 }
 
 export interface TDeleteControlInput {
@@ -30,7 +31,7 @@ export interface TDeleteControlOutput {
 }
 
 export function deleteControls(inp : TDeleteControlInput): Promise<TDeleteControlOutput> {
-    return postFormUrlEncoded<TDeleteControlOutput>(deleteControlUrl, inp)
+    return postFormUrlEncoded<TDeleteControlOutput>(deleteControlUrl, inp, getAPIRequestConfig())
 }
 
 
@@ -46,7 +47,7 @@ export interface TExistingControlOutput {
 
 
 export function addExistingControls(inp : TExistingControlInput): Promise<TExistingControlOutput> {
-    return postFormUrlEncoded<TExistingControlOutput>(addControlUrl, inp)
+    return postFormUrlEncoded<TExistingControlOutput>(addControlUrl, inp, getAPIRequestConfig())
 }
 
 export interface TEditControlInput extends TNewControlInput {
@@ -58,7 +59,7 @@ export interface TEditControlOutput {
 }
 
 export function editControl(inp: TEditControlInput) : Promise<TEditControlOutput> {
-    return postFormUrlEncoded<TEditControlOutput>(editControlUrl, inp)
+    return postFormUrlEncoded<TEditControlOutput>(editControlUrl, inp, getAPIRequestConfig())
 }
 
 export interface TAllControlInput {
@@ -70,7 +71,7 @@ export interface TAllControlOutput {
 }
 
 export function getAllControls(inp : TAllControlInput) : Promise<TAllControlOutput> {
-    return axios.get(allControlAPIUrl + '?' + qs.stringify(inp))
+    return axios.get(allControlAPIUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
 }
 
 export interface TSingleControlInput {
@@ -83,5 +84,5 @@ export interface TSingleControlOutput {
 }
 
 export function getSingleControl(inp : TSingleControlInput) : Promise<TSingleControlOutput> {
-    return axios.get(createSingleControlAPIUrl(inp.controlId) + '?' + qs.stringify(inp))
+    return axios.get(createSingleControlAPIUrl(inp.controlId) + '?' + qs.stringify(inp), getAPIRequestConfig())
 }

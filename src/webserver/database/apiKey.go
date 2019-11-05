@@ -64,3 +64,15 @@ func FindApiKeyForUser(userId int64) (*core.ApiKey, error) {
 
 	return &key, nil
 }
+
+func FindApiKey(hashedRawKey string) (*core.ApiKey, error) {
+	key := core.ApiKey{}
+
+	err := dbConn.Get(&key, `
+		SELECT *
+		FROM api_keys
+		WHERE hashed_api_key = $1
+	`, hashedRawKey)
+
+	return &key, err
+}

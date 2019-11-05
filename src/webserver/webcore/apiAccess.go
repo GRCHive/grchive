@@ -1,7 +1,6 @@
 package webcore
 
 import (
-	"errors"
 	"github.com/google/uuid"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
@@ -49,5 +48,7 @@ func RefreshGrantAPIKey(userId int64, w http.ResponseWriter, r *http.Request) er
 }
 
 func GetAPIKeyFromRequest(r *http.Request) (*core.ApiKey, error) {
-	return nil, errors.New("No API Key in Request")
+	rawApiKey := GetRawClientAPIKeyFromRequest(r)
+	hashedRawKey := rawApiKey.Hash()
+	return database.FindApiKey(hashedRawKey)
 }

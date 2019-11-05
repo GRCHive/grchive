@@ -80,16 +80,10 @@
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup' 
 import MetadataStore from '../../../ts/metadata'
-import axios from 'axios'
-import * as qs from 'query-string'
-import { contactUsUrl, getAllProcessFlowIOTypesAPIUrl, newProcessFlowIOAPIUrl } from '../../../ts/url'
-import { postFormUrlEncoded } from '../../../ts/http'
+import { contactUsUrl } from '../../../ts/url'
 import { deleteProcessFlowIO, editProcessFlowIO } from '../../../ts/api/apiProcessFlowIO'
+import { TNewProcessFlowIOInput, TNewProcessFlowIOOutput, newProcessFlowIO } from '../../../ts/api/apiProcessFlowIO'
 import { getCurrentCSRF } from '../../../ts/csrf'
-
-interface NewIOResponseData {
-    data : ProcessFlowInputOutput
-}
 
 interface IOEditState {
     canEdit: boolean,
@@ -133,19 +127,19 @@ export default Vue.extend({
                 name = "Output " + this.listedIO.length.toString()
             }
 
-            postFormUrlEncoded<NewIOResponseData>(newProcessFlowIOAPIUrl, {
+            newProcessFlowIO(<TNewProcessFlowIOInput>{
                 nodeId: this.nodeId,
                 typeId: type.Id,
                 isInput: this.isInput,
                 name,
                 csrf: getCurrentCSRF()
-            }).then((resp : NewIOResponseData) => {
+            }).then((resp : TNewProcessFlowIOOutput) => {
                 if (this.isInput) {
                     VueSetup.store.commit('addNodeInput', {nodeId: this.nodeId, input: resp.data})
                 } else {
                     VueSetup.store.commit('addNodeOutput', {nodeId: this.nodeId, output: resp.data})
                 }
-            }).catch((err) => {
+            }).catch((err : any) => {
                 console.log(err)
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(

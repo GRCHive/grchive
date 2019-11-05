@@ -13,6 +13,12 @@ import (
 	"time"
 )
 
+const ApiKeyRequestHeaderKey string = "ApiKey"
+
+func GetRawClientAPIKeyFromRequest(r *http.Request) core.RawApiKey {
+	return core.RawApiKey(r.Header.Get(ApiKeyRequestHeaderKey))
+}
+
 func GetRiskFromRequestUrl(r *http.Request) (*core.Risk, error) {
 	urlRouteVars := mux.Vars(r)
 	riskIdStr, ok := urlRouteVars[core.DashboardOrgRiskQueryId]

@@ -103,10 +103,10 @@ import VueSetup from '../../../ts/vueSetup'
 import MetadataStore from '../../../ts/metadata'
 import RenderLayout from '../../../ts/render/renderLayout'
 import LocalSettings from '../../../ts/localSettings'
-import { contactUsUrl, newProcessFlowNodeAPIUrl } from '../../../ts/url'
-import { postFormUrlEncoded } from '../../../ts/http'
+import { contactUsUrl } from '../../../ts/url'
 import { nodeTypeToClass } from '../../../ts/render/nodeCssUtils'
 import { getCurrentCSRF } from '../../../ts/csrf'
+import { TNewProcessFlowNodeInput, TNewProcessFlowNodeOutput, newProcessFlowNode } from '../../../ts/api/apiProcessFlowNodes'
 
 export default Vue.extend({
     computed: {
@@ -125,16 +125,16 @@ export default Vue.extend({
         nodeTypeToClass: nodeTypeToClass,
         createNewNode(_ : MouseEvent, nodeTypeId : number) {
             // Create a new node of the given type.
-            postFormUrlEncoded(newProcessFlowNodeAPIUrl, {
+            newProcessFlowNode(<TNewProcessFlowNodeInput>{
                 typeId: nodeTypeId,
                 flowId: VueSetup.store.getters.currentProcessFlowBasicData.Id,
                 csrf: getCurrentCSRF()
-            }).then((resp) => {
+            }).then((resp : TNewProcessFlowNodeOutput) => {
                 // TODO: Make this more efficient and just do a local adjustment of the data?
                 //       That'd require some more syncing stuff...which is fancier.
                 // Force a refresh of the data for the currently selected process flow.
                 VueSetup.store.dispatch('refreshCurrentProcessFlowFullData', getCurrentCSRF())
-            }).catch((err) => {
+            }).catch((err : any) => {
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
                     "Oops! Something went wrong, please reload the page and try again.",

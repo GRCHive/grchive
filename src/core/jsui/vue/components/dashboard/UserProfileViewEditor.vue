@@ -44,8 +44,8 @@
 <script lang="ts">
 
 import * as rules from "../../../ts/formRules"
-import { contactUsUrl, createUserProfileEditAPIUrl } from "../../../ts/url"
-import { postFormUrlEncoded } from "../../../ts/http"
+import { contactUsUrl } from "../../../ts/url"
+import { TEditUserProfileInput, TEditUserProfileOutput, editUserProfile } from '../../../ts/api/apiUsers'
 import Vue from 'vue'
 import { getCurrentCSRF } from '../../../ts/csrf'
 
@@ -87,11 +87,11 @@ export default Vue.extend({
 
             this.canEdit = false
             //@ts-ignore
-            postFormUrlEncoded<void>(createUserProfileEditAPIUrl(this.$root.userEmail), {
+            editUserProfile(this.$root.userEmail, <TEditUserProfileInput>{
                 firstName: this.formData.firstName,
                 lastName: this.formData.lastName,
                 csrf: getCurrentCSRF()
-            }).then((resp : void) => {
+            }).then((resp : TEditUserProfileOutput) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
                     "Success!.",
@@ -100,7 +100,7 @@ export default Vue.extend({
                     "",
                     false);
                 window.location.reload(false);
-            }).catch((err) => {
+            }).catch((err : any) => {
                 this.formData = this.savedState
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(

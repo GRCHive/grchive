@@ -70,13 +70,11 @@ import VueSetup from '../../../ts/vueSetup'
 import VueRouter from 'vue-router'
 import * as rules from "../../../ts/formRules"
 import { standardFormatTime } from '../../../ts/time'
-import { postFormUrlEncoded } from "../../../ts/http"
-import { contactUsUrl, createUpdateProcessFlowApiUrl } from "../../../ts/url"
+import { contactUsUrl } from "../../../ts/url"
 
 import { getCurrentCSRF } from '../../../ts/csrf'
-interface ResponseData {
-    data : ProcessFlowBasicData
-}
+import { TUpdateProcessFlowInput, TUpdateProcessFlowOutput, updateProcessFlow } from '../../../ts/api/apiProcessFlow'
+
 
 export default Vue.extend({
     data : () => ({
@@ -127,11 +125,11 @@ export default Vue.extend({
             }
 
             //@ts-ignore
-            postFormUrlEncoded<ResponseData>(createUpdateProcessFlowApiUrl(this.basicData.Id), {
+            updateProcessFlow(this.basicData.Id, <TUpdateProcessFlowInput>{
                 name: this.editName,
                 description: this.editDescription,
                 csrf: this.getCurrentCSRF()
-            }).then((resp : ResponseData) => {
+            }).then((resp : TUpdateProcessFlowOutput) => {
                 VueSetup.store.commit(
                     "setIndividualProcessFlowBasicData", 
                     {
@@ -140,7 +138,7 @@ export default Vue.extend({
                     })
                 this.editMode = false
                 this.$emit('on-change')
-            }).catch((err) => {
+            }).catch((err : any) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
                     "Oops! Something went wrong. Try again.",

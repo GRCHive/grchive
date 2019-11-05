@@ -10,6 +10,7 @@ import { newControlDocCatUrl,
          deleteControlDocUrl,
          downloadControlDocUrl } from '../url'
 import JSZip from 'jszip'
+import { getAPIRequestConfig } from './apiUtility'
 
 export interface TNewControlDocCatInput {
     csrf: string
@@ -23,7 +24,7 @@ export interface TNewControlDocCatOutput {
 }
 
 export function newControlDocCat(inp : TNewControlDocCatInput): Promise<TNewControlDocCatOutput> {
-    return postFormUrlEncoded<TNewControlDocCatOutput>(newControlDocCatUrl, inp)
+    return postFormUrlEncoded<TNewControlDocCatOutput>(newControlDocCatUrl, inp, getAPIRequestConfig())
 }
 
 export interface TEditControlDocCatInput {
@@ -38,7 +39,7 @@ export interface TEditControlDocCatOutput {
 }
 
 export function editControlDocCat(inp : TEditControlDocCatInput): Promise<TEditControlDocCatOutput> {
-    return postFormUrlEncoded<TEditControlDocCatOutput>(editControlDocCatUrl, inp)
+    return postFormUrlEncoded<TEditControlDocCatOutput>(editControlDocCatUrl, inp, getAPIRequestConfig())
 }
 
 export interface TDeleteControlDocCatInput {
@@ -50,7 +51,7 @@ export interface TDeleteControlDocCatOutput {
 }
 
 export function deleteControlDocCat(inp : TDeleteControlDocCatInput): Promise<TDeleteControlDocCatOutput> {
-    return postFormUrlEncoded<TDeleteControlDocCatOutput>(deleteControlDocCatUrl, inp)
+    return postFormUrlEncoded<TDeleteControlDocCatOutput>(deleteControlDocCatUrl, inp, getAPIRequestConfig())
 }
 
 
@@ -59,7 +60,7 @@ export interface TUploadControlDocOutput {
 }
 
 export function uploadControlDoc(inp : FormData): Promise<TUploadControlDocOutput> {
-    return postFormMultipart<TUploadControlDocOutput>(uploadControlDocUrl, inp)
+    return postFormMultipart<TUploadControlDocOutput>(uploadControlDocUrl, inp, getAPIRequestConfig())
 }
 
 export interface TGetControlDocumentsInput {
@@ -78,7 +79,7 @@ export interface TGetControlDocumentsOutput {
 }
 
 export function getControlDocuments(inp: TGetControlDocumentsInput) : Promise<TGetControlDocumentsOutput> {
-    return axios.get(getControlDocUrl + '?' + qs.stringify(inp))
+    return axios.get(getControlDocUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
 }
 
 export interface TDeleteControlDocumentsInput {
@@ -90,7 +91,7 @@ export interface TDeleteControlDocumentsOutput {
 }
 
 export function deleteControlDocuments(inp: TDeleteControlDocumentsInput) : Promise<TDeleteControlDocumentsOutput> {
-    return postFormUrlEncoded<TDeleteControlDocumentsOutput>(deleteControlDocUrl, inp)
+    return postFormUrlEncoded<TDeleteControlDocumentsOutput>(deleteControlDocUrl, inp, getAPIRequestConfig())
 }
 
 export interface TDownloadControlDocumentsInput {
