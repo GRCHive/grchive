@@ -8,7 +8,7 @@ import (
 )
 
 func ObtainOrganizationDefaultRole(orgId int32) (*core.Role, error) {
-	role, err := database.FindDefaultRoleForOrg(orgId)
+	role, err := database.FindDefaultRoleForOrg(orgId, core.ServerRole)
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func ObtainOrganizationDefaultRole(orgId int32) (*core.Role, error) {
 	}
 	defaultMetadata := core.CreateDefaultRoleMetadata(orgId)
 
-	err = database.InsertOrgRole(&defaultMetadata, &defaultRole)
+	err = database.InsertOrgRole(&defaultMetadata, &defaultRole, core.ServerRole)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func ObtainOrganizationDefaultRole(orgId int32) (*core.Role, error) {
 }
 
 func ObtainAPIKeyRole(key *core.ApiKey, orgId int32) (*core.Role, error) {
-	role, err := database.FindUserRoleForOrg(key.UserId, orgId)
+	role, err := database.FindUserRoleForOrg(key.UserId, orgId, core.ServerRole)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func GrantAPIKeyDefaultRole(key *core.ApiKey, orgId int32) (*core.Role, error) {
 		return nil, err
 	}
 
-	err = database.InsertUserRoleForOrg(user.Id, org.Id, defaultRole)
+	err = database.InsertUserRoleForOrg(user.Id, org.Id, defaultRole, core.ServerRole)
 	if err != nil {
 		return nil, err
 	}

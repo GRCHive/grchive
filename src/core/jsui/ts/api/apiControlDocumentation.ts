@@ -80,6 +80,7 @@ export function getControlDocuments(inp: TGetControlDocumentsInput) : Promise<TG
 
 export interface TDeleteControlDocumentsInput {
     fileIds: number[]
+    orgGroupName: string
 }
 
 export interface TDeleteControlDocumentsOutput {
@@ -91,6 +92,7 @@ export function deleteControlDocuments(inp: TDeleteControlDocumentsInput) : Prom
 
 export interface TDownloadControlDocumentsInput {
     files: ControlDocumentationFile[]
+    orgId: number
 }
 
 export interface TDownloadControlDocumentsOutput {
@@ -103,7 +105,8 @@ export function downloadControlDocuments(inp: TDownloadControlDocumentsInput) : 
         for (let file of inp.files) {
             try {
                 let blobData = await axios.get<Blob>(downloadControlDocUrl + '?' + qs.stringify({
-                    fileId: file.Id
+                    fileId: file.Id,
+                    orgId: inp.orgId
                 }), {
                     ...getAPIRequestConfig(),
                     responseType: "blob"

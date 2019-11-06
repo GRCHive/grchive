@@ -7,7 +7,10 @@ import (
 	"strings"
 )
 
-func EditRisk(risk *core.Risk) error {
+func EditRisk(risk *core.Risk, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
 	tx := dbConn.MustBegin()
 	_, err := tx.NamedExec(`
 		UPDATE process_flow_risks
@@ -21,9 +24,13 @@ func EditRisk(risk *core.Risk) error {
 	return tx.Commit()
 }
 
-func DeleteRisks(nodeId int64, riskIds []int64, global bool) error {
+func DeleteRisks(nodeId int64, riskIds []int64, global bool, orgId int32, role *core.Role) error {
 	if len(riskIds) == 0 {
 		return nil
+	}
+
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return core.ErrorUnauthorized
 	}
 
 	tx := dbConn.MustBegin()
@@ -51,7 +58,8 @@ func DeleteRisks(nodeId int64, riskIds []int64, global bool) error {
 			_, err := tx.Exec(`
 				DELETE FROM process_flow_risks
 				WHERE id = $1
-			`, id)
+					AND org_id = $2
+			`, id, orgId)
 			if err != nil {
 				tx.Rollback()
 				return err
@@ -62,7 +70,10 @@ func DeleteRisks(nodeId int64, riskIds []int64, global bool) error {
 	return tx.Commit()
 }
 
-func AddRisksToNode(riskIds []int64, nodeId int64) error {
+func AddRisksToNode(riskIds []int64, nodeId int64, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
 	tx := dbConn.MustBegin()
 	for _, id := range riskIds {
 		_, err := tx.Exec(`
@@ -78,7 +89,11 @@ func AddRisksToNode(riskIds []int64, nodeId int64) error {
 	return tx.Commit()
 }
 
-func InsertNewRisk(risk *core.Risk) error {
+func InsertNewRisk(risk *core.Risk, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
 	var err error
 
 	tx := dbConn.MustBegin()
@@ -134,7 +149,10 @@ func findAllRisksFromDbHelper(stmt *sqlx.Stmt, args ...interface{}) ([]*core.Ris
 	return risks, nil
 }
 
-func FindAllRisksForProcessFlow(flowId int64) ([]*core.Risk, error) {
+func FindAllRisksForProcessFlow(flowId int64, role *core.Role) ([]*core.Risk, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	stmt, err := dbConn.Preparex(`
 		SELECT 
 			risk.*
@@ -153,7 +171,10 @@ func FindAllRisksForProcessFlow(flowId int64) ([]*core.Risk, error) {
 	return findAllRisksFromDbHelper(stmt, flowId)
 }
 
-func FindAllRiskForOrganization(org *core.Organization) ([]*core.Risk, error) {
+func FindAllRiskForOrganization(org *core.Organization, role *core.Role) ([]*core.Risk, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	stmt, err := dbConn.Preparex(`
 		SELECT 
 			risk.*
@@ -167,7 +188,10 @@ func FindAllRiskForOrganization(org *core.Organization) ([]*core.Risk, error) {
 	return findAllRisksFromDbHelper(stmt, org.Id)
 }
 
-func FindRisk(riskId int64) (*core.Risk, error) {
+func FindRisk(riskId int64, role *core.Role) (*core.Risk, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	risk := core.Risk{}
 	err := dbConn.Get(&risk, `
 		SELECT risk.id, risk.name, risk.description

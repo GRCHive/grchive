@@ -16,11 +16,9 @@ type GetAllProcessFlowInputs struct {
 
 type DeleteProcessFlowInputs struct {
 	FlowId int64 `webcore:"flowId"`
-	OrgId  int32 `webcore:"orgId"`
 }
 
 type UpdateProcessFlowInputs struct {
-	OrgId       int32  `webcore:"orgId"`
 	Name        string `webcore:"name"`
 	Description string `webcore:"description"`
 }
@@ -178,18 +176,18 @@ func updateProcessFlow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
-	if err != nil {
-		core.Warning("Bad access: " + err.Error())
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	processFlow, err := database.FindProcessFlowWithId(flowId, role)
+	processFlow, err := database.FindProcessFlowWithId(flowId, core.ServerRole)
 	if err != nil {
 		core.Warning("Bad process flow id: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, processFlow.Org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
@@ -218,7 +216,7 @@ func getProcessFlowFullData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := database.FindOrganizationFromProcessFlowId(flowId)
+	org, err := database.FindOrganizationFromProcessFlowId(flowId, core.ServerRole)
 	if err != nil {
 		core.Warning("Can't find organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -226,50 +224,57 @@ func getProcessFlowFullData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	graph := core.ProcessFlowGraph{}
-	graph.Nodes, err = database.FindAllNodesForProcessFlow(flowId)
+	graph.Nodes, err = database.FindAllNodesForProcessFlow(flowId, role)
 	if err != nil {
 		core.Warning("Failed to obtain nodes: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		jsonWriter.Encode(struct{}{})
 		return
 	}
-	graph.Edges, err = database.FindAllEdgesForProcessFlow(flowId)
+	graph.Edges, err = database.FindAllEdgesForProcessFlow(flowId, role)
 	if err != nil {
 		core.Warning("Failed to obtain edges: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		jsonWriter.Encode(struct{}{})
 		return
 	}
-	graph.Risks, err = database.FindAllRiskForOrganization(org)
+	graph.Risks, err = database.FindAllRiskForOrganization(org, role)
 	if err != nil {
 		core.Warning("Failed to obtain risks: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		jsonWriter.Encode(struct{}{})
 		return
 	}
-	graph.Controls, err = database.FindAllControlsForOrganization(org)
+	graph.Controls, err = database.FindAllControlsForOrganization(org, role)
 	if err != nil {
 		core.Warning("Failed to obtain controls: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		jsonWriter.Encode(struct{}{})
 		return
 	}
-	graph.NodeRisk, err = database.FindNodeRiskRelationships(flowId)
+	graph.NodeRisk, err = database.FindNodeRiskRelationships(flowId, role)
 	if err != nil {
 		core.Warning("Failed to obtain node-risk relationships: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		jsonWriter.Encode(struct{}{})
 		return
 	}
-	graph.NodeControl, err = database.FindNodeControlRelationships(flowId)
+	graph.NodeControl, err = database.FindNodeControlRelationships(flowId, role)
 	if err != nil {
 		core.Warning("Failed to obtain node-control relationships: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		jsonWriter.Encode(struct{}{})
 		return
 	}
-	graph.RiskControl, err = database.FindRiskControlRelationships(org.Id)
+	graph.RiskControl, err = database.FindRiskControlRelationships(org.Id, role)
 	if err != nil {
 		core.Warning("Failed to obtain risk-control relationships: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -292,7 +297,15 @@ func deleteProcessFlow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	org, err := database.FindOrganizationFromProcessFlowId(inputs.FlowId, core.ServerRole)
+	if err != nil {
+		core.Warning("Can't find organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
 	if err != nil {
 		core.Warning("Bad access: " + err.Error())
 		w.WriteHeader(http.StatusUnauthorized)

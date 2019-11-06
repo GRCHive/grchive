@@ -13,7 +13,10 @@ func getProcessFlowIODbName(isInput bool) string {
 	}
 }
 
-func GetAllProcessFlowIOTypes() ([]*core.ProcessFlowIOType, error) {
+func GetAllProcessFlowIOTypes(role *core.Role) ([]*core.ProcessFlowIOType, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	result := []*core.ProcessFlowIOType{}
 
 	err := dbConn.Select(&result, `
@@ -21,7 +24,10 @@ func GetAllProcessFlowIOTypes() ([]*core.ProcessFlowIOType, error) {
 	return result, err
 }
 
-func CreateNewProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool) (*core.ProcessFlowInputOutput, error) {
+func CreateNewProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool, role *core.Role) (*core.ProcessFlowInputOutput, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return nil, core.ErrorUnauthorized
+	}
 	var err error
 	var dbName string = getProcessFlowIODbName(isInput)
 
@@ -49,7 +55,10 @@ func CreateNewProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool) (*cor
 	return &outIo, err
 }
 
-func DeleteProcessFlowIO(ioId int64, isInput bool) error {
+func DeleteProcessFlowIO(ioId int64, isInput bool, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
 	var dbName string = getProcessFlowIODbName(isInput)
 	tx := dbConn.MustBegin()
 	_, err := tx.Exec(fmt.Sprintf(`
@@ -64,7 +73,10 @@ func DeleteProcessFlowIO(ioId int64, isInput bool) error {
 	return err
 }
 
-func EditProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool) (*core.ProcessFlowInputOutput, error) {
+func EditProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool, role *core.Role) (*core.ProcessFlowInputOutput, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return nil, core.ErrorUnauthorized
+	}
 	var dbName string = getProcessFlowIODbName(isInput)
 	tx := dbConn.MustBegin()
 	rows, err := tx.NamedQuery(fmt.Sprintf(`

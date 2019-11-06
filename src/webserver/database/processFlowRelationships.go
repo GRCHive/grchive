@@ -4,7 +4,10 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
-func FindNodeRiskRelationships(flowId int64) ([]*core.NodeRiskRelationship, error) {
+func FindNodeRiskRelationships(flowId int64, role *core.Role) ([]*core.NodeRiskRelationship, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	relationships := make([]*core.NodeRiskRelationship, 0)
 	err := dbConn.Select(&relationships, `
 		SELECT DISTINCT risknode.*
@@ -18,7 +21,10 @@ func FindNodeRiskRelationships(flowId int64) ([]*core.NodeRiskRelationship, erro
 	return relationships, err
 }
 
-func FindNodesRelatedToRisk(riskId int64) ([]*core.ProcessFlowNode, error) {
+func FindNodesRelatedToRisk(riskId int64, role *core.Role) ([]*core.ProcessFlowNode, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	nodes := make([]*core.ProcessFlowNode, 0)
 	err := dbConn.Select(&nodes, `
 		SELECT DISTINCT node.*
@@ -30,7 +36,10 @@ func FindNodesRelatedToRisk(riskId int64) ([]*core.ProcessFlowNode, error) {
 	return nodes, err
 }
 
-func FindNodesRelatedToControl(controlId int64) ([]*core.ProcessFlowNode, error) {
+func FindNodesRelatedToControl(controlId int64, role *core.Role) ([]*core.ProcessFlowNode, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	nodes := make([]*core.ProcessFlowNode, 0)
 	err := dbConn.Select(&nodes, `
 		SELECT DISTINCT node.*
@@ -42,7 +51,10 @@ func FindNodesRelatedToControl(controlId int64) ([]*core.ProcessFlowNode, error)
 	return nodes, err
 }
 
-func FindNodeControlRelationships(flowId int64) ([]*core.NodeControlRelationship, error) {
+func FindNodeControlRelationships(flowId int64, role *core.Role) ([]*core.NodeControlRelationship, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	relationships := make([]*core.NodeControlRelationship, 0)
 	err := dbConn.Select(&relationships, `
 		SELECT DISTINCT nodecontrol.*
@@ -56,7 +68,10 @@ func FindNodeControlRelationships(flowId int64) ([]*core.NodeControlRelationship
 	return relationships, err
 }
 
-func FindRiskControlRelationships(orgId int32) ([]*core.RiskControlRelationship, error) {
+func FindRiskControlRelationships(orgId int32, role *core.Role) ([]*core.RiskControlRelationship, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	relationships := make([]*core.RiskControlRelationship, 0)
 	err := dbConn.Select(&relationships, `
 		SELECT DISTINCT riskcontrol.*
@@ -71,7 +86,10 @@ func FindRiskControlRelationships(orgId int32) ([]*core.RiskControlRelationship,
 	return relationships, err
 }
 
-func FindControlsRelatedToRisk(riskId int64) ([]*core.Control, error) {
+func FindControlsRelatedToRisk(riskId int64, role *core.Role) ([]*core.Control, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	controls := make([]*core.Control, 0)
 	err := dbConn.Select(&controls, `
 		SELECT DISTINCT control.*
@@ -83,7 +101,10 @@ func FindControlsRelatedToRisk(riskId int64) ([]*core.Control, error) {
 	return controls, err
 }
 
-func FindRisksRelatedToControl(controlId int64) ([]*core.Risk, error) {
+func FindRisksRelatedToControl(controlId int64, role *core.Role) ([]*core.Risk, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	risks := make([]*core.Risk, 0)
 	err := dbConn.Select(&risks, `
 		SELECT DISTINCT risk.id, risk.name, risk.description

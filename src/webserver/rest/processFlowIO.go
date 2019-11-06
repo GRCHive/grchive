@@ -25,7 +25,7 @@ func getAllProcessFlowIOTypes(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	types, err := database.GetAllProcessFlowIOTypes()
+	types, err := database.GetAllProcessFlowIOTypes(core.ServerRole)
 	if err != nil {
 		core.Warning("Can't get IO types: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -86,12 +86,27 @@ func createNewProcessFlowIO(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	organization, err := database.FindOrganizationFromNodeId(nodeId, core.ServerRole)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, organization.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	io, err := database.CreateNewProcessFlowIO(&core.ProcessFlowInputOutput{
 		Id:           -1,
 		Name:         nameData[0],
 		ParentNodeId: nodeId,
 		TypeId:       int32(typeId),
-	}, isInput)
+	}, isInput, role)
 
 	if err != nil {
 		core.Warning("Failed to add process flow IO: " + core.ErrorString(err))
@@ -116,7 +131,31 @@ func deleteProcessFlowIO(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.DeleteProcessFlowIO(inputs.IoId, inputs.IsInput)
+	var organization *core.Organization
+	if inputs.IsInput {
+		organization, err = database.FindOrganizationFromProcessFlowInputId(inputs.IoId, core.ServerRole)
+		if err != nil {
+			core.Warning("Can't get input org: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	} else {
+		organization, err = database.FindOrganizationFromProcessFlowOutputId(inputs.IoId, core.ServerRole)
+		if err != nil {
+			core.Warning("Can't get output org: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, organization.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteProcessFlowIO(inputs.IoId, inputs.IsInput, role)
 	if err != nil {
 		core.Warning("Failed to delete IO: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -140,13 +179,37 @@ func editProcessFlowIO(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var organization *core.Organization
+	if inputs.IsInput {
+		organization, err = database.FindOrganizationFromProcessFlowInputId(inputs.IoId, core.ServerRole)
+		if err != nil {
+			core.Warning("Can't get input org: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	} else {
+		organization, err = database.FindOrganizationFromProcessFlowOutputId(inputs.IoId, core.ServerRole)
+		if err != nil {
+			core.Warning("Can't get output org: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, organization.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	io, err := database.EditProcessFlowIO(&core.ProcessFlowInputOutput{
 		Id:   inputs.IoId,
 		Name: inputs.Name,
 		// This doesn't need a valid value since we'll assume it'll never be updated.
 		ParentNodeId: 0,
 		TypeId:       inputs.Type,
-	}, inputs.IsInput)
+	}, inputs.IsInput, role)
 
 	if err != nil {
 		core.Warning("Failed to update IO: " + err.Error())

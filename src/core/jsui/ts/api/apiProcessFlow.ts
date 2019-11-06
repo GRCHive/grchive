@@ -10,7 +10,6 @@ import { getAPIRequestConfig } from './apiUtility'
 
 export interface TDeleteProcessFlowInput {
     flowId: number
-    orgId: number
 }
 
 export interface TDeleteProcessFlowOutput {
@@ -22,7 +21,6 @@ export function deleteProcessFlow(inp : TDeleteProcessFlowInput) :
 }
 
 export interface TUpdateProcessFlowInput {
-    orgId : number
     name: string
     description: string
 }

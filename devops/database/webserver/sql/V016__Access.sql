@@ -47,6 +47,11 @@ CREATE TABLE resource_control_documentation_access (
     access_type INTEGER NOT NULL
 );
 
+CREATE TABLE resource_control_documentation_metadata_access (
+    role_id BIGINT NOT NULL REFERENCES organization_available_roles(id) ON DELETE CASCADE,
+    access_type INTEGER NOT NULL
+);
+
 CREATE TABLE resource_risks_access (
     role_id BIGINT NOT NULL REFERENCES organization_available_roles(id) ON DELETE CASCADE,
     access_type INTEGER NOT NULL

@@ -18,6 +18,7 @@ func RegisterPaths(r *mux.Router) {
 	s.Use(webcore.CreateVerifyCSRFMiddleware(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 	}))
+	s.Use(webcore.ObtainUserSessionInContextMiddleware)
 
 	s.HandleFunc(core.WebsocketProcessFlowNodeDisplaySettingsEndpoint,
 		createWebsocketWrapper(processProcessFlowNodeDisplaySettings))

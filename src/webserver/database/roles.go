@@ -7,11 +7,12 @@ import (
 )
 
 var resourceToDatabaseMap = map[core.ResourceType]string{
-	core.ResourceOrgRoles:             "resource_organizations_access",
-	core.ResourceProcessFlows:         "resource_process_flows_access",
-	core.ResourceControls:             "resource_controls_access",
-	core.ResourceControlDocumentation: "resource_control_documentation_access",
-	core.ResourceRisks:                "resource_risks_access",
+	core.ResourceOrgRoles:                     "resource_organizations_access",
+	core.ResourceProcessFlows:                 "resource_process_flows_access",
+	core.ResourceControls:                     "resource_controls_access",
+	core.ResourceControlDocumentation:         "resource_control_documentation_access",
+	core.ResourceControlDocumentationMetadata: "resource_control_documentation_metadata_access",
+	core.ResourceRisks:                        "resource_risks_access",
 }
 
 func createRoleSql(cond string) string {
@@ -24,6 +25,7 @@ func createRoleSql(cond string) string {
 			rpf.access_type AS "permissions.flow_access",
 			rc.access_type AS "permissions.control_access",
 			rcd.access_type AS "permissions.doc_access",
+			rcdm.access_type AS "permissions.doc_meta_access",
 			rr.access_type AS "permissions.risk_access"
 		FROM organization_available_roles AS role
 		INNER JOIN resource_organizations_access AS rorg
@@ -34,6 +36,8 @@ func createRoleSql(cond string) string {
 			ON role.id = rc.role_id
 		INNER JOIN resource_control_documentation_access AS rcd
 			ON role.id = rcd.role_id
+		INNER JOIN resource_control_documentation_metadata_access AS rcdm
+			ON role.id = rcdm.role_id
 		INNER JOIN resource_risks_access AS rr
 			ON role.id = rr.role_id
 		%s
@@ -60,7 +64,11 @@ func FindUserRoleFromStmt(stmt *sqlx.Stmt, args ...interface{}) (*core.Role, err
 }
 
 // This returns nil, nil if no permissions was found for the user.
-func FindUserRoleForOrg(userId int64, orgId int32) (*core.Role, error) {
+func FindUserRoleForOrg(userId int64, orgId int32, actionRole *core.Role) (*core.Role, error) {
+	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
 	stmt, err := dbConn.Preparex(createRoleSql(`
 	INNER JOIN user_roles AS ur
 		ON ur.role_id = role.id
@@ -75,7 +83,10 @@ func FindUserRoleForOrg(userId int64, orgId int32) (*core.Role, error) {
 }
 
 // This returns nil, nil if no permissions was found for the org.
-func FindDefaultRoleForOrg(orgId int32) (*core.Role, error) {
+func FindDefaultRoleForOrg(orgId int32, actionRole *core.Role) (*core.Role, error) {
+	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	stmt, err := dbConn.Preparex(createRoleSql(`
 	WHERE role.org_id = $1
 		AND role.is_default_role = 'true'
@@ -87,7 +98,10 @@ func FindDefaultRoleForOrg(orgId int32) (*core.Role, error) {
 	return FindUserRoleFromStmt(stmt, orgId)
 }
 
-func InsertOrgRole(metadata *core.RoleMetadata, role *core.Role) error {
+func InsertOrgRole(metadata *core.RoleMetadata, role *core.Role, actionRole *core.Role) error {
+	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
 	tx := dbConn.MustBegin()
 
 	rows, err := tx.NamedQuery(`
@@ -127,7 +141,10 @@ func InsertOrgRole(metadata *core.RoleMetadata, role *core.Role) error {
 	return tx.Commit()
 }
 
-func InsertUserRoleForOrg(userId int64, orgId int32, role *core.Role) error {
+func InsertUserRoleForOrg(userId int64, orgId int32, role *core.Role, actionRole *core.Role) error {
+	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
 	tx := dbConn.MustBegin()
 	_, err := tx.Exec(`
 		INSERT INTO user_roles (role_id, user_id, org_id)

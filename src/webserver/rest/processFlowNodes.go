@@ -24,7 +24,14 @@ func getAllProcessFlowNodeTypes(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	types, err := database.GetAllProcessFlowNodeTypes()
+	apiKey, err := webcore.GetAPIKeyFromRequest(r)
+	if apiKey == nil || err != nil {
+		core.Warning("No API Key: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	types, err := database.GetAllProcessFlowNodeTypes(core.ServerRole)
 	if err != nil {
 		core.Warning("Can't get types: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -63,6 +70,7 @@ func newProcessFlowNode(w http.ResponseWriter, r *http.Request) {
 		jsonWriter.Encode(struct{}{})
 		return
 	}
+
 	flowId, err := strconv.ParseInt(flowIdData[0], 10, 64)
 	if err != nil {
 		core.Warning("Bad flow Id: " + err.Error())
@@ -71,9 +79,24 @@ func newProcessFlowNode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	org, err := database.FindOrganizationFromProcessFlowId(flowId, core.ServerRole)
+	if err != nil {
+		core.Warning("Can't find organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	// Let SQL check the two IDs for validity (foreign keys) so don't bother
 	// doing extra SQL queries to make sure the user input a valid type/flow.
-	node, err := database.CreateNewProcessFlowNodeWithTypeId(int32(typeId), flowId)
+	node, err := database.CreateNewProcessFlowNodeWithTypeId(int32(typeId), flowId, role)
 	if err != nil {
 		core.Warning("Failed to create new process flow node: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -101,6 +124,21 @@ func editProcessFlowNode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	org, err := database.FindOrganizationFromNodeId(inputs.NodeId, core.ServerRole)
+	if err != nil {
+		core.Warning("Can't find organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	node, err := database.EditProcessFlowNode(&core.ProcessFlowNode{
 		Id:            inputs.NodeId,
 		Name:          inputs.Name,
@@ -109,7 +147,7 @@ func editProcessFlowNode(w http.ResponseWriter, r *http.Request) {
 		NodeTypeId:    inputs.Type,
 		Inputs:        nil,
 		Outputs:       nil,
-	})
+	}, role)
 
 	if err != nil {
 		core.Warning("Failed to edit node: " + err.Error())
@@ -134,7 +172,22 @@ func deleteProcessFlowNode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.DeleteProcessFlowNodeFromId(inputs.NodeId)
+	org, err := database.FindOrganizationFromNodeId(inputs.NodeId, core.ServerRole)
+	if err != nil {
+		core.Warning("Can't find organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteProcessFlowNodeFromId(inputs.NodeId, role)
 	if err != nil {
 		core.Warning("Failed to delete node: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

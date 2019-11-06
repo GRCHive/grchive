@@ -79,8 +79,6 @@ export default Vue.extend({
             data.set('catId', this.catId.toString())
             data.set('file', this.file!)
             data.set('relevantTime', currentDate.toISOString())
-            //@ts-ignore
-            data.set('orgGroupName', this.$root.orgGroupId)
 
             uploadControlDoc(data).then((resp : TUploadControlDocOutput) => {
                 this.progressOverlay = false

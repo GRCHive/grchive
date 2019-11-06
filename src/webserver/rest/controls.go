@@ -71,6 +71,13 @@ func editControl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	control := core.Control{
 		Id:                inputs.ControlId,
 		Name:              inputs.Name,
@@ -82,7 +89,7 @@ func editControl(w http.ResponseWriter, r *http.Request) {
 		OwnerId:           inputs.OwnerId,
 	}
 
-	err = database.EditControl(&control)
+	err = database.EditControl(&control, role)
 	if err != nil {
 		core.Warning("Failed to edit control: " + err.Error())
 		if database.IsDuplicateDBEntry(err) {
@@ -119,6 +126,13 @@ func newControl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	control := core.Control{
 		Name:              inputs.Name,
 		Description:       inputs.Description,
@@ -129,7 +143,7 @@ func newControl(w http.ResponseWriter, r *http.Request) {
 		OwnerId:           inputs.OwnerId,
 	}
 
-	err = database.InsertNewControl(&control)
+	err = database.InsertNewControl(&control, role)
 	if err != nil {
 		core.Warning("Failed to insert new control: " + err.Error())
 		if database.IsDuplicateDBEntry(err) {
@@ -143,7 +157,7 @@ func newControl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if inputs.NodeId != -1 {
-		err = database.AddControlsToNode(inputs.NodeId, []int64{control.Id})
+		err = database.AddControlsToNode(inputs.NodeId, []int64{control.Id}, role)
 		if err != nil {
 			core.Warning("Failed to add control to node relationship: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -153,7 +167,7 @@ func newControl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if inputs.RiskId != -1 {
-		err = database.AddControlsToRisk(inputs.RiskId, []int64{control.Id})
+		err = database.AddControlsToRisk(inputs.RiskId, []int64{control.Id}, role)
 		if err != nil {
 			core.Warning("Failed to add control to risk relationship: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -169,7 +183,14 @@ func getControlTypes(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	types, err := database.GetControlTypes()
+	apiKey, err := webcore.GetAPIKeyFromRequest(r)
+	if apiKey == nil || err != nil {
+		core.Warning("No API Key: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	types, err := database.GetControlTypes(core.ServerRole)
 	if err != nil {
 		core.Warning("Failed to get control types: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -192,11 +213,27 @@ func deleteControls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	org, err := database.FindOrganizationFromNodeId(inputs.NodeId, core.ServerRole)
+	if err != nil {
+		core.Warning("Bad organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	err = database.DeleteControls(
 		inputs.NodeId,
 		inputs.ControlIds,
 		inputs.RiskIds,
-		inputs.Global)
+		inputs.Global,
+		org.Id,
+		role)
 	if err != nil {
 		core.Warning("Failed to delete controls: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -219,7 +256,21 @@ func addControls(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if inputs.NodeId != -1 {
-		err = database.AddControlsToNode(inputs.NodeId, inputs.ControlIds)
+		org, err := database.FindOrganizationFromNodeId(inputs.NodeId, core.ServerRole)
+		if err != nil {
+			core.Warning("Bad organization: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		role, err := webcore.GetCurrentRequestRole(r, org.Id)
+		if err != nil {
+			core.Warning("Bad access: " + err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		err = database.AddControlsToNode(inputs.NodeId, inputs.ControlIds, role)
 		if err != nil {
 			core.Warning("Failed to add control to node relationship: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -229,7 +280,21 @@ func addControls(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if inputs.RiskId != -1 {
-		err = database.AddControlsToRisk(inputs.RiskId, inputs.ControlIds)
+		org, err := database.FindOrganizationFromRiskId(inputs.RiskId, core.ServerRole)
+		if err != nil {
+			core.Warning("Bad organization: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		role, err := webcore.GetCurrentRequestRole(r, org.Id)
+		if err != nil {
+			core.Warning("Bad access: " + err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		err = database.AddControlsToRisk(inputs.RiskId, inputs.ControlIds, role)
 		if err != nil {
 			core.Warning("Failed to add control to risk relationship: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -261,7 +326,14 @@ func getAllControls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	controls, err := database.FindAllControlsForOrganization(org)
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	controls, err := database.FindAllControlsForOrganization(org, role)
 	if err != nil {
 		core.Warning("Could not find controls: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -284,7 +356,7 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 		DocumentCategories []*core.ControlDocumentationCategory
 	}
 	data := FullControlData{}
-	data.Control, err = webcore.GetControlFromRequestUrl(r)
+	data.Control, err = webcore.GetControlFromRequestUrl(r, core.ServerRole)
 	if err != nil {
 		core.Warning("No control data: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -292,7 +364,21 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.Nodes, err = database.FindNodesRelatedToControl(data.Control.Id)
+	org, err := database.FindOrganizationFromControlId(data.Control.Id, core.ServerRole)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	data.Nodes, err = database.FindNodesRelatedToControl(data.Control.Id, role)
 	if err != nil {
 		core.Warning("Failed to get nodes data: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -300,7 +386,7 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.Risks, err = database.FindRisksRelatedToControl(data.Control.Id)
+	data.Risks, err = database.FindRisksRelatedToControl(data.Control.Id, role)
 	if err != nil {
 		core.Warning("Failed to get risks data: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -308,7 +394,7 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.DocumentCategories, err = database.FindControlDocumentCategoriesForControl(data.Control.Id)
+	data.DocumentCategories, err = database.FindControlDocumentCategoriesForControl(data.Control.Id, role)
 	if err != nil {
 		core.Warning("Failed to get document category data: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

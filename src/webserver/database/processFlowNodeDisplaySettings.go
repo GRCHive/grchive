@@ -9,7 +9,11 @@ import (
 
 type FlowNodeDisplaySettings map[string]interface{}
 
-func FindDisplaySettingsForProcessFlow(flowId int64) (map[int64]FlowNodeDisplaySettings, error) {
+func FindDisplaySettingsForProcessFlow(flowId int64, role *core.Role) (map[int64]FlowNodeDisplaySettings, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
 	type QueryResult struct {
 		NodeId   int64          `db:"parent_node_id"`
 		Settings types.JSONText `db:"settings"`
@@ -45,7 +49,11 @@ func FindDisplaySettingsForProcessFlow(flowId int64) (map[int64]FlowNodeDisplayS
 	return retResult, nil
 }
 
-func FindDisplaySettingsForProcessFlowNode(nodeId int64) (FlowNodeDisplaySettings, error) {
+func FindDisplaySettingsForProcessFlowNode(nodeId int64, role *core.Role) (FlowNodeDisplaySettings, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
 	row := dbConn.QueryRowx(`
 		SELECT settings 
 		FROM process_flow_node_display_settings
@@ -67,7 +75,11 @@ func FindDisplaySettingsForProcessFlowNode(nodeId int64) (FlowNodeDisplaySetting
 	return retMap, nil
 }
 
-func UpdateDisplaySettingsForProcessFlowNode(nodeId int64, settings map[string]interface{}) error {
+func UpdateDisplaySettingsForProcessFlowNode(nodeId int64, settings map[string]interface{}, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
 	rawSettings, err := json.Marshal(settings)
 	if err != nil {
 		return err

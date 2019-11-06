@@ -6,7 +6,11 @@ import (
 	"math"
 )
 
-func NewControlDocumentationCategory(cat *core.ControlDocumentationCategory) error {
+func NewControlDocumentationCategory(cat *core.ControlDocumentationCategory, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
 	tx := dbConn.MustBegin()
 
 	rows, err := tx.NamedQuery(`
@@ -29,13 +33,18 @@ func NewControlDocumentationCategory(cat *core.ControlDocumentationCategory) err
 	return tx.Commit()
 }
 
-func EditControlDocumentationCategory(cat *core.ControlDocumentationCategory) error {
+func EditControlDocumentationCategory(cat *core.ControlDocumentationCategory, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
 	tx := dbConn.MustBegin()
 	_, err := tx.NamedExec(`
 		UPDATE process_flow_control_documentation_categories
 		SET name = :name, 
 			description = :description
 		WHERE id = :id
+			AND control_id = :control_id
 	`, cat)
 	if err != nil {
 		tx.Rollback()
@@ -44,7 +53,11 @@ func EditControlDocumentationCategory(cat *core.ControlDocumentationCategory) er
 	return tx.Commit()
 }
 
-func FindControlDocumentCategoriesForControl(controlId int64) ([]*core.ControlDocumentationCategory, error) {
+func FindControlDocumentCategoriesForControl(controlId int64, role *core.Role) ([]*core.ControlDocumentationCategory, error) {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
 	retArr := make([]*core.ControlDocumentationCategory, 0)
 
 	err := dbConn.Select(&retArr, `
@@ -55,7 +68,11 @@ func FindControlDocumentCategoriesForControl(controlId int64) ([]*core.ControlDo
 	return retArr, err
 }
 
-func DeleteControlDocumentationCategory(catId int64) error {
+func DeleteControlDocumentationCategory(catId int64, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
 	tx := dbConn.MustBegin()
 	_, err := tx.Exec(`
 		DELETE FROM process_flow_control_documentation_categories
@@ -68,7 +85,11 @@ func DeleteControlDocumentationCategory(catId int64) error {
 	return tx.Commit()
 }
 
-func CreateControlDocumentationFileWithTx(file *core.ControlDocumentationFile, tx *sqlx.Tx) error {
+func CreateControlDocumentationFileWithTx(file *core.ControlDocumentationFile, tx *sqlx.Tx, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
 	rows, err := tx.NamedQuery(`
 		INSERT INTO process_flow_control_documentation_file (storage_name, relevant_time, upload_time, category_id)
 		VALUES (:storage_name, :relevant_time, :upload_time, :category_id)
@@ -88,7 +109,11 @@ func CreateControlDocumentationFileWithTx(file *core.ControlDocumentationFile, t
 	return nil
 }
 
-func UpdateControlDocumentation(file *core.ControlDocumentationFile, tx *sqlx.Tx) error {
+func UpdateControlDocumentation(file *core.ControlDocumentationFile, tx *sqlx.Tx, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
 	_, err := tx.NamedExec(`
 		UPDATE process_flow_control_documentation_file
 		SET bucket_id = :bucket_id,
@@ -98,13 +123,22 @@ func UpdateControlDocumentation(file *core.ControlDocumentationFile, tx *sqlx.Tx
 	return err
 }
 
-func DeleteBatchControlDocumentation(fileIds []int64) error {
+func DeleteBatchControlDocumentation(fileIds []int64, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
 	tx := dbConn.MustBegin()
 	for _, id := range fileIds {
 		_, err := tx.Exec(`
-			DELETE FROM process_flow_control_documentation_file
-			WHERE id = $1
-		`, id)
+			DELETE FROM process_flow_control_documentation_file AS file
+			INNER JOIN process_flow_control_documentation_categories AS cat
+				ON file.category_id = cat.id
+			INNER JOIN process_flow_controls AS ctrl
+				ON cat.control_id = ctrl.id
+			WHERE file.id = $1
+				AND ctrl.org_id = $2
+		`, id, orgId)
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -113,19 +147,32 @@ func DeleteBatchControlDocumentation(fileIds []int64) error {
 	return tx.Commit()
 }
 
-func GetControlDocumentation(fileId int64) (*core.ControlDocumentationFile, error) {
+func GetControlDocumentation(fileId int64, orgId int32, role *core.Role) (*core.ControlDocumentationFile, error) {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
 	retFile := core.ControlDocumentationFile{}
 
 	err := dbConn.Get(&retFile, `
-		SELECT *
-		FROM process_flow_control_documentation_file
-		WHERE id = $1
-	`, fileId)
+		SELECT file.*
+		FROM process_flow_control_documentation_file AS file
+		INNER JOIN process_flow_control_documentation_categories AS cat
+			ON file.category_id = cat.id
+		INNER JOIN process_flow_controls AS ctrl
+			ON cat.control_id = ctrl.id
+		WHERE file.id = $1
+			AND ctrl.org_id = $2
+	`, fileId, orgId)
 
 	return &retFile, err
 }
 
-func GetControlDocumentationForCategory(catId int64, pageSize int, pageOffset int) ([]*core.ControlDocumentationFile, error) {
+func GetControlDocumentationForCategory(catId int64, pageSize int, pageOffset int, role *core.Role) ([]*core.ControlDocumentationFile, error) {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
 	retArr := make([]*core.ControlDocumentationFile, 0)
 
 	err := dbConn.Select(&retArr, `
@@ -142,7 +189,11 @@ func GetControlDocumentationForCategory(catId int64, pageSize int, pageOffset in
 	return retArr, err
 }
 
-func GetTotalControlDocumentationPages(catId int64, pageSize int) (int, error) {
+func GetTotalControlDocumentationPages(catId int64, pageSize int, role *core.Role) (int, error) {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
+		return 0, core.ErrorUnauthorized
+	}
+
 	count := 0
 
 	err := dbConn.Get(&count, `

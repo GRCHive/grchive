@@ -235,7 +235,9 @@ export default Vue.extend({
             // Download each file individually from the webserver and then
             // ZIP them together before saving the final ZIP to disk.
             downloadControlDocuments(<TDownloadControlDocumentsInput>{
-                files: this.selectedFiles
+                files: this.selectedFiles,
+                //@ts-ignore
+                orgId: this.$root.orgId
             }).then((resp : TDownloadControlDocumentsOutput) => {
                 saveAs(resp.data, "download.zip")
             }).catch((err : any) => {

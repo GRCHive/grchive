@@ -5,7 +5,10 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
-func GetControlTypes() ([]*core.ControlType, error) {
+func GetControlTypes(role *core.Role) ([]*core.ControlType, error) {
+	if !role.Permissions.HasAccess(core.ResourceControls, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	retArr := make([]*core.ControlType, 0)
 
 	err := dbConn.Select(&retArr, `
@@ -14,7 +17,10 @@ func GetControlTypes() ([]*core.ControlType, error) {
 	return retArr, err
 }
 
-func FindAllControlsForOrganization(org *core.Organization) ([]*core.Control, error) {
+func FindAllControlsForOrganization(org *core.Organization, role *core.Role) ([]*core.Control, error) {
+	if !role.Permissions.HasAccess(core.ResourceControls, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	controls := make([]*core.Control, 0)
 
 	err := dbConn.Select(&controls, `
@@ -26,7 +32,10 @@ func FindAllControlsForOrganization(org *core.Organization) ([]*core.Control, er
 	return controls, err
 }
 
-func EditControl(control *core.Control) error {
+func EditControl(control *core.Control, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceControls, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
 	tx := dbConn.MustBegin()
 	_, err := tx.NamedExec(`
 		UPDATE process_flow_controls
@@ -45,7 +54,11 @@ func EditControl(control *core.Control) error {
 	return tx.Commit()
 }
 
-func InsertNewControl(control *core.Control) error {
+func InsertNewControl(control *core.Control, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceControls, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
 	var err error
 	var rows *sqlx.Rows
 
@@ -78,16 +91,26 @@ func InsertNewControl(control *core.Control) error {
 	return tx.Commit()
 }
 
-func DeleteControls(nodeId int64, controlIds []int64, riskIds []int64, global bool) error {
+func DeleteControls(nodeId int64, controlIds []int64, riskIds []int64, global bool, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceControls, core.AccessManage) ||
+		!role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) ||
+		!role.Permissions.HasAccess(core.ResourceRisks, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
 	tx := dbConn.MustBegin()
 	// Always delete the control relationship between the node and the control
 	// as well as the control and the specified risk.
 	for idx, id := range controlIds {
 		if nodeId != -1 {
 			_, err := tx.Exec(`
-				DELETE FROM process_flow_control_node
-				WHERE node_id = $1 AND control_id = $2
-			`, nodeId, id)
+				DELETE FROM process_flow_control_node AS cn
+				INNER JOIN process_flow_controls AS ctrl
+					ON cn.control_id = ctrl.id
+				WHERE cn.node_id = $1
+					AND cn.control_id = $2
+					AND ctrl.org_id = $3
+			`, nodeId, id, orgId)
 
 			if err != nil {
 				tx.Rollback()
@@ -97,8 +120,12 @@ func DeleteControls(nodeId int64, controlIds []int64, riskIds []int64, global bo
 
 		if idx < len(riskIds) && riskIds[idx] != -1 {
 			_, err := tx.Exec(`
-				DELETE FROM process_flow_risk_control
-				WHERE risk_id = $1 AND control_id = $2
+				DELETE FROM process_flow_risk_control AS rc
+				INNER JOIN process_flow_controls AS ctrl
+					ON rc.control_id = ctrl.id
+				WHERE rc.risk_id = $1
+					AND rc.control_id = $2
+					AND ctrl.org_id = $3
 			`, riskIds[idx], id)
 
 			if err != nil {
@@ -114,7 +141,8 @@ func DeleteControls(nodeId int64, controlIds []int64, riskIds []int64, global bo
 			_, err := tx.Exec(`
 				DELETE FROM process_flow_controls
 				WHERE id = $1
-			`, id)
+					AND org_id = $2
+			`, id, orgId)
 			if err != nil {
 				tx.Rollback()
 				return err
@@ -125,7 +153,11 @@ func DeleteControls(nodeId int64, controlIds []int64, riskIds []int64, global bo
 	return tx.Commit()
 }
 
-func AddControlsToRisk(riskId int64, controlIds []int64) error {
+func AddControlsToRisk(riskId int64, controlIds []int64, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceRisks, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
 	var err error
 	tx := dbConn.MustBegin()
 
@@ -144,7 +176,10 @@ func AddControlsToRisk(riskId int64, controlIds []int64) error {
 	return tx.Commit()
 }
 
-func AddControlsToNode(nodeId int64, controlIds []int64) error {
+func AddControlsToNode(nodeId int64, controlIds []int64, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
 	var err error
 	tx := dbConn.MustBegin()
 
@@ -162,7 +197,10 @@ func AddControlsToNode(nodeId int64, controlIds []int64) error {
 	return tx.Commit()
 }
 
-func FindControl(controlId int64) (*core.Control, error) {
+func FindControl(controlId int64, role *core.Role) (*core.Control, error) {
+	if !role.Permissions.HasAccess(core.ResourceControls, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	control := core.Control{}
 	err := dbConn.Get(&control, `
 		SELECT ctrl.*

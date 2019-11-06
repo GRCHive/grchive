@@ -19,7 +19,7 @@ func GetRawClientAPIKeyFromRequest(r *http.Request) core.RawApiKey {
 	return core.RawApiKey(r.Header.Get(ApiKeyRequestHeaderKey))
 }
 
-func GetRiskFromRequestUrl(r *http.Request) (*core.Risk, error) {
+func GetRiskFromRequestUrl(r *http.Request, role *core.Role) (*core.Risk, error) {
 	urlRouteVars := mux.Vars(r)
 	riskIdStr, ok := urlRouteVars[core.DashboardOrgRiskQueryId]
 	if !ok {
@@ -30,10 +30,10 @@ func GetRiskFromRequestUrl(r *http.Request) (*core.Risk, error) {
 	if err != nil {
 		return nil, err
 	}
-	return database.FindRisk(riskId)
+	return database.FindRisk(riskId, role)
 }
 
-func GetControlFromRequestUrl(r *http.Request) (*core.Control, error) {
+func GetControlFromRequestUrl(r *http.Request, role *core.Role) (*core.Control, error) {
 	urlRouteVars := mux.Vars(r)
 	controlIdStr, ok := urlRouteVars[core.DashboardOrgControlQueryId]
 	if !ok {
@@ -44,7 +44,7 @@ func GetControlFromRequestUrl(r *http.Request) (*core.Control, error) {
 	if err != nil {
 		return nil, err
 	}
-	return database.FindControl(controlId)
+	return database.FindControl(controlId, role)
 }
 
 func GetOrganizationFromRequestUrl(r *http.Request) (*core.Organization, error) {

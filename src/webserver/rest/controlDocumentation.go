@@ -33,7 +33,6 @@ type DeleteControlDocCatInputs struct {
 type UploadControlDocInputs struct {
 	CatId        int64     `webcore:"catId"`
 	RelevantTime time.Time `webcore:"relevantTime"`
-	OrgGroupName string    `webcore:"orgGroupName"`
 }
 
 type GetControlDocInputs struct {
@@ -49,6 +48,7 @@ type DeleteControlDocInputs struct {
 
 type DownloadControlDocInputs struct {
 	FileId int64 `webcore:"fileId"`
+	OrgId  int32 `webcore:"orgId"`
 }
 
 func newControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
@@ -64,13 +64,27 @@ func newControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	org, err := database.FindOrganizationFromControlId(inputs.ControlId, core.ServerRole)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	newCat := core.ControlDocumentationCategory{
 		Name:        inputs.Name,
 		Description: inputs.Description,
 		ControlId:   inputs.ControlId,
 	}
 
-	err = database.NewControlDocumentationCategory(&newCat)
+	err = database.NewControlDocumentationCategory(&newCat, role)
 	if err != nil {
 		core.Warning("Failed to create doc cat: " + err.Error())
 		if database.IsDuplicateDBEntry(err) {
@@ -97,6 +111,20 @@ func editControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	org, err := database.FindOrganizationFromControlId(inputs.ControlId, core.ServerRole)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	editCat := core.ControlDocumentationCategory{
 		Id:          inputs.CatId,
 		Name:        inputs.Name,
@@ -104,7 +132,7 @@ func editControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 		ControlId:   inputs.ControlId,
 	}
 
-	err = database.EditControlDocumentationCategory(&editCat)
+	err = database.EditControlDocumentationCategory(&editCat, role)
 	if err != nil {
 		core.Warning("Failed to edit doc cat: " + err.Error())
 		if database.IsDuplicateDBEntry(err) {
@@ -131,7 +159,21 @@ func deleteControlDocumentationCategory(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = database.DeleteControlDocumentationCategory(inputs.CatId)
+	org, err := database.FindOrganizationFromDocCatId(inputs.CatId, core.ServerRole)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteControlDocumentationCategory(inputs.CatId, role)
 	if err != nil {
 		core.Warning("Failed to delete doc cat: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -170,10 +212,17 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := database.FindOrganizationFromGroupName(inputs.OrgGroupName)
+	org, err := database.FindOrganizationFromDocCatId(inputs.CatId, core.ServerRole)
 	if err != nil {
 		core.Warning("Can't find organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil || !role.Permissions.HasAccess(core.ResourceControlDocumentation, core.AccessManage) {
+		core.Warning("Bad access: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
@@ -207,7 +256,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tx := database.CreateTx()
-	err = database.CreateControlDocumentationFileWithTx(&internalFile, tx)
+	err = database.CreateControlDocumentationFileWithTx(&internalFile, tx, role)
 	if err != nil {
 		tx.Rollback()
 		core.Warning("Could not create file: " + err.Error())
@@ -247,7 +296,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 
 	internalFile.BucketId = b2File.BucketId
 	internalFile.StorageId = b2File.FileId
-	err = database.UpdateControlDocumentation(&internalFile, tx)
+	err = database.UpdateControlDocumentation(&internalFile, tx, role)
 	if err != nil {
 		tx.Rollback()
 		backblaze.DeleteFile(b2Auth, internalFile.StorageFilename(org), b2File)
@@ -279,6 +328,20 @@ func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	org, err := database.FindOrganizationFromDocCatId(inputs.CatId, core.ServerRole)
+	if err != nil {
+		core.Warning("Can't find organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	type DataOutput struct {
 		Files       []*core.ControlDocumentationFile
 		TotalPages  int
@@ -291,7 +354,7 @@ func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	const controlDocPageSize int = 10
 	controlDocPageOffset := controlDocPageSize * inputs.Page
 
-	output.Files, err = database.GetControlDocumentationForCategory(inputs.CatId, controlDocPageSize, controlDocPageOffset)
+	output.Files, err = database.GetControlDocumentationForCategory(inputs.CatId, controlDocPageSize, controlDocPageOffset, role)
 	if err != nil {
 		core.Warning("Can't get files: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -299,7 +362,7 @@ func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if inputs.NeedPages {
-		output.TotalPages, err = database.GetTotalControlDocumentationPages(inputs.CatId, controlDocPageSize)
+		output.TotalPages, err = database.GetTotalControlDocumentationPages(inputs.CatId, controlDocPageSize, role)
 		if err != nil {
 			core.Warning("Can't total pages: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -329,6 +392,13 @@ func deleteControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil || !role.Permissions.HasAccess(core.ResourceControlDocumentation, core.AccessManage) {
+		core.Warning("Bad access: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	// If we fail in deleting anything from Backblaze just log and continue.
 	// TODO: We'll need to develop a utility that runs periodically to
 	// clean up things that failed here.
@@ -337,7 +407,7 @@ func deleteControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		core.Warning("Could not auth with Backblaze: " + err.Error())
 	} else {
 		for _, id := range inputs.FileIds {
-			file, err := database.GetControlDocumentation(id)
+			file, err := database.GetControlDocumentation(id, org.Id, role)
 			if err != nil {
 				core.Warning("Failed to find control documentation: " + err.Error())
 				continue
@@ -356,7 +426,7 @@ func deleteControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = database.DeleteBatchControlDocumentation(inputs.FileIds)
+	err = database.DeleteBatchControlDocumentation(inputs.FileIds, org.Id, role)
 	if err != nil {
 		core.Warning("Can't delete database files: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -384,7 +454,14 @@ func downloadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbFile, err := database.GetControlDocumentation(inputs.FileId)
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil || !role.Permissions.HasAccess(core.ResourceControlDocumentation, core.AccessView) {
+		core.Warning("Bad access: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	dbFile, err := database.GetControlDocumentation(inputs.FileId, inputs.OrgId, role)
 	if err != nil {
 		core.Warning("Can't get file db data: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

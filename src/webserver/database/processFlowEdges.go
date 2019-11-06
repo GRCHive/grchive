@@ -5,7 +5,11 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
-func DeleteProcessFlowEdgeFromId(edgeId int64) error {
+func DeleteProcessFlowEdgeFromId(edgeId int64, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
 	tx := dbConn.MustBegin()
 	_, err := tx.Exec(`
 		DELETE FROM process_flow_edges
@@ -19,7 +23,10 @@ func DeleteProcessFlowEdgeFromId(edgeId int64) error {
 	return err
 }
 
-func FindAllEdgesForProcessFlow(flowId int64) ([]*core.ProcessFlowEdge, error) {
+func FindAllEdgesForProcessFlow(flowId int64, role *core.Role) ([]*core.ProcessFlowEdge, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	edges := []*core.ProcessFlowEdge{}
 	err := dbConn.Select(&edges, `
 		SELECT DISTINCT edge.*
@@ -39,9 +46,13 @@ func FindAllEdgesForProcessFlow(flowId int64) ([]*core.ProcessFlowEdge, error) {
 	return edges, nil
 }
 
-func CreateNewProcessFlowEdge(edge *core.ProcessFlowEdge) (*core.ProcessFlowEdge, error) {
+func CreateNewProcessFlowEdge(edge *core.ProcessFlowEdge, role *core.Role) (*core.ProcessFlowEdge, error) {
 	if edge.InputIoId == edge.OutputIoId {
 		return nil, errors.New("Can not create an edge from a node to itself.")
+	}
+
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return nil, core.ErrorUnauthorized
 	}
 
 	tx := dbConn.MustBegin()
@@ -60,10 +71,10 @@ func CreateNewProcessFlowEdge(edge *core.ProcessFlowEdge) (*core.ProcessFlowEdge
 			output.parent_node_id AS "output.parent_node_id",
 			output.io_type_id AS "output.io_type_id"
 		FROM edge 
-			INNER JOIN process_flow_node_inputs AS input
-				ON edge.input_id = input.id
-			INNER JOIN process_flow_node_outputs AS output
-				ON edge.output_id = output.id
+		INNER JOIN process_flow_node_inputs AS input
+			ON edge.input_id = input.id
+		INNER JOIN process_flow_node_outputs AS output
+			ON edge.output_id = output.id
 	`, edge)
 	if err != nil {
 		tx.Rollback()

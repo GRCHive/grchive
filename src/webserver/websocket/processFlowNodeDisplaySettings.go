@@ -23,6 +23,30 @@ func processProcessFlowNodeDisplaySettings(conn *websocket.Conn, r *http.Request
 		return
 	}
 
+	organization, err := database.FindOrganizationFromProcessFlowId(flowId, core.ServerRole)
+	if err != nil {
+		core.Warning("Failed to get organization: " + err.Error())
+		return
+	}
+
+	userParsedData, err := webcore.FindSessionParsedDataInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to get session parsed data: " + err.Error())
+		return
+	}
+
+	key, err := database.FindApiKeyForUser(userParsedData.CurrentUser.Id)
+	if err != nil {
+		core.Warning("Failed to get user: " + err.Error())
+		return
+	}
+
+	role, err := webcore.ObtainAPIKeyRole(key, organization.Id)
+	if err != nil {
+		core.Warning("Failed to get role: " + err.Error())
+		return
+	}
+
 	// Channel to receive communications from the message hub
 	// about relevant events to send to the user.
 	var hubChannel chan core.MessagePayload = make(chan core.MessagePayload)
@@ -37,7 +61,7 @@ func processProcessFlowNodeDisplaySettings(conn *websocket.Conn, r *http.Request
 	// for the display settings of every node in the process flow. I think this
 	// needs to happen after the channel gets registered successfully so the
 	// user is guaranteed to see all updates.
-	nodeSettings, err := database.FindDisplaySettingsForProcessFlow(flowId)
+	nodeSettings, err := database.FindDisplaySettingsForProcessFlow(flowId, role)
 	if err != nil {
 		core.Warning("Failed to get initial node settings: " + err.Error())
 		return
@@ -60,7 +84,7 @@ func processProcessFlowNodeDisplaySettings(conn *websocket.Conn, r *http.Request
 				break
 			}
 			// TODO: What's the best way to handle errors here?
-			err = database.UpdateDisplaySettingsForProcessFlowNode(data.NodeId, data.Settings)
+			err = database.UpdateDisplaySettingsForProcessFlowNode(data.NodeId, data.Settings, role)
 			if err != nil {
 				core.Warning("Failed to update display settings: " + err.Error())
 				break

@@ -4,7 +4,10 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
-func DeleteProcessFlowNodeFromId(nodeId int64) error {
+func DeleteProcessFlowNodeFromId(nodeId int64, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
 	tx := dbConn.MustBegin()
 	_, err := tx.Exec(`
 		DELETE FROM process_flow_nodes
@@ -18,7 +21,10 @@ func DeleteProcessFlowNodeFromId(nodeId int64) error {
 	return err
 }
 
-func GetAllProcessFlowNodeTypes() ([]*core.ProcessFlowNodeType, error) {
+func GetAllProcessFlowNodeTypes(role *core.Role) ([]*core.ProcessFlowNodeType, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	result := []*core.ProcessFlowNodeType{}
 
 	err := dbConn.Select(&result, `
@@ -27,7 +33,10 @@ func GetAllProcessFlowNodeTypes() ([]*core.ProcessFlowNodeType, error) {
 	return result, err
 }
 
-func CreateNewProcessFlowNodeWithTypeId(typeId int32, flowId int64) (*core.ProcessFlowNode, error) {
+func CreateNewProcessFlowNodeWithTypeId(typeId int32, flowId int64, role *core.Role) (*core.ProcessFlowNode, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return nil, core.ErrorUnauthorized
+	}
 	var err error
 
 	tx := dbConn.MustBegin()
@@ -54,7 +63,10 @@ func CreateNewProcessFlowNodeWithTypeId(typeId int32, flowId int64) (*core.Proce
 	return &node, err
 }
 
-func FindAllNodesForProcessFlow(flowId int64) ([]*core.ProcessFlowNode, error) {
+func FindAllNodesForProcessFlow(flowId int64, role *core.Role) ([]*core.ProcessFlowNode, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
 	nodes := []*core.ProcessFlowNode{}
 	rows, err := dbConn.Queryx(`
 		SELECT 
@@ -111,7 +123,10 @@ func FindAllNodesForProcessFlow(flowId int64) ([]*core.ProcessFlowNode, error) {
 	return nodes, err
 }
 
-func EditProcessFlowNode(node *core.ProcessFlowNode) (*core.ProcessFlowNode, error) {
+func EditProcessFlowNode(node *core.ProcessFlowNode, role *core.Role) (*core.ProcessFlowNode, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return nil, core.ErrorUnauthorized
+	}
 	tx := dbConn.MustBegin()
 	rows, err := tx.NamedQuery(`
 		UPDATE process_flow_nodes

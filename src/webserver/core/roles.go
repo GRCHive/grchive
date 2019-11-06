@@ -23,6 +23,7 @@ const (
 	ResourceProcessFlows
 	ResourceControls
 	ResourceControlDocumentation
+	ResourceControlDocumentationMetadata
 	ResourceRisks
 )
 
@@ -31,6 +32,7 @@ var AvailableResources []ResourceType = []ResourceType{
 	ResourceProcessFlows,
 	ResourceControls,
 	ResourceControlDocumentation,
+	ResourceControlDocumentationMetadata,
 	ResourceRisks,
 }
 
@@ -39,6 +41,7 @@ type PermissionsMap struct {
 	ProcessFlowsAccess         AccessType `db:"flow_access"`
 	ControlsAccess             AccessType `db:"control_access"`
 	ControlDocumentationAccess AccessType `db:"doc_access"`
+	ControlDocMetadataAccess   AccessType `db:"doc_meta_access"`
 	RisksAccess                AccessType `db:"risk_access"`
 }
 
@@ -71,6 +74,13 @@ func CreateAllAccessPermission() PermissionsMap {
 	}
 }
 
+var ServerRole = &Role{
+	Id:          -1,
+	Name:        "Server Role",
+	Description: "All access Server role",
+	Permissions: CreateAllAccessPermission(),
+}
+
 func CreateDefaultRoleMetadata(orgId int32) RoleMetadata {
 	return RoleMetadata{
 		Name:        "Default",
@@ -90,6 +100,8 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 		return p.ControlsAccess
 	case ResourceControlDocumentation:
 		return p.ControlDocumentationAccess
+	case ResourceControlDocumentationMetadata:
+		return p.ControlDocMetadataAccess
 	case ResourceRisks:
 		return p.RisksAccess
 	}

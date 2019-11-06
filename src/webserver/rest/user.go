@@ -32,6 +32,20 @@ func updateUserProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	apiKey, err := webcore.GetAPIKeyFromRequest(r)
+	if apiKey == nil || err != nil {
+		core.Warning("No API Key: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	apiUser, err := database.FindUserFromId(apiKey.UserId)
+	if err != nil || apiUser.Email != email {
+		core.Warning("Can't verify API user access: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	user := core.User{
 		FirstName: inputs.FirstName,
 		LastName:  inputs.LastName,

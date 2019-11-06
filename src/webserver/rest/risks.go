@@ -49,12 +49,26 @@ func editRisk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	org, err := database.FindOrganizationFromRiskId(inputs.RiskId, core.ServerRole)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	risk := core.Risk{
 		Id:          inputs.RiskId,
 		Name:        inputs.Name,
 		Description: inputs.Description,
 	}
-	err = database.EditRisk(&risk)
+	err = database.EditRisk(&risk, role)
 	if err != nil {
 		core.Warning("Couldn't edit  risk: " + err.Error())
 		if database.IsDuplicateDBEntry(err) {
@@ -90,13 +104,20 @@ func createNewRisk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	newRisk := core.Risk{
 		Name:        inputs.Name,
 		Description: inputs.Description,
 		Org:         org,
 	}
 
-	err = database.InsertNewRisk(&newRisk)
+	err = database.InsertNewRisk(&newRisk, role)
 	if err != nil {
 		core.Warning("Couldn't insert new risk: " + err.Error())
 		if database.IsDuplicateDBEntry(err) {
@@ -110,7 +131,7 @@ func createNewRisk(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if inputs.NodeId != -1 {
-		err = database.AddRisksToNode([]int64{newRisk.Id}, inputs.NodeId)
+		err = database.AddRisksToNode([]int64{newRisk.Id}, inputs.NodeId, role)
 		if err != nil {
 			core.Warning("Couldn't add risk-node relationship: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -135,7 +156,21 @@ func deleteRisks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.DeleteRisks(inputs.NodeId, inputs.RiskIds, inputs.Global)
+	org, err := database.FindOrganizationFromNodeId(inputs.NodeId, core.ServerRole)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteRisks(inputs.NodeId, inputs.RiskIds, inputs.Global, org.Id, role)
 	if err != nil {
 		core.Warning("Could not delete risks: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -159,7 +194,21 @@ func addRisksToNode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.AddRisksToNode(inputs.RiskIds, inputs.NodeId)
+	org, err := database.FindOrganizationFromNodeId(inputs.NodeId, core.ServerRole)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.AddRisksToNode(inputs.RiskIds, inputs.NodeId, role)
 	if err != nil {
 		core.Warning("Couldn't add risks: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -190,7 +239,14 @@ func getAllRisks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	risks, err := database.FindAllRiskForOrganization(org)
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	risks, err := database.FindAllRiskForOrganization(org, role)
 	if err != nil {
 		core.Warning("Could not find risks: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -212,7 +268,7 @@ func getSingleRisk(w http.ResponseWriter, r *http.Request) {
 		Controls []*core.Control
 	}
 	data := FullRiskData{}
-	data.Risk, err = webcore.GetRiskFromRequestUrl(r)
+	data.Risk, err = webcore.GetRiskFromRequestUrl(r, core.ServerRole)
 	if err != nil {
 		core.Warning("No risk data: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -220,7 +276,21 @@ func getSingleRisk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.Nodes, err = database.FindNodesRelatedToRisk(data.Risk.Id)
+	org, err := database.FindOrganizationFromRiskId(data.Risk.Id, core.ServerRole)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	data.Nodes, err = database.FindNodesRelatedToRisk(data.Risk.Id, role)
 	if err != nil {
 		core.Warning("Failed to get nodes data: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -228,7 +298,7 @@ func getSingleRisk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.Controls, err = database.FindControlsRelatedToRisk(data.Risk.Id)
+	data.Controls, err = database.FindControlsRelatedToRisk(data.Risk.Id, role)
 	if err != nil {
 		core.Warning("Failed to get controls data: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
