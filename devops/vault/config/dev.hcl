@@ -1,5 +1,5 @@
 storage "postgresql" {
-    connection_url = "postgres://DEVUSER@localhost:5432/audit?sslmode=disable&timezone=UTC"
+    connection_url = "postgres://DEVUSER@localhost:5432/vault?sslmode=disable&timezone=UTC"
     table = "vault_kv_store"
 }
 
