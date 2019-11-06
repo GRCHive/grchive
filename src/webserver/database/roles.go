@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
@@ -13,64 +14,77 @@ var resourceToDatabaseMap = map[core.ResourceType]string{
 	core.ResourceRisks:                "resource_risks_access",
 }
 
-// This returns nil, nil if no permissions was found for the user.
-func FindUserRoleForOrg(userId int64, orgId int32) (*core.Role, error) {
-	rows, err := dbConn.Queryx(`
+func createRoleSql(cond string) string {
+	return fmt.Sprintf(`
 		SELECT
-			rp.role_id AS id,
-			rp.permissions AS permissions
-		FROM user_roles AS ur
-		INNER JOIN role_permissions AS rp
-			ON ur.role_id = rp.role_id
-		WHERE ur.user_id = $1
-			AND ur.org_id = $2
-	`, userId, orgId)
+			role.id AS id,
+			role.name AS name,
+			role.description AS description,
+			rorg.access_type AS "permissions.org_access",
+			rpf.access_type AS "permissions.flow_access",
+			rc.access_type AS "permissions.control_access",
+			rcd.access_type AS "permissions.doc_access",
+			rr.access_type AS "permissions.risk_access"
+		FROM organization_available_roles AS role
+		INNER JOIN resource_organizations_access AS rorg
+			ON role.id = rorg.role_id
+		INNER JOIN resource_process_flows_access AS rpf
+			ON role.id = rpf.role_id
+		INNER JOIN resource_controls_access AS rc
+			ON role.id = rc.role_id
+		INNER JOIN resource_control_documentation_access AS rcd
+			ON role.id = rcd.role_id
+		INNER JOIN resource_risks_access AS rr
+			ON role.id = rr.role_id
+		%s
+		`, cond)
+}
+
+func FindUserRoleFromStmt(stmt *sqlx.Stmt, args ...interface{}) (*core.Role, error) {
+	rows, err := stmt.Queryx(args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	role := &core.Role{}
 	if !rows.Next() {
 		return nil, nil
 	}
 
-	role := core.Role{}
-	err = rows.StructScan(&role)
+	err = rows.StructScan(role)
+	if err != nil {
+		return nil, err
+	}
+	return role, nil
+}
+
+// This returns nil, nil if no permissions was found for the user.
+func FindUserRoleForOrg(userId int64, orgId int32) (*core.Role, error) {
+	stmt, err := dbConn.Preparex(createRoleSql(`
+	INNER JOIN user_roles AS ur
+		ON ur.role_id = role.id
+	WHERE ur.user_id = $1
+		AND ur.org_id = $2
+	`))
 	if err != nil {
 		return nil, err
 	}
 
-	return &role, nil
+	return FindUserRoleFromStmt(stmt, userId, orgId)
 }
 
 // This returns nil, nil if no permissions was found for the org.
 func FindDefaultRoleForOrg(orgId int32) (*core.Role, error) {
-	rows, err := dbConn.Queryx(`
-		SELECT
-			rp.role_id AS id,
-			rp.permissions AS permissions
-		FROM organization_available_roles AS org
-		INNER JOIN role_permissions AS rp
-			ON org.id = rp.role_id
-		WHERE org.org_id = $1
-			AND org.is_default_role = 'true'
-	`, orgId)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	if !rows.Next() {
-		return nil, nil
-	}
-
-	role := core.Role{}
-	err = rows.StructScan(&role)
+	stmt, err := dbConn.Preparex(createRoleSql(`
+	WHERE role.org_id = $1
+		AND role.is_default_role = 'true'
+	`))
 	if err != nil {
 		return nil, err
 	}
 
-	return &role, nil
+	return FindUserRoleFromStmt(stmt, orgId)
 }
 
 func InsertOrgRole(metadata *core.RoleMetadata, role *core.Role) error {

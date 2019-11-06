@@ -4,6 +4,7 @@ import (
 	"errors"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
+	"net/http"
 )
 
 func ObtainOrganizationDefaultRole(orgId int32) (*core.Role, error) {
@@ -68,4 +69,12 @@ func GrantAPIKeyDefaultRole(key *core.ApiKey, orgId int32) (*core.Role, error) {
 	}
 
 	return defaultRole, nil
+}
+
+func GetCurrentRequestRole(r *http.Request, orgId int32) (*core.Role, error) {
+	key, err := FindApiKeyInContext(r.Context())
+	if err != nil {
+		return nil, err
+	}
+	return ObtainAPIKeyRole(key, orgId)
 }

@@ -6,7 +6,11 @@ import (
 	"time"
 )
 
-func FindProcessFlowWithId(id int64) (*core.ProcessFlow, error) {
+func FindProcessFlowWithId(id int64, role *core.Role) (*core.ProcessFlow, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
 	rows, err := dbConn.Queryx(`
 		SELECT
 			pf.id,
@@ -40,7 +44,11 @@ func FindProcessFlowWithId(id int64) (*core.ProcessFlow, error) {
 	return flow, nil
 }
 
-func UpdateProcessFlow(flow *core.ProcessFlow) error {
+func UpdateProcessFlow(flow *core.ProcessFlow, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
 	flow.LastUpdatedTime = time.Now().UTC()
 	tx := dbConn.MustBegin()
 	_, err := tx.NamedExec(`
@@ -56,7 +64,11 @@ func UpdateProcessFlow(flow *core.ProcessFlow) error {
 	return err
 }
 
-func InsertNewProcessFlow(flow *core.ProcessFlow) error {
+func InsertNewProcessFlow(flow *core.ProcessFlow, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
 	var err error
 
 	tx := dbConn.MustBegin()
@@ -82,7 +94,11 @@ func InsertNewProcessFlow(flow *core.ProcessFlow) error {
 	return err
 }
 
-func FindOrganizationProcessFlows(org *core.Organization) ([]*core.ProcessFlow, error) {
+func FindOrganizationProcessFlows(org *core.Organization, role *core.Role) ([]*core.ProcessFlow, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
 	result := []*core.ProcessFlow{}
 
 	err := dbConn.Select(&result, `
@@ -100,8 +116,8 @@ func FindOrganizationProcessFlows(org *core.Organization) ([]*core.ProcessFlow, 
 }
 
 // Finds all process flows and finds the result index of the specified process flow
-func FindOrganizationProcessFlowsWithIndex(org *core.Organization, processFlowId int64) ([]*core.ProcessFlow, int, error) {
-	result, err := FindOrganizationProcessFlows(org)
+func FindOrganizationProcessFlowsWithIndex(org *core.Organization, processFlowId int64, role *core.Role) ([]*core.ProcessFlow, int, error) {
+	result, err := FindOrganizationProcessFlows(org, role)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -125,7 +141,11 @@ func FindOrganizationProcessFlowsWithIndex(org *core.Organization, processFlowId
 	return result, resultIndex, nil
 }
 
-func DeleteProcessFlow(flowId int64) error {
+func DeleteProcessFlow(flowId int64, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
 	tx := dbConn.MustBegin()
 	_, err := tx.Exec(`
 		DELETE FROM process_flows

@@ -110,10 +110,12 @@ export default Vue.extend({
     methods: {
         onDeleteProcessFlow(processFlow : ProcessFlowBasicData) {
             deleteProcessFlow(<TDeleteProcessFlowInput>{
-                flowId: processFlow.Id
+                flowId: processFlow.Id,
+                //@ts-ignore
+                orgId: this.$root.orgId
             }).then((resp : TDeleteProcessFlowOutput) => {
                 VueSetup.store.commit('deleteProcessFlow', processFlow.Id)
-                VueSetup.currentRouter.replace('/')
+                VueSetup.currentRouter.replace({ name : 'flow', params : {}})
             }).catch((err) => {
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(

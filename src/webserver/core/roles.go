@@ -52,6 +52,8 @@ type RoleMetadata struct {
 
 type Role struct {
 	Id          int64          `db:"id"`
+	Name        string         `db:"name"`
+	Description string         `db:"description"`
 	Permissions PermissionsMap `db:"permissions"`
 }
 
@@ -92,4 +94,8 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 		return p.RisksAccess
 	}
 	return AccessNone
+}
+
+func (p PermissionsMap) HasAccess(resource ResourceType, access AccessType) bool {
+	return (p.GetAccessType(resource) & access) != 0
 }

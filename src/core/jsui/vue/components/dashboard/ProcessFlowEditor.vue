@@ -122,10 +122,11 @@ export default Vue.extend({
                 return
             }
 
-            //@ts-ignore
             updateProcessFlow(this.basicData.Id, <TUpdateProcessFlowInput>{
                 name: this.editName,
-                description: this.editDescription
+                description: this.editDescription,
+                //@ts-ignore
+                orgId: this.$root.orgId,
             }).then((resp : TUpdateProcessFlowOutput) => {
                 VueSetup.store.commit(
                     "setIndividualProcessFlowBasicData", 

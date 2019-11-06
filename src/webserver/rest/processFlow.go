@@ -16,6 +16,13 @@ type GetAllProcessFlowInputs struct {
 
 type DeleteProcessFlowInputs struct {
 	FlowId int64 `webcore:"flowId"`
+	OrgId  int32 `webcore:"orgId"`
+}
+
+type UpdateProcessFlowInputs struct {
+	OrgId       int32  `webcore:"orgId"`
+	Name        string `webcore:"name"`
+	Description string `webcore:"description"`
 }
 
 func getAllProcessFlows(w http.ResponseWriter, r *http.Request) {
@@ -38,11 +45,18 @@ func getAllProcessFlows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	role, err := webcore.GetCurrentRequestRole(r, organization.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	var flows []*core.ProcessFlow
 	var index int = 0
 
 	if inputs.RequestedIndex == -1 {
-		flows, err = database.FindOrganizationProcessFlows(organization)
+		flows, err = database.FindOrganizationProcessFlows(organization, role)
 		if err != nil {
 			core.Warning("Database error [0]: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -50,7 +64,7 @@ func getAllProcessFlows(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		flows, index, err = database.FindOrganizationProcessFlowsWithIndex(organization, inputs.RequestedIndex)
+		flows, index, err = database.FindOrganizationProcessFlowsWithIndex(organization, inputs.RequestedIndex, role)
 		if err != nil {
 			core.Warning("Database error [1]: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -99,6 +113,13 @@ func newProcessFlow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	newFlow := core.ProcessFlow{
 		Name:            nameData[0],
 		Org:             org,
@@ -107,7 +128,7 @@ func newProcessFlow(w http.ResponseWriter, r *http.Request) {
 		LastUpdatedTime: time.Now(),
 	}
 
-	err = database.InsertNewProcessFlow(&newFlow)
+	err = database.InsertNewProcessFlow(&newFlow, role)
 	if err != nil {
 		if database.IsDuplicateDBEntry(err) {
 			w.WriteHeader(http.StatusBadRequest)
@@ -141,6 +162,14 @@ func updateProcessFlow(w http.ResponseWriter, r *http.Request) {
 	// flow data structure (core.ProcessFlow) back to the user.
 	jsonWriter := json.NewEncoder(w)
 
+	inputs := UpdateProcessFlowInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	flowId, err := webcore.GetProcessFlowIdFromRequest(r)
 	if err != nil {
 		core.Warning("Failed to extract flow id: " + err.Error())
@@ -149,7 +178,14 @@ func updateProcessFlow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	processFlow, err := database.FindProcessFlowWithId(flowId)
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	processFlow, err := database.FindProcessFlowWithId(flowId, role)
 	if err != nil {
 		core.Warning("Bad process flow id: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -157,26 +193,9 @@ func updateProcessFlow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = r.ParseForm(); err != nil || len(r.PostForm) == 0 {
-		core.Warning("Failed to parse form data: " + core.ErrorString(err))
-		w.WriteHeader(http.StatusBadRequest)
-		jsonWriter.Encode(struct{}{})
-		return
-	}
-
-	// Only expose the name and description for editing.
-	nameData := r.PostForm["name"]
-	descriptionData := r.PostForm["description"]
-	if len(nameData) == 0 || len(descriptionData) == 0 {
-		core.Warning("Empty name or description.")
-		w.WriteHeader(http.StatusBadRequest)
-		jsonWriter.Encode(struct{}{})
-		return
-	}
-
-	processFlow.Name = nameData[0]
-	processFlow.Description = descriptionData[0]
-	if err = database.UpdateProcessFlow(processFlow); err != nil {
+	processFlow.Name = inputs.Name
+	processFlow.Description = inputs.Description
+	if err = database.UpdateProcessFlow(processFlow, role); err != nil {
 		core.Warning("Failed to update flow: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		jsonWriter.Encode(struct{}{})
@@ -273,7 +292,14 @@ func deleteProcessFlow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.DeleteProcessFlow(inputs.FlowId)
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteProcessFlow(inputs.FlowId, role)
 	if err != nil {
 		core.Warning("Can't delete flow: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
