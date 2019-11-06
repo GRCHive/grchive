@@ -1,8 +1,17 @@
 package database
 
 import (
+	"fmt"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
+
+var resourceToDatabaseMap = map[core.ResourceType]string{
+	core.ResourceOrgRoles:             "resource_organizations_access",
+	core.ResourceProcessFlows:         "resource_process_flows_access",
+	core.ResourceControls:             "resource_controls_access",
+	core.ResourceControlDocumentation: "resource_control_documentation_access",
+	core.ResourceRisks:                "resource_risks_access",
+}
 
 // This returns nil, nil if no permissions was found for the user.
 func FindUserRoleForOrg(userId int64, orgId int32) (*core.Role, error) {
@@ -40,11 +49,11 @@ func FindDefaultRoleForOrg(orgId int32) (*core.Role, error) {
 		SELECT
 			rp.role_id AS id,
 			rp.permissions AS permissions
-		FROM organization_available_roles AS or
+		FROM organization_available_roles AS org
 		INNER JOIN role_permissions AS rp
-			ON or.id = rp.role_id
-		WHERE or.org_id = $1
-			AND or.is_default_role = 'true'
+			ON org.id = rp.role_id
+		WHERE org.org_id = $1
+			AND org.is_default_role = 'true'
 	`, orgId)
 	if err != nil {
 		return nil, err
@@ -62,16 +71,15 @@ func FindDefaultRoleForOrg(orgId int32) (*core.Role, error) {
 	}
 
 	return &role, nil
-
 }
 
 func InsertOrgRole(metadata *core.RoleMetadata, role *core.Role) error {
 	tx := dbConn.MustBegin()
 
 	rows, err := tx.NamedQuery(`
-		INSERT INTO organization_avilable_roles ( is_default_role, name, description, org_id)
+		INSERT INTO organization_available_roles ( is_default_role, name, description, org_id)
 		VALUES (
-			:is_default_role
+			:is_default_role,
 			:name,
 			:description,
 			:org_id
@@ -89,17 +97,19 @@ func InsertOrgRole(metadata *core.RoleMetadata, role *core.Role) error {
 		tx.Rollback()
 		return err
 	}
+	rows.Close()
 
-	_, err = tx.NamedExec(`
-		INSERT INTO role_permissions (role_id, permissions)
-		VALUES ( :id, :permissions )
-	`, role)
+	for _, resource := range core.AvailableResources {
+		_, err = tx.Exec(fmt.Sprintf(`
+			INSERT INTO %s (role_id, access_type)
+			VALUES ( $1, $2 )
+		`, resourceToDatabaseMap[resource]), role.Id, role.Permissions.GetAccessType(resource))
 
-	if err != nil {
-		tx.Rollback()
-		return err
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
-
 	return tx.Commit()
 }
 

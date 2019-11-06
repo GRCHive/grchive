@@ -12,11 +12,6 @@ WHERE is_default_role = true;
 
 CREATE UNIQUE INDEX org_roles_id_org_index ON organization_available_roles (id, org_id);
 
-CREATE TABLE role_permissions (
-    role_id BIGINT NOT NULL UNIQUE REFERENCES organization_available_roles(id) ON DELETE CASCADE,
-    permissions JSONB
-);
-
 CREATE TABLE user_roles (
     role_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -30,4 +25,29 @@ CREATE TABLE user_roles (
         FOREIGN KEY(user_id, org_id)
         REFERENCES users(id, org_id)
         ON DELETE CASCADE
+);
+
+CREATE TABLE resource_organizations_access (
+    role_id BIGINT NOT NULL REFERENCES organization_available_roles(id) ON DELETE CASCADE,
+    access_type INTEGER NOT NULL
+);
+
+CREATE TABLE resource_process_flows_access (
+    role_id BIGINT NOT NULL REFERENCES organization_available_roles(id) ON DELETE CASCADE,
+    access_type INTEGER NOT NULL
+);
+
+CREATE TABLE resource_controls_access (
+    role_id BIGINT NOT NULL REFERENCES organization_available_roles(id) ON DELETE CASCADE,
+    access_type INTEGER NOT NULL
+);
+
+CREATE TABLE resource_control_documentation_access (
+    role_id BIGINT NOT NULL REFERENCES organization_available_roles(id) ON DELETE CASCADE,
+    access_type INTEGER NOT NULL
+);
+
+CREATE TABLE resource_risks_access (
+    role_id BIGINT NOT NULL REFERENCES organization_available_roles(id) ON DELETE CASCADE,
+    access_type INTEGER NOT NULL
 );

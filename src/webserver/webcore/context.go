@@ -56,3 +56,11 @@ func FindOrganizationInContext(ctx context.Context) (*core.Organization, error) 
 func AddApiKeyToContext(key *core.ApiKey, ctx context.Context) context.Context {
 	return context.WithValue(ctx, ApiKeyContextKey, key)
 }
+
+func FindApiKeyInContext(ctx context.Context) (*core.ApiKey, error) {
+	key, ok := ctx.Value(ApiKeyContextKey).(*core.ApiKey)
+	if !ok || key == nil {
+		return nil, errors.New("Failed to find api keyin context.")
+	}
+	return key, nil
+}

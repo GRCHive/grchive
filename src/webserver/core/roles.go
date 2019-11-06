@@ -1,28 +1,46 @@
 package core
 
-type AccessType struct {
-	// View: Can see the thing being granted access to.
-	CanView bool
-	// Edit: Can change the thing being granted access to.
-	CanEdit bool
-	// Manage: Can add/delete the thing being granted access to.
-	CanManage bool
-}
+type AccessType int
+
+const (
+	// 0b000
+	AccessNone AccessType = 0
+	// 0b001
+	AccessView AccessType = 1
+	// 0b010
+	AccessEdit AccessType = 2
+	// 0b100
+	AccessManage AccessType = 4
+)
 
 type ResourceType int
 
 const (
 	// Managing is merely for deleting/creating new process flows.
-	OrgRoles ResourceType = iota
+	ResourceOrgRoles ResourceType = iota
 	// In the case of manage, allows giving/revoking a role from a user.
 	// In this case, the editing the process flow includes adding/creating nodes.
-	ProcessFlows
-	Controls
-	ControlDocumentation
-	Risks
+	ResourceProcessFlows
+	ResourceControls
+	ResourceControlDocumentation
+	ResourceRisks
 )
 
-type PermissionsMap map[ResourceType]AccessType
+var AvailableResources []ResourceType = []ResourceType{
+	ResourceOrgRoles,
+	ResourceProcessFlows,
+	ResourceControls,
+	ResourceControlDocumentation,
+	ResourceRisks,
+}
+
+type PermissionsMap struct {
+	OrgRolesAccess             AccessType `db:"org_access"`
+	ProcessFlowsAccess         AccessType `db:"flow_access"`
+	ControlsAccess             AccessType `db:"control_access"`
+	ControlDocumentationAccess AccessType `db:"doc_access"`
+	RisksAccess                AccessType `db:"risk_access"`
+}
 
 type RoleMetadata struct {
 	Id          int64  `db:"id"`
@@ -38,20 +56,16 @@ type Role struct {
 }
 
 func CreateOwnerAccessType() AccessType {
-	return AccessType{
-		CanView:   true,
-		CanEdit:   true,
-		CanManage: true,
-	}
+	return AccessView | AccessEdit | AccessManage
 }
 
 func CreateAllAccessPermission() PermissionsMap {
 	return PermissionsMap{
-		OrgRoles:             CreateOwnerAccessType(),
-		ProcessFlows:         CreateOwnerAccessType(),
-		Controls:             CreateOwnerAccessType(),
-		ControlDocumentation: CreateOwnerAccessType(),
-		Risks:                CreateOwnerAccessType(),
+		OrgRolesAccess:             CreateOwnerAccessType(),
+		ProcessFlowsAccess:         CreateOwnerAccessType(),
+		ControlsAccess:             CreateOwnerAccessType(),
+		ControlDocumentationAccess: CreateOwnerAccessType(),
+		RisksAccess:                CreateOwnerAccessType(),
 	}
 }
 
@@ -62,4 +76,20 @@ func CreateDefaultRoleMetadata(orgId int32) RoleMetadata {
 		IsDefault:   true,
 		OrgId:       orgId,
 	}
+}
+
+func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
+	switch resource {
+	case ResourceOrgRoles:
+		return p.OrgRolesAccess
+	case ResourceProcessFlows:
+		return p.ProcessFlowsAccess
+	case ResourceControls:
+		return p.ControlsAccess
+	case ResourceControlDocumentation:
+		return p.ControlDocumentationAccess
+	case ResourceRisks:
+		return p.RisksAccess
+	}
+	return AccessNone
 }

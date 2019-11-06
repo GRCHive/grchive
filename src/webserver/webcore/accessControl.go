@@ -28,7 +28,7 @@ func ObtainOrganizationDefaultRole(orgId int32) (*core.Role, error) {
 		return nil, err
 	}
 
-	return role, nil
+	return &defaultRole, nil
 }
 
 func ObtainAPIKeyRole(key *core.ApiKey, orgId int32) (*core.Role, error) {
