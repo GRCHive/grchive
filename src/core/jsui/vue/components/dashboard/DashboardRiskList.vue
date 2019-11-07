@@ -1,5 +1,5 @@
 <template>
-    <section class="ma-4">
+    <div class="ma-4">
         <v-dialog v-model="showHideDeleteRisk" persistent max-width="40%">
             <generic-delete-confirmation-form
                 item-name="risks"
@@ -61,7 +61,7 @@
                 </v-list-item-action>
             </v-list-item>
         </v-card>
-    </section>
+    </div>
 </template>
 
 <script lang="ts">

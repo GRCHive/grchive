@@ -145,13 +145,7 @@ func newProcessFlow(w http.ResponseWriter, r *http.Request) {
 
 	// Echo the ID and Name back to the requester.
 	w.WriteHeader(http.StatusOK)
-	jsonWriter.Encode(struct {
-		Name string
-		Id   int64
-	}{
-		newFlow.Name,
-		newFlow.Id,
-	})
+	jsonWriter.Encode(newFlow)
 }
 
 func updateProcessFlow(w http.ResponseWriter, r *http.Request) {

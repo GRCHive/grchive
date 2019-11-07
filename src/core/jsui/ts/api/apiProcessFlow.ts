@@ -41,15 +41,17 @@ export interface TNewProcessFlowInput {
 }
 
 export interface TNewProcessFlowOutput {
-    data: {
-        Name : string
-        Id: number
-    }
+    data: ProcessFlowBasicData
 }
 
 export function newProcessFlow(inp : TNewProcessFlowInput) : 
         Promise<TNewProcessFlowOutput> {
-    return postFormUrlEncoded<TNewProcessFlowOutput>(newProcessFlowAPIUrl, inp, getAPIRequestConfig())
+    return postFormUrlEncoded<TNewProcessFlowOutput>(newProcessFlowAPIUrl, inp, getAPIRequestConfig()).then(
+        (resp : TNewProcessFlowOutput) => {
+            resp.data.CreationTime = new Date(resp.data.CreationTime)
+            resp.data.LastUpdatedTime = new Date(resp.data.LastUpdatedTime)
+            return resp
+        })
 }
 
 export interface TGetAllProcessFlowInput {
@@ -66,7 +68,14 @@ export interface TGetAllProcessFlowOutput {
 
 export function getAllProcessFlow(inp : TGetAllProcessFlowInput) : 
         Promise<TGetAllProcessFlowOutput> {
-    return axios.get(getAllProcessFlowAPIUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+    return axios.get(getAllProcessFlowAPIUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then(
+        (resp : TGetAllProcessFlowOutput) => {
+            for (let d of resp.data.Flows) {
+                d.CreationTime = new Date(d.CreationTime)
+                d.LastUpdatedTime = new Date(d.LastUpdatedTime)
+            }
+            return resp
+        })
 }
 
 export interface TGetFullProcessFlowInput {

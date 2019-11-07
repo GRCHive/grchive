@@ -73,7 +73,7 @@ export default Vue.extend({
             }).then((resp : TNewProcessFlowOutput ) => {
                 this.name = undefined;
                 this.description = undefined;
-                this.$emit('do-save', resp.data.Name, resp.data.Id)
+                this.$emit('do-save', resp.data)
             }).catch((err : any) => {
                 if (!!err.response && err.response.data.IsDuplicate) {
                     // @ts-ignore

@@ -34,6 +34,10 @@ export function createMyAccountUrl(email: string) : string {
     return myAccountBaseUrl + "/" + email
 }
 
+export function createFlowUrl(org : string, flow : number) : string {
+    return `/dashboard/org/${org}/flows/${flow}`
+}
+
 export function createRiskUrl(org : string, risk : number) : string {
     return `/dashboard/org/${org}/risks/${risk}`
 }
