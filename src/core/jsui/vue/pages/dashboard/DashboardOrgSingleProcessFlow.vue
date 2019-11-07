@@ -1,23 +1,34 @@
 <template>
-    <div>
-       <v-content class="max-height" ref="sectionDiv">
-        <div :style="contentContainerStyle">
-            <process-flow-editor @on-change="recomputeProcessFlowHeaderHeight"></process-flow-editor>
-            <v-divider></v-divider>
-            <process-flow-toolbar></process-flow-toolbar>
-            <v-divider ref="headerDivider"></v-divider>
-            <process-flow-renderer :content-max-height-clip="headerClipHeight"
+    <div class="max-height">
+        <dashboard-app-bar ref="dashboardAppBar">
+        </dashboard-app-bar>
+
+        <dashboard-home-page-nav-bar
+            :selected-page="1"
+        ></dashboard-home-page-nav-bar>
+
+        <v-overlay :value="!ready">
+            <v-progress-circular indeterminate size="64"></v-progress-circular>
+        </v-overlay>
+
+        <v-content class="max-height" ref="sectionDiv">
+            <div :style="contentContainerStyle" v-if="ready">
+                <process-flow-editor @on-change="recomputeProcessFlowHeaderHeight"></process-flow-editor>
+                <v-divider></v-divider>
+                <process-flow-toolbar></process-flow-toolbar>
+                <v-divider ref="headerDivider"></v-divider>
+                <process-flow-renderer :content-max-height-clip="headerClipHeight"
                                    :content-max-width-clip="attrEditorClipWidth"
                                    :display-rect="rendererClientRect"
                                    ref="rendererVue"
-            ></process-flow-renderer>
+                ></process-flow-renderer>
 
-            <process-flow-attribute-editor :custom-clip-height="headerClipHeight" 
+                <process-flow-attribute-editor :custom-clip-height="headerClipHeight" 
                                            ref="attrEditor"
                                            :show-hide="showHideAttrEditor && isNodeSelected"
-            ></process-flow-attribute-editor>
-        </div>
-    </v-content>
+                ></process-flow-attribute-editor>
+            </div>
+        </v-content>
 
         <v-btn color="primary"
                id="attrPullButton"
@@ -42,7 +53,6 @@ import ProcessFlowToolbar from '../../components/dashboard/ProcessFlowToolbar.vu
 import ProcessFlowAttributeEditor from '../../components/dashboard/ProcessFlowAttributeEditor.vue'
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
-import VueRouter from 'vue-router'
 import LocalSettings from '../../../ts/localSettings'
 import RenderLayout from '../../../ts/render/renderLayout'
 
@@ -63,17 +73,11 @@ export default Vue.extend({
         attrEditorLeft: 0,
         attrEditorClipWidth: 256,
     }),
-    router: new VueRouter({
-        base : window.location.pathname,
-        routes: [
-            { 
-                path: '/:flowId?',
-                name: 'flow'
-            } 
-        ]
-    }),
     methods: {
         updateClientRect() {
+            if (!this.ready) {
+                return
+            }
             //@ts-ignore
             const rect = this.$refs.rendererVue.$el.getBoundingClientRect()
             const rendererClientRect =  <IDOMRect>{
@@ -87,6 +91,10 @@ export default Vue.extend({
             RenderLayout.store.commit('setRendererRect', rendererClientRect)
         },
         recomputeProcessFlowHeaderHeight() {
+            if (!this.ready) {
+                return
+            }
+
             Vue.nextTick(() => {
                 //@ts-ignore
                 const contentDiv = this.$refs.sectionDiv.$el.firstElementChild
@@ -143,7 +151,7 @@ export default Vue.extend({
         isNodeSelected() : boolean {
             return VueSetup.store.getters.isNodeSelected
         },
-        attributePullButtonStyle() {
+        attributePullButtonStyle() : any {
             let leftTranslate : string = this.attrEditorLeft.toString()
             let topTranslate : string = ((this.attrEditorTop + this.attrEditorBottom) / 2).toString()
 
@@ -161,15 +169,15 @@ export default Vue.extend({
                 "z-index": 5
             }
         },
-        contentContainerStyle() {
+        contentContainerStyle() : any {
             return {
                 "height": "100vh",
                 "maxHeight": `calc(100vh - ${this.appBarClipHeight}px)`
             }
+        },
+        ready() : boolean {
+            return !!VueSetup.store.state.currentProcessFlowBasicData && !!VueSetup.store.state.currentProcessFlowFullData
         }
-    },
-    created() {
-        VueSetup.currentRouter = this.$router
     },
     mounted() {
         this.recomputeProcessFlowHeaderHeight()
@@ -177,10 +185,19 @@ export default Vue.extend({
         this.appBarClipHeight = this.$refs.dashboardAppBar.$el.offsetHeight
 
         window.addEventListener('resize', this.updateClientRect)
+
+        let data = window.location.pathname.split('/')
+        let flowId = Number(data[data.length - 1])
+        VueSetup.store.dispatch('refreshCurrentProcessFlowFullData', flowId)
     },
     watch: {
         isNodeSelected() {
             this.trackAttributeEditor()
+        },
+        ready() {
+            Vue.nextTick(() => {
+                this.recomputeProcessFlowHeaderHeight()
+            })
         }
     }
 })

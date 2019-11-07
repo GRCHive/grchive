@@ -82,10 +82,18 @@ export interface TGetFullProcessFlowInput {
 }
 
 export interface TGetFullProcessFlowOutput {
-    data: FullProcessFlowResponseData
+    data: {
+        Basic: ProcessFlowBasicData
+        Graph: FullProcessFlowResponseData
+    }
 }
 
 export function getFullProcessFlow(id : number, inp : TGetFullProcessFlowInput) : 
         Promise<TGetFullProcessFlowOutput> {
-    return axios.get(createGetProcessFlowFullDataUrl(id) + '?' + qs.stringify(inp), getAPIRequestConfig())
+    return axios.get(createGetProcessFlowFullDataUrl(id) + '?' + qs.stringify(inp), getAPIRequestConfig()).then(
+        (resp : TGetFullProcessFlowOutput) => {
+            resp.data.Basic.CreationTime = new Date(resp.data.Basic.CreationTime)
+            resp.data.Basic.LastUpdatedTime = new Date(resp.data.Basic.LastUpdatedTime)
+            return resp
+        })
 }

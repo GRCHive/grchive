@@ -225,6 +225,13 @@ func getProcessFlowFullData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	flow, err := database.FindProcessFlowWithId(flowId, role)
+	if err != nil {
+		core.Warning("Failed to obtain flow data: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	graph := core.ProcessFlowGraph{}
 	graph.Nodes, err = database.FindAllNodesForProcessFlow(flowId, role)
 	if err != nil {
@@ -276,7 +283,13 @@ func getProcessFlowFullData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonWriter.Encode(&graph)
+	jsonWriter.Encode(struct {
+		Basic *core.ProcessFlow
+		Graph *core.ProcessFlowGraph
+	}{
+		Basic: flow,
+		Graph: &graph,
+	})
 }
 
 func deleteProcessFlow(w http.ResponseWriter, r *http.Request) {

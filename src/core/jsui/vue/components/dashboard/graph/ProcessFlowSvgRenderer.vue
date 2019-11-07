@@ -88,16 +88,16 @@ export default Vue.extend({
             return LocalSettings.state.showHideLegend
         },
         nodes() : Record<number,ProcessFlowNode> {
-            return VueSetup.store.state.currentProcessFlowFullData.Nodes
+            return VueSetup.store.state.currentProcessFlowFullData!.Nodes
         },
         edges() : Record<number, ProcessFlowEdge> {
-            return VueSetup.store.state.currentProcessFlowFullData.Edges
+            return VueSetup.store.state.currentProcessFlowFullData!.Edges
         },
         nodeKeys() : number[] {
-            return VueSetup.store.state.currentProcessFlowFullData.NodeKeys
+            return VueSetup.store.state.currentProcessFlowFullData!.NodeKeys
         },
         edgeKeys() : number[] {
-            return VueSetup.store.state.currentProcessFlowFullData.EdgeKeys
+            return VueSetup.store.state.currentProcessFlowFullData!.EdgeKeys
         },
         viewBoxX() : number {
             return LocalSettings.state.viewBoxTransform.tx
@@ -158,9 +158,9 @@ export default Vue.extend({
     methods: {
         getInputOutputFromId(ioId : number, isInput: boolean): ProcessFlowInputOutput {
             if (isInput) {
-                return VueSetup.store.state.currentProcessFlowFullData.Inputs[ioId]
+                return VueSetup.store.state.currentProcessFlowFullData!.Inputs[ioId]
             } else {
-                return VueSetup.store.state.currentProcessFlowFullData.Outputs[ioId]
+                return VueSetup.store.state.currentProcessFlowFullData!.Outputs[ioId]
             }
         },
         saveTemporaryEdge(endIo: ProcessFlowInputOutput, endIsInput: boolean) {

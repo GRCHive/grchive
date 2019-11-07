@@ -1,5 +1,5 @@
 <template>
-    <section id="content" >
+    <div id="content">
         <v-list-item two-line id="header">
             <v-list-item-content v-if="!editMode" class="mr-2">
                 <v-list-item-title>
@@ -60,7 +60,7 @@
             </v-list-item-action>
 
         </v-list-item>
-    </section>
+    </div>
 </template>
 
 <script lang="ts">
@@ -86,21 +86,11 @@ export default Vue.extend({
     }),
     computed: {
         basicData() : ProcessFlowBasicData {
-            if (VueSetup.store.state.currentProcessFlowIndex >= VueSetup.store.state.allProcessFlowBasicData.length) {
-                return {
-                    Id: 0,
-                    Name : "",
-                    Description: "",
-                    CreationTime: new Date(0),
-                    LastUpdatedTime: new Date(0)
-                }
-            }
-
-            return VueSetup.store.state.allProcessFlowBasicData[VueSetup.store.state.currentProcessFlowIndex] 
+            return VueSetup.store.state.currentProcessFlowBasicData!
         },
         canSubmit() : boolean {
             return this.formValid && this.editName.length > 0;
-        }
+        },
     },
     methods: {
         onExpandDescription() {
@@ -127,11 +117,9 @@ export default Vue.extend({
                 description: this.editDescription,
             }).then((resp : TUpdateProcessFlowOutput) => {
                 VueSetup.store.commit(
-                    "setIndividualProcessFlowBasicData", 
-                    {
-                        index: VueSetup.store.state.currentProcessFlowIndex,
-                        data: resp.data
-                    })
+                    "setProcessFlowBasicData", 
+                    resp.data
+                )
                 this.editMode = false
                 this.$emit('on-change')
             }).catch((err : any) => {
@@ -149,25 +137,14 @@ export default Vue.extend({
             this.$emit('on-change')
         }
     },
-    mounted() {
-        VueSetup.store.watch(
-            (state, getters) => {
-                return state.currentProcessFlowIndex
-            },
-            () => {
-                this.cancelEdit()
-            }
-        )
-
-        VueSetup.store.watch(
-            (state, getters) => {
-                return state.allProcessFlowBasicData
-            },
-            () => {
-                this.cancelEdit()
-            }
-        )
+    watch: {
+        basicData() {
+            this.cancelEdit()
+        }
     },
+    mounted() {
+        this.cancelEdit()
+    }
 })
 </script>
 

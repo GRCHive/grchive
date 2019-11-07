@@ -1,11 +1,9 @@
 import 'core-js/es/promise'
 import Vue from 'vue'
 import Vuex, { StoreOptions } from 'vuex'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify/lib'
 
 Vue.use(Vuex)
-Vue.use(VueRouter)
 Vue.use(Vuetify)
 
 import { deleteProcessFlowEdge, TDeleteProcessFlowEdgeInput, TDeleteProcessFlowEdgeOutput } from './api/apiProcessFlowEdges'
@@ -21,50 +19,20 @@ const opts = {}
 const store : StoreOptions<VuexState> = {
     state: {
         primaryNavBarWidth: 256,
-        allProcessFlowBasicData: [],
-        currentProcessFlowIndex : 0,
-        currentProcessFlowFullData: {} as FullProcessFlowData,
-        fullProcessFlowRequestedId: -1,
+        currentProcessFlowBasicData: null,
+        currentProcessFlowFullData: null,
         selectedNodeId: -1,
         selectedEdgeId: -1
     },
     mutations: {
-        deleteProcessFlow(state, flowId) {
-            if (state.currentProcessFlowFullData.FlowId == flowId) {
-                state.currentProcessFlowIndex = 0
-                state.currentProcessFlowFullData = {} as FullProcessFlowData
-                state.selectedNodeId = -1
-                state.selectedEdgeId = -1
-            }
-
-            state.allProcessFlowBasicData.splice(
-                state.allProcessFlowBasicData.findIndex(
-                    (ele) => ele.Id == flowId),
-                1)
+        setProcessFlowBasicData(state, data) {
+            state.currentProcessFlowBasicData = data
         },
         changePrimaryNavBarWidth(state, width) {
             state.primaryNavBarWidth = width
         },
-        setProcessFlowBasicData(state, data) {
-            for (let d of data) {
-                d.CreationTime = new Date(d.CreationTime)
-                d.LastUpdatedTime = new Date(d.LastUpdatedTime)
-            }
-            state.allProcessFlowBasicData = data
-        },
-        setCurrentProcessFlowIndex(state, index) {
-            state.currentProcessFlowIndex = index
-        },
-        setIndividualProcessFlowBasicData(state, {index, data}) {
-            data.CreationTime = new Date(data.CreationTime)
-            data.LastUpdatedTime = new Date(data.LastUpdatedTime)
-            state.allProcessFlowBasicData.splice(index, 1, data)
-        },
         setCurrentProcessFlowFullData(state, data) {
             state.currentProcessFlowFullData = data
-        },
-        setFullProcessFlowRequestedId(state, data) {
-            state.fullProcessFlowRequestedId = data
         },
         setSelectedProcessFlowNode(state, id) {
             state.selectedNodeId = id
@@ -73,6 +41,10 @@ const store : StoreOptions<VuexState> = {
             state.selectedEdgeId = id
         },
         addNodeInput(state, {nodeId, input}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
+
             state.currentProcessFlowFullData.Nodes[nodeId].Inputs.push(input)
             Vue.set(
                 state.currentProcessFlowFullData.Inputs,
@@ -80,6 +52,9 @@ const store : StoreOptions<VuexState> = {
                 input)
         },
         addNodeOutput(state, {nodeId, output}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             state.currentProcessFlowFullData.Nodes[nodeId].Outputs.push(output)
             Vue.set(
                 state.currentProcessFlowFullData.Outputs,
@@ -87,6 +62,9 @@ const store : StoreOptions<VuexState> = {
                 output)
         },
         removeNodeInput(state, {nodeId, inputId}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             let idx : number = state.currentProcessFlowFullData.Nodes[nodeId].Inputs.findIndex(
                 (ele : ProcessFlowInputOutput) => {
                     return ele.Id == inputId
@@ -99,6 +77,9 @@ const store : StoreOptions<VuexState> = {
             }
         },
         removeNodeOutput(state, {nodeId, outputId}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             let idx : number = state.currentProcessFlowFullData.Nodes[nodeId].Outputs.findIndex(
                 (ele : ProcessFlowInputOutput) => {
                     return ele.Id == outputId
@@ -111,6 +92,9 @@ const store : StoreOptions<VuexState> = {
             }
         },
         updateNodeInputOutput(state, {nodeId, io, isInput}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             let relevantArr : ProcessFlowInputOutput[] = 
                 isInput ? 
                     state.currentProcessFlowFullData.Nodes[nodeId].Inputs :
@@ -125,12 +109,18 @@ const store : StoreOptions<VuexState> = {
             }
         },
         updateNodePartial(state, {nodeId, node}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             let currentNodeData = state.currentProcessFlowFullData.Nodes[nodeId]
             currentNodeData.Name = node.Name
             currentNodeData.Description = node.Description
             currentNodeData.NodeTypeId = node.NodeTypeId
         },
         addNewEdge(state, {edge}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             if (edge.Id in state.currentProcessFlowFullData.Edges) {
                 return
             }
@@ -141,6 +131,9 @@ const store : StoreOptions<VuexState> = {
                 edge)
         },
         deleteEdgeById(state, edgeId) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             if (!(edgeId in state.currentProcessFlowFullData.Edges)) {
                 return
             }
@@ -153,6 +146,9 @@ const store : StoreOptions<VuexState> = {
                 edgeId)
         },
         deleteNodeById(state, nodeId) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             if (!(nodeId in state.currentProcessFlowFullData.Nodes)) {
                 return
             }
@@ -166,6 +162,9 @@ const store : StoreOptions<VuexState> = {
                 nodeId)
         },
         setRisk(state, risk : ProcessFlowRisk) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             if (!(risk.Id in state.currentProcessFlowFullData.Risks)) {
                 state.currentProcessFlowFullData.RiskKeys.push(risk.Id)
                 Vue.set(state.currentProcessFlowFullData.Risks, risk.Id, risk)
@@ -175,6 +174,9 @@ const store : StoreOptions<VuexState> = {
             }
         },
         deleteRiskFromNode(state, {nodeId, riskIds}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             for (let riskId of riskIds) {
                 state.currentProcessFlowFullData.NodeRiskRelationships.delete(
                     state.currentProcessFlowFullData.Nodes[nodeId],
@@ -182,6 +184,9 @@ const store : StoreOptions<VuexState> = {
             }
         },
         deleteRiskGlobal(state, riskIds) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             for (let id of riskIds) {
                 state.currentProcessFlowFullData.NodeRiskRelationships.deleteB(
                     state.currentProcessFlowFullData.Risks[id]
@@ -194,11 +199,17 @@ const store : StoreOptions<VuexState> = {
             }
         },
         deleteNodeFromRisks(state, nodeId) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             state.currentProcessFlowFullData.NodeRiskRelationships.deleteA(
                 state.currentProcessFlowFullData.Nodes[nodeId]
             )
         },
         addRisksToNode(state, {nodeId, riskIds}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             for (let id of riskIds) {
                 state.currentProcessFlowFullData.NodeRiskRelationships.add(
                     state.currentProcessFlowFullData.Nodes[nodeId],
@@ -207,6 +218,9 @@ const store : StoreOptions<VuexState> = {
             }
         },
         setControl(state, {control}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             if (control.Id in state.currentProcessFlowFullData.Controls) {
                 state.currentProcessFlowFullData.Controls[control.Id].Id = control.Id
                 state.currentProcessFlowFullData.Controls[control.Id].Name = control.Name
@@ -224,18 +238,27 @@ const store : StoreOptions<VuexState> = {
             }
         },
         addControlToNode(state, {controlId, nodeId}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             state.currentProcessFlowFullData.NodeControlRelationships.add(
                 state.currentProcessFlowFullData.Nodes[nodeId],
                 state.currentProcessFlowFullData.Controls[controlId]
             )
         },
         addControlToRisk(state, {controlId, riskId}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             state.currentProcessFlowFullData.RiskControlRelationships.add(
                 state.currentProcessFlowFullData.Risks[riskId],
                 state.currentProcessFlowFullData.Controls[controlId]
             )
         },
         deleteControlFromRiskNode(state, {controlId, nodeId, riskId}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             state.currentProcessFlowFullData.NodeControlRelationships.delete(
                 state.currentProcessFlowFullData.Nodes[nodeId],
                 state.currentProcessFlowFullData.Controls[controlId]
@@ -247,6 +270,9 @@ const store : StoreOptions<VuexState> = {
             )
         },
         deleteControlGlobal(state, {controlId}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
             state.currentProcessFlowFullData.NodeControlRelationships.deleteB(
                 state.currentProcessFlowFullData.Controls[controlId]
             )
@@ -283,15 +309,7 @@ const store : StoreOptions<VuexState> = {
             })
             mutationObservers.push(observer)
         },
-        requestSetCurrentProcessFlowIndex(context, {index}) {
-            context.commit('setSelectedProcessFlowEdge', -1)
-            context.commit('setSelectedProcessFlowNode', -1)
-            context.commit('setCurrentProcessFlowIndex', index)
-            context.dispatch('refreshCurrentProcessFlowFullData')
-        },
-        refreshCurrentProcessFlowFullData(context) {
-            const id = context.getters.currentProcessFlowBasicData.Id
-            context.commit('setFullProcessFlowRequestedId', id)
+        refreshCurrentProcessFlowFullData(context, id) {
             getFullProcessFlow(id, <TGetFullProcessFlowInput>{
             }).then(
                 (resp : TGetFullProcessFlowOutput) => {
@@ -311,7 +329,7 @@ const store : StoreOptions<VuexState> = {
                         NodeControlRelationships: Vue.observable(new RelationshipMap<ProcessFlowNode,ProcessFlowControl>()),
                         RiskControlRelationships: Vue.observable(new RelationshipMap<ProcessFlowRisk,ProcessFlowControl>()),
                     }
-                    for (let data of resp.data.Nodes) {
+                    for (let data of resp.data.Graph.Nodes) {
                         newData.Nodes[data.Id] = data
                         newData.NodeKeys.push(data.Id)
                         for (let inp of data.Inputs) {
@@ -322,48 +340,47 @@ const store : StoreOptions<VuexState> = {
                             newData.Outputs[inp.Id] = inp
                         }
                     }
-                    for (let data of resp.data.Edges) {
+                    for (let data of resp.data.Graph.Edges) {
                         newData.Edges[data.Id] = data
                         newData.EdgeKeys.push(data.Id)
                     }
 
-                    for (let data of resp.data.Risks) {
+                    for (let data of resp.data.Graph.Risks) {
                         newData.Risks[data.Id] = data
                         newData.RiskKeys.push(data.Id)
                     }
 
-                    for (let data of resp.data.Controls) {
+                    for (let data of resp.data.Graph.Controls) {
                         newData.Controls[data.Id] = data
                         newData.ControlKeys.push(data.Id)
                     }
 
-                    for (let data of resp.data.NodeRisk) {
+                    for (let data of resp.data.Graph.NodeRisk) {
                         newData.NodeRiskRelationships.add(
                             newData.Nodes[data.NodeId],
                             newData.Risks[data.RiskId])
                     }
 
-                    for (let data of resp.data.NodeControl) {
+                    for (let data of resp.data.Graph.NodeControl) {
                         newData.NodeControlRelationships.add(
                             newData.Nodes[data.NodeId],
                             newData.Controls[data.ControlId])
                     }
 
-                    for (let data of resp.data.RiskControl) {
+                    for (let data of resp.data.Graph.RiskControl) {
                         newData.RiskControlRelationships.add(
                             newData.Risks[data.RiskId],
                             newData.Controls[data.ControlId])
                     }
                     
                     context.commit('setCurrentProcessFlowFullData', newData)
-                    context.commit('setFullProcessFlowRequestedId', -1)
+                    context.commit('setProcessFlowBasicData', resp.data.Basic)
                 }
             ).catch(
                 (err : any) => {
                     // TODO: Somehow display something went wrong??
                     console.log("Failed to obtain process flow.", err)
-                    context.commit('setCurrentProcessFlowFullData', {} as FullProcessFlowData)
-                    context.commit('setFullProcessFlowRequestedId', -1)
+                    context.commit('setCurrentProcessFlowFullData', null)
                 }
             )
         },
@@ -389,6 +406,10 @@ const store : StoreOptions<VuexState> = {
             }
         },
         deleteNodeById(context, nodeId) {
+            if (!context.state.currentProcessFlowFullData) {
+                return
+            }
+
             if (!(nodeId in context.state.currentProcessFlowFullData.Nodes)) {
                 return
             }
@@ -411,6 +432,9 @@ const store : StoreOptions<VuexState> = {
 
         },
         deleteBatchNodeInput(context, {nodeId, inputs}) {
+            if (!context.state.currentProcessFlowFullData) {
+                return
+            }
             const set = new Set(inputs)
             for (let i of inputs) {
                 context.commit('removeNodeInput', {nodeId: nodeId, inputId: i})
@@ -425,6 +449,9 @@ const store : StoreOptions<VuexState> = {
             }
         },
         deleteBatchNodeOutput(context, {nodeId, outputs}) {
+            if (!context.state.currentProcessFlowFullData) {
+                return
+            }
             const set = new Set(outputs)
             for (let i of outputs) {
                 context.commit('removeNodeOutput', {nodeId: nodeId, outputId: i})
@@ -459,31 +486,34 @@ const store : StoreOptions<VuexState> = {
         }
     },
     getters: {
-        currentProcessFlowBasicData: (state) => {
-            return state.allProcessFlowBasicData[state.currentProcessFlowIndex]
-        },
-        isFullRequestInProgress: (state) => {
-            return state.fullProcessFlowRequestedId != -1
-        },
         isNodeSelected: (state) => {
             return state.selectedNodeId != -1
         },
-        nodeInfo: (state) => (nodeId : number) : ProcessFlowNode => {
+        nodeInfo: (state) => (nodeId : number) : ProcessFlowNode | null => {
+            if (!state.currentProcessFlowFullData) {
+                return null
+            }
             return state.currentProcessFlowFullData.Nodes[nodeId]
         },
-        currentNodeInfo: (state, getters) : ProcessFlowNode  => {
+        currentNodeInfo: (state, getters) : ProcessFlowNode | null  => {
             if (!getters.isNodeSelected) {
-                return {} as ProcessFlowNode
+                return null
             }
             return getters.nodeInfo(state.selectedNodeId)
         },
         risksForNode: (state) => (nodeId : number) : ProcessFlowRisk[] => {
+            if (!state.currentProcessFlowFullData) {
+                return []
+            }
             return state.currentProcessFlowFullData.NodeRiskRelationships.changed &&
                 state.currentProcessFlowFullData.NodeRiskRelationships.getB(
                     state.currentProcessFlowFullData.Nodes[nodeId]
                 )
         },
         controlsForRiskNode: (state) => (riskId : number, nodeId : number) : RiskControl[] => {
+            if (!state.currentProcessFlowFullData) {
+                return []
+            }
             let controlsForNode = 
                 state.currentProcessFlowFullData.NodeControlRelationships.changed && 
                 state.currentProcessFlowFullData.NodeControlRelationships.getB(
@@ -496,7 +526,7 @@ const store : StoreOptions<VuexState> = {
                 )
 
             return controlsForNode.filter(val => controlsForRisk.includes(val)).map(ele => ({
-                risk: state.currentProcessFlowFullData.Risks[riskId],
+                risk: state.currentProcessFlowFullData!.Risks[riskId],
                 control: ele
             }))
         }
@@ -506,5 +536,4 @@ const store : StoreOptions<VuexState> = {
 export default {
     vuetify: new Vuetify(opts),
     store: new Vuex.Store<VuexState>(store),
-    currentRouter: {} as VueRouter
 }

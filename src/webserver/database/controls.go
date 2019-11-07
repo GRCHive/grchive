@@ -104,10 +104,11 @@ func DeleteControls(nodeId int64, controlIds []int64, riskIds []int64, global bo
 	for idx, id := range controlIds {
 		if nodeId != -1 {
 			_, err := tx.Exec(`
-				DELETE FROM process_flow_control_node AS cn
-				INNER JOIN process_flow_controls AS ctrl
-					ON cn.control_id = ctrl.id
-				WHERE cn.node_id = $1
+				DELETE
+				FROM process_flow_control_node AS cn
+				USING process_flow_controls AS ctrl
+				WHERE cn.control_id = ctrl.id
+					AND cn.node_id = $1
 					AND cn.control_id = $2
 					AND ctrl.org_id = $3
 			`, nodeId, id, orgId)
@@ -120,13 +121,14 @@ func DeleteControls(nodeId int64, controlIds []int64, riskIds []int64, global bo
 
 		if idx < len(riskIds) && riskIds[idx] != -1 {
 			_, err := tx.Exec(`
-				DELETE FROM process_flow_risk_control AS rc
-				INNER JOIN process_flow_controls AS ctrl
-					ON rc.control_id = ctrl.id
-				WHERE rc.risk_id = $1
+				DELETE
+				FROM process_flow_risk_control AS rc
+				USING process_flow_controls AS ctrl
+				WHERE rc.control_id = ctrl.id
+					AND rc.risk_id = $1
 					AND rc.control_id = $2
 					AND ctrl.org_id = $3
-			`, riskIds[idx], id)
+			`, riskIds[idx], id, orgId)
 
 			if err != nil {
 				tx.Rollback()

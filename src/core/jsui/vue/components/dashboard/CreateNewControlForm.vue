@@ -98,7 +98,7 @@ export default Vue.extend({
         },
         control: {
             type: Object as () => ProcessFlowControl,
-            default: Object() as ProcessFlowControl
+            default: () => Object() as ProcessFlowControl
         },
         stagedEdits: {
             type: Boolean,

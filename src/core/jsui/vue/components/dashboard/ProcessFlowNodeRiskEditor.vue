@@ -163,8 +163,8 @@ export default Vue.extend({
             return VueSetup.store.getters.risksForNode(this.currentNode.Id)
         },
         unselectedRisksForNode() : ProcessFlowRisk[] {
-            let allRisks = VueSetup.store.state.currentProcessFlowFullData.RiskKeys.map(
-                ele => VueSetup.store.state.currentProcessFlowFullData.Risks[ele])
+            let allRisks = VueSetup.store.state.currentProcessFlowFullData!.RiskKeys.map(
+                ele => VueSetup.store.state.currentProcessFlowFullData!.Risks[ele])
 
             let alreadySelected = new Set<number>(this.risksForNode.map(ele => ele.Id))
             return allRisks.filter(ele => !alreadySelected.has(ele.Id))

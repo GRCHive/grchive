@@ -31,6 +31,7 @@ const (
 	DashboardRisksRouteName                        = "Risks"
 	DashboardSingleRiskRouteName                   = "SingleRisk"
 	DashboardSingleControlRouteName                = "SingleControl"
+	DashboardSingleFlowRouteName                   = "SingleFlow"
 	DashboardControlsRouteName                     = "Controls"
 	NewProcessFlowRouteName                        = "NewProcessFlow"
 	DeleteProcessFlowRouteName                     = "DeleteProcessFlow"

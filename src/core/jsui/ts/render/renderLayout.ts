@@ -273,13 +273,13 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
         initialize(context, {host, csrf, processFlowStore}) {
             processFlowStore.watch((state : VuexState) => {
                 return state.currentProcessFlowFullData
-            }, (newFlowData : FullProcessFlowData, oldFlowData: FullProcessFlowData) => {
-                    if (!newFlowData.FlowId) {
+            }, (newFlowData : FullProcessFlowData | null, oldFlowData: FullProcessFlowData | null) => {
+                    if (!newFlowData) {
                         context.commit('resetNodeLayout')
                         return
                     }
 
-                    let newFlow : boolean = oldFlowData.FlowId != newFlowData.FlowId
+                    let newFlow : boolean = !oldFlowData || (oldFlowData.FlowId != newFlowData.FlowId)
                     context.dispatch(
                          newFlow ?
                             'recomputeLayout' :

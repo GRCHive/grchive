@@ -5,6 +5,7 @@ import Vue from 'vue'
 import { VApp } from 'vuetify/lib'
 import DashboardOrgHome from '../vue/pages/dashboard/DashboardOrgHome.vue'
 import DashboardOrgProcessFlows from '../vue/pages/dashboard/DashboardOrgProcessFlows.vue'
+import DashboardOrgSingleProcessFlow from '../vue/pages/dashboard/DashboardOrgSingleProcessFlow.vue'
 import DashboardOrgRisks from '../vue/pages/dashboard/DashboardOrgRisks.vue'
 import DashboardOrgSingleRisk from '../vue/pages/dashboard/DashboardOrgSingleRisk.vue'
 import DashboardOrgControls from '../vue/pages/dashboard/DashboardOrgControls.vue'
@@ -22,6 +23,7 @@ function mountApp(inData : Object) {
             VApp,
             DashboardOrgHome,
             DashboardOrgProcessFlows,
+            DashboardOrgSingleProcessFlow,
             DashboardOrgRisks,
             DashboardOrgSingleRisk,
             DashboardOrgControls,

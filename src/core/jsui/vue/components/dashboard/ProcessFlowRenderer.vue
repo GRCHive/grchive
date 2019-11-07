@@ -47,7 +47,6 @@
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
 import ProcessFlowSvgRenderer from './graph/ProcessFlowSvgRenderer'
-import { isProcessFullDataEmpty } from '../../../ts/processFlow'
 import RenderLayout from '../../../ts/render/renderLayout'
 
 export default Vue.extend({
@@ -62,9 +61,6 @@ export default Vue.extend({
         }
     },
     computed: {
-        renderReady() : boolean {
-            return RenderLayout.store.state.ready
-        },
         svgHeight() : number {
             return (<IDOMRect>this.displayRect).height
         },
@@ -72,9 +68,15 @@ export default Vue.extend({
             return (<IDOMRect>this.displayRect).width
         },
         hasProcessFlowToRender() : boolean {
-            return !isProcessFullDataEmpty(VueSetup.store.state.currentProcessFlowFullData)
+            return !!VueSetup.store.state.currentProcessFlowFullData &&
+                VueSetup.store.state.currentProcessFlowFullData!.NodeKeys.length > 0
         },
-        contentStyle() {
+        renderReady() : boolean {
+            return RenderLayout.store.state.ready && 
+                this.svgHeight > 0 && 
+                this.svgWidth > 0
+        },
+        contentStyle() : any {
             return {
                 "height": "100%",
                 "max-height": `calc(100% - ${this.contentMaxHeightClip.toString()}px)`,
@@ -88,7 +90,8 @@ export default Vue.extend({
     },
     methods: {
         refreshProcessFlow() {
-            VueSetup.store.dispatch('refreshCurrentProcessFlowFullData')
+            VueSetup.store.dispatch('refreshCurrentProcessFlowFullData', 
+                VueSetup.store.state.currentProcessFlowBasicData!.Id)
         }
     },
 })

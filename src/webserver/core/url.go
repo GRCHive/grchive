@@ -22,17 +22,19 @@ const DashboardHomeUrl string = "/"
 const DashboardOrgOrgQueryId string = "orgId"
 const DashboardOrgRiskQueryId string = "risk"
 const DashboardOrgControlQueryId string = "control"
+const DashboardOrgFlowQueryId string = "flow"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 
 const DashboardOrgHomeUrl string = "/"
-const DashboardOrgFlowUrl string = "/flows"
 
+const DashboardOrgAllFlowsEndpoint string = "/flows"
 const DashboardOrgAllRiskEndpoint string = "/risks"
 const DashboardOrgAllControlsEndpoint string = "/controls"
 
 var DashboardOrgRiskEndpoint string = fmt.Sprintf("/risks/{%s}", DashboardOrgRiskQueryId)
 var DashboardOrgControlEndpoint string = fmt.Sprintf("/controls/{%s}", DashboardOrgControlQueryId)
+var DashboardOrgFlowEndpoint string = fmt.Sprintf("/flows/{%s}", DashboardOrgFlowQueryId)
 
 // Dashboard - User
 const DashboardUserQueryId string = "user"

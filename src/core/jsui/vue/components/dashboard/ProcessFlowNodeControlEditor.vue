@@ -1,5 +1,5 @@
 <template>
-    <section>
+    <div>
         <v-dialog v-model="showHideEditControl" persistent max-width="40%">
             <create-new-control-form
                 ref="editControl"
@@ -132,7 +132,7 @@
                 </v-list-group>
             </v-list-item-group>
         </v-list>
-    </section>
+    </div>
 </template>
 
 <script lang="ts">
@@ -191,8 +191,8 @@ export default Vue.extend({
             return this.filteredRiskControl.map(ele => `${ele.control.Name} (${ele.risk.Name})`)
         },
         unselectedControlsForRisk() : (riskId : number) => ProcessFlowControl[] {
-            let allControls = VueSetup.store.state.currentProcessFlowFullData.ControlKeys.map(
-                ele => VueSetup.store.state.currentProcessFlowFullData.Controls[ele])
+            let allControls = VueSetup.store.state.currentProcessFlowFullData!.ControlKeys.map(
+                ele => VueSetup.store.state.currentProcessFlowFullData!.Controls[ele])
 
             let existSetCache = Object() as Record<number, Set<number>>
             for (let r of this.risksForNode) {

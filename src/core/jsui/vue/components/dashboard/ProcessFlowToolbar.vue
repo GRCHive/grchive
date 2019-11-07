@@ -126,12 +126,12 @@ export default Vue.extend({
             // Create a new node of the given type.
             newProcessFlowNode(<TNewProcessFlowNodeInput>{
                 typeId: nodeTypeId,
-                flowId: VueSetup.store.getters.currentProcessFlowBasicData.Id,
+                flowId: VueSetup.store.state.currentProcessFlowBasicData!.Id,
             }).then((resp : TNewProcessFlowNodeOutput) => {
                 // TODO: Make this more efficient and just do a local adjustment of the data?
                 //       That'd require some more syncing stuff...which is fancier.
                 // Force a refresh of the data for the currently selected process flow.
-                VueSetup.store.dispatch('refreshCurrentProcessFlowFullData')
+                VueSetup.store.dispatch('refreshCurrentProcessFlowFullData', VueSetup.store.state.currentProcessFlowBasicData!.Id)
             }).catch((err : any) => {
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
