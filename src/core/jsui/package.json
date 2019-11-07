@@ -5,6 +5,7 @@
     "@babel/core": "^7.6.2",
     "@babel/preset-env": "^7.6.2",
     "@mdi/font": "^4.4.95",
+    "@mdi/js": "^4.5.95",
     "@types/file-saver": "^2.0.1",
     "@types/jszip": "^3.1.6",
     "@types/node": "^12.7.9",

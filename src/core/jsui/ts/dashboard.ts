@@ -14,7 +14,6 @@ import SnackBar from '../vue/components/SnackBar.vue'
 import { getCurrentCSRF } from './csrf'
 
 import '../sass/main.scss'
-//import '@mdi/font/scss/materialdesignicons.scss'
 
 function mountApp(inData : Object) {
     new Vue({
