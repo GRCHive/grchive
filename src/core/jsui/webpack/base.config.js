@@ -1,6 +1,8 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const cssLoaders = [
     {
@@ -54,7 +56,7 @@ module.exports = {
                 use: cssLoaders
             },
             {
-                test: /\.s[ac]ss$/,
+                test: /\.scss$/,
                 use: [
                     ...cssLoaders,
                     {
@@ -64,6 +66,22 @@ module.exports = {
                             sassOptions: {
                                 fiber: require('fibers'),
                                 indentedSyntax: false
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                test: /\.sass$/,
+                use: [
+                    ...cssLoaders,
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            implementation: require('sass'),
+                            sassOptions: {
+                                fiber: require('fibers'),
+                                indentedSyntax: true
                             }
                         }
                     }
@@ -86,7 +104,11 @@ module.exports = {
         new MiniCssExtractPlugin({
             filename: '[name].css'
         }),
-        new VueLoaderPlugin()
+        new VueLoaderPlugin(),
+        new VuetifyLoaderPlugin(),
+        new BundleAnalyzerPlugin({
+            analyzerMode: 'static'
+        })
     ],
     resolve: {
         alias: {

@@ -2,6 +2,7 @@ import vueOpts from  './vueSetup'
 import MetadataStore from './metadata'
 import RenderLayout from './render/renderLayout'
 import Vue from 'vue'
+import { VApp } from 'vuetify/lib'
 import DashboardOrgHome from '../vue/pages/dashboard/DashboardOrgHome.vue'
 import DashboardOrgProcessFlows from '../vue/pages/dashboard/DashboardOrgProcessFlows.vue'
 import DashboardOrgRisks from '../vue/pages/dashboard/DashboardOrgRisks.vue'
@@ -13,12 +14,13 @@ import SnackBar from '../vue/components/SnackBar.vue'
 import { getCurrentCSRF } from './csrf'
 
 import '../sass/main.scss'
-import '@mdi/font/scss/materialdesignicons.scss'
+//import '@mdi/font/scss/materialdesignicons.scss'
 
 function mountApp(inData : Object) {
     new Vue({
         el: '#app',
         components: {
+            VApp,
             DashboardOrgHome,
             DashboardOrgProcessFlows,
             DashboardOrgRisks,

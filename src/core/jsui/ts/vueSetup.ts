@@ -2,8 +2,7 @@ import 'core-js/es/promise'
 import Vue from 'vue'
 import Vuex, { StoreOptions } from 'vuex'
 import VueRouter from 'vue-router'
-import Vuetify from 'vuetify'
-import '../node_modules/vuetify/dist/vuetify.min.css'
+import Vuetify from 'vuetify/lib'
 
 Vue.use(Vuex)
 Vue.use(VueRouter)

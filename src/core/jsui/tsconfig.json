@@ -11,7 +11,8 @@
             "es2018.promise"
         ],
         "downlevelIteration": true,
-        "allowSyntheticDefaultImports": true
+        "allowSyntheticDefaultImports": true,
+        "types": ["vuetify"]
 	},
     "include": [
         "./**/*.ts",
