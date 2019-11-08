@@ -2,7 +2,7 @@
     <v-app-bar app dense clipped-left clipped-right>
         <v-app-bar-nav-icon @click.stop="clickNav"></v-app-bar-nav-icon>
         <v-toolbar-title color="primary">
-            <a :href="this.$root.orgUrl">{{ this.$root.orgName }}</a>
+            <a :href="orgUrl">{{ orgName }}</a>
         </v-toolbar-title>
         <div class="flex-grow-1"></div>
 
@@ -53,20 +53,40 @@ import VueSetup from '../../../ts/vueSetup'
 import LocalStorage from '../../../ts/localSettings'
 import {createLogoutUrl, createMyAccountUrl, createMailtoUrl } from '../../../ts/url'
 import { getCurrentCSRF } from '../../../ts/csrf'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     data: function() {
         return {
-            //@ts-ignore
-            fullName: this.$root.userFirstName + " " + this.$root.userLastName,
             logoutUrl : createLogoutUrl(getCurrentCSRF()),
-            //@ts-ignore
-            myAccountUrl: createMyAccountUrl(this.$root.userEmail),
-            //@ts-ignore
-            supportUrl: createMailtoUrl("support", this.$root.domain),
-            //@ts-ignore
-            feedbackUrl: createMailtoUrl("feedback", this.$root.domain),
         }
+    },
+    computed: {
+        orgUrl() : string  {
+            return PageParamsStore.state.organization!.Url
+        },
+        orgName() : string  {
+            return PageParamsStore.state.organization!.Name
+        },
+        userFirstName() : string {
+            return PageParamsStore.state.user!.FirstName
+        },
+        userLastName() : string {
+            return PageParamsStore.state.user!.LastName
+        },
+        fullName() : string {
+            return this.userFirstName + " " + this.userLastName
+        },
+        myAccountUrl() : string {
+            return createMyAccountUrl(PageParamsStore.state.user!.Email)
+        },
+        supportUrl() : Object {
+            return createMailtoUrl("support", PageParamsStore.state.site!.Domain)
+        },
+        feedbackUrl() : Object {
+            return createMailtoUrl("feedback", PageParamsStore.state.site!.Domain)
+        }
+
     },
     methods: {
         clickNav() {

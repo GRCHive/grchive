@@ -1,7 +1,7 @@
 <template>
     <section>
         <landing-page-app-bar
-            :company-name="this.$root.companyName"
+            :company-name="companyName"
         >
         </landing-page-app-bar>
 
@@ -25,13 +25,13 @@
                     <v-col cols=12>
                         <v-row justify="center" class="ma-4">
                             <div class="white--text display-2 font-weight-bold above-overlay">
-                                What is {{ this.$root.companyName }}?
+                                What is {{ companyName }}?
                             </div>
                         </v-row>
 
                         <v-row justify="center" class="ma-4">
                             <div class="white--text subtitle-2 above-overlay" id="subtitle">
-                                {{ this.$root.companyName }} is an automated audit control management solution that digitizes and streamlines your audit process.
+                                {{ companyName }} is an automated audit control management solution that digitizes and streamlines your audit process.
                                 It organizes and centralizes information about process flows and audit controls so that everyone, auditors and business managers, can obtain the information they need, faster.
                             </div>
                         </v-row>
@@ -70,6 +70,7 @@
 import LandingPageAppBar from '../components/LandingPageAppBar.vue'
 import { createAssetUrl, getStartedUrl, contactUsUrl } from '../../ts/url'
 import Vue from 'vue'
+import { PageParamsStore } from '../../ts/pageParams'
 
 export default Vue.extend({
     components: {
@@ -79,6 +80,9 @@ export default Vue.extend({
         bannerImageUrl() : string {
             return createAssetUrl('generic-banner4.jpg')
         },
+        companyName() : string {
+            return PageParamsStore.state.site!.CompanyName
+        }
     },
     data : () => ({
         getStartedUrl,

@@ -73,6 +73,7 @@ import { contactUsUrl, createRiskUrl } from '../../../ts/url'
 import { replaceWithMark, sanitizeTextForHTML } from '../../../ts/text'
 import CreateNewRiskForm from './CreateNewRiskForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     data : () => ({
@@ -116,13 +117,11 @@ export default Vue.extend({
                 sanitizeTextForHTML(useFilter))
         },
         generateRiskUrl(riskId : number) : string {
-            //@ts-ignore
-            return createRiskUrl(this.$root.orgGroupId, riskId)
+            return createRiskUrl(PageParamsStore.state.organization!.OktaGroupName, riskId)
         },
         refreshRisks() {
             getAllRisks(<TAllRiskInput>{
-                //@ts-ignore
-                orgName: this.$root.orgGroupId
+                orgName: PageParamsStore.state.organization!.OktaGroupName
             }).then((resp : TAllRiskOutput) => {
                 this.allRisks = resp.data
             }).catch((err) => {

@@ -129,6 +129,7 @@ import { TDeleteControlDocumentsInput, TDeleteControlDocumentsOutput, deleteCont
 import { TDownloadControlDocumentsInput, TDownloadControlDocumentsOutput, downloadControlDocuments } from '../../../ts/api/apiControlDocumentation'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import { saveAs } from 'file-saver'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     props : {
@@ -209,8 +210,7 @@ export default Vue.extend({
         },
         deleteSelectedFiles() {
             deleteControlDocuments(<TDeleteControlDocumentsInput>{
-                //@ts-ignore,
-                orgGroupName: this.$root.orgGroupId,
+                orgGroupName: PageParamsStore.state.organization!.OktaGroupName,
                 fileIds: this.selectedFiles.map((ele) => ele.Id)
             }).then(() => {
                 let selectedFileSet = new Set(this.selectedFiles)
@@ -236,8 +236,7 @@ export default Vue.extend({
             // ZIP them together before saving the final ZIP to disk.
             downloadControlDocuments(<TDownloadControlDocumentsInput>{
                 files: this.selectedFiles,
-                //@ts-ignore
-                orgId: this.$root.orgId
+                orgId: PageParamsStore.state.organization!.Id
             }).then((resp : TDownloadControlDocumentsOutput) => {
                 saveAs(resp.data, "download.zip")
             }).catch((err : any) => {

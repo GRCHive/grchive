@@ -125,6 +125,7 @@ import { createFrequencyDisplayString } from '../../../ts/frequency'
 import CreateNewControlForm from './CreateNewControlForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import MetadataStore from '../../../ts/metadata'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     data : () => ({
@@ -169,8 +170,7 @@ export default Vue.extend({
         },
         refreshControls() {
             getAllControls(<TAllControlInput>{
-                //@ts-ignore
-                orgName: this.$root.orgGroupId
+                orgName: PageParamsStore.state.organization!.OktaGroupName
             }).then((resp : TAllControlOutput) => {
                 this.allControls = resp.data
             }).catch((err : any) => {
@@ -185,8 +185,7 @@ export default Vue.extend({
         },
         goToControl(controlId : number) {
             window.location.assign(createControlUrl(
-                //@ts-ignore
-                this.$root.orgGroupId,
+                PageParamsStore.state.organization!.OktaGroupName,
                 controlId))
         },
         deleteSelectedControls() {

@@ -1,13 +1,13 @@
 <template>
     <section>
         <landing-page-app-bar
-            :company-name="this.$root.companyName"
+            :company-name="companyName"
         >
         </landing-page-app-bar>
 
         <v-content>
             <landing-carousel
-                :company-name="this.$root.companyName"
+                :company-name="companyName"
             >
             </landing-carousel>
         </v-content>
@@ -18,11 +18,17 @@
 
 import LandingPageAppBar from '../components/LandingPageAppBar.vue'
 import LandingCarousel from '../components/LandingCarousel.vue'
+import { PageParamsStore } from '../../ts/pageParams.ts'
 
 export default {
     components: {
         LandingPageAppBar,
         LandingCarousel
+    },
+    computed: {
+        companyName() : string {
+            return PageParamsStore.state.site!.CompanyName
+        }
     }
 }
 

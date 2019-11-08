@@ -1,7 +1,7 @@
 <template>
     <section>
         <landing-page-app-bar
-            :company-name="this.$root.companyName"
+            :company-name="companyName"
         >
         </landing-page-app-bar>
 
@@ -28,12 +28,12 @@
                                     Thank you for your interest!
                                 </v-card-title>
                                 <v-card-text class="long-text">
-                                    Our engineers are hard at work getting {{ this.$root.companyName }} ready for you.
+                                    Our engineers are hard at work getting {{ companyName }} ready for you.
                                     Leave us your name and email address, and we will contact you with more information on how we can help you streamline your external and internal auditing processes.
                                 </v-card-text>
                                 <v-col cols=12>
                                     <collect-email 
-                                        :company-name="this.$root.companyName"
+                                        :company-name="companyName"
                                     ></collect-email>
                                 </v-col>
                             </v-col>
@@ -61,6 +61,7 @@ import LandingPageAppBar from '../components/LandingPageAppBar.vue'
 import CollectEmail from '../components/CollectEmail.vue'
 import HeroImage from '../components/HeroImage.vue'
 import { createAssetUrl } from '../../ts/url'
+import { PageParamsStore } from '../../ts/pageParams'
 
 export default {
     components: {
@@ -70,7 +71,10 @@ export default {
     },
     computed: {
         imageUrl: () => createAssetUrl("construct.jpg"),
-        bannerImageUrl: () => createAssetUrl("generic-banner1.jpg")
+        bannerImageUrl: () => createAssetUrl("generic-banner1.jpg"),
+        companyName() : string {
+            return PageParamsStore.state.site!.CompanyName
+        }
     }
 }
 

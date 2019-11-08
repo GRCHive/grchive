@@ -1,7 +1,7 @@
 <template>
     <section>
         <landing-page-app-bar
-            :company-name="this.$root.companyName"
+            :company-name="companyName"
         >
         </landing-page-app-bar>
 
@@ -34,6 +34,7 @@ import LandingPageAppBar from '../components/LandingPageAppBar.vue'
 import HeroImage from '../components/HeroImage.vue'
 import LoginForm from '../components/LoginForm.vue'
 import { createAssetUrl } from '../../ts/url'
+import { PageParamsStore } from '../../ts/pageParams'
 
 export default {
     components: {
@@ -45,6 +46,9 @@ export default {
         bannerImageUrl() : string {
             return createAssetUrl('generic-banner3.jpg')
         },
+        companyName() : string {
+            return PageParamsStore.state.site!.CompanyName
+        }
     }
 }
 

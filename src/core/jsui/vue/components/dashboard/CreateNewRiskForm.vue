@@ -60,6 +60,7 @@ import * as rules from "../../../ts/formRules"
 import { contactUsUrl } from "../../../ts/url"
 import { editRisk, TEditRiskInput, TEditRiskOutput } from "../../../ts/api/apiRisks"
 import { newRisk, TNewRiskInput, TNewRiskOutput } from "../../../ts/api/apiRisks"
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     props : {
@@ -156,8 +157,7 @@ export default Vue.extend({
                 name : this.name,
                 description: this.description,
                 nodeId: this.nodeId,
-                //@ts-ignore
-                orgName: this.$root.orgGroupId
+                orgName: PageParamsStore.state.organization!.OktaGroupName
             }).then((resp : TNewRiskOutput) => {
                 this.onSuccess(resp.data)
             }).catch((err : any) => {
@@ -169,8 +169,7 @@ export default Vue.extend({
                 name : this.name,
                 description: this.description,
                 riskId: this.riskId,
-                //@ts-ignore
-                orgName: this.$root.orgGroupId
+                orgName: PageParamsStore.state.organization!.OktaGroupName
             }).then((resp : TEditRiskOutput) => {
                 this.onSuccess(resp.data)
             }).catch((err : any) => {

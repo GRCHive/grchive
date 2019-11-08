@@ -178,6 +178,7 @@ import { createRiskUrl, contactUsUrl } from '../../../ts/url'
 import { ControlDocumentationCategory } from '../../../ts/controls'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import { deleteControlDocCat, TDeleteControlDocCatInput, TDeleteControlDocCatOutput } from '../../../ts/api/apiControlDocumentation'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     data: () => ({
@@ -242,8 +243,7 @@ export default Vue.extend({
         },
         generateRiskUrl(riskId : number) : string {
             return createRiskUrl(
-                //@ts-ignore
-                this.$root.orgGroupId,
+                PageParamsStore.state.organization!.OktaGroupName,
                 riskId)
         },
         saveNewControlDocCategory(cat : ControlDocumentationCategory) {

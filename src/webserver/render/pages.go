@@ -7,27 +7,15 @@ import (
 )
 
 func RenderGettingStartedPage(w http.ResponseWriter, r *http.Request) {
-	RetrieveTemplate(GettingStartedPageTemplateKey).
-		ExecuteTemplate(
-			w,
-			"base",
-			BuildTemplateParams(w, r))
+	RenderTemplate(w, GettingStartedPageTemplateKey, "base", BuildPageTemplateParametersFull(r))
 }
 
 func RenderContactUsPage(w http.ResponseWriter, r *http.Request) {
-	RetrieveTemplate(ContactUsPageTemplateKey).
-		ExecuteTemplate(
-			w,
-			"base",
-			BuildTemplateParams(w, r))
+	RenderTemplate(w, ContactUsPageTemplateKey, "base", BuildPageTemplateParametersFull(r))
 }
 
 func RenderHomePage(w http.ResponseWriter, r *http.Request) {
-	RetrieveTemplate(LandingPageTemplateKey).
-		ExecuteTemplate(
-			w,
-			"base",
-			BuildTemplateParams(w, r))
+	RenderTemplate(w, LandingPageTemplateKey, "base", BuildPageTemplateParametersFull(r))
 }
 
 func RenderLoginPage(w http.ResponseWriter, r *http.Request) {
@@ -38,19 +26,11 @@ func RenderLoginPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	RetrieveTemplate(LoginPageTemplateKey).
-		ExecuteTemplate(
-			w,
-			"base",
-			BuildTemplateParams(w, r))
+	RenderTemplate(w, LoginPageTemplateKey, "base", BuildPageTemplateParametersFull(r))
 }
 
 func RenderLearnMorePage(w http.ResponseWriter, r *http.Request) {
-	RetrieveTemplate(LearnMorePageTemplateKey).
-		ExecuteTemplate(
-			w,
-			"base",
-			BuildTemplateParams(w, r))
+	RenderTemplate(w, LearnMorePageTemplateKey, "base", BuildPageTemplateParametersFull(r))
 }
 
 func RenderDashboardHomePage(w http.ResponseWriter, r *http.Request) {
@@ -100,14 +80,35 @@ func RenderDashboardOrgHomePage(w http.ResponseWriter, r *http.Request) {
 	//			BuildUserTemplateParams(data.CurrentUser)))
 
 	// TODO: Create some sort of dashboard. For now just redirect to process flows.
-	core.Info(webcore.MustGetRouteUrl(webcore.DashboardProcessFlowsRouteName))
 	http.Redirect(w, r,
 		webcore.MustGetRouteUrl(webcore.DashboardProcessFlowsRouteName, "orgId", org.OktaGroupName),
 		http.StatusTemporaryRedirect)
 }
 
+func verifyContextForOrgDashboard(w http.ResponseWriter, r *http.Request) error {
+	_, err := webcore.FindOrganizationInContext(r.Context())
+	if err != nil {
+		core.Warning("No organization data: " + err.Error())
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
+			http.StatusTemporaryRedirect)
+		return err
+	}
+
+	_, err = webcore.FindSessionParsedDataInContext(r.Context())
+	if err != nil {
+		core.Warning("No user data: " + err.Error())
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
+			http.StatusTemporaryRedirect)
+		return err
+	}
+
+	return nil
+}
+
 func RenderDashboardUserHomePage(w http.ResponseWriter, r *http.Request) {
-	data, err := webcore.FindSessionParsedDataInContext(r.Context())
+	_, err := webcore.FindSessionParsedDataInContext(r.Context())
 	if err != nil {
 		core.Warning("No user data: " + err.Error())
 		http.Redirect(w, r,
@@ -116,186 +117,47 @@ func RenderDashboardUserHomePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	RetrieveTemplate(DashboardUserHomeTemplateKey).
-		ExecuteTemplate(
-			w,
-			"dashboardBase",
-			core.MergeMaps(
-				BuildTemplateParams(w, r),
-				BuildOrgTemplateParams(data.Org),
-				BuildUserTemplateParams(data.CurrentUser)))
+	RenderTemplate(w, DashboardUserHomeTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
 
 func RenderDashboardProcessFlowsPage(w http.ResponseWriter, r *http.Request) {
-	org, err := webcore.FindOrganizationInContext(r.Context())
-	if err != nil {
-		core.Warning("No organization data: " + err.Error())
-		http.Redirect(w, r,
-			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
-			http.StatusTemporaryRedirect)
+	if verifyContextForOrgDashboard(w, r) != nil {
 		return
 	}
-
-	data, err := webcore.FindSessionParsedDataInContext(r.Context())
-	if err != nil {
-		core.Warning("No user data: " + err.Error())
-		http.Redirect(w, r,
-			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
-			http.StatusTemporaryRedirect)
-		return
-	}
-
-	RetrieveTemplate(DashboardProcessFlowsTemplateKey).
-		ExecuteTemplate(
-			w,
-			"dashboardBase",
-			core.MergeMaps(
-				BuildTemplateParams(w, r),
-				BuildOrgTemplateParams(org),
-				BuildUserTemplateParams(data.CurrentUser)))
+	RenderTemplate(w, DashboardProcessFlowsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
 
 func RenderDashboardRisksPage(w http.ResponseWriter, r *http.Request) {
-	org, err := webcore.FindOrganizationInContext(r.Context())
-	if err != nil {
-		core.Warning("No organization data: " + err.Error())
-		http.Redirect(w, r,
-			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
-			http.StatusTemporaryRedirect)
+	if verifyContextForOrgDashboard(w, r) != nil {
 		return
 	}
-
-	data, err := webcore.FindSessionParsedDataInContext(r.Context())
-	if err != nil {
-		core.Warning("No user data: " + err.Error())
-		http.Redirect(w, r,
-			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
-			http.StatusTemporaryRedirect)
-		return
-	}
-
-	RetrieveTemplate(DashboardRisksTemplateKey).
-		ExecuteTemplate(
-			w,
-			"dashboardBase",
-			core.MergeMaps(
-				BuildTemplateParams(w, r),
-				BuildOrgTemplateParams(org),
-				BuildUserTemplateParams(data.CurrentUser)))
+	RenderTemplate(w, DashboardRisksTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
 
 func RenderDashboardSingleRiskPage(w http.ResponseWriter, r *http.Request) {
-	org, err := webcore.FindOrganizationInContext(r.Context())
-	if err != nil {
-		core.Warning("No organization data: " + err.Error())
-		http.Redirect(w, r,
-			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
-			http.StatusTemporaryRedirect)
+	if verifyContextForOrgDashboard(w, r) != nil {
 		return
 	}
-
-	data, err := webcore.FindSessionParsedDataInContext(r.Context())
-	if err != nil {
-		core.Warning("No user data: " + err.Error())
-		http.Redirect(w, r,
-			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
-			http.StatusTemporaryRedirect)
-		return
-	}
-
-	RetrieveTemplate(DashboardSingleRiskTemplateKey).
-		ExecuteTemplate(
-			w,
-			"dashboardBase",
-			core.MergeMaps(
-				BuildTemplateParams(w, r),
-				BuildOrgTemplateParams(org),
-				BuildUserTemplateParams(data.CurrentUser)))
+	RenderTemplate(w, DashboardSingleRiskTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
 
 func RenderDashboardControlsPage(w http.ResponseWriter, r *http.Request) {
-	org, err := webcore.FindOrganizationInContext(r.Context())
-	if err != nil {
-		core.Warning("No organization data: " + err.Error())
-		http.Redirect(w, r,
-			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
-			http.StatusTemporaryRedirect)
+	if verifyContextForOrgDashboard(w, r) != nil {
 		return
 	}
-
-	data, err := webcore.FindSessionParsedDataInContext(r.Context())
-	if err != nil {
-		core.Warning("No user data: " + err.Error())
-		http.Redirect(w, r,
-			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
-			http.StatusTemporaryRedirect)
-		return
-	}
-
-	RetrieveTemplate(DashboardControlsTemplateKey).
-		ExecuteTemplate(
-			w,
-			"dashboardBase",
-			core.MergeMaps(
-				BuildTemplateParams(w, r),
-				BuildOrgTemplateParams(org),
-				BuildUserTemplateParams(data.CurrentUser)))
+	RenderTemplate(w, DashboardControlsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
 
 func RenderDashboardSingleControlPage(w http.ResponseWriter, r *http.Request) {
-	org, err := webcore.FindOrganizationInContext(r.Context())
-	if err != nil {
-		core.Warning("No organization data: " + err.Error())
-		http.Redirect(w, r,
-			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
-			http.StatusTemporaryRedirect)
+	if verifyContextForOrgDashboard(w, r) != nil {
 		return
 	}
-
-	data, err := webcore.FindSessionParsedDataInContext(r.Context())
-	if err != nil {
-		core.Warning("No user data: " + err.Error())
-		http.Redirect(w, r,
-			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
-			http.StatusTemporaryRedirect)
-		return
-	}
-
-	RetrieveTemplate(DashboardSingleControlTemplateKey).
-		ExecuteTemplate(
-			w,
-			"dashboardBase",
-			core.MergeMaps(
-				BuildTemplateParams(w, r),
-				BuildOrgTemplateParams(org),
-				BuildUserTemplateParams(data.CurrentUser)))
+	RenderTemplate(w, DashboardSingleControlTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
 
 func RenderDashboardSingleFlowPage(w http.ResponseWriter, r *http.Request) {
-	org, err := webcore.FindOrganizationInContext(r.Context())
-	if err != nil {
-		core.Warning("No organization data: " + err.Error())
-		http.Redirect(w, r,
-			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
-			http.StatusTemporaryRedirect)
+	if verifyContextForOrgDashboard(w, r) != nil {
 		return
 	}
-
-	data, err := webcore.FindSessionParsedDataInContext(r.Context())
-	if err != nil {
-		core.Warning("No user data: " + err.Error())
-		http.Redirect(w, r,
-			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
-			http.StatusTemporaryRedirect)
-		return
-	}
-
-	RetrieveTemplate(DashboardSingleFlowTemplateKey).
-		ExecuteTemplate(
-			w,
-			"dashboardBase",
-			core.MergeMaps(
-				BuildTemplateParams(w, r),
-				BuildOrgTemplateParams(org),
-				BuildUserTemplateParams(data.CurrentUser)))
+	RenderTemplate(w, DashboardSingleFlowTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }

@@ -47,6 +47,7 @@ import * as rules from "../../../ts/formRules"
 import { contactUsUrl } from "../../../ts/url"
 import { TEditUserProfileInput, TEditUserProfileOutput, editUserProfile } from '../../../ts/api/apiUsers'
 import Vue from 'vue'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     data: function() {
@@ -54,12 +55,9 @@ export default Vue.extend({
             rules,
             formValid: true,
             formData: {
-                //@ts-ignore
-                firstName: this.$root.userFirstName,
-                //@ts-ignore
-                lastName: this.$root.userLastName,
-                //@ts-ignore
-                email: this.$root.userEmail,
+                firstName: PageParamsStore.state.user!.FirstName,
+                lastName: PageParamsStore.state.user!.LastName,
+                email: PageParamsStore.state.user!.Email
             },
             canEdit: false,
             savedState: { firstName: "", lastName: "", email: ""}
@@ -67,7 +65,7 @@ export default Vue.extend({
     },
     computed: {
         canSubmit() : boolean {
-            return this.canEdit && this.formValid && this.formData.firstName && this.formData.lastName;
+            return this.canEdit && this.formValid && this.formData.firstName.length > 0
         }
     },
     methods: {
@@ -86,7 +84,7 @@ export default Vue.extend({
 
             this.canEdit = false
             //@ts-ignore
-            editUserProfile(this.$root.userEmail, <TEditUserProfileInput>{
+            editUserProfile(PageParamsStore.state.user!.Email, <TEditUserProfileInput>{
                 firstName: this.formData.firstName,
                 lastName: this.formData.lastName
             }).then((resp : TEditUserProfileOutput) => {

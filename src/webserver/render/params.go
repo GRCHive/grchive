@@ -1,11 +1,47 @@
 package render
 
 import (
-	"encoding/json"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
 	"net/http"
 )
+
+type PageTemplateParameters struct {
+	Organization struct {
+		*core.Organization
+		Url string
+	} `json:"organization"`
+
+	User struct {
+		*core.User
+		Auth bool
+	} `json:"user"`
+
+	Site struct {
+		core.CompanyConfig
+		Host string
+	} `json:"site"`
+}
+
+func BuildPageTemplateParametersFull(r *http.Request) PageTemplateParameters {
+	retParams := PageTemplateParameters{}
+	parsedData, err := webcore.FindSessionParsedDataInContext(r.Context())
+
+	retParams.User.Auth = (err == nil)
+	if err == nil {
+		retParams.User.User = parsedData.CurrentUser
+
+		retParams.Organization.Organization = parsedData.Org
+		retParams.Organization.Url = webcore.MustGetRouteUrl(
+			webcore.DashboardOrgHomeRouteName,
+			core.DashboardOrgOrgQueryId,
+			parsedData.Org.OktaGroupName)
+	}
+
+	retParams.Site.CompanyConfig = *core.EnvConfig.Company
+	retParams.Site.Host = r.Host
+	return retParams
+}
 
 func BuildTemplateParams(w http.ResponseWriter, r *http.Request) map[string]interface{} {
 	params := core.StructToMap(*core.EnvConfig.Company)
@@ -31,26 +67,6 @@ func BuildUserTemplateParams(user *core.User) map[string]interface{} {
 	params := make(map[string]interface{})
 	params["User"] = core.StructToMap(*user)
 	return params
-}
-
-func BuildFullRiskTemplateParams(risk *core.Risk, relevantNodes []*core.ProcessFlowNode, relevantControls []*core.Control) (map[string]interface{}, error) {
-	params := make(map[string]interface{})
-	rawData, err := json.Marshal(struct {
-		Risk     *core.Risk
-		Nodes    []*core.ProcessFlowNode
-		Controls []*core.Control
-	}{
-		Risk:     risk,
-		Nodes:    relevantNodes,
-		Controls: relevantControls,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	params["FullRiskData"] = string(rawData)
-	return params, nil
 }
 
 func CreateRedirectParams(w http.ResponseWriter, r *http.Request, title string, subtitle string, redirectUrl string) map[string]interface{} {

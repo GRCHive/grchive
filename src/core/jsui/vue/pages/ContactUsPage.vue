@@ -1,7 +1,7 @@
 <template>
     <section>
         <landing-page-app-bar
-            :company-name="this.$root.companyName"
+            :company-name="companyName"
         >
         </landing-page-app-bar>
 
@@ -76,6 +76,7 @@ import LandingPageAppBar from '../components/LandingPageAppBar.vue'
 import HeroImage from '../components/HeroImage.vue'
 import MessageUs from '../components/MessageUs.vue'
 import { createAssetUrl, createMailtoUrl } from '../../ts/url'
+import { PageParamsStore } from '../../ts/pageParams'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -84,27 +85,27 @@ export default Vue.extend({
         HeroImage,
         MessageUs
     },
-    // Note that this.$root.domain DOES exist because we make it so. It just won't be picked up
-    // by typescript.
     computed: {
+        companyName() : string {
+            return PageParamsStore.state.site!.CompanyName
+        },
+        domain() : string {
+            return PageParamsStore.state.site!.Domain
+        },
         bannerImageUrl() : string {
             return createAssetUrl('generic-banner2.jpg')
         },
         salesEmail() : Object {
-            //@ts-ignore
-            return createMailtoUrl('sales', this.$root.domain)
+            return createMailtoUrl('sales', this.domain)
         },
         careerEmail() : Object {
-            //@ts-ignore
-            return createMailtoUrl('careers', this.$root.domain)
+            return createMailtoUrl('careers', this.domain)
         },
         supportEmail() : Object {
-            //@ts-ignore
-            return createMailtoUrl('support', this.$root.domain)
+            return createMailtoUrl('support', this.domain)
         },
         contactEmail() : Object {
-            //@ts-ignore
-            return createMailtoUrl('contact', this.$root.domain)
+            return createMailtoUrl('contact', this.domain)
         }
     }
 })

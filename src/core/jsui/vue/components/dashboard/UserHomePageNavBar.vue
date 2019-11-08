@@ -10,6 +10,7 @@ import VueSetup from '../../../ts/vueSetup'
 import LocalSettings from '../../../ts/localSettings'
 import { createMyAccountUrl } from '../../../ts/url'
 import GenericNavBar from '../GenericNavBar.vue'
+import { PageParamsStore }  from '../../../ts/pageParams'
 
 export default Vue.extend({
     props : {
@@ -21,8 +22,7 @@ export default Vue.extend({
                 {
                     title: 'Profile',
                     icon: 'mdi-account-circle',
-                    //@ts-ignore
-                    url: createMyAccountUrl(this.$root.userEmail),
+                    url: createMyAccountUrl(PageParamsStore.state.user!.Email),
                 }
             ],
         }

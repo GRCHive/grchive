@@ -87,6 +87,7 @@ import { newControl,
          TEditControlInput,
          TEditControlOutput } from "../../../ts/api/apiControls"
 import { contactUsUrl } from "../../../ts/url"
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     props : {
@@ -223,8 +224,7 @@ export default Vue.extend({
                 ownerId : !!this.controlOwner ? this.controlOwner.Id : undefined,
                 nodeId: this.nodeId,
                 riskId: this.riskId,
-                //@ts-ignore
-                orgName: this.$root.orgGroupId
+                orgName: PageParamsStore.state.organization!.OktaGroupName
             }).then((resp : TNewControlOutput) => {
                 this.onSuccess(resp.data)
             }).catch((err : any) => {
@@ -242,8 +242,7 @@ export default Vue.extend({
                 nodeId: this.nodeId,
                 riskId: this.riskId,
                 controlId: this.control.Id,
-                //@ts-ignore
-                orgName: this.$root.orgGroupId
+                orgName: PageParamsStore.state.organization!.OktaGroupName
             }).then((resp : TEditControlOutput) => {
                 this.onSuccess(resp.data)
             }).catch((err : any) => {

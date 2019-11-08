@@ -10,8 +10,12 @@ import RedirectPage from '../vue/pages/RedirectPage.vue'
 import ErrorPage from '../vue/pages/ErrorPage.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
 import '../sass/main.scss'
+import { PageParamsStore, PageParamsStoreState  } from '../ts/pageParams'
 
-function mountApp(inData : Object) {
+function mountApp(inData : PageParamsStoreState) {
+    PageParamsStore.commit('replaceState', inData)
+    document.title = `${PageParamsStore.state.site!.CompanyName}`
+
     new Vue({
         el: '#app',
         components: {
@@ -25,7 +29,6 @@ function mountApp(inData : Object) {
             SnackBar,
             ErrorPage,
         },
-        data: () => (inData),
         vuetify: vueOpts.vuetify
     }).$mount('#app')
 }

@@ -89,6 +89,7 @@
 import Vue from 'vue'
 import VueSetup from '../../../../ts/vueSetup'
 import { createRiskUrl, createControlUrl } from '../../../../ts/url'
+import { PageParamsStore } from '../../../../ts/pageParams'
 
 export default Vue.extend({
     props: {
@@ -211,14 +212,12 @@ export default Vue.extend({
         },
         generateRiskUrl(risk : ProcessFlowRisk) {
             return createRiskUrl(
-                //@ts-ignore
-                this.$root.orgGroupId,
+                PageParamsStore.state.organization!.OktaGroupName,
                 risk.Id)
         },
         generateControlUrl(control : ProcessFlowControl) {
             return createControlUrl(
-                //@ts-ignore
-                this.$root.orgGroupId,
+                PageParamsStore.state.organization!.OktaGroupName,
                 control.Id)
         }
     },

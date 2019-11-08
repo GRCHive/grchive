@@ -9,6 +9,7 @@ import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
 import LocalSettings from '../../../ts/localSettings'
 import GenericNavBar from '../GenericNavBar.vue'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     props : {
@@ -20,57 +21,49 @@ export default Vue.extend({
                 {
                     title: 'Dashboard',
                     icon: 'mdi-view-dashboard',
-                    //@ts-ignore
-                    url: this.$root.orgUrl,
+                    url: PageParamsStore.state.organization!.Url,
                     disabled : false,
                     hidden: true
                 },
                 {
                     title: 'Process Flows',
                     icon: 'mdi-graph-outline',
-                    //@ts-ignore
-                    url: this.$root.orgUrl + '/flows',
+                    url: PageParamsStore.state.organization!.Url + '/flows',
                     disabled : false
                 },
                 {
                     title: 'Risks',
                     icon: 'mdi-fire',
-                    //@ts-ignore
-                    url: this.$root.orgUrl + '/risks',
+                    url: PageParamsStore.state.organization!.Url + '/risks',
                     disabled : false
                 },
                 {
                     title: 'Controls',
                     icon: 'mdi-shield-lock-outline',
-                    //@ts-ignore
-                    url: this.$root.orgUrl + '/controls',
+                    url: PageParamsStore.state.organization!.Url + '/controls',
                     disabled : false
                 },
                 {
                     title: 'General Ledger',
                     icon: 'mdi-bank-outline',
-                    //@ts-ignore
                     url: '#',
                     disabled : true
                 },
                 {
                     title: 'Access Requests',
                     icon: 'mdi-key-outline',
-                    //@ts-ignore
                     url: '#',
                     disabled : true
                 },
                 {
                     title: 'Data Sources',
                     icon: 'mdi-database',
-                    //@ts-ignore
                     url: '#',
                     disabled : true
                 },
                 {
                     title: 'Settings',
                     icon: 'mdi-settings',
-                    //@ts-ignore
                     url: '#',
                     disabled : true
                 },

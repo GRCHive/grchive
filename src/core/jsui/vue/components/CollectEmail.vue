@@ -19,7 +19,7 @@
 
         <v-switch
             v-model="agree"
-            :label="`I agree to ${this.$root.companyName} collecting and storing my personal information to send me updates about future services and products.`"
+            :label="`I agree to ${companyName} collecting and storing my personal information to send me updates about future services and products.`"
             required
             :rules="[rules.required]"
         >
@@ -52,6 +52,9 @@ export default Vue.extend({
         rules: rules,
         formValid: false
     }),
+    props: {
+        companyName: String
+    },
     computed: {
         canSubmit() : boolean {
             return this.$data.formValid && this.$data.name && this.$data.email && this.$data.agree;

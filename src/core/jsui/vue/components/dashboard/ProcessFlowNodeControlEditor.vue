@@ -145,6 +145,7 @@ import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import {TDeleteControlInput, TDeleteControlOutput, deleteControls} from '../../../ts/api/apiControls'
 import {TExistingControlInput, TExistingControlOutput, addExistingControls} from '../../../ts/api/apiControls'
 import { contactUsUrl, createControlUrl } from '../../../ts/url'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     data : () => ({
@@ -212,8 +213,7 @@ export default Vue.extend({
     methods : {
         generateControlUrl(control : ProcessFlowControl) {
             return createControlUrl(
-                //@ts-ignore
-                this.$root.orgGroupId,
+                PageParamsStore.state.organization!.OktaGroupName,
                 control.Id)
         },
         showNewControlDialog(riskId : number) {

@@ -97,6 +97,7 @@ import { FullRiskData } from '../../../ts/risks'
 import { getSingleRisk, TSingleRiskInput, TSingleRiskOutput} from '../../../ts/api/apiRisks'
 import { createControlUrl } from '../../../ts/url'
 import CreateNewRiskForm from './CreateNewRiskForm.vue'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     data: () => ({
@@ -134,8 +135,7 @@ export default Vue.extend({
         },
         generateControlUrl(controlId : number) : string {
             return createControlUrl(
-                //@ts-ignore
-                this.$root.orgGroupId,
+                PageParamsStore.state.organization!.OktaGroupName,
                 controlId)
         }
     },

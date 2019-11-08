@@ -1,8 +1,10 @@
 package render
 
 import (
+	"encoding/json"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"html/template"
+	"net/http"
 )
 
 type templateKey string
@@ -93,4 +95,16 @@ func RetrieveTemplate(name templateKey) *template.Template {
 
 	core.Error("Failed to find template: " + name)
 	return nil
+}
+
+func RenderTemplate(w http.ResponseWriter, key templateKey, name string, params PageTemplateParameters) {
+	// Handle error?
+	jsonRaw, _ := json.Marshal(params)
+	RetrieveTemplate(key).
+		ExecuteTemplate(
+			w,
+			name,
+			map[string]interface{}{
+				"Params": string(jsonRaw),
+			})
 }

@@ -110,6 +110,7 @@ import { deleteProcessFlow, TDeleteProcessFlowInput, TDeleteProcessFlowOutput } 
 import { contactUsUrl, createFlowUrl } from '../../../ts/url'
 import { replaceWithMark, sanitizeTextForHTML } from '../../../ts/text'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     data : () => ({
@@ -159,8 +160,7 @@ export default Vue.extend({
         refreshFlows() {
             getAllProcessFlow(<TGetAllProcessFlowInput>{
                 requested: -1,
-                //@ts-ignore
-                organization: this.$root.orgGroupId
+                organization: PageParamsStore.state.organization!.OktaGroupName
             }).then((resp : TGetAllProcessFlowOutput) => {
                 this.allFlows = resp.data.Flows
             }).catch((err) => {
@@ -175,8 +175,7 @@ export default Vue.extend({
         },
         goToFlow(flowId: number) {
             window.location.assign(createFlowUrl(
-                //@ts-ignore
-                this.$root.orgGroupId,
+                PageParamsStore.state.organization!.OktaGroupName,
                 flowId))
         },
         startDeleteFlow(flow : ProcessFlowBasicData) {

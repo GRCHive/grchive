@@ -13,10 +13,14 @@ import DashboardOrgSingleControl from '../vue/pages/dashboard/DashboardOrgSingle
 import DashboardUserHome from '../vue/pages/dashboard/DashboardUserHome.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
 import { getCurrentCSRF } from './csrf'
+import { PageParamsStore, PageParamsStoreState  } from '../ts/pageParams'
 
 import '../sass/main.scss'
 
-function mountApp(inData : Object) {
+function mountApp(inData : PageParamsStoreState) {
+    PageParamsStore.commit('replaceState', inData)
+    document.title = `${PageParamsStore.state.organization!.Name} :: ${PageParamsStore.state.site!.CompanyName}`
+
     new Vue({
         el: '#app',
         components: {
@@ -31,19 +35,15 @@ function mountApp(inData : Object) {
             DashboardUserHome,
             SnackBar
         },
-        data: () => (inData),
         vuetify: vueOpts.vuetify,
         mounted() {
-            //@ts-ignore
             MetadataStore.dispatch('initialize', {
-                ...inData,
-                csrf: getCurrentCSRF()
+                csrf: getCurrentCSRF(),
+                orgGroupId: PageParamsStore.state.organization!.OktaGroupName
             })
 
-            //@ts-ignore
             RenderLayout.store.dispatch('initialize', {
-                //@ts-ignore
-                host: inData.host,
+                host: PageParamsStore.state.site!.Host,
                 csrf: getCurrentCSRF(),
                 processFlowStore: vueOpts.store})
         }

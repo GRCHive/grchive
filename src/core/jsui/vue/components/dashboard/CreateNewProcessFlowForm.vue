@@ -42,6 +42,7 @@ import Vue from 'vue'
 import * as rules from "../../../ts/formRules"
 import { contactUsUrl } from "../../../ts/url"
 import { TNewProcessFlowInput, TNewProcessFlowOutput, newProcessFlow }  from '../../../ts/api/apiProcessFlow'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     data: () => ({
@@ -68,8 +69,7 @@ export default Vue.extend({
             newProcessFlow(<TNewProcessFlowInput>{
                 name: this.name || "",
                 description: this.description || "",
-                //@ts-ignore
-                organization: this.$root.orgGroupId,
+                organization: PageParamsStore.state.organization!.OktaGroupName,
             }).then((resp : TNewProcessFlowOutput ) => {
                 this.name = undefined;
                 this.description = undefined;

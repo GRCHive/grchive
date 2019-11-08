@@ -26,7 +26,7 @@
                             <p
                                 class="white--text display-2 font-weight-bold above-overlay"
                             >
-                                Streamline your audit process with {{ this.$root.companyName }}.
+                                Streamline your audit process with {{ companyName }}.
                             </p>
                         </v-row>
 
@@ -68,6 +68,9 @@ export default {
         getStartedUrl,
         learnMoreUrl
     }),
+    props: {
+        companyName: String
+    },
     computed:  {
         imageUrl: () => createAssetUrl("working.jpg"),
     }

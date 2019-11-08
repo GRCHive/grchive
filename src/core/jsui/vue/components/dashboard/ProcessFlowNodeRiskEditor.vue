@@ -133,6 +133,7 @@ import { deleteRisk,
          TAddExistingRiskInput,
          TAddExistingRiskOutput } from '../../../ts/api/apiRisks'
 import { contactUsUrl, createRiskUrl } from '../../../ts/url'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     data : () => ({
@@ -183,8 +184,7 @@ export default Vue.extend({
     methods : {
         generateRiskUrl(risk : ProcessFlowRisk) {
             return createRiskUrl(
-                //@ts-ignore
-                this.$root.orgGroupId,
+                PageParamsStore.state.organization!.OktaGroupName,
                 risk.Id)
         },
         saveNewRisk(risk : ProcessFlowRisk) {
