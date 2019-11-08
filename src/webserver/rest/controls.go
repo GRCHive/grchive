@@ -213,7 +213,11 @@ func deleteControls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := database.FindOrganizationFromNodeId(inputs.NodeId, core.ServerRole)
+	if len(inputs.ControlIds) == 0 {
+		return
+	}
+
+	org, err := database.FindOrganizationFromControlId(inputs.ControlIds[0], core.ServerRole)
 	if err != nil {
 		core.Warning("Bad organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)

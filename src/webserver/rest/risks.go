@@ -156,7 +156,12 @@ func deleteRisks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := database.FindOrganizationFromNodeId(inputs.NodeId, core.ServerRole)
+	if len(inputs.RiskIds) == 0 {
+		return
+	}
+
+	// Assume every risk has the same organization ID.
+	org, err := database.FindOrganizationFromRiskId(inputs.RiskIds[0], core.ServerRole)
 	if err != nil {
 		core.Warning("No organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
