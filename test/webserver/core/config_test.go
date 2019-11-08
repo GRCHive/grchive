@@ -5,6 +5,7 @@ import (
 	"github.com/pelletier/go-toml"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/b3h47pte/audit-stuff/mail_api"
 	"reflect"
 	"strings"
 	"testing"
@@ -55,6 +56,7 @@ func generateTestToml(config GenerateTomlConfig) (*toml.Tree, *core.EnvConfigDat
 		Company:   new(core.CompanyConfig),
 		Vault:     new(core.VaultConfig),
 		Backblaze: new(core.BackblazeConfig),
+		Mail:      new(core.MailConfig),
 	}
 
 	newDataVal := reflect.ValueOf(&newData).Elem()
@@ -119,8 +121,13 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"Company.Domain", "company.domain", "domain", nil},
 					{"Vault.Url", "vault.url", "url", nil},
 					{"Vault.Token", "vault.token", "token", nil},
+					{"Backblaze.ControlDocBucketId", "backblaze.control_doc_bucket", "bucketId", nil},
 					{"Backblaze.Key.Id", "backblaze.keyId", "keyId", nil},
 					{"Backblaze.Key.Key", "backblaze.key", "key", nil},
+					{"Mail.Provider", "mail.provider", "provider", mail.MailAPIProvider("provider")},
+					{"Mail.Key", "mail.key", "key", nil},
+					{"Mail.VeriEmailFrom.Name", "mail.verification.from.name", "name", nil},
+					{"Mail.VeriEmailFrom.Email", "mail.verification.from.email", "email", nil},
 				},
 			},
 			parseError: false,

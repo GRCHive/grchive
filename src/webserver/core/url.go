@@ -1,6 +1,9 @@
 package core
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 // Landing Page
 const GetStartedUrl string = "/getting-started"
@@ -13,6 +16,8 @@ const LearnMoreUrl string = "/learn"
 func CreateSamlCallbackUrl() string {
 	return EnvConfig.Login.RedirectUrl
 }
+
+const VerifyEmailUrl string = "/verify"
 
 // Dashboard
 const DashboardUrl string = "/dashboard"
@@ -120,3 +125,18 @@ const ApiDownloadControlDocumentationEndpoint string = "/download"
 const WebsocketPrefix string = "/ws"
 
 var WebsocketProcessFlowNodeDisplaySettingsEndpoint = fmt.Sprintf("/flownodedisp/{%s}", ProcessFlowQueryId)
+
+func CreateUrlWithParams(input string, params map[string]string) (string, error) {
+	gUrl, err := url.Parse(input)
+	if err != nil {
+		return "", err
+	}
+
+	q := gUrl.Query()
+	for k, v := range params {
+		q.Add(k, v)
+	}
+
+	gUrl.RawQuery = q.Encode()
+	return gUrl.String(), nil
+}

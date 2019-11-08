@@ -39,6 +39,7 @@ go_library(
         "database/controlDocumentation.go",
         "database/apiKey.go",
         "database/roles.go",
+        "database/emailVerification.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 
@@ -66,9 +67,11 @@ go_library(
         "webcore/constants.go",
         "webcore/apiAccess.go",
         "webcore/accessControl.go",
+        "webcore/emailVerification.go",
     ],
     deps = [
         "//src/webserver/core:webserver_core_library",
+        "//src/mail_api/golang:mail_golang_api",
         ":webserver_database_library",
         "@io_k8s_klog//:go_default_library",
         "@in_gopkg_square_go_jose_v2//:go_default_library",
@@ -148,6 +151,7 @@ go_binary(
     deps = [
         "@com_github_gorilla_mux//:go_default_library",
         "//src/webserver/core:webserver_core_library",
+        "//src/mail_api/golang:mail_golang_api",
         ":webserver_webcore_library",
         ":webserver_database_library",
         ":webserver_render_library",

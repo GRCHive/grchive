@@ -1,0 +1,15 @@
+package(default_visibility=["//visibility:public"])
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "mail_golang_api",
+    srcs = [
+        "mail.go",
+        "sendgrid.go",
+    ],
+    deps = [
+        "@com_github_sendgrid_sendgrid_go//:go_default_library",
+        "@com_github_sendgrid_sendgrid_go_helpers_mail//:go_default_library"
+    ],
+    importpath = "gitlab.com/b3h47pte/audit-stuff/mail_api"
+)

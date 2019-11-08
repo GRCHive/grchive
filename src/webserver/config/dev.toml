@@ -46,3 +46,11 @@ token = "s.Rp3t8tUgBAs3Syq6lznrat5m"
 control_doc_bucket = "bb0980597ea911e162ed011e"
 keyId = "000b909e9112d1e0000000002"
 key = "K000CqPXF9PgSIcGA+B8P0lvRW/6h3M"
+
+[mail]
+provider = "sendgrid"
+key = "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"
+
+[mail.verification.from]
+name = "Michael Bao"
+email = "me@mikehbao.com"

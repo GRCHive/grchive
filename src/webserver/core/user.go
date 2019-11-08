@@ -8,3 +8,7 @@ type User struct {
 	OktaUserId string `db:"okta_id" json:"-"`
 	OrgId      int32  `db:"org_id"`
 }
+
+func (u User) FullName() string {
+	return u.FirstName + " " + u.LastName
+}

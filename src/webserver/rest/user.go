@@ -13,6 +13,11 @@ type UpdateUserProfileInputs struct {
 	LastName  string `webcore:"lastName"`
 }
 
+type VerifyEmailInputs struct {
+	Code   string `webcore:"code"`
+	UserId int64  `webcore:"user"`
+}
+
 func updateUserProfile(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -60,4 +65,22 @@ func updateUserProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(user)
+}
+
+func verifyUserEmail(w http.ResponseWriter, r *http.Request) {
+	inputs := VerifyEmailInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// SHOULD WE DO SOMETHING BETTER ON ERROR?
+	ok := webcore.CheckEmailVerification(inputs.Code, inputs.UserId)
+	if ok {
+		http.Redirect(w, r, webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName), http.StatusTemporaryRedirect)
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+	}
 }

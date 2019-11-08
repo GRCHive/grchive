@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"github.com/pelletier/go-toml"
 	"gitlab.com/b3h47pte/audit-stuff/backblaze_api"
+	"gitlab.com/b3h47pte/audit-stuff/mail_api"
 	"io/ioutil"
 )
 
@@ -48,6 +49,12 @@ type BackblazeConfig struct {
 	ControlDocBucketId string
 }
 
+type MailConfig struct {
+	Provider      mail.MailAPIProvider
+	Key           string
+	VeriEmailFrom mail.Email
+}
+
 type EnvConfigData struct {
 	SelfUri            string
 	DatabaseConnString string
@@ -58,6 +65,7 @@ type EnvConfigData struct {
 	Company            *CompanyConfig
 	Vault              *VaultConfig
 	Backblaze          *BackblazeConfig
+	Mail               *MailConfig
 }
 
 var EnvConfig *EnvConfigData
@@ -130,6 +138,12 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.Backblaze.ControlDocBucketId = tomlConfig.Get("backblaze.control_doc_bucket").(string)
 	envConfig.Backblaze.Key.Id = tomlConfig.Get("backblaze.keyId").(string)
 	envConfig.Backblaze.Key.Key = tomlConfig.Get("backblaze.key").(string)
+
+	envConfig.Mail = new(MailConfig)
+	envConfig.Mail.Provider = mail.MailAPIProvider(tomlConfig.Get("mail.provider").(string))
+	envConfig.Mail.Key = tomlConfig.Get("mail.key").(string)
+	envConfig.Mail.VeriEmailFrom.Name = tomlConfig.Get("mail.verification.from.name").(string)
+	envConfig.Mail.VeriEmailFrom.Email = tomlConfig.Get("mail.verification.from.email").(string)
 
 	return envConfig
 }

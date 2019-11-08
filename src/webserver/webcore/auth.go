@@ -145,6 +145,23 @@ func createUserFromIdToken(idJwt *RawJWT, orgId int32) *core.User {
 	return &user
 }
 
+// When we create a new user, insert them into
+// the user database table and send them an email
+// verification email.
+func CreateNewUser(newUser *core.User) error {
+	err := database.CreateNewUser(newUser)
+	if err != nil {
+		return err
+	}
+
+	err = SendEmailVerification(newUser)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
 // Creates a core.UserSession object and stores it into the session database.
 func CreateUserSessionFromTokens(tokens *OktaTokens, r *http.Request) (*core.UserSession, error) {
 	userSession := new(core.UserSession)
@@ -161,7 +178,7 @@ func CreateUserSessionFromTokens(tokens *OktaTokens, r *http.Request) (*core.Use
 	if err != nil {
 		// Assume that the first error indicates that we can't find the user.
 		// In that case, try to create the user.
-		err = database.CreateNewUser(newUser)
+		err = CreateNewUser(newUser)
 		if err != nil {
 			return nil, err
 		}

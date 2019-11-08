@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
+	"gitlab.com/b3h47pte/audit-stuff/mail_api"
 	"gitlab.com/b3h47pte/audit-stuff/render"
 	"gitlab.com/b3h47pte/audit-stuff/rest"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
@@ -18,6 +19,7 @@ func main() {
 	database.Init()
 	render.RegisterTemplates()
 	webcore.InitializeWebcore()
+	mail.InitializeMailAPI(core.EnvConfig.Mail.Provider, core.EnvConfig.Mail.Key)
 
 	r := mux.NewRouter().StrictSlash(true)
 	r.Use(webcore.HTTPRedirectStatusCodes)

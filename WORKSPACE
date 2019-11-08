@@ -130,6 +130,26 @@ go_repository(
     tag = "v1.1.1"    
 )
 
+go_repository(
+    name = "com_github_sendgrid_rest",
+    importpath = "github.com/sendgrid/rest",
+    tag = "v2.4.1"    
+)
+
+go_repository(
+    name = "com_github_sendgrid_sendgrid_go",
+    importpath = "github.com/sendgrid/sendgrid-go",
+    tag = "v3.5.0"    
+)
+
+go_repository(
+    name = "com_github_sendgrid_sendgrid_go_helpers_mail",
+    importpath = "github.com/sendgrid/sendgrid-go/helpers/mail",
+    urls = ["https://github.com/sendgrid/sendgrid-go/archive/v3.5.0.zip"],
+    strip_prefix = "sendgrid-go-3.5.0/helpers/mail",
+    type = "zip"
+)
+
 # NODE
 http_archive(
     name = "build_bazel_rules_nodejs",

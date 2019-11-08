@@ -7,6 +7,18 @@ import (
 	"time"
 )
 
+type NullTime struct {
+	sql.NullTime
+}
+
+func (v NullTime) MarshalJSON() ([]byte, error) {
+	if v.Valid {
+		return json.Marshal(v.Time)
+	} else {
+		return json.Marshal(nil)
+	}
+}
+
 type NullInt64 struct {
 	sql.NullInt64
 }

@@ -117,6 +117,7 @@ go_test(
         "//src/webserver/core:webserver_core_library",
         "@com_github_pelletier_go_toml//:go_default_library",
         "@com_github_stretchr_testify_assert//:go_default_library",
+        "//src/mail_api/golang:mail_golang_api",
     ],
     data = [
         "//src/webserver:config_files"

@@ -18,6 +18,7 @@ func RegisterPaths(r *mux.Router) {
 	altApiRouter.HandleFunc(core.LoginUrl, postLogin).Methods("POST").Name(string(webcore.LoginPostRouteName))
 	altApiRouter.HandleFunc(core.CreateSamlCallbackUrl(), getSamlLoginCallback).Methods("GET").Name(string(webcore.SamlCallbackRouteName))
 	altApiRouter.HandleFunc(core.LogoutUrl, getLogout).Methods("GET").Name(string(webcore.LogoutRouteName))
+	altApiRouter.HandleFunc(core.VerifyEmailUrl, verifyUserEmail).Methods("GET").Name(webcore.EmailVerifyRouteName)
 
 	// REST API
 	registerAPIPaths(r)
