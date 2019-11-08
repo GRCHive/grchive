@@ -6,7 +6,7 @@ go_test(
     srcs = ["maps_test.go"],
     deps = [
         "//src/webserver/core:webserver_core_library",
-        "@com_github_stretchr_testify_assert//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
     ],
     data = [
         "//src/webserver:config_files"
@@ -18,7 +18,7 @@ go_test(
     srcs = ["constants_test.go"],
     deps = [
         "//src/webserver/core:webserver_core_library",
-        "@com_github_stretchr_testify_assert//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
     ],
     data = [
         "//src/webserver:config_files"
@@ -30,7 +30,7 @@ go_test(
     srcs = ["encryption_test.go"],
     deps = [
         "//src/webserver/core:webserver_core_library",
-        "@com_github_stretchr_testify_assert//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
     ],
     data = [
         "//src/webserver:config_files"
@@ -42,7 +42,7 @@ go_test(
     srcs = ["error_test.go"],
     deps = [
         "//src/webserver/core:webserver_core_library",
-        "@com_github_stretchr_testify_assert//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
     ],
     data = [
         "//src/webserver:config_files"
@@ -55,7 +55,7 @@ go_test(
     srcs = ["parser_test.go"],
     deps = [
         "//src/webserver/core:webserver_core_library",
-        "@com_github_stretchr_testify_assert//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
     ],
     data = [
         "//src/webserver:config_files"
@@ -67,7 +67,7 @@ go_test(
     srcs = ["structs_test.go"],
     deps = [
         "//src/webserver/core:webserver_core_library",
-        "@com_github_stretchr_testify_assert//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
     ],
     data = [
         "//src/webserver:config_files"
@@ -79,7 +79,7 @@ go_test(
     srcs = ["time_test.go"],
     deps = [
         "//src/webserver/core:webserver_core_library",
-        "@com_github_stretchr_testify_assert//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
     ],
     data = [
         "//src/webserver:config_files"
@@ -91,7 +91,7 @@ go_test(
     srcs = ["types_test.go"],
     deps = [
         "//src/webserver/core:webserver_core_library",
-        "@com_github_stretchr_testify_assert//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
     ],
     data = [
         "//src/webserver:config_files"
@@ -103,7 +103,7 @@ go_test(
     srcs = ["validate_test.go"],
     deps = [
         "//src/webserver/core:webserver_core_library",
-        "@com_github_stretchr_testify_assert//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
     ],
     data = [
         "//src/webserver:config_files"
@@ -116,7 +116,7 @@ go_test(
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_pelletier_go_toml//:go_default_library",
-        "@com_github_stretchr_testify_assert//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
         "//src/mail_api/golang:mail_golang_api",
     ],
     data = [

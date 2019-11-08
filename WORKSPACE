@@ -73,14 +73,6 @@ go_repository(
 )
 
 go_repository(
-    name = "com_github_jmoiron_sqlx_types",
-    importpath = "github.com/jmoiron/sqlx/types",
-    urls = ["https://github.com/jmoiron/sqlx/archive/v1.2.0.zip"],
-    strip_prefix = "sqlx-1.2.0/types",
-    type = "zip",
-)
-
-go_repository(
     name = "com_github_lib_pq",
     importpath = "github.com/lib/pq",
     tag = "v1.2.0"
@@ -111,11 +103,9 @@ go_repository(
 )
 
 go_repository(
-    name = "com_github_stretchr_testify_assert",
-    importpath = "github.com/stretchr/testify/assert",
-    urls = ["https://github.com/stretchr/testify/archive/v1.4.0.zip"],
-    strip_prefix = "testify-1.4.0/assert",
-    type= "zip"
+    name = "com_github_stretchr_testify",
+    importpath = "github.com/stretchr/testify",
+    tag = "v1.4.0"
 )
 
 go_repository(
@@ -140,14 +130,6 @@ go_repository(
     name = "com_github_sendgrid_sendgrid_go",
     importpath = "github.com/sendgrid/sendgrid-go",
     tag = "v3.5.0"    
-)
-
-go_repository(
-    name = "com_github_sendgrid_sendgrid_go_helpers_mail",
-    importpath = "github.com/sendgrid/sendgrid-go/helpers/mail",
-    urls = ["https://github.com/sendgrid/sendgrid-go/archive/v3.5.0.zip"],
-    strip_prefix = "sendgrid-go-3.5.0/helpers/mail",
-    type = "zip"
 )
 
 # NODE
