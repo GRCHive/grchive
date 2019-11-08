@@ -23,6 +23,7 @@ type UserSession struct {
 // Other data that isn't necessarily something we want to call the "UserSesssion"
 // but rather information that gets extracted out of the user session.
 type UserSessionParsedData struct {
-	Org         *Organization
-	CurrentUser *User
+	Org           *Organization
+	CurrentUser   *User
+	VerifiedEmail bool
 }

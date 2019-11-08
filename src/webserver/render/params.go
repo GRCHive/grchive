@@ -14,7 +14,8 @@ type PageTemplateParameters struct {
 
 	User struct {
 		*core.User
-		Auth bool
+		Auth     bool
+		Verified bool
 	} `json:"user"`
 
 	Site struct {
@@ -28,8 +29,10 @@ func BuildPageTemplateParametersFull(r *http.Request) PageTemplateParameters {
 	parsedData, err := webcore.FindSessionParsedDataInContext(r.Context())
 
 	retParams.User.Auth = (err == nil)
+	retParams.User.Verified = false
 	if err == nil {
 		retParams.User.User = parsedData.CurrentUser
+		retParams.User.Verified = parsedData.VerifiedEmail
 
 		retParams.Organization.Organization = parsedData.Org
 		retParams.Organization.Url = webcore.MustGetRouteUrl(

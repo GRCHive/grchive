@@ -109,3 +109,5 @@ export const uploadControlDocUrl : string = "/api/documentation/upload"
 export const getControlDocUrl : string = "/api/documentation/get"
 export const deleteControlDocUrl : string = "/api/documentation/delete"
 export const downloadControlDocUrl : string = "/api/documentation/download"
+
+export const requestVerificationEmailUrl : string = "/api/verification/resend"

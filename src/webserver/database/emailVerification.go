@@ -52,3 +52,18 @@ func AcceptUserVerification(code string, userId int64) error {
 	}
 	return tx.Commit()
 }
+
+func IsUserVerified(userId int64) (bool, error) {
+	rows, err := dbConn.Queryx(`
+		SELECT *
+		FROM email_verification
+		WHERE user_id = $1
+			AND verification_received IS NOT NULL
+	`, userId)
+
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	return rows.Next(), nil
+}

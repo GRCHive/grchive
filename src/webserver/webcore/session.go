@@ -11,9 +11,15 @@ func ExtractParsedDataFromSession(session *core.UserSession) (*core.UserSessionP
 		return nil, err
 	}
 
+	veri, err := database.IsUserVerified(user.Id)
+	if err != nil {
+		return nil, err
+	}
+
 	data := &core.UserSessionParsedData{
-		Org:         org,
-		CurrentUser: user,
+		Org:           org,
+		CurrentUser:   user,
+		VerifiedEmail: veri,
 	}
 	return data, nil
 }

@@ -28,6 +28,7 @@ func registerAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiUrl).Subrouter()
 	s.Use(webcore.ObtainAPIKeyRoleInContextMiddleware)
 
+	registerVerificationAPIPaths(s)
 	registerUserAPIPaths(s)
 	registerOrgAPIPaths(s)
 	registerProcessFlowAPIPaths(s)
@@ -37,6 +38,11 @@ func registerAPIPaths(r *mux.Router) {
 	registerRiskAPIPaths(s)
 	registerControlAPIPaths(s)
 	registerControlDocumentationAPIPaths(s)
+}
+
+func registerVerificationAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiVerificationPrefix).Subrouter()
+	s.HandleFunc(core.ApiResendVerificationEndpoint, requestResendUserVerificationEmail).Methods("POST").Name(webcore.ResendVerificationRouteName)
 }
 
 func registerUserAPIPaths(r *mux.Router) {

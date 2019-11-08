@@ -1,5 +1,5 @@
 <template>
-    <v-app-bar app dense clipped-left clipped-right>
+    <v-app-bar app dense clipped-left clipped-right :extension-height="extensionHeight">
         <v-app-bar-nav-icon @click.stop="clickNav"></v-app-bar-nav-icon>
         <v-toolbar-title color="primary">
             <a :href="orgUrl">{{ orgName }}</a>
@@ -43,6 +43,10 @@
 
             </v-menu>
         </v-toolbar-items>
+
+        <template v-slot:extension>
+            <verify-email-banner @toggle-banner="recomputeExtensionHeight"></verify-email-banner>
+        </template>
     </v-app-bar>
 </template>
 
@@ -54,11 +58,16 @@ import LocalStorage from '../../../ts/localSettings'
 import {createLogoutUrl, createMyAccountUrl, createMailtoUrl } from '../../../ts/url'
 import { getCurrentCSRF } from '../../../ts/csrf'
 import { PageParamsStore } from '../../../ts/pageParams'
+import VerifyEmailBanner from '../VerifyEmailBanner.vue'
 
 export default Vue.extend({
+    components: {
+        VerifyEmailBanner
+    },
     data: function() {
         return {
             logoutUrl : createLogoutUrl(getCurrentCSRF()),
+            extensionHeight: 40,
         }
     },
     computed: {
@@ -85,12 +94,18 @@ export default Vue.extend({
         },
         feedbackUrl() : Object {
             return createMailtoUrl("feedback", PageParamsStore.state.site!.Domain)
-        }
-
+        },
     },
     methods: {
         clickNav() {
             LocalStorage.commit('setMiniNavBar', !LocalStorage.state.miniNavBar)
+        },
+        recomputeExtensionHeight(isBannerShown: boolean) {
+            if (isBannerShown) {
+                this.extensionHeight = 40
+            } else {
+                this.extensionHeight = 0
+            }
         }
     }
 })
@@ -106,6 +121,11 @@ a {
 
 .v-menu__content {
     border-radius: 0px !important;
+}
+
+>>>.v-toolbar__extension {
+    padding: 0;
+    margin: 0;
 }
 
 </style>

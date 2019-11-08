@@ -90,7 +90,6 @@ export default Vue.extend({
                     "Contact Us",
                     contactUsUrl,
                     false);
-
             }).catch((err) => {
                 if (!!err.response && err.response.data.IsDuplicate) {
                     // @ts-ignore

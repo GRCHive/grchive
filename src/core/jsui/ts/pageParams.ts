@@ -8,10 +8,12 @@ export interface PageParamsStoreState {
         Id: number
     } | null
     user: {
+        Id: number
         FirstName: string
         LastName: string
         Email: string
         Auth: boolean
+        Verified: boolean
     } | null
     site: {
         CompanyName: string

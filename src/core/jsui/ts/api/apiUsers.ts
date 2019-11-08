@@ -1,6 +1,6 @@
 import axios from 'axios'
 import * as qs from 'query-string'
-import { createGetAllOrgUsersAPIUrl, createUserProfileEditAPIUrl } from '../url'
+import { createGetAllOrgUsersAPIUrl, createUserProfileEditAPIUrl, requestVerificationEmailUrl } from '../url'
 import { getAPIRequestConfig } from './apiUtility'
 import { postFormUrlEncoded } from '../http'
 
@@ -27,4 +27,16 @@ export interface TEditUserProfileOutput {
 export function editUserProfile(email : string, inp : TEditUserProfileInput) : 
         Promise<TEditUserProfileOutput> {
     return postFormUrlEncoded<TEditUserProfileOutput>(createUserProfileEditAPIUrl(email), inp, getAPIRequestConfig())
+}
+
+export interface TRequestVerificationEmailInput {
+    userId: number
+}
+
+export interface TRequestVerificationEmailOutput {
+}
+
+
+export function requestResendVerificationEmail(inp : TRequestVerificationEmailInput) : Promise<TRequestVerificationEmailOutput> {
+    return postFormUrlEncoded<TRequestVerificationEmailOutput>(requestVerificationEmailUrl, inp, getAPIRequestConfig())
 }

@@ -33,7 +33,7 @@ function mountApp(inData : PageParamsStoreState) {
             DashboardOrgControls,
             DashboardOrgSingleControl,
             DashboardUserHome,
-            SnackBar
+            SnackBar,
         },
         vuetify: vueOpts.vuetify,
         mounted() {

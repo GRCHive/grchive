@@ -70,6 +70,7 @@ const (
 	DeleteControlDocRouteName                      = "DeleteControlDoc"
 	DownloadControlDocRouteName                    = "DownloadControlDoc"
 	EmailVerifyRouteName                           = "VerifyEmail"
+	ResendVerificationRouteName                    = "ResendVerification"
 )
 
 var globalRouter *mux.Router

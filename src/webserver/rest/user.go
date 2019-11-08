@@ -18,6 +18,10 @@ type VerifyEmailInputs struct {
 	UserId int64  `webcore:"user"`
 }
 
+type RequestResendVerificationEmailInputs struct {
+	UserId int64 `webcore:"userId"`
+}
+
 func updateUserProfile(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -82,5 +86,42 @@ func verifyUserEmail(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName), http.StatusTemporaryRedirect)
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
+	}
+}
+
+func requestResendUserVerificationEmail(w http.ResponseWriter, r *http.Request) {
+	inputs := RequestResendVerificationEmailInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	apiKey, err := webcore.GetAPIKeyFromRequest(r)
+	if apiKey == nil || err != nil {
+		core.Warning("No API Key: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	user, err := database.FindUserFromId(inputs.UserId)
+	if err != nil {
+		core.Warning("Can't find user: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if apiKey.UserId != user.Id {
+		core.Warning("Unauthorized requesting request.")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = webcore.SendEmailVerification(user)
+	if err != nil {
+		core.Warning("Can't send verification: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 }

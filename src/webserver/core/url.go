@@ -51,6 +51,10 @@ const DashboardUserHomeUrl string = "/"
 // API
 const ApiUrl string = "/api"
 
+// API Verification
+const ApiVerificationPrefix string = "/verification"
+const ApiResendVerificationEndpoint string = "/resend"
+
 // API - Process Flow
 const ProcessFlowQueryId string = "flow"
 const ApiProcessFlowUrl string = "/flows"
