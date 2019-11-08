@@ -24,9 +24,9 @@ export interface TEditUserProfileInput {
 export interface TEditUserProfileOutput {
 }
 
-export function editUserProfile(email : string, inp : TEditUserProfileInput) : 
+export function editUserProfile(userId : number, inp : TEditUserProfileInput) : 
         Promise<TEditUserProfileOutput> {
-    return postFormUrlEncoded<TEditUserProfileOutput>(createUserProfileEditAPIUrl(email), inp, getAPIRequestConfig())
+    return postFormUrlEncoded<TEditUserProfileOutput>(createUserProfileEditAPIUrl(userId), inp, getAPIRequestConfig())
 }
 
 export interface TRequestVerificationEmailInput {

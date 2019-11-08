@@ -87,7 +87,7 @@ export default Vue.extend({
             return this.userFirstName + " " + this.userLastName
         },
         myAccountUrl() : string {
-            return createMyAccountUrl(PageParamsStore.state.user!.Email)
+            return createMyAccountUrl(PageParamsStore.state.user!.Id)
         },
         supportUrl() : Object {
             return createMailtoUrl("support", PageParamsStore.state.site!.Domain)

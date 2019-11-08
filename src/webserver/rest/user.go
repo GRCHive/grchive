@@ -34,9 +34,9 @@ func updateUserProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email, err := webcore.GetUserEmailFromRequestUrl(r)
+	userId, err := webcore.GetUserIdFromRequestUrl(r)
 	if err != nil {
-		core.Warning("Can't find user email: " + err.Error())
+		core.Warning("Can't find user id: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -49,7 +49,7 @@ func updateUserProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	apiUser, err := database.FindUserFromId(apiKey.UserId)
-	if err != nil || apiUser.Email != email {
+	if err != nil || apiUser.Id != userId {
 		core.Warning("Can't verify API user access: " + core.ErrorString(err))
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -58,7 +58,7 @@ func updateUserProfile(w http.ResponseWriter, r *http.Request) {
 	user := core.User{
 		FirstName: inputs.FirstName,
 		LastName:  inputs.LastName,
-		Email:     email,
+		Email:     apiUser.Email,
 	}
 
 	err = database.UpdateUserFromEmail(&user)

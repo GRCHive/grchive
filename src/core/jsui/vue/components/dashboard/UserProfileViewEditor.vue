@@ -107,7 +107,7 @@ export default Vue.extend({
 
             this.canEdit = false
             //@ts-ignore
-            editUserProfile(PageParamsStore.state.user!.Email, <TEditUserProfileInput>{
+            editUserProfile(PageParamsStore.state.user!.Id, <TEditUserProfileInput>{
                 firstName: this.formData.firstName,
                 lastName: this.formData.lastName
             }).then((resp : TEditUserProfileOutput) => {

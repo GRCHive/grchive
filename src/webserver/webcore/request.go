@@ -61,14 +61,13 @@ func GetOrganizationFromRequestUrl(r *http.Request) (*core.Organization, error) 
 	return org, nil
 }
 
-func GetUserEmailFromRequestUrl(r *http.Request) (string, error) {
+func GetUserIdFromRequestUrl(r *http.Request) (int64, error) {
 	urlRouteVars := mux.Vars(r)
-	email, ok := urlRouteVars[core.DashboardUserQueryId]
+	userIdStr, ok := urlRouteVars[core.DashboardUserQueryId]
 	if !ok {
-		return "", errors.New("No email in request URL")
+		return 0, errors.New("No user id in request URL")
 	}
-
-	return email, nil
+	return strconv.ParseInt(userIdStr, 10, 64)
 }
 
 func GetProcessFlowIdFromRequest(r *http.Request) (int64, error) {

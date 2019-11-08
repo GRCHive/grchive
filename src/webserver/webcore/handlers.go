@@ -136,9 +136,9 @@ func CreateVerifyUserHasAccessToUserMiddleware(failure http.HandlerFunc) mux.Mid
 			// Check that the user stored in the session matches the email specified
 			// in the URL. We will probably need coarser access permissions later so that
 			// you can view the profile of a co-worker (for example).
-			email, err := GetUserEmailFromRequestUrl(r)
+			userId, err := GetUserIdFromRequestUrl(r)
 			if err != nil {
-				core.Info("No user email: " + err.Error())
+				core.Info("No user ID: " + err.Error())
 				failure.ServeHTTP(w, r)
 				return
 			}
@@ -150,7 +150,7 @@ func CreateVerifyUserHasAccessToUserMiddleware(failure http.HandlerFunc) mux.Mid
 				return
 			}
 
-			if currentData.CurrentUser.Email != email {
+			if currentData.CurrentUser.Id != userId {
 				core.Info("Unauthenticated user: " + currentData.CurrentUser.Email)
 				failure.ServeHTTP(w, r)
 				return

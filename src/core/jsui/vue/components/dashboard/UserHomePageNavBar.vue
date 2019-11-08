@@ -22,7 +22,7 @@ export default Vue.extend({
                 {
                     title: 'Profile',
                     icon: 'mdi-account-circle',
-                    url: createMyAccountUrl(PageParamsStore.state.user!.Email),
+                    url: createMyAccountUrl(PageParamsStore.state.user!.Id),
                 }
             ],
         }

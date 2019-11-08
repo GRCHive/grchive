@@ -30,8 +30,8 @@ export function createLogoutUrl(csrf : string) : string {
 }
 
 export const myAccountBaseUrl : string = "/dashboard/user";
-export function createMyAccountUrl(email: string) : string {
-    return myAccountBaseUrl + "/" + email
+export function createMyAccountUrl(id : number) : string {
+    return `${myAccountBaseUrl}/${id}`
 }
 
 export function createFlowUrl(org : string, flow : number) : string {
@@ -46,8 +46,8 @@ export function createControlUrl(org : string, control : number) : string {
     return `/dashboard/org/${org}/controls/${control}`
 }
 
-export function createUserProfileEditAPIUrl(email : string) : string {
-    return "/api/user/" + email + "/profile"
+export function createUserProfileEditAPIUrl(id : number) : string {
+    return `/api/user/${id}/profile`
 }
 
 export const newProcessFlowAPIUrl : string = "/api/flows/new"
