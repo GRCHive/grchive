@@ -70,6 +70,7 @@ func CreateAllAccessPermission() PermissionsMap {
 		ProcessFlowsAccess:         CreateOwnerAccessType(),
 		ControlsAccess:             CreateOwnerAccessType(),
 		ControlDocumentationAccess: CreateOwnerAccessType(),
+		ControlDocMetadataAccess:   CreateOwnerAccessType(),
 		RisksAccess:                CreateOwnerAccessType(),
 	}
 }
