@@ -19,6 +19,12 @@ export interface PageParamsStoreState {
         CompanyName: string
         Domain: string
         Host: string
+    } | null,
+    auth: {
+        OktaServer: string
+        OktaClientId: string
+        OktaRedirectUri: string
+        OktaScope: string
     } | null
 }
 
@@ -27,12 +33,14 @@ const storeOptions: StoreOptions<PageParamsStoreState> = {
         organization: null,
         user: null,
         site: null,
+        auth: null
     },
     mutations: {
         replaceState(state, data : PageParamsStoreState) {
             state.organization = data.organization
             state.user = data.user
             state.site = data.site
+            state.auth = data.auth
         }
     }
 }

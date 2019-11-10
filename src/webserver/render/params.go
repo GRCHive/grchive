@@ -22,6 +22,13 @@ type PageTemplateParameters struct {
 		core.CompanyConfig
 		Host string
 	} `json:"site"`
+
+	Auth struct {
+		OktaServer      string
+		OktaClientId    string
+		OktaRedirectUri string
+		OktaScope       string
+	} `json:"auth"`
 }
 
 func BuildPageTemplateParametersFull(r *http.Request) PageTemplateParameters {
@@ -30,6 +37,7 @@ func BuildPageTemplateParametersFull(r *http.Request) PageTemplateParameters {
 
 	retParams.User.Auth = (err == nil)
 	retParams.User.Verified = false
+
 	if err == nil {
 		retParams.User.User = parsedData.CurrentUser
 		retParams.User.Verified = parsedData.VerifiedEmail
@@ -43,6 +51,11 @@ func BuildPageTemplateParametersFull(r *http.Request) PageTemplateParameters {
 
 	retParams.Site.CompanyConfig = *core.EnvConfig.Company
 	retParams.Site.Host = r.Host
+
+	retParams.Auth.OktaServer = core.EnvConfig.Okta.BaseUrl
+	retParams.Auth.OktaClientId = core.EnvConfig.Login.ClientId
+	retParams.Auth.OktaRedirectUri = webcore.MustGetRouteUrlAbsolute(webcore.SamlCallbackRouteName)
+	retParams.Auth.OktaScope = core.EnvConfig.Login.Scope
 	return retParams
 }
 
