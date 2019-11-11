@@ -23,7 +23,7 @@ CREATE TABLE user_roles (
         ON DELETE CASCADE,
     CONSTRAINT user_org_key
         FOREIGN KEY(user_id, org_id)
-        REFERENCES users(id, org_id)
+        REFERENCES user_orgs(user_id, org_id)
         ON DELETE CASCADE
 );
 

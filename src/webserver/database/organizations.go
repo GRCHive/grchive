@@ -33,7 +33,9 @@ func FindOrganizationFromSamlIdP(samlIdp string) (*core.Organization, error) {
 	defer rows.Close()
 
 	var org *core.Organization = new(core.Organization)
-	rows.Next()
+	if !rows.Next() {
+		return nil, nil
+	}
 	err = rows.StructScan(org)
 	if err != nil {
 		return nil, err

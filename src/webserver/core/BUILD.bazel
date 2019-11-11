@@ -31,6 +31,7 @@ go_library(
         "roles.go",
         "emailVerification.go",
         "templates.go",
+        "search.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",

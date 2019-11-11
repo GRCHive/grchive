@@ -31,6 +31,22 @@ func (v NullInt64) MarshalJSON() ([]byte, error) {
 	}
 }
 
+type NullInt32 struct {
+	sql.NullInt32
+}
+
+func (v NullInt32) MarshalJSON() ([]byte, error) {
+	if v.Valid {
+		return json.Marshal(v.Int32)
+	} else {
+		return json.Marshal(nil)
+	}
+}
+
+func CreateNullInt32(v int32) NullInt32 {
+	return NullInt32{sql.NullInt32{v, true}}
+}
+
 var BoolReflectType = reflect.TypeOf((bool)(false))
 var IntReflectType = reflect.TypeOf((int)(0))
 var Int64ReflectType = reflect.TypeOf((int64)(0))

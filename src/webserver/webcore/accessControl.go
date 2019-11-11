@@ -49,21 +49,26 @@ func GrantAPIKeyDefaultRole(key *core.ApiKey, orgId int32) (*core.Role, error) {
 	// At this point we know that the user doesn't have a set permissions yet so we need
 	// to give the user default access controls (as specified by the org).
 	// We only give these default access controls to users belonging to the organization.
-	user, org, err := database.FindUserFromIdWithOrganization(key.UserId)
+	user, err := database.FindUserFromId(key.UserId)
 	if err != nil {
 		return nil, err
 	}
 
-	if org.Id != orgId {
+	accessibleOrgIds, err := database.FindAccessibleOrganizationsForUser(user)
+	if err != nil {
+		return nil, err
+	}
+
+	if core.LinearSearchInt32Slice(accessibleOrgIds, orgId) == core.SearchNotFound {
 		return nil, errors.New("User does not have access.")
 	}
 
-	defaultRole, err := ObtainOrganizationDefaultRole(org.Id)
+	defaultRole, err := ObtainOrganizationDefaultRole(orgId)
 	if err != nil {
 		return nil, err
 	}
 
-	err = database.InsertUserRoleForOrg(user.Id, org.Id, defaultRole, core.ServerRole)
+	err = database.InsertUserRoleForOrg(user.Id, orgId, defaultRole, core.ServerRole)
 	if err != nil {
 		return nil, err
 	}

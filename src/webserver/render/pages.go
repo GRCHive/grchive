@@ -4,6 +4,7 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
 	"net/http"
+	"strconv"
 )
 
 func RenderGettingStartedPage(w http.ResponseWriter, r *http.Request) {
@@ -44,9 +45,9 @@ func RenderDashboardHomePage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Redirect(w, r,
 			webcore.MustGetRouteUrl(
-				webcore.DashboardOrgHomeRouteName,
-				core.DashboardOrgOrgQueryId,
-				data.Org.OktaGroupName),
+				webcore.DashboardUserHomeRouteName,
+				core.DashboardUserQueryId,
+				strconv.FormatInt(data.CurrentUser.Id, 10)),
 			http.StatusTemporaryRedirect)
 	}
 }

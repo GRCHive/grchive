@@ -134,13 +134,12 @@ func UpdateUserSessionFromTokens(session *core.UserSession, tokens *OktaTokens, 
 	return oldSessionId, nil
 }
 
-func createUserFromIdToken(idJwt *RawJWT, orgId int32) *core.User {
+func createUserFromIdToken(idJwt *RawJWT) *core.User {
 	user := core.User{
 		FirstName:  idJwt.Payload.FirstName,
 		LastName:   idJwt.Payload.LastName,
 		Email:      idJwt.Payload.Email,
 		OktaUserId: idJwt.Payload.Sub,
-		OrgId:      orgId,
 	}
 	return &user
 }
@@ -173,7 +172,7 @@ func CreateUserSessionFromTokens(tokens *OktaTokens, r *http.Request) (*core.Use
 
 	// See if the user exists - if not, create a new user using the data
 	// found in the ID token.
-	newUser := createUserFromIdToken(tokens.DecodedIDToken, org.Id)
+	newUser := createUserFromIdToken(tokens.DecodedIDToken)
 	dbUser, err := database.FindUserFromOktaId(newUser.OktaUserId)
 	if err != nil {
 		// Assume that the first error indicates that we can't find the user.
@@ -184,6 +183,13 @@ func CreateUserSessionFromTokens(tokens *OktaTokens, r *http.Request) (*core.Use
 		}
 
 		dbUser = newUser
+	}
+
+	if org != nil {
+		err = database.AddUserToOrganization(dbUser, org)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	userSession.UserId = dbUser.Id

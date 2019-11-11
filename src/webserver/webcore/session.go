@@ -6,7 +6,7 @@ import (
 )
 
 func ExtractParsedDataFromSession(session *core.UserSession) (*core.UserSessionParsedData, error) {
-	user, org, err := database.FindUserFromIdWithOrganization(session.UserId)
+	user, err := database.FindUserFromId(session.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -16,10 +16,15 @@ func ExtractParsedDataFromSession(session *core.UserSession) (*core.UserSessionP
 		return nil, err
 	}
 
+	accessibleOrgIds, err := database.FindAccessibleOrganizationsForUser(user)
+	if err != nil {
+		return nil, err
+	}
+
 	data := &core.UserSessionParsedData{
-		Org:           org,
-		CurrentUser:   user,
-		VerifiedEmail: veri,
+		CurrentUser:    user,
+		AccessibleOrgs: accessibleOrgIds,
+		VerifiedEmail:  veri,
 	}
 	return data, nil
 }

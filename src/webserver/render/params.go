@@ -41,12 +41,15 @@ func BuildPageTemplateParametersFull(r *http.Request) PageTemplateParameters {
 	if err == nil {
 		retParams.User.User = parsedData.CurrentUser
 		retParams.User.Verified = parsedData.VerifiedEmail
+	}
 
-		retParams.Organization.Organization = parsedData.Org
+	org, err := webcore.FindOrganizationInContext(r.Context())
+	if err == nil {
+		retParams.Organization.Organization = org
 		retParams.Organization.Url = webcore.MustGetRouteUrl(
 			webcore.DashboardOrgHomeRouteName,
 			core.DashboardOrgOrgQueryId,
-			parsedData.Org.OktaGroupName)
+			org.OktaGroupName)
 	}
 
 	retParams.Site.CompanyConfig = *core.EnvConfig.Company
