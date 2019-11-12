@@ -5,6 +5,7 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
 	"gitlab.com/b3h47pte/audit-stuff/mail_api"
+	"gitlab.com/b3h47pte/audit-stuff/okta_api"
 	"gitlab.com/b3h47pte/audit-stuff/render"
 	"gitlab.com/b3h47pte/audit-stuff/rest"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
@@ -20,6 +21,10 @@ func main() {
 	render.RegisterTemplates()
 	webcore.InitializeWebcore()
 	mail.InitializeMailAPI(core.EnvConfig.Mail.Provider, core.EnvConfig.Mail.Key)
+	okta.InitializeOktaAPI(okta.OktaConfig{
+		ApiKey:    core.EnvConfig.Okta.ApiKey,
+		ApiDomain: core.EnvConfig.Okta.BaseUrl,
+	})
 
 	r := mux.NewRouter().StrictSlash(true)
 	r.Use(webcore.HTTPRedirectStatusCodes)
@@ -54,6 +59,7 @@ func main() {
 	pageRouter.HandleFunc(core.ContactUsUrl, render.RenderContactUsPage).Name(string(webcore.ContactUsRouteName))
 	pageRouter.HandleFunc(core.HomePageUrl, render.RenderHomePage).Name(string(webcore.LandingPageRouteName))
 	pageRouter.HandleFunc(core.LoginUrl, render.RenderLoginPage).Name(string(webcore.LoginRouteName))
+	pageRouter.HandleFunc(core.RegisterUrl, render.RenderRegisterPage).Name(string(webcore.RegisterRouteName))
 	pageRouter.HandleFunc(core.LearnMoreUrl, render.RenderLearnMorePage).Name(string(webcore.LearnMoreRouteName))
 	createDashboardSubrouter(pageRouter)
 

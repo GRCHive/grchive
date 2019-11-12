@@ -16,6 +16,7 @@ func RegisterPaths(r *mux.Router) {
 	// core.CreateSamlCallbackUrl() is the GET request the user's SAML IdP will redirect to upon
 	// successful login.
 	altApiRouter.HandleFunc(core.LoginUrl, postLogin).Methods("POST").Name(string(webcore.LoginPostRouteName))
+	altApiRouter.HandleFunc(core.RegisterUrl, postRegister).Methods("POST").Name(string(webcore.RegisterPostRouteName))
 	altApiRouter.HandleFunc(core.CreateSamlCallbackUrl(), getSamlLoginCallback).Methods("GET").Name(string(webcore.SamlCallbackRouteName))
 	altApiRouter.HandleFunc(core.LogoutUrl, getLogout).Methods("GET").Name(string(webcore.LogoutRouteName))
 	altApiRouter.HandleFunc(core.VerifyEmailUrl, verifyUserEmail).Methods("GET").Name(webcore.EmailVerifyRouteName)

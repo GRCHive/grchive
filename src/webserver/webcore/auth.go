@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
+	"gitlab.com/b3h47pte/audit-stuff/okta_api"
 	"io/ioutil"
 	"math/big"
 	"net/http"
@@ -247,6 +248,28 @@ func OktaObtainTokens(code string, isRefresh bool) (*OktaTokens, error) {
 	data.DecodedAccessToken = accessJwt
 	data.DecodedIDToken = idJwt
 	return data, nil
+}
+
+func OktaRegisterUserWithPassword(user *core.User, password string) error {
+	data := okta.RegisterUserData{
+		Profile: okta.ProfileData{
+			Login:     user.Email,
+			Email:     user.Email,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+		},
+		Credentials: okta.CredentialData{
+			Password: okta.PasswordData{password},
+		},
+		Activate: true,
+	}
+	oktaId, err := okta.RegisterUser(data)
+	if err != nil {
+		return err
+	}
+
+	user.OktaUserId = oktaId
+	return nil
 }
 
 func RefreshUserSession(session *core.UserSession, r *http.Request) (string, error) {

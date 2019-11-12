@@ -4,6 +4,10 @@ export function createMaxLength(len : number) : (_: string) => boolean | string 
     return (v : string) => !!v && v.length <= len || `Invalid input length, must have less than ${len} characters.`;
 }
 
+export function createMinLength(len : number) : (_: string) => boolean | string {
+    return (v : string) => !!v && v.length >= len || `Invalid input length, must have more than ${len} characters.`;
+}
+
 export function required(v : any) : boolean | string {
     return (!!v && v != Object()) || (Array.isArray(v) && v.length == 0)  || "Input required.";
 }
@@ -20,4 +24,47 @@ export function email(v : string) : boolean | string {
 
 export function numeric(v : string) : boolean | string {
     return !isNaN(Number(v)) || "Must be numeric."
+}
+
+export function hasLowerCase(v : string) : boolean | string {
+    return (/[a-z]/.test(v)) || "Must have lower case characters."
+}
+
+export function hasUpperCase(v : string) : boolean | string {
+    return (/[A-Z]/.test(v)) || "Must have upper case characters."
+}
+
+export function hasNumeric(v : string) : boolean | string {
+    return (/[0-9]/.test(v)) || "Must have numeric characters."
+}
+
+export function password(v: string) : boolean | string {
+    // This needs to be kept in sync w/ whatever rules we have on the server.
+    //  - Min Length: 8
+    //  - Has lower case
+    //  - Has upper case
+    //  - Has number
+    let minLength = createMinLength(8)
+
+    let rMinLength = minLength(v)
+    if (!rMinLength || typeof rMinLength == 'string') {
+        return rMinLength
+    }
+
+    let rLowerCase = hasLowerCase(v)
+    if (!rLowerCase || typeof rLowerCase == 'string') {
+        return rLowerCase
+    }
+
+    let rUpperCase = hasUpperCase(v)
+    if (!rUpperCase || typeof rUpperCase == 'string') {
+        return rUpperCase
+    }
+
+    let rNumeric = hasNumeric(v)
+    if (!rNumeric || typeof rNumeric == 'string') {
+        return rNumeric
+    }
+
+    return true
 }

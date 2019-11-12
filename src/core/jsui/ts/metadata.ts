@@ -90,6 +90,10 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
             })
         },
         initializeUsers(context, {orgGroupId}) {
+            if (!orgGroupId && orgGroupId != 0) {
+                return
+            }
+
             getAllOrgUsers(<TGetAllOrgUsersInput>{
                 org: orgGroupId
             }).then((resp : TGetAllOrgUsersOutput) => {

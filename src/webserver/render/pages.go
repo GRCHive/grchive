@@ -30,6 +30,17 @@ func RenderLoginPage(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, LoginPageTemplateKey, "base", BuildPageTemplateParametersFull(r))
 }
 
+func RenderRegisterPage(w http.ResponseWriter, r *http.Request) {
+	// If the user has a session they can't login...go to dashboard.
+	_, err := webcore.FindSessionInContext(r.Context())
+	if err == nil {
+		http.Redirect(w, r, webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName), http.StatusTemporaryRedirect)
+		return
+	}
+
+	RenderTemplate(w, RegistrationPageTemplateKey, "base", BuildPageTemplateParametersFull(r))
+}
+
 func RenderLearnMorePage(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, LearnMorePageTemplateKey, "base", BuildPageTemplateParametersFull(r))
 }

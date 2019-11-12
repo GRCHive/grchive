@@ -10,6 +10,7 @@ const GetStartedUrl string = "/getting-started"
 const ContactUsUrl string = "/contact-us"
 const HomePageUrl string = "/"
 const LoginUrl string = "/login"
+const RegisterUrl string = "/register"
 const LogoutUrl string = "/logout"
 const LearnMoreUrl string = "/learn"
 

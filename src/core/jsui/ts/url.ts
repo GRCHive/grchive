@@ -4,6 +4,8 @@ export const getStartedUrl : string = "/getting-started"
 export const contactUsUrl : string = "/contact-us"
 export const homePageUrl : string = "/"
 export const loginPageUrl : string = "/login"
+export const registerPageUrl : string = "/register"
+
 
 export function createAssetUrl(asset : string) : string {
     return "/static/assets/" + asset

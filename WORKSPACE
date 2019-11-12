@@ -132,6 +132,12 @@ go_repository(
     tag = "v3.5.0"    
 )
 
+go_repository(
+    name = "com_github_google_go_querystring",
+    importpath = "github.com/google/go-querystring",
+    tag = "v1.0.0"    
+)
+
 # NODE
 http_archive(
     name = "build_bazel_rules_nodejs",

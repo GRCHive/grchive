@@ -18,6 +18,7 @@ const (
 	ContactUsPageTemplateKey                  = "CONTACT"
 	LandingPageTemplateKey                    = "LANDING"
 	LoginPageTemplateKey                      = "LOGIN"
+	RegistrationPageTemplateKey               = "REGISTRATION"
 	LearnMorePageTemplateKey                  = "LEARNMORE"
 	RedirectTemplateKey                       = "REDIRECT"
 	// Dashboard Keys
@@ -58,6 +59,8 @@ func RegisterTemplates() {
 		defaultLoadTemplateWithBase("src/webserver/templates/index.tmpl")
 	allTemplates[LoginPageTemplateKey] =
 		defaultLoadTemplateWithBase("src/webserver/templates/login.tmpl")
+	allTemplates[RegistrationPageTemplateKey] =
+		defaultLoadTemplateWithBase("src/webserver/templates/register.tmpl")
 	allTemplates[LearnMorePageTemplateKey] =
 		defaultLoadTemplateWithBase("src/webserver/templates/learnMore.tmpl")
 	allTemplates[RedirectTemplateKey] =

@@ -4,6 +4,7 @@ import { VApp } from 'vuetify/lib'
 import LandingPage from '../vue/pages/LandingPage.vue'
 import ContactUsPage from '../vue/pages/ContactUsPage.vue'
 import LoginPage from '../vue/pages/LoginPage.vue'
+import RegistrationPage from '../vue/pages/RegistrationPage.vue'
 import GettingStartedPage from '../vue/pages/GettingStartedPage.vue'
 import LearnMorePage from '../vue/pages/LearnMorePage.vue'
 import RedirectPage from '../vue/pages/RedirectPage.vue'
@@ -28,6 +29,7 @@ function mountApp(inData : PageParamsStoreState) {
             RedirectPage,
             SnackBar,
             ErrorPage,
+            RegistrationPage
         },
         vuetify: vueOpts.vuetify
     }).$mount('#app')

@@ -10,6 +10,70 @@ import (
 	"strings"
 )
 
+type BaseLoginInputs struct {
+	Email string `webcore:"email"`
+	Csrf  string `webcore:"csrf"`
+}
+
+type BaseRegisterInputs struct {
+	Email      string `webcore:"email"`
+	FirstName  string `webcore:"firstName"`
+	LastName   string `webcore:"lastName"`
+	Password   string `webcore:"password"`
+	InviteCode string `webcore:"inviteCode"`
+	Csrf       string `webcore:"csrf"`
+}
+
+func postRegister(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := BaseRegisterInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Failed to parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if ok, err := webcore.VerifyCSRFToken(inputs.Csrf, r); !ok || err != nil {
+		core.Warning("Failed CSRF check: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// TODO: Verify invite code.
+
+	newUser := core.User{
+		FirstName: inputs.FirstName,
+		LastName:  inputs.LastName,
+		Email:     inputs.Email,
+	}
+
+	// Create the user using the Okta API.
+	err = webcore.OktaRegisterUserWithPassword(&newUser, inputs.Password)
+	if err != nil {
+		core.Warning("Failed to register user [okta]: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Store user in database.
+	err = webcore.CreateNewUser(&newUser)
+	if err != nil {
+		core.Warning("Failed to register user [self]: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Redirect user back to login again.
+	jsonWriter.Encode(struct {
+		RedirectUrl string
+	}{
+		RedirectUrl: webcore.MustGetRouteUrl(webcore.LoginRouteName),
+	})
+}
+
 func postLogin(w http.ResponseWriter, r *http.Request) {
 	var err error
 
@@ -26,25 +90,15 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	// Retrieve the email address and parse the domain.
-	if err = r.ParseForm(); err != nil || len(r.PostForm) == 0 {
-		core.Warning("Failed to parse form data: " + core.ErrorString(err))
+	inputs := BaseLoginInputs{}
+	err = webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Failed to parse inputs: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
-		jsonWriter.Encode(struct{}{})
 		return
 	}
 
-	emailData := r.PostForm["email"]
-	csrfToken := r.PostForm["csrf"]
-
-	if len(emailData) == 0 || len(csrfToken) == 0 {
-		core.Warning("Empty email or CSRF.")
-		w.WriteHeader(http.StatusBadRequest)
-		jsonWriter.Encode(struct{}{})
-		return
-	}
-
-	if ok, err := webcore.VerifyCSRFToken(csrfToken[0], r); !ok || err != nil {
+	if ok, err := webcore.VerifyCSRFToken(inputs.Csrf, r); !ok || err != nil {
 		core.Warning("Failed CSRF check: " + core.ErrorString(err))
 		w.WriteHeader(http.StatusBadRequest)
 		jsonWriter.Encode(struct{}{})
@@ -54,7 +108,7 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 	// I don't think performing an email validation here is necessary since all we really
 	// want to do is to parse out the domain. If it matches something it does and if it doesn't
 	// it doesn't. No need to detect if the user entered a valid email.
-	email := strings.TrimSpace(emailData[0])
+	email := strings.TrimSpace(inputs.Email)
 	_, domain := core.ParseEmailAddress(email)
 
 	// Find the IdP. If not found, return an error. Use Error 400 but include a boolean
@@ -87,7 +141,7 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 	}{
 		// Pass the CSRF token as the state and verify it upon redirect
 		// because why not.
-		webcore.CreateOktaLoginUrl(idpIden, csrfToken[0], "filler"),
+		webcore.CreateOktaLoginUrl(idpIden, inputs.Csrf, "filler"),
 	})
 }
 

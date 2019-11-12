@@ -9,7 +9,7 @@ connection = "user=DEVUSER dbname=audit sslmode=disable timezone=UTC"
 
 [okta]
 url = "https://dev-578359.okta.com"
-api_key = "00RTHFmUJxvorwMdg65bHy4r9d-5aaY8a2KwVprzTo"
+api_key = "00AtXv7F_M7soQyw1OTli4OfNMZ2498tL9Bdq9oT51"
 api_endpoint = "/api"
 users_endpoint = "/v1/users"
 

@@ -18,20 +18,27 @@
             >
                 Next
             </v-btn>
+        </v-form>
 
+        <div id="oktaLogin" v-else></div>
+
+        <div class="mx-4">
             <p class="body-1 my-2">
                 Don't have an account?
                 <a :href="getStartedUrl">Get started.</a>
             </p>
-        </v-form>
 
-        <div id="oktaLogin" v-else></div>
+            <p class="body-1 my-2">
+                Have an invitation code?
+                <a :href="registerPageUrl">Register.</a>
+            </p>
+        </div>
     </div>
 </template>
 
 <script lang="ts">
 
-import { getStartedUrl, contactUsUrl } from '../../ts/url'
+import { getStartedUrl, contactUsUrl, registerPageUrl } from '../../ts/url'
 import * as rules from "../../ts/formRules"
 import { postFormUrlEncoded } from "../../ts/http"
 import { getCurrentCSRF } from "../../ts/csrf"
@@ -40,6 +47,7 @@ import Vue from 'vue';
 
 import OktaSignIn from '@okta/okta-signin-widget';
 import '@okta/okta-signin-widget/dist/css/okta-sign-in.min.css';
+import 'url-search-params-polyfill';
 
 interface ResponseData {
     data: {
@@ -50,14 +58,15 @@ interface ResponseData {
 export default Vue.extend({
     data: () => ({
         getStartedUrl,
+        registerPageUrl,
         rules,
-        email: undefined,
+        email: "",
         formValid: false,
         selfSignInMode: false
     }),
     computed: {
         canSubmit() : boolean {
-            return this.$data.formValid && this.$data.email;
+            return this.formValid && this.email.length > 0;
         }
     },
     methods: {
@@ -67,9 +76,6 @@ export default Vue.extend({
             Vue.nextTick(() => {
                 let signInForm = new OktaSignIn({
                     baseUrl: PageParamsStore.state.auth!.OktaServer,
-                    features: {
-                        registration: true,
-                    },
                     username: this.email,
                     clientId: PageParamsStore.state.auth!.OktaClientId,
                     redirectUri: PageParamsStore.state.auth!.OktaRedirectUri,
@@ -112,7 +118,7 @@ export default Vue.extend({
                 email: this.$data.email,
                 csrf: getCurrentCSRF(),
             }, {}).then((resp : ResponseData) => {
-                window.location.assign(resp.data.LoginUrl);
+                window.location.assign(resp.data.LoginUrl)
             }).catch((err) => {
                 if (!!err.response && err.response.data.CanNotFindIdP) {
                     this.switchToOktaLogin()
@@ -126,6 +132,27 @@ export default Vue.extend({
                         true);
                 }
             });
+        },
+    },
+    mounted() {
+        let params = new URLSearchParams(window.location.search)
+
+        if (params.has("email")) {
+            this.email = params.get("email")!
+        }
+
+        if (params.has("selfLogin")) {
+            this.switchToOktaLogin()
+        }
+
+        if (params.has("fromRegistration")) {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Success! Please login to continue.",
+                false,
+                "Contact Us",
+                contactUsUrl,
+                false);
         }
     }
 })
