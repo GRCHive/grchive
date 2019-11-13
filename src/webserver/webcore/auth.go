@@ -184,12 +184,11 @@ func CreateUserSessionFromTokens(tokens *OktaTokens, r *http.Request) (*core.Use
 		}
 
 		dbUser = newUser
-	}
-
-	if org != nil {
-		err = database.AddUserToOrganization(dbUser, org)
-		if err != nil {
-			return nil, err
+		if org != nil {
+			err = database.AddUserToOrganization(dbUser, org)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 

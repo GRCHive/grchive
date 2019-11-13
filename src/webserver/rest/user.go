@@ -22,6 +22,40 @@ type RequestResendVerificationEmailInputs struct {
 	UserId int64 `webcore:"userId"`
 }
 
+func getAllOrganizationsForUser(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	userId, err := webcore.GetUserIdFromRequestUrl(r)
+	if err != nil {
+		core.Warning("Can't find user id: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	apiKey, err := webcore.GetAPIKeyFromRequest(r)
+	if apiKey == nil || err != nil {
+		core.Warning("No API Key: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	if userId != apiKey.UserId {
+		core.Warning("Unauthorized access")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	orgs, err := database.FindAccessibleOrganizationsForUser(userId)
+	if err != nil {
+		core.Warning("Can't find orgs: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(orgs)
+}
+
 func updateUserProfile(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")

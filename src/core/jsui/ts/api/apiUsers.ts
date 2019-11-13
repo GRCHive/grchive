@@ -1,8 +1,12 @@
 import axios from 'axios'
 import * as qs from 'query-string'
-import { createGetAllOrgUsersAPIUrl, createUserProfileEditAPIUrl, requestVerificationEmailUrl } from '../url'
+import { createGetAllOrgUsersAPIUrl,
+         createUserProfileEditAPIUrl,
+         createUserGetOrgsAPIUrl,
+         requestVerificationEmailUrl } from '../url'
 import { getAPIRequestConfig } from './apiUtility'
 import { postFormUrlEncoded } from '../http'
+import { Organization } from '../organizations'
 
 export interface TGetAllOrgUsersInput {
     org : string
@@ -39,4 +43,16 @@ export interface TRequestVerificationEmailOutput {
 
 export function requestResendVerificationEmail(inp : TRequestVerificationEmailInput) : Promise<TRequestVerificationEmailOutput> {
     return postFormUrlEncoded<TRequestVerificationEmailOutput>(requestVerificationEmailUrl, inp, getAPIRequestConfig())
+}
+
+export interface TGetUserOrgsInput {
+    userId: number
+}
+
+export interface TGetUserOrgsOutput {
+    data: Organization[]
+}
+
+export function getAllOrgsForUser(inp: TGetUserOrgsInput) : Promise<TGetUserOrgsOutput> {
+    return axios.get(createUserGetOrgsAPIUrl(inp.userId) + '?' + qs.stringify(inp), getAPIRequestConfig())
 }

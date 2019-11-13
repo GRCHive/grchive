@@ -8,10 +8,10 @@ func FindAllUsersInOrganization(orgId int32) ([]*core.User, error) {
 	users := make([]*core.User, 0)
 
 	err := dbConn.Select(&users, `
-		SELECT user.*
-		FROM users AS user
+		SELECT u.*
+		FROM users AS u
 		INNER JOIN user_orgs AS uo
-			ON user.id = uo.user_id
+			ON u.id = uo.user_id
 		WHERE uo.org_id = $1
 	`, orgId)
 
@@ -118,7 +118,7 @@ func AddUserToOrganization(user *core.User, org *core.Organization) error {
 	return tx.Commit()
 }
 
-func FindAccessibleOrganizationsForUser(user *core.User) ([]int32, error) {
+func FindAccessibleOrganizationIdsForUser(user *core.User) ([]int32, error) {
 	orgIds := make([]int32, 0)
 
 	err := dbConn.Select(&orgIds, `
@@ -132,4 +132,22 @@ func FindAccessibleOrganizationsForUser(user *core.User) ([]int32, error) {
 	}
 
 	return orgIds, nil
+}
+
+func FindAccessibleOrganizationsForUser(userId int64) ([]*core.Organization, error) {
+	orgs := make([]*core.Organization, 0)
+
+	err := dbConn.Select(&orgs, `
+		SELECT org.*
+		FROM user_orgs AS uo
+		INNER JOIN organizations AS org
+			ON org.id = uo.org_id
+		WHERE uo.user_id = $1
+	`, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return orgs, nil
 }

@@ -54,7 +54,7 @@ func GrantAPIKeyDefaultRole(key *core.ApiKey, orgId int32) (*core.Role, error) {
 		return nil, err
 	}
 
-	accessibleOrgIds, err := database.FindAccessibleOrganizationsForUser(user)
+	accessibleOrgIds, err := database.FindAccessibleOrganizationIdsForUser(user)
 	if err != nil {
 		return nil, err
 	}

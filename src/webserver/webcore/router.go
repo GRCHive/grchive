@@ -31,6 +31,7 @@ const (
 	DashboardUserOrgsRouteName                     = "DashboardUserOrgs"
 	DashboardUserProfileRouteName                  = "DashboardUserProfile"
 	UserProfileEditRouteName                       = "UserProfilePost"
+	UserGetOrgsRouteName                           = "UserOrgsGet"
 	DashboardProcessFlowsRouteName                 = "ProcessFlows"
 	DashboardRisksRouteName                        = "Risks"
 	DashboardSingleRiskRouteName                   = "SingleRisk"

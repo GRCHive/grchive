@@ -5,7 +5,7 @@
 
         <user-home-page-nav-bar :selected-page="0"></user-home-page-nav-bar>
         <v-content class="ma-4">
-            <user-dashboard></user-dashboard>
+            <user-org-dashboard></user-org-dashboard>
         </v-content>
     </div>
 </template>
@@ -14,12 +14,12 @@
 
 import DashboardAppBar from '../../components/dashboard/DashboardAppBar.vue'
 import UserHomePageNavBar from '../../components/dashboard/UserHomePageNavBar.vue'
-import UserDashboard from '../../components/dashboard/UserDashboard.vue'
+import UserOrgDashboard from '../../components/dashboard/UserOrgDashboard.vue'
 export default {
     components : {
         DashboardAppBar,
         UserHomePageNavBar,
-        UserDashboard,
+        UserOrgDashboard,
     }
 }
 

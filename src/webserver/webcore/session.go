@@ -16,7 +16,7 @@ func ExtractParsedDataFromSession(session *core.UserSession) (*core.UserSessionP
 		return nil, err
 	}
 
-	accessibleOrgIds, err := database.FindAccessibleOrganizationsForUser(user)
+	accessibleOrgIds, err := database.FindAccessibleOrganizationIdsForUser(user)
 	if err != nil {
 		return nil, err
 	}

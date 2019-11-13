@@ -45,6 +45,10 @@ export function createMyOrgsUrl(id : number) : string {
     return `${myAccountBaseUrl}/${id}/orgs`
 }
 
+export function createOrgUrl(org : string) : string {
+    return `/dashboard/org/${org}`
+}
+
 export function createFlowUrl(org : string, flow : number) : string {
     return `/dashboard/org/${org}/flows/${flow}`
 }
@@ -59,6 +63,11 @@ export function createControlUrl(org : string, control : number) : string {
 
 export function createUserProfileEditAPIUrl(id : number) : string {
     return `/api/user/${id}/profile`
+}
+
+
+export function createUserGetOrgsAPIUrl(id : number) : string {
+    return `/api/user/${id}/orgs`
 }
 
 export const newProcessFlowAPIUrl : string = "/api/flows/new"

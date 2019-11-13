@@ -88,9 +88,10 @@ const ApiProcessFlowIODeleteUrl string = "/delete"
 const ApiProcessFlowIOEditUrl string = "/edit"
 
 // API - Users
-var ApiUserUrl string = fmt.Sprintf("/user/{%s}", DashboardUserQueryId)
+var ApiUserPrefix string = fmt.Sprintf("/user/{%s}", DashboardUserQueryId)
 
-const ApiUserProfileUrl string = "/profile"
+const ApiUserProfileEndpoint string = "/profile"
+const ApiUserOrgsEndpoint string = "/orgs"
 
 // API - Organization
 var ApiOrgPrefix string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)

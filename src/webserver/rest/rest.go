@@ -47,8 +47,9 @@ func registerVerificationAPIPaths(r *mux.Router) {
 }
 
 func registerUserAPIPaths(r *mux.Router) {
-	s := r.PathPrefix(core.ApiUserUrl).Subrouter()
-	s.HandleFunc(core.ApiUserProfileUrl, updateUserProfile).Methods("POST").Name(webcore.UserProfileEditRouteName)
+	s := r.PathPrefix(core.ApiUserPrefix).Subrouter()
+	s.HandleFunc(core.ApiUserProfileEndpoint, updateUserProfile).Methods("POST").Name(webcore.UserProfileEditRouteName)
+	s.HandleFunc(core.ApiUserOrgsEndpoint, getAllOrganizationsForUser).Methods("GET").Name(webcore.UserGetOrgsRouteName)
 }
 
 func registerOrgAPIPaths(r *mux.Router) {
