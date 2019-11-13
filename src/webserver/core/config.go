@@ -55,6 +55,11 @@ type MailConfig struct {
 	VeriEmailFrom mail.Email
 }
 
+type HashIdConfigData struct {
+	Salt      string
+	MinLength int
+}
+
 type EnvConfigData struct {
 	SelfUri            string
 	DatabaseConnString string
@@ -66,6 +71,7 @@ type EnvConfigData struct {
 	Vault              *VaultConfig
 	Backblaze          *BackblazeConfig
 	Mail               *MailConfig
+	HashId             *HashIdConfigData
 }
 
 var EnvConfig *EnvConfigData
@@ -144,6 +150,10 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.Mail.Key = tomlConfig.Get("mail.key").(string)
 	envConfig.Mail.VeriEmailFrom.Name = tomlConfig.Get("mail.verification.from.name").(string)
 	envConfig.Mail.VeriEmailFrom.Email = tomlConfig.Get("mail.verification.from.email").(string)
+
+	envConfig.HashId = new(HashIdConfigData)
+	envConfig.HashId.Salt = tomlConfig.Get("hashids.salt").(string)
+	envConfig.HashId.MinLength = int(tomlConfig.Get("hashids.min_length").(int64))
 
 	return envConfig
 }

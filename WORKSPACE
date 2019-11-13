@@ -138,6 +138,12 @@ go_repository(
     tag = "v1.0.0"    
 )
 
+go_repository(
+    name = "com_github_speps_go_hashids",
+    importpath = "github.com/speps/go-hashids",
+    tag = "v2.0.0"
+)
+
 # NODE
 http_archive(
     name = "build_bazel_rules_nodejs",

@@ -1,0 +1,35 @@
+package(default_visibility=["//visibility:public"])
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "webserver_database_library",
+    srcs = [
+        "database.go",
+        "gettingStartedInterest.go",
+        "samlIdp.go",
+        "session.go",
+        "organizations.go",
+        "processFlows.go",
+        "utility.go",
+        "processFlowNodes.go",
+        "processFlowIO.go",
+        "processFlowEdges.go",
+        "processFlowNodeDisplaySettings.go",
+        "processFlowRelationships.go",
+        "risks.go",
+        "users.go",
+        "controls.go",
+        "controlDocumentation.go",
+        "apiKey.go",
+        "roles.go",
+        "emailVerification.go",
+        "inviteCodes.go",
+    ],
+    deps = [
+        "@com_github_jmoiron_sqlx//:go_default_library", 
+        "@com_github_jmoiron_sqlx//types:go_default_library", 
+        "@com_github_lib_pq//:go_default_library", 
+        "//src/webserver/core:webserver_core_library"
+    ],
+    importpath = "gitlab.com/b3h47pte/audit-stuff/database"
+)

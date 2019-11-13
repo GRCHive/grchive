@@ -57,6 +57,7 @@ func generateTestToml(config GenerateTomlConfig) (*toml.Tree, *core.EnvConfigDat
 		Vault:     new(core.VaultConfig),
 		Backblaze: new(core.BackblazeConfig),
 		Mail:      new(core.MailConfig),
+		HashId:    new(core.HashIdConfigData),
 	}
 
 	newDataVal := reflect.ValueOf(&newData).Elem()
@@ -128,6 +129,8 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"Mail.Key", "mail.key", "key", nil},
 					{"Mail.VeriEmailFrom.Name", "mail.verification.from.name", "name", nil},
 					{"Mail.VeriEmailFrom.Email", "mail.verification.from.email", "email", nil},
+					{"HashId.Salt", "hashids.salt", "salt", nil},
+					{"HashId.MinLength", "hashids.min_length", int64(100), 100},
 				},
 			},
 			parseError: false,

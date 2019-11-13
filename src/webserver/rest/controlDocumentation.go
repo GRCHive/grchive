@@ -6,7 +6,7 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/backblaze_api"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
-	"gitlab.com/b3h47pte/audit-stuff/security"
+	"gitlab.com/b3h47pte/audit-stuff/vault_api"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
 	"io"
 	"net/http"
@@ -265,7 +265,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	transitKey := internalFile.UniqueKey()
-	err = security.TransitCreateNewEngineKey(transitKey)
+	err = vault.TransitCreateNewEngineKey(transitKey)
 	if err != nil {
 		tx.Rollback()
 		core.Warning("Could not create transit key: " + err.Error())
@@ -273,7 +273,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encryptedFile, err := security.TransitEncrypt(transitKey, buffer.Bytes())
+	encryptedFile, err := vault.TransitEncrypt(transitKey, buffer.Bytes())
 	if err != nil {
 		tx.Rollback()
 		core.Warning("Could not encrypt file: " + err.Error())
@@ -478,7 +478,7 @@ func downloadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	decryptedBytes, err := security.TransitDecrypt(dbFile.UniqueKey(), encryptedBytes)
+	decryptedBytes, err := vault.TransitDecrypt(dbFile.UniqueKey(), encryptedBytes)
 	if err != nil {
 		core.Warning("Can't decrypt file: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

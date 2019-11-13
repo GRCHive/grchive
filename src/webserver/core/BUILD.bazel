@@ -4,6 +4,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "webserver_core_library",
     srcs = [
+        "core.go",
         "config.go",
         "log.go",
         "url.go",
@@ -32,11 +33,14 @@ go_library(
         "emailVerification.go",
         "templates.go",
         "search.go",
+        "inviteCodes.go",
+        "hashIds.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",
         "@com_github_pelletier_go_toml//:go_default_library",
         "@com_github_google_uuid//:go_default_library",
+        "@com_github_speps_go_hashids//:go_default_library",
         "//src/backblaze_api/golang:backblaze_golang_api",
         "//src/mail_api/golang:mail_golang_api",
     ],

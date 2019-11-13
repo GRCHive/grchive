@@ -16,9 +16,9 @@ const (
 type ResourceType int
 
 const (
-	// Managing is merely for deleting/creating new process flows.
-	ResourceOrgRoles ResourceType = iota
 	// In the case of manage, allows giving/revoking a role from a user.
+	ResourceOrgRoles ResourceType = iota
+	// Managing is merely for deleting/creating new process flows.
 	// In this case, the editing the process flow includes adding/creating nodes.
 	ResourceProcessFlows
 	ResourceControls

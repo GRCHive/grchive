@@ -19,38 +19,6 @@ genrule(
 )
 
 go_library(
-    name = "webserver_database_library",
-    srcs = [
-        "database/database.go",
-        "database/gettingStartedInterest.go",
-        "database/samlIdp.go",
-        "database/session.go",
-        "database/organizations.go",
-        "database/processFlows.go",
-        "database/utility.go",
-        "database/processFlowNodes.go",
-        "database/processFlowIO.go",
-        "database/processFlowEdges.go",
-        "database/processFlowNodeDisplaySettings.go",
-        "database/processFlowRelationships.go",
-        "database/risks.go",
-        "database/users.go",
-        "database/controls.go",
-        "database/controlDocumentation.go",
-        "database/apiKey.go",
-        "database/roles.go",
-        "database/emailVerification.go",
-    ],
-    deps = [
-        "@com_github_jmoiron_sqlx//:go_default_library", 
-        "@com_github_jmoiron_sqlx//types:go_default_library", 
-        "@com_github_lib_pq//:go_default_library", 
-        "//src/webserver/core:webserver_core_library"
-    ],
-    importpath = "gitlab.com/b3h47pte/audit-stuff/database"
-)
-
-go_library(
     name = "webserver_webcore_library",
     srcs = [
         "webcore/auth.go",
@@ -73,7 +41,7 @@ go_library(
         "//src/webserver/core:webserver_core_library",
         "//src/mail_api/golang:mail_golang_api",
         "//src/okta_api/golang:okta_golang_api",
-        ":webserver_database_library",
+        "//src/webserver/database:webserver_database_library",
         "@io_k8s_klog//:go_default_library",
         "@in_gopkg_square_go_jose_v2//:go_default_library",
         "@com_github_google_uuid//:go_default_library",
@@ -107,7 +75,7 @@ go_library(
     ],
     deps = [
         "//src/webserver/core:webserver_core_library",
-        ":webserver_database_library",
+        "//src/webserver/database:webserver_database_library",
         ":webserver_webcore_library",
         "@com_github_gorilla_mux//:go_default_library",
         "@com_github_gorilla_websocket//:go_default_library",
@@ -134,10 +102,10 @@ go_library(
     deps = [
         "@com_github_gorilla_mux//:go_default_library",
         "//src/webserver/core:webserver_core_library",
-        "//src/webserver/security:webserver_security_library",
+        "//src/vault_api/golang:vault_golang_api",
         "//src/backblaze_api/golang:backblaze_golang_api",
         ":webserver_webcore_library",
-        ":webserver_database_library",
+        "//src/webserver/database:webserver_database_library",
         ":webserver_render_library",
     ],
     importpath = "gitlab.com/b3h47pte/audit-stuff/rest"
@@ -154,8 +122,9 @@ go_binary(
         "//src/webserver/core:webserver_core_library",
         "//src/mail_api/golang:mail_golang_api",
         "//src/okta_api/golang:okta_golang_api",
+        "//src/vault_api/golang:vault_golang_api",
         ":webserver_webcore_library",
-        ":webserver_database_library",
+        "//src/webserver/database:webserver_database_library",
         ":webserver_render_library",
         ":webserver_rest_library",
         ":webserver_websocket_library",

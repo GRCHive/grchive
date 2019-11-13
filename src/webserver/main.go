@@ -8,6 +8,7 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/okta_api"
 	"gitlab.com/b3h47pte/audit-stuff/render"
 	"gitlab.com/b3h47pte/audit-stuff/rest"
+	"gitlab.com/b3h47pte/audit-stuff/vault_api"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
 	"gitlab.com/b3h47pte/audit-stuff/websocket"
 	"net/http"
@@ -16,7 +17,7 @@ import (
 )
 
 func main() {
-	core.InitializeConfig(core.DefaultConfigLocation)
+	core.Init()
 	database.Init()
 	render.RegisterTemplates()
 	webcore.InitializeWebcore()
@@ -24,6 +25,10 @@ func main() {
 	okta.InitializeOktaAPI(okta.OktaConfig{
 		ApiKey:    core.EnvConfig.Okta.ApiKey,
 		ApiDomain: core.EnvConfig.Okta.BaseUrl,
+	})
+	vault.Initialize(vault.VaultConfig{
+		Url:   core.EnvConfig.Vault.Url,
+		Token: core.EnvConfig.Vault.Token,
 	})
 
 	r := mux.NewRouter().StrictSlash(true)
