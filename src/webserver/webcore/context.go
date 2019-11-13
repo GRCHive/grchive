@@ -14,6 +14,7 @@ const (
 	UserSessionParsedDataContextKey            = "PARSEDDATA"
 	// From Request
 	OrganizationContextKey = "ORGANIZATION"
+	UserContextKey         = "USER"
 	ApiKeyContextKey       = "APIKEY"
 )
 
@@ -51,6 +52,18 @@ func FindOrganizationInContext(ctx context.Context) (*core.Organization, error) 
 		return nil, errors.New("Failed to find organization in context.")
 	}
 	return org, nil
+}
+
+func AddUserToContext(user *core.User, ctx context.Context) context.Context {
+	return context.WithValue(ctx, UserContextKey, user)
+}
+
+func FindUserInContext(ctx context.Context) (*core.User, error) {
+	user, ok := ctx.Value(UserContextKey).(*core.User)
+	if !ok || user == nil {
+		return nil, errors.New("Failed to find user in context.")
+	}
+	return user, nil
 }
 
 func AddApiKeyToContext(key *core.ApiKey, ctx context.Context) context.Context {

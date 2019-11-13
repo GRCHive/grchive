@@ -28,6 +28,8 @@ const (
 	DashboardHomeRouteName                         = "DashboardHome"
 	DashboardOrgHomeRouteName                      = "DashboardOrgHome"
 	DashboardUserHomeRouteName                     = "DashboardUserHome"
+	DashboardUserOrgsRouteName                     = "DashboardUserOrgs"
+	DashboardUserProfileRouteName                  = "DashboardUserProfile"
 	UserProfileEditRouteName                       = "UserProfilePost"
 	DashboardProcessFlowsRouteName                 = "ProcessFlows"
 	DashboardRisksRouteName                        = "Risks"

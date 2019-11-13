@@ -120,7 +120,7 @@ func verifyContextForOrgDashboard(w http.ResponseWriter, r *http.Request) error 
 }
 
 func RenderDashboardUserHomePage(w http.ResponseWriter, r *http.Request) {
-	_, err := webcore.FindSessionParsedDataInContext(r.Context())
+	user, err := webcore.FindUserInContext(r.Context())
 	if err != nil {
 		core.Warning("No user data: " + err.Error())
 		http.Redirect(w, r,
@@ -129,7 +129,17 @@ func RenderDashboardUserHomePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	RenderTemplate(w, DashboardUserHomeTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	http.Redirect(w, r,
+		webcore.MustGetRouteUrl(webcore.DashboardUserOrgsRouteName, core.DashboardUserQueryId, strconv.FormatInt(user.Id, 10)),
+		http.StatusTemporaryRedirect)
+}
+
+func RenderDashboardUserOrgsPage(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardUserOrgsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}
+
+func RenderDashboardUserProfilePage(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardUserProfileTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
 
 func RenderDashboardProcessFlowsPage(w http.ResponseWriter, r *http.Request) {

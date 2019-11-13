@@ -8,7 +8,7 @@
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
 import LocalSettings from '../../../ts/localSettings'
-import { createMyAccountUrl } from '../../../ts/url'
+import { createMyProfileUrl, createMyOrgsUrl } from '../../../ts/url'
 import GenericNavBar from '../GenericNavBar.vue'
 import { PageParamsStore }  from '../../../ts/pageParams'
 
@@ -20,9 +20,14 @@ export default Vue.extend({
         return {
             navLinks : [
                 {
+                    title: 'Organizations',
+                    icon: 'mdi-account-group',
+                    url: createMyOrgsUrl(PageParamsStore.state.user!.Id),
+                },
+                {
                     title: 'Profile',
                     icon: 'mdi-account-circle',
-                    url: createMyAccountUrl(PageParamsStore.state.user!.Id),
+                    url: createMyProfileUrl(PageParamsStore.state.user!.Id),
                 }
             ],
         }

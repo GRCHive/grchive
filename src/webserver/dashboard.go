@@ -36,9 +36,12 @@ func createOrganizationSubrouter(r *mux.Router) {
 }
 
 func createUserSubrouter(r *mux.Router) {
-	s := r.PathPrefix(core.DashboardUserUrl).Subrouter()
+	s := r.PathPrefix(core.DashboardUserPrefix).Subrouter()
+	s.Use(webcore.ObtainUserInfoFromRequestInContextMiddleware)
 	s.Use(webcore.CreateVerifyUserHasAccessToUserMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		render.Render403(w, r)
 	}))
 	s.HandleFunc(core.DashboardUserHomeUrl, render.RenderDashboardUserHomePage).Name(webcore.DashboardUserHomeRouteName)
+	s.HandleFunc(core.DashboardUserOrgUrl, render.RenderDashboardUserOrgsPage).Name(webcore.DashboardUserOrgsRouteName)
+	s.HandleFunc(core.DashboardUserProfileUrl, render.RenderDashboardUserProfilePage).Name(webcore.DashboardUserProfileRouteName)
 }

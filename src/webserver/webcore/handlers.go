@@ -3,6 +3,7 @@ package webcore
 import (
 	"github.com/gorilla/mux"
 	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/b3h47pte/audit-stuff/database"
 	"net/http"
 )
 
@@ -113,13 +114,38 @@ func CreateVerifyUserHasAccessToOrganizationMiddleware(failure http.HandlerFunc)
 	}
 }
 
+func ObtainUserInfoFromRequestInContextMiddleware(next http.Handler) http.Handler {
+	// If we can't find the organization we should direct to the dashboard home page.
+	// Note that this runs under the assumption that we won't ever have the case where
+	// the dashboard home page directs to an invalid org...
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userId, err := GetUserIdFromRequestUrl(r)
+		if err != nil {
+			core.Info("Bad user request: " + err.Error())
+			http.Redirect(w, r, MustGetRouteUrl(DashboardHomeRouteName), http.StatusTemporaryRedirect)
+			return
+		}
+
+		user, err := database.FindUserFromId(userId)
+		if err != nil {
+			core.Info("Bad user database: " + err.Error())
+			http.Redirect(w, r, MustGetRouteUrl(DashboardHomeRouteName), http.StatusTemporaryRedirect)
+			return
+		}
+
+		ctx := AddUserToContext(user, r.Context())
+		newR := r.WithContext(ctx)
+		next.ServeHTTP(w, newR)
+	})
+}
+
 func CreateVerifyUserHasAccessToUserMiddleware(failure http.HandlerFunc) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Check that the user stored in the session matches the email specified
 			// in the URL. We will probably need coarser access permissions later so that
 			// you can view the profile of a co-worker (for example).
-			userId, err := GetUserIdFromRequestUrl(r)
+			user, err := FindUserInContext(r.Context())
 			if err != nil {
 				core.Info("No user ID: " + err.Error())
 				failure.ServeHTTP(w, r)
@@ -133,7 +159,7 @@ func CreateVerifyUserHasAccessToUserMiddleware(failure http.HandlerFunc) mux.Mid
 				return
 			}
 
-			if currentData.CurrentUser.Id != userId {
+			if currentData.CurrentUser.Id != user.Id {
 				core.Info("Unauthenticated user: " + currentData.CurrentUser.Email)
 				failure.ServeHTTP(w, r)
 				return

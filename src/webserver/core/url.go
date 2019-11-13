@@ -45,9 +45,11 @@ var DashboardOrgFlowEndpoint string = fmt.Sprintf("/flows/{%s}", DashboardOrgFlo
 // Dashboard - User
 const DashboardUserQueryId string = "user"
 
-var DashboardUserUrl string = fmt.Sprintf("/user/{%s}", DashboardUserQueryId)
+var DashboardUserPrefix string = fmt.Sprintf("/user/{%s}", DashboardUserQueryId)
 
 const DashboardUserHomeUrl string = "/"
+const DashboardUserOrgUrl string = "/orgs"
+const DashboardUserProfileUrl string = "/profile"
 
 // API
 const ApiUrl string = "/api"

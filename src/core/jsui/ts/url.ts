@@ -32,8 +32,17 @@ export function createLogoutUrl(csrf : string) : string {
 }
 
 export const myAccountBaseUrl : string = "/dashboard/user";
+
 export function createMyAccountUrl(id : number) : string {
     return `${myAccountBaseUrl}/${id}`
+}
+
+export function createMyProfileUrl(id : number) : string {
+    return `${myAccountBaseUrl}/${id}/profile`
+}
+
+export function createMyOrgsUrl(id : number) : string {
+    return `${myAccountBaseUrl}/${id}/orgs`
 }
 
 export function createFlowUrl(org : string, flow : number) : string {
