@@ -3,7 +3,6 @@ package okta
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/google/go-querystring/query"
 	"io/ioutil"
 	"net/http"
@@ -53,8 +52,6 @@ func RegisterUser(user RegisterUserData) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	fmt.Println("%s", string(body))
 
 	rootObj := map[string]*json.RawMessage{}
 	err = json.Unmarshal(body, &rootObj)

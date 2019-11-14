@@ -153,7 +153,7 @@ export default Vue.extend({
             }).catch((err) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! It looks like something went wrong on our end. Try again later or contact support.",
+                    "Oops! Something went wrong. Verify your invite code and try again or contact support.",
                     true,
                     "Contact Us",
                     contactUsUrl,

@@ -42,7 +42,12 @@ func postRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Verify invite code.
+	invite, err := database.FindInviteCodeFromHash(inputs.InviteCode, inputs.Email, core.ServerRole)
+	if err != nil {
+		core.Warning("Failed invite code verification: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	newUser := core.User{
 		FirstName: inputs.FirstName,
@@ -51,6 +56,9 @@ func postRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create the user using the Okta API.
+	// TODO: We probably need to check what kind of error this is since if
+	// 		 it fails because the user was created already it could mean that
+	// 		 we failed when creating the user on our end.
 	err = webcore.OktaRegisterUserWithPassword(&newUser, inputs.Password)
 	if err != nil {
 		core.Warning("Failed to register user [okta]: " + err.Error())
@@ -64,6 +72,15 @@ func postRegister(w http.ResponseWriter, r *http.Request) {
 		core.Warning("Failed to register user [self]: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+
+	// Mark invite code as being used.
+	// It's OK to have this fail since it's not critical for future steps.
+	// We should have a cron job or something that tries to fix anything
+	// that errors out here.
+	err = database.MarkInviteAsUsed(invite)
+	if err != nil {
+		core.Warning("Failed to mark invite as used: " + err.Error())
 	}
 
 	// Redirect user back to login again.

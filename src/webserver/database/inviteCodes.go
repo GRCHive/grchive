@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/b3h47pte/audit-stuff/core"
+	"time"
 )
 
 func InsertInviteCodeWithTx(code *core.InviteCode, role *core.Role, tx *sqlx.Tx) (string, error) {
@@ -35,7 +36,7 @@ func InsertInviteCodeWithTx(code *core.InviteCode, role *core.Role, tx *sqlx.Tx)
 	return hash, nil
 }
 
-func FindInviteCodeFromHash(hash string, role *core.Role) (*core.InviteCode, error) {
+func FindInviteCodeFromHash(hash string, email string, role *core.Role) (*core.InviteCode, error) {
 	if !role.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
@@ -50,7 +51,28 @@ func FindInviteCodeFromHash(hash string, role *core.Role) (*core.InviteCode, err
 		SELECT *
 		FROM invitation_codes
 		WHERE id = $1
-	`, id)
+			AND to_email = $2
+			AND used_time IS NULL
+	`, id, email)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return &code, nil
+}
+
+func MarkInviteAsUsed(code *core.InviteCode) error {
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		UPDATE invitation_codes
+		SET used_time = $1
+		WHERE id = $2
+	`, time.Now().UTC(), code.Id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Commit()
+	return err
 }
