@@ -8,6 +8,7 @@
                 filled
                 :rules="[rules.required, rules.createMaxLength(320), rules.email]"
                 required
+                :disabled="disableEmail"
             ></v-text-field>
 
             <v-text-field
@@ -53,6 +54,7 @@
                 filled
                 :rules="[rules.required]"
                 required
+                :disabled="disableInviteCode"
             ></v-text-field>
 
             <v-btn
@@ -87,6 +89,7 @@ import { postFormUrlEncoded } from "../../ts/http"
 import { getCurrentCSRF } from "../../ts/csrf"
 import Vue from 'vue';
 import * as qs from 'query-string'
+import 'url-search-params-polyfill';
 
 interface ResponseData {
     data: {
@@ -107,6 +110,8 @@ export default Vue.extend({
         password: "",
         passwordConfirm: "",
         inviteCode: "",
+        disableEmail: false,
+        disableInviteCode: false,
     }),
     computed: {
         canSubmit() : boolean {
@@ -165,6 +170,19 @@ export default Vue.extend({
             // input based on what the password confirmation field is.
             //@ts-ignore
             this.$refs.form.validate()
+        }
+    },
+    mounted() {
+        let params = new URLSearchParams(window.location.search)
+
+        if (params.has("inviteCode")) {
+            this.inviteCode = params.get("inviteCode")!
+            this.disableInviteCode = true
+        }
+
+        if (params.has("email")) {
+            this.email = params.get("email")!
+            this.disableEmail = true
         }
     }
 })

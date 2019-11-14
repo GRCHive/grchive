@@ -1,5 +1,5 @@
 package(default_visibility=["//visibility:public"])
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
 filegroup(
     name = "templates",
@@ -19,40 +19,6 @@ genrule(
 )
 
 go_library(
-    name = "webserver_webcore_library",
-    srcs = [
-        "webcore/auth.go",
-        "webcore/context.go",
-        "webcore/csrf.go",
-        "webcore/clientsession.go",
-        "webcore/jwt.go",
-        "webcore/handlers.go",
-        "webcore/session.go",
-        "webcore/router.go",
-        "webcore/request.go",
-        "webcore/redirectResponseWriter.go",
-        "webcore/webcore.go",
-        "webcore/constants.go",
-        "webcore/apiAccess.go",
-        "webcore/accessControl.go",
-        "webcore/emailVerification.go",
-    ],
-    deps = [
-        "//src/webserver/core:webserver_core_library",
-        "//src/mail_api/golang:mail_golang_api",
-        "//src/okta_api/golang:okta_golang_api",
-        "//src/webserver/database:webserver_database_library",
-        "@io_k8s_klog//:go_default_library",
-        "@in_gopkg_square_go_jose_v2//:go_default_library",
-        "@com_github_google_uuid//:go_default_library",
-        "@com_github_gorilla_mux//:go_default_library",
-        "@com_github_gorilla_securecookie//:go_default_library",
-        "@com_github_gorilla_sessions//:go_default_library",
-    ],
-    importpath = "gitlab.com/b3h47pte/audit-stuff/webcore"
-)
-
-go_library(
     name = "webserver_render_library",
     srcs = [
         "render/pages.go",
@@ -62,7 +28,7 @@ go_library(
     ],
     deps = [
         "//src/webserver/core:webserver_core_library",
-        ":webserver_webcore_library",
+        "//src/webserver/webcore:webserver_webcore_library",
     ],
     importpath = "gitlab.com/b3h47pte/audit-stuff/render"
 )
@@ -76,7 +42,7 @@ go_library(
     deps = [
         "//src/webserver/core:webserver_core_library",
         "//src/webserver/database:webserver_database_library",
-        ":webserver_webcore_library",
+        "//src/webserver/webcore:webserver_webcore_library",
         "@com_github_gorilla_mux//:go_default_library",
         "@com_github_gorilla_websocket//:go_default_library",
     ],
@@ -104,7 +70,7 @@ go_library(
         "//src/webserver/core:webserver_core_library",
         "//src/vault_api/golang:vault_golang_api",
         "//src/backblaze_api/golang:backblaze_golang_api",
-        ":webserver_webcore_library",
+        "//src/webserver/webcore:webserver_webcore_library",
         "//src/webserver/database:webserver_database_library",
         ":webserver_render_library",
     ],
@@ -123,7 +89,7 @@ go_binary(
         "//src/mail_api/golang:mail_golang_api",
         "//src/okta_api/golang:okta_golang_api",
         "//src/vault_api/golang:vault_golang_api",
-        ":webserver_webcore_library",
+        "//src/webserver/webcore:webserver_webcore_library",
         "//src/webserver/database:webserver_database_library",
         ":webserver_render_library",
         ":webserver_rest_library",

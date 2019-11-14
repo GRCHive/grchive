@@ -131,3 +131,4 @@ export const deleteControlDocUrl : string = "/api/documentation/delete"
 export const downloadControlDocUrl : string = "/api/documentation/download"
 
 export const requestVerificationEmailUrl : string = "/api/verification/resend"
+export const inviteUsersToOrgUrl: string = "/api/invite/send"

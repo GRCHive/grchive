@@ -22,15 +22,17 @@ const (
 	LearnMorePageTemplateKey                  = "LEARNMORE"
 	RedirectTemplateKey                       = "REDIRECT"
 	// Dashboard Keys
-	DashboardOrgHomeTemplateKey       = "DASHBOARDORGHOME"
-	DashboardProcessFlowsTemplateKey  = "DASHBOARDFLOWS"
-	DashboardSingleFlowTemplateKey    = "DASHBOARDSINGLEFLOW"
-	DashboardUserOrgsTemplateKey      = "DASHBOARDUSERORGS"
-	DashboardUserProfileTemplateKey   = "DASHBOARDUSERPROFILE"
-	DashboardRisksTemplateKey         = "DASHBOARDRISKS"
-	DashboardSingleRiskTemplateKey    = "DASHBOARDSINGLERISK"
-	DashboardControlsTemplateKey      = "DASHBOARDCONTROLS"
-	DashboardSingleControlTemplateKey = "DASHBOARDSINGLECONTROL"
+	DashboardOrgHomeTemplateKey          = "DASHBOARDORGHOME"
+	DashboardProcessFlowsTemplateKey     = "DASHBOARDFLOWS"
+	DashboardSingleFlowTemplateKey       = "DASHBOARDSINGLEFLOW"
+	DashboardUserOrgsTemplateKey         = "DASHBOARDUSERORGS"
+	DashboardUserProfileTemplateKey      = "DASHBOARDUSERPROFILE"
+	DashboardRisksTemplateKey            = "DASHBOARDRISKS"
+	DashboardSingleRiskTemplateKey       = "DASHBOARDSINGLERISK"
+	DashboardControlsTemplateKey         = "DASHBOARDCONTROLS"
+	DashboardSingleControlTemplateKey    = "DASHBOARDSINGLECONTROL"
+	DashboardOrgSettingsUsersTemplateKey = "DASHBOARDORGSETTINGSUSERS"
+	DashboardOrgSettingsRolesTemplateKey = "DASHBOARDORGSETTINGSROLES"
 	// Error Keys
 	Error403TemplateKey = "ERROR403"
 	Error404TemplateKey = "ERROR404"
@@ -82,6 +84,12 @@ func RegisterTemplates() {
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardControls.tmpl")
 	allTemplates[DashboardSingleControlTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardSingleControl.tmpl")
+
+	// Dashboard Org Settings
+	allTemplates[DashboardOrgSettingsUsersTemplateKey] =
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardOrgSettingsUsers.tmpl")
+	allTemplates[DashboardOrgSettingsRolesTemplateKey] =
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardOrgSettingsRoles.tmpl")
 
 	// Dashboard User
 	allTemplates[DashboardUserOrgsTemplateKey] =

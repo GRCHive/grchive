@@ -76,6 +76,11 @@ const (
 	DownloadControlDocRouteName                    = "DownloadControlDoc"
 	EmailVerifyRouteName                           = "VerifyEmail"
 	ResendVerificationRouteName                    = "ResendVerification"
+	OrgSettingsHomeRouteName                       = "OrgSettingsHome"
+	OrgSettingsUsersRouteName                      = "OrgSettingsUsers"
+	OrgSettingsRolesRouteName                      = "OrgSettingsRoles"
+	SendInviteRouteName                            = "SendInvite"
+	AcceptInviteRouteName                          = "AcceptInvite"
 )
 
 var globalRouter *mux.Router

@@ -1,15 +1,14 @@
 package database
 
 import (
+	"github.com/jmoiron/sqlx"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
-func InsertInviteCode(code *core.InviteCode, role *core.Role) (string, error) {
+func InsertInviteCodeWithTx(code *core.InviteCode, role *core.Role, tx *sqlx.Tx) (string, error) {
 	if !role.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessManage) {
 		return "", core.ErrorUnauthorized
 	}
-
-	tx := dbConn.MustBegin()
 
 	rows, err := tx.NamedQuery(`
 		INSERT INTO invitation_codes (from_user_id, from_org_id, to_email, sent_time)
@@ -18,14 +17,12 @@ func InsertInviteCode(code *core.InviteCode, role *core.Role) (string, error) {
 	`, code)
 
 	if err != nil {
-		tx.Rollback()
 		return "", err
 	}
 
 	rows.Next()
 	err = rows.Scan(&code.Id)
 	if err != nil {
-		tx.Rollback()
 		return "", err
 	}
 	rows.Close()
@@ -35,7 +32,7 @@ func InsertInviteCode(code *core.InviteCode, role *core.Role) (string, error) {
 		return "", err
 	}
 
-	return hash, tx.Commit()
+	return hash, nil
 }
 
 func FindInviteCodeFromHash(hash string, role *core.Role) (*core.InviteCode, error) {

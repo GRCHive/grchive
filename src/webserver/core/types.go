@@ -19,6 +19,10 @@ func (v NullTime) MarshalJSON() ([]byte, error) {
 	}
 }
 
+func CreateNullTime(v time.Time) NullTime {
+	return NullTime{sql.NullTime{v, true}}
+}
+
 type NullInt64 struct {
 	sql.NullInt64
 }
@@ -53,5 +57,6 @@ var Int64ReflectType = reflect.TypeOf((int64)(0))
 var NullInt64ReflectType = reflect.TypeOf(NullInt64{})
 var Int32ReflectType = reflect.TypeOf((int32)(0))
 var StringReflectType = reflect.TypeOf((string)(""))
-var Int64ArrayReflectType = reflect.TypeOf(([]int64)([]int64{}))
+var Int64ArrayReflectType = reflect.TypeOf([]int64{})
+var StringArrayReflectType = reflect.TypeOf([]string{})
 var TimeReflectType = reflect.TypeOf(time.Time{})

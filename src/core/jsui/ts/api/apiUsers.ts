@@ -3,7 +3,8 @@ import * as qs from 'query-string'
 import { createGetAllOrgUsersAPIUrl,
          createUserProfileEditAPIUrl,
          createUserGetOrgsAPIUrl,
-         requestVerificationEmailUrl } from '../url'
+         requestVerificationEmailUrl,
+         inviteUsersToOrgUrl } from '../url'
 import { getAPIRequestConfig } from './apiUtility'
 import { postFormUrlEncoded } from '../http'
 import { Organization } from '../organizations'
@@ -55,4 +56,17 @@ export interface TGetUserOrgsOutput {
 
 export function getAllOrgsForUser(inp: TGetUserOrgsInput) : Promise<TGetUserOrgsOutput> {
     return axios.get(createUserGetOrgsAPIUrl(inp.userId) + '?' + qs.stringify(inp), getAPIRequestConfig())
+}
+
+export interface TInviteUsersInput {
+    fromUserId: number
+    fromOrgId: number
+    toEmails: string[]
+}
+
+export interface TInviteUsersOutput {
+}
+
+export function inviteUsers(inp: TInviteUsersInput) : Promise<TInviteUsersOutput> {
+    return postFormUrlEncoded<TInviteUsersOutput>(inviteUsersToOrgUrl, inp, getAPIRequestConfig())
 }

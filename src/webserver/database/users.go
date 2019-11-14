@@ -4,7 +4,11 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
-func FindAllUsersInOrganization(orgId int32) ([]*core.User, error) {
+func FindAllUsersInOrganization(orgId int32, role *core.Role) ([]*core.User, error) {
+	if !role.Permissions.HasAccess(core.ResourceOrgUsers, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
 	users := make([]*core.User, 0)
 
 	err := dbConn.Select(&users, `

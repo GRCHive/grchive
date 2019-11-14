@@ -16,8 +16,9 @@ const (
 type ResourceType int
 
 const (
+	ResourceOrgUsers ResourceType = iota
 	// In the case of manage, allows giving/revoking a role from a user.
-	ResourceOrgRoles ResourceType = iota
+	ResourceOrgRoles
 	// Managing is merely for deleting/creating new process flows.
 	// In this case, the editing the process flow includes adding/creating nodes.
 	ResourceProcessFlows
@@ -28,6 +29,7 @@ const (
 )
 
 var AvailableResources []ResourceType = []ResourceType{
+	ResourceOrgUsers,
 	ResourceOrgRoles,
 	ResourceProcessFlows,
 	ResourceControls,
@@ -37,7 +39,8 @@ var AvailableResources []ResourceType = []ResourceType{
 }
 
 type PermissionsMap struct {
-	OrgRolesAccess             AccessType `db:"org_access"`
+	OrgUsersAccess             AccessType `db:"users_access"`
+	OrgRolesAccess             AccessType `db:"roles_access"`
 	ProcessFlowsAccess         AccessType `db:"flow_access"`
 	ControlsAccess             AccessType `db:"control_access"`
 	ControlDocumentationAccess AccessType `db:"doc_access"`
@@ -66,6 +69,7 @@ func CreateOwnerAccessType() AccessType {
 
 func CreateAllAccessPermission() PermissionsMap {
 	return PermissionsMap{
+		OrgUsersAccess:             CreateOwnerAccessType(),
 		OrgRolesAccess:             CreateOwnerAccessType(),
 		ProcessFlowsAccess:         CreateOwnerAccessType(),
 		ControlsAccess:             CreateOwnerAccessType(),
@@ -93,6 +97,8 @@ func CreateDefaultRoleMetadata(orgId int32) RoleMetadata {
 
 func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 	switch resource {
+	case ResourceOrgUsers:
+		return p.OrgUsersAccess
 	case ResourceOrgRoles:
 		return p.OrgRolesAccess
 	case ResourceProcessFlows:

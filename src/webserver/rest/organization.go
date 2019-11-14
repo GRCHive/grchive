@@ -19,7 +19,14 @@ func getAllUsersInOrganization(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	users, err := database.FindAllUsersInOrganization(org.Id)
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	users, err := database.FindAllUsersInOrganization(org.Id, role)
 	if err != nil {
 		core.Warning("Failed to find users: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

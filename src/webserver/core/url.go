@@ -19,6 +19,7 @@ func CreateSamlCallbackUrl() string {
 }
 
 const VerifyEmailUrl string = "/verify"
+const AcceptInviteUrl string = "/invite"
 
 // Dashboard
 const DashboardUrl string = "/dashboard"
@@ -42,6 +43,12 @@ var DashboardOrgRiskEndpoint string = fmt.Sprintf("/risks/{%s}", DashboardOrgRis
 var DashboardOrgControlEndpoint string = fmt.Sprintf("/controls/{%s}", DashboardOrgControlQueryId)
 var DashboardOrgFlowEndpoint string = fmt.Sprintf("/flows/{%s}", DashboardOrgFlowQueryId)
 
+// Dashboard - Organization - Settings
+const DashboardOrgSettingsPrefix string = "/settings"
+const DashboardOrgSettingsHomeEndpoint string = "/"
+const DashboardOrgSettingsUsersEndpoint string = "/users"
+const DashboardOrgSettingsRolesEndpoint string = "/roles"
+
 // Dashboard - User
 const DashboardUserQueryId string = "user"
 
@@ -53,6 +60,10 @@ const DashboardUserProfileUrl string = "/profile"
 
 // API
 const ApiUrl string = "/api"
+
+// API - Invites
+const ApiInvitePrefix string = "/invite"
+const ApiSendInviteEndpoint string = "/send"
 
 // API Verification
 const ApiVerificationPrefix string = "/verification"

@@ -183,3 +183,26 @@ func RenderDashboardSingleFlowPage(w http.ResponseWriter, r *http.Request) {
 	}
 	RenderTemplate(w, DashboardSingleFlowTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
+
+func RenderDashboardOrgSettingsHome(w http.ResponseWriter, r *http.Request) {
+	org, err := webcore.FindOrganizationInContext(r.Context())
+	if err != nil {
+		core.Warning("No organization data: " + err.Error())
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
+			http.StatusTemporaryRedirect)
+		return
+	}
+
+	http.Redirect(w, r,
+		webcore.MustGetRouteUrl(webcore.OrgSettingsUsersRouteName, core.DashboardOrgOrgQueryId, org.OktaGroupName),
+		http.StatusTemporaryRedirect)
+}
+
+func RenderDashboardOrgSettingsUsers(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardOrgSettingsUsersTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}
+
+func RenderDashboardOrgSettingsRoles(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardOrgSettingsRolesTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}

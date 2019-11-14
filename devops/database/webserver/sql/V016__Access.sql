@@ -27,32 +27,16 @@ CREATE TABLE user_roles (
         ON DELETE CASCADE
 );
 
-CREATE TABLE resource_organizations_access (
+CREATE TABLE _base_resource_access (
     role_id BIGINT NOT NULL REFERENCES organization_available_roles(id) ON DELETE CASCADE,
     access_type INTEGER NOT NULL
 );
 
-CREATE TABLE resource_process_flows_access (
-    role_id BIGINT NOT NULL REFERENCES organization_available_roles(id) ON DELETE CASCADE,
-    access_type INTEGER NOT NULL
-);
 
-CREATE TABLE resource_controls_access (
-    role_id BIGINT NOT NULL REFERENCES organization_available_roles(id) ON DELETE CASCADE,
-    access_type INTEGER NOT NULL
-);
-
-CREATE TABLE resource_control_documentation_access (
-    role_id BIGINT NOT NULL REFERENCES organization_available_roles(id) ON DELETE CASCADE,
-    access_type INTEGER NOT NULL
-);
-
-CREATE TABLE resource_control_documentation_metadata_access (
-    role_id BIGINT NOT NULL REFERENCES organization_available_roles(id) ON DELETE CASCADE,
-    access_type INTEGER NOT NULL
-);
-
-CREATE TABLE resource_risks_access (
-    role_id BIGINT NOT NULL REFERENCES organization_available_roles(id) ON DELETE CASCADE,
-    access_type INTEGER NOT NULL
-);
+CREATE TABLE resource_organization_users_access () INHERITS (_base_resource_access);
+CREATE TABLE resource_organization_roles_access () INHERITS (_base_resource_access);
+CREATE TABLE resource_process_flows_access () INHERITS (_base_resource_access);
+CREATE TABLE resource_controls_access () INHERITS (_base_resource_access);
+CREATE TABLE resource_control_documentation_access () INHERITS (_base_resource_access);
+CREATE TABLE resource_control_documentation_metadata_access () INHERITS (_base_resource_access);
+CREATE TABLE resource_risks_access () INHERITS (_base_resource_access);

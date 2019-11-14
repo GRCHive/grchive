@@ -1,5 +1,5 @@
 <template>
-    <generic-nav-bar :selectedPage="selectedPage" :navLinks="navLinks" :mini="mini">
+    <generic-nav-bar :selected-page="selectedPage" :nav-links="navLinks" :mini="mini">
     </generic-nav-bar>
 </template>
 

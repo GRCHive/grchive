@@ -68,3 +68,15 @@ export function password(v: string) : boolean | string {
 
     return true
 }
+
+export function createPerElement(fn : (arg0 : string) => boolean | string) : (arg0 : Array<string>) => boolean | string {
+    return function(v: Array<string>) : boolean | string  {
+        for (const ele of v) {
+            const res = fn(ele)
+            if (!res || typeof res == 'string') {
+                return res + ` [${ele}]`
+            }
+        }
+        return true
+    }
+}

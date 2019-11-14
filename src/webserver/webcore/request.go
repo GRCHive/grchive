@@ -176,6 +176,9 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 		case core.StringReflectType:
 			dataValue = reflect.ValueOf(data[0])
 			break
+		case core.StringArrayReflectType:
+			dataValue = reflect.ValueOf(data[:])
+			break
 		case core.Int64ArrayReflectType:
 			arr := make([]int64, len(data))
 			for idx, val := range data {

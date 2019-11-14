@@ -1,5 +1,5 @@
 <template>
-    <generic-nav-bar :selectedPage="selectedPage" :navLinks="navLinks" :mini="mini">
+    <generic-nav-bar :selected-page="selectedPage" :nav-links="navLinks" :mini="mini">
     </generic-nav-bar>
 </template>
 
@@ -64,8 +64,8 @@ export default Vue.extend({
                 {
                     title: 'Settings',
                     icon: 'mdi-settings',
-                    url: '#',
-                    disabled : true
+                    url: PageParamsStore.state.organization!.Url + '/settings',
+                    disabled : false
                 },
             ],
         }

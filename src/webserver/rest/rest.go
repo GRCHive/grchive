@@ -20,6 +20,7 @@ func RegisterPaths(r *mux.Router) {
 	altApiRouter.HandleFunc(core.CreateSamlCallbackUrl(), getSamlLoginCallback).Methods("GET").Name(string(webcore.SamlCallbackRouteName))
 	altApiRouter.HandleFunc(core.LogoutUrl, getLogout).Methods("GET").Name(string(webcore.LogoutRouteName))
 	altApiRouter.HandleFunc(core.VerifyEmailUrl, verifyUserEmail).Methods("GET").Name(webcore.EmailVerifyRouteName)
+	altApiRouter.HandleFunc(core.AcceptInviteUrl, acceptInviteToOrganization).Methods("GET").Name(webcore.AcceptInviteRouteName)
 
 	// REST API
 	registerAPIPaths(r)
@@ -29,6 +30,7 @@ func registerAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiUrl).Subrouter()
 	s.Use(webcore.ObtainAPIKeyRoleInContextMiddleware)
 
+	registerInviteAPIPaths(s)
 	registerVerificationAPIPaths(s)
 	registerUserAPIPaths(s)
 	registerOrgAPIPaths(s)
@@ -39,6 +41,11 @@ func registerAPIPaths(r *mux.Router) {
 	registerRiskAPIPaths(s)
 	registerControlAPIPaths(s)
 	registerControlDocumentationAPIPaths(s)
+}
+
+func registerInviteAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiInvitePrefix).Subrouter()
+	s.HandleFunc(core.ApiSendInviteEndpoint, sendInviteToOrganization).Methods("POST").Name(webcore.SendInviteRouteName)
 }
 
 func registerVerificationAPIPaths(r *mux.Router) {

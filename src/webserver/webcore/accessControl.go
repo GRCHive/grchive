@@ -25,7 +25,10 @@ func ObtainOrganizationDefaultRole(orgId int32) (*core.Role, error) {
 	defaultMetadata := core.CreateDefaultRoleMetadata(orgId)
 
 	err = database.InsertOrgRole(&defaultMetadata, &defaultRole, core.ServerRole)
-	if err != nil {
+	if database.IsDuplicateDBEntry(err) {
+		// Something happened we should actually be able to find this thing...try again!
+		return ObtainOrganizationDefaultRole(orgId)
+	} else if err != nil {
 		return nil, err
 	}
 
@@ -69,7 +72,8 @@ func GrantAPIKeyDefaultRole(key *core.ApiKey, orgId int32) (*core.Role, error) {
 	}
 
 	err = database.InsertUserRoleForOrg(user.Id, orgId, defaultRole, core.ServerRole)
-	if err != nil {
+	// It's ok if there's a duplicate because it means we've added the role already. OK!
+	if err != nil && !database.IsDuplicateDBEntry(err) {
 		return nil, err
 	}
 

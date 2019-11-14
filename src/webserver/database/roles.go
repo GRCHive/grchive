@@ -7,7 +7,8 @@ import (
 )
 
 var resourceToDatabaseMap = map[core.ResourceType]string{
-	core.ResourceOrgRoles:                     "resource_organizations_access",
+	core.ResourceOrgUsers:                     "resource_organization_users_access",
+	core.ResourceOrgRoles:                     "resource_organization_roles_access",
 	core.ResourceProcessFlows:                 "resource_process_flows_access",
 	core.ResourceControls:                     "resource_controls_access",
 	core.ResourceControlDocumentation:         "resource_control_documentation_access",
@@ -21,15 +22,18 @@ func createRoleSql(cond string) string {
 			role.id AS id,
 			role.name AS name,
 			role.description AS description,
-			rorg.access_type AS "permissions.org_access",
+			ruser.access_type AS "permissions.users_access",
+			rrole.access_type AS "permissions.roles_access",
 			rpf.access_type AS "permissions.flow_access",
 			rc.access_type AS "permissions.control_access",
 			rcd.access_type AS "permissions.doc_access",
 			rcdm.access_type AS "permissions.doc_meta_access",
 			rr.access_type AS "permissions.risk_access"
 		FROM organization_available_roles AS role
-		INNER JOIN resource_organizations_access AS rorg
-			ON role.id = rorg.role_id
+		INNER JOIN resource_organization_users_access AS ruser
+			ON role.id = ruser.role_id
+		INNER JOIN resource_organization_roles_access AS rrole
+			ON role.id = rrole.role_id
 		INNER JOIN resource_process_flows_access AS rpf
 			ON role.id = rpf.role_id
 		INNER JOIN resource_controls_access AS rc
@@ -75,6 +79,7 @@ func FindUserRoleForOrg(userId int64, orgId int32, actionRole *core.Role) (*core
 	WHERE ur.user_id = $1
 		AND ur.org_id = $2
 	`))
+
 	if err != nil {
 		return nil, err
 	}

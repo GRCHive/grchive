@@ -12,6 +12,8 @@ func initializeHasher() {
 	}
 
 	data := hashids.NewData()
+	data.MinLength = EnvConfig.HashId.MinLength
+	data.Salt = EnvConfig.HashId.Salt
 
 	var err error
 	hasher, err = hashids.NewWithData(data)

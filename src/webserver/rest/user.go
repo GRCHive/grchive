@@ -6,6 +6,7 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/database"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
 	"net/http"
+	"time"
 )
 
 type UpdateUserProfileInputs struct {
@@ -20,6 +21,12 @@ type VerifyEmailInputs struct {
 
 type RequestResendVerificationEmailInputs struct {
 	UserId int64 `webcore:"userId"`
+}
+
+type SendInviteInputs struct {
+	FromUserId int64    `webcore:"fromUserId"`
+	FromOrgId  int32    `webcore:"fromOrgId"`
+	ToEmails   []string `webcore:"toEmails"`
 }
 
 func getAllOrganizationsForUser(w http.ResponseWriter, r *http.Request) {
@@ -158,4 +165,56 @@ func requestResendUserVerificationEmail(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+}
+
+func sendInviteToOrganization(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := SendInviteInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.FromOrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	pendingInvites := []*core.InviteCode{}
+	for _, email := range inputs.ToEmails {
+		invite := core.InviteCode{
+			FromUserId: inputs.FromUserId,
+			FromOrgId:  inputs.FromOrgId,
+			ToEmail:    email,
+			SentTime:   core.CreateNullTime(time.Now().UTC()),
+		}
+		pendingInvites = append(pendingInvites, &invite)
+	}
+
+	failureEmail, err := webcore.SendBatchInviteCodes(pendingInvites, role)
+	if err != nil {
+		core.Warning("Failed to send invites: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonWriter.Encode(struct {
+			FailedEmail string
+		}{
+			FailedEmail: failureEmail,
+		})
+		return
+	}
+}
+
+func acceptInviteToOrganization(w http.ResponseWriter, r *http.Request) {
+	// Needs to handle three states:
+	// 1) Email and code match up with logged in user. Add user to organization.
+	// 2) Email and code do not match up with logged in user. Tell user they're logged in on the wrong account.
+	// 3) User is not logged in, prompt them to login. Otherwise, ask them to register.
+	// 	  The invite code should flow through in both those cases. Login/registration will handle
+	// 	  adding them to the registration (probably through a redirect back here).
 }
