@@ -156,7 +156,7 @@ func CreateNewUser(newUser *core.User, invite *core.InviteCode) error {
 	}
 
 	if invite != nil {
-		err = ProcessInviteCodeForUser(invite, newUser, tx)
+		err = ProcessInviteCodeForUserWithTx(invite, newUser, tx)
 		if err != nil {
 			tx.Rollback()
 			return err

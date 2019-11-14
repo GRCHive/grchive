@@ -2,6 +2,7 @@ package rest
 
 import (
 	"encoding/json"
+	"github.com/google/go-querystring/query"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
@@ -27,6 +28,11 @@ type SendInviteInputs struct {
 	FromUserId int64    `webcore:"fromUserId"`
 	FromOrgId  int32    `webcore:"fromOrgId"`
 	ToEmails   []string `webcore:"toEmails"`
+}
+
+type AcceptInviteInputs struct {
+	Email      string `webcore:"email"`
+	InviteCode string `webcore:"inviteCode"`
 }
 
 func getAllOrganizationsForUser(w http.ResponseWriter, r *http.Request) {
@@ -211,10 +217,59 @@ func sendInviteToOrganization(w http.ResponseWriter, r *http.Request) {
 }
 
 func acceptInviteToOrganization(w http.ResponseWriter, r *http.Request) {
-	// Needs to handle three states:
-	// 1) Email and code match up with logged in user. Add user to organization.
-	// 2) Email and code do not match up with logged in user. Tell user they're logged in on the wrong account.
-	// 3) User is not logged in, prompt them to login. Otherwise, ask them to register.
-	// 	  The invite code should flow through in both those cases. Login/registration will handle
-	// 	  adding them to the registration (probably through a redirect back here).
+	inputs := AcceptInviteInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// If the user isn't registered, redirect them to the registration page with the email
+	// and invite code prefilled.
+	user, err := database.FindUserFromEmail(inputs.Email)
+	if err != nil {
+		registerV, _ := query.Values(struct {
+			InviteCode string `url:"inviteCode"`
+			Email      string `url:"email"`
+		}{
+			InviteCode: inputs.InviteCode,
+			Email:      inputs.Email,
+		})
+
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.RegisterRouteName)+"?"+registerV.Encode(),
+			http.StatusTemporaryRedirect)
+		return
+	}
+
+	// If the key isn't valid just error out.
+	// TODO: Better error?
+	invite, err := database.FindInviteCodeFromHash(inputs.InviteCode, inputs.Email, core.ServerRole)
+	if err != nil {
+		core.Warning("Invalid invite code: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Process the invite and associate it with the user.
+	err = webcore.ProcessInviteCodeForUser(invite, user)
+	if err != nil {
+		core.Warning("Failed to process invite code: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// If the user is logged in, direct them to the dashboard.
+	// If the user is not logged in, direct them to the login page.
+	_, err = webcore.FindSessionInContext(r.Context())
+	if err != nil {
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.LoginRouteName),
+			http.StatusTemporaryRedirect)
+	} else {
+		http.Redirect(w, r,
+			webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
+			http.StatusTemporaryRedirect)
+	}
 }

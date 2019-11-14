@@ -114,7 +114,7 @@ func SendBatchInviteCodes(invites []*core.InviteCode, role *core.Role) (string, 
 	return "", nil
 }
 
-func ProcessInviteCodeForUser(invite *core.InviteCode, user *core.User, tx *sqlx.Tx) error {
+func ProcessInviteCodeForUserWithTx(invite *core.InviteCode, user *core.User, tx *sqlx.Tx) error {
 	// Need to do two things here: add the user to the correct organization.
 	// Mark the invite as being used.
 	org, err := database.FindOrganizationFromId(invite.FromOrgId)
@@ -133,4 +133,14 @@ func ProcessInviteCodeForUser(invite *core.InviteCode, user *core.User, tx *sqlx
 	}
 
 	return nil
+}
+
+func ProcessInviteCodeForUser(invite *core.InviteCode, user *core.User) error {
+	tx := database.CreateTx()
+	err := ProcessInviteCodeForUserWithTx(invite, user, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
 }

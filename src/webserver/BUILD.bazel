@@ -49,34 +49,6 @@ go_library(
     importpath = "gitlab.com/b3h47pte/audit-stuff/websocket"
 )
 
-go_library(
-    name = "webserver_rest_library",
-    srcs = [
-        "rest/rest.go",
-        "rest/gettingStarted.go",
-        "rest/login.go",
-        "rest/user.go",
-        "rest/processFlow.go",
-        "rest/processFlowNodes.go",
-        "rest/processFlowIO.go",
-        "rest/processFlowEdges.go",
-        "rest/risks.go",
-        "rest/organization.go",
-        "rest/controls.go",
-        "rest/controlDocumentation.go",
-    ],
-    deps = [
-        "@com_github_gorilla_mux//:go_default_library",
-        "//src/webserver/core:webserver_core_library",
-        "//src/vault_api/golang:vault_golang_api",
-        "//src/backblaze_api/golang:backblaze_golang_api",
-        "//src/webserver/webcore:webserver_webcore_library",
-        "//src/webserver/database:webserver_database_library",
-        ":webserver_render_library",
-    ],
-    importpath = "gitlab.com/b3h47pte/audit-stuff/rest"
-)
-
 go_binary(
     name = "webserver",
     srcs = [
@@ -92,7 +64,7 @@ go_binary(
         "//src/webserver/webcore:webserver_webcore_library",
         "//src/webserver/database:webserver_database_library",
         ":webserver_render_library",
-        ":webserver_rest_library",
+        "//src/webserver/rest:webserver_rest_library",
         ":webserver_websocket_library",
     ],
     data = [

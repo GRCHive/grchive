@@ -33,7 +33,7 @@ func RefreshGrantAPIKey(userId int64, w http.ResponseWriter, r *http.Request) er
 	// This situation happens if they share the browser and login as a different user.
 	forceNeedNewKey := false
 	cookie, err := r.Cookie("client-api-key")
-	if err != nil && key != nil {
+	if err == nil && key != nil {
 		clientKey := core.RawApiKey(cookie.Value)
 		forceNeedNewKey = clientKey.Hash() != key.HashedKey
 	}
