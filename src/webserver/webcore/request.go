@@ -2,10 +2,12 @@ package webcore
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
+	"io/ioutil"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -82,9 +84,13 @@ func GetProcessFlowIdFromRequest(r *http.Request) (int64, error) {
 }
 
 func IsRequestMultipartForm(r *http.Request) bool {
-	header := r.Header
-	contentType := header.Get("Content-Type")
+	contentType := r.Header.Get("Content-Type")
 	return strings.Contains(contentType, "multipart/form-data")
+}
+
+func IsJsonRequest(r *http.Request) bool {
+	contentType := r.Header.Get("Content-Type")
+	return strings.Contains(contentType, "application/json")
 }
 
 func UnmarshalRequestForm(r *http.Request, output interface{}) error {
@@ -92,6 +98,18 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 		if err := r.ParseMultipartForm(MaxMultipartFormMemoryBytes); err != nil {
 			return err
 		}
+	} else if IsJsonRequest(r) {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			return err
+		}
+
+		err = json.Unmarshal(body, output)
+		if err != nil {
+			return err
+		}
+
+		return nil
 	} else {
 		if err := r.ParseForm(); err != nil {
 			return err

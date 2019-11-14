@@ -16,6 +16,7 @@ go_library(
         "organization.go",
         "controls.go",
         "controlDocumentation.go",
+        "roles.go"
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",
@@ -25,7 +26,7 @@ go_library(
         "//src/webserver/webcore:webserver_webcore_library",
         "//src/webserver/database:webserver_database_library",
         "@com_github_google_go_querystring//query:go_default_library",
-        "//src/webserver:webserver_render_library",
+        "//src/webserver/render:webserver_render_library",
     ],
     importpath = "gitlab.com/b3h47pte/audit-stuff/rest"
 )

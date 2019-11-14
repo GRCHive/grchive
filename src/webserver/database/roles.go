@@ -19,9 +19,12 @@ var resourceToDatabaseMap = map[core.ResourceType]string{
 func createRoleSql(cond string) string {
 	return fmt.Sprintf(`
 		SELECT
-			role.id AS id,
-			role.name AS name,
-			role.description AS description,
+			role.id AS "role.id",
+			role.name AS "role.name",
+			role.description AS "role.description",
+			role.is_default_role AS "role.is_default_role",
+			role.is_admin_role AS "role.is_admin_role",
+			role.org_id AS "role.org_id",
 			ruser.access_type AS "permissions.users_access",
 			rrole.access_type AS "permissions.roles_access",
 			rpf.access_type AS "permissions.flow_access",
@@ -110,9 +113,10 @@ func InsertOrgRole(metadata *core.RoleMetadata, role *core.Role, actionRole *cor
 	tx := dbConn.MustBegin()
 
 	rows, err := tx.NamedQuery(`
-		INSERT INTO organization_available_roles ( is_default_role, name, description, org_id)
+		INSERT INTO organization_available_roles ( is_default_role, is_admin_role, name, description, org_id)
 		VALUES (
 			:is_default_role,
+			:is_admin_role,
 			:name,
 			:description,
 			:org_id
@@ -162,4 +166,30 @@ func InsertUserRoleForOrg(userId int64, orgId int32, role *core.Role, actionRole
 	}
 
 	return tx.Commit()
+}
+
+func FindRolesForOrg(orgId int32, actionRole *core.Role) ([]*core.RoleMetadata, error) {
+	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	stmt, err := dbConn.Preparex(createRoleSql(`
+	WHERE role.org_id = $1
+	`))
+
+	if err != nil {
+		return nil, err
+	}
+
+	roles := make([]*core.Role, 0)
+	err = stmt.Select(&roles, orgId)
+	if err != nil {
+		return nil, err
+	}
+
+	metadata := make([]*core.RoleMetadata, len(roles))
+	for i, r := range roles {
+		metadata[i] = &r.RoleMetadata
+	}
+	return metadata, err
 }

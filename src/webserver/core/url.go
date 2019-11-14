@@ -140,6 +140,13 @@ const ApiGetControlDocumentationEndpoint string = "/get"
 const ApiDeleteControlDocumentationEndpoint string = "/delete"
 const ApiDownloadControlDocumentationEndpoint string = "/download"
 
+// API - Roles
+const ApiRolePrefix string = "/roles"
+const ApiGetOrganizationRolesEndpoint string = "/all"
+const ApiNewRoleEndpoint string = "/new"
+const ApiEditRoleEndpoint string = "/edit"
+const ApiDeleteRoleEndpoint string = "/delete"
+
 // Websocket
 const WebsocketPrefix string = "/ws"
 

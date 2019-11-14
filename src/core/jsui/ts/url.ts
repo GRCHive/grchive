@@ -132,3 +132,6 @@ export const downloadControlDocUrl : string = "/api/documentation/download"
 
 export const requestVerificationEmailUrl : string = "/api/verification/resend"
 export const inviteUsersToOrgUrl: string = "/api/invite/send"
+
+export const getOrgRolesUrl : string = "/api/roles/all"
+export const newRoleUrl : string = "/api/roles/new"

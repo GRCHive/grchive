@@ -18,37 +18,6 @@ genrule(
     cmd = "cp $< $@"
 )
 
-go_library(
-    name = "webserver_render_library",
-    srcs = [
-        "render/pages.go",
-        "render/templates.go",
-        "render/params.go",
-        "render/error.go",
-    ],
-    deps = [
-        "//src/webserver/core:webserver_core_library",
-        "//src/webserver/webcore:webserver_webcore_library",
-    ],
-    importpath = "gitlab.com/b3h47pte/audit-stuff/render"
-)
-
-go_library(
-    name = "webserver_websocket_library",
-    srcs = [
-        "websocket/websocket.go",
-        "websocket/processFlowNodeDisplaySettings.go"
-    ],
-    deps = [
-        "//src/webserver/core:webserver_core_library",
-        "//src/webserver/database:webserver_database_library",
-        "//src/webserver/webcore:webserver_webcore_library",
-        "@com_github_gorilla_mux//:go_default_library",
-        "@com_github_gorilla_websocket//:go_default_library",
-    ],
-    importpath = "gitlab.com/b3h47pte/audit-stuff/websocket"
-)
-
 go_binary(
     name = "webserver",
     srcs = [
@@ -63,9 +32,9 @@ go_binary(
         "//src/vault_api/golang:vault_golang_api",
         "//src/webserver/webcore:webserver_webcore_library",
         "//src/webserver/database:webserver_database_library",
-        ":webserver_render_library",
+        "//src/webserver/render:webserver_render_library",
         "//src/webserver/rest:webserver_rest_library",
-        ":webserver_websocket_library",
+        "//src/webserver/websocket:webserver_websocket_library",
     ],
     data = [
         ":templates",

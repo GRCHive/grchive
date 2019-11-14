@@ -53,7 +53,7 @@
                     :key="index"
                 >
                     <template v-slot:default="{active}">
-                        <v-checkbox class="ma-0" :value="active" :hide-details="true"></v-checkbox>
+                        <v-checkbox class="ma-0" v-model="active" :hide-details="true"></v-checkbox>
                         <v-list-item-content>
                             <v-list-item-title v-html="highlightText(`${item.FirstName} ${item.LastName}`)">
                             </v-list-item-title>
@@ -114,6 +114,13 @@ export default Vue.extend({
         },
         onInvite() {
             this.showHideInvite = false
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Successfully sent invite(s)!",
+                false,
+                "",
+                "",
+                false);
         },
         cancelInvite() {
             this.showHideInvite = false

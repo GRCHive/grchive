@@ -41,6 +41,7 @@ func registerAPIPaths(r *mux.Router) {
 	registerRiskAPIPaths(s)
 	registerControlAPIPaths(s)
 	registerControlDocumentationAPIPaths(s)
+	registerRoleAPIPaths(s)
 }
 
 func registerInviteAPIPaths(r *mux.Router) {
@@ -125,4 +126,12 @@ func registerControlDocumentationAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiGetControlDocumentationEndpoint, getControlDocumentation).Methods("GET").Name(webcore.UploadControlDocRouteName)
 	s.HandleFunc(core.ApiDeleteControlDocumentationEndpoint, deleteControlDocumentation).Methods("POST").Name(webcore.UploadControlDocRouteName)
 	s.HandleFunc(core.ApiDownloadControlDocumentationEndpoint, downloadControlDocumentation).Methods("GET").Name(webcore.UploadControlDocRouteName)
+}
+
+func registerRoleAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiRolePrefix).Subrouter()
+	s.HandleFunc(core.ApiGetOrganizationRolesEndpoint, getAllOrganizationRoles).Methods("GET").Name(webcore.GetOrgRolesRouteName)
+	s.HandleFunc(core.ApiNewRoleEndpoint, newRole).Methods("POST").Name(webcore.NewRoleRouteName)
+	s.HandleFunc(core.ApiEditRoleEndpoint, editRole).Methods("POST").Name(webcore.EditRoleRouteName)
+	s.HandleFunc(core.ApiDeleteRoleEndpoint, deleteRole).Methods("POST").Name(webcore.DeleteRoleRouteName)
 }

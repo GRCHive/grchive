@@ -81,6 +81,10 @@ const (
 	OrgSettingsRolesRouteName                      = "OrgSettingsRoles"
 	SendInviteRouteName                            = "SendInvite"
 	AcceptInviteRouteName                          = "AcceptInvite"
+	GetOrgRolesRouteName                           = "GetOrgRoles"
+	NewRoleRouteName                               = "NewRole"
+	EditRoleRouteName                              = "EditRole"
+	DeleteRoleRouteName                            = "DeleteRole"
 )
 
 var globalRouter *mux.Router

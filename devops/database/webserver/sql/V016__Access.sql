@@ -1,6 +1,7 @@
 CREATE TABLE organization_available_roles (
     id BIGSERIAL PRIMARY KEY,
     is_default_role BOOLEAN NOT NULL,
+    is_admin_role BOOLEAN NOT NULL,
     name VARCHAR(256) NOT NULL,
     description TEXT,
     org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
@@ -8,6 +9,10 @@ CREATE TABLE organization_available_roles (
 );
 
 CREATE UNIQUE INDEX org_roles_default_index ON organization_available_roles (is_default_role)
+WHERE is_default_role = true;
+
+
+CREATE UNIQUE INDEX org_roles_admin_index ON organization_available_roles (is_admin_role)
 WHERE is_default_role = true;
 
 CREATE UNIQUE INDEX org_roles_id_org_index ON organization_available_roles (id, org_id);

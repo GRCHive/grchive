@@ -53,14 +53,13 @@ type RoleMetadata struct {
 	Name        string `db:"name"`
 	Description string `db:"description"`
 	IsDefault   bool   `db:"is_default_role"`
+	IsAdmin     bool   `db:"is_admin_role"`
 	OrgId       int32  `db:"org_id"`
 }
 
 type Role struct {
-	Id          int64          `db:"id"`
-	Name        string         `db:"name"`
-	Description string         `db:"description"`
-	Permissions PermissionsMap `db:"permissions"`
+	RoleMetadata `db:"role" json:"RoleMetadata"`
+	Permissions  PermissionsMap `db:"permissions"`
 }
 
 func CreateOwnerAccessType() AccessType {
@@ -80,9 +79,11 @@ func CreateAllAccessPermission() PermissionsMap {
 }
 
 var ServerRole = &Role{
-	Id:          -1,
-	Name:        "Server Role",
-	Description: "All access Server role",
+	RoleMetadata: RoleMetadata{
+		Id:          -1,
+		Name:        "Server Role",
+		Description: "All access Server role",
+	},
 	Permissions: CreateAllAccessPermission(),
 }
 
@@ -91,6 +92,7 @@ func CreateDefaultRoleMetadata(orgId int32) RoleMetadata {
 		Name:        "Default",
 		Description: "Default role granted to all users in the organization.",
 		IsDefault:   true,
+		IsAdmin:     false,
 		OrgId:       orgId,
 	}
 }

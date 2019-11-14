@@ -1,0 +1,18 @@
+package(default_visibility=["//visibility:public"])
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "webserver_websocket_library",
+    srcs = [
+        "websocket.go",
+        "processFlowNodeDisplaySettings.go"
+    ],
+    deps = [
+        "//src/webserver/core:webserver_core_library",
+        "//src/webserver/database:webserver_database_library",
+        "//src/webserver/webcore:webserver_webcore_library",
+        "@com_github_gorilla_mux//:go_default_library",
+        "@com_github_gorilla_websocket//:go_default_library",
+    ],
+    importpath = "gitlab.com/b3h47pte/audit-stuff/websocket"
+)
