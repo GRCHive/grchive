@@ -28,7 +28,17 @@ func RefreshGrantAPIKey(userId int64, w http.ResponseWriter, r *http.Request) er
 		return err
 	}
 
-	if key == nil || key.IsExpired() {
+	// Check if the user's API key is the same as what we have on the server.
+	// If it isn't the same, re-grant the API key.
+	// This situation happens if they share the browser and login as a different user.
+	forceNeedNewKey := false
+	cookie, err := r.Cookie("client-api-key")
+	if err != nil && key != nil {
+		clientKey := core.RawApiKey(cookie.Value)
+		forceNeedNewKey = clientKey.Hash() != key.HashedKey
+	}
+
+	if key == nil || forceNeedNewKey || key.IsExpired() {
 		isNew := (key == nil)
 		rawKey, key := GenerateTemporaryAPIKeyForUser(userId)
 
