@@ -137,10 +137,9 @@ func UpdateUserSessionFromTokens(session *core.UserSession, tokens *OktaTokens, 
 
 func createUserFromIdToken(idJwt *RawJWT) *core.User {
 	user := core.User{
-		FirstName:  idJwt.Payload.FirstName,
-		LastName:   idJwt.Payload.LastName,
-		Email:      idJwt.Payload.Email,
-		OktaUserId: idJwt.Payload.Sub,
+		FirstName: idJwt.Payload.FirstName,
+		LastName:  idJwt.Payload.LastName,
+		Email:     idJwt.Payload.Email,
 	}
 	return &user
 }
@@ -148,18 +147,29 @@ func createUserFromIdToken(idJwt *RawJWT) *core.User {
 // When we create a new user, insert them into
 // the user database table and send them an email
 // verification email.
-func CreateNewUser(newUser *core.User) error {
-	err := database.CreateNewUser(newUser)
+func CreateNewUser(newUser *core.User, invite *core.InviteCode) error {
+	tx := database.CreateTx()
+	err := database.CreateNewUserWithTx(newUser, tx)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	err = SendEmailVerification(newUser)
+	if invite != nil {
+		err = ProcessInviteCodeForUser(invite, newUser, tx)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	err = SendEmailVerificationWithTx(newUser, tx)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	return err
+	return tx.Commit()
 }
 
 // Creates a core.UserSession object and stores it into the session database.
@@ -174,11 +184,11 @@ func CreateUserSessionFromTokens(tokens *OktaTokens, r *http.Request) (*core.Use
 	// See if the user exists - if not, create a new user using the data
 	// found in the ID token.
 	newUser := createUserFromIdToken(tokens.DecodedIDToken)
-	dbUser, err := database.FindUserFromOktaId(newUser.OktaUserId)
+	dbUser, err := database.FindUserFromEmail(newUser.Email)
 	if err != nil {
 		// Assume that the first error indicates that we can't find the user.
 		// In that case, try to create the user.
-		err = CreateNewUser(newUser)
+		err = CreateNewUser(newUser, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -262,12 +272,11 @@ func OktaRegisterUserWithPassword(user *core.User, password string) error {
 		},
 		Activate: true,
 	}
-	oktaId, err := okta.RegisterUser(data)
+	_, err := okta.RegisterUser(data)
 	if err != nil {
 		return err
 	}
 
-	user.OktaUserId = oktaId
 	return nil
 }
 

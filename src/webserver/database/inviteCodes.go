@@ -62,17 +62,24 @@ func FindInviteCodeFromHash(hash string, email string, role *core.Role) (*core.I
 	return &code, nil
 }
 
-func MarkInviteAsUsed(code *core.InviteCode) error {
-	tx := dbConn.MustBegin()
+func MarkInviteAsUsedWithTx(code *core.InviteCode, tx *sqlx.Tx) error {
 	_, err := tx.Exec(`
 		UPDATE invitation_codes
 		SET used_time = $1
 		WHERE id = $2
 	`, time.Now().UTC(), code.Id)
 	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func MarkInviteAsUsed(code *core.InviteCode) error {
+	tx := dbConn.MustBegin()
+	err := MarkInviteAsUsedWithTx(code, tx)
+	if err != nil {
 		tx.Rollback()
 		return err
 	}
-	err = tx.Commit()
-	return err
+	return tx.Commit()
 }

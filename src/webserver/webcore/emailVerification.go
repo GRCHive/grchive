@@ -2,6 +2,7 @@ package webcore
 
 import (
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
 	"gitlab.com/b3h47pte/audit-stuff/mail_api"
@@ -19,6 +20,16 @@ const emailVerificationTemplateFname string = "src/webserver/templates/email/ver
 var emailVerificationTemplate = template.Must(template.ParseFiles(emailVerificationTemplateFname))
 
 func SendEmailVerification(user *core.User) error {
+	tx := database.CreateTx()
+	err := SendEmailVerificationWithTx(user, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
+func SendEmailVerificationWithTx(user *core.User, tx *sqlx.Tx) error {
 	veri := core.CreateNewEmailVerification(user)
 
 	veriLink, err := core.CreateUrlWithParams(MustGetRouteUrlAbsolute(EmailVerifyRouteName), map[string]string{
@@ -30,7 +41,7 @@ func SendEmailVerification(user *core.User) error {
 		return err
 	}
 
-	err = database.StoreEmailVerification(veri)
+	err = database.StoreEmailVerificationWithTx(veri, tx)
 	if err != nil {
 		return err
 	}

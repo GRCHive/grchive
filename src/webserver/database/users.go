@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/jmoiron/sqlx"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
@@ -26,43 +27,33 @@ func FindAllUsersInOrganization(orgId int32, role *core.Role) ([]*core.User, err
 	return users, nil
 }
 
-func FindUserFromOktaId(oktaId string) (*core.User, error) {
-	user := core.User{}
-
-	err := dbConn.Get(&user, `
-		SELECT * FROM users
-		WHERE okta_id = $1
-	`, oktaId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
-}
-
-func CreateNewUser(user *core.User) error {
-	var err error
-
-	tx := dbConn.MustBegin()
+func CreateNewUserWithTx(user *core.User, tx *sqlx.Tx) error {
 	rows, err := tx.NamedQuery(`
-		INSERT INTO users (okta_id, first_name, last_name, email)
-		VALUES (:okta_id, :first_name, :last_name, :email)
+		INSERT INTO users (first_name, last_name, email)
+		VALUES (:first_name, :last_name, :email)
 		RETURNING id
 	`, user)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	rows.Next()
 	err = rows.Scan(&user.Id)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 	rows.Close()
 
+	return nil
+}
+
+func CreateNewUser(user *core.User) error {
+	tx := dbConn.MustBegin()
+	err := CreateNewUserWithTx(user, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 	return tx.Commit()
 }
 
@@ -73,6 +64,21 @@ func FindUserFromId(id int64) (*core.User, error) {
 		SELECT * FROM users
 		WHERE id = $1
 	`, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func FindUserFromEmail(email string) (*core.User, error) {
+	user := core.User{}
+
+	err := dbConn.Get(&user, `
+		SELECT * FROM users
+		WHERE email = $1
+	`, email)
 
 	if err != nil {
 		return nil, err
@@ -106,19 +112,25 @@ func UpdateUserFromEmail(user *core.User) error {
 	return tx.Commit()
 }
 
-func AddUserToOrganization(user *core.User, org *core.Organization) error {
-	tx := dbConn.MustBegin()
-
+func AddUserToOrganizationWithTx(user *core.User, org *core.Organization, tx *sqlx.Tx) error {
 	_, err := tx.Exec(`
 		INSERT INTO user_orgs (user_id, org_id)
 		VALUES ($1, $2)
 	`, user.Id, org.Id)
 
 	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func AddUserToOrganization(user *core.User, org *core.Organization) error {
+	tx := dbConn.MustBegin()
+	err := AddUserToOrganizationWithTx(user, org, tx)
+	if err != nil {
 		tx.Rollback()
 		return err
 	}
-
 	return tx.Commit()
 }
 

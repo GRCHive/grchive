@@ -1,13 +1,12 @@
 package database
 
 import (
+	"github.com/jmoiron/sqlx"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"time"
 )
 
-func StoreEmailVerification(veri core.EmailVerification) error {
-	tx := dbConn.MustBegin()
-
+func StoreEmailVerificationWithTx(veri core.EmailVerification, tx *sqlx.Tx) error {
 	_, err := tx.NamedExec(`
 		INSERT INTO email_verification (user_id, code, verification_sent)
 		VALUES (:user_id, :code, :verification_sent)
@@ -17,6 +16,16 @@ func StoreEmailVerification(veri core.EmailVerification) error {
 					verification_sent = EXCLUDED.verification_sent
 	`, veri)
 
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func StoreEmailVerification(veri core.EmailVerification) error {
+	tx := dbConn.MustBegin()
+	err := StoreEmailVerificationWithTx(veri, tx)
 	if err != nil {
 		tx.Rollback()
 		return err

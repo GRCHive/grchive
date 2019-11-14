@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/go-querystring/query"
+	"github.com/jmoiron/sqlx"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
 	"gitlab.com/b3h47pte/audit-stuff/mail_api"
@@ -111,4 +112,25 @@ func SendBatchInviteCodes(invites []*core.InviteCode, role *core.Role) (string, 
 		}
 	}
 	return "", nil
+}
+
+func ProcessInviteCodeForUser(invite *core.InviteCode, user *core.User, tx *sqlx.Tx) error {
+	// Need to do two things here: add the user to the correct organization.
+	// Mark the invite as being used.
+	org, err := database.FindOrganizationFromId(invite.FromOrgId)
+	if err != nil {
+		return err
+	}
+
+	err = database.AddUserToOrganizationWithTx(user, org, tx)
+	if err != nil {
+		return err
+	}
+
+	err = database.MarkInviteAsUsedWithTx(invite, tx)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
