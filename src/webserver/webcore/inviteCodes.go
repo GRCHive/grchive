@@ -1,6 +1,7 @@
 package webcore
 
 import (
+	"errors"
 	"fmt"
 	"github.com/google/go-querystring/query"
 	"gitlab.com/b3h47pte/audit-stuff/core"
@@ -70,6 +71,16 @@ func SendInviteCodeEmailCode(invite *core.InviteCode, code string) error {
 }
 
 func SendSingleInviteCode(invite *core.InviteCode, role *core.Role) error {
+	// Make sure the user isn't already a part of the organization.
+	exists, err := database.IsUserEmailInOrganization(invite.ToEmail, invite.FromOrgId)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return errors.New("Can not send invite to a user in the organization.")
+	}
+
 	tx := database.CreateTx()
 
 	// Store pending invite into the database so we can

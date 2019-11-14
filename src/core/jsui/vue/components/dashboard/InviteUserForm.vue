@@ -82,11 +82,16 @@ export default Vue.extend({
                 if (!!err.response && err.response.data.FailedEmail) {
                     // @ts-ignore
                     this.$root.$refs.snackbar.showSnackBar(
-                        `Oops! Some emails failed to send. Please check the email ${err.response.data.FailedEmail} and try again. There may already be a pending invitation to this user from your organization.`,
+                        `Oops! Some invites failed to send. Please check the email ${err.response.data.FailedEmail} and try again. There may already be a pending invitation to this user from your organization or they may already have access to your organization.`,
                         true,
                         "Contact Us",
                         contactUsUrl,
                         true);
+
+                    let failIdx = this.emails.findIndex((ele : string) => (ele == err.response.data.FailedEmail))
+                    if (failIdx != -1) {
+                        this.emails.splice(0, failIdx)
+                    }
                 } else {
                     // @ts-ignore
                     this.$root.$refs.snackbar.showSnackBar(

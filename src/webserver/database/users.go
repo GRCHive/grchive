@@ -155,3 +155,21 @@ func FindAccessibleOrganizationsForUser(userId int64) ([]*core.Organization, err
 
 	return orgs, nil
 }
+
+func IsUserEmailInOrganization(email string, orgId int32) (bool, error) {
+	rows, err := dbConn.Queryx(`
+		SELECT *
+		FROM users AS u
+		INNER JOIN user_orgs AS uo
+			ON u.id = uo.user_id
+		WHERE u.email = $1
+			AND uo.org_id = $2
+	`, email, orgId)
+
+	if err != nil {
+		return false, nil
+	}
+
+	defer rows.Close()
+	return rows.Next(), nil
+}
