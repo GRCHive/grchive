@@ -66,11 +66,11 @@
                 </v-list-item-content>
 
                 <v-list-item-content>
-                    <v-checkbox class="ma-0" v-model="item.IsDefault" :hide-details="true" readonly :ripple="false"></v-checkbox>
+                    <v-checkbox class="ma-0" v-model="item.IsDefault" :hide-details="true" disabled></v-checkbox>
                 </v-list-item-content>
 
                 <v-list-item-content>
-                    <v-checkbox class="ma-0" v-model="item.IsAdmin" :hide-details="true" readonly :ripple="false"></v-checkbox>
+                    <v-checkbox class="ma-0" v-model="item.IsAdmin" :hide-details="true" disabled></v-checkbox>
                 </v-list-item-content>
             </v-list-item>
         </v-list>

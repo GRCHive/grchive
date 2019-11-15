@@ -32,6 +32,11 @@ type EditRoleInputs struct {
 	Permissions core.PermissionsMap `json:"permissions"`
 }
 
+type DeleteRoleInputs struct {
+	OrgId  int32 `json:"orgId"`
+	RoleId int64 `json:"roleId"`
+}
+
 func getAllOrganizationRoles(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -115,6 +120,36 @@ func editRole(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteRole(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := DeleteRoleInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	actionRole, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteRoleMetadata(inputs.OrgId, inputs.RoleId, actionRole)
+	if err != nil {
+		core.Warning("Failed to delete role: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func newRole(w http.ResponseWriter, r *http.Request) {

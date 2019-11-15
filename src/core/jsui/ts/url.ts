@@ -61,6 +61,10 @@ export function createControlUrl(org : string, control : number) : string {
     return `/dashboard/org/${org}/controls/${control}`
 }
 
+export function createOrgAllRolesUrl(org : string) : string {
+    return `/dashboard/org/${org}/settings/roles`
+}
+
 export function createOrgRoleUrl(org : string, role : number) : string {
     return `/dashboard/org/${org}/settings/roles/${role}`
 }

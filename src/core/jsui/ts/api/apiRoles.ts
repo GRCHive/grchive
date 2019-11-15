@@ -5,6 +5,7 @@ import { getAPIRequestConfig } from './apiUtility'
 import { getOrgRolesUrl,
          newRoleUrl,
          editRoleUrl,
+         deleteRoleUrl,
          getSingleOrgRoleUrl } from '../url'
 import { postFormJson } from '../http'
 
@@ -61,4 +62,16 @@ export interface TEditRoleOutput {
 
 export function editRole(inp : TEditRoleInput) : Promise<TEditRoleOutput> {
     return postFormJson<TEditRoleOutput>(editRoleUrl, inp, getAPIRequestConfig())
+}
+
+export interface TDeleteRoleInput {
+    roleId: number
+    orgId: number
+}
+
+export interface TDeleteRoleOutput {
+}
+
+export function deleteRole(inp : TDeleteRoleInput) : Promise<TDeleteRoleOutput> {
+    return postFormJson<TEditRoleOutput>(deleteRoleUrl, inp, getAPIRequestConfig())
 }

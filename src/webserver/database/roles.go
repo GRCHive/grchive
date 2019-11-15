@@ -270,3 +270,26 @@ func UpdateRole(role *core.Role, actionRole *core.Role) error {
 
 	return tx.Commit()
 }
+
+func DeleteRoleMetadata(orgId int32, roleId int64, actionRole *core.Role) error {
+	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+
+	_, err := tx.Exec(`
+		DELETE FROM organization_available_roles AS role
+		WHERE role.org_id = $1
+			AND role.id = $2
+			AND role.is_default_role = 'false'
+			AND role.is_admin_role = 'false'
+	`, orgId, roleId)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
