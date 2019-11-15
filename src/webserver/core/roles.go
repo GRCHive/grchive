@@ -97,6 +97,16 @@ func CreateDefaultRoleMetadata(orgId int32) RoleMetadata {
 	}
 }
 
+func CreateAdminRoleMetadata(orgId int32) RoleMetadata {
+	return RoleMetadata{
+		Name:        "Admin",
+		Description: "Admin role for the organization.",
+		IsDefault:   false,
+		IsAdmin:     true,
+		OrgId:       orgId,
+	}
+}
+
 func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 	switch resource {
 	case ResourceOrgUsers:

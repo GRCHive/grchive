@@ -86,6 +86,7 @@ const (
 	NewRoleRouteName                               = "NewRole"
 	EditRoleRouteName                              = "EditRole"
 	DeleteRoleRouteName                            = "DeleteRole"
+	AddUsersToRoleRouteName                        = "AddUsersToRole"
 	OrgSettingsSingleRoleRouteName                 = "OrgSettingsSingleRole"
 )
 

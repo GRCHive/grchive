@@ -35,6 +35,34 @@ func ObtainOrganizationDefaultRole(orgId int32) (*core.Role, error) {
 	return &defaultRole, nil
 }
 
+func ObtainOrganizationAdminRole(orgId int32) (*core.Role, error) {
+	role, err := database.FindAdminRoleForOrg(orgId, core.ServerRole)
+	if err != nil {
+		return nil, err
+	}
+
+	if role != nil {
+		return role, nil
+	}
+
+	// No default permissions was found which probably means this org was just created
+	// so create a default default permissions which is full admin access to everybody.
+	adminRole := core.Role{
+		Permissions: core.CreateAllAccessPermission(),
+	}
+	adminMetadata := core.CreateAdminRoleMetadata(orgId)
+
+	err = database.InsertOrgRole(&adminMetadata, &adminRole, core.ServerRole)
+	if database.IsDuplicateDBEntry(err) {
+		// Something happened we should actually be able to find this thing...try again!
+		return ObtainOrganizationAdminRole(orgId)
+	} else if err != nil {
+		return nil, err
+	}
+
+	return &adminRole, nil
+}
+
 func ObtainAPIKeyRole(key *core.ApiKey, orgId int32) (*core.Role, error) {
 	role, err := database.FindUserRoleForOrg(key.UserId, orgId, core.ServerRole)
 	if err != nil {
@@ -66,12 +94,30 @@ func GrantAPIKeyDefaultRole(key *core.ApiKey, orgId int32) (*core.Role, error) {
 		return nil, errors.New("User does not have access.")
 	}
 
+	// Obtain both the default role and admin role to make sure the
+	// organization's default roles are initialized.
 	defaultRole, err := ObtainOrganizationDefaultRole(orgId)
 	if err != nil {
 		return nil, err
 	}
 
-	err = database.InsertUserRoleForOrg(user.Id, orgId, defaultRole, core.ServerRole)
+	adminRole, err := ObtainOrganizationAdminRole(orgId)
+	if err != nil {
+		return nil, err
+	}
+
+	adminUserIds, err := database.FindUserIdsWithRole(adminRole.Id, orgId, core.ServerRole)
+	if err != nil {
+		return nil, err
+	}
+
+	// If this user is the first in their organization to login, they are the de-facto admin.
+	if len(adminUserIds) == 0 {
+		err = database.InsertUserRoleForOrg(user.Id, orgId, adminRole, core.ServerRole)
+	} else {
+		err = database.InsertUserRoleForOrg(user.Id, orgId, defaultRole, core.ServerRole)
+	}
+
 	// It's ok if there's a duplicate because it means we've added the role already. OK!
 	if err != nil && !database.IsDuplicateDBEntry(err) {
 		return nil, err

@@ -106,6 +106,20 @@ func FindDefaultRoleForOrg(orgId int32, actionRole *core.Role) (*core.Role, erro
 	return FindUserRoleFromStmt(stmt, orgId)
 }
 
+func FindAdminRoleForOrg(orgId int32, actionRole *core.Role) (*core.Role, error) {
+	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+	stmt, err := dbConn.Preparex(createRoleSql(`
+	WHERE role.org_id = $1
+		AND role.is_admin_role = 'true'
+	`))
+	if err != nil {
+		return nil, err
+	}
+	return FindUserRoleFromStmt(stmt, orgId)
+}
+
 func FindRoleFromId(roleId int64, orgId int32, actionRole *core.Role) (*core.Role, error) {
 	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessView) {
 		return nil, core.ErrorUnauthorized
@@ -289,6 +303,30 @@ func DeleteRoleMetadata(orgId int32, roleId int64, actionRole *core.Role) error 
 	if err != nil {
 		tx.Rollback()
 		return err
+	}
+
+	return tx.Commit()
+}
+
+func AddUsersToRole(userIds []int64, orgId int32, roleId int64, actionRole *core.Role) error {
+	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+
+	for _, userId := range userIds {
+		_, err := tx.Exec(`
+			UPDATE user_roles
+			SET role_id = $1
+			WHERE user_id = $2
+				AND org_id = $3
+		`, roleId, userId, orgId)
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	return tx.Commit()

@@ -135,4 +135,5 @@ func registerRoleAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiNewRoleEndpoint, newRole).Methods("POST").Name(webcore.NewRoleRouteName)
 	s.HandleFunc(core.ApiEditRoleEndpoint, editRole).Methods("POST").Name(webcore.EditRoleRouteName)
 	s.HandleFunc(core.ApiDeleteRoleEndpoint, deleteRole).Methods("POST").Name(webcore.DeleteRoleRouteName)
+	s.HandleFunc(core.ApiAddUsersToRoleEndpoint, addUsersToRole).Methods("POST").Name(webcore.AddUsersToRoleRouteName)
 }

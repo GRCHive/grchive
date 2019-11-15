@@ -44,7 +44,7 @@
                             </template>
                             <span v-if="currentRole.RoleMetadata.IsDefault">You can not delete the default role. </span>
                             <span v-if="currentRole.RoleMetadata.IsAdmin">You can not delete the admin role. </span>
-                            <span v-if="users.length > 0">You can not delete roles with users. </span>
+                            <span v-if="users.length > 0">You can not delete roles with users assigned to it. </span>
                         </v-tooltip>
                         <v-btn color="error"
                               :disabled="!canDelete"
@@ -70,7 +70,52 @@
                     </v-col>
 
                     <v-col cols="3">
+                        <v-card>
+                            <v-card-title>
+                                Users
+                                <v-spacer></v-spacer>
 
+                                <v-dialog v-model="showHideAddUser" persistent max-width="40%">
+                                    <template v-slot:activator="{ on }">
+                                        <v-btn small color="primary" v-on="on">
+                                            Add User
+                                        </v-btn>
+                                    </template>
+
+                                    <v-card>
+                                        <v-card-title>
+                                            Select Users to Add to the
+                                            <span class="font-weight-bold">&nbsp;{{ currentRole.RoleMetadata.Name }}&nbsp;</span>
+                                            Role
+                                        </v-card-title>
+                                        <v-divider></v-divider>
+                                        <user-table
+                                            :users="selectableOrgUsers"
+                                            v-model="usersToAdd"
+                                            selectable
+                                            multi>
+                                        </user-table>
+
+                                        <v-card-actions>
+                                            <v-btn color="error" @click="showHideAddUser = false">
+                                                Cancel
+                                            </v-btn>
+                                            <v-spacer></v-spacer>
+                                            <v-btn color="success"
+                                                   :disabled="usersToAdd.length == 0"
+                                                   @click="addUsersToRole">
+                                                Add
+                                            </v-btn>
+                                        </v-card-actions>
+                                    </v-card>
+
+                                </v-dialog>
+                            </v-card-title>
+                            <v-divider></v-divider>
+
+                            <user-table :users="users">
+                            </user-table>
+                        </v-card>
                     </v-col>
                 </v-row>
             </v-container>
@@ -86,9 +131,13 @@ import { FullRole } from '../../../ts/roles'
 import { createOrgAllRolesUrl, contactUsUrl } from '../../../ts/url'
 import { TGetSingleRoleInput, TGetSingleRoleOutput, getSingleRole} from '../../../ts/api/apiRoles'
 import { TDeleteRoleInput, TDeleteRoleOutput, deleteRole} from '../../../ts/api/apiRoles'
+import { TAddUsersToRoleInput, TAddUsersToRoleOutput, addUsersToRole} from '../../../ts/api/apiRoles'
 import { lazyGetUserFromId } from '../../../ts/metadataUtils'
 import CreateNewRoleForm from './CreateNewRoleForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
+import UserTable from '../../generic/UserTable.vue'
+import MetadataStore from '../../../ts/metadata'
+import { listSubtract } from '../../../ts/sets'
 
 export default Vue.extend({
     data: () => ({
@@ -97,6 +146,8 @@ export default Vue.extend({
         currentRole: Object() as FullRole,
         users: [] as User[],
         showHideDeleteRole: false,
+        showHideAddUser: false,
+        usersToAdd: [] as User[]
     }),
     methods: {
         refreshRoleData() {
@@ -147,6 +198,25 @@ export default Vue.extend({
                     true);
             })
         },
+        addUsersToRole() {
+            addUsersToRole(<TAddUsersToRoleInput>{
+                roleId: this.currentRole.RoleMetadata.Id,
+                orgId: PageParamsStore.state.organization!.Id,
+                userIds: this.usersToAdd.map((ele : User) => ele.Id)
+            }).then((resp : TAddUsersToRoleOutput) => {
+                this.users.push(...this.usersToAdd)
+                this.usersToAdd = []
+                this.showHideAddUser = false
+            }).catch((err : any) => {
+                //@ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Ensure that there is at least one user assigned to the admin role after this change and try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        }
     },
     computed: {
         canDelete(): boolean {
@@ -154,11 +224,15 @@ export default Vue.extend({
         },
         currentRolesToDelete() : string[] {
             return [this.currentRole.RoleMetadata.Name]
+        },
+        selectableOrgUsers() : User[] {
+            return listSubtract<User>(MetadataStore.state.availableUsers, this.users)
         }
     },
     components: {
         CreateNewRoleForm,
         GenericDeleteConfirmationForm,
+        UserTable
     },
     mounted() {
         this.refreshRoleData()

@@ -6,6 +6,7 @@ import { getOrgRolesUrl,
          newRoleUrl,
          editRoleUrl,
          deleteRoleUrl,
+         addUsersToRoleUrl,
          getSingleOrgRoleUrl } from '../url'
 import { postFormJson } from '../http'
 
@@ -73,5 +74,18 @@ export interface TDeleteRoleOutput {
 }
 
 export function deleteRole(inp : TDeleteRoleInput) : Promise<TDeleteRoleOutput> {
-    return postFormJson<TEditRoleOutput>(deleteRoleUrl, inp, getAPIRequestConfig())
+    return postFormJson<TDeleteRoleOutput>(deleteRoleUrl, inp, getAPIRequestConfig())
+}
+
+export interface TAddUsersToRoleInput {
+    roleId: number
+    orgId: number
+    userIds: number[]
+}
+
+export interface TAddUsersToRoleOutput {
+}
+
+export function addUsersToRole(inp : TAddUsersToRoleInput) : Promise<TAddUsersToRoleOutput> {
+    return postFormJson<TAddUsersToRoleOutput>(addUsersToRoleUrl, inp, getAPIRequestConfig())
 }

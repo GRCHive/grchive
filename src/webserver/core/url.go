@@ -150,6 +150,7 @@ const ApiGetSingleRoleEndpoint string = "/get"
 const ApiNewRoleEndpoint string = "/new"
 const ApiEditRoleEndpoint string = "/edit"
 const ApiDeleteRoleEndpoint string = "/delete"
+const ApiAddUsersToRoleEndpoint string = "/addUsers"
 
 // Websocket
 const WebsocketPrefix string = "/ws"
