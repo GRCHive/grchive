@@ -106,6 +106,21 @@ func FindDefaultRoleForOrg(orgId int32, actionRole *core.Role) (*core.Role, erro
 	return FindUserRoleFromStmt(stmt, orgId)
 }
 
+func FindRoleFromId(roleId int64, orgId int32, actionRole *core.Role) (*core.Role, error) {
+	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+	stmt, err := dbConn.Preparex(createRoleSql(`
+	WHERE role.org_id = $1
+		AND role.id = $2
+	`))
+	if err != nil {
+		return nil, err
+	}
+
+	return FindUserRoleFromStmt(stmt, orgId, roleId)
+}
+
 func InsertOrgRole(metadata *core.RoleMetadata, role *core.Role, actionRole *core.Role) error {
 	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessManage) {
 		return core.ErrorUnauthorized
@@ -192,4 +207,66 @@ func FindRolesForOrg(orgId int32, actionRole *core.Role) ([]*core.RoleMetadata, 
 		metadata[i] = &r.RoleMetadata
 	}
 	return metadata, err
+}
+
+func FindUserIdsWithRole(roleId int64, orgId int32, actionRole *core.Role) ([]int64, error) {
+	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	userIds := make([]int64, 0)
+
+	err := dbConn.Select(&userIds, `
+		SELECT ur.user_id
+		FROM user_roles AS ur
+		WHERE ur.role_id = $1
+			AND ur.org_id = $2
+	`, roleId, orgId)
+	return userIds, err
+}
+
+func UpdateRole(role *core.Role, actionRole *core.Role) error {
+	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	// We only need to update the metadata in the RETURNING
+	// part because we assume that whatever the user passes in
+	// as the permissions should be what gets spit out.
+	tx := dbConn.MustBegin()
+	rows, err := tx.NamedQuery(`
+		UPDATE organization_available_roles
+		SET name = :name,
+			description = :description
+		WHERE id = :id AND org_id = :org_id
+		RETURNING *
+	`, role.RoleMetadata)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	rows.Next()
+	err = rows.StructScan(&role.RoleMetadata)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	rows.Close()
+
+	for _, resource := range core.AvailableResources {
+		_, err = tx.Exec(fmt.Sprintf(`
+			UPDATE %s
+			SET access_type = $1
+			WHERE role_id = $2
+		`, resourceToDatabaseMap[resource]), role.Permissions.GetAccessType(resource), role.Id)
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit()
 }

@@ -10,6 +10,7 @@
                         hide-details
                         class="ma-0 pa-0"
                         @change="updateValue(AccessType.View)"
+                        :disabled="disabled"
             ></v-checkbox>
         </v-col>
 
@@ -19,6 +20,7 @@
                         hide-details
                         class="ma-0 pa-0"
                         @change="updateValue(AccessType.Edit)"
+                        :disabled="disabled"
             ></v-checkbox>
         </v-col>
 
@@ -28,6 +30,7 @@
                         hide-details
                         class="ma-0 pa-0"
                         @change="updateValue(AccessType.Manage)"
+                        :disabled="disabled"
             ></v-checkbox>
         </v-col>
     </v-row>
@@ -41,6 +44,10 @@ export default Vue.extend({
     props: {
         label: String,
         value: Number,
+        disabled: {
+            type: Boolean,
+            default: false
+        }
     },
     data: () => ({
         AccessType,

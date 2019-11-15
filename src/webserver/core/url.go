@@ -30,6 +30,7 @@ const DashboardOrgOrgQueryId string = "orgId"
 const DashboardOrgRiskQueryId string = "risk"
 const DashboardOrgControlQueryId string = "control"
 const DashboardOrgFlowQueryId string = "flow"
+const DashboardOrgRoleQueryId string = "roleId"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 
@@ -48,6 +49,8 @@ const DashboardOrgSettingsPrefix string = "/settings"
 const DashboardOrgSettingsHomeEndpoint string = "/"
 const DashboardOrgSettingsUsersEndpoint string = "/users"
 const DashboardOrgSettingsRolesEndpoint string = "/roles"
+
+var DashboardOrgSettingsSingleRoleEndpoint string = fmt.Sprintf("/roles/{%s}", DashboardOrgRoleQueryId)
 
 // Dashboard - User
 const DashboardUserQueryId string = "user"
@@ -143,6 +146,7 @@ const ApiDownloadControlDocumentationEndpoint string = "/download"
 // API - Roles
 const ApiRolePrefix string = "/roles"
 const ApiGetOrganizationRolesEndpoint string = "/all"
+const ApiGetSingleRoleEndpoint string = "/get"
 const ApiNewRoleEndpoint string = "/new"
 const ApiEditRoleEndpoint string = "/edit"
 const ApiDeleteRoleEndpoint string = "/delete"

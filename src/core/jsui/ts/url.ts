@@ -61,6 +61,10 @@ export function createControlUrl(org : string, control : number) : string {
     return `/dashboard/org/${org}/controls/${control}`
 }
 
+export function createOrgRoleUrl(org : string, role : number) : string {
+    return `/dashboard/org/${org}/settings/roles/${role}`
+}
+
 export function createUserProfileEditAPIUrl(id : number) : string {
     return `/api/user/${id}/profile`
 }
@@ -134,4 +138,7 @@ export const requestVerificationEmailUrl : string = "/api/verification/resend"
 export const inviteUsersToOrgUrl: string = "/api/invite/send"
 
 export const getOrgRolesUrl : string = "/api/roles/all"
+export const getSingleOrgRoleUrl : string = "/api/roles/get"
 export const newRoleUrl : string = "/api/roles/new"
+export const editRoleUrl : string = "/api/roles/edit"
+export const deleteRoleUrl : string = "/api/roles/delete"

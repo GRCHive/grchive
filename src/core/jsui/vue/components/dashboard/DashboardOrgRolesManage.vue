@@ -55,6 +55,7 @@
             <v-list-item
                 v-for="(item, index) in filteredRoles"
                 :key="index"
+                :href="createOrgRoleUrl(orgGroupName, item.Id)"
             >
                 <v-list-item-content>
                     <v-list-item-title v-html="`${item.Name}`">
@@ -83,7 +84,7 @@ import Vue from 'vue'
 import { RoleMetadata, FullRole } from '../../../ts/roles'
 import { TGetAllOrgRolesInput, TGetAllOrgRolesOutput, getAllOrgRoles } from '../../../ts/api/apiRoles'
 import { PageParamsStore } from '../../../ts/pageParams'
-import { contactUsUrl } from '../../../ts/url'
+import { contactUsUrl, createOrgRoleUrl } from '../../../ts/url'
 import CreateNewRoleForm from './CreateNewRoleForm.vue'
 
 export default Vue.extend({
@@ -98,6 +99,9 @@ export default Vue.extend({
     computed: {
         filteredRoles() : RoleMetadata[] {
             return this.roles
+        },
+        orgGroupName() : string {
+            return PageParamsStore.state.organization!.OktaGroupName
         }
     },
     methods: {
@@ -109,6 +113,7 @@ export default Vue.extend({
             console.log(role)
             this.roles.push(role.RoleMetadata)
         },
+        createOrgRoleUrl
     },
     mounted() {
         getAllOrgRoles(<TGetAllOrgRolesInput>{

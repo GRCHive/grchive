@@ -42,6 +42,7 @@ func createOrganizationSettingsSubrouter(r *mux.Router) {
 	s.HandleFunc(core.DashboardOrgSettingsHomeEndpoint, render.RenderDashboardOrgSettingsHome).Name(webcore.OrgSettingsHomeRouteName)
 	s.HandleFunc(core.DashboardOrgSettingsUsersEndpoint, render.RenderDashboardOrgSettingsUsers).Name(webcore.OrgSettingsUsersRouteName)
 	s.HandleFunc(core.DashboardOrgSettingsRolesEndpoint, render.RenderDashboardOrgSettingsRoles).Name(webcore.OrgSettingsRolesRouteName)
+	s.HandleFunc(core.DashboardOrgSettingsSingleRoleEndpoint, render.RenderDashboardOrgSettingsSingleRole).Name(webcore.OrgSettingsSingleRoleRouteName)
 }
 
 func createUserSubrouter(r *mux.Router) {

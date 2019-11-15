@@ -131,6 +131,7 @@ func registerControlDocumentationAPIPaths(r *mux.Router) {
 func registerRoleAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiRolePrefix).Subrouter()
 	s.HandleFunc(core.ApiGetOrganizationRolesEndpoint, getAllOrganizationRoles).Methods("GET").Name(webcore.GetOrgRolesRouteName)
+	s.HandleFunc(core.ApiGetSingleRoleEndpoint, getSingleRole).Methods("GET").Name(webcore.GetSingleRoleRouteName)
 	s.HandleFunc(core.ApiNewRoleEndpoint, newRole).Methods("POST").Name(webcore.NewRoleRouteName)
 	s.HandleFunc(core.ApiEditRoleEndpoint, editRole).Methods("POST").Name(webcore.EditRoleRouteName)
 	s.HandleFunc(core.ApiDeleteRoleEndpoint, deleteRole).Methods("POST").Name(webcore.DeleteRoleRouteName)

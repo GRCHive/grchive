@@ -2,40 +2,42 @@ package render
 
 import (
 	"encoding/json"
+	"fmt"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"html/template"
 	"net/http"
 )
 
-type templateKey string
+type templateKey int
 type templateMap map[templateKey]*template.Template
 
 var allTemplates templateMap = make(templateMap)
 
 const (
 	// Landing Page Keys
-	GettingStartedPageTemplateKey templateKey = "GETSTARTED"
-	ContactUsPageTemplateKey                  = "CONTACT"
-	LandingPageTemplateKey                    = "LANDING"
-	LoginPageTemplateKey                      = "LOGIN"
-	RegistrationPageTemplateKey               = "REGISTRATION"
-	LearnMorePageTemplateKey                  = "LEARNMORE"
-	RedirectTemplateKey                       = "REDIRECT"
+	GettingStartedPageTemplateKey templateKey = iota
+	ContactUsPageTemplateKey
+	LandingPageTemplateKey
+	LoginPageTemplateKey
+	RegistrationPageTemplateKey
+	LearnMorePageTemplateKey
+	RedirectTemplateKey
 	// Dashboard Keys
-	DashboardOrgHomeTemplateKey          = "DASHBOARDORGHOME"
-	DashboardProcessFlowsTemplateKey     = "DASHBOARDFLOWS"
-	DashboardSingleFlowTemplateKey       = "DASHBOARDSINGLEFLOW"
-	DashboardUserOrgsTemplateKey         = "DASHBOARDUSERORGS"
-	DashboardUserProfileTemplateKey      = "DASHBOARDUSERPROFILE"
-	DashboardRisksTemplateKey            = "DASHBOARDRISKS"
-	DashboardSingleRiskTemplateKey       = "DASHBOARDSINGLERISK"
-	DashboardControlsTemplateKey         = "DASHBOARDCONTROLS"
-	DashboardSingleControlTemplateKey    = "DASHBOARDSINGLECONTROL"
-	DashboardOrgSettingsUsersTemplateKey = "DASHBOARDORGSETTINGSUSERS"
-	DashboardOrgSettingsRolesTemplateKey = "DASHBOARDORGSETTINGSROLES"
+	DashboardOrgHomeTemplateKey
+	DashboardProcessFlowsTemplateKey
+	DashboardSingleFlowTemplateKey
+	DashboardUserOrgsTemplateKey
+	DashboardUserProfileTemplateKey
+	DashboardRisksTemplateKey
+	DashboardSingleRiskTemplateKey
+	DashboardControlsTemplateKey
+	DashboardSingleControlTemplateKey
+	DashboardOrgSettingsUsersTemplateKey
+	DashboardOrgSettingsRolesTemplateKey
+	DashboardOrgSettingsSingleRoleTemplateKey
 	// Error Keys
-	Error403TemplateKey = "ERROR403"
-	Error404TemplateKey = "ERROR404"
+	Error403TemplateKey
+	Error404TemplateKey
 )
 
 func defaultLoadTemplateWithBase(file string) *template.Template {
@@ -90,6 +92,8 @@ func RegisterTemplates() {
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardOrgSettingsUsers.tmpl")
 	allTemplates[DashboardOrgSettingsRolesTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardOrgSettingsRoles.tmpl")
+	allTemplates[DashboardOrgSettingsSingleRoleTemplateKey] =
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardOrgSettingsSingleRole.tmpl")
 
 	// Dashboard User
 	allTemplates[DashboardUserOrgsTemplateKey] =
@@ -109,7 +113,7 @@ func RetrieveTemplate(name templateKey) *template.Template {
 		return tmpl
 	}
 
-	core.Error("Failed to find template: " + name)
+	core.Error(fmt.Sprintf("Failed to find template: %d", name))
 	return nil
 }
 

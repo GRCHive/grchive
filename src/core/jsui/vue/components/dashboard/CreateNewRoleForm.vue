@@ -25,42 +25,49 @@
         <access-type-editor
             label="Organization Users"
             v-model="permissions.OrgUsersAccess"
+            :disabled="!canEdit"
         ></access-type-editor>
         <v-divider></v-divider>
 
         <access-type-editor
             label="Organization Roles"
             v-model="permissions.OrgRolesAccess"
+            :disabled="!canEdit"
         ></access-type-editor>
         <v-divider></v-divider>
 
         <access-type-editor
             label="Process Flows"
             v-model="permissions.ProcessFlowsAccess"
+            :disabled="!canEdit"
         ></access-type-editor>
         <v-divider></v-divider>
 
         <access-type-editor
             label="Controls"
             v-model="permissions.ControlsAccess"
+            :disabled="!canEdit"
         ></access-type-editor>
         <v-divider></v-divider>
 
         <access-type-editor
             label="Risks"
             v-model="permissions.RisksAccess"
+            :disabled="!canEdit"
         ></access-type-editor>
         <v-divider></v-divider>
 
         <access-type-editor
             label="Control Documentation Metadata"
             v-model="permissions.ControlDocMetadataAccess"
+            :disabled="!canEdit"
         ></access-type-editor>
         <v-divider></v-divider>
 
         <access-type-editor
             label="Control Documentation"
             v-model="permissions.ControlDocumentationAccess"
+            :disabled="!canEdit"
         ></access-type-editor>
     </v-form>
 
@@ -90,7 +97,6 @@
             Edit
         </v-btn>
     </v-card-actions>
-
 </v-card>
 
 </template>
@@ -100,8 +106,9 @@
 import Vue from 'vue'
 import * as rules from "../../../ts/formRules"
 import { PageParamsStore } from '../../../ts/pageParams'
-import { Permissions, AccessType } from '../../../ts/roles'
+import { Permissions, AccessType, FullRole } from '../../../ts/roles'
 import { TNewRoleInput, TNewRoleOutput, newRole} from '../../../ts/api/apiRoles'
+import { TEditRoleInput, TEditRoleOutput, editRole} from '../../../ts/api/apiRoles'
 import { contactUsUrl } from '../../../ts/url'
 import AccessTypeEditor from '../../generic/AccessTypeEditor.vue'
 
@@ -114,6 +121,10 @@ export default Vue.extend({
         stagedEdits: {
             type: Boolean,
             default: false
+        },
+        referenceRole: {
+            type: Object as () => FullRole,
+            default: null
         }
     },
     components: {
@@ -142,15 +153,45 @@ export default Vue.extend({
     },
     methods: {
         cancel() {
+            this.canEdit = false
+            this.refreshFromReference()
             this.$emit('do-cancel')
         },
         save() {
+            if (this.editMode) {
+                this.doEdit()
+            } else {
+                this.doSave()
+            }
+        },
+        doSave() {
             newRole(<TNewRoleInput>{
                 orgId: PageParamsStore.state.organization!.Id,
                 name: this.name,
                 description: this.description,
                 permissions: this.permissions
             }).then((resp : TNewRoleOutput) => {
+                this.canEdit = false
+                this.$emit('do-save', resp.data)
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
+        doEdit() {
+            editRole(<TEditRoleInput>{
+                orgId: PageParamsStore.state.organization!.Id,
+                roleId: this.referenceRole.RoleMetadata.Id,
+                name: this.name,
+                description: this.description,
+                permissions: this.permissions
+            }).then((resp : TEditRoleOutput) => {
+                this.canEdit = false
                 this.$emit('do-save', resp.data)
             }).catch((err : any) => {
                 // @ts-ignore
@@ -164,10 +205,24 @@ export default Vue.extend({
         },
         edit() {
             this.canEdit = true
+        },
+        refreshFromReference() {
+            if (!this.referenceRole) {
+                return
+            }
+            this.name = this.referenceRole.RoleMetadata.Name
+            this.description = this.referenceRole.RoleMetadata.Description
+            this.permissions = Object.assign({}, this.referenceRole.Permissions)
         }
     },
     mounted() {
         this.canEdit = (!this.stagedEdits || !this.editMode)
+        this.refreshFromReference()
+    },
+    watch: {
+        referenceRole() {
+            this.refreshFromReference()
+        }
     }
 })
 

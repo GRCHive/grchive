@@ -14,6 +14,7 @@ import DashboardUserProfile from '../vue/pages/dashboard/DashboardUserProfile.vu
 import DashboardUserOrgs from '../vue/pages/dashboard/DashboardUserOrgs.vue'
 import DashboardOrgSettingsUsers from '../vue/pages/dashboard/DashboardOrgSettingsUsers.vue'
 import DashboardOrgSettingsRoles from '../vue/pages/dashboard/DashboardOrgSettingsRoles.vue'
+import DashboardOrgSettingsSingleRole from '../vue/pages/dashboard/DashboardOrgSettingsSingleRole.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
 import { getCurrentCSRF } from './csrf'
 import { PageParamsStore, PageParamsStoreState  } from '../ts/pageParams'
@@ -44,6 +45,7 @@ function mountApp(inData : PageParamsStoreState) {
             DashboardUserOrgs,
             DashboardOrgSettingsUsers,
             DashboardOrgSettingsRoles,
+            DashboardOrgSettingsSingleRole,
             SnackBar,
         },
         vuetify: vueOpts.vuetify,
