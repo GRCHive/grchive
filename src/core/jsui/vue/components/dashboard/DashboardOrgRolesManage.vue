@@ -31,50 +31,10 @@
         </v-list-item>
         <v-divider></v-divider>
 
-        <v-list-item>
-            <v-list-item-content class="font-weight-bold">
-                <v-list-item-title>
-                    Role
-                </v-list-item-title>
-            </v-list-item-content>
-
-            <v-list-item-content class="font-weight-bold">
-                <v-list-item-title>
-                    Default
-                </v-list-item-title>
-            </v-list-item-content>
-
-            <v-list-item-content class="font-weight-bold">
-                <v-list-item-title>
-                    Admin
-                </v-list-item-title>
-            </v-list-item-content>
-        </v-list-item>
-
-        <v-list two-line>
-            <v-list-item
-                v-for="(item, index) in filteredRoles"
-                :key="index"
-                :href="createOrgRoleUrl(orgGroupName, item.Id)"
-            >
-                <v-list-item-content>
-                    <v-list-item-title v-html="`${item.Name}`">
-                    </v-list-item-title>
-
-                    <v-list-item-subtitle v-html="`${item.Description}`">
-                    </v-list-item-subtitle>
-                </v-list-item-content>
-
-                <v-list-item-content>
-                    <v-checkbox class="ma-0" v-model="item.IsDefault" :hide-details="true" disabled></v-checkbox>
-                </v-list-item-content>
-
-                <v-list-item-content>
-                    <v-checkbox class="ma-0" v-model="item.IsAdmin" :hide-details="true" disabled></v-checkbox>
-                </v-list-item-content>
-            </v-list-item>
-        </v-list>
-
+        <role-table
+            :resources="roles"
+            :search="filterText">
+        </role-table>
     </div>
 </template>
 
@@ -86,6 +46,7 @@ import { TGetAllOrgRolesInput, TGetAllOrgRolesOutput, getAllOrgRoles } from '../
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl, createOrgRoleUrl } from '../../../ts/url'
 import CreateNewRoleForm from './CreateNewRoleForm.vue'
+import RoleTable from '../../generic/RoleTable.vue'
 
 export default Vue.extend({
     data : () => ({
@@ -94,12 +55,10 @@ export default Vue.extend({
         roles: [] as RoleMetadata[]
     }),
     components: {
-        CreateNewRoleForm
+        CreateNewRoleForm,
+        RoleTable
     },
     computed: {
-        filteredRoles() : RoleMetadata[] {
-            return this.roles
-        },
         orgGroupName() : string {
             return PageParamsStore.state.organization!.OktaGroupName
         }
@@ -110,7 +69,6 @@ export default Vue.extend({
         },
         saveNew(role : FullRole) {
             this.showHideCreate = false
-            console.log(role)
             this.roles.push(role.RoleMetadata)
         },
         createOrgRoleUrl

@@ -31,42 +31,10 @@
         </v-list-item>
         <v-divider></v-divider>
 
-        <v-list-item>
-            <v-checkbox style="visibility: hidden;"></v-checkbox>
-            <v-list-item-content class="font-weight-bold">
-                <v-list-item-title>
-                    Name
-                </v-list-item-title>
-            </v-list-item-content>
-
-            <v-list-item-content class="font-weight-bold">
-                <v-list-item-title>
-                    Email
-                </v-list-item-title>
-            </v-list-item-content>
-        </v-list-item>
-
-        <v-list>
-            <v-list-item-group multiple>
-                <v-list-item
-                    v-for="(item, index) in filteredUsers"
-                    :key="index"
-                >
-                    <template v-slot:default="{active}">
-                        <v-checkbox class="ma-0" v-model="active" :hide-details="true"></v-checkbox>
-                        <v-list-item-content>
-                            <v-list-item-title v-html="highlightText(`${item.FirstName} ${item.LastName}`)">
-                            </v-list-item-title>
-                        </v-list-item-content>
-
-                        <v-list-item-content>
-                            <v-list-item-title v-html="highlightText(`${item.Email}`)">
-                            </v-list-item-title>
-                        </v-list-item-content>
-                    </template>
-                </v-list-item>
-            </v-list-item-group>
-        </v-list>
+        <user-table
+            :resources="users"
+            :search="filterText"
+        ></user-table>
     </div>
 </template>
 
@@ -76,6 +44,7 @@ import Vue from 'vue'
 import MetadataStore from '../../../ts/metadata'
 import InviteUserForm from './InviteUserForm.vue'
 import { replaceWithMark, sanitizeTextForHTML } from '../../../ts/text'
+import UserTable from '../../generic/UserTable.vue'
 
 export default Vue.extend({
     data: () => ({
@@ -83,7 +52,8 @@ export default Vue.extend({
         showHideInvite: false,
     }),
     components: {
-        InviteUserForm
+        InviteUserForm,
+        UserTable
     },
     computed: {
         filter() : (a : User) => boolean {
@@ -97,9 +67,6 @@ export default Vue.extend({
         users() : User[] {
             return MetadataStore.state.availableUsers
         },
-        filteredUsers() : User[] {
-            return this.users.filter(this.filter)
-        }
     },
     methods: {
         highlightText(input : string) : string {
