@@ -113,7 +113,7 @@
                             </v-card-title>
                             <v-divider></v-divider>
 
-                            <user-table :users="users">
+                            <user-table :resources="users">
                             </user-table>
                         </v-card>
                     </v-col>
