@@ -18,6 +18,8 @@ const babelLoader = {
     }
 }
 
+const badNodeModulesRegex = /node_modules\/(?!(query-string|split-on-first|strict-uri-encode|vuetify)\/).*/
+
 module.exports = {
     devtool: "source-map",
     entry: {
@@ -36,6 +38,7 @@ module.exports = {
             {
                 test: /\.tsx?$/,
                 use: [
+                    babelLoader,
                     {
                         loader: 'ts-loader',
                         options: {
@@ -44,7 +47,7 @@ module.exports = {
                     }
                 ],
                 exclude: [ 
-                    /node_modules/,
+                    badNodeModulesRegex
                 ],
             },
             {
@@ -91,7 +94,7 @@ module.exports = {
                 test: /\.jsx?$/,
                 use: babelLoader,
                 exclude: [ 
-                    /node_modules/,
+                    badNodeModulesRegex
                 ],
             },
             {
