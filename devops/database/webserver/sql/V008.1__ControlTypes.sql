@@ -3,4 +3,5 @@ VALUES
     ('Report', ''),
     ('Configuration', ''),
     ('Interface', ''),
-    ('Reconciliation', '');
+    ('Reconciliation', ''),
+    ('GITC', '');
