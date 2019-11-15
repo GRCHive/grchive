@@ -56,7 +56,7 @@ export default Vue.extend({
                     disabled : true
                 },
                 {
-                    title: 'Data Sources',
+                    title: 'Systems',
                     icon: 'mdi-database',
                     url: '#',
                     disabled : true
