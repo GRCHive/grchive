@@ -46,8 +46,8 @@ export default Vue.extend({
                 {
                     title: 'General Ledger',
                     icon: 'mdi-bank-outline',
-                    url: '#',
-                    disabled : true
+                    url: PageParamsStore.state.organization!.Url + '/gl',
+                    disabled : false
                 },
                 {
                     title: 'Access Requests',

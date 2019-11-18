@@ -26,6 +26,7 @@ const (
 	ResourceControlDocumentation
 	ResourceControlDocumentationMetadata
 	ResourceRisks
+	ResourceGeneralLedger
 )
 
 var AvailableResources []ResourceType = []ResourceType{
@@ -36,6 +37,7 @@ var AvailableResources []ResourceType = []ResourceType{
 	ResourceControlDocumentation,
 	ResourceControlDocumentationMetadata,
 	ResourceRisks,
+	ResourceGeneralLedger,
 }
 
 type PermissionsMap struct {
@@ -46,6 +48,7 @@ type PermissionsMap struct {
 	ControlDocumentationAccess AccessType `db:"doc_access"`
 	ControlDocMetadataAccess   AccessType `db:"doc_meta_access"`
 	RisksAccess                AccessType `db:"risk_access"`
+	GLAccess                   AccessType `db:"gl_access"`
 }
 
 type RoleMetadata struct {
@@ -123,6 +126,8 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 		return p.ControlDocMetadataAccess
 	case ResourceRisks:
 		return p.RisksAccess
+	case ResourceGeneralLedger:
+		return p.GLAccess
 	}
 	return AccessNone
 }

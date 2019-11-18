@@ -61,6 +61,9 @@ const DashboardUserHomeUrl string = "/"
 const DashboardUserOrgUrl string = "/orgs"
 const DashboardUserProfileUrl string = "/profile"
 
+// Dashboard - General Ledger
+const DashboardGeneralLedgerEndpoint string = "/gl"
+
 // API
 const ApiUrl string = "/api"
 
@@ -151,6 +154,12 @@ const ApiNewRoleEndpoint string = "/new"
 const ApiEditRoleEndpoint string = "/edit"
 const ApiDeleteRoleEndpoint string = "/delete"
 const ApiAddUsersToRoleEndpoint string = "/addUsers"
+
+// API - General Ledger
+const ApiGeneralLedgerPrefix = "/gl"
+const ApiGetGLLevelEndpoint string = "/get"
+const ApiNewGLCategoryEndpoint string = "/newCat"
+const ApiNewGLAccountEndpoint string = "/newAcc"
 
 // Websocket
 const WebsocketPrefix string = "/ws"

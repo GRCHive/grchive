@@ -42,6 +42,7 @@ func registerAPIPaths(r *mux.Router) {
 	registerControlAPIPaths(s)
 	registerControlDocumentationAPIPaths(s)
 	registerRoleAPIPaths(s)
+	registerGeneralLedgerAPIPaths(s)
 }
 
 func registerInviteAPIPaths(r *mux.Router) {
@@ -136,4 +137,11 @@ func registerRoleAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiEditRoleEndpoint, editRole).Methods("POST").Name(webcore.EditRoleRouteName)
 	s.HandleFunc(core.ApiDeleteRoleEndpoint, deleteRole).Methods("POST").Name(webcore.DeleteRoleRouteName)
 	s.HandleFunc(core.ApiAddUsersToRoleEndpoint, addUsersToRole).Methods("POST").Name(webcore.AddUsersToRoleRouteName)
+}
+
+func registerGeneralLedgerAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiGeneralLedgerPrefix).Subrouter()
+	s.HandleFunc(core.ApiGetGLLevelEndpoint, getGL).Methods("GET").Name(webcore.ApiGetGLRouteName)
+	s.HandleFunc(core.ApiNewGLCategoryEndpoint, createNewGLCategory).Methods("POST").Name(webcore.ApiNewGLCatRouteName)
+	s.HandleFunc(core.ApiNewGLAccountEndpoint, createNewGLAccount).Methods("POST").Name(webcore.ApiNewGLAccRouteName)
 }

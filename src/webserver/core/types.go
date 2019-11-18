@@ -35,6 +35,17 @@ func (v NullInt64) MarshalJSON() ([]byte, error) {
 	}
 }
 
+func (v *NullInt64) UnmarshalJSON(b []byte) error {
+	var val int64
+	err := json.Unmarshal(b, &val)
+	if err != nil {
+		return nil
+	}
+	v.NullInt64.Int64 = val
+	v.NullInt64.Valid = true
+	return nil
+}
+
 type NullInt32 struct {
 	sql.NullInt32
 }

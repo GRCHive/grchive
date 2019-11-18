@@ -35,6 +35,7 @@ go_library(
         "search.go",
         "inviteCodes.go",
         "hashIds.go",
+        "generalLedger.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",

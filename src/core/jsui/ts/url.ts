@@ -147,3 +147,7 @@ export const newRoleUrl : string = "/api/roles/new"
 export const editRoleUrl : string = "/api/roles/edit"
 export const deleteRoleUrl : string = "/api/roles/delete"
 export const addUsersToRoleUrl : string = "/api/roles/addUsers"
+
+export const getGLUrl : string = "/api/gl/get"
+export const createNewGLCatUrl : string = "/api/gl/newCat"
+export const createNewGLAccUrl : string = "/api/gl/newAcc"

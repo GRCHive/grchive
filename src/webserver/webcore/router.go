@@ -88,6 +88,10 @@ const (
 	DeleteRoleRouteName                            = "DeleteRole"
 	AddUsersToRoleRouteName                        = "AddUsersToRole"
 	OrgSettingsSingleRoleRouteName                 = "OrgSettingsSingleRole"
+	GeneralLedgerRouteName                         = "GeneralLedger"
+	ApiGetGLRouteName                              = "ApiGetGL"
+	ApiNewGLCatRouteName                           = "ApiNewGLCat"
+	ApiNewGLAccRouteName                           = "ApiNewGLAcc"
 )
 
 var globalRouter *mux.Router
