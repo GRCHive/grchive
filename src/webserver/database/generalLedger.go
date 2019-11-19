@@ -170,3 +170,48 @@ func FindGLAccountParentCategories(acc *core.GeneralLedgerAccount, role *core.Ro
 	`, acc.ParentCategoryId, acc.OrgId)
 	return parents, err
 }
+
+func UpdateGLAccount(acc *core.GeneralLedgerAccount, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceGeneralLedger, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+	_, err := tx.NamedExec(`
+		UPDATE general_ledger_accounts
+		SET 
+			parent_category_id = :parent_category_id,
+			account_identifier = :account_identifier,
+			account_name = :account_name,
+			account_description = :account_description,
+			financially_relevant = :financially_relevant
+		WHERE id = :id
+			AND org_id = :org_id
+	`, acc)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
+func DeleteGLAccount(accId int64, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceGeneralLedger, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		DELETE FROM general_ledger_accounts
+		WHERE id = $1
+			AND org_id = $2
+	`, accId, orgId)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+
+}

@@ -167,6 +167,8 @@ const ApiEditGLCategoryEndpoint string = "/cat/edit"
 const ApiDeleteGLCategoryEndpoint string = "/cat/delete"
 const ApiNewGLAccountEndpoint string = "/acc/new"
 const ApiGetGLAccountEndpoint string = "/acc/get"
+const ApiEditGLAccountEndpoint string = "/acc/edit"
+const ApiDeleteGLAccountEndpoint string = "/acc/delete"
 
 // Websocket
 const WebsocketPrefix string = "/ws"

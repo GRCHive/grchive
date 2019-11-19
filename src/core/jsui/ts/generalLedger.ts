@@ -56,7 +56,6 @@ export class GeneralLedger {
         // Then the categories with those categories as the parent, etc.
         let catsToProcess = [...cats]
         let processedCatIds = new Set<number>()
-        console.log(catsToProcess)
         while (catsToProcess.length != 0) {
             let catsHandled = 0
 
@@ -102,7 +101,6 @@ export class GeneralLedger {
     addRawCategory(cat : RawGeneralLedgerCategory) {
         let newCat = this.createCategoryFromRaw(cat)
         this.categories.set(cat.Id, newCat)
-        console.log("add cat ", cat.Id)
 
         if (!!cat.ParentCategoryId) {
             let parentCat = this.categories.get(cat.ParentCategoryId)!
@@ -183,19 +181,49 @@ export class GeneralLedger {
         this.changed += 1
     }
 
-    addRawAccount(acc : RawGeneralLedgerAccount) {
-        console.log("parent cat ", acc.ParentCategoryId)
+    createAccountFomRaw(acc : RawGeneralLedgerAccount) : GeneralLedgerAccount {
         let parentCat = this.categories.get(acc.ParentCategoryId)!
         let newAcc = <GeneralLedgerAccount>{
             ...acc,
             ParentCategory: parentCat,
             changed: 1
         }
+        return newAcc
+    }
+
+    addRawAccount(acc : RawGeneralLedgerAccount) {
+        let newAcc = this.createAccountFomRaw(acc)
 
         this.accounts.set(acc.Id, newAcc)
-        parentCat.SubAccounts.set(acc.Id, newAcc)
-
-        parentCat.changed += 1
+        newAcc.ParentCategory.SubAccounts.set(acc.Id, newAcc)
+        newAcc.ParentCategory.changed += 1
         this.changed += 1
     }
+
+    replaceRawAccount(acc : RawGeneralLedgerAccount) {
+        if (!this.accounts.has(acc.Id)) {
+            return
+        }
+
+        let newAcc = this.createAccountFomRaw(acc)
+        let existingAcc = this.accounts.get(acc.Id)!
+
+        let oldParentCat = existingAcc.ParentCategory
+        oldParentCat.SubAccounts.delete(existingAcc.Id)
+        oldParentCat.changed += 1
+
+        existingAcc.ParentCategory = newAcc.ParentCategory
+        existingAcc.ParentCategoryId = newAcc.ParentCategoryId
+        existingAcc.AccountId = newAcc.AccountId
+        existingAcc.AccountName = newAcc.AccountName
+        existingAcc.AccountDescription = newAcc.AccountDescription
+        existingAcc.FinanciallyRelevant = newAcc.FinanciallyRelevant
+
+        existingAcc.ParentCategory.SubAccounts.set(existingAcc.Id, existingAcc)
+        existingAcc.ParentCategory.changed += 1
+
+        existingAcc.changed += 1
+        this.changed += 1
+    }
+
 }

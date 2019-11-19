@@ -49,6 +49,10 @@ export function createOrgUrl(org : string) : string {
     return `/dashboard/org/${org}`
 }
 
+export function createOrgGLUrl(org : string ): string {
+    return `${createOrgUrl(org)}/gl`
+}
+
 export function createFlowUrl(org : string, flow : number) : string {
     return `/dashboard/org/${org}/flows/${flow}`
 }
@@ -153,7 +157,9 @@ export const createNewGLCatUrl : string = "/api/gl/cat/new"
 export const editGLCatUrl : string = "/api/gl/cat/edit"
 export const deleteGLCatUrl : string = "/api/gl/cat/delete"
 export const createNewGLAccUrl : string = "/api/gl/acc/new"
+export const editGLAccUrl : string = "/api/gl/acc/edit"
 export const getGLAccUrl : string = "/api/gl/acc/get"
+export const deleteGLAccUrl : string = "/api/gl/acc/delete"
 export function createSingleGLAccountUrl(org : string, accId : number) : string {
     return `/dashboard/org/${org}/gl/acc/${accId}`
 }

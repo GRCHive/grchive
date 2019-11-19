@@ -85,7 +85,9 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 import * as rules from '../../../ts/formRules'
+import { GeneralLedgerAccount } from '../../../ts/generalLedger'
 import { TNewGLAccountInputs, TNewGLAccountOutputs, newGLAccount } from '../../../ts/api/apiGeneralLedger'
+import { TEditGLAccountInputs, TEditGLAccountOutputs, editGLAccount } from '../../../ts/api/apiGeneralLedger'
 import { contactUsUrl } from '../../../ts/url'
 import {PageParamsStore } from '../../../ts/pageParams'
 
@@ -103,6 +105,10 @@ const VueComponent = Vue.extend({
             type: Boolean,
             default: false
         },
+        referenceAccount: {
+            type: Object as () => GeneralLedgerAccount | null,
+            default: null
+        }
     }
 })
 
@@ -122,7 +128,7 @@ export default class CreateNewGeneralLedgerAccountForm extends VueComponent {
         this.$emit('do-cancel')
     }
 
-    save() {
+    doSave() {
         newGLAccount(<TNewGLAccountInputs>{
             orgId: PageParamsStore.state.organization!.Id,
             parentCategoryId: this.parentCategoryId!,
@@ -143,6 +149,37 @@ export default class CreateNewGeneralLedgerAccountForm extends VueComponent {
         })
     }
 
+    doEdit() {
+        editGLAccount(<TEditGLAccountInputs>{
+            accId: this.referenceAccount!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            parentCategoryId: this.parentCategoryId!,
+            accountId: this.id,
+            accountName: this.name,
+            accountDescription: this.description,
+            financiallyRelevant: this.financiallyRelevant
+        }).then((resp : TEditGLAccountOutputs) => {
+            this.canEdit = false
+            this.$emit('do-save', resp.data)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops. Something went wrong. Try again.",
+                false,
+                "",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    save() {
+        if (this.editMode) {
+            this.doEdit()
+        } else {
+            this.doSave()
+        }
+    }
+
     edit() {
         this.canEdit = true
     }
@@ -161,6 +198,22 @@ export default class CreateNewGeneralLedgerAccountForm extends VueComponent {
             return
         }
         this.name = newId
+    }
+
+    resetForm() {
+        if (!!this.referenceAccount) {
+            this.parentCategoryId = this.referenceAccount.ParentCategoryId
+            this.id = this.referenceAccount.AccountId
+            this.name = this.referenceAccount.AccountName
+            this.description = this.referenceAccount.AccountDescription
+            this.financiallyRelevant = this.referenceAccount.FinanciallyRelevant
+        } else {
+            this.parentCategoryId = null
+            this.id = ""
+            this.name = ""
+            this.description = ""
+            this.financiallyRelevant = true
+        }
     }
 }
 

@@ -24,8 +24,37 @@
                         {{ glAccount.AccountDescription }}
                     </v-list-item-subtitle>
                 </v-list-item-content>
+
+                <v-spacer></v-spacer>
+
+                <v-dialog v-model="showHideDelete"
+                          persistent
+                          max-width="40%"
+                >
+                    <template v-slot:activator="{ on }">
+                        <v-btn color="error" v-on="on">
+                            Delete
+                        </v-btn>
+                    </template>
+
+                    <generic-delete-confirmation-form
+                        item-name="accounts"
+                        :items-to-delete="[glAccount.AccountName]"
+                        :use-global-deletion="false"
+                        @do-cancel="showHideDelete = false"
+                        @do-delete="onDelete">
+                    </generic-delete-confirmation-form>
+                </v-dialog>
             </v-list-item>
             <v-divider></v-divider>
+
+            <create-new-general-ledger-account-form
+                :edit-mode="true"
+                :reference-account="glAccount"
+                :available-gl-cats="availableGLCats"
+                @do-save="finishEdit"
+                ref="editForm">
+            </create-new-general-ledger-account-form>
         </div>
     </div>
 </template>
@@ -34,33 +63,50 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { GeneralLedgerAccount, GeneralLedgerCategory, GeneralLedger } from '../../../ts/generalLedger'
+import { RawGeneralLedgerAccount, GeneralLedgerAccount, GeneralLedgerCategory, GeneralLedger } from '../../../ts/generalLedger'
 import { TGetGLAccountInputs, TGetGLAccountOutputs, getGLAccount } from '../../../ts/api/apiGeneralLedger'
+import { TDeleteGLAccountInputs, TDeleteGLAccountOutputs, deleteGLAccount } from '../../../ts/api/apiGeneralLedger'
 import { PageParamsStore } from '../../../ts/pageParams'
+import { createOrgGLUrl, contactUsUrl } from '../../../ts/url'
+import CreateNewGeneralLedgerAccountForm from './CreateNewGeneralLedgerAccountForm.vue'
+import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 
 @Component({
     components: {
+        CreateNewGeneralLedgerAccountForm,
+        GenericDeleteConfirmationForm
     }
 })
 export default class FullEditGeneralLedgerAccountComponent extends Vue {
     ready: boolean = false
     ledger : GeneralLedger = new GeneralLedger()
+    expandDescription : boolean = false
+    showHideDelete: boolean = false
+
+    $refs!: {
+        editForm: CreateNewGeneralLedgerAccountForm
+    }
 
     get parentBreadcrumbs() : any[] {
         let parentCrumbs = []
         let currentParent : GeneralLedgerCategory | null = this.glAccount.ParentCategory
         while (currentParent != null) {
-            parentCrumbs.push({
+            parentCrumbs.unshift({
                 disabled: true,
                 text: currentParent.Name
             })
             currentParent = currentParent.ParentCategory
         }
-        return parentCrumbs
+        return this.ledger.changed && parentCrumbs
     }
 
     get glAccount() : GeneralLedgerAccount {
         return this.ledger.accounts.values().next().value
+    }
+
+    get availableGLCats() : GeneralLedgerCategory[] {
+        return this.ledger.changed && 
+            this.ledger.listCategories
     }
 
     refreshAccountData() {
@@ -71,17 +117,40 @@ export default class FullEditGeneralLedgerAccountComponent extends Vue {
             orgId: PageParamsStore.state.organization!.Id,
             accId: accId,
         }).then((resp : TGetGLAccountOutputs) => {
-            console.log(resp.data)
             this.ledger.rebuildGL(resp.data.Parents, [resp.data.Account])
             this.ready = true
+
+            Vue.nextTick(() => {
+                this.$refs.editForm.resetForm()
+            })
         }).catch((err : any) => {
-            console.log(err)
-            //window.location.replace('/404')
+            window.location.replace('/404')
         })
     }
 
     mounted() {
         this.refreshAccountData()
+    }
+
+    onDelete() {
+        deleteGLAccount(<TDeleteGLAccountInputs>{
+            orgId: PageParamsStore.state.organization!.Id,
+            accId: this.glAccount.Id,
+        }).then((resp : TDeleteGLAccountOutputs) => {
+            window.location.replace(createOrgGLUrl(PageParamsStore.state.organization!.OktaGroupName))
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    finishEdit(acc : RawGeneralLedgerAccount) {
+        this.ledger.replaceRawAccount(acc)
     }
 }
 

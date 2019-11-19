@@ -5,7 +5,9 @@ import { getGLUrl,
          createNewGLCatUrl,
          editGLCatUrl,
          deleteGLCatUrl,
-         getGLAccUrl } from '../url'
+         getGLAccUrl,
+         editGLAccUrl,
+         deleteGLAccUrl } from '../url'
 import { getAPIRequestConfig } from './apiUtility'
 import { RawGeneralLedgerCategory, RawGeneralLedgerAccount } from '../generalLedger'
 import { postFormJson } from '../http'
@@ -96,4 +98,28 @@ export interface TGetGLAccountOutputs {
 
 export function getGLAccount(inp : TGetGLAccountInputs) : Promise<TGetGLAccountOutputs> {
     return axios.get(getGLAccUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+}
+
+export interface TEditGLAccountInputs extends TNewGLAccountInputs {
+    accId: number
+}
+
+export interface TEditGLAccountOutputs {
+    data: RawGeneralLedgerAccount
+}
+
+export function editGLAccount(inp : TEditGLAccountInputs) : Promise<TEditGLAccountOutputs> {
+    return postFormJson<TEditGLAccountOutputs>(editGLAccUrl, inp, getAPIRequestConfig())
+}
+
+export interface TDeleteGLAccountInputs {
+	orgId: number
+	accId: number
+}
+
+export interface TDeleteGLAccountOutputs {
+}
+
+export function deleteGLAccount(inp : TDeleteGLAccountInputs) : Promise<TDeleteGLAccountOutputs> {
+    return postFormJson<TDeleteGLAccountOutputs>(deleteGLAccUrl, inp, getAPIRequestConfig())
 }

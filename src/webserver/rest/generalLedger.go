@@ -46,6 +46,21 @@ type GetGLAccountInputs struct {
 	OrgId int32 `webcore:"orgId"`
 }
 
+type EditGLAccountInputs struct {
+	AccId               int64  `json:"accId"`
+	OrgId               int32  `json:"orgId"`
+	ParentCategoryId    int64  `json:"parentCategoryId"`
+	AccountName         string `json:"accountName"`
+	AccountId           string `json:"accountId"`
+	AccountDescription  string `json:"accountDescription"`
+	FinanciallyRelevant bool   `json:"financiallyRelevant"`
+}
+
+type DeleteGLAccountInputs struct {
+	AccId int64 `webcore:"accId"`
+	OrgId int32 `webcore:"orgId"`
+}
+
 func deleteGLCategory(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -292,9 +307,9 @@ func getGLAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	parents, err := database.FindGLAccountParentCategories(acc, role)
+	cats, err := database.GetOrgGLCategories(inputs.OrgId, role)
 	if err != nil {
-		core.Warning("Can't get GL account parent categories from DB: " + err.Error())
+		core.Warning("Can't get GL categories from DB: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -303,6 +318,83 @@ func getGLAccount(w http.ResponseWriter, r *http.Request) {
 		Account *core.GeneralLedgerAccount
 		Parents []*core.GeneralLedgerCategory
 	}
-	outputs := GetGLAccountOutputs{acc, parents}
+	outputs := GetGLAccountOutputs{acc, cats}
 	jsonWriter.Encode(outputs)
+}
+
+func editGLAccount(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := EditGLAccountInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	acc := core.GeneralLedgerAccount{
+		Id:                  inputs.AccId,
+		OrgId:               inputs.OrgId,
+		ParentCategoryId:    inputs.ParentCategoryId,
+		AccountId:           inputs.AccountId,
+		AccountName:         inputs.AccountName,
+		AccountDescription:  inputs.AccountDescription,
+		FinanciallyRelevant: inputs.FinanciallyRelevant,
+	}
+
+	err = database.UpdateGLAccount(&acc, role)
+	if err != nil {
+		core.Warning("Can't update GL account: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(acc)
+}
+
+func deleteGLAccount(w http.ResponseWriter, r *http.Request) {
+	inputs := DeleteGLAccountInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteGLAccount(inputs.AccId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Can't delete GL account: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
