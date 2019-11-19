@@ -146,4 +146,5 @@ func registerGeneralLedgerAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiEditGLCategoryEndpoint, editGLCategory).Methods("POST").Name(webcore.ApiEditGLCatRouteName)
 	s.HandleFunc(core.ApiDeleteGLCategoryEndpoint, deleteGLCategory).Methods("POST").Name(webcore.ApiDeleteGLCatRouteName)
 	s.HandleFunc(core.ApiNewGLAccountEndpoint, createNewGLAccount).Methods("POST").Name(webcore.ApiNewGLAccRouteName)
+	s.HandleFunc(core.ApiGetGLAccountEndpoint, getGLAccount).Methods("GET").Name(webcore.ApiGetGLAccRouteName)
 }

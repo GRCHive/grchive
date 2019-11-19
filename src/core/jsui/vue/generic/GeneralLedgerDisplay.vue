@@ -38,7 +38,10 @@
             ref="view"
             :items="displayItems"
             open-on-click
-            open-all>
+            open-all
+            @update:active="goToAcc"
+            activatable
+        >
             <template v-slot:prepend="{ item, open }">
                 <v-icon v-if="!!item.cat">
                     {{ open ? 'mdi-folder-open' : 'mdi-folder' }}
@@ -47,6 +50,12 @@
 
             <template v-slot:label="{ item }">
                 <span :class="!!item.cat ? 'font-weight-bold' : ''">{{ item.name }}</span>
+                <v-tooltip bottom v-if="!!item.description && item.description.length > 0">
+                    <template v-slot:activator="{ on }">
+                        <v-icon small v-on="on">mdi-help-circle</v-icon>
+                    </template>
+                    <span>{{ item.description }}</span>
+                </v-tooltip>
             </template>
 
             <template v-slot:append="{ item }">
@@ -75,9 +84,10 @@ import { RawGeneralLedgerCategory,
          GeneralLedger } from '../../ts/generalLedger'
 import { getGL, TGetGLInputs, TGetGLOutputs } from '../../ts/api/apiGeneralLedger'
 import { deleteGLCategory, TDeleteGLCategoryInputs, TDeleteGLCategoryOutputs } from '../../ts/api/apiGeneralLedger'
-import { contactUsUrl } from '../../ts/url'
+import { contactUsUrl, createSingleGLAccountUrl } from '../../ts/url'
 import CreateNewGeneralLedgerCategoryForm from '../components/dashboard/CreateNewGeneralLedgerCategoryForm.vue'
 import GenericDeleteConfirmationForm from '../components/dashboard/GenericDeleteConfirmationForm.vue'
+import { PageParamsStore } from '../../ts/pageParams'
 
 const VueComponent = Vue.extend({
     props: {
@@ -151,6 +161,7 @@ export default class GeneralLedgerDisplay extends VueComponent {
         return {
             id: cat.Id.toString(),
             name: cat.Name,
+            description: cat.Description,
             cat: cat,
             children: [...childCats, ...childAccs]
         }
@@ -160,6 +171,7 @@ export default class GeneralLedgerDisplay extends VueComponent {
         return {
             id: `${acc.ParentCategoryId} ${acc.Id}`,
             name: `${acc.AccountName} ${acc.AccountName != acc.AccountId ?  "(" + acc.AccountId.toString() + ")" : ""}`,
+            description: acc.AccountDescription,
             acc: acc
         }
     }
@@ -216,6 +228,22 @@ export default class GeneralLedgerDisplay extends VueComponent {
     finishCatEdit(cat : RawGeneralLedgerCategory) {
         this.showHideEditCat = false
         this.generalLedger.replaceRawCategory(cat)
+    }
+
+    goToAcc(inp : Array<string>) {
+        if (inp.length == 0) {
+            return
+        }
+
+        // Only do something if we clicked an account which will have a space in the ID
+        // and the ID is in the form of "CAT_ID ACC_ID". Parse out the account ID and go to the
+        // appropriate URL.
+        const data = inp[0].split(' ')
+        if (data.length < 2) {
+            return
+        }
+        const accId = parseInt(data[1], 10)
+        window.location.assign(createSingleGLAccountUrl(PageParamsStore.state.organization!.OktaGroupName, accId))
     }
 }
 

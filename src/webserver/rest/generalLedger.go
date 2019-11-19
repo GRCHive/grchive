@@ -41,6 +41,11 @@ type GetGLInputs struct {
 	OrgId int32 `webcore:"orgId"`
 }
 
+type GetGLAccountInputs struct {
+	AccId int64 `webcore:"accId"`
+	OrgId int32 `webcore:"orgId"`
+}
+
 func deleteGLCategory(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -251,5 +256,53 @@ func getGL(w http.ResponseWriter, r *http.Request) {
 		Accounts   []*core.GeneralLedgerAccount
 	}
 	outputs := GetGLOutputs{cats, accs}
+	jsonWriter.Encode(outputs)
+}
+
+func getGLAccount(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := GetGLAccountInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	acc, err := database.GetGLAccountFromDbId(inputs.AccId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Can't get GL account from DB: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	parents, err := database.FindGLAccountParentCategories(acc, role)
+	if err != nil {
+		core.Warning("Can't get GL account parent categories from DB: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	type GetGLAccountOutputs struct {
+		Account *core.GeneralLedgerAccount
+		Parents []*core.GeneralLedgerCategory
+	}
+	outputs := GetGLAccountOutputs{acc, parents}
 	jsonWriter.Encode(outputs)
 }

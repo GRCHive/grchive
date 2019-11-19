@@ -214,3 +214,7 @@ func RenderDashboardOrgSettingsSingleRole(w http.ResponseWriter, r *http.Request
 func RenderDashboardGeneralLedger(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardGeneralLedgerTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
+
+func RenderDashboardGLAccount(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardGLAccountTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}

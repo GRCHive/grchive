@@ -56,6 +56,7 @@ export class GeneralLedger {
         // Then the categories with those categories as the parent, etc.
         let catsToProcess = [...cats]
         let processedCatIds = new Set<number>()
+        console.log(catsToProcess)
         while (catsToProcess.length != 0) {
             let catsHandled = 0
 
@@ -63,6 +64,7 @@ export class GeneralLedger {
                 if (cat.ParentCategoryId == null || processedCatIds.has(cat.ParentCategoryId)) {
                     this.addRawCategory(cat)
                     processedCatIds.add(cat.Id)
+                    catsHandled += 1
                 }
             }
 
@@ -70,6 +72,8 @@ export class GeneralLedger {
             if (catsHandled == 0) {
                 break
             }
+
+            catsToProcess = catsToProcess.filter((ele : RawGeneralLedgerCategory) => !processedCatIds.has(ele.Id))
         }
 
         for (let acc of accs) {
@@ -98,6 +102,7 @@ export class GeneralLedger {
     addRawCategory(cat : RawGeneralLedgerCategory) {
         let newCat = this.createCategoryFromRaw(cat)
         this.categories.set(cat.Id, newCat)
+        console.log("add cat ", cat.Id)
 
         if (!!cat.ParentCategoryId) {
             let parentCat = this.categories.get(cat.ParentCategoryId)!
@@ -179,6 +184,7 @@ export class GeneralLedger {
     }
 
     addRawAccount(acc : RawGeneralLedgerAccount) {
+        console.log("parent cat ", acc.ParentCategoryId)
         let parentCat = this.categories.get(acc.ParentCategoryId)!
         let newAcc = <GeneralLedgerAccount>{
             ...acc,

@@ -31,6 +31,7 @@ const DashboardOrgRiskQueryId string = "risk"
 const DashboardOrgControlQueryId string = "control"
 const DashboardOrgFlowQueryId string = "flow"
 const DashboardOrgRoleQueryId string = "roleId"
+const DashboardOrgGLAccQueryId string = "accId"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 
@@ -62,7 +63,10 @@ const DashboardUserOrgUrl string = "/orgs"
 const DashboardUserProfileUrl string = "/profile"
 
 // Dashboard - General Ledger
-const DashboardGeneralLedgerEndpoint string = "/gl"
+const DashboardGeneralLedgerPrefix string = "/gl"
+const DashboardGeneralLedgerViewEndpoint string = "/"
+
+var DashboardOrgGLAccountEndpoint string = fmt.Sprintf("/acc/{%s}", DashboardOrgGLAccQueryId)
 
 // API
 const ApiUrl string = "/api"
@@ -162,6 +166,7 @@ const ApiNewGLCategoryEndpoint string = "/cat/new"
 const ApiEditGLCategoryEndpoint string = "/cat/edit"
 const ApiDeleteGLCategoryEndpoint string = "/cat/delete"
 const ApiNewGLAccountEndpoint string = "/acc/new"
+const ApiGetGLAccountEndpoint string = "/acc/get"
 
 // Websocket
 const WebsocketPrefix string = "/ws"

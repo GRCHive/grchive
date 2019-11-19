@@ -131,3 +131,42 @@ func DeleteGLCategory(catId int64, orgId int32, role *core.Role) error {
 
 	return tx.Commit()
 }
+
+func GetGLAccountFromDbId(accId int64, orgId int32, role *core.Role) (*core.GeneralLedgerAccount, error) {
+	if !role.Permissions.HasAccess(core.ResourceGeneralLedger, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	acc := core.GeneralLedgerAccount{}
+	err := dbConn.Get(&acc, `
+		SELECT *
+		FROM general_ledger_accounts
+		WHERE id = $1
+			AND org_id = $2
+	`, accId, orgId)
+
+	return &acc, err
+}
+
+func FindGLAccountParentCategories(acc *core.GeneralLedgerAccount, role *core.Role) ([]*core.GeneralLedgerCategory, error) {
+	if !role.Permissions.HasAccess(core.ResourceGeneralLedger, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	parents := make([]*core.GeneralLedgerCategory, 0)
+	err := dbConn.Select(&parents, `
+		WITH RECURSIVE parents AS (
+			SELECT cat.*
+			FROM general_ledger_categories AS cat
+			WHERE cat.id = $1
+				AND cat.org_id = $2
+			UNION
+				SELECT cat.*
+				FROM general_ledger_categories AS cat
+				INNER JOIN parents
+					ON parents.parent_category_id = cat.id
+		)
+		SELECT * FROM parents
+	`, acc.ParentCategoryId, acc.OrgId)
+	return parents, err
+}

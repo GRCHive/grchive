@@ -89,11 +89,13 @@ const (
 	AddUsersToRoleRouteName                        = "AddUsersToRole"
 	OrgSettingsSingleRoleRouteName                 = "OrgSettingsSingleRole"
 	GeneralLedgerRouteName                         = "GeneralLedger"
+	GLAccountRouteName                             = "GLAccount"
 	ApiGetGLRouteName                              = "ApiGetGL"
 	ApiNewGLCatRouteName                           = "ApiNewGLCat"
 	ApiEditGLCatRouteName                          = "ApiEditGLCat"
 	ApiDeleteGLCatRouteName                        = "ApiDeleteGLCat"
 	ApiNewGLAccRouteName                           = "ApiNewGLAcc"
+	ApiGetGLAccRouteName                           = "ApiGetGLAcc"
 )
 
 var globalRouter *mux.Router

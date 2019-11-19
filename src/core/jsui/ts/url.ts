@@ -153,3 +153,7 @@ export const createNewGLCatUrl : string = "/api/gl/cat/new"
 export const editGLCatUrl : string = "/api/gl/cat/edit"
 export const deleteGLCatUrl : string = "/api/gl/cat/delete"
 export const createNewGLAccUrl : string = "/api/gl/acc/new"
+export const getGLAccUrl : string = "/api/gl/acc/get"
+export function createSingleGLAccountUrl(org : string, accId : number) : string {
+    return `/dashboard/org/${org}/gl/acc/${accId}`
+}
