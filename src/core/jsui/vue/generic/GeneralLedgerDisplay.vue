@@ -73,6 +73,7 @@ import { RawGeneralLedgerCategory,
          GeneralLedgerAccount,
          GeneralLedger } from '../../ts/generalLedger'
 import { getGL, TGetGLInputs, TGetGLOutputs } from '../../ts/api/apiGeneralLedger'
+import { deleteGLCategory, TDeleteGLCategoryInputs, TDeleteGLCategoryOutputs } from '../../ts/api/apiGeneralLedger'
 import { contactUsUrl } from '../../ts/url'
 import CreateNewGeneralLedgerCategoryForm from '../components/dashboard/CreateNewGeneralLedgerCategoryForm.vue'
 import GenericDeleteConfirmationForm from '../components/dashboard/GenericDeleteConfirmationForm.vue'
@@ -189,8 +190,22 @@ export default class GeneralLedgerDisplay extends VueComponent {
     }
 
     confirmCatDelete() {
-        this.currentEditDeleteCat = null
-        this.showHideDeleteCat = false
+        deleteGLCategory(<TDeleteGLCategoryInputs>{
+            orgId: this.orgId,
+            catId: this.currentEditDeleteCat!.Id,
+        }).then((resp : TDeleteGLCategoryOutputs) => {
+            this.generalLedger.removeCategory(this.currentEditDeleteCat!.Id)
+            this.currentEditDeleteCat = null
+            this.showHideDeleteCat = false
+        }).catch((err: any) => {
+            //@ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 
     cancelCatEdit() {

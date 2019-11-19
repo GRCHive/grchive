@@ -143,6 +143,41 @@ export class GeneralLedger {
         this.changed += 1
     }
 
+    removeCategory(catId : number) {
+        if (!this.categories.has(catId)) {
+            return
+        }
+    
+        let existingCat = this.categories.get(catId)!
+        this.categories.delete(catId)
+        this.topLevelCategories.delete(catId)
+
+        if (!!existingCat.ParentCategory) {
+            existingCat.ParentCategory!.SubCategories.delete(existingCat.Id)
+        }
+
+        for (let subCat of existingCat.SubCategories.values()) {
+            this.removeCategory(subCat.Id)
+        }
+
+        for (let subAcc of existingCat.SubAccounts.values()) {
+            this.removeAccount(subAcc.Id)
+        }
+
+        this.changed += 1
+    }
+
+    removeAccount(accountId : number) {
+        if (!this.accounts.has(accountId)) {
+            return
+        }
+
+        let acc = this.accounts.get(accountId)!
+        acc.ParentCategory.SubAccounts.delete(accountId)
+        this.accounts.delete(accountId)
+        this.changed += 1
+    }
+
     addRawAccount(acc : RawGeneralLedgerAccount) {
         let parentCat = this.categories.get(acc.ParentCategoryId)!
         let newAcc = <GeneralLedgerAccount>{

@@ -3,7 +3,8 @@ import * as qs from 'query-string'
 import { getGLUrl,
          createNewGLAccUrl,
          createNewGLCatUrl,
-         editGLCatUrl } from '../url'
+         editGLCatUrl,
+         deleteGLCatUrl } from '../url'
 import { getAPIRequestConfig } from './apiUtility'
 import { RawGeneralLedgerCategory, RawGeneralLedgerAccount } from '../generalLedger'
 import { postFormJson } from '../http'
@@ -65,4 +66,17 @@ export interface TNewGLAccountOutputs {
 
 export function newGLAccount(inp : TNewGLAccountInputs) : Promise<TNewGLAccountOutputs> {
     return postFormJson<TNewGLAccountOutputs>(createNewGLAccUrl, inp, getAPIRequestConfig())
+}
+
+export interface TDeleteGLCategoryInputs {
+    orgId: number
+    catId: number
+}
+
+export interface TDeleteGLCategoryOutputs {
+    data: RawGeneralLedgerCategory
+}
+
+export function deleteGLCategory(inp : TDeleteGLCategoryInputs) : Promise<TDeleteGLCategoryOutputs> {
+    return postFormJson<TDeleteGLCategoryOutputs>(deleteGLCatUrl, inp, getAPIRequestConfig())
 }

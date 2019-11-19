@@ -111,3 +111,23 @@ func CreateNewGLAccount(acc *core.GeneralLedgerAccount, role *core.Role) error {
 
 	return tx.Commit()
 }
+
+func DeleteGLCategory(catId int64, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceGeneralLedger, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		DELETE FROM general_ledger_categories
+		WHERE id = $1
+			AND org_id = $2
+	`, catId, orgId)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}

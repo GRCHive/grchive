@@ -92,6 +92,7 @@ const (
 	ApiGetGLRouteName                              = "ApiGetGL"
 	ApiNewGLCatRouteName                           = "ApiNewGLCat"
 	ApiEditGLCatRouteName                          = "ApiEditGLCat"
+	ApiDeleteGLCatRouteName                        = "ApiDeleteGLCat"
 	ApiNewGLAccRouteName                           = "ApiNewGLAcc"
 )
 

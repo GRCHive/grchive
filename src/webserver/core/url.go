@@ -158,9 +158,10 @@ const ApiAddUsersToRoleEndpoint string = "/addUsers"
 // API - General Ledger
 const ApiGeneralLedgerPrefix = "/gl"
 const ApiGetGLLevelEndpoint string = "/get"
-const ApiNewGLCategoryEndpoint string = "/newCat"
-const ApiEditGLCategoryEndpoint string = "/editCat"
-const ApiNewGLAccountEndpoint string = "/newAcc"
+const ApiNewGLCategoryEndpoint string = "/cat/new"
+const ApiEditGLCategoryEndpoint string = "/cat/edit"
+const ApiDeleteGLCategoryEndpoint string = "/cat/delete"
+const ApiNewGLAccountEndpoint string = "/acc/new"
 
 // Websocket
 const WebsocketPrefix string = "/ws"
