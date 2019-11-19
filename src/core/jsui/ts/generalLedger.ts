@@ -77,7 +77,7 @@ export class GeneralLedger {
         }
     }
 
-    addRawCategory(cat : RawGeneralLedgerCategory) {
+    createCategoryFromRaw(cat : RawGeneralLedgerCategory) : GeneralLedgerCategory {
         let newCat = <GeneralLedgerCategory>{
             ...cat,
             ParentCategory: null,
@@ -86,15 +86,58 @@ export class GeneralLedger {
             changed: 1
         }
 
+
+        if (!!cat.ParentCategoryId) {
+            let parentCat = this.categories.get(cat.ParentCategoryId)!
+            newCat.ParentCategory = parentCat
+        }
+
+        return newCat
+    }
+
+    addRawCategory(cat : RawGeneralLedgerCategory) {
+        let newCat = this.createCategoryFromRaw(cat)
         this.categories.set(cat.Id, newCat)
 
         if (!!cat.ParentCategoryId) {
             let parentCat = this.categories.get(cat.ParentCategoryId)!
             parentCat.SubCategories.set(cat.Id, newCat)
-            newCat.ParentCategory = parentCat
             parentCat.changed += 1
         } else {
             this.topLevelCategories.set(cat.Id, newCat)
+        }
+
+        this.changed += 1
+    }
+
+    replaceRawCategory(cat : RawGeneralLedgerCategory) {
+        if (!this.categories.has(cat.Id)) {
+            return
+        }
+    
+        let existingCat = this.categories.get(cat.Id)!
+
+        // Remove connections from parent. Children pointer should still be OK!
+        if (!!existingCat.ParentCategoryId) {
+            existingCat.ParentCategory!.SubCategories.delete(existingCat.Id)
+            existingCat.ParentCategory!.changed += 1
+        } else {
+            this.topLevelCategories.delete(existingCat.Id)
+        }
+
+        let newCat = this.createCategoryFromRaw(cat)
+        existingCat.Name = newCat.Name
+        existingCat.Description = newCat.Description
+        existingCat.ParentCategory = newCat.ParentCategory
+        existingCat.ParentCategoryId = newCat.ParentCategoryId
+        existingCat.changed += 1
+
+        // Reconnect parent.
+        if (!!existingCat.ParentCategoryId) {
+            existingCat.ParentCategory!.SubCategories.set(existingCat.Id, existingCat)
+            existingCat.ParentCategory!.changed += 1
+        } else {
+            this.topLevelCategories.set(existingCat.Id, existingCat)
         }
 
         this.changed += 1

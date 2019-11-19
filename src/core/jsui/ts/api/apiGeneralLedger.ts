@@ -2,7 +2,8 @@ import axios from 'axios'
 import * as qs from 'query-string'
 import { getGLUrl,
          createNewGLAccUrl,
-         createNewGLCatUrl } from '../url'
+         createNewGLCatUrl,
+         editGLCatUrl } from '../url'
 import { getAPIRequestConfig } from './apiUtility'
 import { RawGeneralLedgerCategory, RawGeneralLedgerAccount } from '../generalLedger'
 import { postFormJson } from '../http'
@@ -35,6 +36,18 @@ export interface TNewGLCategoryOutputs {
 
 export function newGLCategory(inp : TNewGLCategoryInputs) : Promise<TNewGLCategoryOutputs> {
     return postFormJson<TNewGLCategoryOutputs>(createNewGLCatUrl, inp, getAPIRequestConfig())
+}
+
+export interface TEditGLCategoryInputs extends TNewGLCategoryInputs {
+    catId: number
+}
+
+export interface TEditGLCategoryOutputs {
+    data: RawGeneralLedgerCategory
+}
+
+export function editGLCategory(inp : TEditGLCategoryInputs) : Promise<TEditGLCategoryOutputs> {
+    return postFormJson<TEditGLCategoryOutputs>(editGLCatUrl, inp, getAPIRequestConfig())
 }
 
 export interface TNewGLAccountInputs {

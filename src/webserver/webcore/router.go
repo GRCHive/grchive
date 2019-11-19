@@ -91,6 +91,7 @@ const (
 	GeneralLedgerRouteName                         = "GeneralLedger"
 	ApiGetGLRouteName                              = "ApiGetGL"
 	ApiNewGLCatRouteName                           = "ApiNewGLCat"
+	ApiEditGLCatRouteName                          = "ApiEditGLCat"
 	ApiNewGLAccRouteName                           = "ApiNewGLAcc"
 )
 

@@ -159,6 +159,7 @@ const ApiAddUsersToRoleEndpoint string = "/addUsers"
 const ApiGeneralLedgerPrefix = "/gl"
 const ApiGetGLLevelEndpoint string = "/get"
 const ApiNewGLCategoryEndpoint string = "/newCat"
+const ApiEditGLCategoryEndpoint string = "/editCat"
 const ApiNewGLAccountEndpoint string = "/newAcc"
 
 // Websocket

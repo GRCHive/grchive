@@ -21,7 +21,7 @@
         </v-textarea> 
 
         <v-autocomplete
-            v-if="isSubledger"
+            v-if="isSubledger || editMode"
             v-model="parentCategoryId"
             label="Parent Category"
             deletable-chips
@@ -33,8 +33,7 @@
             filled
             item-text="Name"
             item-value="Id"
-            :items="availableGlCats"
-            :rules="[rules.required]"
+            :items="finalAvailableCats"
         ></v-autocomplete>
     </v-form>
 
@@ -74,8 +73,10 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import * as rules from '../../../ts/formRules'
 import { TNewGLCategoryInputs, TNewGLCategoryOutputs, newGLCategory } from '../../../ts/api/apiGeneralLedger'
+import { TEditGLCategoryInputs, TEditGLCategoryOutputs, editGLCategory } from '../../../ts/api/apiGeneralLedger'
 import { contactUsUrl } from '../../../ts/url'
 import {PageParamsStore } from '../../../ts/pageParams'
+import { GeneralLedgerCategory } from '../../../ts/generalLedger'
 
 const VueComponent = Vue.extend({
     props: {
@@ -87,6 +88,10 @@ const VueComponent = Vue.extend({
         availableGlCats : {
             type: Array,
             default: () => []
+        },
+        referenceCat : {
+            type: Object as () => GeneralLedgerCategory | null,
+            default: null
         }
     }
 })
@@ -101,11 +106,19 @@ export default class CreateNewGeneralLedgerCategoryForm extends VueComponent {
     description: string = ""
     parentCategoryId: number | null = null
 
+    get finalAvailableCats() : GeneralLedgerCategory[] {
+        if (!this.referenceCat) {
+            return this.availableGlCats as GeneralLedgerCategory[]
+        }
+        return (this.availableGlCats as GeneralLedgerCategory[]).filter((ele : GeneralLedgerCategory) =>
+            ele.Id != this.referenceCat!.Id)
+    }
+
     cancel() {
         this.$emit('do-cancel')
     }
 
-    save() {
+    doSave() {
         newGLCategory(<TNewGLCategoryInputs>{
             orgId: PageParamsStore.state.organization!.Id,
             parentCategoryId: this.parentCategoryId,
@@ -124,12 +137,52 @@ export default class CreateNewGeneralLedgerCategoryForm extends VueComponent {
         })
     }
 
+    doEdit() {
+        editGLCategory(<TEditGLCategoryInputs>{
+            catId: this.referenceCat!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            parentCategoryId: this.parentCategoryId,
+            name: this.name,
+            description: this.description
+        }).then((resp : TEditGLCategoryOutputs) => {
+            this.$emit('do-save', resp.data)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops. Something went wrong. Try again.",
+                false,
+                "",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    save() {
+        if (this.editMode) {
+            this.doEdit()
+        } else {
+            this.doSave()
+        }
+    }
+
     edit() {
         this.canEdit = true
     }
 
     mounted() {
         this.canEdit = !this.editMode
+    }
+
+    resetForm() {
+        if (!!this.referenceCat) {
+            this.name = this.referenceCat.Name
+            this.description = this.referenceCat.Description
+            this.parentCategoryId = this.referenceCat.ParentCategoryId
+        } else {
+            this.name = ""
+            this.description = ""
+            this.parentCategoryId = null
+        }
     }
 
     get canSubmit() : boolean {

@@ -78,6 +78,7 @@ func CreateAllAccessPermission() PermissionsMap {
 		ControlDocumentationAccess: CreateOwnerAccessType(),
 		ControlDocMetadataAccess:   CreateOwnerAccessType(),
 		RisksAccess:                CreateOwnerAccessType(),
+		GLAccess:                   CreateOwnerAccessType(),
 	}
 }
 

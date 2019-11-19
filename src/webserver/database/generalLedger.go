@@ -62,6 +62,28 @@ func CreateNewGLCategory(cat *core.GeneralLedgerCategory, role *core.Role) error
 	return tx.Commit()
 }
 
+func UpdateGLCategory(cat *core.GeneralLedgerCategory, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceGeneralLedger, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+	_, err := tx.NamedExec(`
+		UPDATE general_ledger_categories
+		SET parent_category_id = :parent_category_id,
+			name = :name,
+			description = :description
+		WHERE id = :id
+			AND org_id = :org_id
+	`, cat)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
 func CreateNewGLAccount(acc *core.GeneralLedgerAccount, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceGeneralLedger, core.AccessManage) {
 		return core.ErrorUnauthorized

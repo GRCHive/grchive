@@ -38,7 +38,7 @@ func (v NullInt64) MarshalJSON() ([]byte, error) {
 func (v *NullInt64) UnmarshalJSON(b []byte) error {
 	var val int64
 	err := json.Unmarshal(b, &val)
-	if err != nil {
+	if err != nil || string(b) == "null" {
 		return nil
 	}
 	v.NullInt64.Int64 = val
