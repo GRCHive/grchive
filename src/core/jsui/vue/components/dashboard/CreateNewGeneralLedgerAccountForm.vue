@@ -53,7 +53,7 @@
         <v-btn
             color="error"
             @click="cancel"
-            v-if="canEdit"
+            v-if="canEdit || dialogMode"
         >
             Cancel
         </v-btn>
@@ -98,7 +98,11 @@ const VueComponent = Vue.extend({
         availableGlCats : {
             type: Array,
             default: () => []
-        }
+        },
+        dialogMode: {
+            type: Boolean,
+            default: false
+        },
     }
 })
 

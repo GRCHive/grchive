@@ -27,7 +27,7 @@
         <v-btn
             color="error"
             @click="cancel"
-            v-if="canEdit"
+            v-if="canEdit || dialogMode"
         >
             Cancel
         </v-btn>
@@ -84,7 +84,11 @@ export default Vue.extend({
         stagedEdits: {
             type: Boolean,
             default: false
-        }
+        },
+        dialogMode: {
+            type: Boolean,
+            default: false
+        },
     },
     data: () => ({
         name: "",

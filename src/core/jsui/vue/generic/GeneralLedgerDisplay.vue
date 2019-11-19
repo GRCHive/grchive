@@ -8,6 +8,7 @@
 
             <create-new-general-ledger-category-form
                 :edit-mode="true"
+                :dialog-mode="true"
                 :is-subledger="!!currentEditDeleteCat.ParentCategory"
                 :available-gl-cats="availableCats"
                 :reference-cat="currentEditDeleteCat"

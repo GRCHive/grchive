@@ -42,7 +42,7 @@
         <v-btn
             color="error"
             @click="cancel"
-            v-if="canEdit"
+            v-if="canEdit || dialogMode"
         >
             Cancel
         </v-btn>
@@ -93,7 +93,11 @@ const VueComponent = Vue.extend({
         referenceCat : {
             type: Object as () => GeneralLedgerCategory | null,
             default: null
-        }
+        },
+        dialogMode: {
+            type: Boolean,
+            default: false
+        },
     }
 })
 
