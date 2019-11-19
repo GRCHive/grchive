@@ -34,6 +34,7 @@
             item-text="Name"
             item-value="Id"
             :items="finalAvailableCats"
+            :rules="(!editMode && isSubledger) ? [rules.required] : []"
         ></v-autocomplete>
     </v-form>
 
