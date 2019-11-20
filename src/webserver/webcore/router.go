@@ -98,6 +98,9 @@ const (
 	ApiGetGLAccRouteName                           = "ApiGetGLAcc"
 	ApiEditGLAccRouteName                          = "ApiEditGLAcc"
 	ApiDeleteGLAccRouteName                        = "ApiDeleteGLAcc"
+	SystemHomeRouteName                            = "SystemHome"
+	DbSystemsRouteName                             = "DbSystesm"
+	InfraSystemsRouteName                          = "InfraSystems"
 )
 
 var globalRouter *mux.Router

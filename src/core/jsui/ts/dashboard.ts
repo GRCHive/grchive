@@ -17,6 +17,9 @@ import DashboardOrgSettingsRoles from '../vue/pages/dashboard/DashboardOrgSettin
 import DashboardOrgSettingsSingleRole from '../vue/pages/dashboard/DashboardOrgSettingsSingleRole.vue'
 import DashboardOrgGeneralLedger from '../vue/pages/dashboard/DashboardOrgGeneralLedger.vue'
 import DashboardOrgSingleGeneralLedgerAccount from '../vue/pages/dashboard/DashboardOrgSingleGeneralLedgerAccount.vue'
+import DashboardOrgSystems from '../vue/pages/dashboard/DashboardOrgSystems.vue'
+import DashboardOrgDatabases from '../vue/pages/dashboard/DashboardOrgDatabases.vue'
+import DashboardOrgInfrastructure from '../vue/pages/dashboard/DashboardOrgInfrastructure.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
 import { getCurrentCSRF } from './csrf'
 import { PageParamsStore, PageParamsStoreState  } from '../ts/pageParams'
@@ -50,6 +53,9 @@ function mountApp(inData : PageParamsStoreState) {
             DashboardOrgSettingsSingleRole,
             DashboardOrgGeneralLedger,
             DashboardOrgSingleGeneralLedgerAccount,
+            DashboardOrgSystems,
+            DashboardOrgDatabases,
+            DashboardOrgInfrastructure,
             SnackBar,
         },
         vuetify: vueOpts.vuetify,

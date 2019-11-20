@@ -3,9 +3,7 @@
         <dashboard-app-bar ref="dashboardAppBar">
         </dashboard-app-bar>
 
-        <dashboard-home-page-nav-bar
-            :selected-page="1"
-        ></dashboard-home-page-nav-bar>
+        <dashboard-home-page-nav-bar></dashboard-home-page-nav-bar>
 
         <v-overlay :value="!ready">
             <v-progress-circular indeterminate size="64"></v-progress-circular>

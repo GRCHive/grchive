@@ -36,12 +36,20 @@ func createOrganizationSubrouter(r *mux.Router) {
 
 	createOrganizationSettingsSubrouter(s)
 	createOrganizationGLSubrouter(s)
+	createOrganizationSystemSubrouter(s)
 }
 
 func createOrganizationGLSubrouter(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardGeneralLedgerPrefix).Subrouter()
 	s.HandleFunc(core.DashboardGeneralLedgerViewEndpoint, render.RenderDashboardGeneralLedger).Name(webcore.GeneralLedgerRouteName)
 	s.HandleFunc(core.DashboardOrgGLAccountEndpoint, render.RenderDashboardGLAccount).Name(webcore.GLAccountRouteName)
+}
+
+func createOrganizationSystemSubrouter(r *mux.Router) {
+	s := r.PathPrefix(core.DashboardSystemsPrefix).Subrouter()
+	s.HandleFunc(core.DashboardSystemHomeEndpoint, render.RenderSystemHome).Name(webcore.SystemHomeRouteName)
+	s.HandleFunc(core.DashboardDbSystemsEndpoint, render.RenderDbSystems).Name(webcore.DbSystemsRouteName)
+	s.HandleFunc(core.DashboardInfraSystemsEndpoint, render.RenderInfraSystems).Name(webcore.InfraSystemsRouteName)
 }
 
 func createOrganizationSettingsSubrouter(r *mux.Router) {

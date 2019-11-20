@@ -1,5 +1,5 @@
 <template>
-    <generic-nav-bar :selected-page="selectedPage" :nav-links="navLinks" :mini="mini">
+    <generic-nav-bar :nav-links="navLinks" :mini="mini">
     </generic-nav-bar>
 </template>
 
@@ -13,9 +13,6 @@ import GenericNavBar from '../GenericNavBar.vue'
 import { PageParamsStore }  from '../../../ts/pageParams'
 
 export default Vue.extend({
-    props : {
-        selectedPage : Number
-    },
     data : function() {
         return {
             navLinks : [

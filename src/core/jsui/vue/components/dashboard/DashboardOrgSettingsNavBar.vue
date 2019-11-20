@@ -1,5 +1,5 @@
 <template>
-    <generic-nav-bar :selected-page="selectedPage" :nav-links="navLinks" :mini="mini">
+    <generic-nav-bar :nav-links="navLinks" :mini="mini">
     </generic-nav-bar>
 </template>
 
@@ -20,14 +20,14 @@ export default Vue.extend({
                 {
                     title: 'Users',
                     icon: 'mdi-account-multiple',
-                    url: PageParamsStore.state.organization!.Url + '/settings/users',
+                    url: PageParamsStore.state.organization!.Url + 'settings/users',
                     disabled : false,
                     hidden: false
                 },
                 {
                     title: 'Roles',
                     icon: 'mdi-security',
-                    url: PageParamsStore.state.organization!.Url + '/settings/roles',
+                    url: PageParamsStore.state.organization!.Url + 'settings/roles',
                     disabled : false,
                     hidden: false
                 },

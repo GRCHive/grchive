@@ -3,8 +3,7 @@
         <dashboard-app-bar ref="dashboardAppBar">
         </dashboard-app-bar>
 
-        <dashboard-home-page-nav-bar :selected-page="2"
-        ></dashboard-home-page-nav-bar>
+        <dashboard-home-page-nav-bar></dashboard-home-page-nav-bar>
 
         <v-content>
             <full-edit-risk-component></full-edit-risk-component>

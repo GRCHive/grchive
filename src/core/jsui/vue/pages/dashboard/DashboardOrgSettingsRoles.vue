@@ -3,7 +3,7 @@
         <dashboard-app-bar ref="dashboardAppBar">
         </dashboard-app-bar>
 
-        <dashboard-org-settings-nav-bar :selected-page="1"></dashboard-org-settings-nav-bar>
+        <dashboard-org-settings-nav-bar></dashboard-org-settings-nav-bar>
 
         <v-content>
             <dashboard-org-roles-manage></dashboard-org-roles-manage>

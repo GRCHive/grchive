@@ -7,38 +7,33 @@
     >
         <slot></slot>
         <v-list class="py-0">
-            <v-list-item-group :value="selectedPage" mandatory>
-                <v-list-item v-for="(item, i) in navLinks" 
-                             :key="i"
-                             :href="item.url"
-                             :to="item.path"
-                             link
-                             :color="item.disabled ? `secondary` : primaryColor"
-                             :disabled="item.disabled"
-                             :two-line="item.disabled"
-                             @click="doItemClick($event, i)"
-                             :style="!!item.hidden ? `display: none;` : ``"
+            <div v-for="(item, i) in navLinks" 
+                 :key="i"
+                 :style="!!item.hidden ? `display: none;` : ``"
+            >
+                <v-list-group v-if="!!item.children && item.children.length > 0"
+                              :prepend-icon="item.icon"
+                              no-action
+                              value="true"
+                              color="rgba(0, 0, 0, 0.87) !important"
                 >
-                    <v-list-item-icon v-if="item.icon != ''">
-                        <v-icon>{{ item.icon }}</v-icon>
-                    </v-list-item-icon>
 
-                    <v-list-item-content>
-                        <v-list-item-title>
-                            {{ item.title }}
-                        </v-list-item-title>
-                        <v-list-item-subtitle v-if="item.disabled">
-                            Coming Soon.
-                        </v-list-item-subtitle>
-                    </v-list-item-content>
+                    <template v-slot:activator>
+                        <v-list-item-title>{{ item.title }} </v-list-item-title>
+                    </template>
 
-                    <v-list-item-action v-if="!!item.action">
-                        <v-btn icon @click.stop="item.action.fn" @mousedown.stop>
-                            <v-icon>{{ item.action.icon }}</v-icon>
-                        </v-btn>
-                    </v-list-item-action>
-                </v-list-item>
-            </v-list-item-group>
+                    <generic-nav-bar-item v-for="(child, ci) in item.children"
+                                          :key="ci"
+                                          :item="child"
+                                          :primary-color="primaryColor">
+                    </generic-nav-bar-item>
+                </v-list-group>
+
+                <generic-nav-bar-item :item="item"
+                                      :primary-color="primaryColor"
+                                      v-else>
+                </generic-nav-bar-item>
+            </div>
         </v-list>
     </v-navigation-drawer>
 </template>
@@ -46,12 +41,13 @@
 <script lang="ts">
 
 import Vue from 'vue'
+import GenericNavBarItem from './GenericNavBarItem.vue'
 
 export default Vue.extend({
     props : {
         mini : Boolean,
-        selectedPage : Number,
-        navLinks: {},
+        kelectedPage : Number,
+        navLinks: Array,
         primaryColor: {
             type: String,
             default: "primary"
@@ -61,11 +57,17 @@ export default Vue.extend({
             default: 256
         }
     },
-    methods: {
-        doItemClick(e : MouseEvent, idx : number) {
-            this.$emit('item-change', e, idx)
-        }
-    }
+    components: {
+        GenericNavBarItem
+    },
 })
 
 </script>
+
+<style scoped>
+
+>>>.v-list-group__header .v-list-group__header__prepend-icon .v-icon {
+    color: rgba(0, 0, 0, 0.54) !important;
+}
+
+</style>

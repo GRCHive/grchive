@@ -218,3 +218,15 @@ func RenderDashboardGeneralLedger(w http.ResponseWriter, r *http.Request) {
 func RenderDashboardGLAccount(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardGLAccountTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
+
+func RenderSystemHome(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardSystemHomeTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}
+
+func RenderDbSystems(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardDbSystemsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}
+
+func RenderInfraSystems(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardInfraSystemsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}

@@ -1,5 +1,5 @@
 <template>
-    <generic-nav-bar :selected-page="selectedPage" :nav-links="navLinks" :mini="mini">
+    <generic-nav-bar :nav-links="navLinks" :mini="mini">
     </generic-nav-bar>
 </template>
 
@@ -12,41 +12,38 @@ import GenericNavBar from '../GenericNavBar.vue'
 import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
-    props : {
-        selectedPage : Number
-    },
     data : function() {
         return {
             navLinks : [
                 {
                     title: 'Dashboard',
                     icon: 'mdi-view-dashboard',
-                    url: PageParamsStore.state.organization!.Url,
+                    url: PageParamsStore.state.organization!.Url + 'dashboard',
                     disabled : false,
                     hidden: true
                 },
                 {
                     title: 'Process Flows',
                     icon: 'mdi-graph-outline',
-                    url: PageParamsStore.state.organization!.Url + '/flows',
+                    url: PageParamsStore.state.organization!.Url + 'flows',
                     disabled : false
                 },
                 {
                     title: 'Risks',
                     icon: 'mdi-fire',
-                    url: PageParamsStore.state.organization!.Url + '/risks',
+                    url: PageParamsStore.state.organization!.Url + 'risks',
                     disabled : false
                 },
                 {
                     title: 'Controls',
                     icon: 'mdi-shield-lock-outline',
-                    url: PageParamsStore.state.organization!.Url + '/controls',
+                    url: PageParamsStore.state.organization!.Url + 'controls',
                     disabled : false
                 },
                 {
                     title: 'General Ledger',
                     icon: 'mdi-bank-outline',
-                    url: PageParamsStore.state.organization!.Url + '/gl',
+                    url: PageParamsStore.state.organization!.Url + 'gl',
                     disabled : false
                 },
                 {
@@ -56,15 +53,31 @@ export default Vue.extend({
                     disabled : true
                 },
                 {
-                    title: 'Systems',
-                    icon: 'mdi-database',
-                    url: '#',
-                    disabled : true
+                    title: 'IT',
+                    icon: 'mdi-web',
+                    disabled : false,
+                    children: [
+                        {
+                            title: 'Systems',
+                            icon: 'mdi-webpack',
+                            url: PageParamsStore.state.organization!.Url + 'it/systems',
+                        },
+                        {
+                            title: 'Databases',
+                            icon: 'mdi-database',
+                            url: PageParamsStore.state.organization!.Url + 'it/databases',
+                        },
+                        {
+                            title: 'Infrastructure',
+                            icon: 'mdi-server-network',
+                            url: PageParamsStore.state.organization!.Url + 'it/infrastructure',
+                        },
+                    ]
                 },
                 {
                     title: 'Settings',
                     icon: 'mdi-settings',
-                    url: PageParamsStore.state.organization!.Url + '/settings',
+                    url: PageParamsStore.state.organization!.Url + 'settings',
                     disabled : false
                 },
             ],

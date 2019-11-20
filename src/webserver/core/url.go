@@ -68,6 +68,12 @@ const DashboardGeneralLedgerViewEndpoint string = "/"
 
 var DashboardOrgGLAccountEndpoint string = fmt.Sprintf("/acc/{%s}", DashboardOrgGLAccQueryId)
 
+// Dashboard - Systems
+const DashboardSystemsPrefix string = "/it"
+const DashboardSystemHomeEndpoint string = "/systems"
+const DashboardDbSystemsEndpoint string = "/databases"
+const DashboardInfraSystemsEndpoint string = "/infrastructure"
+
 // API
 const ApiUrl string = "/api"
 

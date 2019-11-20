@@ -3,9 +3,7 @@
         <dashboard-app-bar ref="dashboardAppBar">
         </dashboard-app-bar>
 
-        <dashboard-home-page-nav-bar
-            :selected-page="1"
-        ></dashboard-home-page-nav-bar>
+        <dashboard-home-page-nav-bar></dashboard-home-page-nav-bar>
         <v-content>
             <dashboard-process-flow-list></dashboard-process-flow-list>
         </v-content>

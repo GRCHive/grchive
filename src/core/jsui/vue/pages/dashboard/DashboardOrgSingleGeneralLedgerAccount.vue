@@ -3,8 +3,7 @@
         <dashboard-app-bar ref="dashboardAppBar">
         </dashboard-app-bar>
 
-        <dashboard-home-page-nav-bar :selected-page="4"
-        ></dashboard-home-page-nav-bar>
+        <dashboard-home-page-nav-bar></dashboard-home-page-nav-bar>
 
         <v-content>
             <full-edit-general-ledger-account-component></full-edit-general-ledger-account-component>
