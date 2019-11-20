@@ -6,7 +6,8 @@
         :show-select="selectable"
         :single-select="!multi"
         :search="search"
-        @input="changeInput">
+        @input="changeInput"
+        @click:row="goToRole">
 
         <template v-slot:item.roleName="{ item }">
             <p class="ma-0 pa-0 body-1 font-weight-bold">{{ item.value.Name }}</p>
@@ -20,12 +21,6 @@
         <template v-slot:item.isAdmin="{ item }">
             <v-checkbox class="ma-0 pa-0" :input-value="item.value.IsAdmin" disabled hide-details></v-checkbox>
         </template>
-
-        <template v-slot:item.action="{ item }">
-            <v-btn small icon :href="createOrgRoleUrl(orgGroupName, item.value.Id)">
-                <v-icon small>mdi-pencil</v-icon>
-            </v-btn>
-        </template>
     </v-data-table>
 </template>
 
@@ -37,16 +32,8 @@ import { RoleMetadata } from '../../ts/roles'
 import { PageParamsStore } from '../../ts/pageParams'
 import { createOrgRoleUrl } from '../../ts/url'
 
-@Component({
-    methods: {
-        createOrgRoleUrl
-    }
-})
+@Component
 export default class RoleTable extends BaseResourceTable {
-    get orgGroupName() : string {
-        return PageParamsStore.state.organization!.OktaGroupName
-    }
-
     get tableHeaders() : any[] {
         return [
             {
@@ -61,12 +48,6 @@ export default class RoleTable extends BaseResourceTable {
             {
                 text: 'Admin',
                 value: 'isAdmin',
-                filterable: false,
-            },
-            {
-                text: 'Actions',
-                value: 'action',
-                sortable: false,
                 filterable: false,
             },
         ]
@@ -84,6 +65,18 @@ export default class RoleTable extends BaseResourceTable {
     transformTableItemToInputResource(inp : any) : any {
         return inp.value
     }
+
+    goToRole(item : any) {
+        window.location.assign(createOrgRoleUrl(PageParamsStore.state.organization!.OktaGroupName, item.value.Id))
+    }
 }
 
 </script>
+
+<style scoped>
+
+>>>tr {
+    cursor: pointer !important;
+}
+
+</style>
