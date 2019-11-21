@@ -27,6 +27,9 @@ const (
 	ResourceControlDocumentationMetadata
 	ResourceRisks
 	ResourceGeneralLedger
+	ResourceSystems
+	ResourceDatabases
+	ResourceInfrastructure
 )
 
 var AvailableResources []ResourceType = []ResourceType{
@@ -38,6 +41,7 @@ var AvailableResources []ResourceType = []ResourceType{
 	ResourceControlDocumentationMetadata,
 	ResourceRisks,
 	ResourceGeneralLedger,
+	ResourceSystems,
 }
 
 type PermissionsMap struct {
@@ -49,6 +53,7 @@ type PermissionsMap struct {
 	ControlDocMetadataAccess   AccessType `db:"doc_meta_access"`
 	RisksAccess                AccessType `db:"risk_access"`
 	GLAccess                   AccessType `db:"gl_access"`
+	SystemAccess               AccessType `db:"system_access"`
 }
 
 type RoleMetadata struct {
@@ -79,6 +84,7 @@ func CreateAllAccessPermission() PermissionsMap {
 		ControlDocMetadataAccess:   CreateOwnerAccessType(),
 		RisksAccess:                CreateOwnerAccessType(),
 		GLAccess:                   CreateOwnerAccessType(),
+		SystemAccess:               CreateOwnerAccessType(),
 	}
 }
 
@@ -129,6 +135,8 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 		return p.RisksAccess
 	case ResourceGeneralLedger:
 		return p.GLAccess
+	case ResourceSystems:
+		return p.SystemAccess
 	}
 	return AccessNone
 }

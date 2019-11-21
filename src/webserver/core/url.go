@@ -176,6 +176,14 @@ const ApiGetGLAccountEndpoint string = "/acc/get"
 const ApiEditGLAccountEndpoint string = "/acc/edit"
 const ApiDeleteGLAccountEndpoint string = "/acc/delete"
 
+// API - IT
+const ApiITPrefix = "/it"
+
+// API - IT - Systems
+const ApiITSystemsPrefix = "/system"
+const ApiITSystemsNewEndpoint = "/new"
+const ApiITSystemsAllEndpoint = "/all"
+
 // Websocket
 const WebsocketPrefix string = "/ws"
 

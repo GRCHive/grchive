@@ -103,7 +103,7 @@
                 <v-dialog v-model="showHideCreateNewRisk" persistent max-width="40%">
                     <template v-slot:activator="{ on }">
                         <v-btn color="success" v-on="on">
-                            Create New
+                            New
                         </v-btn>
                     </template>
                     <create-new-risk-form

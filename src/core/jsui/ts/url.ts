@@ -163,3 +163,6 @@ export const deleteGLAccUrl : string = "/api/gl/acc/delete"
 export function createSingleGLAccountUrl(org : string, accId : number) : string {
     return `/dashboard/org/${org}/gl/acc/${accId}`
 }
+
+export const newSystemUrl : string = "/api/it/system/new"
+export const allSystemsUrl : string = "/api/it/system/all"

@@ -29,7 +29,7 @@
                 <v-dialog v-model="showHideCreateNewControl" persistent max-width="40%">
                     <template v-slot:activator="{ on }">
                         <v-btn class="primary" v-on="on">
-                            Create New
+                            New
                         </v-btn>
                     </template>
                     <create-new-control-form

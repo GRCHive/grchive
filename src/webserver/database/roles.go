@@ -15,6 +15,7 @@ var resourceToDatabaseMap = map[core.ResourceType]string{
 	core.ResourceControlDocumentationMetadata: "resource_control_documentation_metadata_access",
 	core.ResourceRisks:                        "resource_risks_access",
 	core.ResourceGeneralLedger:                "resource_gl_access",
+	core.ResourceSystems:                      "resource_systems_access",
 }
 
 func createRoleSql(cond string) string {
@@ -33,7 +34,8 @@ func createRoleSql(cond string) string {
 			rcd.access_type AS "permissions.doc_access",
 			rcdm.access_type AS "permissions.doc_meta_access",
 			rr.access_type AS "permissions.risk_access",
-			rgl.access_type AS "permissions.gl_access"
+			rgl.access_type AS "permissions.gl_access",
+			rsys.access_type AS "permissions.system_access"
 		FROM organization_available_roles AS role
 		INNER JOIN resource_organization_users_access AS ruser
 			ON role.id = ruser.role_id
@@ -51,6 +53,8 @@ func createRoleSql(cond string) string {
 			ON role.id = rr.role_id
 		INNER JOIN resource_gl_access AS rgl
 			ON role.id = rgl.role_id
+		INNER JOIN resource_systems_access AS rsys
+			ON role.id = rsys.role_id
 		%s
 		`, cond)
 }

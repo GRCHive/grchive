@@ -59,7 +59,7 @@ export default Vue.extend({
                     children: [
                         {
                             title: 'Systems',
-                            icon: 'mdi-webpack',
+                            icon: 'mdi-application',
                             url: PageParamsStore.state.organization!.Url + 'it/systems',
                         },
                         {

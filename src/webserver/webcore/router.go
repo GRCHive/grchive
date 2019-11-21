@@ -101,6 +101,8 @@ const (
 	SystemHomeRouteName                            = "SystemHome"
 	DbSystemsRouteName                             = "DbSystesm"
 	InfraSystemsRouteName                          = "InfraSystems"
+	ApiNewSystemRouteName                          = "ApiNewSystem"
+	ApiSystemAllRouteName                          = "ApiSystemAll"
 )
 
 var globalRouter *mux.Router
