@@ -18,7 +18,9 @@ go_library(
         "controlDocumentation.go",
         "roles.go",
         "generalLedger.go",
-        "systems.go"
+        "systems.go",
+        "databases.go",
+        "infrastructure.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",

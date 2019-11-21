@@ -32,6 +32,9 @@ const DashboardOrgControlQueryId string = "control"
 const DashboardOrgFlowQueryId string = "flow"
 const DashboardOrgRoleQueryId string = "roleId"
 const DashboardOrgGLAccQueryId string = "accId"
+const DashboardOrgSystemQueryId string = "sysId"
+const DashboardOrgDbQueryId string = "dbId"
+const DashboardOrgInfraQueryId string = "infraId"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 
@@ -73,6 +76,10 @@ const DashboardSystemsPrefix string = "/it"
 const DashboardSystemHomeEndpoint string = "/systems"
 const DashboardDbSystemsEndpoint string = "/databases"
 const DashboardInfraSystemsEndpoint string = "/infrastructure"
+
+var DashboardSingleSystemEndpoint string = fmt.Sprintf("%s/{%s}", DashboardSystemHomeEndpoint, DashboardOrgSystemQueryId)
+var DashboardSingleDbEndpoint string = fmt.Sprintf("%s/{%s}", DashboardDbSystemsEndpoint, DashboardOrgDbQueryId)
+var DashboardSingleInfraEndpoint string = fmt.Sprintf("%s/{%s}", DashboardInfraSystemsEndpoint, DashboardOrgInfraQueryId)
 
 // API
 const ApiUrl string = "/api"
@@ -180,9 +187,18 @@ const ApiDeleteGLAccountEndpoint string = "/acc/delete"
 const ApiITPrefix = "/it"
 
 // API - IT - Systems
-const ApiITSystemsPrefix = "/system"
+const ApiITSystemsPrefix = "/systems"
 const ApiITSystemsNewEndpoint = "/new"
 const ApiITSystemsAllEndpoint = "/all"
+
+// API - IT - DB
+const ApiITDbPrefix = "/db"
+const ApiITDbNewEndpoint = "/new"
+const ApiITDbAllEndpoint = "/all"
+const ApiITDbTypesEndpoint = "/types"
+
+// API - IT - Infrastructure
+const ApiITInfraPrefix = "/infra"
 
 // Websocket
 const WebsocketPrefix string = "/ws"

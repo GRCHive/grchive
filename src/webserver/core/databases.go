@@ -6,9 +6,12 @@ type DatabaseType struct {
 }
 
 type Database struct {
-	Id     int64 `db:"id"`
-	OrgId  int32 `db:"org_id"`
-	TypeId int32 `db:"type_id"`
+	Id        int64  `db:"id"`
+	Name      string `db:"name"`
+	OrgId     int32  `db:"org_id"`
+	TypeId    int32  `db:"type_id"`
+	OtherType string `db:"other_type"`
+	Version   string `db:"version"`
 }
 
 type DatabaseConnection struct {

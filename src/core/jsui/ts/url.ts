@@ -1,5 +1,5 @@
 // TODO: Replace this whole file with some way of getting metadata from the server
-// and just using stuff from the metadata...
+// and just using stuff from the metadata...Maybe?
 export const getStartedUrl : string = "/getting-started"
 export const contactUsUrl : string = "/contact-us"
 export const homePageUrl : string = "/"
@@ -51,6 +51,18 @@ export function createOrgUrl(org : string) : string {
 
 export function createOrgGLUrl(org : string ): string {
     return `${createOrgUrl(org)}/gl`
+}
+
+export function createSingleSystemUrl(org: string, sys : number) : string {
+    return `/dashboard/org/${org}/it/systems/${sys}`
+}
+
+export function createSingleDbUrl(org: string, db : number) : string {
+    return `/dashboard/org/${org}/it/databases/${db}`
+}
+
+export function createSingleInfraUrl(org: string, infra : number) : string {
+    return `/dashboard/org/${org}/it/infrastructure/${infra}`
 }
 
 export function createFlowUrl(org : string, flow : number) : string {
@@ -164,5 +176,9 @@ export function createSingleGLAccountUrl(org : string, accId : number) : string 
     return `/dashboard/org/${org}/gl/acc/${accId}`
 }
 
-export const newSystemUrl : string = "/api/it/system/new"
-export const allSystemsUrl : string = "/api/it/system/all"
+export const newSystemUrl : string = "/api/it/systems/new"
+export const allSystemsUrl : string = "/api/it/systems/all"
+
+export const newDatabaseUrl : string = "/api/it/db/new"
+export const allDatabaseUrl : string = "/api/it/db/all"
+export const typesDatabaseUrl : string = "/api/it/db/types"

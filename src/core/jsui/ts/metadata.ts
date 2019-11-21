@@ -4,6 +4,8 @@ import { getProcessFlowIOTypes, TGetProcessFlowIOTypesInput, TGetProcessFlowIOTy
 import { getProcessFlowNodeTypes, TGetProcessFlowNodeTypesInput, TGetProcessFlowNodeTypesOutput } from './api/apiProcessFlowNodes'
 import { getControlTypes, TGetControlTypesInput, TGetControlTypesOutput } from './api/apiControls'
 import { getAllOrgUsers, TGetAllOrgUsersInput, TGetAllOrgUsersOutput } from './api/apiUsers'
+import { getAllDatabaseTypes, TDbTypeOutputs } from './api/apiDatabases'
+import { DatabaseType } from './databases'
 
 interface MetadataStoreState {
     ioTypes: ProcessFlowIOType[]
@@ -16,6 +18,9 @@ interface MetadataStoreState {
     availableUsers: User[]
     idToUsers: Record<number, User>
     usersInitialized: boolean
+    availableDbTypes: DatabaseType[]
+    idToDbType: Record<number, DatabaseType>
+    dbTypesInitialized: boolean
 }
 
 const metaDataStore: StoreOptions<MetadataStoreState> = {
@@ -29,7 +34,10 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
         controlTypeInitialized: false,
         availableUsers: [] as User[],
         idToUsers: Object() as Record<number, User>,
-        usersInitialized: false
+        usersInitialized: false,
+        availableDbTypes: [] as DatabaseType[],
+        idToDbType: Object() as Record<number, DatabaseType>,
+        dbTypesInitialized: false
     },
     mutations: {
         setIoTypes(state, inTypes : ProcessFlowIOType[]) {
@@ -61,6 +69,14 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
                 Vue.set(state.idToUsers, user.Id, user)
             }
             state.usersInitialized = true
+        },
+        setDbTypes(state, inTypes: DatabaseType[]) {
+            state.availableDbTypes = inTypes
+            state.idToDbType = Object() as Record<number, DatabaseType>
+            for (let typ of inTypes) {
+                Vue.set(state.idToDbType, typ.Id, typ)
+            }
+            state.dbTypesInitialized = true
         }
     },
     actions: {
@@ -70,6 +86,7 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
             context.dispatch('initializeProcessFlowNodeTypes')
             context.dispatch('initializeProcessFlowControlTypes')
             context.dispatch('initializeUsers', data)
+            context.dispatch('initializeDatabaseTypes')
         },
         initializeProcessFlowIOTypes(context) {
             getProcessFlowIOTypes(<TGetProcessFlowIOTypesInput>{
@@ -98,6 +115,11 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
                 org: orgGroupId
             }).then((resp : TGetAllOrgUsersOutput) => {
                 context.commit('setUsers', resp.data)
+            })
+        },
+        initializeDatabaseTypes(context) {
+            getAllDatabaseTypes().then((resp : TDbTypeOutputs) => {
+                context.commit('setDbTypes', resp.data)
             })
         }
     },

@@ -5,8 +5,10 @@ CREATE TABLE supported_databases (
 
 CREATE TABLE database_resources (
     id BIGSERIAL,
+    name TEXT NOT NULL,
     org_id INTEGER NOT NULL REFERENCES organizations(id),
     type_id INTEGER NOT NULL REFERENCES supported_databases(id),
+    other_type TEXT,
     version TEXT NOT NULL,
     PRIMARY KEY(id, org_id)
 );

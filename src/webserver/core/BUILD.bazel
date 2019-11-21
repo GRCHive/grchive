@@ -38,6 +38,7 @@ go_library(
         "generalLedger.go",
         "systems.go",
         "databases.go",
+        "infrastructure.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",

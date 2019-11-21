@@ -1,5 +1,6 @@
 <template>
     <v-data-table
+        v-if="ready"
         v-model="selected"
         :headers="tableHeaders"
         :items="tableItems"
@@ -7,12 +8,7 @@
         :single-select="!multi"
         :search="search"
         @input="changeInput"
-        @click:row="goToSystem">
-
-        <template v-slot:item.name="{ item }">
-            <p class="ma-0 pa-0 body-1 font-weight-bold">{{ item.value.Name }}</p>
-            <p class="ma-0 pa-0 caption font-weight-light">{{ item.value.Purpose }}</p>
-        </template>
+        @click:row="goToDb">
     </v-data-table>
 </template>
 
@@ -21,15 +17,29 @@
 import Component from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
 import { PageParamsStore } from '../../ts/pageParams'
-import { createSingleSystemUrl } from '../../ts/url'
+import { createSingleDbUrl } from '../../ts/url'
+import { getDbTypeAsString } from '../../ts/databases'
+import MetadataStore from '../../ts/metadata'
 
 @Component
 export default class SystemsTable extends BaseResourceTable {
+    get ready() : boolean {
+        return MetadataStore.state.dbTypesInitialized
+    }
+
     get tableHeaders() : any[] {
         return [
             {
                 text: 'Name',
                 value: 'name',
+            },
+            {
+                text: 'Type',
+                value: 'type',
+            },
+            {
+                text: 'Version',
+                value: 'version',
             },
         ]
     }
@@ -37,8 +47,9 @@ export default class SystemsTable extends BaseResourceTable {
     transformInputResourceToTableItem(inp : any) : any {
         return {
             id: inp.Id,
-            // Filter purposes
-            name: `${inp.Name} ${inp.Purpose}`,
+            name: inp.Name,
+            type: getDbTypeAsString(inp),
+            version: inp.Version,
             value: inp
         }
     }
@@ -47,8 +58,8 @@ export default class SystemsTable extends BaseResourceTable {
         return inp.value
     }
 
-    goToSystem(item : any) {
-        window.location.assign(createSingleSystemUrl(
+    goToDb(item : any) {
+        window.location.assign(createSingleDbUrl(
             PageParamsStore.state.organization!.OktaGroupName,
             item.value.Id))
     }

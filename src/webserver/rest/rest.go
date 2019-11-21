@@ -155,10 +155,23 @@ func registerGeneralLedgerAPIPaths(r *mux.Router) {
 func registerITAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiITPrefix).Subrouter()
 	registerITSystemsAPIPaths(s)
+	registerITDbAPIPaths(s)
+	registerITInfraAPIPaths(s)
 }
 
 func registerITSystemsAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiITSystemsPrefix).Subrouter()
 	s.HandleFunc(core.ApiITSystemsNewEndpoint, newSystem).Methods("POST").Name(webcore.ApiNewSystemRouteName)
 	s.HandleFunc(core.ApiITSystemsAllEndpoint, getAllSystems).Methods("GET").Name(webcore.ApiSystemAllRouteName)
+}
+
+func registerITDbAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiITDbPrefix).Subrouter()
+	s.HandleFunc(core.ApiITDbNewEndpoint, newDb).Methods("POST").Name(webcore.ApiNewDbRouteName)
+	s.HandleFunc(core.ApiITDbAllEndpoint, getAllDb).Methods("GET").Name(webcore.ApiAllDbRouteName)
+	s.HandleFunc(core.ApiITDbTypesEndpoint, getDbTypes).Methods("GET").Name(webcore.ApiTypesDbRouteName)
+}
+
+func registerITInfraAPIPaths(r *mux.Router) {
+	//s := r.PathPrefix(core.ApiITInfraPrefix).Subrouter()
 }

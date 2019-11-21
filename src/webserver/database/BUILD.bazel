@@ -26,6 +26,7 @@ go_library(
         "inviteCodes.go",
         "generalLedger.go",
         "systems.go",
+        "sysDatabase.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 

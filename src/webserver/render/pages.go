@@ -223,10 +223,22 @@ func RenderSystemHome(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardSystemHomeTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
 
+func RenderSingleSystem(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardSingleSystemTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}
+
 func RenderDbSystems(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardDbSystemsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
 
+func RenderSingleDb(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardSingleDbTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}
+
 func RenderInfraSystems(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardInfraSystemsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}
+
+func RenderSingleInfra(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardSingleInfraTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }

@@ -29,7 +29,7 @@ const (
 	ResourceGeneralLedger
 	ResourceSystems
 	ResourceDatabases
-	ResourceInfrastructure
+	ResourceDbConnections
 )
 
 var AvailableResources []ResourceType = []ResourceType{
@@ -42,6 +42,8 @@ var AvailableResources []ResourceType = []ResourceType{
 	ResourceRisks,
 	ResourceGeneralLedger,
 	ResourceSystems,
+	ResourceDatabases,
+	ResourceDbConnections,
 }
 
 type PermissionsMap struct {
@@ -54,6 +56,8 @@ type PermissionsMap struct {
 	RisksAccess                AccessType `db:"risk_access"`
 	GLAccess                   AccessType `db:"gl_access"`
 	SystemAccess               AccessType `db:"system_access"`
+	DbAccess                   AccessType `db:"db_access"`
+	DbConnectionAccess         AccessType `db:"db_conn_access"`
 }
 
 type RoleMetadata struct {
@@ -85,6 +89,8 @@ func CreateAllAccessPermission() PermissionsMap {
 		RisksAccess:                CreateOwnerAccessType(),
 		GLAccess:                   CreateOwnerAccessType(),
 		SystemAccess:               CreateOwnerAccessType(),
+		DbAccess:                   CreateOwnerAccessType(),
+		DbConnectionAccess:         CreateOwnerAccessType(),
 	}
 }
 
@@ -137,6 +143,10 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 		return p.GLAccess
 	case ResourceSystems:
 		return p.SystemAccess
+	case ResourceDatabases:
+		return p.DbAccess
+	case ResourceDbConnections:
+		return p.DbConnectionAccess
 	}
 	return AccessNone
 }

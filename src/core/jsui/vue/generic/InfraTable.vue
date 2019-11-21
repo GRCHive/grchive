@@ -7,12 +7,7 @@
         :single-select="!multi"
         :search="search"
         @input="changeInput"
-        @click:row="goToSystem">
-
-        <template v-slot:item.name="{ item }">
-            <p class="ma-0 pa-0 body-1 font-weight-bold">{{ item.value.Name }}</p>
-            <p class="ma-0 pa-0 caption font-weight-light">{{ item.value.Purpose }}</p>
-        </template>
+        @click:row="goToInfra">
     </v-data-table>
 </template>
 
@@ -21,16 +16,12 @@
 import Component from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
 import { PageParamsStore } from '../../ts/pageParams'
-import { createSingleSystemUrl } from '../../ts/url'
+import { createSingleInfraUrl } from '../../ts/url'
 
 @Component
-export default class SystemsTable extends BaseResourceTable {
+export default class InfraTable extends BaseResourceTable {
     get tableHeaders() : any[] {
         return [
-            {
-                text: 'Name',
-                value: 'name',
-            },
         ]
     }
 
@@ -47,8 +38,8 @@ export default class SystemsTable extends BaseResourceTable {
         return inp.value
     }
 
-    goToSystem(item : any) {
-        window.location.assign(createSingleSystemUrl(
+    goToInfra(item : any) {
+        window.location.assign(createSingleInfraUrl(
             PageParamsStore.state.organization!.OktaGroupName,
             item.value.Id))
     }

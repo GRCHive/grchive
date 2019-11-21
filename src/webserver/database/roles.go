@@ -16,47 +16,57 @@ var resourceToDatabaseMap = map[core.ResourceType]string{
 	core.ResourceRisks:                        "resource_risks_access",
 	core.ResourceGeneralLedger:                "resource_gl_access",
 	core.ResourceSystems:                      "resource_systems_access",
+	core.ResourceDatabases:                    "resource_database_access",
+	core.ResourceDbConnections:                "resource_db_conn_access",
+}
+
+var resourceToColumnName = map[core.ResourceType]string{
+	core.ResourceOrgUsers:                     "permissions.users_access",
+	core.ResourceOrgRoles:                     "permissions.roles_access",
+	core.ResourceProcessFlows:                 "permissions.flow_access",
+	core.ResourceControls:                     "permissions.control_access",
+	core.ResourceControlDocumentation:         "permissions.doc_access",
+	core.ResourceControlDocumentationMetadata: "permissions.doc_meta_access",
+	core.ResourceRisks:                        "permissions.risk_access",
+	core.ResourceGeneralLedger:                "permissions.gl_access",
+	core.ResourceSystems:                      "permissions.system_access",
+	core.ResourceDatabases:                    "permissions.db_access",
+	core.ResourceDbConnections:                "permissions.db_conn_access",
 }
 
 func createRoleSql(cond string) string {
+	selectColumns := `
+		role.id AS "role.id",
+		role.name AS "role.name",
+		role.description AS "role.description",
+		role.is_default_role AS "role.is_default_role",
+		role.is_admin_role AS "role.is_admin_role",
+		role.org_id AS "role.org_id"
+	`
+
+	joinStmts := ""
+
+	for _, res := range core.AvailableResources {
+		table := resourceToDatabaseMap[res]
+		col := resourceToColumnName[res]
+
+		selectColumns = selectColumns + fmt.Sprintf(`
+			, %s.access_type AS "%s"
+		`, table, col)
+
+		joinStmts = joinStmts + fmt.Sprintf(`
+			INNER JOIN %s
+				ON role.id = %s.role_id
+		`, table, table)
+	}
+
 	return fmt.Sprintf(`
 		SELECT
-			role.id AS "role.id",
-			role.name AS "role.name",
-			role.description AS "role.description",
-			role.is_default_role AS "role.is_default_role",
-			role.is_admin_role AS "role.is_admin_role",
-			role.org_id AS "role.org_id",
-			ruser.access_type AS "permissions.users_access",
-			rrole.access_type AS "permissions.roles_access",
-			rpf.access_type AS "permissions.flow_access",
-			rc.access_type AS "permissions.control_access",
-			rcd.access_type AS "permissions.doc_access",
-			rcdm.access_type AS "permissions.doc_meta_access",
-			rr.access_type AS "permissions.risk_access",
-			rgl.access_type AS "permissions.gl_access",
-			rsys.access_type AS "permissions.system_access"
-		FROM organization_available_roles AS role
-		INNER JOIN resource_organization_users_access AS ruser
-			ON role.id = ruser.role_id
-		INNER JOIN resource_organization_roles_access AS rrole
-			ON role.id = rrole.role_id
-		INNER JOIN resource_process_flows_access AS rpf
-			ON role.id = rpf.role_id
-		INNER JOIN resource_controls_access AS rc
-			ON role.id = rc.role_id
-		INNER JOIN resource_control_documentation_access AS rcd
-			ON role.id = rcd.role_id
-		INNER JOIN resource_control_documentation_metadata_access AS rcdm
-			ON role.id = rcdm.role_id
-		INNER JOIN resource_risks_access AS rr
-			ON role.id = rr.role_id
-		INNER JOIN resource_gl_access AS rgl
-			ON role.id = rgl.role_id
-		INNER JOIN resource_systems_access AS rsys
-			ON role.id = rsys.role_id
 		%s
-		`, cond)
+		FROM organization_available_roles AS role
+		%s	
+		%s
+		`, selectColumns, joinStmts, cond)
 }
 
 func FindUserRoleFromStmt(stmt *sqlx.Stmt, args ...interface{}) (*core.Role, error) {
