@@ -53,6 +53,14 @@ export function createOrgGLUrl(org : string ): string {
     return `${createOrgUrl(org)}/gl`
 }
 
+export function createOrgSystemUrl(org : string) : string {
+    return `${createOrgUrl(org)}/it/systems`
+}
+
+export function createOrgDatabaseUrl(org : string) : string {
+    return `${createOrgUrl(org)}/it/databases`
+}
+
 export function createSingleSystemUrl(org: string, sys : number) : string {
     return `/dashboard/org/${org}/it/systems/${sys}`
 }
@@ -178,7 +186,13 @@ export function createSingleGLAccountUrl(org : string, accId : number) : string 
 
 export const newSystemUrl : string = "/api/it/systems/new"
 export const allSystemsUrl : string = "/api/it/systems/all"
+export const editSystemUrl : string = "/api/it/systems/edit"
+export const deleteSystemUrl : string = "/api/it/systems/delete"
+export const getSystemUrl : string = "/api/it/systems/get"
 
 export const newDatabaseUrl : string = "/api/it/db/new"
 export const allDatabaseUrl : string = "/api/it/db/all"
 export const typesDatabaseUrl : string = "/api/it/db/types"
+export const editDatabaseUrl : string = "/api/it/db/edit"
+export const deleteDatabaseUrl : string = "/api/it/db/delete"
+export const getDatabaseUrl : string = "/api/it/db/get"

@@ -190,12 +190,18 @@ const ApiITPrefix = "/it"
 const ApiITSystemsPrefix = "/systems"
 const ApiITSystemsNewEndpoint = "/new"
 const ApiITSystemsAllEndpoint = "/all"
+const ApiITSystemGetEndpoint = "/get"
+const ApiITSystemEditEndpoint = "/edit"
+const ApiITSystemDeleteEndpoint = "/delete"
 
 // API - IT - DB
 const ApiITDbPrefix = "/db"
 const ApiITDbNewEndpoint = "/new"
 const ApiITDbAllEndpoint = "/all"
 const ApiITDbTypesEndpoint = "/types"
+const ApiITDbGetEndpoint = "/get"
+const ApiITDbEditEndpoint = "/edit"
+const ApiITDbDeleteEndpoint = "/delete"
 
 // API - IT - Infrastructure
 const ApiITInfraPrefix = "/infra"

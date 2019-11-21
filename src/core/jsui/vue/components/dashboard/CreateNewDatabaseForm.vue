@@ -21,6 +21,7 @@
             label="Type"
             hide-no-data
             :rules="[rules.required]"
+            :disabled="!canEdit"
         >
         </v-autocomplete>
 
@@ -76,9 +77,10 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import * as rules from '../../../ts/formRules'
 import { TNewDatabaseOutputs, newDatabase} from '../../../ts/api/apiDatabases'
+import { TEditDatabaseOutputs, editDatabase} from '../../../ts/api/apiDatabases'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
-import { otherTypeId, DatabaseType } from '../../../ts/databases'
+import { otherTypeId, DatabaseType, Database } from '../../../ts/databases'
 import MetadataStore from '../../../ts/metadata'
 
 const VueComponent = Vue.extend({
@@ -91,6 +93,10 @@ const VueComponent = Vue.extend({
             type: Boolean,
             default: false
         },
+        referenceDb: {
+            type: Object as () => Database | null,
+            default: null
+        }
     }
 })
 
@@ -120,7 +126,7 @@ export default class CreateNewDatabaseForm extends VueComponent {
         return !MetadataStore.state.dbTypesInitialized
     }
 
-    save() {
+    doSave() {
         newDatabase({
             name: this.name,
             orgId: PageParamsStore.state.organization!.Id,
@@ -140,6 +146,36 @@ export default class CreateNewDatabaseForm extends VueComponent {
         })
     }
 
+    doEdit() {
+        editDatabase({
+            dbId: this.referenceDb!.Id,
+            name: this.name,
+            orgId: PageParamsStore.state.organization!.Id,
+            typeId: this.typeId!,
+            otherType: this.otherType,
+            version: this.version,
+        }).then((resp : TNewDatabaseOutputs) => {
+            this.$emit('do-save', resp.data)
+            this.canEdit = false
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops. Something went wrong. Try again.",
+                false,
+                "",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    save() {
+        if (this.editMode) {
+            this.doEdit()
+        } else {
+            this.doSave()
+        }
+    }
+
     cancel() {
         this.$emit('do-cancel')
     }
@@ -150,6 +186,20 @@ export default class CreateNewDatabaseForm extends VueComponent {
 
     mounted() {
         this.canEdit = !this.editMode
+    }
+
+    clearForm() {
+        if (!!this.referenceDb) {
+            this.name = this.referenceDb.Name
+            this.typeId = this.referenceDb.TypeId
+            this.otherType = this.referenceDb.OtherType
+            this.version = this.referenceDb.Version
+        } else {
+            this.name = ""
+            this.typeId = null
+            this.otherType = ""
+            this.version = ""
+        }
     }
 }
 

@@ -6,6 +6,7 @@
         <dashboard-home-page-nav-bar></dashboard-home-page-nav-bar>
 
         <v-content>
+            <full-edit-database-component></full-edit-database-component>
         </v-content>
     </div>
 </template>
@@ -14,12 +15,14 @@
 
 import DashboardAppBar from '../../components/dashboard/DashboardAppBar.vue'
 import DashboardHomePageNavBar from '../../components/dashboard/DashboardHomePageNavBar.vue'
+import FullEditDatabaseComponent from '../../components/dashboard/FullEditDatabaseComponent.vue'
 import Vue from 'vue'
 
 export default Vue.extend({
     components : {
         DashboardAppBar,
         DashboardHomePageNavBar,
+        FullEditDatabaseComponent
     },
 })
 </script>

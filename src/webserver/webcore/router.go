@@ -103,11 +103,17 @@ const (
 	InfraSystemsRouteName                          = "InfraSystems"
 	ApiNewSystemRouteName                          = "ApiNewSystem"
 	ApiSystemAllRouteName                          = "ApiSystemAll"
+	ApiGetSystemRouteName                          = "ApiGetSystem"
+	ApiEditSystemRouteName                         = "ApiEditSystem"
+	ApiDeleteSystemRouteName                       = "ApiDeleteSystem"
 	SingleSystemRouteName                          = "SingleSystem"
 	SingleDbRouteName                              = "SingleDb"
 	ApiNewDbRouteName                              = "ApiNewDb"
 	ApiAllDbRouteName                              = "ApiAllDb"
 	ApiTypesDbRouteName                            = "ApiTypesDb"
+	ApiGetDbRouteName                              = "ApiGetDb"
+	ApiEditDbRouteName                             = "ApiEditDb"
+	ApiDeleteDbRouteName                           = "ApiDeleteDb"
 )
 
 var globalRouter *mux.Router

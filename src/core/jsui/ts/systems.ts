@@ -3,4 +3,5 @@ export interface System {
     OrgId: number
     Name: string
     Purpose: string
+    Description: string
 }

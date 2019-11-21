@@ -11,7 +11,7 @@
 
         <template v-slot:item.name="{ item }">
             <p class="ma-0 pa-0 body-1 font-weight-bold">{{ item.value.Name }}</p>
-            <p class="ma-0 pa-0 caption font-weight-light">{{ item.value.Purpose }}</p>
+            <p class="ma-0 pa-0 caption font-weight-light">{{ item.value.Description }}</p>
         </template>
     </v-data-table>
 </template>
@@ -31,6 +31,10 @@ export default class SystemsTable extends BaseResourceTable {
                 text: 'Name',
                 value: 'name',
             },
+            {
+                text: 'Purpose',
+                value: 'purpose',
+            },
         ]
     }
 
@@ -38,7 +42,8 @@ export default class SystemsTable extends BaseResourceTable {
         return {
             id: inp.Id,
             // Filter purposes
-            name: `${inp.Name} ${inp.Purpose}`,
+            name: `${inp.Name} ${inp.Description}`,
+            purpose: inp.Purpose,
             value: inp
         }
     }

@@ -20,6 +20,25 @@ type GetAllDatabaseInputs struct {
 	OrgId int32 `webcore:"orgId"`
 }
 
+type GetDatabaseInputs struct {
+	DbId  int64 `webcore:"dbId"`
+	OrgId int32 `webcore:"orgId"`
+}
+
+type EditDatabaseInputs struct {
+	DbId      int64  `json:"dbId"`
+	Name      string `json:"name"`
+	OrgId     int32  `json:"orgId"`
+	TypeId    int32  `json:"typeId"`
+	OtherType string `json:"otherType"`
+	Version   string `json:"version"`
+}
+
+type DeleteDatabaseInputs struct {
+	DbId  int64 `json:"dbId"`
+	OrgId int32 `json:"orgId"`
+}
+
 func newDb(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -117,4 +136,120 @@ func getDbTypes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	jsonWriter.Encode(types)
+}
+
+func getDb(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := GetDatabaseInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	db, err := database.GetDb(inputs.DbId, org.Id, role)
+	if err != nil {
+		core.Warning("Can't get database: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(struct {
+		Database *core.Database
+	}{
+		Database: db,
+	})
+}
+
+func editDb(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := EditDatabaseInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	db := core.Database{
+		Id:        inputs.DbId,
+		Name:      inputs.Name,
+		OrgId:     inputs.OrgId,
+		TypeId:    inputs.TypeId,
+		OtherType: inputs.OtherType,
+		Version:   inputs.Version,
+	}
+
+	err = database.EditDb(&db, role)
+	if err != nil {
+		core.Warning("Can't edit database: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(db)
+}
+
+func deleteDb(w http.ResponseWriter, r *http.Request) {
+	inputs := DeleteDatabaseInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteDb(inputs.DbId, org.Id, role)
+	if err != nil {
+		core.Warning("Can't delete database: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }

@@ -22,7 +22,6 @@ import DashboardOrgDatabases from '../vue/pages/dashboard/DashboardOrgDatabases.
 import DashboardOrgInfrastructure from '../vue/pages/dashboard/DashboardOrgInfrastructure.vue'
 import DashboardOrgSingleSystem from '../vue/pages/dashboard/DashboardOrgSingleSystem.vue'
 import DashboardOrgSingleDb from '../vue/pages/dashboard/DashboardOrgSingleDb.vue'
-import DashboardOrgSingleInfra from '../vue/pages/dashboard/DashboardOrgSingleInfra.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
 import { getCurrentCSRF } from './csrf'
 import { PageParamsStore, PageParamsStoreState  } from '../ts/pageParams'
@@ -61,7 +60,6 @@ function mountApp(inData : PageParamsStoreState) {
             DashboardOrgInfrastructure,
             DashboardOrgSingleSystem,
             DashboardOrgSingleDb,
-            DashboardOrgSingleInfra,
             SnackBar,
         },
         vuetify: vueOpts.vuetify,

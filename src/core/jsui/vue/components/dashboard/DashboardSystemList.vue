@@ -56,6 +56,7 @@ export default class DashboardSystemList extends Vue {
     systems : System[] = []
 
     saveSystem(newSys : System) {
+        this.showHideNew = false
         this.systems.push(newSys)
     }
 

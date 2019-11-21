@@ -7,6 +7,9 @@ import {
     newDatabaseUrl,
     allDatabaseUrl,
     typesDatabaseUrl,
+    editDatabaseUrl,
+    deleteDatabaseUrl,
+    getDatabaseUrl,
 } from '../url'
 
 export interface TDbTypeOutputs {
@@ -43,4 +46,43 @@ export interface TAllDatabaseOutputs {
 
 export function allDatabase(inp : TAllDatabaseInputs) : Promise<TAllDatabaseOutputs> {
     return axios.get(allDatabaseUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+}
+
+export interface TEditDatabaseInputs extends TNewDatabaseInputs {
+    dbId: number
+}
+
+export interface TEditDatabaseOutputs {
+    data: Database
+}
+
+export function editDatabase(inp : TEditDatabaseInputs) : Promise<TEditDatabaseOutputs> {
+    return postFormJson<TEditDatabaseOutputs>(editDatabaseUrl, inp, getAPIRequestConfig())
+}
+
+export interface TDeleteDatabaseInputs {
+    dbId: number
+    orgId: number
+}
+
+export interface TDeleteDatabaseOutputs {
+}
+
+export function deleteDatabase(inp : TDeleteDatabaseInputs) : Promise<TDeleteDatabaseOutputs> {
+    return postFormJson<TDeleteDatabaseOutputs>(deleteDatabaseUrl, inp, getAPIRequestConfig())
+}
+
+export interface TGetDatabaseInputs {
+    dbId: number
+    orgId: number
+}
+
+export interface TGetDatabaseOutputs {
+    data: {
+        Database: Database
+    }
+}
+
+export function getDatabase(inp : TGetDatabaseInputs) : Promise<TGetDatabaseOutputs> {
+    return axios.get(getDatabaseUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
 }

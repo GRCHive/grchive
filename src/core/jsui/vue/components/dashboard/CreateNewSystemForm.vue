@@ -14,11 +14,18 @@
                       :disabled="!canEdit">
         </v-text-field>
 
-        <v-textarea v-model="purpose"
-                    label="Purpose"
+        <v-text-field v-model="purpose"
+                      label="Purpose"
+                      filled
+                      :disabled="!canEdit">
+        </v-text-field> 
+
+        <v-textarea v-model="description"
+                    label="Description"
                     filled
                     :disabled="!canEdit">
         </v-textarea> 
+
     </v-form>
 
     <v-card-actions>
@@ -58,8 +65,10 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import * as rules from '../../../ts/formRules'
 import { TNewSystemOutputs, newSystem} from '../../../ts/api/apiSystems'
+import { TEditSystemOutputs, editSystem} from '../../../ts/api/apiSystems'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
+import { System } from '../../../ts/systems'
 
 const VueComponent = Vue.extend({
     props: {
@@ -71,6 +80,10 @@ const VueComponent = Vue.extend({
             type: Boolean,
             default: false
         },
+        referenceSystem: {
+            type: Object as () => System | null,
+            default: null
+        }
     }
 })
 
@@ -82,12 +95,14 @@ export default class CreateNewSystemForm extends VueComponent {
 
     name : string = ""
     purpose : string = ""
+    description: string = ""
 
-    save() {
+    doSave() {
         newSystem({
             orgId: PageParamsStore.state.organization!.Id,
             name: this.name,
             purpose: this.purpose,
+            description: this.description,
         }).then((resp : TNewSystemOutputs) => {
             this.$emit('do-save', resp.data)
         }).catch((err : any) => {
@@ -101,6 +116,35 @@ export default class CreateNewSystemForm extends VueComponent {
         })
     }
 
+    doEdit() {
+        editSystem({
+            sysId: this.referenceSystem!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            name: this.name,
+            purpose: this.purpose,
+            description: this.description,
+        }).then((resp : TNewSystemOutputs) => {
+            this.$emit('do-save', resp.data)
+            this.canEdit = false
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops. Something went wrong. Try again.",
+                false,
+                "",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    save() {
+        if (this.editMode) {
+            this.doEdit()
+        } else {
+            this.doSave()
+        }
+    }
+
     cancel() {
         this.$emit('do-cancel')
     }
@@ -111,6 +155,18 @@ export default class CreateNewSystemForm extends VueComponent {
 
     mounted() {
         this.canEdit = !this.editMode
+    }
+
+    clearForm() {
+        if (!!this.referenceSystem) {
+            this.name = this.referenceSystem.Name
+            this.purpose = this.referenceSystem.Purpose
+            this.description = this.referenceSystem.Description
+        } else {
+            this.name = ""
+            this.purpose = ""
+            this.description = ""
+        }
     }
 }
 
