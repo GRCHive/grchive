@@ -39,6 +39,20 @@ type DeleteDatabaseInputs struct {
 	OrgId int32 `json:"orgId"`
 }
 
+type NewDbConnectionInputs struct {
+	DbId       int64  `json:"dbId"`
+	OrgId      int32  `json:"orgId"`
+	ConnString string `json:"connectionString"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+}
+
+type DeleteDatabaseConnectionInputs struct {
+	ConnId int64 `json:"connId"`
+	DbId   int64 `json:"dbId"`
+	OrgId  int32 `json:"orgId"`
+}
+
 func newDb(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -171,10 +185,19 @@ func getDb(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	conn, err := database.FindDatabaseConnectionForDatabase(inputs.DbId, org.Id, role)
+	if err != nil {
+		core.Warning("Can't get database connection: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	jsonWriter.Encode(struct {
-		Database *core.Database
+		Database   *core.Database
+		Connection *core.DatabaseConnection
 	}{
-		Database: db,
+		Database:   db,
+		Connection: conn,
 	})
 }
 
@@ -249,6 +272,89 @@ func deleteDb(w http.ResponseWriter, r *http.Request) {
 	err = database.DeleteDb(inputs.DbId, org.Id, role)
 	if err != nil {
 		core.Warning("Can't delete database: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func newDbConnection(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := NewDbConnectionInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	encPassword, salt, err := webcore.CreateSaltedEncryptedPassword(inputs.Password)
+	if err != nil {
+		core.Warning("Failed to encrypt password: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	conn := core.DatabaseConnection{
+		DbId:       inputs.DbId,
+		OrgId:      org.Id,
+		ConnString: inputs.ConnString,
+		Username:   inputs.Username,
+		Password:   encPassword,
+		Salt:       salt,
+	}
+
+	err = database.InsertNewDatabaseConnection(&conn, role)
+	if err != nil {
+		core.Warning("Failed to insert db connection: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(conn)
+}
+
+func deleteDbConnection(w http.ResponseWriter, r *http.Request) {
+	inputs := DeleteDatabaseConnectionInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteDatabaseConnection(inputs.ConnId, inputs.DbId, org.Id, role)
+	if err != nil {
+		core.Warning("Failed to delete db connection: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -20,6 +20,6 @@ type DatabaseConnection struct {
 	OrgId      int32  `db:"org_id"`
 	ConnString string `db:"connection_string"`
 	Username   string `db:"username"`
-	Password   string `db:"password"`
-	Salt       string `db:"salt"`
+	Password   string `db:"password" json:"-"`
+	Salt       string `db:"salt" json:"-"`
 }

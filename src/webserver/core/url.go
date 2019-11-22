@@ -203,6 +203,11 @@ const ApiITDbGetEndpoint = "/get"
 const ApiITDbEditEndpoint = "/edit"
 const ApiITDbDeleteEndpoint = "/delete"
 
+// API - IT - DB CONN
+const ApiITDbConnPrefix = "/connection"
+const ApiITDbConnNewEndpoint = "/new"
+const ApiITDbConnDeleteEndpoint = "/delete"
+
 // API - IT - Infrastructure
 const ApiITInfraPrefix = "/infra"
 

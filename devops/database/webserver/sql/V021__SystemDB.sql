@@ -15,13 +15,13 @@ CREATE TABLE database_resources (
 
 CREATE TABLE database_connection_info (
     id BIGSERIAL,
-    db_id BIGINT NOT NULL,
+    db_id BIGINT NOT NULL UNIQUE,
     org_id INTEGER NOT NULL REFERENCES organizations(id),
     connection_string TEXT NOT NULL,
     username TEXT NOT NULL,
     password TEXT NOT NULL,
     salt TEXT NOT NULL,
-    PRIMARY KEY(id, org_id),
+    PRIMARY KEY(id, db_id, org_id),
     FOREIGN KEY(db_id, org_id) REFERENCES database_resources(id, org_id) ON DELETE CASCADE
 );
 

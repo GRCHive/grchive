@@ -19,12 +19,14 @@ go_library(
         "apiAccess.go",
         "accessControl.go",
         "emailVerification.go",
-        "inviteCodes.go"
+        "inviteCodes.go",
+        "passwords.go",
     ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "//src/mail_api/golang:mail_golang_api",
         "//src/okta_api/golang:okta_golang_api",
+        "//src/vault_api/golang:vault_golang_api",
         "//src/webserver/database:webserver_database_library",
         "@io_k8s_klog//:go_default_library",
         "@in_gopkg_square_go_jose_v2//:go_default_library",

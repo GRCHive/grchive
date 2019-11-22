@@ -112,5 +112,89 @@ func DeleteDb(dbId int64, orgId int32, role *core.Role) error {
 		return err
 	}
 	return tx.Commit()
+}
 
+func InsertNewDatabaseConnection(conn *core.DatabaseConnection, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceDbConnections, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+	tx := dbConn.MustBegin()
+	rows, err := tx.NamedQuery(`
+		INSERT INTO database_connection_info (
+			db_id,
+			org_id,
+			connection_string, 
+			username,
+			password,
+			salt)
+		VALUES (
+			:db_id,
+			:org_id,
+			:connection_string,
+			:username,
+			:password,
+			:salt)
+		RETURNING id
+	`, conn)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	rows.Next()
+	err = rows.Scan(&conn.Id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	rows.Close()
+	return tx.Commit()
+}
+
+// Returns nil, nil if no connection is found.
+func FindDatabaseConnectionForDatabase(dbId int64, orgId int32, role *core.Role) (*core.DatabaseConnection, error) {
+	if !role.Permissions.HasAccess(core.ResourceDbConnections, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	rows, err := dbConn.Queryx(`
+		SELECT *
+		FROM database_connection_info
+		WHERE db_id = $1
+			AND org_id = $2
+	`, dbId, orgId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !rows.Next() {
+		return nil, nil
+	}
+
+	conn := core.DatabaseConnection{}
+	err = rows.StructScan(&conn)
+	if err != nil {
+		return nil, err
+	}
+	return &conn, nil
+}
+
+func DeleteDatabaseConnection(connId int64, dbId int64, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceDbConnections, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		DELETE FROM database_connection_info
+		WHERE id = $1
+			AND db_id = $2
+			AND org_id = $3
+	`, connId, dbId, orgId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
 }

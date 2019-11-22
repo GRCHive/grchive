@@ -1,7 +1,7 @@
 import axios from 'axios'
 import * as qs from 'query-string'
 import { getAPIRequestConfig } from './apiUtility'
-import { DatabaseType, Database} from '../databases'
+import { DatabaseType, Database, DatabaseConnection } from '../databases'
 import { postFormJson } from '../http'
 import {
     newDatabaseUrl,
@@ -10,6 +10,8 @@ import {
     editDatabaseUrl,
     deleteDatabaseUrl,
     getDatabaseUrl,
+    newDbConnUrl,
+    deleteDbConnUrl,
 } from '../url'
 
 export interface TDbTypeOutputs {
@@ -80,9 +82,39 @@ export interface TGetDatabaseInputs {
 export interface TGetDatabaseOutputs {
     data: {
         Database: Database
+        Connection: DatabaseConnection
     }
 }
 
 export function getDatabase(inp : TGetDatabaseInputs) : Promise<TGetDatabaseOutputs> {
     return axios.get(getDatabaseUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+}
+
+export interface TNewDbConnInputs {
+    dbId: number
+    orgId: number
+    connectionString: string
+    username: string
+    password: string
+}
+
+export interface TNewDbConnOutputs {
+    data: DatabaseConnection
+}
+
+export function newDatabaseConnection(inp : TNewDbConnInputs) : Promise<TNewDbConnOutputs> {
+    return postFormJson<TNewDbConnOutputs>(newDbConnUrl, inp, getAPIRequestConfig())
+}
+
+export interface TDeleteDbConnInputs {
+    connId: number
+    dbId: number
+    orgId: number
+}
+
+export interface TDeleteDbConnOutputs {
+}
+
+export function deleteDatabaseConnection(inp : TDeleteDbConnInputs) : Promise<TDeleteDbConnOutputs> {
+    return postFormJson<TDeleteDbConnOutputs>(deleteDbConnUrl, inp, getAPIRequestConfig())
 }

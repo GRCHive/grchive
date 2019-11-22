@@ -196,3 +196,6 @@ export const typesDatabaseUrl : string = "/api/it/db/types"
 export const editDatabaseUrl : string = "/api/it/db/edit"
 export const deleteDatabaseUrl : string = "/api/it/db/delete"
 export const getDatabaseUrl : string = "/api/it/db/get"
+
+export const newDbConnUrl : string = "/api/it/db/connection/new"
+export const deleteDbConnUrl : string = "/api/it/db/connection/delete"

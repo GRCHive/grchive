@@ -14,8 +14,20 @@ export interface Database {
     Version: string
 }
 
+export interface DatabaseConnection {
+    Id: number
+    DbId: number
+    OrgId: number
+    ConnString: string
+    Username: string
+}
+
 export const otherTypeId = 2
 const otherTypeName = "Other"
+
+export function isDatabaseSupported(db: Database) : boolean {
+    return db.TypeId != otherTypeId
+}
 
 export function getDbTypeAsString(db : Database) : string {
     let typ = MetadataStore.state.idToDbType[db.TypeId]

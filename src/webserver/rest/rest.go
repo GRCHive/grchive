@@ -176,6 +176,14 @@ func registerITDbAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiITDbGetEndpoint, getDb).Methods("GET").Name(webcore.ApiGetDbRouteName)
 	s.HandleFunc(core.ApiITDbEditEndpoint, editDb).Methods("POST").Name(webcore.ApiEditDbRouteName)
 	s.HandleFunc(core.ApiITDbDeleteEndpoint, deleteDb).Methods("POST").Name(webcore.ApiDeleteDbRouteName)
+
+	registerITDbConnAPIPaths(s)
+}
+
+func registerITDbConnAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiITDbConnPrefix).Subrouter()
+	s.HandleFunc(core.ApiITDbConnNewEndpoint, newDbConnection).Methods("POST").Name(webcore.ApiNewDbConnRouteName)
+	s.HandleFunc(core.ApiITDbConnDeleteEndpoint, deleteDbConnection).Methods("POST").Name(webcore.ApiDeleteDbConnRouteName)
 }
 
 func registerITInfraAPIPaths(r *mux.Router) {

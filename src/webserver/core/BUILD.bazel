@@ -39,6 +39,7 @@ go_library(
         "systems.go",
         "databases.go",
         "infrastructure.go",
+        "random.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",
