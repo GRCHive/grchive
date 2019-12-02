@@ -1,6 +1,6 @@
 <template>
     <v-data-table
-        v-model="selected"
+        :value="selected"
         :headers="tableHeaders"
         :items="tableItems"
         :show-select="selectable"
@@ -67,7 +67,11 @@ export default class RoleTable extends BaseResourceTable {
     }
 
     goToRole(item : any) {
-        window.location.assign(createOrgRoleUrl(PageParamsStore.state.organization!.OktaGroupName, item.value.Id))
+        if (this.selectable) {
+            this.manualToggleItem(item)
+        } else {
+            window.location.assign(createOrgRoleUrl(PageParamsStore.state.organization!.OktaGroupName, item.value.Id))
+        }
     }
 }
 

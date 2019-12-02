@@ -199,3 +199,6 @@ export const getDatabaseUrl : string = "/api/it/db/get"
 
 export const newDbConnUrl : string = "/api/it/db/connection/new"
 export const deleteDbConnUrl : string = "/api/it/db/connection/delete"
+
+export const linkDbsToSystemUrl : string = "/api/it/systems/linkDb"
+export const linkSystemsToDbUrl : string = "/api/it/db/linkSys"

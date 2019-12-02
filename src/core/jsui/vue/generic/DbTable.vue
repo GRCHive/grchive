@@ -1,7 +1,7 @@
 <template>
     <v-data-table
         v-if="ready"
-        v-model="selected"
+        :value="selected"
         :headers="tableHeaders"
         :items="tableItems"
         :show-select="selectable"
@@ -59,9 +59,13 @@ export default class SystemsTable extends BaseResourceTable {
     }
 
     goToDb(item : any) {
-        window.location.assign(createSingleDbUrl(
-            PageParamsStore.state.organization!.OktaGroupName,
-            item.value.Id))
+        if (this.selectable) {
+            this.manualToggleItem(item)
+        } else {
+            window.location.assign(createSingleDbUrl(
+                PageParamsStore.state.organization!.OktaGroupName,
+                item.value.Id))
+        }
     }
 }
 

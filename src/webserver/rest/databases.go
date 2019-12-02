@@ -53,6 +53,12 @@ type DeleteDatabaseConnectionInputs struct {
 	OrgId  int32 `json:"orgId"`
 }
 
+type LinkSystemsInputs struct {
+	DbId   int64   `json:"dbId"`
+	OrgId  int32   `json:"orgId"`
+	SysIds []int64 `json:"sysIds"`
+}
+
 func newDb(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -192,20 +198,40 @@ func getDb(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Decrypt for sending back to client.
-	conn.Password, err = webcore.DecryptSaltedEncryptedPassword(conn.Password, conn.Salt)
+	if conn != nil {
+		// Decrypt for sending back to client.
+		conn.Password, err = webcore.DecryptSaltedEncryptedPassword(conn.Password, conn.Salt)
+		if err != nil {
+			core.Warning("Failed to decrypt password: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
+	allSystems, err := database.GetAllSystemsForOrg(org.Id, role)
 	if err != nil {
-		core.Warning("Failed to decrypt password: " + err.Error())
+		core.Warning("Failed to obtain systems: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	sysIds, err := database.FindSystemIdsForDatabase(db.Id, org.Id, role)
+	if err != nil {
+		core.Warning("Failed to find relevant systems: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	jsonWriter.Encode(struct {
-		Database   *core.Database
-		Connection *core.DatabaseConnection
+		Database          *core.Database
+		Connection        *core.DatabaseConnection
+		RelevantSystemIds []int64
+		AllSystems        []*core.System
 	}{
-		Database:   db,
-		Connection: conn,
+		Database:          db,
+		Connection:        conn,
+		RelevantSystemIds: sysIds,
+		AllSystems:        allSystems,
 	})
 }
 
@@ -371,6 +397,37 @@ func deleteDbConnection(w http.ResponseWriter, r *http.Request) {
 	err = database.DeleteDatabaseConnection(inputs.ConnId, inputs.DbId, org.Id, role)
 	if err != nil {
 		core.Warning("Failed to delete db connection: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func linkSystemsToDatabase(w http.ResponseWriter, r *http.Request) {
+	inputs := LinkSystemsInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.LinkSystemsToDatabase(inputs.DbId, org.Id, inputs.SysIds, role)
+	if err != nil {
+		core.Warning("Failed to link systems to database: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

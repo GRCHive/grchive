@@ -43,12 +43,77 @@
             <v-divider></v-divider>
 
             <v-container fluid>
-                <create-new-system-form
-                    ref="editForm"
-                    :edit-mode="true"
-                    :reference-system="currentSystem"
-                    @do-save="onEdit">
-                </create-new-system-form>
+                <v-row>
+                    <v-col cols="8">
+                        <create-new-system-form
+                            ref="editForm"
+                            :edit-mode="true"
+                            :reference-system="currentSystem"
+                            @do-save="onEdit">
+                        </create-new-system-form>
+                    </v-col>
+
+                    <v-col cols="4">
+                        <v-card class="mb-4">
+                            <v-card-title>
+                                Relevant Databases
+                                <v-spacer></v-spacer>
+                                
+                                <v-dialog persistent
+                                          max-width="40%"
+                                          v-model="showHideLinkDb">
+                                    <template v-slot:activator="{ on }">
+                                        <v-btn color="primary" icon v-on="on">
+                                            <v-icon>mdi-plus</v-icon>
+                                        </v-btn>
+                                    </template>
+
+                                    <v-card>
+                                        <v-card-title>
+                                            Link Databases
+                                        </v-card-title>
+                                        <v-divider></v-divider>
+
+                                        <db-table :resources="allDb"
+                                                  v-model="dbToLink"
+                                                  selectable
+                                                  multi
+                                        ></db-table>
+
+                                        <v-card-actions>
+                                            <v-btn color="error" @click="showHideLinkDb = false">
+                                                Cancel
+                                            </v-btn>
+                                            <v-spacer></v-spacer>
+                                            <v-btn color="success" @click="linkDbs">
+                                                Link
+                                            </v-btn>
+                                        </v-card-actions>
+                                    </v-card>
+                                </v-dialog>
+                            </v-card-title>
+                            <v-divider></v-divider>
+                            <db-table :resources="relatedDbs"></db-table>
+                        </v-card>
+
+                        <v-card>
+                            <v-card-title>
+                                Infrastructure
+                            </v-card-title>
+                            <v-divider></v-divider>
+
+                            <v-row align="center" justify="center">
+                                <v-btn color="primary"
+                                       fab
+                                       outlined
+                                       x-large
+                                       class="my-6">
+                                    <v-icon>mdi-plus</v-icon>
+                                </v-btn>
+                            </v-row>
+                        </v-card>
+                    </v-col>
+                </v-row>
             </v-container>
         </div>
     </div>
@@ -60,23 +125,33 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { getSystem, TGetSystemOutputs } from '../../../ts/api/apiSystems'
 import { deleteSystem, TDeleteSystemOutputs } from '../../../ts/api/apiSystems'
+import { linkDatabasesToSystem } from '../../../ts/api/apiSystems'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { System } from '../../../ts/systems'
 import CreateNewSystemForm from './CreateNewSystemForm.vue'
 import { contactUsUrl, createOrgSystemUrl } from '../../../ts/url'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
+import DbTable from '../../generic/DbTable.vue'
+import { Database } from '../../../ts/databases'
 
 @Component({
     components: {
         CreateNewSystemForm,
-        GenericDeleteConfirmationForm
+        GenericDeleteConfirmationForm,
+        DbTable
     }
 })
 export default class FullEditSystemComponent extends Vue {
     currentSystem: System = {} as System
+    relatedDbs: Database[] = []
+    allDb: Database[] = []
+
+    dbToLink: Database[] = []
+
     ready : boolean = false
     expandDescription: boolean = false
     showHideDelete: boolean = false
+    showHideLinkDb: boolean = false
 
     $refs!: {
         editForm: CreateNewSystemForm
@@ -92,6 +167,10 @@ export default class FullEditSystemComponent extends Vue {
         }).then((resp : TGetSystemOutputs) => {
             this.currentSystem = resp.data.System
             this.ready = true
+            this.allDb = resp.data.AllDatabases
+
+            let idSet = new Set(resp.data.RelevantDatabaseIds)
+            this.relatedDbs = resp.data.AllDatabases.filter((ele : Database) => idSet.has(ele.Id))
 
             Vue.nextTick(() => {
                 this.$refs.editForm.clearForm()
@@ -126,6 +205,28 @@ export default class FullEditSystemComponent extends Vue {
         this.currentSystem.Name = sys.Name
         this.currentSystem.Purpose = sys.Purpose
         this.currentSystem.Description = sys.Description
+    }
+
+    linkDbs() {
+        linkDatabasesToSystem({
+            sysId: this.currentSystem.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            dbIds: this.dbToLink.map((ele : Database) => ele.Id)
+        }).then(() => {
+            let idSet = new Set([...this.dbToLink, ...this.relatedDbs].map((ele : Database) => ele.Id))
+            this.relatedDbs = this.allDb.filter((ele : Database) => idSet.has(ele.Id))
+            this.dbToLink = []
+            this.showHideLinkDb = false
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+
+        })
     }
 }
 

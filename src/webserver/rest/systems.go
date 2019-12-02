@@ -37,6 +37,12 @@ type DeleteSystemInputs struct {
 	OrgId int32 `json:"orgId"`
 }
 
+type LinkDatabaseInputs struct {
+	SysId int64   `json:"sysId"`
+	OrgId int32   `json:"orgId"`
+	DbIds []int64 `json:"dbIds"`
+}
+
 func newSystem(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -149,10 +155,28 @@ func getSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	allDb, err := database.GetAllDatabasesForOrg(org.Id, role)
+	if err != nil {
+		core.Warning("Failed to get all databases: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	dbIds, err := database.FindDbIdsForSystem(sys.Id, org.Id, role)
+	if err != nil {
+		core.Warning("Failed to find relevant databases: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	jsonWriter.Encode(struct {
-		System *core.System
+		System              *core.System
+		RelevantDatabaseIds []int64
+		AllDatabases        []*core.Database
 	}{
-		System: sys,
+		System:              sys,
+		RelevantDatabaseIds: dbIds,
+		AllDatabases:        allDb,
 	})
 }
 
@@ -226,6 +250,37 @@ func deleteSystem(w http.ResponseWriter, r *http.Request) {
 	err = database.DeleteSystem(inputs.SysId, org.Id, role)
 	if err != nil {
 		core.Warning("Failed to delete system: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func linkDatabasesToSystem(w http.ResponseWriter, r *http.Request) {
+	inputs := LinkDatabaseInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.LinkDatabasesToSystem(inputs.SysId, org.Id, inputs.DbIds, role)
+	if err != nil {
+		core.Warning("Failed to link databases to system: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

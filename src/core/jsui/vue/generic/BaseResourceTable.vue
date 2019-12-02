@@ -27,7 +27,11 @@ const ResourceTableProps = Vue.extend({
 
 @Component
 export default class BaseResourceTable extends ResourceTableProps {
-    selected = []
+    selected: any[] = []
+
+    get valueSet() : Set<any> {
+        return new Set<any>(this.value)
+    }
 
     get tableHeaders() : any[] {
         return []
@@ -38,7 +42,20 @@ export default class BaseResourceTable extends ResourceTableProps {
     }
 
     changeInput(items: any[]) {
-        this.$emit('input', items.map(this.transformTableItemToInputResource))
+        this.$emit('input', Array.from(new Set(items)).map(this.transformTableItemToInputResource))
+    }
+
+    manualToggleItem(item : any) {
+        let val = this.transformTableItemToInputResource(item)
+        let newValueArr = []
+        if (this.valueSet.has(val)) {
+            newValueArr = this.value.filter((ele : any) => ele != val)
+        } else {
+            newValueArr = [...this.value, val]
+        }
+
+        this.$emit('input', newValueArr)
+        this.selected = newValueArr.map(this.transformInputResourceToTableItem)
     }
 
     transformInputResourceToTableItem(inp : any) : any {
@@ -48,6 +65,7 @@ export default class BaseResourceTable extends ResourceTableProps {
     transformTableItemToInputResource(inp : any) : any {
         return null
     }
+
 }
 
 </script>

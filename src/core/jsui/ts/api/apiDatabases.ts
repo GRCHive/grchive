@@ -12,7 +12,9 @@ import {
     getDatabaseUrl,
     newDbConnUrl,
     deleteDbConnUrl,
+    linkSystemsToDbUrl
 } from '../url'
+import { System } from '../systems'
 
 export interface TDbTypeOutputs {
     data: DatabaseType[]
@@ -83,6 +85,8 @@ export interface TGetDatabaseOutputs {
     data: {
         Database: Database
         Connection: DatabaseConnection
+        RelevantSystemIds: number[]
+        AllSystems: System[]
     }
 }
 
@@ -117,4 +121,17 @@ export interface TDeleteDbConnOutputs {
 
 export function deleteDatabaseConnection(inp : TDeleteDbConnInputs) : Promise<TDeleteDbConnOutputs> {
     return postFormJson<TDeleteDbConnOutputs>(deleteDbConnUrl, inp, getAPIRequestConfig())
+}
+
+export interface TLinkSystemInputs {
+    dbId: number
+    orgId: number
+    sysIds: number[]
+}
+
+export interface TLinkSystemOutputs {
+}
+
+export function linkSystemsToDatabase(inp : TLinkSystemInputs) : Promise<TLinkSystemOutputs> {
+    return postFormJson<TLinkSystemOutputs>(linkSystemsToDbUrl, inp, getAPIRequestConfig())
 }

@@ -198,3 +198,38 @@ func DeleteDatabaseConnection(connId int64, dbId int64, orgId int32, role *core.
 	}
 	return tx.Commit()
 }
+
+func FindDbIdsForSystem(sysId int64, orgId int32, role *core.Role) ([]int64, error) {
+	if !role.Permissions.HasAccess(core.ResourceDatabases, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	ids := make([]int64, 0)
+	err := dbConn.Select(&ids, `
+		SELECT db_id
+		FROM database_system_link
+		WHERE system_id = $1
+			AND org_id = $2
+	`, sysId, orgId)
+	return ids, err
+}
+
+func LinkSystemsToDatabase(dbId int64, orgId int32, sysIds []int64, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceSystems, core.AccessEdit) ||
+		!role.Permissions.HasAccess(core.ResourceDatabases, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+	for _, sysId := range sysIds {
+		_, err := tx.Exec(`
+			INSERT INTO database_system_link (db_id, org_id, system_id)
+			VALUES ($1, $2, $3)
+		`, dbId, orgId, sysId)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	return tx.Commit()
+}

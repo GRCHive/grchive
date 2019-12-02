@@ -52,6 +52,48 @@
                     <v-col cols="4">
                         <v-card class="mb-4">
                             <v-card-title>
+                                Relevant Systems
+                                <v-spacer></v-spacer>
+
+                                <v-dialog persistent
+                                          max-width="40%"
+                                          v-model="showHideLinkSystem">
+                                    <template v-slot:activator="{ on }">
+                                        <v-btn color="primary" icon v-on="on">
+                                            <v-icon>mdi-plus</v-icon>
+                                        </v-btn>
+                                    </template>
+
+                                    <v-card>
+                                        <v-card-title>
+                                            Link Systems
+                                        </v-card-title>
+                                        <v-divider></v-divider>
+
+                                        <systems-table :resources="allSystems"
+                                                       selectable
+                                                       multi
+                                                       v-model="systemsToLink"
+                                        ></systems-table>
+
+                                        <v-card-actions>
+                                            <v-btn color="error" @click="showHideLinkSystem = false">
+                                                Cancel
+                                            </v-btn>
+                                            <v-spacer></v-spacer>
+                                            <v-btn color="success" @click="linkSystems">
+                                                Link
+                                            </v-btn>
+                                        </v-card-actions>
+                                    </v-card>
+                                </v-dialog>
+                            </v-card-title>
+                            <v-divider></v-divider>
+                            <systems-table :resources="relatedSystems"></systems-table>
+                        </v-card>
+
+                        <v-card class="mb-4">
+                            <v-card-title>
                                 Connection Info
 
                                 <v-spacer></v-spacer>
@@ -142,6 +184,7 @@ import Component from 'vue-class-component'
 import { getDatabase, TGetDatabaseOutputs } from '../../../ts/api/apiDatabases'
 import { deleteDatabase, TDeleteDatabaseOutputs } from '../../../ts/api/apiDatabases'
 import { deleteDatabaseConnection, TDeleteDbConnOutputs } from '../../../ts/api/apiDatabases'
+import { linkSystemsToDatabase } from '../../../ts/api/apiDatabases'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { Database, DatabaseConnection, getDbTypeAsString, isDatabaseSupported } from '../../../ts/databases'
 import CreateNewDatabaseForm from './CreateNewDatabaseForm.vue'
@@ -151,6 +194,8 @@ import MetadataStore from '../../../ts/metadata'
 import CreateNewDbConnectionForm from './CreateNewDbConnectionForm.vue'
 import { Watch } from 'vue-property-decorator'
 import DatabaseConnectionReadOnlyComponent from '../../generic/DatabaseConnectionReadOnlyComponent.vue'
+import SystemsTable from '../../generic/SystemsTable.vue'
+import { System } from '../../../ts/systems'
 
 @Component({
     components: {
@@ -158,15 +203,21 @@ import DatabaseConnectionReadOnlyComponent from '../../generic/DatabaseConnectio
         GenericDeleteConfirmationForm,
         CreateNewDbConnectionForm,
         DatabaseConnectionReadOnlyComponent,
+        SystemsTable
     }
 })
 export default class FullEditDatabaseComponent extends Vue {
     currentDb: Database | null = null
     dbConn: DatabaseConnection | null = null
+    relatedSystems : System[] = []
+    allSystems: System[] = []
+
+    systemsToLink : System[] = []
 
     showHideDelete: boolean = false
     showHideDeleteConnection: boolean = false
     showHideNewConn : boolean = false
+    showHideLinkSystem: boolean = false
 
     get canConnectToDb() : boolean {
         return isDatabaseSupported(this.currentDb!)
@@ -201,6 +252,10 @@ export default class FullEditDatabaseComponent extends Vue {
         }).then((resp : TGetDatabaseOutputs) => {
             this.currentDb = resp.data.Database
             this.dbConn = resp.data.Connection
+            this.allSystems = resp.data.AllSystems
+
+            let idSet = new Set(resp.data.RelevantSystemIds)
+            this.relatedSystems = resp.data.AllSystems.filter((ele : System) => idSet.has(ele.Id))
         }).catch((err : any) => {
             window.location.replace('/404')
         })
@@ -247,6 +302,27 @@ export default class FullEditDatabaseComponent extends Vue {
         }).then((resp : TDeleteDbConnOutputs) => {
             this.dbConn = null
             this.showHideDeleteConnection = false
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    linkSystems() {
+        linkSystemsToDatabase({
+            dbId: this.currentDb!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            sysIds: this.systemsToLink.map((ele : System) => ele.Id)
+        }).then(() => {
+            let idSet = new Set([...this.systemsToLink, ...this.relatedSystems].map((ele: System) => ele.Id))
+            this.relatedSystems = this.allSystems.filter((ele : System) => idSet.has(ele.Id))
+            this.systemsToLink = []
+            this.showHideLinkSystem = false
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

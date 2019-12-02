@@ -7,9 +7,11 @@ import {
     allSystemsUrl,
     editSystemUrl,
     deleteSystemUrl,
-    getSystemUrl
+    getSystemUrl,
+    linkDbsToSystemUrl
 } from '../url'
 import { System } from '../systems'
+import { Database } from '../databases'
 
 export interface TNewSystemInputs {
     orgId: number
@@ -70,9 +72,24 @@ export interface TGetSystemInputs {
 export interface TGetSystemOutputs {
     data: {
         System: System
+        RelevantDatabaseIds: number[]
+        AllDatabases: Database[]
     }
 }
 
 export function getSystem(inp : TGetSystemInputs) : Promise<TGetSystemOutputs> {
     return axios.get(getSystemUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+}
+
+export interface TLinkDatabaseInputs {
+    sysId: number
+    orgId: number
+    dbIds: number[]
+}
+
+export interface TLinkDatabaseOutputs {
+}
+
+export function linkDatabasesToSystem(inp : TLinkDatabaseInputs) : Promise<TLinkDatabaseOutputs> {
+    return postFormJson<TLinkDatabaseOutputs>(linkDbsToSystemUrl, inp, getAPIRequestConfig())
 }

@@ -166,6 +166,7 @@ func registerITSystemsAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiITSystemGetEndpoint, getSystem).Methods("GET").Name(webcore.ApiGetSystemRouteName)
 	s.HandleFunc(core.ApiITSystemEditEndpoint, editSystem).Methods("POST").Name(webcore.ApiEditSystemRouteName)
 	s.HandleFunc(core.ApiITSystemDeleteEndpoint, deleteSystem).Methods("POST").Name(webcore.ApiDeleteSystemRouteName)
+	s.HandleFunc(core.ApiITSystemLinkDbEndpoint, linkDatabasesToSystem).Methods("POST").Name(webcore.ApiLinkDbsToSystemRouteName)
 }
 
 func registerITDbAPIPaths(r *mux.Router) {
@@ -176,6 +177,7 @@ func registerITDbAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiITDbGetEndpoint, getDb).Methods("GET").Name(webcore.ApiGetDbRouteName)
 	s.HandleFunc(core.ApiITDbEditEndpoint, editDb).Methods("POST").Name(webcore.ApiEditDbRouteName)
 	s.HandleFunc(core.ApiITDbDeleteEndpoint, deleteDb).Methods("POST").Name(webcore.ApiDeleteDbRouteName)
+	s.HandleFunc(core.ApiITDbLinkSysEndpoint, linkSystemsToDatabase).Methods("POST").Name(webcore.ApiLinkSystemsToDbRouteName)
 
 	registerITDbConnAPIPaths(s)
 }

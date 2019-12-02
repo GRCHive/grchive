@@ -1,6 +1,6 @@
 <template>
     <v-data-table
-        v-model="selected"
+        :value="selected"
         :headers="tableHeaders"
         :items="tableItems"
         :show-select="selectable"

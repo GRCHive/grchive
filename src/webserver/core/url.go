@@ -193,6 +193,7 @@ const ApiITSystemsAllEndpoint = "/all"
 const ApiITSystemGetEndpoint = "/get"
 const ApiITSystemEditEndpoint = "/edit"
 const ApiITSystemDeleteEndpoint = "/delete"
+const ApiITSystemLinkDbEndpoint = "/linkDb"
 
 // API - IT - DB
 const ApiITDbPrefix = "/db"
@@ -202,6 +203,7 @@ const ApiITDbTypesEndpoint = "/types"
 const ApiITDbGetEndpoint = "/get"
 const ApiITDbEditEndpoint = "/edit"
 const ApiITDbDeleteEndpoint = "/delete"
+const ApiITDbLinkSysEndpoint = "/linkSys"
 
 // API - IT - DB CONN
 const ApiITDbConnPrefix = "/connection"
