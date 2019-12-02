@@ -59,7 +59,7 @@
 
             <v-container fluid>
                 <v-row>
-                    <v-col cols="9">
+                    <v-col cols="8">
                         <create-new-role-form
                             ref="editForm"
                             :staged-edits="true"
@@ -69,7 +69,7 @@
                         </create-new-role-form>
                     </v-col>
 
-                    <v-col cols="3">
+                    <v-col cols="4">
                         <v-card>
                             <v-card-title>
                                 Users

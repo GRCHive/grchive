@@ -192,6 +192,14 @@ func getDb(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Decrypt for sending back to client.
+	conn.Password, err = webcore.DecryptSaltedEncryptedPassword(conn.Password, conn.Salt)
+	if err != nil {
+		core.Warning("Failed to decrypt password: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	jsonWriter.Encode(struct {
 		Database   *core.Database
 		Connection *core.DatabaseConnection
@@ -322,6 +330,14 @@ func newDbConnection(w http.ResponseWriter, r *http.Request) {
 	err = database.InsertNewDatabaseConnection(&conn, role)
 	if err != nil {
 		core.Warning("Failed to insert db connection: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Decrypt for sending back to client.
+	conn.Password, err = webcore.DecryptSaltedEncryptedPassword(conn.Password, conn.Salt)
+	if err != nil {
+		core.Warning("Failed to decrypt password: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

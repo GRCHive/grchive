@@ -61,9 +61,12 @@
                                 >
                                     <template v-slot:activator="{ on }">
                                         <v-btn color="error"
+                                               outlined
+                                               fab
                                                v-on="on"
+                                               small
                                                v-if="!!dbConn">
-                                            Delete
+                                            <v-icon>mdi-delete</v-icon>
                                         </v-btn>
                                     </template>
 
