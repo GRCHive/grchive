@@ -12,7 +12,7 @@ const RoleProps = Vue.extend({
     props: {
         availableRoles: {
             type: Object as () => Record<number, RoleMetadata>,
-            default: Object()
+            default: () => ({} as Record<number, RoleMetadata>)
         },
         showRole: {
             type: Boolean,
