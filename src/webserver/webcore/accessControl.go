@@ -113,9 +113,9 @@ func GrantAPIKeyDefaultRole(key *core.ApiKey, orgId int32) (*core.Role, error) {
 
 	// If this user is the first in their organization to login, they are the de-facto admin.
 	if len(adminUserIds) == 0 {
-		err = database.InsertUserRoleForOrg(user.Id, orgId, adminRole, core.ServerRole)
+		err = database.InsertUserRoleForOrg(user.Id, orgId, adminRole.Id, core.ServerRole)
 	} else {
-		err = database.InsertUserRoleForOrg(user.Id, orgId, defaultRole, core.ServerRole)
+		err = database.InsertUserRoleForOrg(user.Id, orgId, defaultRole.Id, core.ServerRole)
 	}
 
 	// It's ok if there's a duplicate because it means we've added the role already. OK!

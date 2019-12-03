@@ -185,9 +185,9 @@ func InsertOrgRole(metadata *core.RoleMetadata, role *core.Role, actionRole *cor
 
 	for _, resource := range core.AvailableResources {
 		_, err = tx.Exec(fmt.Sprintf(`
-			INSERT INTO %s (role_id, access_type)
-			VALUES ( $1, $2 )
-		`, resourceToDatabaseMap[resource]), role.Id, role.Permissions.GetAccessType(resource))
+			INSERT INTO %s (role_id, org_id, access_type)
+			VALUES ( $1, $2, $3)
+		`, resourceToDatabaseMap[resource]), role.Id, metadata.OrgId, role.Permissions.GetAccessType(resource))
 
 		if err != nil {
 			tx.Rollback()
@@ -197,21 +197,30 @@ func InsertOrgRole(metadata *core.RoleMetadata, role *core.Role, actionRole *cor
 	return tx.Commit()
 }
 
-func InsertUserRoleForOrg(userId int64, orgId int32, role *core.Role, actionRole *core.Role) error {
+func InsertUserRoleForOrgWithTx(userId int64, orgId int32, roleId int64, actionRole *core.Role, tx *sqlx.Tx) error {
 	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessManage) {
 		return core.ErrorUnauthorized
 	}
-	tx := dbConn.MustBegin()
+
 	_, err := tx.Exec(`
 		INSERT INTO user_roles (role_id, user_id, org_id)
 		VALUES ( $1, $2, $3)
-	`, role.Id, userId, orgId)
+	`, roleId, userId, orgId)
 
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func InsertUserRoleForOrg(userId int64, orgId int32, roleId int64, actionRole *core.Role) error {
+	tx := dbConn.MustBegin()
+	err := InsertUserRoleForOrgWithTx(userId, orgId, roleId, actionRole, tx)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-
 	return tx.Commit()
 }
 

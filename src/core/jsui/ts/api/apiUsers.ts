@@ -62,6 +62,7 @@ export interface TInviteUsersInput {
     fromUserId: number
     fromOrgId: number
     toEmails: string[]
+    roleId: number
 }
 
 export interface TInviteUsersOutput {

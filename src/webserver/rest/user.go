@@ -28,6 +28,7 @@ type SendInviteInputs struct {
 	FromUserId int64    `webcore:"fromUserId"`
 	FromOrgId  int32    `webcore:"fromOrgId"`
 	ToEmails   []string `webcore:"toEmails"`
+	RoleId     int64    `webcore:"roleId"`
 }
 
 type AcceptInviteInputs struct {
@@ -199,6 +200,7 @@ func sendInviteToOrganization(w http.ResponseWriter, r *http.Request) {
 			FromOrgId:  inputs.FromOrgId,
 			ToEmail:    email,
 			SentTime:   core.CreateNullTime(time.Now().UTC()),
+			RoleId:     inputs.RoleId,
 		}
 		pendingInvites = append(pendingInvites, &invite)
 	}

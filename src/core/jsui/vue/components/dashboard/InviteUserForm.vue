@@ -21,6 +21,14 @@
                              rules.createPerElement(rules.createMaxLength(320))]"
                     v-model="emails">
         </v-combobox>
+
+        <role-search-form-component
+            label="Role"
+            :preload-roles="preloadRoles"
+            v-bind:role.sync="role"
+            :rules="[rules.required]"
+        >
+        </role-search-form-component>
     </v-form>
 
     <v-card-actions>
@@ -51,17 +59,29 @@ import * as rules from '../../../ts/formRules'
 import { contactUsUrl } from '../../../ts/url'
 import { TInviteUsersInput, TInviteUsersOutput, inviteUsers } from '../../../ts/api/apiUsers'
 import { PageParamsStore } from '../../../ts/pageParams'
+import RoleSearchFormComponent from '../../generic/RoleSearchFormComponent.vue'
+import { RoleMetadata } from '../../../ts/roles'
 
 export default Vue.extend({
+    props: {
+        preloadRoles: {
+            type: Object as () => RoleMetadata[] | null,
+            default: null
+        }
+    },
     data: () => ({
         emails: [],
         formValid: false,
-        rules
+        rules,
+        role: null as RoleMetadata | null
     }),
     computed: {
         canSubmit() : boolean {
             return this.formValid && this.emails.length > 0
         }
+    },
+    components: {
+        RoleSearchFormComponent
     },
     methods: {
         cancel() {
@@ -75,7 +95,8 @@ export default Vue.extend({
             inviteUsers(<TInviteUsersInput>{
                 fromUserId: PageParamsStore.state.user!.Id,
                 fromOrgId: PageParamsStore.state.organization!.Id,
-                toEmails: this.emails
+                toEmails: this.emails,
+                roleId: this.role!.Id,
             }).then((resp : TInviteUsersOutput) => {
                 this.$emit('do-save')
             }).catch((err : any) => {

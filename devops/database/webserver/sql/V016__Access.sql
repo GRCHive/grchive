@@ -1,10 +1,11 @@
 CREATE TABLE organization_available_roles (
-    id BIGSERIAL PRIMARY KEY,
+    id BIGSERIAL,
     is_default_role BOOLEAN NOT NULL,
     is_admin_role BOOLEAN NOT NULL,
     name VARCHAR(256) NOT NULL,
     description TEXT,
     org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    PRIMARY KEY(id, org_id),
     UNIQUE(name, org_id)
 );
 
@@ -33,10 +34,14 @@ CREATE TABLE user_roles (
 );
 
 CREATE TABLE _base_resource_access (
-    role_id BIGINT NOT NULL REFERENCES organization_available_roles(id) ON DELETE CASCADE,
-    access_type INTEGER NOT NULL
+    role_id BIGINT NOT NULL,
+    org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    access_type INTEGER NOT NULL,
+    CONSTRAINT role_org_foreign_key
+        FOREIGN KEY(role_id, org_id)
+        REFERENCES organization_available_roles(id, org_id)
+        ON DELETE CASCADE
 );
-
 
 CREATE TABLE resource_organization_users_access () INHERITS (_base_resource_access);
 CREATE TABLE resource_organization_roles_access () INHERITS (_base_resource_access);

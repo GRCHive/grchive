@@ -12,8 +12,8 @@ func InsertInviteCodeWithTx(code *core.InviteCode, role *core.Role, tx *sqlx.Tx)
 	}
 
 	rows, err := tx.NamedQuery(`
-		INSERT INTO invitation_codes (from_user_id, from_org_id, to_email, sent_time)
-		VALUES (:from_user_id, :from_org_id, :to_email, :sent_time)
+		INSERT INTO invitation_codes (from_user_id, from_org_id, to_email, sent_time, role_id)
+		VALUES (:from_user_id, :from_org_id, :to_email, :sent_time, :role_id)
 		RETURNING id
 	`, code)
 

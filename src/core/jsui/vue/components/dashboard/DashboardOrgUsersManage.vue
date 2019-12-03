@@ -23,6 +23,7 @@
                         </v-btn>
                     </template>
                     <invite-user-form
+                      :preload-roles="roleList"
                       @do-cancel="cancelInvite"
                       @do-save="onInvite"
                     ></invite-user-form>
@@ -56,6 +57,7 @@ export default Vue.extend({
     data: () => ({
         filterText: "",
         showHideInvite: false,
+        roleList: [] as RoleMetadata[],
         roles: null as Record<number, RoleMetadata> | null,
     }),
     components: {
@@ -112,6 +114,7 @@ export default Vue.extend({
             for (let role of resp.data) {
                 this.roles[role.Id] = role
             }
+            this.roleList = resp.data
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

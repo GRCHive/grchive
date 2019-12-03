@@ -127,6 +127,11 @@ func ProcessInviteCodeForUserWithTx(invite *core.InviteCode, user *core.User, tx
 		return err
 	}
 
+	err = database.InsertUserRoleForOrgWithTx(user.Id, org.Id, invite.RoleId, core.ServerRole, tx)
+	if err != nil {
+		return err
+	}
+
 	err = database.MarkInviteAsUsedWithTx(invite, tx)
 	if err != nil {
 		return err

@@ -7,4 +7,5 @@ type InviteCode struct {
 	ToEmail    string   `db:"to_email"`
 	SentTime   NullTime `db:"sent_time"`
 	UsedTime   NullTime `db:"used_time"`
+	RoleId     int64    `db:"role_id"`
 }
