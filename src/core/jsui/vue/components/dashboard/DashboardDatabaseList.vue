@@ -6,6 +6,14 @@
                     Databases
                 </v-list-item-title>
             </v-list-item-content>
+            <v-list-item-action>
+                <v-text-field outlined
+                              v-model="filterText"
+                              prepend-inner-icon="mdi-magnify"
+                              hide-details
+                ></v-text-field>
+            </v-list-item-action>
+
 
             <v-spacer></v-spacer>
             <v-list-item-action>
@@ -28,6 +36,7 @@
         <v-divider></v-divider>
         <db-table
             :resources="allDbs"
+            :search="filterText"
         ></db-table>
     </div>
 </template>
@@ -52,6 +61,7 @@ import CreateNewDatabaseForm from './CreateNewDatabaseForm.vue'
 export default class DashboardDatabaseList extends Vue {
     allDbs : Database[] = []
     showHideNew: boolean = false
+    filterText : string = ""
 
     refreshDatabases() {
         allDatabase({

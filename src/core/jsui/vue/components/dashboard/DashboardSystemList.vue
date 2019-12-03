@@ -6,6 +6,14 @@
                     Systems
                 </v-list-item-title>
             </v-list-item-content>
+            <v-list-item-action>
+                <v-text-field outlined
+                              v-model="filterText"
+                              prepend-inner-icon="mdi-magnify"
+                              hide-details
+                ></v-text-field>
+            </v-list-item-action>
+
 
             <v-spacer></v-spacer>
 
@@ -30,6 +38,7 @@
         <v-divider></v-divider>
         <systems-table
             :resources="systems"
+            :search="filterText"
         ></systems-table>
     </div>
 </template>
@@ -54,6 +63,7 @@ import SystemsTable from '../../generic/SystemsTable.vue'
 export default class DashboardSystemList extends Vue {
     showHideNew: boolean = false
     systems : System[] = []
+    filterText : string = ""
 
     saveSystem(newSys : System) {
         this.showHideNew = false
