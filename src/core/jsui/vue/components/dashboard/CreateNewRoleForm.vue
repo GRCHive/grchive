@@ -69,6 +69,31 @@
             v-model="permissions.ControlDocumentationAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+
+        <access-type-editor
+            label="General Ledger"
+            v-model="permissions.GLAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+
+        <access-type-editor
+            label="Systems"
+            v-model="permissions.SystemAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+
+        <access-type-editor
+            label="Database"
+            v-model="permissions.DbAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+
+        <access-type-editor
+            label="Database Connection"
+            v-model="permissions.DbConnectionAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+
     </v-form>
 
     <v-card-actions>
@@ -148,6 +173,10 @@ export default Vue.extend({
             ControlDocumentationAccess: AccessType.NoAccess,
             ControlDocMetadataAccess: AccessType.NoAccess,
             RisksAccess: AccessType.NoAccess,
+            GLAccess: AccessType.NoAccess,
+            SystemAccess: AccessType.NoAccess,
+            DbAccess: AccessType.NoAccess,
+            DbConnectionAccess: AccessType.NoAccess,
         },
     }),
     computed: {

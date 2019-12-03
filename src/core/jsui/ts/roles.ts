@@ -22,6 +22,10 @@ export interface Permissions {
 	ControlDocumentationAccess: AccessType 
 	ControlDocMetadataAccess  : AccessType 
 	RisksAccess               : AccessType 
+    GLAccess                  : AccessType
+    SystemAccess              : AccessType
+    DbAccess                  : AccessType
+    DbConnectionAccess        : AccessType
 }
 
 export interface FullRole {
