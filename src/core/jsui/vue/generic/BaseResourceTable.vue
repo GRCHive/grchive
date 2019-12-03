@@ -8,7 +8,7 @@ import ResourceTableProps from './ResourceTableProps'
 const TableProps = Vue.extend({
     props: {
         tableHeaders: Array,
-        tableItems: Array
+        tableItems: Array,
     }
 })
 
@@ -22,6 +22,19 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
 
     changeInput(items: any[]) {
         this.$emit('input', items)
+    }
+
+    get finalTableHeaders() : any[] {
+        let headers = this.tableHeaders
+
+        if (this.useCrudDelete) {
+            headers.push({
+                text: 'Actions',
+                value: 'action'
+            })
+        }
+
+        return headers
     }
 
     clickRow(item : any) {
@@ -44,7 +57,7 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
             {
                 props: {
                     value: this.selected,
-                    headers: this.tableHeaders,
+                    headers: this.finalTableHeaders,
                     items: this.tableItems,
                     showSelect: this.selectable,
                     singleSelect: this.multi,
@@ -54,7 +67,9 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
                     input: this.changeInput,
                     'click:row': this.clickRow
                 },
-                scopedSlots: this.$scopedSlots
+                scopedSlots: {
+                    ...this.$scopedSlots
+                }
             }
         )
     }

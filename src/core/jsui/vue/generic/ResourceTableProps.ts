@@ -18,6 +18,10 @@ const ResourceTableProps = Vue.extend({
         search : {
             type: String,
             default: ""
+        },
+        useCrudDelete: {
+            type: Boolean,
+            default: false
         }
     }
 })

@@ -1,20 +1,6 @@
-<template>
-    <base-resource-table
-        :resources="resources"
-        :value="value"
-        :selectable="selectable"
-        :multi="multi"
-        :search="search"
-        :table-headers="tableHeaders"
-        :table-items="tableItems"
-        @input="$emit('input', ...arguments)"
-    >
-    </base-resource-table>
-</template>
-
 <script lang="ts">
 
-import Vue from 'vue'
+import Vue, { VNode } from 'vue'
 import Component from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
@@ -54,6 +40,24 @@ export default class UserTable extends ResourceTableProps {
     transformTableItemToInputResource(inp : any) : any {
         return inp.value
     }
+
+    render() : VNode {
+        return this.$createElement(
+            BaseResourceTable,
+            {
+                props: {
+                    ...this.$props,
+                    tableHeaders: this.tableHeaders,
+                    tableItems: this.tableItems,
+                },
+                on: {
+                    input: (...args : any[]) => this.$emit('input', ...args),
+                }
+            }
+        )
+    }
+
+
 }
 
 </script>
