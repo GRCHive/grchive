@@ -10,3 +10,9 @@ type User struct {
 func (u User) FullName() string {
 	return u.FirstName + " " + u.LastName
 }
+
+type UserWithRole struct {
+	User
+	RoleId int64 `db:"role_id"`
+	OrgId  int32 `db:"org_id"`
+}

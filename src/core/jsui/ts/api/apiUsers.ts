@@ -14,7 +14,7 @@ export interface TGetAllOrgUsersInput {
 }
 
 export interface TGetAllOrgUsersOutput {
-    data: User[]
+    data: UserWithRole[]
 }
 
 export function getAllOrgUsers(inp : TGetAllOrgUsersInput) : Promise<TGetAllOrgUsersOutput> {

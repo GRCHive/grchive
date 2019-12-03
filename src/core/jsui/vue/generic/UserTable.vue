@@ -1,18 +1,32 @@
 <script lang="ts">
 
 import Vue, { VNode } from 'vue'
-import Component from 'vue-class-component'
+import Component, { mixins } from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
+import { RoleMetadata } from '../../ts/roles'
+
+const RoleProps = Vue.extend({
+    props: {
+        availableRoles: {
+            type: Object as () => Record<number, RoleMetadata>,
+            default: Object()
+        },
+        showRole: {
+            type: Boolean,
+            default: false
+        }
+    }
+})
 
 @Component({
     components: {
         BaseResourceTable
     }
 })
-export default class UserTable extends ResourceTableProps {
+export default class UserTable extends mixins(ResourceTableProps, RoleProps) {
     get tableHeaders() : any[] {
-        return [
+        let headers = [
             {
                 text: 'Name',
                 value: 'fullName'
@@ -22,6 +36,15 @@ export default class UserTable extends ResourceTableProps {
                 value: 'email'
             },
         ]
+
+        if (this.showRole) {
+            headers.push({
+                text: 'Role',
+                value: 'role'
+            })
+        }
+
+        return headers
     }
 
     get tableItems(): any[] {
@@ -33,7 +56,10 @@ export default class UserTable extends ResourceTableProps {
             id: inp.Id,
             fullName: `${inp.FirstName} ${inp.LastName}`,
             email: inp.Email,
-            value: inp
+            value: inp,
+            role: this.showRole ? 
+                this.availableRoles[inp.RoleId].Name :
+                undefined
         }
     }
 
@@ -53,8 +79,6 @@ export default class UserTable extends ResourceTableProps {
             }
         )
     }
-
-
 }
 
 </script>

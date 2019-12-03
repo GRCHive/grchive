@@ -4,3 +4,9 @@ interface User {
     LastName : string
     Email : string
 }
+
+interface UserWithRole {
+    User: User
+    RoleId: number
+    OrgId: number
+}

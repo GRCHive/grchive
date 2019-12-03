@@ -1,5 +1,5 @@
 <template>
-    <div class="ma-4">
+    <div class="ma-4" v-if="ready">
         <v-list-item class="pa-0">
             <v-list-item-content class="disable-flex mr-4">
                 <v-list-item-title class="title">
@@ -34,6 +34,8 @@
         <user-table
             :resources="users"
             :search="filterText"
+            show-role
+            :available-roles="roles"
         ></user-table>
     </div>
 </template>
@@ -45,17 +47,26 @@ import MetadataStore from '../../../ts/metadata'
 import InviteUserForm from './InviteUserForm.vue'
 import { replaceWithMark, sanitizeTextForHTML } from '../../../ts/text'
 import UserTable from '../../generic/UserTable.vue'
+import { RoleMetadata } from '../../../ts/roles'
+import { TGetAllOrgRolesOutput, getAllOrgRoles } from '../../../ts/api/apiRoles'
+import { PageParamsStore } from '../../../ts/pageParams'
+import { contactUsUrl } from '../../../ts/url'
 
 export default Vue.extend({
     data: () => ({
         filterText: "",
         showHideInvite: false,
+        roles: null as Record<number, RoleMetadata> | null,
     }),
     components: {
         InviteUserForm,
         UserTable
     },
     computed: {
+        ready() {
+            return MetadataStore.state.usersInitialized && !!this.roles
+        },
+
         filter() : (a : User) => boolean {
             const filterText = this.filterText.trim()
             return (ele : User) : boolean => {
@@ -92,6 +103,24 @@ export default Vue.extend({
         cancelInvite() {
             this.showHideInvite = false
         }
+    },
+    mounted() {
+        getAllOrgRoles({
+            orgId: PageParamsStore.state.organization!.Id
+        }).then((resp : TGetAllOrgRolesOutput) => {
+            this.roles = new Object() as Record<number, RoleMetadata>
+            for (let role of resp.data) {
+                this.roles[role.Id] = role
+            }
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 })
 

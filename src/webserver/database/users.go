@@ -5,18 +5,24 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
 
-func FindAllUsersInOrganization(orgId int32, role *core.Role) ([]*core.User, error) {
+func FindAllUsersInOrganization(orgId int32, role *core.Role) ([]*core.UserWithRole, error) {
 	if !role.Permissions.HasAccess(core.ResourceOrgUsers, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
 
-	users := make([]*core.User, 0)
+	users := make([]*core.UserWithRole, 0)
 
 	err := dbConn.Select(&users, `
-		SELECT u.*
+		SELECT 
+			u.*,
+			ur.role_id as "role_id",
+			$1 as "org_id"
 		FROM users AS u
 		INNER JOIN user_orgs AS uo
 			ON u.id = uo.user_id
+		INNER JOIN user_roles AS ur
+			ON ur.user_id = u.id
+				AND ur.org_id = $1
 		WHERE uo.org_id = $1
 	`, orgId)
 
