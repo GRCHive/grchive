@@ -5,6 +5,8 @@ import Component, { mixins } from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
 import { RoleMetadata } from '../../ts/roles'
+import { createOrgRoleUrl } from '../../ts/url'
+import { PageParamsStore } from '../../ts/pageParams'
 
 const RoleProps = Vue.extend({
     props: {
@@ -58,9 +60,21 @@ export default class UserTable extends mixins(ResourceTableProps, RoleProps) {
             email: inp.Email,
             value: inp,
             role: this.showRole ? 
-                this.availableRoles[inp.RoleId].Name :
+                this.availableRoles[inp.RoleId] :
                 undefined
         }
+    }
+
+    renderRole(props : any): VNode {
+        return this.$createElement(
+            'a',
+            {
+                attrs: {
+                    href: createOrgRoleUrl(PageParamsStore.state.organization!.OktaGroupName, props.item.role.Id)
+                }
+            },
+            props.item.role.Name
+        )
     }
 
     render() : VNode {
@@ -75,6 +89,9 @@ export default class UserTable extends mixins(ResourceTableProps, RoleProps) {
                 on: {
                     input: (items : any[]) => this.$emit('input', items.map((ele : any) => ele.value)),
                     delete: (item : any) => this.$emit('delete', item.value),
+                },
+                scopedSlots: {
+                    'item.role': this.renderRole,
                 }
             }
         )
