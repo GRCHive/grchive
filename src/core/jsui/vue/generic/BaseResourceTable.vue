@@ -1,7 +1,7 @@
 <script lang="ts">
 
 import Vue, { VNode } from 'vue'
-import { VDataTable } from 'vuetify/lib'
+import { VBtn, VIcon, VDataTable } from 'vuetify/lib'
 import Component, { mixins } from 'vue-class-component'
 import ResourceTableProps from './ResourceTableProps'
 
@@ -30,7 +30,9 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
         if (this.useCrudDelete) {
             headers.push({
                 text: 'Actions',
-                value: 'action'
+                value: 'action',
+                sortable: false,
+                filterable: false
             })
         }
 
@@ -51,6 +53,43 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
         }
     }
 
+    deleteItem(e : MouseEvent, item : any) {
+        this.$emit('delete', item)
+        e.stopPropagation()
+    }
+
+    renderActionSlot(props: any) : VNode {
+        let childEle : VNode[] = []
+
+        if (this.useCrudDelete) {
+            childEle.push(
+                this.$createElement(
+                    VBtn,
+                    {
+                        props: {
+                            icon: true,
+                            'x-small': true,
+                        },
+                        on: {
+                            click: (e : MouseEvent) => this.deleteItem(e, props.item)
+                        }
+                    },
+                    [
+                        this.$createElement(
+                            VIcon,
+                            'mdi-delete'
+                        )
+                    ]
+                )
+            )
+        }
+
+        return this.$createElement(
+            'div',
+            childEle
+        )
+    }
+
     render() : VNode {
         return this.$createElement(
             VDataTable,
@@ -68,7 +107,8 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
                     'click:row': this.clickRow
                 },
                 scopedSlots: {
-                    ...this.$scopedSlots
+                    ...this.$scopedSlots,
+                    'item.action': this.renderActionSlot
                 }
             }
         )

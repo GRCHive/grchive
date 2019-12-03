@@ -202,3 +202,4 @@ export const deleteDbConnUrl : string = "/api/it/db/connection/delete"
 
 export const linkDbsToSystemUrl : string = "/api/it/systems/linkDb"
 export const linkSystemsToDbUrl : string = "/api/it/db/linkSys"
+export const deleteDbSysLinkUrl : string = "/api/it/deleteDbSysLink"

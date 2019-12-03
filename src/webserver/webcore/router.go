@@ -118,6 +118,7 @@ const (
 	ApiDeleteDbConnRouteName                       = "ApiDeleteDbConn"
 	ApiLinkSystemsToDbRouteName                    = "ApiLinkSystemsToDb"
 	ApiLinkDbsToSystemRouteName                    = "ApiLinkDbsToSystem"
+	ApiDeleteDbSysLinkRouteName                    = "ApiDeleteDbSysLink"
 )
 
 var globalRouter *mux.Router

@@ -133,3 +133,23 @@ func LinkDatabasesToSystem(sysId int64, orgId int32, dbIds []int64, role *core.R
 	}
 	return tx.Commit()
 }
+
+func DeleteDatabaseSystemLink(sysId int64, dbId int64, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceSystems, core.AccessEdit) ||
+		!role.Permissions.HasAccess(core.ResourceDatabases, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		DELETE FROM database_system_link
+		WHERE system_id = $1
+			AND db_id = $2
+			AND org_id = $3
+	`, sysId, dbId, orgId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}

@@ -93,7 +93,11 @@
                                 </v-dialog>
                             </v-card-title>
                             <v-divider></v-divider>
-                            <db-table :resources="relatedDbs"></db-table>
+                            <db-table
+                                :resources="relatedDbs"
+                                use-crud-delete
+                                @delete="onDeleteDbLink"
+                            ></db-table>
                         </v-card>
 
                         <v-card>
@@ -125,7 +129,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { getSystem, TGetSystemOutputs } from '../../../ts/api/apiSystems'
 import { deleteSystem, TDeleteSystemOutputs } from '../../../ts/api/apiSystems'
-import { linkDatabasesToSystem } from '../../../ts/api/apiSystems'
+import { linkDatabasesToSystem, deleteDbSysLink } from '../../../ts/api/apiSystems'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { System } from '../../../ts/systems'
 import CreateNewSystemForm from './CreateNewSystemForm.vue'
@@ -226,6 +230,24 @@ export default class FullEditSystemComponent extends Vue {
                 contactUsUrl,
                 true);
 
+        })
+    }
+
+    onDeleteDbLink(db : Database) {
+        deleteDbSysLink({
+            sysId: this.currentSystem.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            dbId: db.Id,
+        }).then(() => {
+            this.relatedDbs = this.relatedDbs.filter((ele : Database) => ele.Id != db.Id)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
         })
     }
 }

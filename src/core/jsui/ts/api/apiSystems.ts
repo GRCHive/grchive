@@ -8,7 +8,8 @@ import {
     editSystemUrl,
     deleteSystemUrl,
     getSystemUrl,
-    linkDbsToSystemUrl
+    linkDbsToSystemUrl,
+    deleteDbSysLinkUrl
 } from '../url'
 import { System } from '../systems'
 import { Database } from '../databases'
@@ -92,4 +93,15 @@ export interface TLinkDatabaseOutputs {
 
 export function linkDatabasesToSystem(inp : TLinkDatabaseInputs) : Promise<TLinkDatabaseOutputs> {
     return postFormJson<TLinkDatabaseOutputs>(linkDbsToSystemUrl, inp, getAPIRequestConfig())
+}
+
+export interface TDeleteDbSysLink {
+    sysId: number
+    orgId: number
+    dbId: number
+}
+
+
+export function deleteDbSysLink(inp : TDeleteDbSysLink) : Promise<void> {
+    return postFormJson<void>(deleteDbSysLinkUrl, inp, getAPIRequestConfig())
 }

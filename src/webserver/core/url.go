@@ -185,6 +185,7 @@ const ApiDeleteGLAccountEndpoint string = "/acc/delete"
 
 // API - IT
 const ApiITPrefix = "/it"
+const ApiITDeleteDbSysLinkEndpoint = "/deleteDbSysLink"
 
 // API - IT - Systems
 const ApiITSystemsPrefix = "/systems"

@@ -43,6 +43,12 @@ type LinkDatabaseInputs struct {
 	DbIds []int64 `json:"dbIds"`
 }
 
+type DeleteDbSystemLinkInputs struct {
+	SysId int64 `json:"sysId"`
+	DbId  int64 `json:"dbId"`
+	OrgId int32 `json:"orgId"`
+}
+
 func newSystem(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -279,6 +285,37 @@ func linkDatabasesToSystem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = database.LinkDatabasesToSystem(inputs.SysId, org.Id, inputs.DbIds, role)
+	if err != nil {
+		core.Warning("Failed to link databases to system: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func deleteDatabaseSystemLink(w http.ResponseWriter, r *http.Request) {
+	inputs := DeleteDbSystemLinkInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
+	if err != nil {
+		core.Warning("No organization: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteDatabaseSystemLink(inputs.SysId, inputs.DbId, org.Id, role)
 	if err != nil {
 		core.Warning("Failed to link databases to system: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

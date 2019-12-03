@@ -157,6 +157,8 @@ func registerITAPIPaths(r *mux.Router) {
 	registerITSystemsAPIPaths(s)
 	registerITDbAPIPaths(s)
 	registerITInfraAPIPaths(s)
+
+	s.HandleFunc(core.ApiITDeleteDbSysLinkEndpoint, deleteDatabaseSystemLink).Methods("POST").Name(webcore.ApiDeleteDbSysLinkRouteName)
 }
 
 func registerITSystemsAPIPaths(r *mux.Router) {

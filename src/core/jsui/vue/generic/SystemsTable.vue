@@ -40,10 +40,6 @@ export default class SystemsTable extends ResourceTableProps {
         }
     }
 
-    transformTableItemToInputResource(inp : any) : any {
-        return inp.value
-    }
-
     goToSystem(item : any) {
         window.location.assign(createSingleSystemUrl(
             PageParamsStore.state.organization!.OktaGroupName,
@@ -100,7 +96,8 @@ export default class SystemsTable extends ResourceTableProps {
                     tableItems: this.tableItems,
                 },
                 on: {
-                    input: (...args : any[]) => this.$emit('input', ...args),
+                    input: (items : any[]) => this.$emit('input', items.map((ele : any) => ele.value)),
+                    delete: (item : any) => this.$emit('delete', item.value),
                     'click:row': this.goToSystem
                 },
                 scopedSlots: {

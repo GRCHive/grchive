@@ -89,7 +89,11 @@
                                 </v-dialog>
                             </v-card-title>
                             <v-divider></v-divider>
-                            <systems-table :resources="relatedSystems"></systems-table>
+                            <systems-table
+                                :resources="relatedSystems"
+                                use-crud-delete
+                                @delete="onDeleteSysLink"
+                            ></systems-table>
                         </v-card>
 
                         <v-card class="mb-4">
@@ -184,6 +188,7 @@ import Component from 'vue-class-component'
 import { getDatabase, TGetDatabaseOutputs } from '../../../ts/api/apiDatabases'
 import { deleteDatabase, TDeleteDatabaseOutputs } from '../../../ts/api/apiDatabases'
 import { deleteDatabaseConnection, TDeleteDbConnOutputs } from '../../../ts/api/apiDatabases'
+import { deleteDbSysLink } from '../../../ts/api/apiSystems'
 import { linkSystemsToDatabase } from '../../../ts/api/apiDatabases'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { Database, DatabaseConnection, getDbTypeAsString, isDatabaseSupported } from '../../../ts/databases'
@@ -323,6 +328,24 @@ export default class FullEditDatabaseComponent extends Vue {
             this.relatedSystems = this.allSystems.filter((ele : System) => idSet.has(ele.Id))
             this.systemsToLink = []
             this.showHideLinkSystem = false
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    onDeleteSysLink(sys : System) {
+        deleteDbSysLink({
+            sysId: sys.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            dbId: this.currentDb!.Id,
+        }).then(() => {
+            this.relatedSystems = this.relatedSystems.filter((ele : System) => ele.Id != sys.Id)
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

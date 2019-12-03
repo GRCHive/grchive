@@ -37,10 +37,6 @@ export default class UserTable extends ResourceTableProps {
         }
     }
 
-    transformTableItemToInputResource(inp : any) : any {
-        return inp.value
-    }
-
     render() : VNode {
         return this.$createElement(
             BaseResourceTable,
@@ -51,7 +47,8 @@ export default class UserTable extends ResourceTableProps {
                     tableItems: this.tableItems,
                 },
                 on: {
-                    input: (...args : any[]) => this.$emit('input', ...args),
+                    input: (items : any[]) => this.$emit('input', items.map((ele : any) => ele.value)),
+                    delete: (item : any) => this.$emit('delete', item.value),
                 }
             }
         )
