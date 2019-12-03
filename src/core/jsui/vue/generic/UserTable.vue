@@ -1,23 +1,30 @@
 <template>
-    <v-data-table
-        :value="selected"
-        :headers="tableHeaders"
-        :items="tableItems"
-        :show-select="selectable"
-        :single-select="!multi"
+    <base-resource-table
+        :resources="resources"
+        :value="value"
+        :selectable="selectable"
+        :multi="multi"
         :search="search"
-        @input="changeInput">
-    </v-data-table>
+        :table-headers="tableHeaders"
+        :table-items="tableItems"
+        @input="$emit('input', ...arguments)"
+    >
+    </base-resource-table>
 </template>
 
 <script lang="ts">
 
+import Vue from 'vue'
 import Component from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
-import Vue from 'vue'
+import ResourceTableProps from './ResourceTableProps'
 
-@Component
-export default class UserTable extends BaseResourceTable {
+@Component({
+    components: {
+        BaseResourceTable
+    }
+})
+export default class UserTable extends ResourceTableProps {
     get tableHeaders() : any[] {
         return [
             {
@@ -29,6 +36,10 @@ export default class UserTable extends BaseResourceTable {
                 value: 'email'
             },
         ]
+    }
+
+    get tableItems(): any[] {
+        return this.resources.map(this.transformInputResourceToTableItem)
     }
 
     transformInputResourceToTableItem(inp : any) : any {

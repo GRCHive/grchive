@@ -90,7 +90,7 @@
                                         </v-card-title>
                                         <v-divider></v-divider>
                                         <user-table
-                                            :users="selectableOrgUsers"
+                                            :resources="selectableOrgUsers"
                                             v-model="usersToAdd"
                                             selectable
                                             multi>

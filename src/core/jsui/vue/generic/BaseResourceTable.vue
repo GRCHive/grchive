@@ -1,71 +1,71 @@
 <script lang="ts">
 
-import Vue from 'vue'
-import Component from 'vue-class-component'
+import Vue, { VNode } from 'vue'
+import { VDataTable } from 'vuetify/lib'
+import Component, { mixins } from 'vue-class-component'
+import ResourceTableProps from './ResourceTableProps'
 
-const ResourceTableProps = Vue.extend({
+const TableProps = Vue.extend({
     props: {
-        resources: Array,
-        value: {
-            type: Array,
-            default: () => []
-        },
-        selectable: {
-            type: Boolean,
-            default: false
-        },
-        multi: {
-            type: Boolean,
-            default: false
-        },
-        search : {
-            type: String,
-            default: ""
-        }
+        tableHeaders: Array,
+        tableItems: Array
     }
 })
 
 @Component
-export default class BaseResourceTable extends ResourceTableProps {
+export default class BaseResourceTable extends mixins(ResourceTableProps, TableProps) {
     selected: any[] = []
 
-    get valueSet() : Set<any> {
-        return new Set<any>(this.value)
-    }
-
-    get tableHeaders() : any[] {
-        return []
-    }
-
-    get tableItems() : any[] {
-        return this.resources.map(this.transformInputResourceToTableItem)
+    get selectedSet() : Set<any> {
+        return new Set<any>(this.selected)
     }
 
     changeInput(items: any[]) {
-        this.$emit('input', Array.from(new Set(items)).map(this.transformTableItemToInputResource))
+        this.$emit('input', items)
     }
 
-    manualToggleItem(item : any) {
-        let val = this.transformTableItemToInputResource(item)
-        let newValueArr = []
-        if (this.valueSet.has(val)) {
-            newValueArr = this.value.filter((ele : any) => ele != val)
+    clickRow(item : any) {
+        if (this.selectable) {
+            if (this.selectedSet.has(item)) {
+                this.selected = this.selected.filter((ele : any) => ele != item)
+            } else {
+                this.selected = [...this.selected, item]
+            }
+
+            this.changeInput(this.selected)
         } else {
-            newValueArr = [...this.value, val]
+            this.$emit('click:row', item)
         }
-
-        this.$emit('input', newValueArr)
-        this.selected = newValueArr.map(this.transformInputResourceToTableItem)
     }
 
-    transformInputResourceToTableItem(inp : any) : any {
-        return null
+    render() : VNode {
+        return this.$createElement(
+            VDataTable,
+            {
+                props: {
+                    value: this.selected,
+                    headers: this.tableHeaders,
+                    items: this.tableItems,
+                    showSelect: this.selectable,
+                    singleSelect: this.multi,
+                    search: this.search
+                },
+                on: {
+                    input: this.changeInput,
+                    'click:row': this.clickRow
+                },
+                scopedSlots: this.$scopedSlots
+            }
+        )
     }
-
-    transformTableItemToInputResource(inp : any) : any {
-        return null
-    }
-
 }
 
 </script>
+
+<style scoped>
+
+>>>tr {
+    cursor: pointer !important;
+}
+
+</style>

@@ -1,30 +1,37 @@
 <template>
-    <v-data-table
-        :value="selected"
-        :headers="tableHeaders"
-        :items="tableItems"
-        :show-select="selectable"
-        :single-select="!multi"
+    <base-resource-table
+        :resources="resources"
+        :value="value"
+        :selectable="selectable"
+        :multi="multi"
         :search="search"
-        @input="changeInput"
-        @click:row="goToSystem">
-
+        :table-headers="tableHeaders"
+        :table-items="tableItems"
+        @input="$emit('input', ...arguments)"
+        @click:row="goToSystem"
+    >
         <template v-slot:item.name="{ item }">
             <p class="ma-0 pa-0 body-1 font-weight-bold">{{ item.value.Name }}</p>
             <p class="ma-0 pa-0 caption font-weight-light">{{ item.value.Description }}</p>
         </template>
-    </v-data-table>
+    </base-resource-table>
 </template>
 
 <script lang="ts">
 
+import Vue from 'vue'
 import Component from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
+import ResourceTableProps from './ResourceTableProps'
 import { PageParamsStore } from '../../ts/pageParams'
 import { createSingleSystemUrl } from '../../ts/url'
 
-@Component
-export default class SystemsTable extends BaseResourceTable {
+@Component({
+    components: {
+        BaseResourceTable
+    }
+})
+export default class SystemsTable extends ResourceTableProps {
     get tableHeaders() : any[] {
         return [
             {
@@ -36,6 +43,10 @@ export default class SystemsTable extends BaseResourceTable {
                 value: 'purpose',
             },
         ]
+    }
+
+    get tableItems(): any[] {
+        return this.resources.map(this.transformInputResourceToTableItem)
     }
 
     transformInputResourceToTableItem(inp : any) : any {
@@ -53,22 +64,10 @@ export default class SystemsTable extends BaseResourceTable {
     }
 
     goToSystem(item : any) {
-        if (this.selectable) {
-            this.manualToggleItem(item)
-        } else {
-            window.location.assign(createSingleSystemUrl(
-                PageParamsStore.state.organization!.OktaGroupName,
-                item.value.Id))
-        }
+        window.location.assign(createSingleSystemUrl(
+            PageParamsStore.state.organization!.OktaGroupName,
+            item.value.Id))
     }
 }
 
 </script>
-
-<style scoped>
-
->>>tr {
-    cursor: pointer !important;
-}
-
-</style>

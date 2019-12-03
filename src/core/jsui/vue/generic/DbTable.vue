@@ -1,28 +1,36 @@
 <template>
-    <v-data-table
+    <base-resource-table
         v-if="ready"
-        :value="selected"
-        :headers="tableHeaders"
-        :items="tableItems"
-        :show-select="selectable"
-        :single-select="!multi"
+        :resources="resources"
+        :value="value"
+        :selectable="selectable"
+        :multi="multi"
         :search="search"
-        @input="changeInput"
-        @click:row="goToDb">
-    </v-data-table>
+        :table-headers="tableHeaders"
+        :table-items="tableItems"
+        @input="$emit('input', ...arguments)"
+        @click:row="goToDb"
+    >
+    </base-resource-table>
 </template>
 
 <script lang="ts">
 
+import Vue from 'vue'
 import Component from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
+import ResourceTableProps from './ResourceTableProps'
 import { PageParamsStore } from '../../ts/pageParams'
 import { createSingleDbUrl } from '../../ts/url'
 import { getDbTypeAsString } from '../../ts/databases'
 import MetadataStore from '../../ts/metadata'
 
-@Component
-export default class SystemsTable extends BaseResourceTable {
+@Component({
+    components: {
+        BaseResourceTable
+    }
+})
+export default class SystemsTable extends ResourceTableProps {
     get ready() : boolean {
         return MetadataStore.state.dbTypesInitialized
     }
@@ -44,6 +52,10 @@ export default class SystemsTable extends BaseResourceTable {
         ]
     }
 
+    get tableItems(): any[] {
+        return this.resources.map(this.transformInputResourceToTableItem)
+    }
+
     transformInputResourceToTableItem(inp : any) : any {
         return {
             id: inp.Id,
@@ -59,22 +71,10 @@ export default class SystemsTable extends BaseResourceTable {
     }
 
     goToDb(item : any) {
-        if (this.selectable) {
-            this.manualToggleItem(item)
-        } else {
-            window.location.assign(createSingleDbUrl(
-                PageParamsStore.state.organization!.OktaGroupName,
-                item.value.Id))
-        }
+        window.location.assign(createSingleDbUrl(
+            PageParamsStore.state.organization!.OktaGroupName,
+            item.value.Id))
     }
 }
 
 </script>
-
-<style scoped>
-
->>>tr {
-    cursor: pointer !important;
-}
-
-</style>
