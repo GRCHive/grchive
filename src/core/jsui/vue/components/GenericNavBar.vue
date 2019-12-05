@@ -1,13 +1,15 @@
 <template>
     <v-navigation-drawer app clipped
         :mini-variant="mini"
+        :expand-on-hover="mini"
         mini-variant-width=50
         :width="width"
         permanent
+        ref="drawer"
     >
         <slot></slot>
         <v-list class="py-0">
-            <div v-for="(item, i) in navLinks" 
+            <div v-for="(item, i) in finalNavLinks" 
                  :key="i"
                  :style="!!item.hidden ? `display: none;` : ``"
             >
@@ -46,7 +48,6 @@ import GenericNavBarItem from './GenericNavBarItem.vue'
 export default Vue.extend({
     props : {
         mini : Boolean,
-        kelectedPage : Number,
         navLinks: Array,
         primaryColor: {
             type: String,
@@ -60,6 +61,46 @@ export default Vue.extend({
     components: {
         GenericNavBarItem
     },
+    data: () => ({
+        dispMini: false
+    }),
+    computed: {
+        finalNavLinks(): Array<any> {
+            if (!this.dispMini) {
+                return this.navLinks
+            } else {
+                let fullArray = new Array<any>()
+
+                let expandFn = (ele : any) => {
+                    if (!!ele.children && ele.children.length > 0) {
+                        let newParent = Object.assign({}, ele)
+                        newParent.children = []
+                        fullArray.push(newParent)
+                        ele.children.forEach(expandFn)
+                    } else {
+                        fullArray.push(ele)
+                    }
+                }
+
+                this.navLinks.forEach(expandFn)
+                return fullArray
+            }
+        },
+    },
+    mounted() {
+        this.$watch(
+            () => {
+                //@ts-ignore
+                return this.$refs.drawer.isMiniVariant
+            },
+            (v : boolean) => {
+                this.dispMini = v
+            }
+        )
+
+        //@ts-ignore
+        this.dispMini = this.$refs.drawer.isMiniVariant
+    }
 })
 
 </script>

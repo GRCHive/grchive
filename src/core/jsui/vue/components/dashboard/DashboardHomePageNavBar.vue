@@ -29,28 +29,41 @@ export default Vue.extend({
                     disabled : false
                 },
                 {
-                    title: 'Risks',
-                    icon: 'mdi-fire',
-                    url: PageParamsStore.state.organization!.Url + 'risks',
-                    disabled : false
-                },
-                {
-                    title: 'Controls',
-                    icon: 'mdi-shield-lock-outline',
-                    url: PageParamsStore.state.organization!.Url + 'controls',
-                    disabled : false
+                    title: 'Audit',
+                    icon: 'mdi-lock',
+                    disabled : false,
+                    children: [
+                        {
+                            title: 'Risks',
+                            icon: 'mdi-fire',
+                            url: PageParamsStore.state.organization!.Url + 'risks',
+                            disabled : false
+                        },
+                        {
+                            title: 'Controls',
+                            icon: 'mdi-shield-lock-outline',
+                            url: PageParamsStore.state.organization!.Url + 'controls',
+                            disabled : false
+                        },
+                        {
+                            title: 'Documentation',
+                            icon: 'mdi-file-document-outline',
+                            url: PageParamsStore.state.organization!.Url + 'documentation',
+                            disabled : false
+                        },
+                        {
+                            title: 'Requests',
+                            icon: 'mdi-key-outline',
+                            url: '#',
+                            disabled : true
+                        },
+                    ],
                 },
                 {
                     title: 'General Ledger',
                     icon: 'mdi-bank-outline',
                     url: PageParamsStore.state.organization!.Url + 'gl',
                     disabled : false
-                },
-                {
-                    title: 'Access Requests',
-                    icon: 'mdi-key-outline',
-                    url: '#',
-                    disabled : true
                 },
                 {
                     title: 'IT',
