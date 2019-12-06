@@ -22,7 +22,11 @@ const ResourceTableProps = Vue.extend({
         useCrudDelete: {
             type: Boolean,
             default: false
-        }
+        },
+        confirmDelete: {
+            type: Boolean,
+            default: false
+        },
     }
 })
 

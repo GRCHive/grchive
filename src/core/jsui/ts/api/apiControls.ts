@@ -105,3 +105,4 @@ export interface TSingleControlOutput {
 export function getSingleControl(inp : TSingleControlInput) : Promise<TSingleControlOutput> {
     return axios.get(createSingleControlAPIUrl(inp.controlId) + '?' + qs.stringify(inp), getAPIRequestConfig())
 }
+

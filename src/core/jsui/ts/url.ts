@@ -93,6 +93,10 @@ export function createOrgRoleUrl(org : string, role : number) : string {
     return `/dashboard/org/${org}/settings/roles/${role}`
 }
 
+export function createSingleDocCatUrl(org : string, id: number) : string {
+    return `/dashboard/org/${org}/documentation/cat/${id}`
+}
+
 export function createUserProfileEditAPIUrl(id : number) : string {
     return `/api/user/${id}/profile`
 }
@@ -153,14 +157,15 @@ export function createSingleControlAPIUrl(controlId : number) : string {
     return `/api/control/${controlId}`
 }
 
-export const newControlDocCatUrl : string = "/api/documentation/newcat"
-export const editControlDocCatUrl : string = "/api/documentation/editcat"
-export const deleteControlDocCatUrl : string = "/api/documentation/deletecat"
+export const newControlDocCatUrl : string = "/api/documentation/cat/new"
+export const editControlDocCatUrl : string = "/api/documentation/cat/edit"
+export const deleteControlDocCatUrl : string = "/api/documentation/cat/delete"
+export const allControlDocCatUrl : string = "/api/documentation/cat/all"
 
-export const uploadControlDocUrl : string = "/api/documentation/upload"
-export const getControlDocUrl : string = "/api/documentation/get"
-export const deleteControlDocUrl : string = "/api/documentation/delete"
-export const downloadControlDocUrl : string = "/api/documentation/download"
+export const uploadControlDocUrl : string = "/api/documentation/file/upload"
+export const getControlDocUrl : string = "/api/documentation/file/get"
+export const deleteControlDocUrl : string = "/api/documentation/file/delete"
+export const downloadControlDocUrl : string = "/api/documentation/file/download"
 
 export const requestVerificationEmailUrl : string = "/api/verification/resend"
 export const inviteUsersToOrgUrl: string = "/api/invite/send"

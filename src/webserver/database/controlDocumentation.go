@@ -14,8 +14,8 @@ func NewControlDocumentationCategory(cat *core.ControlDocumentationCategory, rol
 	tx := dbConn.MustBegin()
 
 	rows, err := tx.NamedQuery(`
-		INSERT INTO process_flow_control_documentation_categories (name, description, control_id)
-		VALUES (:name, :description, :control_id)
+		INSERT INTO process_flow_control_documentation_categories (name, description, org_id)
+		VALUES (:name, :description, :org_id)
 		RETURNING id
 	`, cat)
 	if err != nil {
@@ -44,7 +44,7 @@ func EditControlDocumentationCategory(cat *core.ControlDocumentationCategory, ro
 		SET name = :name, 
 			description = :description
 		WHERE id = :id
-			AND control_id = :control_id
+			AND org_id = :org_id
 	`, cat)
 	if err != nil {
 		tx.Rollback()
@@ -53,22 +53,7 @@ func EditControlDocumentationCategory(cat *core.ControlDocumentationCategory, ro
 	return tx.Commit()
 }
 
-func FindControlDocumentCategoriesForControl(controlId int64, role *core.Role) ([]*core.ControlDocumentationCategory, error) {
-	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
-		return nil, core.ErrorUnauthorized
-	}
-
-	retArr := make([]*core.ControlDocumentationCategory, 0)
-
-	err := dbConn.Select(&retArr, `
-		SELECT cat.*
-		FROM process_flow_control_documentation_categories AS cat
-		WHERE cat.control_id = $1
-	`, controlId)
-	return retArr, err
-}
-
-func DeleteControlDocumentationCategory(catId int64, role *core.Role) error {
+func DeleteControlDocumentationCategory(catId int64, orgId int32, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessManage) {
 		return core.ErrorUnauthorized
 	}
@@ -77,7 +62,8 @@ func DeleteControlDocumentationCategory(catId int64, role *core.Role) error {
 	_, err := tx.Exec(`
 		DELETE FROM process_flow_control_documentation_categories
 		WHERE id = $1
-	`, catId)
+			AND org_id = $2
+	`, catId, orgId)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -91,8 +77,8 @@ func CreateControlDocumentationFileWithTx(file *core.ControlDocumentationFile, t
 	}
 
 	rows, err := tx.NamedQuery(`
-		INSERT INTO process_flow_control_documentation_file (storage_name, relevant_time, upload_time, category_id)
-		VALUES (:storage_name, :relevant_time, :upload_time, :category_id)
+		INSERT INTO process_flow_control_documentation_file (storage_name, relevant_time, upload_time, category_id, org_id)
+		VALUES (:storage_name, :relevant_time, :upload_time, :category_id, :org_id)
 		RETURNING id
 	`, file)
 	if err != nil {
@@ -119,11 +105,13 @@ func UpdateControlDocumentation(file *core.ControlDocumentationFile, tx *sqlx.Tx
 		SET bucket_id = :bucket_id,
 			storage_id = :storage_id
 		WHERE id = :id
+			AND org_id = :org_id
+			AND category_id = :category_id
 	`, file)
 	return err
 }
 
-func DeleteBatchControlDocumentation(fileIds []int64, orgId int32, role *core.Role) error {
+func DeleteBatchControlDocumentation(fileIds []int64, catId int64, orgId int32, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessManage) {
 		return core.ErrorUnauthorized
 	}
@@ -137,8 +125,9 @@ func DeleteBatchControlDocumentation(fileIds []int64, orgId int32, role *core.Ro
 			INNER JOIN process_flow_controls AS ctrl
 				ON cat.control_id = ctrl.id
 			WHERE file.id = $1
-				AND ctrl.org_id = $2
-		`, id, orgId)
+				AND file.org_id = $2
+				AND file.category_id = $3
+		`, id, orgId, catId)
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -168,7 +157,7 @@ func GetControlDocumentation(fileId int64, orgId int32, role *core.Role) (*core.
 	return &retFile, err
 }
 
-func GetControlDocumentationForCategory(catId int64, pageSize int, pageOffset int, role *core.Role) ([]*core.ControlDocumentationFile, error) {
+func GetControlDocumentationForCategory(catId int64, orgId int32, pageSize int, pageOffset int, role *core.Role) ([]*core.ControlDocumentationFile, error) {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
@@ -179,17 +168,18 @@ func GetControlDocumentationForCategory(catId int64, pageSize int, pageOffset in
 		SELECT *
 		FROM process_flow_control_documentation_file
 		WHERE category_id = $1
+			AND org_id = $2
 			AND bucket_id IS NOT NULL
 			AND storage_id IS NOT NULL
 		ORDER BY relevant_time DESC
-		LIMIT $2
-		OFFSET $3
-	`, catId, pageSize, pageOffset)
+		LIMIT $3
+		OFFSET $4
+	`, catId, orgId, pageSize, pageOffset)
 
 	return retArr, err
 }
 
-func GetTotalControlDocumentationPages(catId int64, pageSize int, role *core.Role) (int, error) {
+func GetTotalControlDocumentationPages(catId int64, orgId int32, pageSize int, role *core.Role) (int, error) {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
 		return 0, core.ErrorUnauthorized
 	}
@@ -200,9 +190,24 @@ func GetTotalControlDocumentationPages(catId int64, pageSize int, role *core.Rol
 		SELECT COUNT(*)
 		FROM process_flow_control_documentation_file
 		WHERE category_id = $1
+			AND org_id = $2
 			AND bucket_id IS NOT NULL
 			AND storage_id IS NOT NULL
-	`, catId)
+	`, catId, orgId)
 
 	return int(math.Ceil(float64(count) / float64(pageSize))), err
+}
+
+func GetAllDocumentationCategoriesForOrg(orgId int32, role *core.Role) ([]*core.ControlDocumentationCategory, error) {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	cats := make([]*core.ControlDocumentationCategory, 0)
+	err := dbConn.Select(&cats, `
+		SELECT *
+		FROM process_flow_control_documentation_categories
+		WHERE org_id = $1
+	`, orgId)
+	return cats, err
 }

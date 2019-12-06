@@ -242,3 +242,11 @@ func RenderInfraSystems(w http.ResponseWriter, r *http.Request) {
 func RenderSingleInfra(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardSingleInfraTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
+
+func RenderDocumentation(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardDocumentationTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}
+
+func RenderSingleDocCat(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardSingleDocumentationTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}

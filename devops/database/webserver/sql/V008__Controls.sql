@@ -13,7 +13,8 @@ CREATE TABLE process_flow_controls (
     freq_type INTEGER NOT NULL,
     freq_interval INTEGER NOT NULL,
     owner_id BIGINT REFERENCES users(id) ON DELETE NO ACTION,
-    UNIQUE(name, org_id)
+    UNIQUE(name, org_id),
+    UNIQUE(id, org_id)
 );
 
 CREATE TABLE process_flow_control_node (

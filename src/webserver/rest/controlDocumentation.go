@@ -14,41 +14,50 @@ import (
 )
 
 type NewControlDocCatInputs struct {
-	ControlId   int64  `webcore:"controlId"`
 	Name        string `webcore:"name"`
 	Description string `webcore:"description"`
+	OrgId       int32  `webcore:"orgId"`
 }
 
 type EditControlDocCatInputs struct {
 	CatId       int64  `webcore:"catId"`
-	ControlId   int64  `webcore:"controlId"`
 	Name        string `webcore:"name"`
 	Description string `webcore:"description"`
+	OrgId       int32  `webcore:"orgId"`
 }
 
 type DeleteControlDocCatInputs struct {
 	CatId int64 `webcore:"catId"`
+	OrgId int32 `webcore:"orgId"`
 }
 
 type UploadControlDocInputs struct {
 	CatId        int64     `webcore:"catId"`
+	OrgId        int32     `webcore:"orgId"`
 	RelevantTime time.Time `webcore:"relevantTime"`
 }
 
 type GetControlDocInputs struct {
 	CatId     int64 `webcore:"catId"`
+	OrgId     int32 `webcore:"orgId"`
 	Page      int   `webcore:"page"`
 	NeedPages bool  `webcore:"needPages"`
 }
 
 type DeleteControlDocInputs struct {
-	FileIds      []int64 `webcore:"fileIds"`
-	OrgGroupName string  `webcore:"orgGroupName"`
+	CatId   int64   `webcore:"catId"`
+	OrgId   int32   `webcore:"orgId"`
+	FileIds []int64 `webcore:"fileIds"`
 }
 
 type DownloadControlDocInputs struct {
 	FileId int64 `webcore:"fileId"`
+	CatId  int64 `webcore:"catId"`
 	OrgId  int32 `webcore:"orgId"`
+}
+
+type AllControlDocCatInputs struct {
+	OrgId int32 `webcore:"orgId"`
 }
 
 func newControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +73,7 @@ func newControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := database.FindOrganizationFromControlId(inputs.ControlId, core.ServerRole)
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
 	if err != nil {
 		core.Warning("No organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -81,7 +90,7 @@ func newControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 	newCat := core.ControlDocumentationCategory{
 		Name:        inputs.Name,
 		Description: inputs.Description,
-		ControlId:   inputs.ControlId,
+		OrgId:       org.Id,
 	}
 
 	err = database.NewControlDocumentationCategory(&newCat, role)
@@ -111,7 +120,7 @@ func editControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := database.FindOrganizationFromControlId(inputs.ControlId, core.ServerRole)
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
 	if err != nil {
 		core.Warning("No organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -129,7 +138,7 @@ func editControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 		Id:          inputs.CatId,
 		Name:        inputs.Name,
 		Description: inputs.Description,
-		ControlId:   inputs.ControlId,
+		OrgId:       inputs.OrgId,
 	}
 
 	err = database.EditControlDocumentationCategory(&editCat, role)
@@ -159,7 +168,7 @@ func deleteControlDocumentationCategory(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	org, err := database.FindOrganizationFromDocCatId(inputs.CatId, core.ServerRole)
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
 	if err != nil {
 		core.Warning("No organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -173,7 +182,7 @@ func deleteControlDocumentationCategory(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = database.DeleteControlDocumentationCategory(inputs.CatId, role)
+	err = database.DeleteControlDocumentationCategory(inputs.CatId, org.Id, role)
 	if err != nil {
 		core.Warning("Failed to delete doc cat: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -212,7 +221,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := database.FindOrganizationFromDocCatId(inputs.CatId, core.ServerRole)
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
 	if err != nil {
 		core.Warning("Can't find organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -253,6 +262,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		RelevantTime: inputs.RelevantTime,
 		UploadTime:   time.Now().UTC(),
 		CategoryId:   inputs.CatId,
+		OrgId:        org.Id,
 	}
 
 	tx := database.CreateTx()
@@ -328,7 +338,7 @@ func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := database.FindOrganizationFromDocCatId(inputs.CatId, core.ServerRole)
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
 	if err != nil {
 		core.Warning("Can't find organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -354,7 +364,7 @@ func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	const controlDocPageSize int = 10
 	controlDocPageOffset := controlDocPageSize * inputs.Page
 
-	output.Files, err = database.GetControlDocumentationForCategory(inputs.CatId, controlDocPageSize, controlDocPageOffset, role)
+	output.Files, err = database.GetControlDocumentationForCategory(inputs.CatId, org.Id, controlDocPageSize, controlDocPageOffset, role)
 	if err != nil {
 		core.Warning("Can't get files: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -362,7 +372,7 @@ func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if inputs.NeedPages {
-		output.TotalPages, err = database.GetTotalControlDocumentationPages(inputs.CatId, controlDocPageSize, role)
+		output.TotalPages, err = database.GetTotalControlDocumentationPages(inputs.CatId, org.Id, controlDocPageSize, role)
 		if err != nil {
 			core.Warning("Can't total pages: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -385,7 +395,7 @@ func deleteControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := database.FindOrganizationFromGroupName(inputs.OrgGroupName)
+	org, err := database.FindOrganizationFromId(inputs.OrgId)
 	if err != nil {
 		core.Warning("Can't find organization: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -426,7 +436,7 @@ func deleteControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = database.DeleteBatchControlDocumentation(inputs.FileIds, org.Id, role)
+	err = database.DeleteBatchControlDocumentation(inputs.FileIds, inputs.CatId, org.Id, role)
 	if err != nil {
 		core.Warning("Can't delete database files: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -486,4 +496,33 @@ func downloadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(decryptedBytes)
+}
+
+func allControlDocumentationCategories(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := AllControlDocCatInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil || !role.Permissions.HasAccess(core.ResourceControlDocumentation, core.AccessView) {
+		core.Warning("Bad access: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	cats, err := database.GetAllDocumentationCategoriesForOrg(inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get all doc cats: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(cats)
 }

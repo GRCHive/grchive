@@ -9,7 +9,7 @@ type ControlDocumentationCategory struct {
 	Id          int64  `db:"id"`
 	Name        string `db:"name"`
 	Description string `db:"description"`
-	ControlId   int64  `db:"control_id"`
+	OrgId       int32  `db:"org_id"`
 }
 
 type ControlDocumentationFile struct {
@@ -20,6 +20,7 @@ type ControlDocumentationFile struct {
 	RelevantTime time.Time `db:"relevant_time"`
 	UploadTime   time.Time `db:"upload_time"`
 	CategoryId   int64     `db:"category_id"`
+	OrgId        int32     `db:"org_id"`
 }
 
 func (file ControlDocumentationFile) UniqueKey() string {
@@ -29,5 +30,5 @@ func (file ControlDocumentationFile) UniqueKey() string {
 }
 
 func (file ControlDocumentationFile) StorageFilename(org *Organization) string {
-	return org.OktaGroupName + "/" + file.UniqueKey()
+	return fmt.Sprintf("org-%d-%s/%s", org.Id, org.Name, file.UniqueKey())
 }

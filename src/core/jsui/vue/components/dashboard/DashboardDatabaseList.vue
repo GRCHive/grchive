@@ -14,8 +14,8 @@
                 ></v-text-field>
             </v-list-item-action>
 
-
             <v-spacer></v-spacer>
+
             <v-list-item-action>
                 <v-dialog v-model="showHideNew"
                           persistent

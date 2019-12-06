@@ -354,10 +354,9 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type FullControlData struct {
-		Control            *core.Control
-		Nodes              []*core.ProcessFlowNode
-		Risks              []*core.Risk
-		DocumentCategories []*core.ControlDocumentationCategory
+		Control *core.Control
+		Nodes   []*core.ProcessFlowNode
+		Risks   []*core.Risk
 	}
 	data := FullControlData{}
 	data.Control, err = webcore.GetControlFromRequestUrl(r, core.ServerRole)
@@ -393,14 +392,6 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 	data.Risks, err = database.FindRisksRelatedToControl(data.Control.Id, role)
 	if err != nil {
 		core.Warning("Failed to get risks data: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		jsonWriter.Encode(struct{}{})
-		return
-	}
-
-	data.DocumentCategories, err = database.FindControlDocumentCategoriesForControl(data.Control.Id, role)
-	if err != nil {
-		core.Warning("Failed to get document category data: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		jsonWriter.Encode(struct{}{})
 		return

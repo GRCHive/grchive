@@ -1,20 +1,36 @@
 <script lang="ts">
 
 import Vue, { VNode } from 'vue'
-import { VBtn, VIcon, VDataTable } from 'vuetify/lib'
+import { VBtn, VIcon, VDataTable, VDialog } from 'vuetify/lib'
 import Component, { mixins } from 'vue-class-component'
 import ResourceTableProps from './ResourceTableProps'
+import GenericDeleteConfirmationForm from '../components/dashboard/GenericDeleteConfirmationForm.vue'
 
 const TableProps = Vue.extend({
     props: {
         tableHeaders: Array,
         tableItems: Array,
+        resourceName: {
+            type: String,
+            default: "resources"
+        },
+
     }
 })
 
-@Component
+@Component({
+    components: {
+        GenericDeleteConfirmationForm
+    }
+})
 export default class BaseResourceTable extends mixins(ResourceTableProps, TableProps) {
     selected: any[] = []
+    itemToDelete: any | null = null
+
+    get showHideDelete() : boolean {
+        console.log("show hide" , !!this.itemToDelete)
+        return !!this.itemToDelete
+    }
 
     get selectedSet() : Set<any> {
         return new Set<any>(this.selected)
@@ -54,7 +70,12 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
     }
 
     deleteItem(e : MouseEvent, item : any) {
-        this.$emit('delete', item)
+        if (this.confirmDelete) {
+            console.log(item)
+            this.itemToDelete = item
+        } else {
+            this.$emit('delete', item)
+        }
         e.stopPropagation()
     }
 
@@ -91,7 +112,40 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
     }
 
     render() : VNode {
-        return this.$createElement(
+        let children : VNode[] = []
+        if (!!this.itemToDelete) {
+            children.push(this.$createElement(
+                VDialog,
+                {
+                    props: {
+                        persistent: true,
+                        "max-width": "40%",
+                        value: this.showHideDelete
+                    },
+                },
+                [
+                   this.$createElement( 
+                        GenericDeleteConfirmationForm,
+                        {
+                            props: {
+                                itemName: this.resourceName,
+                                itemsToDelete: [this.itemToDelete.name],
+                                useGlobalDeletion: false
+                            },
+                            on: {
+                                'do-cancel': () => { this.itemToDelete = null },
+                                'do-delete': () => {
+                                    this.$emit('delete', this.itemToDelete)
+                                    this.itemToDelete = null
+                                }
+                            }
+                        }
+                    )
+                ]
+            ))
+        }
+
+        children.push(this.$createElement(
             VDataTable,
             {
                 props: {
@@ -110,8 +164,10 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
                     ...this.$scopedSlots,
                     'item.action': this.renderActionSlot
                 }
-            }
-        )
+            },
+        ))
+
+        return this.$createElement('div', children)
     }
 }
 

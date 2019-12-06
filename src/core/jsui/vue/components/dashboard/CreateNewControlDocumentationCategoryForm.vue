@@ -5,10 +5,6 @@
         {{ editMode ? "Edit" : "New" }} Documentation Category
     </v-card-title>
 
-    <v-card-subtitle class="pl-3">
-        Control: {{ control.Name }}
-    </v-card-subtitle>
-
     <v-divider></v-divider>
 
     <v-form class="ma-4" ref="form" v-model="formValid">
@@ -53,12 +49,10 @@ import { contactUsUrl } from "../../../ts/url"
 import { newControlDocCat, TNewControlDocCatInput, TNewControlDocCatOutput } from '../../../ts/api/apiControlDocumentation'
 import { editControlDocCat, TEditControlDocCatInput, TEditControlDocCatOutput } from '../../../ts/api/apiControlDocumentation'
 import { ControlDocumentationCategory } from '../../../ts/controls'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     props : {
-        control: {
-            type: Object as () => ProcessFlowControl,
-        },
         editMode: {
             type: Boolean,
             default: false
@@ -133,9 +127,9 @@ export default Vue.extend({
         },
         doSave() {
             newControlDocCat(<TNewControlDocCatInput>{
-                controlId: this.control.Id,
                 name: this.name,
-                description: this.description
+                description: this.description,
+                orgId: PageParamsStore.state.organization!.Id,
             }).then((resp : TNewControlDocCatOutput) => {
                 this.onSuccess(resp.data)
             }).catch((err : any) => {
@@ -144,10 +138,10 @@ export default Vue.extend({
         },
         doEdit() {
             editControlDocCat(<TEditControlDocCatInput>{
-                controlId: this.control.Id,
                 catId: this.catId,
                 name: this.name,
-                description: this.description
+                description: this.description,
+                orgId: PageParamsStore.state.organization!.Id,
             }).then((resp : TEditControlDocCatOutput) => {
                 this.onSuccess(resp.data)
             }).catch((err : any) => {

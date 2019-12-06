@@ -8,14 +8,15 @@ import { newControlDocCatUrl,
          uploadControlDocUrl,
          getControlDocUrl,
          deleteControlDocUrl,
-         downloadControlDocUrl } from '../url'
+         downloadControlDocUrl,
+         allControlDocCatUrl } from '../url'
 import JSZip from 'jszip'
 import { getAPIRequestConfig } from './apiUtility'
 
 export interface TNewControlDocCatInput {
-    controlId: number
     name: string
     description: string
+    orgId: number
 }
 
 export interface TNewControlDocCatOutput {
@@ -42,6 +43,7 @@ export function editControlDocCat(inp : TEditControlDocCatInput): Promise<TEditC
 
 export interface TDeleteControlDocCatInput {
     catId: number
+    orgId: number
 }
 
 export interface TDeleteControlDocCatOutput {
@@ -54,6 +56,7 @@ export function deleteControlDocCat(inp : TDeleteControlDocCatInput): Promise<TD
 
 export interface TUploadControlDocOutput {
     data: ControlDocumentationFile
+    orgId: number
 }
 
 export function uploadControlDoc(inp : FormData): Promise<TUploadControlDocOutput> {
@@ -62,6 +65,7 @@ export function uploadControlDoc(inp : FormData): Promise<TUploadControlDocOutpu
 
 export interface TGetControlDocumentsInput {
     catId: number
+    orgId: number
     page: number
     needPages: boolean
 }
@@ -80,7 +84,7 @@ export function getControlDocuments(inp: TGetControlDocumentsInput) : Promise<TG
 
 export interface TDeleteControlDocumentsInput {
     fileIds: number[]
-    orgGroupName: string
+    orgId: number
 }
 
 export interface TDeleteControlDocumentsOutput {
@@ -125,4 +129,16 @@ export function downloadControlDocuments(inp: TDownloadControlDocumentsInput) : 
             resolve({ data: blob })
         })
     })
+}
+
+export interface TGetAllDocumentationCategoriesInput {
+    orgId: number
+}
+
+export interface TGetAllDocumentationCategoriesOutput {
+    data: ControlDocumentationCategory[]
+}
+
+export function getAllDocumentationCategories(inp : TGetAllDocumentationCategoriesInput) : Promise<TGetAllDocumentationCategoriesOutput> {
+    return axios.get(allControlDocCatUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
 }

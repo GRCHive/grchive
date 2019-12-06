@@ -35,6 +35,7 @@ const DashboardOrgGLAccQueryId string = "accId"
 const DashboardOrgSystemQueryId string = "sysId"
 const DashboardOrgDbQueryId string = "dbId"
 const DashboardOrgInfraQueryId string = "infraId"
+const DashboardOrgDocCatQueryId string = "docCatId"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 
@@ -43,10 +44,12 @@ const DashboardOrgHomeUrl string = "/"
 const DashboardOrgAllFlowsEndpoint string = "/flows"
 const DashboardOrgAllRiskEndpoint string = "/risks"
 const DashboardOrgAllControlsEndpoint string = "/controls"
+const DashboardOrgAllDocumentationEndpoint string = "/documentation"
 
 var DashboardOrgRiskEndpoint string = fmt.Sprintf("/risks/{%s}", DashboardOrgRiskQueryId)
 var DashboardOrgControlEndpoint string = fmt.Sprintf("/controls/{%s}", DashboardOrgControlQueryId)
 var DashboardOrgFlowEndpoint string = fmt.Sprintf("/flows/{%s}", DashboardOrgFlowQueryId)
+var DashboardOrgSingleDocCatEndpoint string = fmt.Sprintf("/documentation/cat/{%s}", DashboardOrgDocCatQueryId)
 
 // Dashboard - Organization - Settings
 const DashboardOrgSettingsPrefix string = "/settings"
@@ -155,13 +158,15 @@ var ApiGetSingleControlEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgContro
 
 // API - Control Documentation
 const ApiControlDocumentationPrefix string = "/documentation"
-const ApiNewControlDocumentationCategoryEndpoint string = "/newcat"
-const ApiEditControlDocumentationCategoryEndpoint string = "/editcat"
-const ApiDeleteControlDocumentationCategoryEndpoint string = "/deletecat"
-const ApiUploadControlDocumentationEndpoint string = "/upload"
-const ApiGetControlDocumentationEndpoint string = "/get"
-const ApiDeleteControlDocumentationEndpoint string = "/delete"
-const ApiDownloadControlDocumentationEndpoint string = "/download"
+const ApiNewControlDocumentationCategoryEndpoint string = "/cat/new"
+const ApiEditControlDocumentationCategoryEndpoint string = "/cat/edit"
+const ApiDeleteControlDocumentationCategoryEndpoint string = "/cat/delete"
+const ApiAllControlDocumentationCategoryEndpoint string = "/cat/all"
+
+const ApiUploadControlDocumentationEndpoint string = "/file/upload"
+const ApiGetControlDocumentationEndpoint string = "/file/get"
+const ApiDeleteControlDocumentationEndpoint string = "/file/delete"
+const ApiDownloadControlDocumentationEndpoint string = "/file/download"
 
 // API - Roles
 const ApiRolePrefix string = "/roles"
