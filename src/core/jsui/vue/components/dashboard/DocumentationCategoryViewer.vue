@@ -212,7 +212,8 @@ export default Vue.extend({
         deleteSelectedFiles() {
             deleteControlDocuments(<TDeleteControlDocumentsInput>{
                 orgId: PageParamsStore.state.organization!.Id,
-                fileIds: this.selectedFiles.map((ele) => ele.Id)
+                fileIds: this.selectedFiles.map((ele) => ele.Id),
+                catId: this.catId,
             }).then(() => {
                 let selectedFileSet = new Set(this.selectedFiles)
                 for (let i = this.files.length - 1; i >= 0; --i) {
@@ -237,10 +238,12 @@ export default Vue.extend({
             // ZIP them together before saving the final ZIP to disk.
             downloadControlDocuments(<TDownloadControlDocumentsInput>{
                 files: this.selectedFiles,
-                orgId: PageParamsStore.state.organization!.Id
+                orgId: PageParamsStore.state.organization!.Id,
+                catId: this.catId,
             }).then((resp : TDownloadControlDocumentsOutput) => {
                 saveAs(resp.data, "download.zip")
             }).catch((err : any) => {
+                console.log(err)
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
                     "Oops! Something went wrong. Try again.",

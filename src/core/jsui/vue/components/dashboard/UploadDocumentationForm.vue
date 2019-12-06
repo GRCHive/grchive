@@ -43,6 +43,7 @@ import Vue from 'vue'
 import { TUploadControlDocOutput, uploadControlDoc } from '../../../ts/api/apiControlDocumentation'
 import { contactUsUrl } from '../../../ts/url'
 import * as rules from '../../../ts/formRules'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     props : {
@@ -77,6 +78,7 @@ export default Vue.extend({
 
             let data = new FormData()
             data.set('catId', this.catId.toString())
+            data.set('orgId', PageParamsStore.state.organization!.Id.toString())
             data.set('file', this.file!)
             data.set('relevantTime', currentDate.toISOString())
 

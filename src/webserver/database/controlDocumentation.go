@@ -120,10 +120,6 @@ func DeleteBatchControlDocumentation(fileIds []int64, catId int64, orgId int32, 
 	for _, id := range fileIds {
 		_, err := tx.Exec(`
 			DELETE FROM process_flow_control_documentation_file AS file
-			INNER JOIN process_flow_control_documentation_categories AS cat
-				ON file.category_id = cat.id
-			INNER JOIN process_flow_controls AS ctrl
-				ON cat.control_id = ctrl.id
 			WHERE file.id = $1
 				AND file.org_id = $2
 				AND file.category_id = $3
@@ -148,10 +144,8 @@ func GetControlDocumentation(fileId int64, orgId int32, role *core.Role) (*core.
 		FROM process_flow_control_documentation_file AS file
 		INNER JOIN process_flow_control_documentation_categories AS cat
 			ON file.category_id = cat.id
-		INNER JOIN process_flow_controls AS ctrl
-			ON cat.control_id = ctrl.id
 		WHERE file.id = $1
-			AND ctrl.org_id = $2
+			AND file.org_id = $2
 	`, fileId, orgId)
 
 	return &retFile, err

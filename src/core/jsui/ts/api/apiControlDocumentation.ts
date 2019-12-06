@@ -57,7 +57,6 @@ export function deleteControlDocCat(inp : TDeleteControlDocCatInput): Promise<TD
 
 export interface TUploadControlDocOutput {
     data: ControlDocumentationFile
-    orgId: number
 }
 
 export function uploadControlDoc(inp : FormData): Promise<TUploadControlDocOutput> {
@@ -86,6 +85,7 @@ export function getControlDocuments(inp: TGetControlDocumentsInput) : Promise<TG
 export interface TDeleteControlDocumentsInput {
     fileIds: number[]
     orgId: number
+    catId: number
 }
 
 export interface TDeleteControlDocumentsOutput {
@@ -98,6 +98,7 @@ export function deleteControlDocuments(inp: TDeleteControlDocumentsInput) : Prom
 export interface TDownloadControlDocumentsInput {
     files: ControlDocumentationFile[]
     orgId: number
+    catId: number
 }
 
 export interface TDownloadControlDocumentsOutput {
@@ -111,7 +112,8 @@ export function downloadControlDocuments(inp: TDownloadControlDocumentsInput) : 
             try {
                 let blobData = await axios.get<Blob>(downloadControlDocUrl + '?' + qs.stringify({
                     fileId: file.Id,
-                    orgId: inp.orgId
+                    orgId: inp.orgId,
+                    catId: inp.catId,
                 }), {
                     ...getAPIRequestConfig(),
                     responseType: "blob"
