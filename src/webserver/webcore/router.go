@@ -64,6 +64,8 @@ const (
 	ControlTypesRouteName                           = "ControlTypes"
 	DeleteControlRouteName                          = "DeleteControl"
 	AddControlRouteName                             = "AddControl"
+	LinkDocCatControlRouteName                      = "LinkDocCatControl"
+	UnlinkDocCatControlRouteName                    = "UnlinkDocCatControl"
 	EditControlRouteName                            = "EditControl"
 	GetAllControlRouteName                          = "GetAllControl"
 	GetSingleControlRouteName                       = "GetSingleControl"

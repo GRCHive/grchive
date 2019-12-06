@@ -152,6 +152,8 @@ const ApiGetControlTypesEndpoint string = "/types"
 const ApiDeleteControlEndpoint string = "/delete"
 const ApiEditControlEndpoint string = "/edit"
 const ApiAddControlEndpoint string = "/add"
+const ApiLinkDocCatControlEndpoint string = "/linkCat"
+const ApiUnlinkDocCatControlEndpoint string = "/unlinkCat"
 const ApiGetAllControlEndpoint string = "/"
 
 var ApiGetSingleControlEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgControlQueryId)

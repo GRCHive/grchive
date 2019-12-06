@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 )
@@ -210,4 +211,56 @@ func FindControl(controlId int64, role *core.Role) (*core.Control, error) {
 		WHERE id = $1
 	`, controlId)
 	return &control, err
+}
+
+func getTableNameForControlDocCatIO(isInput bool) string {
+	var tableName string
+	if isInput {
+		tableName = "controls_input_documentation"
+	} else {
+		tableName = "controls_output_documentation"
+	}
+	return tableName
+}
+
+func AddControlDocCatToControl(controlId int64, catId int64, orgId int32, isInput bool, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceControls, core.AccessEdit) ||
+		!role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+	tableName := getTableNameForControlDocCatIO(isInput)
+
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(fmt.Sprintf(`
+		INSERT INTO %s (category_id, org_id, control_id)
+		VALUES ($1, $2, $3)
+	`, tableName), catId, orgId, controlId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func RemoveControlDocCatFromControl(controlId int64, catId int64, orgId int32, isInput bool, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceControls, core.AccessEdit) ||
+		!role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+	tableName := getTableNameForControlDocCatIO(isInput)
+
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(fmt.Sprintf(`
+		DELETE FROM %s
+		WHERE category_id = $1
+			AND org_id = $2
+			AND control_id = $3
+	`, tableName), catId, orgId, controlId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }

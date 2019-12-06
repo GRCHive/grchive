@@ -123,6 +123,41 @@ const metaDataStore: StoreOptions<MetadataStoreState> = {
             })
         }
     },
+    getters: {
+        getControlTypeName(state) : (a0 : number) => string {
+            if (!state.controlTypeInitialized) {
+                return () => {
+                    return "Loading..."
+                }
+            }
+
+            return (typeId: number) => {
+                if (!(typeId in state.idToControlTypes)) {
+                    return "Invalid Type"
+                }
+                return state.idToControlTypes[typeId].Name
+            }
+        },
+        getUser(state) : (a0 : number | null) => User | null {
+            if (!state.usersInitialized) {
+                return () => {
+                    return null
+                }
+            }
+
+            return (userId : number | null) => {
+                if (userId == null) {
+                    return null
+                }
+
+                if (!(userId in state.idToUsers)) {
+                    return null
+                }
+
+                return state.idToUsers[userId]
+            }
+        }
+    }
 }
 
 let store = new Vuex.Store<MetadataStoreState>(metaDataStore)

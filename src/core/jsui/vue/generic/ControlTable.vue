@@ -5,19 +5,34 @@ import Component from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
 import { PageParamsStore } from '../../ts/pageParams'
-import { createSingleDocCatUrl } from '../../ts/url'
+import MetadataStore from '../../ts/metadata'
+import { createFrequencyDisplayString } from '../../ts/frequency'
+import { createUserString } from '../../ts/users'
+import { createControlUrl } from '../../ts/url'
 
 @Component({
     components: {
         BaseResourceTable
     }
 })
-export default class DocumentationTable extends ResourceTableProps {
+export default class ControlTable extends ResourceTableProps {
     get tableHeaders() : any[] {
         return [
             {
-                text: 'Category',
-                value: 'category',
+                text: 'Control',
+                value: 'control',
+            },
+            {
+                text: 'Type',
+                value: 'type',
+            },
+            {
+                text: 'Owner',
+                value: 'owner',
+            },
+            {
+                text: 'Frequency',
+                value: 'frequency'
             },
         ]
     }
@@ -29,17 +44,22 @@ export default class DocumentationTable extends ResourceTableProps {
     transformInputResourceToTableItem(inp : any) : any {
         return {
             id: inp.Id,
-            category: `${inp.Name} ${inp.Description}`,
-            name: inp.Name,
+            control: `${inp.Name} ${inp.Descrption}`,
+            type: MetadataStore.getters.getControlTypeName(inp.ControlTypeId),
+            owner: createUserString(MetadataStore.getters.getUser(inp.OwnerId)),
+            frequency:createFrequencyDisplayString(inp.FrequencyType, inp.FrequencyInterval),
             value: inp
         }
     }
 
-    goToDocumentation(item : any) {
-        window.location.assign(createSingleDocCatUrl(PageParamsStore.state.organization!.OktaGroupName, item.value.Id))
+    goToControl(item : any) {
+        window.location.assign(createControlUrl(
+            PageParamsStore.state.organization!.OktaGroupName,
+            item.value.Id
+        ))
     }
 
-    renderCategory(props: any) : VNode { 
+    renderControl(props: any) : VNode { 
         return this.$createElement(
             'div',
             [
@@ -83,15 +103,15 @@ export default class DocumentationTable extends ResourceTableProps {
                     ...this.$props,
                     tableHeaders: this.tableHeaders,
                     tableItems: this.tableItems,
-                    resourceName: "documentation categories"
+                    resourceName: "controls"
                 },
                 on: {
                     input: (items : any[]) => this.$emit('input', items.map((ele : any) => ele.value)),
                     delete: (item : any) => this.$emit('delete', item.value),
-                    'click:row': this.goToDocumentation
+                    'click:row': this.goToControl
                 },
                 scopedSlots: {
-                    'item.category': this.renderCategory,
+                    'item.control': this.renderControl,
                 }
             }
         )
@@ -99,4 +119,3 @@ export default class DocumentationTable extends ResourceTableProps {
 }
 
 </script>
-

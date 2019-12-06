@@ -152,7 +152,11 @@ export interface TGetDocCatInput {
 }
 
 export interface TGetDocCatOutput {
-    data: ControlDocumentationCategory
+    data: {
+        Cat: ControlDocumentationCategory
+        InputFor: ProcessFlowControl[]
+        OutputFor: ProcessFlowControl[]
+    }
 }
 
 export function getDocumentCategory(inp : TGetDocCatInput) : Promise<TGetDocCatOutput> {

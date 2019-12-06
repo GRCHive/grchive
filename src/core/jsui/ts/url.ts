@@ -152,6 +152,8 @@ export const newControlUrl : string = "/api/control/new"
 export const deleteControlUrl : string = "/api/control/delete"
 export const addControlUrl : string = "/api/control/add"
 export const editControlUrl : string = "/api/control/edit"
+export const linkCatControlUrl : string = "/api/control/linkCat"
+export const unlinkCatControlUrl : string = "/api/control/unlinkCat"
 export const allControlAPIUrl : string = "/api/control/"
 export function createSingleControlAPIUrl(controlId : number) : string {
     return `/api/control/${controlId}`

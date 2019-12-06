@@ -558,5 +558,27 @@ func getControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonWriter.Encode(cat)
+	inputControls, err := database.GetControlsWithInputDocumentationCategory(inputs.CatId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get all input controls: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	outputControls, err := database.GetControlsWithOutputDocumentationCategory(inputs.CatId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get all output controls: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(struct {
+		Cat       *core.ControlDocumentationCategory
+		InputFor  []*core.Control
+		OutputFor []*core.Control
+	}{
+		Cat:       cat,
+		InputFor:  inputControls,
+		OutputFor: outputControls,
+	})
 }

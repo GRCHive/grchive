@@ -9,7 +9,8 @@ CREATE TABLE _base_link_controls_control_documentation (
     CONSTRAINT control_org_fkey
         FOREIGN KEY(control_id, org_id)
         REFERENCES process_flow_controls(id, org_id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+    UNIQUE(category_id, org_id, control_id)
 );
 
 CREATE TABLE controls_input_documentation () INHERITS (_base_link_controls_control_documentation);

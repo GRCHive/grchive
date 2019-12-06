@@ -114,6 +114,8 @@ func registerControlAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiGetControlTypesEndpoint, getControlTypes).Methods("GET").Name(webcore.ControlTypesRouteName)
 	s.HandleFunc(core.ApiDeleteControlEndpoint, deleteControls).Methods("POST").Name(webcore.DeleteControlRouteName)
 	s.HandleFunc(core.ApiAddControlEndpoint, addControls).Methods("POST").Name(webcore.AddControlRouteName)
+	s.HandleFunc(core.ApiLinkDocCatControlEndpoint, linkControlToDocumentCategory).Methods("POST").Name(webcore.LinkDocCatControlRouteName)
+	s.HandleFunc(core.ApiUnlinkDocCatControlEndpoint, unlinkControlToDocumentCategory).Methods("POST").Name(webcore.UnlinkDocCatControlRouteName)
 	s.HandleFunc(core.ApiEditControlEndpoint, editControl).Methods("POST").Name(webcore.EditControlRouteName)
 	s.HandleFunc(core.ApiGetAllControlEndpoint, getAllControls).Methods("GET").Name(webcore.GetAllControlRouteName)
 	s.HandleFunc(core.ApiGetSingleControlEndpoint, getSingleControl).Methods("GET").Name(webcore.GetSingleControlRouteName)

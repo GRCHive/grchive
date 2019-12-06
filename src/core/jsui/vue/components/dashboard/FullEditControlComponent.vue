@@ -39,11 +39,70 @@
                         <v-card class="mb-4">
                             <v-card-title>
                                 <span class="mr-2">
-                                    Documentation
+                                    Input Documentation
                                 </span>
                                 <v-spacer></v-spacer>
+
+                                <v-dialog persistent
+                                          max-width="40%"
+                                          v-model="showHideAddInputDocCat">
+                                    <template v-slot:activator="{ on }">
+                                        <v-btn color="primary" icon v-on="on">
+                                            <v-icon>mdi-plus</v-icon>
+                                        </v-btn>
+                                    </template>
+                                    
+                                    <add-document-category-to-control-form
+                                        :is-input="true"
+                                        @do-cancel="showHideAddInputDocCat = false"
+                                        @do-save="addInputCat"
+                                        :fixed-control="fullControlData.Control"
+                                        :cat-choices="availableDocCats"
+                                    ></add-document-category-to-control-form>
+                                </v-dialog>
                             </v-card-title>
                             <v-divider></v-divider>
+
+                            <documentation-table
+                                :resources="fullControlData.InputDocCats"
+                                use-crud-delete
+                                @delete="deleteInputCat"
+                            ></documentation-table>
+                        </v-card>
+
+                        <v-card class="mb-4">
+                            <v-card-title>
+                                <span class="mr-2">
+                                    Output Documentation
+                                </span>
+                                <v-spacer></v-spacer>
+
+                                <v-dialog persistent
+                                          max-width="40%"
+                                          v-model="showHideAddOutputDocCat">
+                                    <template v-slot:activator="{ on }">
+                                        <v-btn color="primary" icon v-on="on">
+                                            <v-icon>mdi-plus</v-icon>
+                                        </v-btn>
+                                    </template>
+                                    
+                                    <add-document-category-to-control-form
+                                        :is-input="true"
+                                        @do-cancel="showHideAddOutputDocCat = false"
+                                        @do-save="addOutputCat"
+                                        :fixed-control="fullControlData.Control"
+                                        :cat-choices="availableDocCats"
+                                    ></add-document-category-to-control-form>
+                                </v-dialog>
+
+                            </v-card-title>
+                            <v-divider></v-divider>
+
+                            <documentation-table
+                                :resources="fullControlData.OutputDocCats"
+                                use-crud-delete
+                                @delete="deleteOutputCat"
+                            ></documentation-table>
                         </v-card>
 
                         <v-card class="mb-4">
@@ -92,7 +151,6 @@
                                 </v-list-item>
                             </v-list>
                         </v-card>
-
                     </v-col>
                 </v-row>
             </v-container>
@@ -107,20 +165,36 @@ import CreateNewControlForm from './CreateNewControlForm.vue'
 import { FullControlData } from '../../../ts/controls'
 import { getSingleControl, TSingleControlInput, TSingleControlOutput } from '../../../ts/api/apiControls'
 import { createRiskUrl, contactUsUrl } from '../../../ts/url'
-import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
-import { deleteControlDocCat, TDeleteControlDocCatInput, TDeleteControlDocCatOutput } from '../../../ts/api/apiControlDocumentation'
 import { PageParamsStore } from '../../../ts/pageParams'
+import DocumentationTable from '../../generic/DocumentationTable.vue'
+import { ControlDocumentationCategory } from '../../../ts/controls'
+import { linkControlToDocumentCategory, unlinkControlFromDocumentCategory } from '../../../ts/api/apiControls'
+import { getAllDocumentationCategories, TGetAllDocumentationCategoriesOutput } from '../../../ts/api/apiControlDocumentation'
+import AddDocumentCategoryToControlForm from '../../generic/AddDocumentCategoryToControlForm.vue'
 
 export default Vue.extend({
     data: () => ({
         expandDescription: false,
-        ready: false,
-        fullControlData: Object() as FullControlData,
+        fullControlData: null as FullControlData | null,
         showHideNewCat: false,
         showHideEditCat : false,
         showHideDeleteCat : false,
+        showHideAddInputDocCat: false,
+        showHideAddOutputDocCat: false,
+        availableDocCats: null as ControlDocumentationCategory[] | null
     }),
     computed: {
+        ready() : boolean {
+            return (this.fullControlData != null && this.availableDocCats != null)
+        }
+    },
+    watch: {
+        ready() {
+            Vue.nextTick(() => {
+                //@ts-ignore
+                this.$refs.editControl.clearForm()
+            })
+        }
     },
     methods: {
         refreshData() {
@@ -128,26 +202,41 @@ export default Vue.extend({
             let controlId = Number(data[data.length - 1])
 
             getSingleControl(<TSingleControlInput>{
-                controlId: controlId
+                controlId: controlId,
+                orgId: PageParamsStore.state.organization!.Id,
             }).then((resp : TSingleControlOutput) => {
                 this.fullControlData = resp.data
-                this.ready = true
-
-                Vue.nextTick(() => {
-                    //@ts-ignore
-                    this.$refs.editControl.clearForm()
-                })
             }).catch((err : any) => {
-                window.location.replace('/404')
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+
+            getAllDocumentationCategories({
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TGetAllDocumentationCategoriesOutput) => {
+                this.availableDocCats = resp.data
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
             })
         },
         onEditControl(control : ProcessFlowControl) {
-            this.fullControlData.Control.Name = control.Name
-            this.fullControlData.Control.Description = control.Description
-            this.fullControlData.Control.ControlTypeId = control.ControlTypeId
-            this.fullControlData.Control.FrequencyType = control.FrequencyType
-            this.fullControlData.Control.FrequencyInterval = control.FrequencyInterval
-            this.fullControlData.Control.OwnerId = control.OwnerId
+            this.fullControlData!.Control.Name = control.Name
+            this.fullControlData!.Control.Description = control.Description
+            this.fullControlData!.Control.ControlTypeId = control.ControlTypeId
+            this.fullControlData!.Control.FrequencyType = control.FrequencyType
+            this.fullControlData!.Control.FrequencyInterval = control.FrequencyInterval
+            this.fullControlData!.Control.OwnerId = control.OwnerId
 
             Vue.nextTick(() => {
                 //@ts-ignore
@@ -159,10 +248,73 @@ export default Vue.extend({
                 PageParamsStore.state.organization!.OktaGroupName,
                 riskId)
         },
+
+        addIoCat(cat : ControlDocumentationCategory, control : ProcessFlowControl, isInput: boolean) {
+            linkControlToDocumentCategory({
+                controlId: control.Id,
+                orgId: PageParamsStore.state.organization!.Id,
+                catId: cat.Id,
+                isInput: isInput
+            }).then(() => {
+                this.showHideAddInputDocCat = false
+                this.showHideAddOutputDocCat = false
+                if (isInput) {
+                    this.fullControlData!.InputDocCats.push(cat)
+                } else {
+                    this.fullControlData!.OutputDocCats.push(cat)
+                }
+            }).catch((err: any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
+        addInputCat(cat : ControlDocumentationCategory, control : ProcessFlowControl) {
+            this.addIoCat(cat, control, true)
+        },
+        addOutputCat(cat : ControlDocumentationCategory, control : ProcessFlowControl) {
+            this.addIoCat(cat, control, false)
+        },
+
+        deleteIoCat(cat : ControlDocumentationCategory, control : ProcessFlowControl, isInput: boolean) {
+            unlinkControlFromDocumentCategory({
+                controlId: control.Id,
+                orgId: PageParamsStore.state.organization!.Id,
+                catId: cat.Id,
+                isInput: isInput
+            }).then(() => {
+                if (isInput) {
+                    this.fullControlData!.InputDocCats = this.fullControlData!.InputDocCats.filter((ele : ControlDocumentationCategory) =>
+                        ele.Id != cat.Id)
+                } else {
+                    this.fullControlData!.OutputDocCats = this.fullControlData!.OutputDocCats.filter((ele : ControlDocumentationCategory) =>
+                        ele.Id != cat.Id)
+                }
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
+        deleteInputCat(cat : ControlDocumentationCategory) {
+            this.deleteIoCat(cat, this.fullControlData!.Control, true)
+        },
+        deleteOutputCat(cat : ControlDocumentationCategory) {
+            this.deleteIoCat(cat, this.fullControlData!.Control, false)
+        },
     },
     components: {
         CreateNewControlForm,
-        GenericDeleteConfirmationForm,
+        DocumentationTable,
+        AddDocumentCategoryToControlForm
     },
     mounted() {
         this.refreshData()

@@ -50,6 +50,17 @@ type AddControlInputs struct {
 	ControlIds []int64 `webcore:"controlIds"`
 }
 
+type GetSingleControlInputs struct {
+	OrgId int32 `webcore:"orgId"`
+}
+
+type LinkControlToDocCatInputs struct {
+	ControlId int64 `json:"controlId"`
+	OrgId     int32 `json:"orgId"`
+	CatId     int64 `json:"catId"`
+	IsInput   bool  `json:"isInput"`
+}
+
 func editControl(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -353,28 +364,30 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
+	inputs := GetSingleControlInputs{}
+	err = webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	type FullControlData struct {
-		Control *core.Control
-		Nodes   []*core.ProcessFlowNode
-		Risks   []*core.Risk
+		Control       *core.Control
+		Nodes         []*core.ProcessFlowNode
+		Risks         []*core.Risk
+		InputDocCats  []*core.ControlDocumentationCategory
+		OutputDocCats []*core.ControlDocumentationCategory
 	}
 	data := FullControlData{}
 	data.Control, err = webcore.GetControlFromRequestUrl(r, core.ServerRole)
 	if err != nil {
 		core.Warning("No control data: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
-		jsonWriter.Encode(struct{}{})
 		return
 	}
 
-	org, err := database.FindOrganizationFromControlId(data.Control.Id, core.ServerRole)
-	if err != nil {
-		core.Warning("No organization: " + err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
 	if err != nil {
 		core.Warning("Bad access: " + err.Error())
 		w.WriteHeader(http.StatusUnauthorized)
@@ -385,7 +398,6 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		core.Warning("Failed to get nodes data: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
-		jsonWriter.Encode(struct{}{})
 		return
 	}
 
@@ -393,9 +405,70 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		core.Warning("Failed to get risks data: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
-		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	data.InputDocCats, err = database.GetInputDocumentationCategoriesForControl(data.Control.Id, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get input doc cats: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	data.OutputDocCats, err = database.GetOutputDocumentationCategoriesForControl(data.Control.Id, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get output doc cats: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	jsonWriter.Encode(data)
+}
+
+func linkControlToDocumentCategory(w http.ResponseWriter, r *http.Request) {
+	inputs := LinkControlToDocCatInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.AddControlDocCatToControl(inputs.ControlId, inputs.CatId, inputs.OrgId, inputs.IsInput, role)
+	if err != nil {
+		core.Warning("Failed to add doc cat/control relationship: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func unlinkControlToDocumentCategory(w http.ResponseWriter, r *http.Request) {
+	inputs := LinkControlToDocCatInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.RemoveControlDocCatFromControl(inputs.ControlId, inputs.CatId, inputs.OrgId, inputs.IsInput, role)
+	if err != nil {
+		core.Warning("Failed to remove doc cat/control relationship: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
