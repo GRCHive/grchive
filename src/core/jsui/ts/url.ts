@@ -161,6 +161,7 @@ export const newControlDocCatUrl : string = "/api/documentation/cat/new"
 export const editControlDocCatUrl : string = "/api/documentation/cat/edit"
 export const deleteControlDocCatUrl : string = "/api/documentation/cat/delete"
 export const allControlDocCatUrl : string = "/api/documentation/cat/all"
+export const getControlDocCatUrl : string = "/api/documentation/cat/get"
 
 export const uploadControlDocUrl : string = "/api/documentation/file/upload"
 export const getControlDocUrl : string = "/api/documentation/file/get"

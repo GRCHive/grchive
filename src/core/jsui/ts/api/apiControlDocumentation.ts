@@ -9,7 +9,8 @@ import { newControlDocCatUrl,
          getControlDocUrl,
          deleteControlDocUrl,
          downloadControlDocUrl,
-         allControlDocCatUrl } from '../url'
+         allControlDocCatUrl,
+         getControlDocCatUrl } from '../url'
 import JSZip from 'jszip'
 import { getAPIRequestConfig } from './apiUtility'
 
@@ -141,4 +142,17 @@ export interface TGetAllDocumentationCategoriesOutput {
 
 export function getAllDocumentationCategories(inp : TGetAllDocumentationCategoriesInput) : Promise<TGetAllDocumentationCategoriesOutput> {
     return axios.get(allControlDocCatUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+}
+
+export interface TGetDocCatInput {
+    orgId: number
+    catId: number
+}
+
+export interface TGetDocCatOutput {
+    data: ControlDocumentationCategory
+}
+
+export function getDocumentCategory(inp : TGetDocCatInput) : Promise<TGetDocCatOutput> {
+    return axios.get(getControlDocCatUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
 }

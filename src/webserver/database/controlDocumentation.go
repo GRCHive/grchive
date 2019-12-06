@@ -211,3 +211,18 @@ func GetAllDocumentationCategoriesForOrg(orgId int32, role *core.Role) ([]*core.
 	`, orgId)
 	return cats, err
 }
+
+func GetDocumentationCategory(catId int64, orgId int32, role *core.Role) (*core.ControlDocumentationCategory, error) {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	cat := &core.ControlDocumentationCategory{}
+	err := dbConn.Get(cat, `
+		SELECT *
+		FROM process_flow_control_documentation_categories
+		WHERE id = $1
+			AND org_id = $2
+	`, catId, orgId)
+	return cat, err
+}

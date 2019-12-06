@@ -60,6 +60,11 @@ type AllControlDocCatInputs struct {
 	OrgId int32 `webcore:"orgId"`
 }
 
+type GetControlDocCatInputs struct {
+	OrgId int32 `webcore:"orgId"`
+	CatId int64 `webcore:"catId"`
+}
+
 func newControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -525,4 +530,33 @@ func allControlDocumentationCategories(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(cats)
+}
+
+func getControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := GetControlDocCatInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil || !role.Permissions.HasAccess(core.ResourceControlDocumentation, core.AccessView) {
+		core.Warning("Bad access: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	cat, err := database.GetDocumentationCategory(inputs.CatId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get doc cat: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(cat)
 }

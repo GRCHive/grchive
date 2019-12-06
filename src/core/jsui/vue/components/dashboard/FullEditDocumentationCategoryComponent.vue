@@ -24,6 +24,22 @@
             <v-divider></v-divider>
 
             <v-container fluid>
+                <v-row>
+                    <v-col cols="4">
+                        <create-new-control-documentation-category-form
+                            edit-mode
+                            :default-name="currentCat.Name"
+                            :default-description="currentCat.Description"
+                            :cat-id="currentCat.Id"
+                            ref="editForm"
+                        ></create-new-control-documentation-category-form>
+                    </v-col>
+
+                    <v-col cols="8">
+                        <documentation-category-viewer :cat-id="currentCat.Id">
+                        </documentation-category-viewer>
+                    </v-col>
+                </v-row>
             </v-container>
         </div>
     </div>
@@ -34,12 +50,50 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { ControlDocumentationCategory } from '../../../ts/controls'
+import { TGetDocCatOutput, getDocumentCategory } from '../../../ts/api/apiControlDocumentation'
+import { contactUsUrl } from '../../../ts/url'
+import { PageParamsStore } from '../../../ts/pageParams'
+import DocumentationCategoryViewer from './DocumentationCategoryViewer.vue'
+import CreateNewControlDocumentationCategoryForm from './CreateNewControlDocumentationCategoryForm.vue'
 
-@Component
+@Component({
+    components: {
+        DocumentationCategoryViewer,
+        CreateNewControlDocumentationCategoryForm
+    }
+})
 export default class FullEditDocumentationCategoryComponent extends Vue {
     ready: boolean = false
     expandDescription : boolean = false
     currentCat : ControlDocumentationCategory | null = null
+
+    $refs!: {
+        editForm : CreateNewControlDocumentationCategoryForm
+    }
+    
+    mounted() {
+        let data = window.location.pathname.split('/')
+        let resourceId = Number(data[data.length - 1])
+
+        getDocumentCategory({
+            orgId: PageParamsStore.state.organization!.Id,
+            catId: resourceId,
+        }).then((resp : TGetDocCatOutput) => {
+            this.currentCat = resp.data
+            this.ready = true
+            Vue.nextTick(() => {
+                this.$refs.editForm.clearForm()
+            })
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
 }
 
 </script>

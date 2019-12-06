@@ -179,6 +179,7 @@ export default Vue.extend({
         refreshData(page : number, needPages : boolean) {
             getControlDocuments(<TGetControlDocumentsInput>{
                 catId: this.catId,
+                orgId: PageParamsStore.state.organization!.Id,
                 page: page,
                 needPages: needPages,
             }).then((resp : TGetControlDocumentsOutput) => {
@@ -210,7 +211,7 @@ export default Vue.extend({
         },
         deleteSelectedFiles() {
             deleteControlDocuments(<TDeleteControlDocumentsInput>{
-                orgGroupName: PageParamsStore.state.organization!.OktaGroupName,
+                orgId: PageParamsStore.state.organization!.Id,
                 fileIds: this.selectedFiles.map((ele) => ele.Id)
             }).then(() => {
                 let selectedFileSet = new Set(this.selectedFiles)

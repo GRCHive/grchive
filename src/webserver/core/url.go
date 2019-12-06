@@ -162,6 +162,7 @@ const ApiNewControlDocumentationCategoryEndpoint string = "/cat/new"
 const ApiEditControlDocumentationCategoryEndpoint string = "/cat/edit"
 const ApiDeleteControlDocumentationCategoryEndpoint string = "/cat/delete"
 const ApiAllControlDocumentationCategoryEndpoint string = "/cat/all"
+const ApiGetControlDocumentationCategoryEndpoint string = "/cat/get"
 
 const ApiUploadControlDocumentationEndpoint string = "/file/upload"
 const ApiGetControlDocumentationEndpoint string = "/file/get"

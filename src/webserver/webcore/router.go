@@ -67,6 +67,7 @@ const (
 	EditControlRouteName                            = "EditControl"
 	GetAllControlRouteName                          = "GetAllControl"
 	GetSingleControlRouteName                       = "GetSingleControl"
+	GetControlDocCatRouteName                       = "GetControlDocCat"
 	AllControlDocCatRouteName                       = "AllControlDocCat"
 	NewControlDocCatRouteName                       = "NewControlDocCat"
 	EditControlDocCatRouteName                      = "EditControlDocCat"
