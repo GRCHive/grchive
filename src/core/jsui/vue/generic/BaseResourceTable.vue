@@ -14,7 +14,10 @@ const TableProps = Vue.extend({
             type: String,
             default: "resources"
         },
-
+        showExpand: {
+            type: Boolean,
+            default: false,
+        },
     }
 })
 
@@ -49,6 +52,13 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
                 value: 'action',
                 sortable: false,
                 filterable: false
+            })
+        }
+
+        if (this.showExpand) {
+            headers.push({
+                text: '',
+                value: 'data-table-expand'
             })
         }
 
@@ -154,7 +164,8 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
                     items: this.tableItems,
                     showSelect: this.selectable,
                     singleSelect: this.multi,
-                    search: this.search
+                    search: this.search,
+                    showExpand: this.showExpand,
                 },
                 on: {
                     input: this.changeInput,

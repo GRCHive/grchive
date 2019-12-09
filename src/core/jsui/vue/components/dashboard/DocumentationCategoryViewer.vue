@@ -1,74 +1,11 @@
 <template>
     <div>
-        <v-list-item>
-            <v-list-item-action class="ma-1 hidden">
-                <v-checkbox>
-                </v-checkbox>
-            </v-list-item-action>
-
-            <v-list-item-content>
-                <v-list-item-title class="font-weight-bold">
-                    Filename
-                </v-list-item-title>
-            </v-list-item-content>
-
-            <v-list-item-content>
-                <v-list-item-title class="font-weight-bold">
-                    Relevant Date
-                </v-list-item-title>
-            </v-list-item-content>
-
-            <v-list-item-content>
-                <v-list-item-title class="font-weight-bold">
-                    Upload Date
-                </v-list-item-title>
-            </v-list-item-content>
-        </v-list-item>
-        <v-divider></v-divider>
-
-        <v-list>
-            <v-list-item-group multiple v-model="selectedFiles">
-                <v-list-item v-for="(item, index) in files"
-                             :key="index"
-                             :value="item"
-                >
-                    <template v-slot:default="{active, toggle}">
-                        <v-list-item-action class="ma-1">
-                            <v-checkbox :input-value="active"
-                                        @true-value="item"
-                                        @click="toggle">
-                            </v-checkbox>
-                        </v-list-item-action>
-
-                        <v-list-item-content>
-                            <v-list-item-title>
-                                {{index+1}}.&nbsp;{{ item.StorageName }}
-                            </v-list-item-title>
-                        </v-list-item-content>
-
-                        <v-list-item-content>
-                            <v-list-item-title>
-                                {{ item.RelevantTime.toDateString() }}
-                            </v-list-item-title>
-                        </v-list-item-content>
-
-                        <v-list-item-content>
-                            <v-list-item-title>
-                                {{ item.UploadTime.toDateString() }}
-                            </v-list-item-title>
-                        </v-list-item-content>
-                    </template>
-                </v-list-item>
-            </v-list-item-group>
-        </v-list>
-
-        <div class="text-center">
-            <v-pagination
-                :value="pageNumOneIndex"
-                :length="totalPages"
-                @input="changePage"
-            ></v-pagination>
-        </div>
+        <doc-file-table
+            :resources="files"
+            :selectable="true"
+            :multi="true"
+            v-model="selectedFiles"
+        ></doc-file-table>
 
         <v-divider></v-divider>
         <v-list-item>
@@ -130,6 +67,7 @@ import { TDownloadControlDocumentsInput, TDownloadControlDocumentsOutput, downlo
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import { saveAs } from 'file-saver'
 import { PageParamsStore } from '../../../ts/pageParams'
+import DocFileTable from '../../generic/DocFileTable.vue'
 
 export default Vue.extend({
     props : {
@@ -145,7 +83,8 @@ export default Vue.extend({
     }),
     components : {
         UploadDocumentationForm,
-        GenericDeleteConfirmationForm
+        GenericDeleteConfirmationForm,
+        DocFileTable
     },
     computed : {
         hasSelected() : boolean {

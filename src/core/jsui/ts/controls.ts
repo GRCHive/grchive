@@ -10,6 +10,9 @@ export interface ControlDocumentationFile {
     RelevantTime: Date
     UploadTime: Date
     CategoryId: number
+    AltName: string
+    Description: string
+    UploadUserId: number
 }
 
 export interface FullControlData {
