@@ -21,6 +21,9 @@ type ControlDocumentationFile struct {
 	UploadTime   time.Time `db:"upload_time"`
 	CategoryId   int64     `db:"category_id"`
 	OrgId        int32     `db:"org_id"`
+	AltName      string    `db:"alt_name"`
+	Description  string    `db:"description"`
+	UploadUserId int64     `db:"upload_user_id"`
 }
 
 func (file ControlDocumentationFile) UniqueKey() string {

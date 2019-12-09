@@ -78,8 +78,26 @@ func CreateControlDocumentationFileWithTx(file *core.ControlDocumentationFile, t
 	}
 
 	rows, err := tx.NamedQuery(`
-		INSERT INTO process_flow_control_documentation_file (storage_name, relevant_time, upload_time, category_id, org_id)
-		VALUES (:storage_name, :relevant_time, :upload_time, :category_id, :org_id)
+		INSERT INTO process_flow_control_documentation_file (
+			storage_name,
+			relevant_time,
+			upload_time,
+			category_id,
+			org_id,
+			upload_user_id,
+			alt_name,
+			description
+		)
+		VALUES (
+			:storage_name,
+			:relevant_time,
+			:upload_time,
+			:category_id,
+			:org_id,
+			:upload_user_id,
+			:alt_name,
+			:description
+		)
 		RETURNING id
 	`, file)
 	if err != nil {
@@ -104,7 +122,11 @@ func UpdateControlDocumentation(file *core.ControlDocumentationFile, tx *sqlx.Tx
 	_, err := tx.NamedExec(`
 		UPDATE process_flow_control_documentation_file
 		SET bucket_id = :bucket_id,
-			storage_id = :storage_id
+			storage_id = :storage_id,
+			alt_name = :alt_name,
+			description = :description,
+			upload_user_id = :upload_user_id,
+			relevant_time = :relevant_time
 		WHERE id = :id
 			AND org_id = :org_id
 			AND category_id = :category_id

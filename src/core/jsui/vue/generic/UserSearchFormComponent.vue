@@ -11,6 +11,7 @@
         :value="user"
         @change="changeUser"
         :disabled="disabled"
+        :value-comparator="compare"
     ></v-autocomplete>
 </template>
 
@@ -49,6 +50,9 @@ export default Vue.extend({
     methods: {
         changeUser(val : User) {
             this.$emit('update:user', val)
+        },
+        compare(a : User, b : User) : boolean {
+            return a.Id == b.Id
         }
     },
 })

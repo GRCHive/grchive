@@ -23,6 +23,22 @@
                 </v-date-picker>
             </v-menu>
             <v-file-input label="Documentation" v-model="file" :rules="[rules.required]"></v-file-input>
+
+            <v-text-field v-model="altName"
+                          label="Name"
+                          filled
+                          :rules="[rules.required, rules.createMaxLength(256)]"
+            ></v-text-field>
+
+            <v-textarea v-model="description"
+                        label="Description"
+                        filled
+            ></v-textarea> 
+
+            <user-search-form-component
+                label="File Owner"
+                v-bind:user.sync="uploadUser"
+            ></user-search-form-component>
         </v-form>
 
         <v-card-actions>
@@ -44,10 +60,14 @@ import { TUploadControlDocOutput, uploadControlDoc } from '../../../ts/api/apiCo
 import { contactUsUrl } from '../../../ts/url'
 import * as rules from '../../../ts/formRules'
 import { PageParamsStore } from '../../../ts/pageParams'
+import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 
 export default Vue.extend({
     props : {
         catId: Number
+    },
+    components: {
+        UserSearchFormComponent
     },
     data : () => ({
         dateMenu: false,
@@ -55,7 +75,10 @@ export default Vue.extend({
         file: null as File | null,
         rules,
         formValid: false,
-        progressOverlay: false
+        progressOverlay: false,
+        altName: "",
+        description: "",
+        uploadUser: {} as User
     }),
     computed : {
         canSubmit() : boolean {
@@ -76,13 +99,15 @@ export default Vue.extend({
             let currentDate : Date = new Date(this.dateString)
             currentDate = new Date(currentDate.getTime() + currentDate.getTimezoneOffset() * 60000)
 
-            let data = new FormData()
-            data.set('catId', this.catId.toString())
-            data.set('orgId', PageParamsStore.state.organization!.Id.toString())
-            data.set('file', this.file!)
-            data.set('relevantTime', currentDate.toISOString())
-
-            uploadControlDoc(data).then((resp : TUploadControlDocOutput) => {
+            uploadControlDoc({
+                catId: this.catId,
+                orgId: PageParamsStore.state.organization!.Id,
+                file: this.file!,
+                relevantTime: currentDate,
+                altName: this.altName,
+                description: this.description,
+                uploadUserId: this.uploadUser.Id,
+            }).then((resp : TUploadControlDocOutput) => {
                 this.progressOverlay = false
                 this.$emit('do-save', resp.data)
             }).catch((err : any) => {
@@ -97,6 +122,17 @@ export default Vue.extend({
             })
         }
     },
+    watch: {
+        file() {
+            if (!!this.file) {
+                this.altName = this.file!.name
+            }
+        }
+    },
+    mounted() {
+        this.uploadUser = PageParamsStore.state.user!
+        console.log(this.uploadUser)
+    }
 })
 
 </script>

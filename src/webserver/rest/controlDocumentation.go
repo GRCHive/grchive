@@ -35,6 +35,9 @@ type UploadControlDocInputs struct {
 	CatId        int64     `webcore:"catId"`
 	OrgId        int32     `webcore:"orgId"`
 	RelevantTime time.Time `webcore:"relevantTime"`
+	AltName      string    `webcore:"altName"`
+	Description  string    `webcore:"description"`
+	UploadUserId int64     `webcore:"uploadUserId"`
 }
 
 type GetControlDocInputs struct {
@@ -233,7 +236,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
 	if err != nil || !role.Permissions.HasAccess(core.ResourceControlDocumentation, core.AccessManage) {
 		core.Warning("Bad access: " + core.ErrorString(err))
 		w.WriteHeader(http.StatusUnauthorized)
@@ -268,6 +271,9 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		UploadTime:   time.Now().UTC(),
 		CategoryId:   inputs.CatId,
 		OrgId:        org.Id,
+		AltName:      inputs.AltName,
+		Description:  inputs.Description,
+		UploadUserId: inputs.UploadUserId,
 	}
 
 	tx := database.CreateTx()

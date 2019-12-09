@@ -1,6 +1,6 @@
 CREATE TABLE general_ledger_categories (
     id BIGSERIAL,
-    org_id INTEGER NOT NULL REFERENCES organizations(id),
+    org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     parent_category_id BIGINT,
     name TEXT NOT NULL,
     description TEXT,
@@ -11,7 +11,7 @@ CREATE TABLE general_ledger_categories (
 
 CREATE TABLE general_ledger_accounts (
     id BIGSERIAL,
-    org_id INTEGER NOT NULL REFERENCES organizations(id),
+    org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     parent_category_id BIGINT NOT NULL,
     account_identifier TEXT NOT NULL,
     account_name TEXT NOT NULL,

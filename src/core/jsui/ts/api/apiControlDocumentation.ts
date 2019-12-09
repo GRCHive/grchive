@@ -54,13 +54,30 @@ export function deleteControlDocCat(inp : TDeleteControlDocCatInput): Promise<TD
     return postFormUrlEncoded<TDeleteControlDocCatOutput>(deleteControlDocCatUrl, inp, getAPIRequestConfig())
 }
 
+export interface TUploadControlDocInput {
+    catId: number
+    orgId: number
+    file: File
+    relevantTime: Date
+    altName: string
+    description: string
+    uploadUserId: number
+}
 
 export interface TUploadControlDocOutput {
     data: ControlDocumentationFile
 }
 
-export function uploadControlDoc(inp : FormData): Promise<TUploadControlDocOutput> {
-    return postFormMultipart<TUploadControlDocOutput>(uploadControlDocUrl, inp, getAPIRequestConfig())
+export function uploadControlDoc(inp : TUploadControlDocInput): Promise<TUploadControlDocOutput> {
+    let data = new FormData()
+    data.set('catId', inp.catId.toString())
+    data.set('orgId', inp.orgId.toString())
+    data.set('file', inp.file)
+    data.set('relevantTime', inp.relevantTime.toISOString())
+    data.set('altName', inp.altName)
+    data.set('description', inp.description)
+    data.set('uploadUserId', inp.uploadUserId.toString())
+    return postFormMultipart<TUploadControlDocOutput>(uploadControlDocUrl, data, getAPIRequestConfig())
 }
 
 export interface TGetControlDocumentsInput {
