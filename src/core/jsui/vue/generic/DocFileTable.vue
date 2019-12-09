@@ -58,7 +58,7 @@ export default class DocFileTable extends ResourceTableProps {
         return this.$createElement(
             'td',
             {
-                domProps: {
+                attrs: {
                     colspan: props.headers.length
                 },
             },
