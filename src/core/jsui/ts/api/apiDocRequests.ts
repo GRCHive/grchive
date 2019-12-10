@@ -24,6 +24,7 @@ export function newDocRequest(inp : TNewDocRequestInput) : Promise<TNewDocReques
         if (!!resp.data.CompletionTime) {
             resp.data.CompletionTime = new Date(resp.data.CompletionTime)
         }
+        resp.data.RequestTime = new Date(resp.data.RequestTime)
         return resp
     })
 }
@@ -43,6 +44,7 @@ export function getAllDocRequests(inp : TGetAllDocumentRequestInput) : Promise<T
             if (!!ele.CompletionTime) {
                 ele.CompletionTime = new Date(ele.CompletionTime)
             }
+            ele.RequestTime = new Date(ele.RequestTime)
             return ele
         })
         return resp

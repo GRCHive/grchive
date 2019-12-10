@@ -35,6 +35,10 @@ export default class DocRequestTable extends ResourceTableProps {
                 value: 'requester',
             },
             {
+                text: 'Request Time',
+                value: 'requestTime',
+            },
+            {
                 text: 'Complete',
                 value: 'complete',
             },
@@ -93,7 +97,8 @@ export default class DocRequestTable extends ResourceTableProps {
             id: inp.Id,
             name: inp.Name,
             docCat: !!this.catIdToName[inp.CatId] ? this.catIdToName[inp.CatId] : "Loading...", 
-            requester: createUserString(MetadataStore.getters.getUser(inp.RequestedUserId)) ,
+            requester: createUserString(MetadataStore.getters.getUser(inp.RequestedUserId)),
+            requestTime: inp.RequestTime.toString(),
             complete: false,
             value: inp
         }

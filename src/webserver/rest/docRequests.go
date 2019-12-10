@@ -68,6 +68,7 @@ func NewDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		CatId:           inputs.CatId,
 		OrgId:           inputs.OrgId,
 		RequestedUserId: inputs.RequestedUserId,
+		RequestTime:     time.Now().UTC(),
 	}
 
 	err = database.CreateNewDocumentRequest(&request, role)

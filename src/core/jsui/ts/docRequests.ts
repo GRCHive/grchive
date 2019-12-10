@@ -5,4 +5,5 @@ export interface DocumentRequest {
     OrgId:           number
     RequestedUserId: number
     CompletionTime:  Date | null
+    RequestTime:     Date
 }

@@ -16,14 +16,16 @@ func CreateNewDocumentRequest(request *core.DocumentRequest, role *core.Role) er
 			description,
 			cat_id,
 			org_id,
-			requested_user_id
+			requested_user_id,
+			request_time
 		)
 		VALUES (
 			:name,
 			:description,
 			:cat_id,
 			:org_id,
-			:requested_user_id
+			:requested_user_id,
+			:request_time
 		)
 		RETURNING id
 	`, request)
