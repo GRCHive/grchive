@@ -35,6 +35,8 @@ func createOrganizationSubrouter(r *mux.Router) {
 	s.HandleFunc(core.DashboardOrgControlEndpoint, render.RenderDashboardSingleControlPage).Name(webcore.DashboardSingleControlRouteName)
 	s.HandleFunc(core.DashboardOrgAllDocumentationEndpoint, render.RenderDocumentation).Name(webcore.DashboardDocumentationsRouteName)
 	s.HandleFunc(core.DashboardOrgSingleDocCatEndpoint, render.RenderSingleDocCat).Name(webcore.DashboardSingleDocumentationRouteName)
+	s.HandleFunc(core.DashboardOrgAllDocRequestsEndpoint, render.RenderDocRequest).Name(webcore.DashboardDocRequestRouteName)
+	s.HandleFunc(core.DashboardOrgSingleDocRequestEndpoint, render.RenderSingleDocRequest).Name(webcore.DashboardSingleDocRequestRouteName)
 
 	createOrganizationSettingsSubrouter(s)
 	createOrganizationGLSubrouter(s)

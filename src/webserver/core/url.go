@@ -36,6 +36,7 @@ const DashboardOrgSystemQueryId string = "sysId"
 const DashboardOrgDbQueryId string = "dbId"
 const DashboardOrgInfraQueryId string = "infraId"
 const DashboardOrgDocCatQueryId string = "docCatId"
+const DashboardOrgDocRequestQueryId string = "reqId"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 
@@ -45,11 +46,13 @@ const DashboardOrgAllFlowsEndpoint string = "/flows"
 const DashboardOrgAllRiskEndpoint string = "/risks"
 const DashboardOrgAllControlsEndpoint string = "/controls"
 const DashboardOrgAllDocumentationEndpoint string = "/documentation"
+const DashboardOrgAllDocRequestsEndpoint string = "/requests"
 
 var DashboardOrgRiskEndpoint string = fmt.Sprintf("/risks/{%s}", DashboardOrgRiskQueryId)
 var DashboardOrgControlEndpoint string = fmt.Sprintf("/controls/{%s}", DashboardOrgControlQueryId)
 var DashboardOrgFlowEndpoint string = fmt.Sprintf("/flows/{%s}", DashboardOrgFlowQueryId)
 var DashboardOrgSingleDocCatEndpoint string = fmt.Sprintf("/documentation/cat/{%s}", DashboardOrgDocCatQueryId)
+var DashboardOrgSingleDocRequestEndpoint string = fmt.Sprintf("/requests/{%s}", DashboardOrgDocRequestQueryId)
 
 // Dashboard - Organization - Settings
 const DashboardOrgSettingsPrefix string = "/settings"

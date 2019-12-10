@@ -53,9 +53,9 @@ export default Vue.extend({
                         },
                         {
                             title: 'Requests',
-                            icon: 'mdi-key-outline',
-                            url: '#',
-                            disabled : true
+                            icon: 'mdi-shield-search',
+                            url: PageParamsStore.state.organization!.Url + 'requests',
+                            disabled : false
                         },
                     ],
                 },

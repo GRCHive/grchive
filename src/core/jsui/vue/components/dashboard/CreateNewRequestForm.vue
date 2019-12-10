@@ -17,6 +17,13 @@
                     label="Description"
                     filled
         ></v-textarea> 
+        
+        <document-category-search-form-component
+            v-if="!catId"
+            v-model="realCatId"
+            :id-mode="true"
+            :available-cats="availableCats"
+        ></document-category-search-form-component>
     </v-form>
 
     <v-card-actions>
@@ -47,10 +54,21 @@ import * as rules from '../../../ts/formRules'
 import { newDocRequest, TNewDocRequestOutput } from '../../../ts/api/apiDocRequests'
 import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
+import DocumentCategorySearchFormComponent from '../../generic/DocumentCategorySearchFormComponent.vue'
 
 const Props = Vue.extend({
     props: {
-        catId: Number
+        catId: {
+            type: Object as () => number | null,
+            default: null
+        },
+        availableCats: {
+            type: Array,
+            default: () => []
+        }
+    },
+    components: {
+        DocumentCategorySearchFormComponent
     }
 })
 
@@ -60,6 +78,7 @@ export default class CreateNewRequestForm extends Props {
     rules = rules
     name: string = ""
     description: string = ""
+    realCatId: number | null = null
 
     cancel() {
         this.$emit('do-cancel')
@@ -69,7 +88,7 @@ export default class CreateNewRequestForm extends Props {
         newDocRequest({
             name: this.name,
             description: this.description,
-            catId: this.catId,
+            catId: this.realCatId!,
             orgId: PageParamsStore.state.organization!.Id,
             requestedUserId: PageParamsStore.state.user!.Id,
         }).then((resp : TNewDocRequestOutput) => {
@@ -83,6 +102,10 @@ export default class CreateNewRequestForm extends Props {
                 contactUsUrl,
                 true);
         })
+    }
+
+    mounted() {
+        this.realCatId = this.catId
     }
 }
 

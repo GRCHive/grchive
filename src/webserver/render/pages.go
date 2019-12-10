@@ -250,3 +250,11 @@ func RenderDocumentation(w http.ResponseWriter, r *http.Request) {
 func RenderSingleDocCat(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardSingleDocumentationTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
+
+func RenderDocRequest(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardDocRequestsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}
+
+func RenderSingleDocRequest(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardDocRequestsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}

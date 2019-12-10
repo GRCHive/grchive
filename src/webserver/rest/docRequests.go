@@ -25,7 +25,7 @@ type GetDocumentRequestInputs struct {
 
 type AllDocumentRequestsInputs struct {
 	OrgId int32          `webcore:"orgId"`
-	CatId core.NullInt64 `webcore:"catId"`
+	CatId core.NullInt64 `webcore:"catId,optional"`
 }
 
 type NewDocumentRequestCommentInputs struct {

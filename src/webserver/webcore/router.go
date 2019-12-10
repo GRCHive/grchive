@@ -130,6 +130,8 @@ const (
 	ApiAllDocRequestRouteName                       = "ApiAllDocRequest"
 	ApiNewDocRequestCommentRouteName                = "ApiNewDocRequestComment"
 	ApiAllDocRequestCommentRouteName                = "ApiAllDocRequestComment"
+	DashboardDocRequestRouteName                    = "DocRequests"
+	DashboardSingleDocRequestRouteName              = "SingleDocRequest"
 )
 
 var globalRouter *mux.Router
