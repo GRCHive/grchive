@@ -27,6 +27,7 @@ go_library(
         "generalLedger.go",
         "systems.go",
         "sysDatabase.go",
+        "docRequests.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 

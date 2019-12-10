@@ -44,6 +44,7 @@ func registerAPIPaths(r *mux.Router) {
 	registerRoleAPIPaths(s)
 	registerGeneralLedgerAPIPaths(s)
 	registerITAPIPaths(s)
+	registerDocRequestsAPIPaths(s)
 }
 
 func registerInviteAPIPaths(r *mux.Router) {
@@ -196,4 +197,19 @@ func registerITDbConnAPIPaths(r *mux.Router) {
 
 func registerITInfraAPIPaths(r *mux.Router) {
 	//s := r.PathPrefix(core.ApiITInfraPrefix).Subrouter()
+}
+
+func registerDocRequestsAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiDocRequestPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, NewDocumentRequest).Methods("POST").Name(webcore.ApiNewDocRequestRouteName)
+	s.HandleFunc(core.ApiGetEndpoint, GetDocumentRequest).Methods("GET").Name(webcore.ApiGetDocRequestRouteName)
+	s.HandleFunc(core.ApiAllEndpoint, AllDocumentRequests).Methods("GET").Name(webcore.ApiAllDocRequestRouteName)
+
+	registerDocRequestCommentsAPIPaths(s)
+}
+
+func registerDocRequestCommentsAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiDocRequestCommentsPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, NewDocumentRequestComment).Methods("GET").Name(webcore.ApiNewDocRequestCommentRouteName)
+	s.HandleFunc(core.ApiAllEndpoint, AllDocumentRequestComments).Methods("GET").Name(webcore.ApiAllDocRequestCommentRouteName)
 }

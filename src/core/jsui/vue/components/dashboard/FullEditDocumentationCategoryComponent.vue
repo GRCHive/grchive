@@ -163,6 +163,7 @@ export default class FullEditDocumentationCategoryComponent extends Vue {
         getDocumentCategory({
             orgId: PageParamsStore.state.organization!.Id,
             catId: resourceId,
+            lean: false,
         }).then((resp : TGetDocCatOutput) => {
             this.inputControls = resp.data.InputFor
             this.outputControls = resp.data.OutputFor

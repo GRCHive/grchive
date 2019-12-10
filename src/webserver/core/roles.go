@@ -30,6 +30,7 @@ const (
 	ResourceSystems
 	ResourceDatabases
 	ResourceDbConnections
+	ResourceDocRequests
 )
 
 var AvailableResources []ResourceType = []ResourceType{
@@ -44,6 +45,7 @@ var AvailableResources []ResourceType = []ResourceType{
 	ResourceSystems,
 	ResourceDatabases,
 	ResourceDbConnections,
+	ResourceDocRequests,
 }
 
 type PermissionsMap struct {
@@ -58,6 +60,7 @@ type PermissionsMap struct {
 	SystemAccess               AccessType `db:"system_access"`
 	DbAccess                   AccessType `db:"db_access"`
 	DbConnectionAccess         AccessType `db:"db_conn_access"`
+	DocRequestAccess           AccessType `db:"doc_request_access"`
 }
 
 type RoleMetadata struct {
@@ -91,6 +94,7 @@ func CreateAllAccessPermission() PermissionsMap {
 		SystemAccess:               CreateOwnerAccessType(),
 		DbAccess:                   CreateOwnerAccessType(),
 		DbConnectionAccess:         CreateOwnerAccessType(),
+		DocRequestAccess:           CreateOwnerAccessType(),
 	}
 }
 
@@ -147,6 +151,8 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 		return p.DbAccess
 	case ResourceDbConnections:
 		return p.DbConnectionAccess
+	case ResourceDocRequests:
+		return p.DocRequestAccess
 	}
 	return AccessNone
 }

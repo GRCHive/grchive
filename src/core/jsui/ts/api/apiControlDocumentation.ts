@@ -166,6 +166,7 @@ export function getAllDocumentationCategories(inp : TGetAllDocumentationCategori
 export interface TGetDocCatInput {
     orgId: number
     catId: number
+    lean: boolean
 }
 
 export interface TGetDocCatOutput {

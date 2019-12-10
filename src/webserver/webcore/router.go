@@ -125,6 +125,11 @@ const (
 	ApiDeleteDbSysLinkRouteName                     = "ApiDeleteDbSysLink"
 	DashboardDocumentationsRouteName                = "Documentations"
 	DashboardSingleDocumentationRouteName           = "SingleDocumentation"
+	ApiNewDocRequestRouteName                       = "ApiNewDocRequest"
+	ApiGetDocRequestRouteName                       = "ApiGetDocRequest"
+	ApiAllDocRequestRouteName                       = "ApiAllDocRequest"
+	ApiNewDocRequestCommentRouteName                = "ApiNewDocRequestComment"
+	ApiAllDocRequestCommentRouteName                = "ApiAllDocRequestComment"
 )
 
 var globalRouter *mux.Router

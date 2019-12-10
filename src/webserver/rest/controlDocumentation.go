@@ -66,6 +66,7 @@ type AllControlDocCatInputs struct {
 type GetControlDocCatInputs struct {
 	OrgId int32 `webcore:"orgId"`
 	CatId int64 `webcore:"catId"`
+	Lean  bool  `webcore:"lean"`
 }
 
 func newControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
@@ -564,18 +565,23 @@ func getControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	inputControls, err := database.GetControlsWithInputDocumentationCategory(inputs.CatId, inputs.OrgId, role)
-	if err != nil {
-		core.Warning("Failed to get all input controls: " + core.ErrorString(err))
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	var inputControls []*core.Control
+	var outputControls []*core.Control
 
-	outputControls, err := database.GetControlsWithOutputDocumentationCategory(inputs.CatId, inputs.OrgId, role)
-	if err != nil {
-		core.Warning("Failed to get all output controls: " + core.ErrorString(err))
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	if !inputs.Lean {
+		inputControls, err = database.GetControlsWithInputDocumentationCategory(inputs.CatId, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get all input controls: " + core.ErrorString(err))
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		outputControls, err = database.GetControlsWithOutputDocumentationCategory(inputs.CatId, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get all output controls: " + core.ErrorString(err))
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	jsonWriter.Encode(struct {

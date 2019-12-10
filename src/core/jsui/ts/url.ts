@@ -97,6 +97,10 @@ export function createSingleDocCatUrl(org : string, id: number) : string {
     return `/dashboard/org/${org}/documentation/cat/${id}`
 }
 
+export function createSingleDocRequestUrl(org : string, id: number) : string {
+    return `/dashboard/org/${org}/requests/${id}`
+}
+
 export function createUserProfileEditAPIUrl(id : number) : string {
     return `/api/user/${id}/profile`
 }
@@ -211,3 +215,7 @@ export const deleteDbConnUrl : string = "/api/it/db/connection/delete"
 export const linkDbsToSystemUrl : string = "/api/it/systems/linkDb"
 export const linkSystemsToDbUrl : string = "/api/it/db/linkSys"
 export const deleteDbSysLinkUrl : string = "/api/it/deleteDbSysLink"
+
+export const newDocRequestUrl : string = "/api/requests/new"
+export const allDocRequestUrl : string = "/api/requests/all"
+export const getDocRequestUrl : string = "/api/requests/get"

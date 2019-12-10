@@ -34,9 +34,18 @@
             </v-dialog>
 
             <v-spacer></v-spacer>
-            <v-btn color="success" @click="downloadSelectedFiles" :disabled="!hasSelected">
-                Download
-            </v-btn>
+
+            <v-list-item-action>
+                <v-btn color="info">
+                    Sample
+                </v-btn>
+            </v-list-item-action>
+
+            <v-list-item-action class="ml-4">
+                <v-btn color="success" @click="downloadSelectedFiles" :disabled="!hasSelected">
+                    Download
+                </v-btn>
+            </v-list-item-action>
 
             <v-list-item-action>
                 <v-dialog v-model="showHideUpload" persistent max-width="40%">
@@ -52,6 +61,34 @@
                 </v-dialog>
             </v-list-item-action>
         </v-list-item>
+
+        <v-card>
+            <v-card-title>
+                <span class="mr-2">
+                    Requests
+                </span>
+                <v-spacer></v-spacer>
+
+                <v-dialog v-model="showHideRequest" persistent max-width="40%">
+                    <template v-slot:activator="{ on }">
+                        <v-btn color="warning" icon v-on="on">
+                            <v-icon>mdi-plus</v-icon>
+                        </v-btn>
+                    </template>
+
+                    <create-new-request-form
+                        :cat-id="catId"
+                        @do-cancel="showHideRequest = false"
+                        @do-save="newRequest">
+                    </create-new-request-form>
+                </v-dialog>
+            </v-card-title>
+            <v-divider></v-divider>
+
+            <doc-request-table :resources="requests">
+            </doc-request-table>
+        </v-card>
+
     </div>
 </template>
 
@@ -64,10 +101,14 @@ import { ControlDocumentationFile } from '../../../ts/controls'
 import { TGetControlDocumentsInput, TGetControlDocumentsOutput, getControlDocuments } from '../../../ts/api/apiControlDocumentation'
 import { TDeleteControlDocumentsInput, TDeleteControlDocumentsOutput, deleteControlDocuments } from '../../../ts/api/apiControlDocumentation'
 import { TDownloadControlDocumentsInput, TDownloadControlDocumentsOutput, downloadControlDocuments } from '../../../ts/api/apiControlDocumentation'
+import { TGetAllDocumentRequestOutput, getAllDocRequests } from '../../../ts/api/apiDocRequests'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import { saveAs } from 'file-saver'
 import { PageParamsStore } from '../../../ts/pageParams'
 import DocFileTable from '../../generic/DocFileTable.vue'
+import CreateNewRequestForm from './CreateNewRequestForm.vue'
+import { DocumentRequest } from '../../../ts/docRequests'
+import DocRequestTable from '../../generic/DocRequestTable.vue'
 
 export default Vue.extend({
     props : {
@@ -79,12 +120,16 @@ export default Vue.extend({
         totalPages: 0,
         files: [] as ControlDocumentationFile[],
         selectedFiles: [] as ControlDocumentationFile[],
+        requests: [] as DocumentRequest[],
         showHideDeleteFiles: false,
+        showHideRequest: false,
     }),
     components : {
         UploadDocumentationForm,
         GenericDeleteConfirmationForm,
-        DocFileTable
+        DocFileTable,
+        CreateNewRequestForm,
+        DocRequestTable
     },
     computed : {
         hasSelected() : boolean {
@@ -131,6 +176,21 @@ export default Vue.extend({
                 if (needPages) {
                     this.totalPages = resp.data.TotalPages
                 }
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+
+            getAllDocRequests({
+                orgId: PageParamsStore.state.organization!.Id,
+                catId: this.catId,
+            }).then((resp : TGetAllDocumentRequestOutput) => {
+                this.requests = resp.data
             }).catch((err : any) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
@@ -199,6 +259,11 @@ export default Vue.extend({
             this.selectedFiles = []
             this.refreshData(newPage - 1, false)
         },
+
+        newRequest(req : DocumentRequest) {
+            this.requests.push(req)
+            this.showHideRequest = false
+        }
     },
     watch : {
         catId() {

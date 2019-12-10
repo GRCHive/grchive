@@ -84,6 +84,11 @@ var DashboardSingleSystemEndpoint string = fmt.Sprintf("%s/{%s}", DashboardSyste
 var DashboardSingleDbEndpoint string = fmt.Sprintf("%s/{%s}", DashboardDbSystemsEndpoint, DashboardOrgDbQueryId)
 var DashboardSingleInfraEndpoint string = fmt.Sprintf("%s/{%s}", DashboardInfraSystemsEndpoint, DashboardOrgInfraQueryId)
 
+// Generic API Actions
+const ApiNewEndpoint = "/new"
+const ApiAllEndpoint = "/all"
+const ApiGetEndpoint = "/get"
+
 // API
 const ApiUrl string = "/api"
 
@@ -221,6 +226,12 @@ const ApiITDbConnDeleteEndpoint = "/delete"
 
 // API - IT - Infrastructure
 const ApiITInfraPrefix = "/infra"
+
+// API - Document Requests
+const ApiDocRequestPrefix = "/requests"
+
+// API - Document Request Comments
+const ApiDocRequestCommentsPrefix = "/comments"
 
 // Websocket
 const WebsocketPrefix string = "/ws"
