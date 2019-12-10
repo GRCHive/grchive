@@ -1,66 +1,75 @@
 <template>
     <div>
-        <doc-file-table
-            :resources="files"
-            :selectable="true"
-            :multi="true"
-            v-model="selectedFiles"
-        ></doc-file-table>
+        <v-card class="mb-4">
+            <v-card-title>
+                <span class="mr-2">
+                    Documents
+                </span>
+            </v-card-title>
+            <v-divider></v-divider>
 
-        <v-divider></v-divider>
-        <v-list-item>
-            <v-list-item-action class="ma-1">
-                <v-btn icon @click="toggleSelection">
-                    <v-icon v-if="!hasSelected">mdi-checkbox-blank-outline</v-icon>
-                    <v-icon v-else>mdi-minus-box-outline</v-icon>
-                </v-btn>
-            </v-list-item-action>
+            <doc-file-table
+                :resources="files"
+                :selectable="true"
+                :multi="true"
+                v-model="selectedFiles"
+            ></doc-file-table>
 
-            <v-dialog v-model="showHideDeleteFiles" persistent max-width="40%">
-                <template v-slot:activator="{on}">
-                    <v-btn color="error" v-on="on" :disabled="!hasSelected">
-                        Delete
+            <v-divider></v-divider>
+            <v-list-item>
+                <v-list-item-action class="ma-1">
+                    <v-btn icon @click="toggleSelection">
+                        <v-icon v-if="!hasSelected">mdi-checkbox-blank-outline</v-icon>
+                        <v-icon v-else>mdi-minus-box-outline</v-icon>
                     </v-btn>
-                </template>
+                </v-list-item-action>
 
-                <generic-delete-confirmation-form
-                    item-name="documents"
-                    :items-to-delete="selectedFileNames"
-                    v-on:do-cancel="showHideDeleteFiles = false"
-                    v-on:do-delete="deleteSelectedFiles"
-                    :use-global-deletion="false"
-                    :force-global-deletion="true">
-                </generic-delete-confirmation-form>
-            </v-dialog>
-
-            <v-spacer></v-spacer>
-
-            <v-list-item-action>
-                <v-btn color="info">
-                    Sample
-                </v-btn>
-            </v-list-item-action>
-
-            <v-list-item-action class="ml-4">
-                <v-btn color="success" @click="downloadSelectedFiles" :disabled="!hasSelected">
-                    Download
-                </v-btn>
-            </v-list-item-action>
-
-            <v-list-item-action>
-                <v-dialog v-model="showHideUpload" persistent max-width="40%">
+                <v-dialog v-model="showHideDeleteFiles" persistent max-width="40%">
                     <template v-slot:activator="{on}">
-                        <v-btn color="primary" v-on="on">
-                            Upload
+                        <v-btn color="error" v-on="on" :disabled="!hasSelected">
+                            Delete
                         </v-btn>
                     </template>
-                    <upload-documentation-form :cat-id="catId"
-                        @do-cancel="cancelUpload"
-                        @do-save="finishUpload">
-                    </upload-documentation-form>
+
+                    <generic-delete-confirmation-form
+                        item-name="documents"
+                        :items-to-delete="selectedFileNames"
+                        v-on:do-cancel="showHideDeleteFiles = false"
+                        v-on:do-delete="deleteSelectedFiles"
+                        :use-global-deletion="false"
+                        :force-global-deletion="true">
+                    </generic-delete-confirmation-form>
                 </v-dialog>
-            </v-list-item-action>
-        </v-list-item>
+
+                <v-spacer></v-spacer>
+
+                <v-list-item-action>
+                    <v-btn color="info">
+                        Sample
+                    </v-btn>
+                </v-list-item-action>
+
+                <v-list-item-action class="ml-4">
+                    <v-btn color="success" @click="downloadSelectedFiles" :disabled="!hasSelected">
+                        Download
+                    </v-btn>
+                </v-list-item-action>
+
+                <v-list-item-action>
+                    <v-dialog v-model="showHideUpload" persistent max-width="40%">
+                        <template v-slot:activator="{on}">
+                            <v-btn color="primary" v-on="on">
+                                Upload
+                            </v-btn>
+                        </template>
+                        <upload-documentation-form :cat-id="catId"
+                            @do-cancel="cancelUpload"
+                            @do-save="finishUpload">
+                        </upload-documentation-form>
+                    </v-dialog>
+                </v-list-item-action>
+            </v-list-item>
+        </v-card>
 
         <v-card>
             <v-card-title>
