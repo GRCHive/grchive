@@ -226,3 +226,6 @@ export const getDocRequestUrl : string = "/api/requests/get"
 export const deleteDocRequestUrl : string = "/api/requests/delete"
 export const completeDocRequestUrl : string = "/api/requests/complete"
 export const updateDocRequestUrl : string = "/api/requests/update"
+
+export const newDocRequestCommentUrl : string = "/api/comments/requests/new"
+export const allDocRequestCommentUrl : string = "/api/comments/requests/all"

@@ -202,3 +202,51 @@ func GetFulfilledFileIdsForDocRequest(requestId int64, orgId int32, role *core.R
 	`, orgId, requestId)
 	return ids, err
 }
+
+func GetDocumentRequestComments(requestId int64, orgId int32, role *core.Role) ([]*core.Comment, error) {
+	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	return getComments(`
+		INNER JOIN document_request_comments AS drc
+			ON drc.comment_id = comments.id
+		WHERE drc.request_id = $1
+			AND drc.org_id = $2
+	`, requestId, orgId)
+}
+
+func InsertDocumentRequestComment(requestId int64, catId int64, orgId int32, comment *core.Comment, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+
+	err := insertCommentWithTx(comment, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.Exec(`
+		INSERT INTO document_request_comments (
+			request_id,
+			cat_id,
+			org_id,
+			comment_id
+		)
+		VALUES (
+			$1,
+			$2,
+			$3,
+			$4
+		)
+	`, requestId, catId, orgId, comment.Id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}

@@ -45,6 +45,7 @@ func registerAPIPaths(r *mux.Router) {
 	registerGeneralLedgerAPIPaths(s)
 	registerITAPIPaths(s)
 	registerDocRequestsAPIPaths(s)
+	registerCommentsAPIPaths(s)
 }
 
 func registerInviteAPIPaths(r *mux.Router) {
@@ -207,4 +208,15 @@ func registerDocRequestsAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiDeleteEndpoint, deleteDocumentRequest).Methods("POST").Name(webcore.ApiDeleteDocRequestRouteName)
 	s.HandleFunc(core.ApiUpdateEndpoint, updateDocumentRequest).Methods("POST").Name(webcore.ApiUpdateDocRequestRouteName)
 	s.HandleFunc(core.ApiDocRequestCompleteEndpoint, completeDocumentRequest).Methods("POST").Name(webcore.ApiCompleteDocRequestRouteName)
+}
+
+func registerCommentsAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiCommentsPrefix).Subrouter()
+	registerDocRequestCommentsAPIPaths(s)
+}
+
+func registerDocRequestCommentsAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiDocRequestPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, newDocumentRequestComment).Methods("POST")
+	s.HandleFunc(core.ApiAllEndpoint, allDocumentRequestComments).Methods("GET")
 }

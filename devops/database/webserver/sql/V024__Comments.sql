@@ -1,0 +1,6 @@
+CREATE TABLE comments (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    post_time TIMESTAMPTZ NOT NULL,
+    content TEXT
+);

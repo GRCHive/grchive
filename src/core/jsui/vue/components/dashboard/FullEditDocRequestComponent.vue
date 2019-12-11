@@ -63,7 +63,7 @@
 
             <v-container fluid>
                 <v-row>
-                    <v-col cols="4">
+                    <v-col cols="6">
                         <create-new-request-form
                             class="mb-4"
                             ref="form"
@@ -73,14 +73,6 @@
                             @do-save="onEdit"
                         ></create-new-request-form>
 
-                        <v-card>
-                            <v-card-title>
-                                Comments
-                            </v-card-title>
-                        </v-card>
-                    </v-col>
-
-                    <v-col cols="8">
                         <v-card>
                             <v-card-title>
                                 Relevant Files
@@ -93,6 +85,20 @@
                                 v-model="relevantFiles"
                                 disable-sample
                             ></doc-file-manager>
+                        </v-card>
+                    </v-col>
+
+                    <v-col cols="6">
+                        <v-card>
+                            <v-card-title>
+                                Comments
+                            </v-card-title>
+                            <v-divider></v-divider>
+
+                            <comment-manager
+                                :params="commentParams"
+                                :type="commentType"
+                            ></comment-manager>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -115,12 +121,15 @@ import { ControlDocumentationCategory, ControlDocumentationFile } from '../../..
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import CreateNewRequestForm from './CreateNewRequestForm.vue'
 import DocFileManager from '../../generic/DocFileManager.vue'
+import CommentManager from '../../generic/CommentManager.vue'
+import { CommentResource } from '../../../ts/comments'
 
 @Component({
     components: {
         GenericDeleteConfirmationForm,
         CreateNewRequestForm,
-        DocFileManager
+        DocFileManager,
+        CommentManager
     }
 })
 export default class FullEditDatabaseComponent extends Vue {
@@ -131,6 +140,18 @@ export default class FullEditDatabaseComponent extends Vue {
 
     $refs!: {
         form: CreateNewRequestForm
+    }
+
+    get commentParams() : Object {
+        return {
+            requestId: this.currentRequest!.Id,
+            catId: this.currentRequest!.CatId,
+            orgId: PageParamsStore.state.organization!.Id,
+        }
+    }
+
+    get commentType() : CommentResource {
+        return CommentResource.DocumentRequest
     }
 
     get ready() : boolean {

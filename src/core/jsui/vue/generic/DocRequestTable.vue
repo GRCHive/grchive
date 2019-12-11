@@ -110,7 +110,7 @@ export default class DocRequestTable extends ResourceTableProps {
             {
                 props: {
                     small : true,
-                    color: props.item.complete ? 'primary' : 'error'
+                    color: props.item.complete ? 'success' : 'error'
                 }
             },
             props.item.complete ? 'mdi-check' : 'mdi-close'

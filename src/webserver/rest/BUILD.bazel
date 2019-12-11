@@ -22,6 +22,7 @@ go_library(
         "databases.go",
         "infrastructure.go",
         "docRequests.go",
+        "comments.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",
