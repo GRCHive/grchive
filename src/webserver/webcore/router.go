@@ -131,8 +131,6 @@ const (
 	ApiUpdateDocRequestRouteName                    = "ApiUpdateDocRequest"
 	ApiCompleteDocRequestRouteName                  = "ApiCompleteDocRequest"
 	ApiDeleteDocRequestRouteName                    = "ApiDeleteDocRequest"
-	ApiNewDocRequestCommentRouteName                = "ApiNewDocRequestComment"
-	ApiAllDocRequestCommentRouteName                = "ApiAllDocRequestComment"
 	DashboardDocRequestRouteName                    = "DocRequests"
 	DashboardSingleDocRequestRouteName              = "SingleDocRequest"
 )

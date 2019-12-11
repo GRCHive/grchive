@@ -236,9 +236,6 @@ const ApiITInfraPrefix = "/infra"
 const ApiDocRequestPrefix = "/requests"
 const ApiDocRequestCompleteEndpoint = "/complete"
 
-// API - Document Request Comments
-const ApiDocRequestCommentsPrefix = "/comments"
-
 // Websocket
 const WebsocketPrefix string = "/ws"
 

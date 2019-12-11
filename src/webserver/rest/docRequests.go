@@ -47,20 +47,6 @@ type AllDocumentRequestsInputs struct {
 	CatId core.NullInt64 `webcore:"catId,optional"`
 }
 
-type NewDocumentRequestCommentInputs struct {
-	UserId    int64  `json:"userId"`
-	Text      string `json:"text"`
-	CatId     int64  `json:"catId"`
-	OrgId     int32  `json:"orgId"`
-	RequestId int64  `json:"requestId"`
-}
-
-type AllDocumentRequestCommentsInputs struct {
-	RequestId int64 `webcore:"requestId"`
-	CatId     int64 `webcore:"catId"`
-	OrgId     int32 `webcore:"orgId"`
-}
-
 func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -238,45 +224,6 @@ func allDocumentRequests(w http.ResponseWriter, r *http.Request) {
 	jsonWriter.Encode(reqs)
 }
 
-func newDocumentRequestComment(w http.ResponseWriter, r *http.Request) {
-	jsonWriter := json.NewEncoder(w)
-	w.Header().Set("Content-Type", "application/json")
-
-	inputs := NewDocumentRequestCommentInputs{}
-	err := webcore.UnmarshalRequestForm(r, &inputs)
-	if err != nil {
-		core.Warning("Can't parse inputs: " + err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		jsonWriter.Encode(struct{}{})
-		return
-	}
-
-	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
-	if err != nil {
-		core.Warning("Bad access: " + err.Error())
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	comment := core.DocumentRequestComment{
-		UserId:    inputs.UserId,
-		Text:      inputs.Text,
-		PostTime:  time.Now().UTC(),
-		CatId:     inputs.CatId,
-		OrgId:     inputs.OrgId,
-		RequestId: inputs.RequestId,
-	}
-
-	err = database.AddDocRequestComment(&comment, role)
-	if err != nil {
-		core.Warning("Failed to add doc request comment: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	jsonWriter.Encode(comment)
-}
-
 func deleteDocumentRequest(w http.ResponseWriter, r *http.Request) {
 	inputs := DeleteDocumentRequestInputs{}
 	err := webcore.UnmarshalRequestForm(r, &inputs)
@@ -323,34 +270,4 @@ func completeDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-}
-
-func allDocumentRequestComments(w http.ResponseWriter, r *http.Request) {
-	jsonWriter := json.NewEncoder(w)
-	w.Header().Set("Content-Type", "application/json")
-
-	inputs := AllDocumentRequestCommentsInputs{}
-	err := webcore.UnmarshalRequestForm(r, &inputs)
-	if err != nil {
-		core.Warning("Can't parse inputs: " + err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		jsonWriter.Encode(struct{}{})
-		return
-	}
-
-	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
-	if err != nil {
-		core.Warning("Bad access: " + err.Error())
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	comments, err := database.GetAllDocumentRequestComments(inputs.RequestId, inputs.OrgId, role)
-	if err != nil {
-		core.Warning("Failed to get all doc request comments: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	jsonWriter.Encode(comments)
 }

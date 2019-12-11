@@ -188,63 +188,6 @@ func FulfillDocumentRequestWithTx(requestId int64, fileId int64, catId int64, or
 	return nil
 }
 
-func AddDocRequestComment(comment *core.DocumentRequestComment, role *core.Role) error {
-	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessEdit) {
-		return core.ErrorUnauthorized
-	}
-
-	tx := dbConn.MustBegin()
-	rows, err := tx.NamedQuery(`
-		INSERT INTO document_request_comments (
-			user_id,
-			text,
-			post_time,
-			cat_id,
-			org_id,
-			request_id
-		)
-		VALUES (
-			:user_id,
-			:text,
-			:post_time,
-			:cat_id,
-			:org_id,
-			:request_id
-		)
-		RETURNING id
-	`, comment)
-
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	rows.Next()
-	err = rows.Scan(&comment.Id)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	rows.Close()
-
-	return tx.Commit()
-}
-
-func GetAllDocumentRequestComments(requestId int64, orgId int32, role *core.Role) ([]*core.DocumentRequestComment, error) {
-	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessView) {
-		return nil, core.ErrorUnauthorized
-	}
-
-	comments := make([]*core.DocumentRequestComment, 0)
-	err := dbConn.Select(&comments, `
-		SELECT *
-		FROM document_request_comments
-		WHERE org_id = $1
-			AND request_id = $2
-	`, orgId, requestId)
-	return comments, err
-}
-
 func GetFulfilledFileIdsForDocRequest(requestId int64, orgId int32, role *core.Role) ([]int64, error) {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
 		return nil, core.ErrorUnauthorized
