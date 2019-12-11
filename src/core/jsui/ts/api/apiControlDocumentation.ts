@@ -62,6 +62,7 @@ export interface TUploadControlDocInput {
     altName: string
     description: string
     uploadUserId: number
+    fulfilledRequestId?: number | null
 }
 
 export interface TUploadControlDocOutput {
@@ -77,6 +78,10 @@ export function uploadControlDoc(inp : TUploadControlDocInput): Promise<TUploadC
     data.set('altName', inp.altName)
     data.set('description', inp.description)
     data.set('uploadUserId', inp.uploadUserId.toString())
+    if (!!inp.fulfilledRequestId) {
+        data.set('fulfilledRequestId', inp.fulfilledRequestId!.toString())
+    }
+
     return postFormMultipart<TUploadControlDocOutput>(uploadControlDocUrl, data, getAPIRequestConfig())
 }
 
@@ -96,7 +101,14 @@ export interface TGetControlDocumentsOutput {
 }
 
 export function getControlDocuments(inp: TGetControlDocumentsInput) : Promise<TGetControlDocumentsOutput> {
-    return axios.get(getControlDocUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+    return axios.get(getControlDocUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetControlDocumentsOutput) => {
+        resp.data.Files = resp.data.Files.map((ele : ControlDocumentationFile) => {
+            ele.UploadTime = new Date(ele.UploadTime)
+            ele.RelevantTime = new Date(ele.RelevantTime)
+            return ele
+        })
+        return resp
+    })
 }
 
 export interface TDeleteControlDocumentsInput {

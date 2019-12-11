@@ -17,6 +17,15 @@ type NewDocumentRequestInputs struct {
 	RequestedUserId int64  `json:"requestedUserId"`
 }
 
+type UpdateDocumentRequestInputs struct {
+	RequestId       int64  `json:"requestId"`
+	Name            string `json:"name"`
+	Description     string `json:"description"`
+	CatId           int64  `json:"catId"`
+	OrgId           int32  `json:"orgId"`
+	RequestedUserId int64  `json:"requestedUserId"`
+}
+
 type GetDocumentRequestInputs struct {
 	RequestId int64 `webcore:"requestId"`
 	OrgId     int32 `webcore:"orgId"`
@@ -84,6 +93,46 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 	err = database.CreateNewDocumentRequest(&request, role)
 	if err != nil {
 		core.Warning("Failed to create new doc request: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(request)
+}
+
+func updateDocumentRequest(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := UpdateDocumentRequestInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	request := core.DocumentRequest{
+		Id:              inputs.RequestId,
+		Name:            inputs.Name,
+		Description:     inputs.Description,
+		CatId:           inputs.CatId,
+		OrgId:           inputs.OrgId,
+		RequestedUserId: inputs.RequestedUserId,
+		RequestTime:     time.Now().UTC(),
+	}
+
+	err = database.UpdateDocumentRequest(&request, role)
+	if err != nil {
+		core.Warning("Failed to update doc request: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

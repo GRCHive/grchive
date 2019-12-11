@@ -6,7 +6,8 @@ import { newDocRequestUrl,
          allDocRequestUrl,
          getDocRequestUrl,
          deleteDocRequestUrl,
-         completeDocRequestUrl } from '../url'
+         completeDocRequestUrl,
+         updateDocRequestUrl } from '../url'
 import { DocumentRequest } from '../docRequests'
 import { ControlDocumentationCategory, ControlDocumentationFile } from '../controls'
 
@@ -24,6 +25,24 @@ export interface TNewDocRequestOutput {
 
 export function newDocRequest(inp : TNewDocRequestInput) : Promise<TNewDocRequestOutput> {
     return postFormJson<TNewDocRequestOutput>(newDocRequestUrl, inp, getAPIRequestConfig()).then((resp : TNewDocRequestOutput) => {
+        if (!!resp.data.CompletionTime) {
+            resp.data.CompletionTime = new Date(resp.data.CompletionTime)
+        }
+        resp.data.RequestTime = new Date(resp.data.RequestTime)
+        return resp
+    })
+}
+
+export interface TUpdateDocRequestInput extends TNewDocRequestInput {
+    requestId: number
+}
+
+export interface TUpdateDocRequestOutput {
+    data: DocumentRequest
+}
+
+export function updateDocRequest(inp : TUpdateDocRequestInput) : Promise<TUpdateDocRequestOutput> {
+    return postFormJson<TUpdateDocRequestOutput>(updateDocRequestUrl, inp, getAPIRequestConfig()).then((resp : TUpdateDocRequestOutput) => {
         if (!!resp.data.CompletionTime) {
             resp.data.CompletionTime = new Date(resp.data.CompletionTime)
         }
@@ -73,6 +92,13 @@ export function getSingleDocRequest(inp : TGetSingleDocumentRequestInput) : Prom
             resp.data.Request.CompletionTime = new Date(resp.data.Request.CompletionTime)
         }
         resp.data.Request.RequestTime = new Date(resp.data.Request.RequestTime)
+
+        resp.data.Files = resp.data.Files.map((ele : ControlDocumentationFile) => {
+            ele.UploadTime = new Date(ele.UploadTime)
+            ele.RelevantTime = new Date(ele.RelevantTime)
+            return ele
+        })
+
         return resp
     })
 }

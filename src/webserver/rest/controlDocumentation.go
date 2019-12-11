@@ -32,12 +32,13 @@ type DeleteControlDocCatInputs struct {
 }
 
 type UploadControlDocInputs struct {
-	CatId        int64     `webcore:"catId"`
-	OrgId        int32     `webcore:"orgId"`
-	RelevantTime time.Time `webcore:"relevantTime"`
-	AltName      string    `webcore:"altName"`
-	Description  string    `webcore:"description"`
-	UploadUserId int64     `webcore:"uploadUserId"`
+	CatId              int64          `webcore:"catId"`
+	OrgId              int32          `webcore:"orgId"`
+	RelevantTime       time.Time      `webcore:"relevantTime"`
+	AltName            string         `webcore:"altName"`
+	Description        string         `webcore:"description"`
+	UploadUserId       int64          `webcore:"uploadUserId"`
+	FulfilledRequestId core.NullInt64 `webcore:"fulfilledRequestId,optional"`
 }
 
 type GetControlDocInputs struct {
@@ -326,6 +327,24 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		core.Warning("Failed to update control documentation: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+
+	if inputs.FulfilledRequestId.NullInt64.Valid {
+		err = database.FulfillDocumentRequestWithTx(
+			inputs.FulfilledRequestId.NullInt64.Int64,
+			internalFile.Id,
+			inputs.CatId,
+			inputs.OrgId,
+			role,
+			tx)
+		if err != nil {
+			tx.Rollback()
+			backblaze.DeleteFile(b2Auth, internalFile.StorageFilename(org), b2File)
+
+			core.Warning("Failed to fulfill request in db: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	err = tx.Commit()

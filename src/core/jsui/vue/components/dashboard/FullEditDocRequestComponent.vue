@@ -9,14 +9,11 @@
                 <v-list-item-content>
                     <v-list-item-title class="title">
                         Document Request: {{ currentRequest.Name }}
-                        <v-btn icon @click="expandDescription = !expandDescription">
-                            <v-icon small v-if="!expandDescription" >mdi-chevron-down</v-icon>
-                            <v-icon small v-else>mdi-chevron-up</v-icon>
-                        </v-btn>
                     </v-list-item-title>
 
-                    <v-list-item-subtitle :class="expandDescription ? `long-text` : `hide-long-text`">
-                        {{ currentRequest.Description }}
+                    <v-list-item-subtitle>
+                        Relevant Document Category:
+                        <a :href="parentCategoryUrl">{{ parentCategory.Name }}</a>
                     </v-list-item-subtitle>
 
                 </v-list-item-content>
@@ -66,10 +63,37 @@
 
             <v-container fluid>
                 <v-row>
-                    <v-col cols="8">
+                    <v-col cols="4">
+                        <create-new-request-form
+                            class="mb-4"
+                            ref="form"
+                            edit-mode
+                            :cat-id="currentRequest.CatId"
+                            :reference-req="currentRequest"
+                            @do-save="onEdit"
+                        ></create-new-request-form>
+
+                        <v-card>
+                            <v-card-title>
+                                Comments
+                            </v-card-title>
+                        </v-card>
                     </v-col>
 
-                    <v-col cols="4">
+                    <v-col cols="8">
+                        <v-card>
+                            <v-card-title>
+                                Relevant Files
+                            </v-card-title>
+                            <v-divider></v-divider>
+
+                            <doc-file-manager
+                                :cat-id="currentRequest.CatId"
+                                :request-id="currentRequest.Id"
+                                v-model="relevantFiles"
+                                disable-sample
+                            ></doc-file-manager>
+                        </v-card>
                     </v-col>
                 </v-row>
             </v-container>
@@ -81,28 +105,49 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import { DocumentRequest } from '../../../ts/docRequests'
 import { TGetSingleDocumentRequestOutput, getSingleDocRequest } from '../../../ts/api/apiDocRequests'
 import { deleteSingleDocRequest, completeDocRequest } from '../../../ts/api/apiDocRequests'
 import { PageParamsStore } from '../../../ts/pageParams'
-import { contactUsUrl, createOrgDocRequestsUrl } from '../../../ts/url'
+import { contactUsUrl, createOrgDocRequestsUrl, createSingleDocCatUrl } from '../../../ts/url'
 import { ControlDocumentationCategory, ControlDocumentationFile } from '../../../ts/controls'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
+import CreateNewRequestForm from './CreateNewRequestForm.vue'
+import DocFileManager from '../../generic/DocFileManager.vue'
 
 @Component({
     components: {
         GenericDeleteConfirmationForm,
+        CreateNewRequestForm,
+        DocFileManager
     }
 })
 export default class FullEditDatabaseComponent extends Vue {
     currentRequest : DocumentRequest | null = null
     relevantFiles: ControlDocumentationFile[] = []
     parentCategory : ControlDocumentationCategory | null = null
-    expandDescription: boolean = false
     showHideDelete: boolean = false
+
+    $refs!: {
+        form: CreateNewRequestForm
+    }
 
     get ready() : boolean {
         return !!this.currentRequest && !!this.parentCategory
+    }
+
+    get parentCategoryUrl() : string {
+        return createSingleDocCatUrl(
+            PageParamsStore.state.organization!.OktaGroupName,
+            this.parentCategory!.Id)
+    }
+
+    @Watch('ready')
+    onReady() {
+        Vue.nextTick(() => {
+            this.$refs.form.clearForm()
+        })
     }
 
     refreshData() {
@@ -125,6 +170,10 @@ export default class FullEditDatabaseComponent extends Vue {
                 contactUsUrl,
                 true);
         })
+    }
+
+    onEdit(req : DocumentRequest) {
+        this.currentRequest = req
     }
 
     onDelete() {

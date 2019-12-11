@@ -92,6 +92,7 @@ const ApiNewEndpoint = "/new"
 const ApiAllEndpoint = "/all"
 const ApiGetEndpoint = "/get"
 const ApiDeleteEndpoint = "/delete"
+const ApiUpdateEndpoint = "/update"
 
 // API
 const ApiUrl string = "/api"

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/jmoiron/sqlx"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"time"
 )
@@ -38,6 +39,37 @@ func CreateNewDocumentRequest(request *core.DocumentRequest, role *core.Role) er
 
 	rows.Next()
 	err = rows.Scan(&request.Id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	rows.Close()
+	return tx.Commit()
+}
+
+func UpdateDocumentRequest(request *core.DocumentRequest, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+	rows, err := tx.NamedQuery(`
+		UPDATE document_requests
+		SET name = :name,
+			description = :description
+		WHERE id = :id
+			AND org_id = :org_id
+			AND cat_id = :cat_id
+		RETURNING *
+	`, request)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	rows.Next()
+	err = rows.StructScan(request)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -131,29 +163,29 @@ func GetAllDocumentRequestsForDocCat(catId int64, orgId int32, role *core.Role) 
 	return requests, err
 }
 
-func FulfillDocumentRequest(fileId int64, catId int64, orgId int32, role *core.Role) error {
+func FulfillDocumentRequestWithTx(requestId int64, fileId int64, catId int64, orgId int32, role *core.Role, tx *sqlx.Tx) error {
 	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
 	_, err := tx.Exec(`
 		INSERT INTO document_request_fulfillment (
 			cat_id,
 			org_id,
-			fulfilled_file_id
+			fulfilled_file_id,
+			request_id
 		)
 		VALUES (
 			$1,
 			$2,
-			$3
+			$3,
+			$4
 		)
-	`, catId, orgId, fileId)
+	`, catId, orgId, fileId, requestId)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
-	return tx.Commit()
+	return nil
 }
 
 func AddDocRequestComment(comment *core.DocumentRequestComment, role *core.Role) error {

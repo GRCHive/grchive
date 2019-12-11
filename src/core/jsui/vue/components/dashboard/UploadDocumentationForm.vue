@@ -64,7 +64,11 @@ import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 
 export default Vue.extend({
     props : {
-        catId: Number
+        catId: Number,
+        requestId: {
+            type: Number,
+            default: -1
+        }
     },
     components: {
         UserSearchFormComponent
@@ -107,6 +111,7 @@ export default Vue.extend({
                 altName: this.altName,
                 description: this.description,
                 uploadUserId: this.uploadUser.Id,
+                fulfilledRequestId: (this.requestId != -1) ? this.requestId : null
             }).then((resp : TUploadControlDocOutput) => {
                 this.progressOverlay = false
                 this.$emit('do-save', resp.data)

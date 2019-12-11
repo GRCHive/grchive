@@ -205,6 +205,7 @@ func registerDocRequestsAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiGetEndpoint, getDocumentRequest).Methods("GET").Name(webcore.ApiGetDocRequestRouteName)
 	s.HandleFunc(core.ApiAllEndpoint, allDocumentRequests).Methods("GET").Name(webcore.ApiAllDocRequestRouteName)
 	s.HandleFunc(core.ApiDeleteEndpoint, deleteDocumentRequest).Methods("POST").Name(webcore.ApiDeleteDocRequestRouteName)
+	s.HandleFunc(core.ApiUpdateEndpoint, updateDocumentRequest).Methods("POST").Name(webcore.ApiUpdateDocRequestRouteName)
 	s.HandleFunc(core.ApiDocRequestCompleteEndpoint, completeDocumentRequest).Methods("POST").Name(webcore.ApiCompleteDocRequestRouteName)
 
 	registerDocRequestCommentsAPIPaths(s)
