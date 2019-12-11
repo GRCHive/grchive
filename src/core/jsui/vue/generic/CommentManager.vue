@@ -17,7 +17,7 @@
         <v-list two-line v-if="!loading">
             <template v-for="(item, index) in comments">
                 <v-list-item
-                    :key="item.Id"
+                    :key="`content-${item.Id}`"
                 >
                     <v-list-item-content>
                         <v-list-item-title>
@@ -34,7 +34,7 @@
                     </v-list-item-content>
                 </v-list-item>
                 <v-divider
-                    :key="index"
+                    :key="`divider-${item.Id}`"
                     v-if="index != comments.length - 1"
                 ></v-divider>
             </template>
