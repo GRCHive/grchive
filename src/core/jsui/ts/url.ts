@@ -97,6 +97,10 @@ export function createSingleDocCatUrl(org : string, id: number) : string {
     return `/dashboard/org/${org}/documentation/cat/${id}`
 }
 
+export function createOrgDocRequestsUrl(org : string) : string {
+    return `/dashboard/org/${org}/requests`
+}
+
 export function createSingleDocRequestUrl(org : string, id: number) : string {
     return `/dashboard/org/${org}/requests/${id}`
 }
@@ -219,3 +223,4 @@ export const deleteDbSysLinkUrl : string = "/api/it/deleteDbSysLink"
 export const newDocRequestUrl : string = "/api/requests/new"
 export const allDocRequestUrl : string = "/api/requests/all"
 export const getDocRequestUrl : string = "/api/requests/get"
+export const deleteDocRequestUrl : string = "/api/requests/delete"

@@ -256,5 +256,5 @@ func RenderDocRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func RenderSingleDocRequest(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardDocRequestsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardSingleDocRequestTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }

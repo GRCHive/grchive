@@ -11,6 +11,7 @@
         @change="change"
         :disabled="disabled"
         :value-comparator="compare"
+        :rules="rules"
     ></v-autocomplete>
 </template>
 
@@ -35,6 +36,10 @@ const Props = Vue.extend({
         idMode: {
             type: Boolean,
             default: false
+        },
+        rules: {
+            type: Array,
+            default: () => []
         }
     }
 })

@@ -45,7 +45,7 @@ func CreateNewDocumentRequest(request *core.DocumentRequest, role *core.Role) er
 	return tx.Commit()
 }
 
-func GetDocumentRequest(requestId int64, catId int64, orgId int32, role *core.Role) (*core.DocumentRequest, error) {
+func GetDocumentRequest(requestId int64, orgId int32, role *core.Role) (*core.DocumentRequest, error) {
 	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
@@ -55,10 +55,27 @@ func GetDocumentRequest(requestId int64, catId int64, orgId int32, role *core.Ro
 		SELECT *
 		FROM document_requests
 		WHERE id = $1
-			AND cat_id = $2
-			AND org_id = $3
-	`, requestId, catId, orgId)
+			AND org_id = $2
+	`, requestId, orgId)
 	return &req, err
+}
+
+func DeleteDocumentRequest(requestId int64, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		DELETE FROM document_requests
+		WHERE id = $1
+			AND org_id = $2
+	`, requestId, orgId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
 }
 
 func GetAllDocumentRequestsForOrganization(orgId int32, role *core.Role) ([]*core.DocumentRequest, error) {
@@ -169,4 +186,19 @@ func GetAllDocumentRequestComments(requestId int64, orgId int32, role *core.Role
 			AND request_id = $2
 	`, orgId, requestId)
 	return comments, err
+}
+
+func GetFulfilledFileIdsForDocRequest(requestId int64, orgId int32, role *core.Role) ([]int64, error) {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	ids := make([]int64, 0)
+	err := dbConn.Select(&ids, `
+		SELECT fulfilled_file_id
+		FROM document_request_fulfillment
+		WHERE org_id = $1
+			AND request_id = $2
+	`, orgId, requestId)
+	return ids, err
 }

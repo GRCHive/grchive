@@ -201,15 +201,16 @@ func registerITInfraAPIPaths(r *mux.Router) {
 
 func registerDocRequestsAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiDocRequestPrefix).Subrouter()
-	s.HandleFunc(core.ApiNewEndpoint, NewDocumentRequest).Methods("POST").Name(webcore.ApiNewDocRequestRouteName)
-	s.HandleFunc(core.ApiGetEndpoint, GetDocumentRequest).Methods("GET").Name(webcore.ApiGetDocRequestRouteName)
-	s.HandleFunc(core.ApiAllEndpoint, AllDocumentRequests).Methods("GET").Name(webcore.ApiAllDocRequestRouteName)
+	s.HandleFunc(core.ApiNewEndpoint, newDocumentRequest).Methods("POST").Name(webcore.ApiNewDocRequestRouteName)
+	s.HandleFunc(core.ApiGetEndpoint, getDocumentRequest).Methods("GET").Name(webcore.ApiGetDocRequestRouteName)
+	s.HandleFunc(core.ApiAllEndpoint, allDocumentRequests).Methods("GET").Name(webcore.ApiAllDocRequestRouteName)
+	s.HandleFunc(core.ApiDeleteEndpoint, deleteDocumentRequest).Methods("POST").Name(webcore.ApiDeleteDocRequestRouteName)
 
 	registerDocRequestCommentsAPIPaths(s)
 }
 
 func registerDocRequestCommentsAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiDocRequestCommentsPrefix).Subrouter()
-	s.HandleFunc(core.ApiNewEndpoint, NewDocumentRequestComment).Methods("GET").Name(webcore.ApiNewDocRequestCommentRouteName)
-	s.HandleFunc(core.ApiAllEndpoint, AllDocumentRequestComments).Methods("GET").Name(webcore.ApiAllDocRequestCommentRouteName)
+	s.HandleFunc(core.ApiNewEndpoint, newDocumentRequestComment).Methods("GET").Name(webcore.ApiNewDocRequestCommentRouteName)
+	s.HandleFunc(core.ApiAllEndpoint, allDocumentRequestComments).Methods("GET").Name(webcore.ApiAllDocRequestCommentRouteName)
 }

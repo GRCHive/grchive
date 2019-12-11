@@ -23,6 +23,7 @@
             v-model="realCatId"
             :id-mode="true"
             :available-cats="availableCats"
+            :rules="[rules.required]"
         ></document-category-search-form-component>
     </v-form>
 

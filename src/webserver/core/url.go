@@ -91,6 +91,7 @@ var DashboardSingleInfraEndpoint string = fmt.Sprintf("%s/{%s}", DashboardInfraS
 const ApiNewEndpoint = "/new"
 const ApiAllEndpoint = "/all"
 const ApiGetEndpoint = "/get"
+const ApiDeleteEndpoint = "/delete"
 
 // API
 const ApiUrl string = "/api"

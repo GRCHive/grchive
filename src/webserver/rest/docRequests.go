@@ -19,8 +19,12 @@ type NewDocumentRequestInputs struct {
 
 type GetDocumentRequestInputs struct {
 	RequestId int64 `webcore:"requestId"`
-	CatId     int64 `webcore:"catId"`
 	OrgId     int32 `webcore:"orgId"`
+}
+
+type DeleteDocumentRequestInputs struct {
+	RequestId int64 `json:"requestId"`
+	OrgId     int32 `json:"orgId"`
 }
 
 type AllDocumentRequestsInputs struct {
@@ -42,7 +46,7 @@ type AllDocumentRequestCommentsInputs struct {
 	OrgId     int32 `webcore:"orgId"`
 }
 
-func NewDocumentRequest(w http.ResponseWriter, r *http.Request) {
+func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -81,7 +85,7 @@ func NewDocumentRequest(w http.ResponseWriter, r *http.Request) {
 	jsonWriter.Encode(request)
 }
 
-func GetDocumentRequest(w http.ResponseWriter, r *http.Request) {
+func getDocumentRequest(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -101,21 +105,49 @@ func GetDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req, err := database.GetDocumentRequest(inputs.RequestId, inputs.CatId, inputs.OrgId, role)
+	req, err := database.GetDocumentRequest(inputs.RequestId, inputs.OrgId, role)
 	if err != nil {
 		core.Warning("Failed to get single doc request: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
+	cat, err := database.GetDocumentationCategory(req.CatId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get doc category: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	fileIds, err := database.GetFulfilledFileIdsForDocRequest(inputs.RequestId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get relevant file IDs for request: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	files := make([]*core.ControlDocumentationFile, len(fileIds))
+	for i, id := range fileIds {
+		files[i], err = database.GetControlDocumentation(id, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get file metadata: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
 	jsonWriter.Encode(struct {
-		Request *core.DocumentRequest
+		Request  *core.DocumentRequest
+		Files    []*core.ControlDocumentationFile
+		Category *core.ControlDocumentationCategory
 	}{
-		Request: req,
+		Request:  req,
+		Files:    files,
+		Category: cat,
 	})
 }
 
-func AllDocumentRequests(w http.ResponseWriter, r *http.Request) {
+func allDocumentRequests(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -151,7 +183,7 @@ func AllDocumentRequests(w http.ResponseWriter, r *http.Request) {
 	jsonWriter.Encode(reqs)
 }
 
-func NewDocumentRequestComment(w http.ResponseWriter, r *http.Request) {
+func newDocumentRequestComment(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -190,7 +222,31 @@ func NewDocumentRequestComment(w http.ResponseWriter, r *http.Request) {
 	jsonWriter.Encode(comment)
 }
 
-func AllDocumentRequestComments(w http.ResponseWriter, r *http.Request) {
+func deleteDocumentRequest(w http.ResponseWriter, r *http.Request) {
+	inputs := DeleteDocumentRequestInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteDocumentRequest(inputs.RequestId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to delete doc request: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func allDocumentRequestComments(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 

@@ -4,8 +4,10 @@ import { postFormJson } from '../http'
 import { getAPIRequestConfig } from './apiUtility'
 import { newDocRequestUrl,
          allDocRequestUrl,
-         getDocRequestUrl } from '../url'
+         getDocRequestUrl,
+         deleteDocRequestUrl } from '../url'
 import { DocumentRequest } from '../docRequests'
+import { ControlDocumentationCategory, ControlDocumentationFile } from '../controls'
 
 export interface TNewDocRequestInput {
     name: string
@@ -49,4 +51,36 @@ export function getAllDocRequests(inp : TGetAllDocumentRequestInput) : Promise<T
         })
         return resp
     })
+}
+
+export interface TGetSingleDocumentRequestInput {
+    requestId: number
+    orgId: number
+}
+
+export interface TGetSingleDocumentRequestOutput {
+    data: {
+        Request: DocumentRequest
+        Files: ControlDocumentationFile[]
+        Category: ControlDocumentationCategory
+    }
+}
+
+export function getSingleDocRequest(inp : TGetSingleDocumentRequestInput) : Promise<TGetSingleDocumentRequestOutput> {
+    return axios.get(getDocRequestUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetSingleDocumentRequestOutput) => {
+        if (!!resp.data.Request.CompletionTime) {
+            resp.data.Request.CompletionTime = new Date(resp.data.Request.CompletionTime)
+        }
+        resp.data.Request.RequestTime = new Date(resp.data.Request.RequestTime)
+        return resp
+    })
+}
+
+export interface TDeleteDocumentRequestInput {
+    requestId: number
+    orgId: number
+}
+
+export function deleteSingleDocRequest(inp : TDeleteDocumentRequestInput) : Promise<void> {
+    return postFormJson(deleteDocRequestUrl, inp, getAPIRequestConfig())
 }
