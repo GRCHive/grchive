@@ -44,11 +44,19 @@
                 </v-list-item-action>
 
                 <v-list-item-action>
-                    <v-btn color="success" v-if="!currentRequest.CompletionTime">
+                    <v-btn 
+                        @click="doComplete(true)"
+                        color="success"
+                        v-if="!currentRequest.CompletionTime"
+                    >
                         Complete  
                     </v-btn>
 
-                    <v-btn color="error" v-else>
+                    <v-btn 
+                        @click="doComplete(false)"
+                        color="warning"
+                        v-else
+                    >
                         Reopen
                     </v-btn>
                 </v-list-item-action>
@@ -75,7 +83,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { DocumentRequest } from '../../../ts/docRequests'
 import { TGetSingleDocumentRequestOutput, getSingleDocRequest } from '../../../ts/api/apiDocRequests'
-import { deleteSingleDocRequest } from '../../../ts/api/apiDocRequests'
+import { deleteSingleDocRequest, completeDocRequest } from '../../../ts/api/apiDocRequests'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl, createOrgDocRequestsUrl } from '../../../ts/url'
 import { ControlDocumentationCategory, ControlDocumentationFile } from '../../../ts/controls'
@@ -125,6 +133,28 @@ export default class FullEditDatabaseComponent extends Vue {
             orgId: PageParamsStore.state.organization!.Id,
         }).then(() => {
             window.location.replace(createOrgDocRequestsUrl(PageParamsStore.state.organization!.OktaGroupName))
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    doComplete(val : boolean) {
+        completeDocRequest({
+            requestId: this.currentRequest!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            complete: val,
+        }).then(() => {
+            if (val) {
+                this.currentRequest!.CompletionTime = new Date()
+            } else {
+                this.currentRequest!.CompletionTime = null
+            }
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

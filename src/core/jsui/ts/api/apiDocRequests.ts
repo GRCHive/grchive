@@ -5,7 +5,8 @@ import { getAPIRequestConfig } from './apiUtility'
 import { newDocRequestUrl,
          allDocRequestUrl,
          getDocRequestUrl,
-         deleteDocRequestUrl } from '../url'
+         deleteDocRequestUrl,
+         completeDocRequestUrl } from '../url'
 import { DocumentRequest } from '../docRequests'
 import { ControlDocumentationCategory, ControlDocumentationFile } from '../controls'
 
@@ -84,3 +85,14 @@ export interface TDeleteDocumentRequestInput {
 export function deleteSingleDocRequest(inp : TDeleteDocumentRequestInput) : Promise<void> {
     return postFormJson(deleteDocRequestUrl, inp, getAPIRequestConfig())
 }
+
+export interface TCompleteDocumentRequestInput {
+    requestId: number
+    orgId: number
+    complete: boolean
+}
+
+export function completeDocRequest(inp : TCompleteDocumentRequestInput) : Promise<void> {
+    return postFormJson(completeDocRequestUrl, inp, getAPIRequestConfig())
+}
+

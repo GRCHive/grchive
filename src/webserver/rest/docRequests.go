@@ -27,6 +27,12 @@ type DeleteDocumentRequestInputs struct {
 	OrgId     int32 `json:"orgId"`
 }
 
+type CompleteDocumentRequestInputs struct {
+	RequestId int64 `json:"requestId"`
+	OrgId     int32 `json:"orgId"`
+	Complete  bool  `json:"complete"`
+}
+
 type AllDocumentRequestsInputs struct {
 	OrgId int32          `webcore:"orgId"`
 	CatId core.NullInt64 `webcore:"catId,optional"`
@@ -241,6 +247,30 @@ func deleteDocumentRequest(w http.ResponseWriter, r *http.Request) {
 	err = database.DeleteDocumentRequest(inputs.RequestId, inputs.OrgId, role)
 	if err != nil {
 		core.Warning("Failed to delete doc request: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func completeDocumentRequest(w http.ResponseWriter, r *http.Request) {
+	inputs := CompleteDocumentRequestInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.CompleteDocumentRequest(inputs.RequestId, inputs.OrgId, inputs.Complete, role)
+	if err != nil {
+		core.Warning("Failed to complete/reopen doc request: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -233,6 +233,7 @@ const ApiITInfraPrefix = "/infra"
 
 // API - Document Requests
 const ApiDocRequestPrefix = "/requests"
+const ApiDocRequestCompleteEndpoint = "/complete"
 
 // API - Document Request Comments
 const ApiDocRequestCommentsPrefix = "/comments"

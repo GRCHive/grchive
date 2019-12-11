@@ -2,6 +2,7 @@ package database
 
 import (
 	"gitlab.com/b3h47pte/audit-stuff/core"
+	"time"
 )
 
 func CreateNewDocumentRequest(request *core.DocumentRequest, role *core.Role) error {
@@ -71,6 +72,30 @@ func DeleteDocumentRequest(requestId int64, orgId int32, role *core.Role) error 
 		WHERE id = $1
 			AND org_id = $2
 	`, requestId, orgId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
+func CompleteDocumentRequest(requestId int64, orgId int32, complete bool, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	newTime := core.NullTime{}
+	if complete {
+		newTime = core.CreateNullTime(time.Now().UTC())
+	}
+
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		UPDATE document_requests
+		SET completion_time = $3
+		WHERE id = $1
+			AND org_id = $2
+	`, requestId, orgId, newTime)
 	if err != nil {
 		tx.Rollback()
 		return err

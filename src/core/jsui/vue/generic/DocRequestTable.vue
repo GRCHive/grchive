@@ -99,7 +99,7 @@ export default class DocRequestTable extends ResourceTableProps {
             docCat: !!this.catIdToName[inp.CatId] ? this.catIdToName[inp.CatId] : "Loading...", 
             requester: createUserString(MetadataStore.getters.getUser(inp.RequestedUserId)),
             requestTime: inp.RequestTime.toString(),
-            complete: false,
+            complete: !!inp.CompletionTime,
             value: inp
         }
     }
