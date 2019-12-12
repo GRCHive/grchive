@@ -2,3 +2,4 @@ bazel/
 .bazelci/
 .bazelrc
 flyway/
+vault/
