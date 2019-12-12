@@ -158,6 +158,7 @@ node_repositories(
     node_version = "12.10.0",
     node_repositories = {
         "12.10.0-linux_amd64": ("node-v12.10.0-linux-x64.tar.gz", "node-v12.10.0-linux-x64", "3de23fd9f2145ff76d0583e7f57aa4ccead58b3fb991e215f862e779c9cdf151"),
+        "12.10.0-darwin_amd64": ("node-v12.10.0-darwin-x64.tar.gz", "node-v12.10.0-darwin-x64", "4c16d1f6454f5dc3977ad00cea123792b8d4e1d6d1bf42bbc82a4202039a5971"),
     },
     node_urls = ["https://nodejs.org/dist/v{version}/{filename}"],
 )
