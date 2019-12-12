@@ -1,7 +1,9 @@
 #!/bin/bash
-sudo -u postgres initdb -D /var/lib/postgres/data
-sudo -u postgres pg_ctl -D /var/lib/postgres/data -l logfile start
-sudo -u postgres createuser -d -s -r -h localhost DEVUSER
-sudo -u postgres createdb audit -O DEVUSER
-sudo -u postgres createdb vault -O DEVUSER
+DB_LOC=$2
+
+$1 initdb -D ${DB_LOC}
+$1 pg_ctl -D ${DB_LOC} -l logfile start
+$1 createuser -d -s -r -h localhost DEVUSER
+$1 createdb audit -O DEVUSER
+$1 createdb vault -O DEVUSER
 echo "!!! Start/Enable the PostgreSQL service for your OS."

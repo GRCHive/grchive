@@ -7,8 +7,9 @@ BAZEL_VERSION_NAME=${BAZEL_MAJOR_VERSION}.${BAZEL_MINOR_VERSION}.${BAZEL_PATCH_V
 
 if [ ! -d bazel ] && [ ! -f bazel-${BAZEL_VERSION_NAME}-dist.zip ]; then
     curl -L -O https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION_NAME}/bazel-${BAZEL_VERSION_NAME}-dist.zip
-    unzip bazel-${BAZEL_VERSION_NAME}-dist.zip -d bazel
 fi
+
+unzip bazel-${BAZEL_VERSION_NAME}-dist.zip -d bazel
 cd bazel
 
 env EXTRA_BAZEL_ARGS="--host_javabase=@local_jdk//:jdk" bash ./compile.sh

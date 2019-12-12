@@ -46,6 +46,9 @@ This document will assume that the git checkout directory is set in an environme
     ```
 - Create the PostgreSQL schema
     ```
+    cd $SRC/devops/database/vault
+    flyway -configFiles=./flyway/dev-flyway.conf migrate
+    cd $SRC/devops/database/webserver
     flyway -configFiles=./flyway/dev-flyway.conf migrate
     ```
 ## Setup and Unseal Vault
@@ -57,6 +60,8 @@ This document will assume that the git checkout directory is set in an environme
 - `vault operator unseal -address="http://localhost:8081"`
 - Past the previously copied unseal key to unseal the vault.
 - `vault login -address="http://localhost:8081" $ROOT_TOKEN_HERE`
+- `cd $SRC/devops/vault`
+- `./init_dev_vault.sh -address="http://localhost:8081"`
 
 Note that the Vault server must be started before attempting to run the webserver.
 Every time the Vault server is restarted, it must be unsealed.
