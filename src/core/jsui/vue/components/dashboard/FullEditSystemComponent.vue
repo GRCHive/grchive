@@ -102,7 +102,7 @@
 
                         <v-card>
                             <v-card-title>
-                                Infrastructure
+                                Deployment
                             </v-card-title>
                             <v-divider></v-divider>
 

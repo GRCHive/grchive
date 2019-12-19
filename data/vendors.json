@@ -1,0 +1,12 @@
+{
+    "database": [
+        "Google Cloud Spanner",
+        "Google Cloud SQL",
+        "Amazon Aurora",
+        "Amazon RDS"
+    ],
+    "software": [
+        "Oracle ERP Cloud",
+        "Workday"
+    ]
+}

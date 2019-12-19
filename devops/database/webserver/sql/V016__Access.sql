@@ -35,18 +35,63 @@ CREATE TABLE user_roles (
 
 CREATE TABLE _base_resource_access (
     role_id BIGINT NOT NULL,
-    org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-    access_type INTEGER NOT NULL,
-    CONSTRAINT role_org_foreign_key
-        FOREIGN KEY(role_id, org_id)
-        REFERENCES organization_available_roles(id, org_id)
-        ON DELETE CASCADE
+    org_id INTEGER NOT NULL,
+    access_type INTEGER NOT NULL
 );
 
-CREATE TABLE resource_organization_users_access () INHERITS (_base_resource_access);
-CREATE TABLE resource_organization_roles_access () INHERITS (_base_resource_access);
-CREATE TABLE resource_process_flows_access () INHERITS (_base_resource_access);
-CREATE TABLE resource_controls_access () INHERITS (_base_resource_access);
-CREATE TABLE resource_control_documentation_access () INHERITS (_base_resource_access);
-CREATE TABLE resource_control_documentation_metadata_access () INHERITS (_base_resource_access);
-CREATE TABLE resource_risks_access () INHERITS (_base_resource_access);
+CREATE TABLE resource_organization_users_access (
+    FOREIGN KEY(org_id)
+        REFERENCES organizations(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY(role_id, org_id)
+        REFERENCES organization_available_roles(id, org_id)
+        ON DELETE CASCADE
+) INHERITS (_base_resource_access);
+CREATE TABLE resource_organization_roles_access (
+    FOREIGN KEY(org_id)
+        REFERENCES organizations(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY(role_id, org_id)
+        REFERENCES organization_available_roles(id, org_id)
+        ON DELETE CASCADE
+) INHERITS (_base_resource_access);
+CREATE TABLE resource_process_flows_access (
+    FOREIGN KEY(org_id)
+        REFERENCES organizations(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY(role_id, org_id)
+        REFERENCES organization_available_roles(id, org_id)
+        ON DELETE CASCADE
+) INHERITS (_base_resource_access);
+CREATE TABLE resource_controls_access (
+    FOREIGN KEY(org_id)
+        REFERENCES organizations(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY(role_id, org_id)
+        REFERENCES organization_available_roles(id, org_id)
+        ON DELETE CASCADE
+) INHERITS (_base_resource_access);
+CREATE TABLE resource_control_documentation_access (
+    FOREIGN KEY(org_id)
+        REFERENCES organizations(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY(role_id, org_id)
+        REFERENCES organization_available_roles(id, org_id)
+        ON DELETE CASCADE
+) INHERITS (_base_resource_access);
+CREATE TABLE resource_control_documentation_metadata_access (
+    FOREIGN KEY(org_id)
+        REFERENCES organizations(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY(role_id, org_id)
+        REFERENCES organization_available_roles(id, org_id)
+        ON DELETE CASCADE
+) INHERITS (_base_resource_access);
+CREATE TABLE resource_risks_access (
+    FOREIGN KEY(org_id)
+        REFERENCES organizations(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY(role_id, org_id)
+        REFERENCES organization_available_roles(id, org_id)
+        ON DELETE CASCADE
+) INHERITS (_base_resource_access);

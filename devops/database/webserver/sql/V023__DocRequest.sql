@@ -21,4 +21,11 @@ CREATE TABLE document_request_fulfillment (
     FOREIGN KEY(request_id, cat_id, org_id) REFERENCES document_requests(id, cat_id, org_id) ON DELETE CASCADE
 );
 
-CREATE TABLE resource_doc_request_access () INHERITS (_base_resource_access);
+CREATE TABLE resource_doc_request_access (
+    FOREIGN KEY(org_id)
+        REFERENCES organizations(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY(role_id, org_id)
+        REFERENCES organization_available_roles(id, org_id)
+        ON DELETE CASCADE
+) INHERITS (_base_resource_access);
