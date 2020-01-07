@@ -121,6 +121,10 @@ export default class CreateNewGeneralLedgerCategoryForm extends VueComponent {
 
     cancel() {
         this.$emit('do-cancel')
+
+        if (this.editMode) {
+            this.canEdit = false
+        }
     }
 
     doSave() {

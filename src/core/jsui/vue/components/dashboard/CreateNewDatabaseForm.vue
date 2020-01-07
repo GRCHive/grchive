@@ -178,6 +178,12 @@ export default class CreateNewDatabaseForm extends VueComponent {
 
     cancel() {
         this.$emit('do-cancel')
+        this.clearForm()
+
+        if (this.editMode) {
+            this.canEdit = false
+        }
+
     }
 
     edit() {

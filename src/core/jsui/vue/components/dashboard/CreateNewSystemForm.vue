@@ -147,6 +147,7 @@ export default class CreateNewSystemForm extends VueComponent {
 
     cancel() {
         this.$emit('do-cancel')
+        this.canEdit = false
     }
 
     edit() {

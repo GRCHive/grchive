@@ -126,6 +126,10 @@ export default class CreateNewGeneralLedgerAccountForm extends VueComponent {
 
     cancel() {
         this.$emit('do-cancel')
+
+        if (this.editMode) {
+            this.canEdit = false
+        }
     }
 
     doSave() {
