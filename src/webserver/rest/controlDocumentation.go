@@ -42,10 +42,8 @@ type UploadControlDocInputs struct {
 }
 
 type GetControlDocInputs struct {
-	CatId     int64 `webcore:"catId"`
-	OrgId     int32 `webcore:"orgId"`
-	Page      int   `webcore:"page"`
-	NeedPages bool  `webcore:"needPages"`
+	CatId int64 `webcore:"catId"`
+	OrgId int32 `webcore:"orgId"`
 }
 
 type DeleteControlDocInputs struct {
@@ -384,31 +382,15 @@ func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type DataOutput struct {
-		Files       []*core.ControlDocumentationFile
-		TotalPages  int
-		CurrentPage int
+		Files []*core.ControlDocumentationFile
 	}
-	output := DataOutput{
-		CurrentPage: inputs.Page,
-	}
+	output := DataOutput{}
 
-	const controlDocPageSize int = 10
-	controlDocPageOffset := controlDocPageSize * inputs.Page
-
-	output.Files, err = database.GetControlDocumentationForCategory(inputs.CatId, org.Id, controlDocPageSize, controlDocPageOffset, role)
+	output.Files, err = database.GetControlDocumentationForCategory(inputs.CatId, org.Id, role)
 	if err != nil {
 		core.Warning("Can't get files: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
-	}
-
-	if inputs.NeedPages {
-		output.TotalPages, err = database.GetTotalControlDocumentationPages(inputs.CatId, org.Id, controlDocPageSize, role)
-		if err != nil {
-			core.Warning("Can't total pages: " + err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
 	}
 
 	jsonWriter.Encode(output)

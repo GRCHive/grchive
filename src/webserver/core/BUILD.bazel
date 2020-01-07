@@ -42,6 +42,7 @@ go_library(
         "random.go",
         "docRequests.go",
         "comments.go",
+        "deployments.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",

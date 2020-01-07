@@ -222,16 +222,25 @@ func getDb(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	deployment, err := database.GetDatabaseDeployment(db.Id, org.Id, role)
+	if err != nil {
+		core.Warning("Failed to find relevant deployment: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	jsonWriter.Encode(struct {
 		Database          *core.Database
 		Connection        *core.DatabaseConnection
 		RelevantSystemIds []int64
 		AllSystems        []*core.System
+		Deployment        *core.FullDeployment
 	}{
 		Database:          db,
 		Connection:        conn,
 		RelevantSystemIds: sysIds,
 		AllSystems:        allSystems,
+		Deployment:        deployment,
 	})
 }
 

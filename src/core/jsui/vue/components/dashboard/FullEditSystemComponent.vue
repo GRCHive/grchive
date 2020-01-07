@@ -44,7 +44,7 @@
 
             <v-container fluid>
                 <v-row>
-                    <v-col cols="8">
+                    <v-col cols="6">
                         <create-new-system-form
                             ref="editForm"
                             :edit-mode="true"
@@ -53,7 +53,7 @@
                         </create-new-system-form>
                     </v-col>
 
-                    <v-col cols="4">
+                    <v-col cols="6">
                         <v-card class="mb-4">
                             <v-card-title>
                                 Relevant Databases
@@ -106,15 +106,28 @@
                             </v-card-title>
                             <v-divider></v-divider>
 
-                            <v-row align="center" justify="center">
-                                <v-btn color="primary"
-                                       fab
-                                       outlined
-                                       x-large
-                                       class="my-6">
-                                    <v-icon>mdi-plus</v-icon>
-                                </v-btn>
-                            </v-row>
+                            <div v-if="!deployment">
+                                <v-row align="center" justify="center">
+                                    <v-btn color="primary"
+                                           fab
+                                           outlined
+                                           x-large
+                                           class="my-6"
+                                           @click="addDeployment">
+                                        <v-icon>mdi-plus</v-icon>
+                                    </v-btn>
+                                </v-row>
+                            </div>
+
+                            <div v-else>
+                                <deployment-editor
+                                    class="pa-4"
+                                    v-model="deployment"
+                                    :system-id="currentSystem.Id"
+                                >
+                                </deployment-editor>
+                            </div>
+
                         </v-card>
                     </v-col>
                 </v-row>
@@ -137,12 +150,16 @@ import { contactUsUrl, createOrgSystemUrl } from '../../../ts/url'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import DbTable from '../../generic/DbTable.vue'
 import { Database } from '../../../ts/databases'
+import { FullDeployment } from '../../../ts/deployments'
+import DeploymentEditor from '../../generic/DeploymentEditor.vue'
+import { newDeployment, TNewDeploymentOutput } from '../../../ts/api/apiDeployments'
 
 @Component({
     components: {
         CreateNewSystemForm,
         GenericDeleteConfirmationForm,
-        DbTable
+        DbTable,
+        DeploymentEditor
     }
 })
 export default class FullEditSystemComponent extends Vue {
@@ -151,6 +168,7 @@ export default class FullEditSystemComponent extends Vue {
     allDb: Database[] = []
 
     dbToLink: Database[] = []
+    deployment: FullDeployment | null = null
 
     ready : boolean = false
     expandDescription: boolean = false
@@ -159,6 +177,24 @@ export default class FullEditSystemComponent extends Vue {
 
     $refs!: {
         editForm: CreateNewSystemForm
+    }
+
+    addDeployment() {
+        newDeployment({
+            orgId: PageParamsStore.state.organization!.Id,
+            systemId: this.currentSystem.Id,
+            dbId: null,
+        }).then((resp : TNewDeploymentOutput) => {
+            this.deployment = resp.data
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 
     refreshSystemData() {
@@ -175,6 +211,7 @@ export default class FullEditSystemComponent extends Vue {
 
             let idSet = new Set(resp.data.RelevantDatabaseIds)
             this.relatedDbs = resp.data.AllDatabases.filter((ele : Database) => idSet.has(ele.Id))
+            this.deployment = resp.data.Deployment
 
             Vue.nextTick(() => {
                 this.$refs.editForm.clearForm()

@@ -29,6 +29,7 @@ go_library(
         "sysDatabase.go",
         "docRequests.go",
         "comments.go",
+        "deployments.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 

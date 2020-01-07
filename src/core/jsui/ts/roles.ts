@@ -26,6 +26,8 @@ export interface Permissions {
     SystemAccess              : AccessType
     DbAccess                  : AccessType
     DbConnectionAccess        : AccessType
+    DocRequestAccess          : AccessType
+    DeploymentAccess          : AccessType
 }
 
 export interface FullRole {

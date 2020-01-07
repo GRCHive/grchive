@@ -94,6 +94,18 @@
             :disabled="!canEdit"
         ></access-type-editor>
 
+        <access-type-editor
+            label="Document Requests"
+            v-model="permissions.DocRequestAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+
+        <access-type-editor
+            label="Deployments"
+            v-model="permissions.DeploymentAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+
     </v-form>
 
     <v-card-actions>
@@ -177,6 +189,8 @@ export default Vue.extend({
             SystemAccess: AccessType.NoAccess,
             DbAccess: AccessType.NoAccess,
             DbConnectionAccess: AccessType.NoAccess,
+            DocRequestAccess: AccessType.NoAccess,
+            DeploymentAccess: AccessType.NoAccess,
         },
     }),
     computed: {

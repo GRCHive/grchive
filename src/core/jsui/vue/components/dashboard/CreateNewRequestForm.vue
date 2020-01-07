@@ -22,8 +22,7 @@
         
         <document-category-search-form-component
             v-if="!catId"
-            v-model="realCatId"
-            :id-mode="true"
+            v-model="realCat"
             :available-cats="availableCats"
             :rules="[rules.required]"
             :disabled="!canEdit"
@@ -67,6 +66,7 @@ import Component from 'vue-class-component'
 import * as rules from '../../../ts/formRules'
 import { newDocRequest, TNewDocRequestOutput } from '../../../ts/api/apiDocRequests'
 import { updateDocRequest, TUpdateDocRequestOutput } from '../../../ts/api/apiDocRequests'
+import { ControlDocumentationCategory } from '../../../ts/controls'
 import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { DocumentRequest } from '../../../ts/docRequests'
@@ -102,8 +102,15 @@ export default class CreateNewRequestForm extends Props {
     rules = rules
     name: string = ""
     description: string = ""
-    realCatId: number | null = null
+    realCat: ControlDocumentationCategory | null = null
     canEdit: boolean = false
+
+    get realCatId() : number {
+        if (this.catId == -1) {
+            return this.realCat!.Id
+        }
+        return this.catId
+    }
 
     cancel() {
         this.$emit('do-cancel')
@@ -133,7 +140,7 @@ export default class CreateNewRequestForm extends Props {
         newDocRequest({
             name: this.name,
             description: this.description,
-            catId: this.realCatId!,
+            catId: this.realCatId,
             orgId: PageParamsStore.state.organization!.Id,
             requestedUserId: PageParamsStore.state.user!.Id,
         }).then((resp : TNewDocRequestOutput) => {
@@ -167,7 +174,6 @@ export default class CreateNewRequestForm extends Props {
     }
 
     mounted() {
-        this.realCatId = (this.catId == -1) ? null : this.catId
         this.canEdit = !this.editMode
     }
 

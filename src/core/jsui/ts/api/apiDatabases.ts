@@ -15,6 +15,7 @@ import {
     linkSystemsToDbUrl
 } from '../url'
 import { System } from '../systems'
+import { FullDeployment } from '../deployments'
 
 export interface TDbTypeOutputs {
     data: DatabaseType[]
@@ -87,6 +88,7 @@ export interface TGetDatabaseOutputs {
         Connection: DatabaseConnection
         RelevantSystemIds: number[]
         AllSystems: System[]
+        Deployment: FullDeployment
     }
 }
 

@@ -31,6 +31,7 @@ const (
 	ResourceDatabases
 	ResourceDbConnections
 	ResourceDocRequests
+	ResourceDeployments
 )
 
 var AvailableResources []ResourceType = []ResourceType{
@@ -46,6 +47,7 @@ var AvailableResources []ResourceType = []ResourceType{
 	ResourceDatabases,
 	ResourceDbConnections,
 	ResourceDocRequests,
+	ResourceDeployments,
 }
 
 type PermissionsMap struct {
@@ -61,6 +63,7 @@ type PermissionsMap struct {
 	DbAccess                   AccessType `db:"db_access"`
 	DbConnectionAccess         AccessType `db:"db_conn_access"`
 	DocRequestAccess           AccessType `db:"doc_request_access"`
+	DeploymentAccess           AccessType `db:"deployment_access"`
 }
 
 type RoleMetadata struct {
@@ -81,6 +84,24 @@ func CreateOwnerAccessType() AccessType {
 	return AccessView | AccessEdit | AccessManage
 }
 
+func CreateViewOnlyAccessPermission() PermissionsMap {
+	return PermissionsMap{
+		OrgUsersAccess:             AccessView,
+		OrgRolesAccess:             AccessView,
+		ProcessFlowsAccess:         AccessView,
+		ControlsAccess:             AccessView,
+		ControlDocumentationAccess: AccessView,
+		ControlDocMetadataAccess:   AccessView,
+		RisksAccess:                AccessView,
+		GLAccess:                   AccessView,
+		SystemAccess:               AccessView,
+		DbAccess:                   AccessView,
+		DbConnectionAccess:         AccessView,
+		DocRequestAccess:           AccessView,
+		DeploymentAccess:           AccessView,
+	}
+}
+
 func CreateAllAccessPermission() PermissionsMap {
 	return PermissionsMap{
 		OrgUsersAccess:             CreateOwnerAccessType(),
@@ -95,6 +116,7 @@ func CreateAllAccessPermission() PermissionsMap {
 		DbAccess:                   CreateOwnerAccessType(),
 		DbConnectionAccess:         CreateOwnerAccessType(),
 		DocRequestAccess:           CreateOwnerAccessType(),
+		DeploymentAccess:           CreateOwnerAccessType(),
 	}
 }
 
@@ -153,6 +175,8 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 		return p.DbConnectionAccess
 	case ResourceDocRequests:
 		return p.DocRequestAccess
+	case ResourceDeployments:
+		return p.DeploymentAccess
 	}
 	return AccessNone
 }

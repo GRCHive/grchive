@@ -229,3 +229,5 @@ export const updateDocRequestUrl : string = "/api/requests/update"
 
 export const newDocRequestCommentUrl : string = "/api/comments/requests/new"
 export const allDocRequestCommentUrl : string = "/api/comments/requests/all"
+
+export const newDeploymentUrl : string = "/api/deployment/new"

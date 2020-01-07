@@ -14,7 +14,7 @@ import MetadataStore from '../../ts/metadata'
         BaseResourceTable
     }
 })
-export default class SystemsTable extends ResourceTableProps {
+export default class DbTable extends ResourceTableProps {
     get ready() : boolean {
         return MetadataStore.state.dbTypesInitialized
     }

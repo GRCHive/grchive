@@ -175,14 +175,23 @@ func getSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	deployment, err := database.GetSystemDeployment(sys.Id, org.Id, role)
+	if err != nil {
+		core.Warning("Failed to find relevant deployment: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	jsonWriter.Encode(struct {
 		System              *core.System
 		RelevantDatabaseIds []int64
 		AllDatabases        []*core.Database
+		Deployment          *core.FullDeployment
 	}{
 		System:              sys,
 		RelevantDatabaseIds: dbIds,
 		AllDatabases:        allDb,
+		Deployment:          deployment,
 	})
 }
 

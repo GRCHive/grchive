@@ -31,7 +31,6 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
     itemToDelete: any | null = null
 
     get showHideDelete() : boolean {
-        console.log("show hide" , !!this.itemToDelete)
         return !!this.itemToDelete
     }
 
@@ -44,7 +43,7 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
     }
 
     get finalTableHeaders() : any[] {
-        let headers = this.tableHeaders
+        let headers = [...this.tableHeaders]
 
         if (this.useCrudDelete) {
             headers.push({
@@ -81,7 +80,6 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
 
     deleteItem(e : MouseEvent, item : any) {
         if (this.confirmDelete) {
-            console.log(item)
             this.itemToDelete = item
         } else {
             this.$emit('delete', item)

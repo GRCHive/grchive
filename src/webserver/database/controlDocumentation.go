@@ -174,7 +174,7 @@ func GetControlDocumentation(fileId int64, orgId int32, role *core.Role) (*core.
 	return &retFile, err
 }
 
-func GetControlDocumentationForCategory(catId int64, orgId int32, pageSize int, pageOffset int, role *core.Role) ([]*core.ControlDocumentationFile, error) {
+func GetControlDocumentationForCategory(catId int64, orgId int32, role *core.Role) ([]*core.ControlDocumentationFile, error) {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
@@ -189,9 +189,7 @@ func GetControlDocumentationForCategory(catId int64, orgId int32, pageSize int, 
 			AND bucket_id IS NOT NULL
 			AND storage_id IS NOT NULL
 		ORDER BY relevant_time DESC
-		LIMIT $3
-		OFFSET $4
-	`, catId, orgId, pageSize, pageOffset)
+	`, catId, orgId)
 
 	return retArr, err
 }

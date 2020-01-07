@@ -8,6 +8,15 @@
         </v-card-title>
         <v-divider></v-divider>
         <v-form @submit.prevent v-model="formValid" class="ma-4">
+            <document-category-search-form-component
+                v-if="catId == -1"
+                v-model="chosenCat"
+                id-mode
+                load-cats
+                :rules="[rules.required]"
+            >
+            </document-category-search-form-component>
+
             <v-menu offset-y v-model="dateMenu" :close-on-content-click="false">
                 <template v-slot:activator="{ on }">
                     <v-text-field
@@ -60,7 +69,9 @@ import { TUploadControlDocOutput, uploadControlDoc } from '../../../ts/api/apiCo
 import { contactUsUrl } from '../../../ts/url'
 import * as rules from '../../../ts/formRules'
 import { PageParamsStore } from '../../../ts/pageParams'
+import { ControlDocumentationCategory } from '../../../ts/controls'
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
+import DocumentCategorySearchFormComponent from '../../generic/DocumentCategorySearchFormComponent.vue'
 
 export default Vue.extend({
     props : {
@@ -71,7 +82,8 @@ export default Vue.extend({
         }
     },
     components: {
-        UserSearchFormComponent
+        UserSearchFormComponent,
+        DocumentCategorySearchFormComponent
     },
     data : () => ({
         dateMenu: false,
@@ -82,12 +94,20 @@ export default Vue.extend({
         progressOverlay: false,
         altName: "",
         description: "",
-        uploadUser: {} as User
+        uploadUser: {} as User,
+        chosenCat: {} as ControlDocumentationCategory,
     }),
     computed : {
         canSubmit() : boolean {
             return !!this.file && this.formValid
         },
+
+        finalCatId() : number {
+            if (this.catId == -1) {
+                return this.chosenCat.Id
+            }
+            return this.catId
+        }
     },
     methods: {
         onCancel() {
@@ -104,7 +124,7 @@ export default Vue.extend({
             currentDate = new Date(currentDate.getTime() + currentDate.getTimezoneOffset() * 60000)
 
             uploadControlDoc({
-                catId: this.catId,
+                catId: this.finalCatId,
                 orgId: PageParamsStore.state.organization!.Id,
                 file: this.file!,
                 relevantTime: currentDate,
@@ -136,7 +156,6 @@ export default Vue.extend({
     },
     mounted() {
         this.uploadUser = PageParamsStore.state.user!
-        console.log(this.uploadUser)
     }
 })
 

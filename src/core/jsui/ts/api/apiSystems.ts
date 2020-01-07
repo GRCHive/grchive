@@ -13,6 +13,7 @@ import {
 } from '../url'
 import { System } from '../systems'
 import { Database } from '../databases'
+import { FullDeployment } from '../deployments'
 
 export interface TNewSystemInputs {
     orgId: number
@@ -75,6 +76,7 @@ export interface TGetSystemOutputs {
         System: System
         RelevantDatabaseIds: number[]
         AllDatabases: Database[]
+        Deployment: FullDeployment
     }
 }
 

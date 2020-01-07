@@ -239,6 +239,9 @@ const ApiDocRequestCompleteEndpoint = "/complete"
 // API - Comments
 const ApiCommentsPrefix = "/comments"
 
+// API - Deployment
+const ApiDeploymentPrefix = "/deployment"
+
 // Websocket
 const WebsocketPrefix string = "/ws"
 

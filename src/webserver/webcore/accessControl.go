@@ -20,7 +20,7 @@ func ObtainOrganizationDefaultRole(orgId int32) (*core.Role, error) {
 	// No default permissions was found which probably means this org was just created
 	// so create a default default permissions which is full admin access to everybody.
 	defaultRole := core.Role{
-		Permissions: core.CreateAllAccessPermission(),
+		Permissions: core.CreateViewOnlyAccessPermission(),
 	}
 	defaultMetadata := core.CreateDefaultRoleMetadata(orgId)
 

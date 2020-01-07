@@ -40,7 +40,7 @@
 
             <v-container fluid>
                 <v-row>
-                    <v-col cols="8">
+                    <v-col cols="6">
                         <create-new-database-form
                             ref="editForm"
                             :edit-mode="true"
@@ -49,7 +49,7 @@
                         </create-new-database-form>
                     </v-col>
 
-                    <v-col cols="4">
+                    <v-col cols="6">
                         <v-card class="mb-4">
                             <v-card-title>
                                 Relevant Systems
@@ -163,16 +163,29 @@
                             </v-card-title>
                             <v-divider></v-divider>
 
+                        </v-card>
+
+                        <div v-if="!deployment">
                             <v-row align="center" justify="center">
                                 <v-btn color="primary"
                                        fab
                                        outlined
                                        x-large
-                                       class="my-6">
+                                       class="my-6"
+                                       @click="addDeployment">
                                     <v-icon>mdi-plus</v-icon>
                                 </v-btn>
                             </v-row>
-                        </v-card>
+                        </div>
+
+                        <div v-else>
+                            <deployment-editor
+                                class="pa-4"
+                                v-model="deployment"
+                                :system-id="currentSystem.Id"
+                            >
+                            </deployment-editor>
+                        </div>
 
                     </v-col>
                 </v-row>
@@ -201,6 +214,9 @@ import { Watch } from 'vue-property-decorator'
 import DatabaseConnectionReadOnlyComponent from '../../generic/DatabaseConnectionReadOnlyComponent.vue'
 import SystemsTable from '../../generic/SystemsTable.vue'
 import { System } from '../../../ts/systems'
+import { FullDeployment } from '../../../ts/deployments'
+import DeploymentEditor from '../../generic/DeploymentEditor.vue'
+import { newDeployment, TNewDeploymentOutput } from '../../../ts/api/apiDeployments'
 
 @Component({
     components: {
@@ -208,7 +224,8 @@ import { System } from '../../../ts/systems'
         GenericDeleteConfirmationForm,
         CreateNewDbConnectionForm,
         DatabaseConnectionReadOnlyComponent,
-        SystemsTable
+        SystemsTable,
+        DeploymentEditor
     }
 })
 export default class FullEditDatabaseComponent extends Vue {
@@ -218,11 +235,30 @@ export default class FullEditDatabaseComponent extends Vue {
     allSystems: System[] = []
 
     systemsToLink : System[] = []
+    deployment: FullDeployment | null = null
 
     showHideDelete: boolean = false
     showHideDeleteConnection: boolean = false
     showHideNewConn : boolean = false
     showHideLinkSystem: boolean = false
+
+    addDeployment() {
+        newDeployment({
+            orgId: PageParamsStore.state.organization!.Id,
+            systemId: null,
+            dbId: this.currentDb!.Id,
+        }).then((resp : TNewDeploymentOutput) => {
+            this.deployment = resp.data
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
 
     get canConnectToDb() : boolean {
         return isDatabaseSupported(this.currentDb!)
@@ -258,6 +294,7 @@ export default class FullEditDatabaseComponent extends Vue {
             this.currentDb = resp.data.Database
             this.dbConn = resp.data.Connection
             this.allSystems = resp.data.AllSystems
+            this.deployment = resp.data.Deployment
 
             let idSet = new Set(resp.data.RelevantSystemIds)
             this.relatedSystems = resp.data.AllSystems.filter((ele : System) => idSet.has(ele.Id))

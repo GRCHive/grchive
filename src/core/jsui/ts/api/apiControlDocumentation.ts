@@ -82,21 +82,21 @@ export function uploadControlDoc(inp : TUploadControlDocInput): Promise<TUploadC
         data.set('fulfilledRequestId', inp.fulfilledRequestId!.toString())
     }
 
-    return postFormMultipart<TUploadControlDocOutput>(uploadControlDocUrl, data, getAPIRequestConfig())
+    return postFormMultipart<TUploadControlDocOutput>(uploadControlDocUrl, data, getAPIRequestConfig()).then((resp : TUploadControlDocOutput) => {
+        resp.data.RelevantTime = new Date(resp.data.RelevantTime)
+        resp.data.UploadTime = new Date(resp.data.UploadTime)
+        return resp
+    })
 }
 
 export interface TGetControlDocumentsInput {
     catId: number
     orgId: number
-    page: number
-    needPages: boolean
 }
 
 export interface TGetControlDocumentsOutput {
     data: {
         Files: ControlDocumentationFile[]
-        TotalPages: number
-        CurrentPage: number
     }
 }
 
