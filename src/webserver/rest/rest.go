@@ -225,4 +225,5 @@ func registerDocRequestCommentsAPIPaths(r *mux.Router) {
 func registerDeploymentAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiDeploymentPrefix).Subrouter()
 	s.HandleFunc(core.ApiNewEndpoint, newDeployment).Methods("POST")
+	s.HandleFunc(core.ApiUpdateEndpoint, updateDeployment).Methods("POST")
 }

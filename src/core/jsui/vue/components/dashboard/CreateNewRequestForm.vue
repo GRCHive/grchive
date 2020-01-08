@@ -21,9 +21,10 @@
         ></v-textarea> 
         
         <document-category-search-form-component
-            v-if="!catId"
+            v-if="catId == -1"
             v-model="realCat"
             :available-cats="availableCats"
+            :load-cats="loadCats"
             :rules="[rules.required]"
             :disabled="!canEdit"
         ></document-category-search-form-component>
@@ -81,6 +82,14 @@ const Props = Vue.extend({
         availableCats: {
             type: Array,
             default: () => []
+        },
+        loadCats: {
+            type: Boolean,
+            default: false
+        },
+        socRequestDeployId: {
+            type: Number,
+            default: -1
         },
         editMode: {
             type: Boolean,

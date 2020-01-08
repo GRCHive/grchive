@@ -1,7 +1,14 @@
-import { ControlDocumentationFile } from './controls'
+import { 
+    ControlDocumentationFile,
+    ControlDocumentationFileHandle,
+    extractControlDocumentationFileHandle
+} from './controls'
+
+export const KSelfHosted : number = 0
+export const KVendorHosted : number = 1
+export const KNoHost : number = -1
 
 export interface SelfDeployment {
-
 }
 
 export interface VendorDeployment {
@@ -13,6 +20,7 @@ export interface VendorDeployment {
 export interface FullDeployment {
     Id: number
     OrgId: number
+    DeploymentType: number
     VendorDeployment: VendorDeployment | null
     SelfDeployment: SelfDeployment | null
 }
@@ -40,4 +48,52 @@ export function deepCopyFullDeployment(f : FullDeployment) : FullDeployment {
     }
 
     return copy
+}
+
+export interface StrippedSelfDeployment {
+}
+
+export function createStrippedSelfDeployment(f : SelfDeployment) : StrippedSelfDeployment {
+    return {}
+}
+
+export interface StrippedVendorDeployment {
+    VendorName: string
+    VendorProduct: string
+    SocFiles: ControlDocumentationFileHandle[]
+}
+
+export function createStrippedVendorDeployment(f: VendorDeployment) : StrippedVendorDeployment {
+    return {
+        VendorName: f.VendorName,
+        VendorProduct: f.VendorProduct,
+        SocFiles: f.SocFiles.map((ele: ControlDocumentationFile) => extractControlDocumentationFileHandle(ele))
+    }
+}
+
+export interface StrippedFullDeployment {
+    Id: number
+    OrgId: number
+    DeploymentType: number
+    VendorDeployment? : StrippedVendorDeployment
+    SelfDeployment? : StrippedSelfDeployment
+}
+
+
+export function createStrippedDeployment(f : FullDeployment) : StrippedFullDeployment {
+    let ret = <StrippedFullDeployment>{
+        Id: f.Id,
+        OrgId: f.OrgId,
+        DeploymentType: f.DeploymentType,
+    }
+
+    if (f.VendorDeployment) {
+        ret.VendorDeployment = createStrippedVendorDeployment(f.VendorDeployment!)
+    }
+
+    if (f.SelfDeployment) {
+        ret.SelfDeployment = createStrippedSelfDeployment(f.SelfDeployment!)
+    }
+
+    return ret
 }

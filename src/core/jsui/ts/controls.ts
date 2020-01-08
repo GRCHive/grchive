@@ -15,6 +15,11 @@ export interface ControlDocumentationFile {
     UploadUserId: number
 }
 
+export interface ControlDocumentationFileHandle {
+    Id: number
+    CategoryId: number
+}
+
 export interface FullControlData {
     Control: ProcessFlowControl
     Nodes: ProcessFlowNode[]
@@ -35,4 +40,11 @@ export function compareControls(a : ProcessFlowControl | null, b : ProcessFlowCo
         return false
     }
     return a.Id == b.Id
+}
+
+export function extractControlDocumentationFileHandle(f : ControlDocumentationFile) : ControlDocumentationFileHandle {
+    return {
+        Id: f.Id,
+        CategoryId: f.CategoryId
+    }
 }

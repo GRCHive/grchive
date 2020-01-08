@@ -25,15 +25,8 @@
             </doc-searcher-form>
         </v-dialog>
 
-        <v-dialog
-            v-model="showRequestSoc"
-            persistent
-            max-width="40%"
-        >
-        </v-dialog>
-
         <v-select
-            v-model="deploymentType"
+            v-model="editableDeployment.DeploymentType"
             filled
             label="Type"
             :items="typeItems"
@@ -79,53 +72,74 @@
                     class="mb-2"
                 >
                 </v-text-field>
-
-                <v-divider class="mb-2"></v-divider>
-
-                <v-row class="title ml-2">
-                    SOC Reports
-
-                    <v-spacer></v-spacer>
-
-                    <v-menu offset-y>
-                        <template v-slot:activator="{ on }">
-                            <v-btn
-                                color="primary"
-                                icon
-                                v-on="on"
-                                :disabled="!canEdit"
-                            >
-                                <v-icon>mdi-plus</v-icon>
-                            </v-btn>
-                        </template>
-
-                        <v-list dense>
-                            <v-list-item @click="showUploadSoc = true">
-                                <v-list-item-title>Upload New</v-list-item-title>
-                            </v-list-item>
-
-                            <v-list-item @click="showAddSoc = true">
-                                <v-list-item-title>Add Existing</v-list-item-title>
-                            </v-list-item>
-
-                            <v-list-item @click="showRequestSoc = true">
-                                <v-list-item-title>Request Missing</v-list-item-title>
-                            </v-list-item>
-
-                        </v-list>
-                    </v-menu>
-                </v-row>
-
-                <doc-file-table
-                    :resources="editableDeployment.VendorDeployment.SocFiles"
-                    :use-crud-delete="canEdit"
-                    confirm-delete
-                    @delete="unlinkSOCReport"
-                >
-                </doc-file-table>
             </v-form>
 
-            <v-divider></v-divider>
+            <v-divider class="mb-2"></v-divider>
+
+            <v-row class="title ml-2">
+                SOC Reports
+
+                <v-spacer></v-spacer>
+
+                <v-menu offset-y>
+                    <template v-slot:activator="{ on }">
+                        <v-btn
+                            color="primary"
+                            icon
+                            v-on="on"
+                            :disabled="!canEdit"
+                        >
+                            <v-icon>mdi-plus</v-icon>
+                        </v-btn>
+                    </template>
+
+                    <v-list dense>
+                        <v-list-item @click="showUploadSoc = true">
+                            <v-list-item-title>Upload New</v-list-item-title>
+                        </v-list-item>
+
+                        <v-list-item @click="showAddSoc = true">
+                            <v-list-item-title>Add Existing</v-list-item-title>
+                        </v-list-item>
+                    </v-list>
+                </v-menu>
+            </v-row>
+
+            <doc-file-table
+                :resources="editableDeployment.VendorDeployment.SocFiles"
+                :use-crud-delete="canEdit"
+                confirm-delete
+                @delete="unlinkSOCReport"
+            >
+            </doc-file-table>
+
+            <v-divider class="mb-2"></v-divider>
+
+            <v-row class="title ml-2">
+                SOC Report Requests
+
+                <v-spacer></v-spacer>
+
+                <v-dialog v-model="showRequestSoc" persistent max-width="40%">
+                    <template v-slot:activator="{ on }">
+                        <v-btn color="warning" icon v-on="on">
+                            <v-icon>mdi-plus</v-icon>
+                        </v-btn>
+                    </template>
+
+                    <create-new-request-form
+                        load-cats
+                        :soc-request-deploy-id="editableDeployment.Id"
+                        @do-cancel="showRequestSoc = false"
+                        @do-save="onRequestSOC">
+                    </create-new-request-form>
+                </v-dialog>
+
+            </v-row>
+
+            <doc-request-table :resources="socRequests">
+            </doc-request-table>
+
         </div>
 
         <v-list-item class="pa-0">
@@ -166,11 +180,23 @@ import { FullDeployment,
          VendorDeployment,
          createEmptyVendorDeployment,
          createEmptySelfDeployment,
-         deepCopyFullDeployment } from '../../ts/deployments'
+         deepCopyFullDeployment,
+         KSelfHosted,
+         KVendorHosted,
+         KNoHost
+} from '../../ts/deployments'
+import {
+    TUpdateDeploymentOutput,
+    updateDeployment
+} from '../../ts/api/apiDeployments'
 import DocFileTable from './DocFileTable.vue'
 import UploadDocumentationForm from '../components/dashboard/UploadDocumentationForm.vue'
 import DocSearcherForm from './DocSearcherForm.vue'
+import CreateNewRequestForm from '../components/dashboard/CreateNewRequestForm.vue'
 import { ControlDocumentationFile } from '../../ts/controls'
+import { DocumentRequest } from '../../ts/docRequests'
+import { contactUsUrl } from '../../ts/url'
+import DocRequestTable from './DocRequestTable.vue'
 
 const VueProps = Vue.extend({
     props: {
@@ -178,27 +204,29 @@ const VueProps = Vue.extend({
     }
 })
 
-const KSelfHosted : number = 0
-const KVendorHosted : number = 1
-const KNoHost : number = -1
-
 @Component({
     components: {
         DocFileTable,
         UploadDocumentationForm,
-        DocSearcherForm
+        DocSearcherForm,
+        CreateNewRequestForm,
+        DocRequestTable
     }
 })
 export default class DeploymentEditor extends VueProps {
-    deploymentType: number = KNoHost
     canEdit: boolean = false
     formValid: boolean = false
     editableDeployment: FullDeployment = {} as FullDeployment
+    socRequests: DocumentRequest[] = []
 
     showUploadSoc: boolean = false
     showAddSoc: boolean = false
 
     showRequestSoc: boolean = false
+
+    get deploymentType() : number {
+        return this.editableDeployment.DeploymentType
+    }
 
     get canSubmit() : boolean {
         if (this.deploymentType == KSelfHosted || this.deploymentType == KVendorHosted) {
@@ -228,30 +256,30 @@ export default class DeploymentEditor extends VueProps {
         this.editableDeployment = deepCopyFullDeployment(this.value)
     }
 
-    resetDeploymentType() {
-        if (!!this.value.SelfDeployment) {
-            this.deploymentType = KSelfHosted
-        } else if (!!this.value.VendorDeployment) {
-            this.deploymentType = KVendorHosted
-        } else {
-            this.deploymentType = KNoHost
-        }
-    }
-
     mounted() {
-        this.resetDeploymentType()
         this.resetEditCopyFromProps()
     }
 
     cancel() {
         this.canEdit = false
-        this.resetDeploymentType()
         this.resetEditCopyFromProps()
     }
 
     save() {
-        this.$emit('input', JSON.parse(JSON.stringify(this.editableDeployment)))
-        Vue.nextTick(this.cancel)
+        updateDeployment({
+            deployment: this.editableDeployment
+        }).then((resp : TUpdateDeploymentOutput) => {
+            this.$emit('input', resp.data)
+            Vue.nextTick(this.cancel)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 
     changeDeploymentType(val : number) {
@@ -284,6 +312,11 @@ export default class DeploymentEditor extends VueProps {
     onSelectSOC(files : ControlDocumentationFile[]) {
         this.showAddSoc = false
         this.editableDeployment.VendorDeployment!.SocFiles.push(...files)
+    }
+
+    onRequestSOC(req : DocumentRequest) {
+        this.showRequestSoc = false
+        this.socRequests.push(req)
     }
 }
 

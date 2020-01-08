@@ -26,6 +26,11 @@ type ControlDocumentationFile struct {
 	UploadUserId int64     `db:"upload_user_id"`
 }
 
+type ControlDocumentationFileHandle struct {
+	Id         int64
+	CategoryId int64
+}
+
 func (file ControlDocumentationFile) UniqueKey() string {
 	// It's tempting to also use the bucket id and storage id here but
 	// the file ID is the only thing we control so it's probably safe only to use that.
