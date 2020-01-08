@@ -152,6 +152,7 @@ export default class CreateNewRequestForm extends Props {
             catId: this.realCatId,
             orgId: PageParamsStore.state.organization!.Id,
             requestedUserId: PageParamsStore.state.user!.Id,
+            socRequestDeployId: this.socRequestDeployId
         }).then((resp : TNewDocRequestOutput) => {
             this.onSuccess(resp)
         }).catch((err : any) => {
@@ -167,6 +168,7 @@ export default class CreateNewRequestForm extends Props {
             catId: this.realCatId!,
             orgId: PageParamsStore.state.organization!.Id,
             requestedUserId: PageParamsStore.state.user!.Id,
+            socRequestDeployId: this.socRequestDeployId
         }).then((resp : TNewDocRequestOutput) => {
             this.onSuccess(resp)
         }).catch((err : any) => {

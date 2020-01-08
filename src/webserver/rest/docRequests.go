@@ -10,11 +10,12 @@ import (
 )
 
 type NewDocumentRequestInputs struct {
-	Name            string `json:"name"`
-	Description     string `json:"description"`
-	CatId           int64  `json:"catId"`
-	OrgId           int32  `json:"orgId"`
-	RequestedUserId int64  `json:"requestedUserId"`
+	Name               string `json:"name"`
+	Description        string `json:"description"`
+	CatId              int64  `json:"catId"`
+	OrgId              int32  `json:"orgId"`
+	RequestedUserId    int64  `json:"requestedUserId"`
+	SocRequestDeployId int64  `json:"socRequestDeployId"`
 }
 
 type UpdateDocumentRequestInputs struct {
@@ -43,8 +44,9 @@ type CompleteDocumentRequestInputs struct {
 }
 
 type AllDocumentRequestsInputs struct {
-	OrgId int32          `webcore:"orgId"`
-	CatId core.NullInt64 `webcore:"catId,optional"`
+	OrgId    int32          `webcore:"orgId"`
+	CatId    core.NullInt64 `webcore:"catId,optional"`
+	DeployId core.NullInt64 `webcore:"deployId,optional"`
 }
 
 func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
@@ -76,9 +78,29 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		RequestTime:     time.Now().UTC(),
 	}
 
-	err = database.CreateNewDocumentRequest(&request, role)
+	tx := database.CreateTx()
+
+	err = database.CreateNewDocumentRequestWithTx(&request, role, tx)
 	if err != nil {
+		tx.Rollback()
 		core.Warning("Failed to create new doc request: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if inputs.SocRequestDeployId != -1 {
+		err = database.LinkRequestToDeploymentWithTx(inputs.SocRequestDeployId, request.Id, request.CatId, request.OrgId, role, tx)
+		if err != nil {
+			tx.Rollback()
+			core.Warning("Failed to link request to deployment: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		tx.Rollback()
+		core.Warning("Failed to commit new doc request: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -209,14 +231,16 @@ func allDocumentRequests(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var reqs []*core.DocumentRequest
-	if inputs.CatId.NullInt64.Valid {
+	if inputs.DeployId.NullInt64.Valid {
+		reqs, err = database.GetAllDocumentRequestsForDeployment(inputs.DeployId.NullInt64.Int64, inputs.OrgId, role)
+	} else if inputs.CatId.NullInt64.Valid {
 		reqs, err = database.GetAllDocumentRequestsForDocCat(inputs.CatId.NullInt64.Int64, inputs.OrgId, role)
 	} else {
 		reqs, err = database.GetAllDocumentRequestsForOrganization(inputs.OrgId, role)
 	}
 
 	if err != nil {
-		core.Warning("Failed to get all doc requests for org: " + err.Error())
+		core.Warning("Failed to get all doc requests: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

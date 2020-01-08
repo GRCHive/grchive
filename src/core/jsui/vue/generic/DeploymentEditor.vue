@@ -189,6 +189,10 @@ import {
     TUpdateDeploymentOutput,
     updateDeployment
 } from '../../ts/api/apiDeployments'
+import {
+    TGetAllDocumentRequestOutput,
+    getAllDocRequests
+} from '../../ts/api/apiDocRequests'
 import DocFileTable from './DocFileTable.vue'
 import UploadDocumentationForm from '../components/dashboard/UploadDocumentationForm.vue'
 import DocSearcherForm from './DocSearcherForm.vue'
@@ -196,6 +200,7 @@ import CreateNewRequestForm from '../components/dashboard/CreateNewRequestForm.v
 import { ControlDocumentationFile } from '../../ts/controls'
 import { DocumentRequest } from '../../ts/docRequests'
 import { contactUsUrl } from '../../ts/url'
+import { PageParamsStore } from '../../ts/pageParams'
 import DocRequestTable from './DocRequestTable.vue'
 
 const VueProps = Vue.extend({
@@ -258,6 +263,7 @@ export default class DeploymentEditor extends VueProps {
 
     mounted() {
         this.resetEditCopyFromProps()
+        this.reloadSocRequests()
     }
 
     cancel() {
@@ -317,6 +323,23 @@ export default class DeploymentEditor extends VueProps {
     onRequestSOC(req : DocumentRequest) {
         this.showRequestSoc = false
         this.socRequests.push(req)
+    }
+
+    reloadSocRequests() {
+        getAllDocRequests({
+            orgId: PageParamsStore.state.organization!.Id,
+            deployId: this.value.Id,
+        }).then((resp : TGetAllDocumentRequestOutput) => {
+            this.socRequests = resp.data
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 }
 

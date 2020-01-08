@@ -6,12 +6,11 @@ import (
 	"time"
 )
 
-func CreateNewDocumentRequest(request *core.DocumentRequest, role *core.Role) error {
+func CreateNewDocumentRequestWithTx(request *core.DocumentRequest, role *core.Role, tx *sqlx.Tx) error {
 	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessManage) {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
 	rows, err := tx.NamedQuery(`
 		INSERT INTO document_requests(
 			name,
@@ -33,17 +32,25 @@ func CreateNewDocumentRequest(request *core.DocumentRequest, role *core.Role) er
 	`, request)
 
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	rows.Next()
 	err = rows.Scan(&request.Id)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 	rows.Close()
+	return nil
+}
+
+func CreateNewDocumentRequest(request *core.DocumentRequest, role *core.Role) error {
+	tx := dbConn.MustBegin()
+	err := CreateNewDocumentRequestWithTx(request, role, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 	return tx.Commit()
 }
 
@@ -135,6 +142,22 @@ func CompleteDocumentRequest(requestId int64, orgId int32, complete bool, role *
 	return tx.Commit()
 }
 
+func GetAllDocumentRequestsForDeployment(deployId int64, orgId int32, role *core.Role) ([]*core.DocumentRequest, error) {
+	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	requests := make([]*core.DocumentRequest, 0)
+	err := dbConn.Select(&requests, `
+		SELECT req.*
+		FROM document_requests AS req
+		INNER JOIN deployment_request_link AS link
+			ON req.id = link.request_id
+		WHERE req.org_id = $1 AND link.deployment_id = $2
+	`, orgId, deployId)
+	return requests, err
+}
+
 func GetAllDocumentRequestsForOrganization(orgId int32, role *core.Role) ([]*core.DocumentRequest, error) {
 	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessView) {
 		return nil, core.ErrorUnauthorized
@@ -185,6 +208,20 @@ func FulfillDocumentRequestWithTx(requestId int64, fileId int64, catId int64, or
 	if err != nil {
 		return err
 	}
+
+	// Check if the request has any linked deployments - need to also link the file to the deployments.
+	_, err = tx.Exec(`
+		INSERT INTO vendor_soc_reports (deployment_id, org_id, soc_report_file_id, soc_report_cat_id)
+		SELECT link.deployment_id, $2, $3, $4
+		FROM deployment_request_link AS link
+		INNER JOIN document_requests AS req
+			ON req.id = link.request_id
+		WHERE req.id = $1 AND req.org_id = $2
+	`, requestId, orgId, fileId, catId)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -249,4 +286,17 @@ func InsertDocumentRequestComment(requestId int64, catId int64, orgId int32, com
 	}
 
 	return tx.Commit()
+}
+
+func LinkRequestToDeploymentWithTx(deployId int64, requestId int64, catId int64, orgId int32, role *core.Role, tx *sqlx.Tx) error {
+	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	_, err := tx.Exec(`
+		INSERT INTO deployment_request_link (deployment_id, org_id, request_id, category_id)
+		VALUES ($1, $2, $3, $4)
+	`, deployId, orgId, requestId, catId)
+
+	return err
 }
