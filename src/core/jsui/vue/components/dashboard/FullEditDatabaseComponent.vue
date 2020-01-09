@@ -260,7 +260,6 @@ export default class FullEditDatabaseComponent extends Vue {
     }
 
     get hasDb() : boolean {
-        console.log('has db', !!this.dbConn)
         return !!this.dbConn
     }
 
