@@ -57,7 +57,8 @@ func createOrganizationSystemSubrouter(r *mux.Router) {
 	s.HandleFunc(core.DashboardDbSystemsEndpoint, render.RenderDbSystems)
 	s.HandleFunc(core.DashboardSingleDbEndpoint, render.RenderSingleDb)
 
-	s.HandleFunc(core.DashboardInfraSystemsEndpoint, render.RenderInfraSystems)
+	s.HandleFunc(core.DashboardServersEndpoint, render.RenderServers)
+	s.HandleFunc(core.DashboardSingleServerEndpoint, render.RenderSingleServer)
 }
 
 func createOrganizationSettingsSubrouter(r *mux.Router) {

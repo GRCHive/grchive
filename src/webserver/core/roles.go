@@ -32,6 +32,7 @@ const (
 	ResourceDbConnections
 	ResourceDocRequests
 	ResourceDeployments
+	ResourceServers
 )
 
 var AvailableResources []ResourceType = []ResourceType{
@@ -48,6 +49,7 @@ var AvailableResources []ResourceType = []ResourceType{
 	ResourceDbConnections,
 	ResourceDocRequests,
 	ResourceDeployments,
+	ResourceServers,
 }
 
 type PermissionsMap struct {
@@ -64,6 +66,7 @@ type PermissionsMap struct {
 	DbConnectionAccess         AccessType `db:"db_conn_access"`
 	DocRequestAccess           AccessType `db:"doc_request_access"`
 	DeploymentAccess           AccessType `db:"deployment_access"`
+	ServerAccess               AccessType `db:"server_access"`
 }
 
 type RoleMetadata struct {
@@ -99,6 +102,7 @@ func CreateViewOnlyAccessPermission() PermissionsMap {
 		DbConnectionAccess:         AccessNone,
 		DocRequestAccess:           AccessView,
 		DeploymentAccess:           AccessView,
+		ServerAccess:               AccessView,
 	}
 }
 
@@ -117,6 +121,7 @@ func CreateAllAccessPermission() PermissionsMap {
 		DbConnectionAccess:         CreateOwnerAccessType(),
 		DocRequestAccess:           CreateOwnerAccessType(),
 		DeploymentAccess:           CreateOwnerAccessType(),
+		ServerAccess:               CreateOwnerAccessType(),
 	}
 }
 
@@ -177,6 +182,8 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 		return p.DocRequestAccess
 	case ResourceDeployments:
 		return p.DeploymentAccess
+	case ResourceServers:
+		return p.ServerAccess
 	}
 	return AccessNone
 }

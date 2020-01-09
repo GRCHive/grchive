@@ -5,16 +5,32 @@ import Component from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
 import { PageParamsStore } from '../../ts/pageParams'
-import { createSingleInfraUrl } from '../../ts/url'
+import { createSingleServerUrl } from '../../ts/url'
 
 @Component({
     components: {
         BaseResourceTable
     }
 })
-export default class InfraTable extends ResourceTableProps {
+export default class ServerTable extends ResourceTableProps {
     get tableHeaders() : any[] {
         return [
+            {
+                text: 'Name',
+                value: 'name',
+            },
+            {
+                text: 'Operating System',
+                value: 'os',
+            },
+            {
+                text: 'Location',
+                value: 'location',
+            },
+            {
+                text: 'IP Address',
+                value: 'ip',
+            },
         ]
     }
 
@@ -25,14 +41,16 @@ export default class InfraTable extends ResourceTableProps {
     transformInputResourceToTableItem(inp : any) : any {
         return {
             id: inp.Id,
-            // Filter purposes
-            name: `${inp.Name} ${inp.Purpose}`,
+            name: inp.Name,
+            os: inp.OperatingSystem,
+            location: inp.Location,
+            ip: inp.IpAddress,
             value: inp
         }
     }
 
-    goToInfra(item : any) {
-        window.location.assign(createSingleInfraUrl(
+    goToServer(item : any) {
+        window.location.assign(createSingleServerUrl(
             PageParamsStore.state.organization!.OktaGroupName,
             item.value.Id))
     }
@@ -49,12 +67,11 @@ export default class InfraTable extends ResourceTableProps {
                 on: {
                     input: (items : any[]) => this.$emit('input', items.map((ele : any) => ele.value)),
                     delete: (item : any) => this.$emit('delete', item.value),
-                    'click:row': this.goToInfra
+                    'click:row': this.goToServer
                 }
             }
         )
     }
-
 }
 
 </script>

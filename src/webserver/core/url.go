@@ -34,7 +34,7 @@ const DashboardOrgRoleQueryId string = "roleId"
 const DashboardOrgGLAccQueryId string = "accId"
 const DashboardOrgSystemQueryId string = "sysId"
 const DashboardOrgDbQueryId string = "dbId"
-const DashboardOrgInfraQueryId string = "infraId"
+const DashboardOrgServerQueryId string = "serverId"
 const DashboardOrgDocCatQueryId string = "docCatId"
 const DashboardOrgDocRequestQueryId string = "reqId"
 
@@ -81,11 +81,11 @@ var DashboardOrgGLAccountEndpoint string = fmt.Sprintf("/acc/{%s}", DashboardOrg
 const DashboardSystemsPrefix string = "/it"
 const DashboardSystemHomeEndpoint string = "/systems"
 const DashboardDbSystemsEndpoint string = "/databases"
-const DashboardInfraSystemsEndpoint string = "/infrastructure"
+const DashboardServersEndpoint string = "/servers"
 
 var DashboardSingleSystemEndpoint string = fmt.Sprintf("%s/{%s}", DashboardSystemHomeEndpoint, DashboardOrgSystemQueryId)
 var DashboardSingleDbEndpoint string = fmt.Sprintf("%s/{%s}", DashboardDbSystemsEndpoint, DashboardOrgDbQueryId)
-var DashboardSingleInfraEndpoint string = fmt.Sprintf("%s/{%s}", DashboardInfraSystemsEndpoint, DashboardOrgInfraQueryId)
+var DashboardSingleServerEndpoint string = fmt.Sprintf("%s/{%s}", DashboardServersEndpoint, DashboardOrgServerQueryId)
 
 // Generic API Actions
 const ApiNewEndpoint = "/new"
@@ -229,8 +229,8 @@ const ApiITDbConnPrefix = "/connection"
 const ApiITDbConnNewEndpoint = "/new"
 const ApiITDbConnDeleteEndpoint = "/delete"
 
-// API - IT - Infrastructure
-const ApiITInfraPrefix = "/infra"
+// API - IT - Server
+const ApiITServerPrefix = "/servers"
 
 // API - Document Requests
 const ApiDocRequestPrefix = "/requests"

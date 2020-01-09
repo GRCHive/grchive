@@ -22,13 +22,14 @@ import DashboardOrgGeneralLedger from '../vue/pages/dashboard/DashboardOrgGenera
 import DashboardOrgSingleGeneralLedgerAccount from '../vue/pages/dashboard/DashboardOrgSingleGeneralLedgerAccount.vue'
 import DashboardOrgSystems from '../vue/pages/dashboard/DashboardOrgSystems.vue'
 import DashboardOrgDatabases from '../vue/pages/dashboard/DashboardOrgDatabases.vue'
-import DashboardOrgInfrastructure from '../vue/pages/dashboard/DashboardOrgInfrastructure.vue'
+import DashboardOrgServers from '../vue/pages/dashboard/DashboardOrgServers.vue'
 import DashboardOrgSingleSystem from '../vue/pages/dashboard/DashboardOrgSingleSystem.vue'
 import DashboardOrgSingleDb from '../vue/pages/dashboard/DashboardOrgSingleDb.vue'
 import DashboardOrgDocumentation from '../vue/pages/dashboard/DashboardOrgDocumentation.vue'
 import DashboardOrgSingleDocumentation from '../vue/pages/dashboard/DashboardOrgSingleDocumentation.vue'
 import DashboardOrgDocRequests from '../vue/pages/dashboard/DashboardOrgDocRequests.vue'
 import DashboardOrgSingleDocRequest from '../vue/pages/dashboard/DashboardOrgSingleDocRequest.vue'
+import DashboardOrgSingleServer from '../vue/pages/dashboard/DashboardOrgSingleServer.vue'
 import SnackBar from '../vue/components/SnackBar.vue'
 import { getCurrentCSRF } from './csrf'
 import { PageParamsStore, PageParamsStoreState  } from '../ts/pageParams'
@@ -64,13 +65,14 @@ function mountApp(inData : PageParamsStoreState) {
             DashboardOrgSingleGeneralLedgerAccount,
             DashboardOrgSystems,
             DashboardOrgDatabases,
-            DashboardOrgInfrastructure,
+            DashboardOrgServers,
             DashboardOrgSingleSystem,
             DashboardOrgSingleDb,
             DashboardOrgDocumentation,
             DashboardOrgSingleDocumentation,
             DashboardOrgDocRequests,
             DashboardOrgSingleDocRequest,
+            DashboardOrgSingleServer,
             SnackBar,
         },
         vuetify: vueOpts.vuetify,

@@ -81,9 +81,9 @@ export default Vue.extend({
                             url: PageParamsStore.state.organization!.Url + 'it/databases',
                         },
                         {
-                            title: 'Infrastructure',
+                            title: 'Servers',
                             icon: 'mdi-server-network',
-                            url: PageParamsStore.state.organization!.Url + 'it/infrastructure',
+                            url: PageParamsStore.state.organization!.Url + 'it/servers',
                         },
                     ]
                 },

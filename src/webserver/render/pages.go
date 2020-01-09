@@ -235,12 +235,12 @@ func RenderSingleDb(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardSingleDbTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
 
-func RenderInfraSystems(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardInfraSystemsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+func RenderServers(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardServersTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
 
-func RenderSingleInfra(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardSingleInfraTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+func RenderSingleServer(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardSingleServerTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
 
 func RenderDocumentation(w http.ResponseWriter, r *http.Request) {

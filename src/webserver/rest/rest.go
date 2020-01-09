@@ -163,7 +163,7 @@ func registerITAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiITPrefix).Subrouter()
 	registerITSystemsAPIPaths(s)
 	registerITDbAPIPaths(s)
-	registerITInfraAPIPaths(s)
+	registerITServerAPIPaths(s)
 
 	s.HandleFunc(core.ApiITDeleteDbSysLinkEndpoint, deleteDatabaseSystemLink).Methods("POST")
 }
@@ -197,8 +197,13 @@ func registerITDbConnAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiITDbConnDeleteEndpoint, deleteDbConnection).Methods("POST")
 }
 
-func registerITInfraAPIPaths(r *mux.Router) {
-	//s := r.PathPrefix(core.ApiITInfraPrefix).Subrouter()
+func registerITServerAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiITServerPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, newServer).Methods("POST")
+	s.HandleFunc(core.ApiAllEndpoint, allServers).Methods("GET")
+	s.HandleFunc(core.ApiGetEndpoint, getServer).Methods("GET")
+	s.HandleFunc(core.ApiUpdateEndpoint, updateServer).Methods("POST")
+	s.HandleFunc(core.ApiDeleteEndpoint, deleteServer).Methods("POST")
 }
 
 func registerDocRequestsAPIPaths(r *mux.Router) {

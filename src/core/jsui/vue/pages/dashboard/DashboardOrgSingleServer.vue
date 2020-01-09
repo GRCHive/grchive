@@ -1,12 +1,12 @@
 <template>
     <div class="max-height">
-        <dashboard-app-bar ref="dashboardAppBar">
+        <dashboard-app-bar>
         </dashboard-app-bar>
 
         <dashboard-home-page-nav-bar></dashboard-home-page-nav-bar>
 
         <v-content>
-            <dashboard-infrastructure-list></dashboard-infrastructure-list>
+            <full-edit-server-component></full-edit-server-component>
         </v-content>
     </div>
 </template>
@@ -15,14 +15,14 @@
 
 import DashboardAppBar from '../../components/dashboard/DashboardAppBar.vue'
 import DashboardHomePageNavBar from '../../components/dashboard/DashboardHomePageNavBar.vue'
-import DashboardInfrastructureList from '../../components/dashboard/DashboardInfrastructureList.vue'
+import FullEditServerComponent from '../../components/dashboard/FullEditServerComponent.vue'
 import Vue from 'vue'
 
 export default Vue.extend({
     components : {
         DashboardAppBar,
         DashboardHomePageNavBar,
-        DashboardInfrastructureList,
+        FullEditServerComponent
     },
 })
 </script>

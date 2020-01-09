@@ -39,10 +39,10 @@ const (
 	DashboardGLAccountTemplateKey
 	DashboardSystemHomeTemplateKey
 	DashboardDbSystemsTemplateKey
-	DashboardInfraSystemsTemplateKey
+	DashboardServersTemplateKey
 	DashboardSingleSystemTemplateKey
 	DashboardSingleDbTemplateKey
-	DashboardSingleInfraTemplateKey
+	DashboardSingleServerTemplateKey
 	DashboardDocumentationTemplateKey
 	DashboardSingleDocumentationTemplateKey
 	DashboardDocRequestsTemplateKey
@@ -106,15 +106,15 @@ func RegisterTemplates() {
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardSystems.tmpl")
 	allTemplates[DashboardDbSystemsTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardDatabases.tmpl")
-	allTemplates[DashboardInfraSystemsTemplateKey] =
-		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardInfrastructure.tmpl")
+	allTemplates[DashboardServersTemplateKey] =
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardServers.tmpl")
 
 	allTemplates[DashboardSingleSystemTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardSingleSystem.tmpl")
 	allTemplates[DashboardSingleDbTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardSingleDb.tmpl")
-	allTemplates[DashboardSingleInfraTemplateKey] =
-		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardSingleInfra.tmpl")
+	allTemplates[DashboardSingleServerTemplateKey] =
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardSingleServer.tmpl")
 
 	allTemplates[DashboardDocumentationTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardDocumentation.tmpl")

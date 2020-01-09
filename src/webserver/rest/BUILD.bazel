@@ -20,10 +20,10 @@ go_library(
         "generalLedger.go",
         "systems.go",
         "databases.go",
-        "infrastructure.go",
         "docRequests.go",
         "comments.go",
         "deployment.go",
+        "servers.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",

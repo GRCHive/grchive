@@ -61,6 +61,10 @@ export function createOrgDatabaseUrl(org : string) : string {
     return `${createOrgUrl(org)}/it/databases`
 }
 
+export function createOrgServersUrl(org : string) : string {
+    return `${createOrgUrl(org)}/it/servers`
+}
+
 export function createSingleSystemUrl(org: string, sys : number) : string {
     return `/dashboard/org/${org}/it/systems/${sys}`
 }
@@ -69,8 +73,8 @@ export function createSingleDbUrl(org: string, db : number) : string {
     return `/dashboard/org/${org}/it/databases/${db}`
 }
 
-export function createSingleInfraUrl(org: string, infra : number) : string {
-    return `/dashboard/org/${org}/it/infrastructure/${infra}`
+export function createSingleServerUrl(org: string, server : number) : string {
+    return `/dashboard/org/${org}/it/servers/${server}`
 }
 
 export function createFlowUrl(org : string, flow : number) : string {
@@ -232,3 +236,9 @@ export const allDocRequestCommentUrl : string = "/api/comments/requests/all"
 
 export const newDeploymentUrl : string = "/api/deployment/new"
 export const updateDeploymentUrl : string = "/api/deployment/update"
+
+export const newServerUrl : string = "/api/it/servers/new"
+export const allServersUrl : string = "/api/it/servers/all"
+export const getServerUrl : string = "/api/it/servers/get"
+export const updateServerUrl : string = "/api/it/servers/update"
+export const deleteServerUrl : string = "/api/it/servers/delete"
