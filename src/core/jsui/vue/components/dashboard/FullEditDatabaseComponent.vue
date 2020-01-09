@@ -4,6 +4,19 @@
             <v-progress-circular indeterminate size="64"></v-progress-circular>
         </v-overlay>
 
+        <v-dialog v-model="showHideDeleteConnection"
+                  persistent
+                  max-width="40%"
+        >
+            <generic-delete-confirmation-form
+                item-name="database connections"
+                :items-to-delete="[currentDb.Name]"
+                :use-global-deletion="false"
+                @do-cancel="showHideDeleteConnection = false"
+                @do-delete="onDeleteDbConn">
+            </generic-delete-confirmation-form>
+        </v-dialog>
+
         <div v-if="ready">
             <v-list-item two-line class="pa-0">
                 <v-list-item-content>
@@ -101,33 +114,21 @@
                                 Connection Info
 
                                 <v-spacer></v-spacer>
-                                <v-dialog v-model="showHideDeleteConnection"
-                                          persistent
-                                          max-width="40%"
-                                >
-                                    <template v-slot:activator="{ on }">
-                                        <v-btn color="error"
-                                               outlined
-                                               fab
-                                               v-on="on"
-                                               small
-                                               v-if="!!dbConn">
-                                            <v-icon>mdi-delete</v-icon>
-                                        </v-btn>
-                                    </template>
+                                <v-btn color="error"
+                                       outlined
+                                       fab
+                                       v-on="on"
+                                       small
+                                       v-if="hasDb"
+                                       @click="showHideDeleteConnection=true"
+                                    >
+                                    <v-icon>mdi-delete</v-icon>
+                                </v-btn>
 
-                                    <generic-delete-confirmation-form
-                                        item-name="database connections"
-                                        :items-to-delete="[currentDb.Name]"
-                                        :use-global-deletion="false"
-                                        @do-cancel="showHideDeleteConnection = false"
-                                        @do-delete="onDeleteDbConn">
-                                    </generic-delete-confirmation-form>
-                                </v-dialog>
                             </v-card-title>
                             <v-divider></v-divider>
 
-                            <v-row align="center" justify="center" v-if="!dbConn">
+                            <v-row align="center" justify="center" v-if="!hasDb">
                                 <v-dialog v-model="showHideNewConn"
                                           persistent
                                           max-width="40%"
@@ -257,6 +258,11 @@ export default class FullEditDatabaseComponent extends Vue {
                 contactUsUrl,
                 true);
         })
+    }
+
+    get hasDb() : boolean {
+        console.log('has db', !!this.dbConn)
+        return !!this.dbConn
     }
 
     get canConnectToDb() : boolean {
