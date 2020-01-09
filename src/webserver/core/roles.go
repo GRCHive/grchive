@@ -96,7 +96,7 @@ func CreateViewOnlyAccessPermission() PermissionsMap {
 		GLAccess:                   AccessView,
 		SystemAccess:               AccessView,
 		DbAccess:                   AccessView,
-		DbConnectionAccess:         AccessView,
+		DbConnectionAccess:         AccessNone,
 		DocRequestAccess:           AccessView,
 		DeploymentAccess:           AccessView,
 	}
