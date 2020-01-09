@@ -198,16 +198,6 @@ func getDb(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if conn != nil {
-		// Decrypt for sending back to client.
-		conn.Password, err = webcore.DecryptSaltedEncryptedPassword(conn.Password, conn.Salt)
-		if err != nil {
-			core.Warning("Failed to decrypt password: " + err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}
-
 	allSystems, err := database.GetAllSystemsForOrg(org.Id, role)
 	if err != nil {
 		core.Warning("Failed to obtain systems: " + err.Error())

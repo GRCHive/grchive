@@ -45,5 +45,5 @@ func DecryptSaltedEncryptedPassword(encPassword string, salt string) (string, er
 		return "", errors.New("Salt mismatch.")
 	}
 
-	return strings.Join(splitData[:len(splitData)-1], "."), nil
+	return hex.EncodeToString([]byte(strings.Join(splitData[:len(splitData)-1], "."))), nil
 }

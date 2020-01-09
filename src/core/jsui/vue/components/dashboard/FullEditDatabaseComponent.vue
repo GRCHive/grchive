@@ -163,29 +163,28 @@
                             </v-card-title>
                             <v-divider></v-divider>
 
+                            <div v-if="!deployment">
+                                <v-row align="center" justify="center">
+                                    <v-btn color="primary"
+                                           fab
+                                           outlined
+                                           x-large
+                                           class="my-6"
+                                           @click="addDeployment">
+                                        <v-icon>mdi-plus</v-icon>
+                                    </v-btn>
+                                </v-row>
+                            </div>
+
+                            <div v-else>
+                                <deployment-editor
+                                    class="pa-4"
+                                    v-model="deployment"
+                                    :db-id="currentDb.Id"
+                                >
+                                </deployment-editor>
+                            </div>
                         </v-card>
-
-                        <div v-if="!deployment">
-                            <v-row align="center" justify="center">
-                                <v-btn color="primary"
-                                       fab
-                                       outlined
-                                       x-large
-                                       class="my-6"
-                                       @click="addDeployment">
-                                    <v-icon>mdi-plus</v-icon>
-                                </v-btn>
-                            </v-row>
-                        </div>
-
-                        <div v-else>
-                            <deployment-editor
-                                class="pa-4"
-                                v-model="deployment"
-                                :system-id="currentSystem.Id"
-                            >
-                            </deployment-editor>
-                        </div>
 
                     </v-col>
                 </v-row>

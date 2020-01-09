@@ -20,21 +20,6 @@
             {{ connection.Username }}
         </span>
     </p>
-
-    <p>
-        <span class="font-weight-bold">
-            Password:
-        </span>
-
-        <input :type="showPassword ? `text` : `password`" :value="connection.Password" readonly>
-
-        <v-btn icon @click="showPassword = !showPassword">
-            <v-icon>
-                {{ showPassword ? 'mdi-eye-off' : 'mdi-eye' }}
-            </v-icon>
-        </v-btn>
-    </p>
-
 </div>
 
 </template>
@@ -53,7 +38,6 @@ const VueComponent = Vue.extend({
 
 @Component
 export default class DatabaseConnectionReadOnlyComponent extends VueComponent {
-    showPassword: boolean = false
 }
 
 </script>

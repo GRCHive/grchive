@@ -20,7 +20,6 @@ export interface DatabaseConnection {
     OrgId: number
     ConnString: string
     Username: string
-    Password: string
 }
 
 export const otherTypeId = 2
