@@ -117,7 +117,6 @@
                                 <v-btn color="error"
                                        outlined
                                        fab
-                                       v-on="on"
                                        small
                                        v-if="hasDb"
                                        @click="showHideDeleteConnection=true"
