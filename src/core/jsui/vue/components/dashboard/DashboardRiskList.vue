@@ -135,7 +135,7 @@ export default Vue.extend({
             })
         },
         saveNewRisk(risk : ProcessFlowRisk) {
-            this.allRisks.push(risk)
+            this.allRisks.unshift(risk)
             this.showHideCreateNewRisk = false
         },
         cancelNewRisk() {

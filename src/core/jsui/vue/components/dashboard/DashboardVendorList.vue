@@ -3,10 +3,9 @@
         <v-list-item class="pa-0">
             <v-list-item-content class="disable-flex mr-4">
                 <v-list-item-title class="title">
-                    Servers
+                    Vendors
                 </v-list-item-title>
             </v-list-item-content>
-
             <v-list-item-action>
                 <v-text-field outlined
                               v-model="filterText"
@@ -21,7 +20,6 @@
                 <v-dialog v-model="showHideNew"
                           persistent
                           max-width="40%"
-                          ref="form"
                 >
                     <template v-slot:activator="{ on }">
                         <v-btn color="primary" v-on="on">
@@ -29,21 +27,21 @@
                         </v-btn>
                     </template>
 
-                    <create-new-server-form
-                        @do-save="onSave"
-                        @do-cancel="showHideNew = false">
-                    </create-new-server-form>
+                    <create-new-vendor-form
+                        @do-cancel="showHideNew = false"
+                        @do-save="saveVendor">
+                    </create-new-vendor-form>
+
                 </v-dialog>
             </v-list-item-action>
-
         </v-list-item>
         <v-divider></v-divider>
 
-        <server-table
-            :resources="servers"
+        <vendor-table
+            :resources="allVendors"
             :search="filterText"
         >
-        </server-table>
+        </vendor-table>
     </div>
 </template>
 
@@ -51,39 +49,29 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import ServerTable from '../../generic/ServerTable.vue'
-import { Server } from '../../../ts/infrastructure'
-import { allServers, TAllServerOutput } from '../../../ts/api/apiServers'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
-import CreateNewServerForm from './CreateNewServerForm.vue'
+import { Vendor } from '../../../ts/vendors'
+import VendorTable from '../../generic/VendorTable.vue'
+import CreateNewVendorForm from './CreateNewVendorForm.vue'
+import { allVendors, TAllVendorOutput } from '../../../ts/api/apiVendors'
 
 @Component({
     components: {
-        ServerTable,
-        CreateNewServerForm
+        VendorTable,
+        CreateNewVendorForm
     }
 })
-export default class DashboardServerList extends Vue {
-    showHideNew : boolean = false
-    filterText: string = ""
-    servers : Server[] = []
+export default class DashboardSystemList extends Vue {
+    showHideNew: boolean = false
+    filterText : string = ""
+    allVendors : Vendor[] = []
 
-    $refs!: {
-        form: CreateNewServerForm
-    }
-
-    onSave(s : Server) {
-        this.showHideNew = false
-        this.servers.unshift(s)
-        this.$refs.form.clearForm()
-    }
-
-    mounted() {
-        allServers({
-            orgId: PageParamsStore.state.organization!.Id
-        }).then((resp : TAllServerOutput) => {
-            this.servers = resp.data
+    refreshVendors() {
+        allVendors({
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TAllVendorOutput) => {
+            this.allVendors = resp.data
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
@@ -93,6 +81,15 @@ export default class DashboardServerList extends Vue {
                 contactUsUrl,
                 true);
         })
+    }
+
+    saveVendor(vendor : Vendor) {
+        this.showHideNew = false
+        this.allVendors.unshift(vendor)
+    }
+
+    mounted() {
+        this.refreshVendors()
     }
 }
 

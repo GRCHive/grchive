@@ -47,6 +47,7 @@ func registerAPIPaths(r *mux.Router) {
 	registerDocRequestsAPIPaths(s)
 	registerCommentsAPIPaths(s)
 	registerDeploymentAPIPaths(s)
+	registerVendorAPIPaths(s)
 }
 
 func registerInviteAPIPaths(r *mux.Router) {
@@ -244,4 +245,24 @@ func registerDeploymentServerLinkAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiITServerPrefix).Subrouter()
 	s.HandleFunc(core.ApiNewEndpoint, newDeploymentServerLink).Methods("POST")
 	s.HandleFunc(core.ApiDeleteEndpoint, deleteDeploymentServerLink).Methods("POST")
+}
+
+func registerVendorAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiVendorPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, newVendor).Methods("POST")
+	s.HandleFunc(core.ApiAllEndpoint, allVendors).Methods("GET")
+	s.HandleFunc(core.ApiGetEndpoint, getVendor).Methods("GET")
+	s.HandleFunc(core.ApiUpdateEndpoint, updateVendor).Methods("POST")
+	s.HandleFunc(core.ApiDeleteEndpoint, deleteVendor).Methods("POST")
+
+	registerVendorProductAPIPaths(s)
+}
+
+func registerVendorProductAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiVendorProductPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, newVendorProduct).Methods("POST")
+	s.HandleFunc(core.ApiAllEndpoint, allVendorProducts).Methods("GET")
+	s.HandleFunc(core.ApiGetEndpoint, getVendorProduct).Methods("GET")
+	s.HandleFunc(core.ApiUpdateEndpoint, updateVendorProduct).Methods("POST")
+	s.HandleFunc(core.ApiDeleteEndpoint, deleteVendorProduct).Methods("POST")
 }

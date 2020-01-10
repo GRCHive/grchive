@@ -85,7 +85,7 @@ export default class DashboardDatabaseList extends Vue {
 
     onSaveDatabase(db : Database) {
         this.showHideNew = false
-        this.allDbs.push(db)
+        this.allDbs.unshift(db)
     }
 }
 

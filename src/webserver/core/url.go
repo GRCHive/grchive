@@ -37,6 +37,7 @@ const DashboardOrgDbQueryId string = "dbId"
 const DashboardOrgServerQueryId string = "serverId"
 const DashboardOrgDocCatQueryId string = "docCatId"
 const DashboardOrgDocRequestQueryId string = "reqId"
+const DashboardOrgVendorQueryId string = "vendorId"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 
@@ -47,12 +48,14 @@ const DashboardOrgAllRiskEndpoint string = "/risks"
 const DashboardOrgAllControlsEndpoint string = "/controls"
 const DashboardOrgAllDocumentationEndpoint string = "/documentation"
 const DashboardOrgAllDocRequestsEndpoint string = "/requests"
+const DashboardOrgAllVendorsEndpoint string = "/vendors"
 
 var DashboardOrgRiskEndpoint string = fmt.Sprintf("/risks/{%s}", DashboardOrgRiskQueryId)
 var DashboardOrgControlEndpoint string = fmt.Sprintf("/controls/{%s}", DashboardOrgControlQueryId)
 var DashboardOrgFlowEndpoint string = fmt.Sprintf("/flows/{%s}", DashboardOrgFlowQueryId)
 var DashboardOrgSingleDocCatEndpoint string = fmt.Sprintf("/documentation/cat/{%s}", DashboardOrgDocCatQueryId)
 var DashboardOrgSingleDocRequestEndpoint string = fmt.Sprintf("/requests/{%s}", DashboardOrgDocRequestQueryId)
+var DashboardOrgSingleVendorEndpoint string = fmt.Sprintf("/vendors/{%s}", DashboardOrgVendorQueryId)
 
 // Dashboard - Organization - Settings
 const DashboardOrgSettingsPrefix string = "/settings"
@@ -242,6 +245,10 @@ const ApiCommentsPrefix = "/comments"
 // API - Deployment
 const ApiDeploymentPrefix = "/deployment"
 const ApiLinkPrefix = "/link"
+
+// API - Vendor
+const ApiVendorPrefix = "/vendor"
+const ApiVendorProductPrefix = "/product"
 
 // Websocket
 const WebsocketPrefix string = "/ws"

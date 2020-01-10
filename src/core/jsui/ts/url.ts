@@ -65,6 +65,10 @@ export function createOrgServersUrl(org : string) : string {
     return `${createOrgUrl(org)}/it/servers`
 }
 
+export function createOrgVendorsUrl(org : string) : string {
+    return `${createOrgUrl(org)}/vendors`
+}
+
 export function createSingleSystemUrl(org: string, sys : number) : string {
     return `/dashboard/org/${org}/it/systems/${sys}`
 }
@@ -113,9 +117,12 @@ export function createUserProfileEditAPIUrl(id : number) : string {
     return `/api/user/${id}/profile`
 }
 
-
 export function createUserGetOrgsAPIUrl(id : number) : string {
     return `/api/user/${id}/orgs`
+}
+
+export function createSingleVendorUrl(org: string, vendor : number) : string {
+    return `/dashboard/org/${org}/vendors/${vendor}`
 }
 
 export const newProcessFlowAPIUrl : string = "/api/flows/new"
@@ -245,3 +252,9 @@ export const allServersUrl : string = "/api/it/servers/all"
 export const getServerUrl : string = "/api/it/servers/get"
 export const updateServerUrl : string = "/api/it/servers/update"
 export const deleteServerUrl : string = "/api/it/servers/delete"
+
+export const newVendorUrl : string = "/api/vendor/new"
+export const allVendorsUrl : string = "/api/vendor/all"
+export const getVendorUrl : string = "/api/vendor/get"
+export const updateVendorUrl : string = "/api/vendor/update"
+export const deleteVendorUrl : string = "/api/vendor/delete"

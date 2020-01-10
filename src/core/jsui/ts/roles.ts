@@ -28,6 +28,8 @@ export interface Permissions {
     DbConnectionAccess        : AccessType
     DocRequestAccess          : AccessType
     DeploymentAccess          : AccessType
+    ServerAccess              : AccessType
+    VendorAccess              : AccessType
 }
 
 export interface FullRole {

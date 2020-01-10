@@ -24,6 +24,7 @@ go_library(
         "comments.go",
         "deployment.go",
         "servers.go",
+        "vendors.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",

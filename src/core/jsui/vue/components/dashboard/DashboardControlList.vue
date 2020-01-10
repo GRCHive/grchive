@@ -215,7 +215,7 @@ export default Vue.extend({
             this.currentDeleteControl = control
         },
         saveNewControl(control : ProcessFlowControl) {
-            this.allControls.push(control)
+            this.allControls.unshift(control)
             this.showHideCreateNewControl = false
         },
         cancelNewControl() {

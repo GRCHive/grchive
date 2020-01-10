@@ -2,7 +2,7 @@
 
 <v-card>
     <v-card-title>
-        {{ editMode ? "Edit" : "New" }} System
+        {{ editMode ? "Edit" : "New" }} Vendor
     </v-card-title>
     <v-divider></v-divider>
 
@@ -10,29 +10,28 @@
         <v-text-field v-model="name"
                       label="Name"
                       filled
-                      :rules="[rules.required]"
+                      :rules="[rules.required, rules.createMaxLength(256)]"
                       :disabled="!canEdit">
         </v-text-field>
 
-        <v-text-field v-model="purpose"
-                      label="Purpose"
+        <v-text-field v-model="url"
+                      label="Url"
                       filled
                       :disabled="!canEdit">
-        </v-text-field> 
+        </v-text-field>
 
         <v-textarea v-model="description"
                     label="Description"
                     filled
                     :disabled="!canEdit">
         </v-textarea> 
-
     </v-form>
 
     <v-card-actions>
         <v-btn
             color="error"
             @click="cancel"
-            v-if="canEdit || dialogMode"
+            v-if="canEdit"
         >
             Cancel
         </v-btn>
@@ -64,11 +63,10 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import * as rules from '../../../ts/formRules'
-import { TNewSystemOutputs, newSystem} from '../../../ts/api/apiSystems'
-import { TEditSystemOutputs, editSystem} from '../../../ts/api/apiSystems'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
-import { System } from '../../../ts/systems'
+import { Vendor } from '../../../ts/vendors'
+import { updateVendor, newVendor, TNewVendorOutput } from '../../../ts/api/apiVendors'
 
 const VueComponent = Vue.extend({
     props: {
@@ -76,36 +74,32 @@ const VueComponent = Vue.extend({
             type: Boolean,
             default: false
         },
-        dialogMode: {
-            type: Boolean,
-            default: false
-        },
-        referenceSystem: {
-            type: Object as () => System | null,
+        referenceVendor: {
+            type: Object as () => Vendor | null,
             default: null
         }
     }
 })
 
 @Component
-export default class CreateNewSystemForm extends VueComponent {
+export default class CreateNewVendorForm extends VueComponent {
     canEdit : boolean = false
     formValid: boolean = false
     rules: any = rules
 
     name : string = ""
-    purpose : string = ""
-    description: string = ""
+    url : string = ""
+    description : string = ""
 
     doSave() {
-        newSystem({
+        newVendor({
             orgId: PageParamsStore.state.organization!.Id,
             name: this.name,
-            purpose: this.purpose,
+            url : this.url,
             description: this.description,
-        }).then((resp : TNewSystemOutputs) => {
+        }).then((resp : TNewVendorOutput) => {
             this.$emit('do-save', resp.data)
-        }).catch((err : any) => {
+        }).catch((err: any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
                 "Oops. Something went wrong. Try again.",
@@ -117,16 +111,16 @@ export default class CreateNewSystemForm extends VueComponent {
     }
 
     doEdit() {
-        editSystem({
-            sysId: this.referenceSystem!.Id,
+        updateVendor({
+            vendorId: this.referenceVendor!.Id,
             orgId: PageParamsStore.state.organization!.Id,
             name: this.name,
-            purpose: this.purpose,
+            url : this.url,
             description: this.description,
-        }).then((resp : TNewSystemOutputs) => {
+        }).then((resp : TNewVendorOutput) => {
             this.$emit('do-save', resp.data)
             this.canEdit = false
-        }).catch((err : any) => {
+        }).catch((err: any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
                 "Oops. Something went wrong. Try again.",
@@ -161,13 +155,13 @@ export default class CreateNewSystemForm extends VueComponent {
     }
 
     clearForm() {
-        if (!!this.referenceSystem) {
-            this.name = this.referenceSystem.Name
-            this.purpose = this.referenceSystem.Purpose
-            this.description = this.referenceSystem.Description
+        if (!!this.referenceVendor) {
+            this.name = this.referenceVendor!.Name
+            this.url = this.referenceVendor!.Url
+            this.description = this.referenceVendor!.Description
         } else {
             this.name = ""
-            this.purpose = ""
+            this.url = ""
             this.description = ""
         }
     }

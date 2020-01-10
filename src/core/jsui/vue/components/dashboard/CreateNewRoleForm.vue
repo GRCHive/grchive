@@ -106,6 +106,17 @@
             :disabled="!canEdit"
         ></access-type-editor>
 
+        <access-type-editor
+            label="Servers"
+            v-model="permissions.ServerAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+
+        <access-type-editor
+            label="Vendors"
+            v-model="permissions.VendorAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
     </v-form>
 
     <v-card-actions>
@@ -191,6 +202,8 @@ export default Vue.extend({
             DbConnectionAccess: AccessType.NoAccess,
             DocRequestAccess: AccessType.NoAccess,
             DeploymentAccess: AccessType.NoAccess,
+            ServerAccess: AccessType.NoAccess,
+            VendorAccess: AccessType.NoAccess,
         },
     }),
     computed: {

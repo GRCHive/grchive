@@ -155,7 +155,7 @@ export default Vue.extend({
         },
         onCreateNewFlow(data : ProcessFlowBasicData) {
             this.showHideCreateNewFlow = false
-            this.allFlows.push(data)
+            this.allFlows.unshift(data)
         },
         refreshFlows() {
             getAllProcessFlow(<TGetAllProcessFlowInput>{

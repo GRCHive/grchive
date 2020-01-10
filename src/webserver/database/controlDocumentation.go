@@ -7,12 +7,10 @@ import (
 	"math"
 )
 
-func NewControlDocumentationCategory(cat *core.ControlDocumentationCategory, role *core.Role) error {
+func NewControlDocumentationCategoryWithTx(cat *core.ControlDocumentationCategory, role *core.Role, tx *sqlx.Tx) error {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessManage) {
 		return core.ErrorUnauthorized
 	}
-
-	tx := dbConn.MustBegin()
 
 	rows, err := tx.NamedQuery(`
 		INSERT INTO process_flow_control_documentation_categories (name, description, org_id)
@@ -20,17 +18,26 @@ func NewControlDocumentationCategory(cat *core.ControlDocumentationCategory, rol
 		RETURNING id
 	`, cat)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	rows.Next()
 	err = rows.Scan(&cat.Id)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 	rows.Close()
+	return nil
+}
+
+func NewControlDocumentationCategory(cat *core.ControlDocumentationCategory, role *core.Role) error {
+	tx := dbConn.MustBegin()
+	err := NewControlDocumentationCategoryWithTx(cat, role, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	return tx.Commit()
 }
 
@@ -54,17 +61,24 @@ func EditControlDocumentationCategory(cat *core.ControlDocumentationCategory, ro
 	return tx.Commit()
 }
 
-func DeleteControlDocumentationCategory(catId int64, orgId int32, role *core.Role) error {
+func DeleteControlDocumentationCategoryWithTx(catId int64, orgId int32, role *core.Role, tx *sqlx.Tx) error {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessManage) {
 		return core.ErrorUnauthorized
 	}
-
-	tx := dbConn.MustBegin()
 	_, err := tx.Exec(`
 		DELETE FROM process_flow_control_documentation_categories
 		WHERE id = $1
 			AND org_id = $2
 	`, catId, orgId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteControlDocumentationCategory(catId int64, orgId int32, role *core.Role) error {
+	tx := dbConn.MustBegin()
+	err := DeleteControlDocumentationCategoryWithTx(catId, orgId, role, tx)
 	if err != nil {
 		tx.Rollback()
 		return err
