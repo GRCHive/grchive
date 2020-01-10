@@ -7,6 +7,7 @@
              :disabled="item.disabled"
              :two-line="item.disabled"
              :input-value="isActive"
+             v-if="!item.hidden"
 >
     <v-list-item-icon v-if="item.icon != ''">
         <v-icon>{{ item.icon }}</v-icon>

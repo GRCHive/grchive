@@ -16,17 +16,36 @@ export default Vue.extend({
         return {
             navLinks : [
                 {
-                    title: 'Dashboard',
-                    icon: 'mdi-view-dashboard',
-                    url: PageParamsStore.state.organization!.Url + 'dashboard',
-                    disabled : false,
-                    hidden: true
-                },
-                {
-                    title: 'Process Flows',
-                    icon: 'mdi-graph-outline',
-                    url: PageParamsStore.state.organization!.Url + 'flows',
-                    disabled : false
+                    title: 'Business',
+                    icon : 'mdi-domain',
+                    disabled: false,
+                    children: [
+                        {
+                            title: 'Dashboard',
+                            icon: 'mdi-view-dashboard',
+                            url: PageParamsStore.state.organization!.Url + 'dashboard',
+                            disabled : false,
+                            hidden: true
+                        },
+                        {
+                            title: 'Process Flows',
+                            icon: 'mdi-graph-outline',
+                            url: PageParamsStore.state.organization!.Url + 'flows',
+                            disabled : false
+                        },
+                        {
+                            title: 'General Ledger',
+                            icon: 'mdi-bank-outline',
+                            url: PageParamsStore.state.organization!.Url + 'gl',
+                            disabled : false
+                        },
+                        {
+                            title: 'Vendors',
+                            icon: 'mdi-store',
+                            url: PageParamsStore.state.organization!.Url + 'vendors',
+                            disabled : false
+                        },
+                    ]
                 },
                 {
                     title: 'Audit',
@@ -58,12 +77,6 @@ export default Vue.extend({
                             disabled : false
                         },
                     ],
-                },
-                {
-                    title: 'General Ledger',
-                    icon: 'mdi-bank-outline',
-                    url: PageParamsStore.state.organization!.Url + 'gl',
-                    disabled : false
                 },
                 {
                     title: 'IT',

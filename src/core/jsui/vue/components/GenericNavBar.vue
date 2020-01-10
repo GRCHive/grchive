@@ -8,7 +8,7 @@
         ref="drawer"
     >
         <slot></slot>
-        <v-list class="py-0">
+        <v-list class="py-0" expand>
             <div v-for="(item, i) in finalNavLinks" 
                  :key="i"
                  :style="!!item.hidden ? `display: none;` : ``"
@@ -62,7 +62,7 @@ export default Vue.extend({
         GenericNavBarItem
     },
     data: () => ({
-        dispMini: false
+        dispMini: false,
     }),
     computed: {
         finalNavLinks(): Array<any> {
@@ -100,7 +100,7 @@ export default Vue.extend({
 
         //@ts-ignore
         this.dispMini = this.$refs.drawer.isMiniVariant
-    }
+    },
 })
 
 </script>
