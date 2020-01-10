@@ -37,12 +37,6 @@
 
             <v-spacer></v-spacer>
 
-            <v-list-item-action v-if="!disableSample">
-                <v-btn color="info">
-                    Sample
-                </v-btn>
-            </v-list-item-action>
-
             <v-list-item-action class="ml-4" v-if="!disableDownload">
                 <v-btn color="success" @click="downloadSelectedFiles" :disabled="!hasSelected">
                     Download

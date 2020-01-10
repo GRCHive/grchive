@@ -67,6 +67,11 @@
 
                 <v-tab-item>
                     <v-container fluid>
+                        <full-edit-documentation-category-component
+                            content-only
+                            :resource-id="currentVendor.DocCatId"
+                        >
+                        </full-edit-documentation-category-component>
                     </v-container>
                 </v-tab-item>
             </v-tabs-items>
@@ -84,11 +89,13 @@ import { deleteVendor, getVendor, TGetVendorOutput } from '../../../ts/api/apiVe
 import { PageParamsStore } from '../../../ts/pageParams'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import CreateNewVendorForm from './CreateNewVendorForm.vue'
+import FullEditDocumentationCategoryComponent from './FullEditDocumentationCategoryComponent.vue'
 
 @Component({
     components: {
         GenericDeleteConfirmationForm,
-        CreateNewVendorForm
+        CreateNewVendorForm,
+        FullEditDocumentationCategoryComponent
     }
 })
 export default class FullEditVendorComponent extends Vue {

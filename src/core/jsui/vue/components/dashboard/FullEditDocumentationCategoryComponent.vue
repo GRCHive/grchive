@@ -1,11 +1,11 @@
 <template>
-    <div class="ma-4">
+    <div :class="contentOnly ? '' : 'ma-4'">
         <v-overlay :value="!ready">
             <v-progress-circular indeterminate size="64"></v-progress-circular>
         </v-overlay>
 
         <div v-if="ready">
-            <v-list-item two-line class="pa-0">
+            <v-list-item two-line class="pa-0" v-if="!contentOnly">
                 <v-list-item-content>
                     <v-list-item-title class="title">
                         Category: {{ currentCat.Name }}
@@ -21,9 +21,9 @@
                 </v-list-item-content>
             </v-list-item>
 
-            <v-divider></v-divider>
+            <v-divider v-if="!contentOnly"></v-divider>
 
-            <v-container fluid>
+            <v-container fluid :class="contentOnly ? 'pa-0' : ''">
                 <v-row>
                     <v-col cols="4">
                         <create-new-control-documentation-category-form
@@ -131,6 +131,19 @@ import DocumentationCategoryViewer from './DocumentationCategoryViewer.vue'
 import CreateNewControlDocumentationCategoryForm from './CreateNewControlDocumentationCategoryForm.vue'
 import AddDocumentCategoryToControlForm from '../../generic/AddDocumentCategoryToControlForm.vue'
 
+const Props = Vue.extend({
+    props: {
+        contentOnly : {
+            type: Boolean,
+            default: false
+        },
+        resourceId: {
+            type: Number,
+            default: -1
+        }
+    }
+})
+
 @Component({
     components: {
         DocumentationCategoryViewer,
@@ -139,7 +152,7 @@ import AddDocumentCategoryToControlForm from '../../generic/AddDocumentCategoryT
         AddDocumentCategoryToControlForm
     }
 })
-export default class FullEditDocumentationCategoryComponent extends Vue {
+export default class FullEditDocumentationCategoryComponent extends Props {
     expandDescription : boolean = false
     currentCat : ControlDocumentationCategory | null = null
     inputControls: ProcessFlowControl[] = []
@@ -157,8 +170,13 @@ export default class FullEditDocumentationCategoryComponent extends Vue {
     }
     
     mounted() {
-        let data = window.location.pathname.split('/')
-        let resourceId = Number(data[data.length - 1])
+        let resourceId = 0
+        if (this.resourceId != -1) {
+            resourceId = this.resourceId
+        } else {
+            let data = window.location.pathname.split('/')
+            resourceId = Number(data[data.length - 1])
+        }
 
         getDocumentCategory({
             orgId: PageParamsStore.state.organization!.Id,
