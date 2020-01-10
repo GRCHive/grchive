@@ -7,6 +7,7 @@ const (
 )
 
 type SelfDeployment struct {
+	Servers []*Server
 }
 
 type VendorDeployment struct {
@@ -24,6 +25,7 @@ type FullDeployment struct {
 }
 
 type StrippedSelfDeployment struct {
+	Servers []*ServerHandle
 }
 
 type StrippedVendorDeployment struct {

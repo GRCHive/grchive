@@ -60,11 +60,21 @@ func LinkDeploymentWithDatabaseWithTx(deployment *core.FullDeployment, dbId int6
 }
 
 func getSelfDeploymentHelper(id int64, orgId int32, role *core.Role) (*core.SelfDeployment, error) {
-	return nil, nil
+	servers, err := AllServersForDeployment(id, orgId, role)
+	if err != nil {
+		return nil, err
+	}
+
+	self := core.SelfDeployment{
+		Servers: servers,
+	}
+	return &self, nil
 }
 
 func getVendorDeploymentHelper(id int64, orgId int32, role *core.Role) (*core.VendorDeployment, error) {
-	vendor := core.VendorDeployment{}
+	vendor := core.VendorDeployment{
+		SocFiles: make([]*core.ControlDocumentationFile, 0),
+	}
 
 	rows, err := dbConn.Queryx(`
 		SELECT vd.vendor_name, vd.vendor_product
@@ -76,7 +86,7 @@ func getVendorDeploymentHelper(id int64, orgId int32, role *core.Role) (*core.Ve
 	}
 
 	if !rows.Next() {
-		return nil, nil
+		return &vendor, nil
 	}
 
 	err = rows.StructScan(&vendor)
@@ -92,7 +102,7 @@ func getVendorDeploymentHelper(id int64, orgId int32, role *core.Role) (*core.Ve
 	return &vendor, nil
 }
 
-func getDeploymentHelper(condition string, role *core.Role, args ...interface{}) (*core.FullDeployment, error) {
+func getDeploymentHelper(condition string, lite bool, role *core.Role, args ...interface{}) (*core.FullDeployment, error) {
 	if !role.Permissions.HasAccess(core.ResourceDeployments, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
@@ -116,6 +126,10 @@ func getDeploymentHelper(condition string, role *core.Role, args ...interface{})
 		return nil, err
 	}
 
+	if lite {
+		return &deployment, nil
+	}
+
 	deployment.SelfDeployment, err = getSelfDeploymentHelper(deployment.Id, deployment.OrgId, role)
 	if err != nil {
 		return nil, err
@@ -129,29 +143,64 @@ func getDeploymentHelper(condition string, role *core.Role, args ...interface{})
 	return &deployment, err
 }
 
-func getLinkedDeployment(resourceId int64, linkTable string, linkResource string, orgId int32, role *core.Role) (*core.FullDeployment, error) {
+func getLinkedDeployment(resourceId int64, linkTable string, linkResource string, orgId int32, lite bool, role *core.Role) (*core.FullDeployment, error) {
 	return getDeploymentHelper(fmt.Sprintf(`
 		INNER JOIN %s AS lnk
 			ON lnk.deployment_id = d.id
 				AND lnk.org_id = d.org_id
 		WHERE lnk.%s = $1
 			AND lnk.org_id = $2
-	`, linkTable, linkResource), role, resourceId, orgId)
+	`, linkTable, linkResource), lite, role, resourceId, orgId)
 }
 
 func GetDeploymentFromId(id int64, orgId int32, role *core.Role) (*core.FullDeployment, error) {
-	return getDeploymentHelper("WHERE d.id = $1 AND d.org_id = $2", role, id, orgId)
+	return getDeploymentHelper("WHERE d.id = $1 AND d.org_id = $2", false, role, id, orgId)
 }
 
 func GetSystemDeployment(systemId int64, orgId int32, role *core.Role) (*core.FullDeployment, error) {
-	return getLinkedDeployment(systemId, "deployment_system_link", "system_id", orgId, role)
+	return getLinkedDeployment(systemId, "deployment_system_link", "system_id", orgId, false, role)
 }
 
 func GetDatabaseDeployment(dbId int64, orgId int32, role *core.Role) (*core.FullDeployment, error) {
-	return getLinkedDeployment(dbId, "deployment_db_link", "db_id", orgId, role)
+	return getLinkedDeployment(dbId, "deployment_db_link", "db_id", orgId, false, role)
+}
+
+func GetSystemDeploymentId(systemId int64, orgId int32, role *core.Role) (int64, error) {
+	deploy, err := getLinkedDeployment(systemId, "deployment_system_link", "system_id", orgId, true, role)
+	if err != nil {
+		return -1, err
+	}
+	return deploy.Id, nil
+}
+
+func GetDatabaseDeploymentId(dbId int64, orgId int32, role *core.Role) (int64, error) {
+	deploy, err := getLinkedDeployment(dbId, "deployment_db_link", "db_id", orgId, true, role)
+	if err != nil {
+		return -1, err
+	}
+	return deploy.Id, nil
 }
 
 func updateSelfDeploymentWithTx(id int64, orgId int32, selfDeploy *core.StrippedSelfDeployment, tx *sqlx.Tx) error {
+	_, err := tx.Exec(`
+		DELETE FROM deployment_server_link
+		WHERE deployment_id = $1 AND org_id = $2
+	`, id, orgId)
+
+	if err != nil {
+		return err
+	}
+
+	for _, handle := range selfDeploy.Servers {
+		_, err = tx.Exec(`
+			INSERT INTO deployment_server_link (server_id, deployment_id, org_id)
+			VALUES ($1, $2, $3)
+		`, handle.Id, id, orgId)
+
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -168,11 +217,19 @@ func updateVendorDeploymentWithTx(id int64, orgId int32, vendorDeploy *core.Stri
 		return err
 	}
 
+	_, err = tx.Exec(`
+		DELETE FROM vendor_soc_reports
+		WHERE deployment_id = $1 AND org_id = $2
+	`, id, orgId)
+
+	if err != nil {
+		return err
+	}
+
 	for _, handle := range vendorDeploy.SocFiles {
 		_, err := tx.Exec(`
 			INSERT INTO vendor_soc_reports (deployment_id, org_id, soc_report_file_id, soc_report_cat_id)
 			VALUES ($1, $2, $3, $4)
-			ON CONFLICT DO NOTHING
 		`, id, orgId, handle.Id, handle.CategoryId)
 
 		if err != nil {
@@ -213,6 +270,33 @@ func UpdateDeployment(deployment *core.StrippedFullDeployment, role *core.Role) 
 	if deployment.VendorDeployment != nil {
 		err = updateVendorDeploymentWithTx(deployment.Id, deployment.OrgId, deployment.VendorDeployment, tx)
 	}
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func LinkDeploymentWithServer(deploymentId int64, serverId int64, orgId int32, role *core.Role) error {
+	return nil
+}
+
+func DeleteDeploymentServerLink(deploymentId int64, serverId int64, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceDeployments, core.AccessEdit) ||
+		!role.Permissions.HasAccess(core.ResourceServers, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+
+	_, err := tx.Exec(`
+		DELETE FROM deployment_server_link
+		WHERE deployment_id = $1
+			AND server_id = $2
+			AND org_id = $3
+	`, deploymentId, serverId, orgId)
 
 	if err != nil {
 		tx.Rollback()

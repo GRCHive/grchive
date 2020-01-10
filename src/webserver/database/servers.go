@@ -98,3 +98,66 @@ func GetServer(serverId int64, orgId int32, role *core.Role) (*core.Server, erro
 	`, serverId, orgId)
 	return &server, err
 }
+
+func AllServersForDeployment(deployId int64, orgId int32, role *core.Role) ([]*core.Server, error) {
+	if !role.Permissions.HasAccess(core.ResourceServers, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	servers := make([]*core.Server, 0)
+	err := dbConn.Select(&servers, `
+		SELECT srv.*
+		FROM infrastructure_servers AS srv
+		INNER JOIN deployment_server_link AS link
+			ON link.server_id = srv.id
+		WHERE srv.org_id = $1
+			AND link.deployment_id = $2
+	`, orgId, deployId)
+	return servers, err
+}
+
+func GetSystemsLinkedToServer(serverId int64, orgId int32, role *core.Role) ([]*core.System, error) {
+	if !role.Permissions.HasAccess(core.ResourceServers, core.AccessView) ||
+		!role.Permissions.HasAccess(core.ResourceSystems, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	systems := make([]*core.System, 0)
+	err := dbConn.Select(&systems, `
+		SELECT sys.*
+		FROM systems AS sys
+		INNER JOIN deployment_system_link AS dlink
+			ON dlink.system_id = sys.id
+		INNER JOIN deployments AS deploy
+			ON dlink.deployment_id = deploy.id
+		INNER JOIN deployment_server_link AS slink
+			ON dlink.deployment_id = slink.deployment_id
+		WHERE slink.server_id = $1
+			AND sys.org_id = $2
+			AND deploy.deployment_type = $3
+	`, serverId, orgId, core.KSelfDeployment)
+	return systems, err
+}
+
+func GetDatabasesLinkedToServer(serverId int64, orgId int32, role *core.Role) ([]*core.Database, error) {
+	if !role.Permissions.HasAccess(core.ResourceServers, core.AccessView) ||
+		!role.Permissions.HasAccess(core.ResourceDatabases, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	dbs := make([]*core.Database, 0)
+	err := dbConn.Select(&dbs, `
+		SELECT db.*
+		FROM database_resources AS db
+		INNER JOIN deployment_db_link AS dlink
+			ON dlink.db_id = db.id
+		INNER JOIN deployments AS deploy
+			ON dlink.deployment_id = deploy.id
+		INNER JOIN deployment_server_link AS slink
+			ON dlink.deployment_id = slink.deployment_id
+		WHERE slink.server_id = $1
+			AND db.org_id = $2
+			AND deploy.deployment_type = $3
+	`, serverId, orgId, core.KSelfDeployment)
+	return dbs, err
+}

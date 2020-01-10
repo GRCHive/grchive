@@ -62,10 +62,28 @@ func CreateNullInt32(v int32) NullInt32 {
 	return NullInt32{sql.NullInt32{v, true}}
 }
 
+type NullBool struct {
+	sql.NullBool
+}
+
+func (v NullBool) MarshalJSON() ([]byte, error) {
+	if v.Valid {
+		return json.Marshal(v.Bool)
+	} else {
+		return json.Marshal(nil)
+	}
+}
+
+func CreateNullBool(v bool) NullBool {
+	return NullBool{sql.NullBool{v, true}}
+}
+
 var BoolReflectType = reflect.TypeOf((bool)(false))
 var IntReflectType = reflect.TypeOf((int)(0))
 var Int64ReflectType = reflect.TypeOf((int64)(0))
 var NullInt64ReflectType = reflect.TypeOf(NullInt64{})
+var NullInt32ReflectType = reflect.TypeOf(NullInt32{})
+var NullBoolReflectType = reflect.TypeOf(NullBool{})
 var Int32ReflectType = reflect.TypeOf((int32)(0))
 var StringReflectType = reflect.TypeOf((string)(""))
 var Int64ArrayReflectType = reflect.TypeOf([]int64{})

@@ -32,6 +32,7 @@ export function newSystem(inp : TNewSystemInputs) : Promise<TNewSystemOutputs> {
 
 export interface TAllSystemsInputs {
     orgId: number
+    deploymentType? : number
 }
 
 export interface TAllSystemsOutputs {

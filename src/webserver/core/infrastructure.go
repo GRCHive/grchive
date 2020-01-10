@@ -9,3 +9,8 @@ type Server struct {
 	Location        string `db:"location"`
 	IpAddress       string `db:"ip_address"`
 }
+
+type ServerHandle struct {
+	Id    int64
+	OrgId int32
+}

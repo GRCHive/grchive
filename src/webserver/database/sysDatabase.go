@@ -60,6 +60,26 @@ func GetAllDatabasesForOrg(orgId int32, role *core.Role) ([]*core.Database, erro
 	return dbs, err
 }
 
+func GetAllDatabasesForOrgWithDeployment(orgId int32, deploymentType int32, role *core.Role) ([]*core.Database, error) {
+	if !role.Permissions.HasAccess(core.ResourceDatabases, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	dbs := make([]*core.Database, 0)
+	err := dbConn.Select(&dbs, `
+		SELECT db.*
+		FROM database_resources AS db
+		INNER JOIN deployment_db_link AS link
+			ON link.db_id = db.id
+		INNER JOIN deployments AS dp
+			ON dp.id = link.deployment_id
+		WHERE db.org_id = $1
+			AND dp.deployment_type = $2
+	`, orgId, deploymentType)
+
+	return dbs, err
+}
+
 func GetDb(dbId int64, orgId int32, role *core.Role) (*core.Database, error) {
 	if !role.Permissions.HasAccess(core.ResourceDatabases, core.AccessView) {
 		return nil, core.ErrorUnauthorized

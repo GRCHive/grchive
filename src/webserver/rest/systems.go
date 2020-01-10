@@ -16,7 +16,8 @@ type NewSystemInputs struct {
 }
 
 type SystemAllInputs struct {
-	OrgId int32 `webcore:"orgId"`
+	OrgId          int32          `webcore:"orgId"`
+	DeploymentType core.NullInt32 `webcore:"deploymentType,optional"`
 }
 
 type GetSystemInputs struct {
@@ -118,7 +119,14 @@ func getAllSystems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	systems, err := database.GetAllSystemsForOrg(inputs.OrgId, role)
+	var systems []*core.System
+
+	if !inputs.DeploymentType.NullInt32.Valid {
+		systems, err = database.GetAllSystemsForOrg(inputs.OrgId, role)
+	} else {
+		systems, err = database.GetAllSystemsForOrgWithDeployment(inputs.OrgId, inputs.DeploymentType.NullInt32.Int32, role)
+	}
+
 	if err != nil {
 		core.Warning("Failed to get all systems: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

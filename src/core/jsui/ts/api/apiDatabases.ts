@@ -43,6 +43,7 @@ export function newDatabase(inp : TNewDatabaseInputs) : Promise<TNewDatabaseOutp
 
 export interface TAllDatabaseInputs {
     orgId: number
+    deploymentType? : number
 }
 
 export interface TAllDatabaseOutputs {

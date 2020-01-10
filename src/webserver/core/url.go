@@ -241,6 +241,7 @@ const ApiCommentsPrefix = "/comments"
 
 // API - Deployment
 const ApiDeploymentPrefix = "/deployment"
+const ApiLinkPrefix = "/link"
 
 // Websocket
 const WebsocketPrefix string = "/ws"

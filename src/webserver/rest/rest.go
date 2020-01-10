@@ -231,4 +231,17 @@ func registerDeploymentAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiDeploymentPrefix).Subrouter()
 	s.HandleFunc(core.ApiNewEndpoint, newDeployment).Methods("POST")
 	s.HandleFunc(core.ApiUpdateEndpoint, updateDeployment).Methods("POST")
+
+	registerDeploymentLinkAPIPaths(s)
+}
+
+func registerDeploymentLinkAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiLinkPrefix).Subrouter()
+	registerDeploymentServerLinkAPIPaths(s)
+}
+
+func registerDeploymentServerLinkAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiITServerPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, newDeploymentServerLink).Methods("POST")
+	s.HandleFunc(core.ApiDeleteEndpoint, deleteDeploymentServerLink).Methods("POST")
 }

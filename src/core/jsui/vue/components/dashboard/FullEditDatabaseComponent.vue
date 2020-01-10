@@ -4,20 +4,20 @@
             <v-progress-circular indeterminate size="64"></v-progress-circular>
         </v-overlay>
 
-        <v-dialog v-model="showHideDeleteConnection"
-                  persistent
-                  max-width="40%"
-        >
-            <generic-delete-confirmation-form
-                item-name="database connections"
-                :items-to-delete="[currentDb.Name]"
-                :use-global-deletion="false"
-                @do-cancel="showHideDeleteConnection = false"
-                @do-delete="onDeleteDbConn">
-            </generic-delete-confirmation-form>
-        </v-dialog>
-
         <div v-if="ready">
+            <v-dialog v-model="showHideDeleteConnection"
+                      persistent
+                      max-width="40%"
+            >
+                <generic-delete-confirmation-form
+                    item-name="database connections"
+                    :items-to-delete="[currentDb.Name]"
+                    :use-global-deletion="false"
+                    @do-cancel="showHideDeleteConnection = false"
+                    @do-delete="onDeleteDbConn">
+                </generic-delete-confirmation-form>
+            </v-dialog>
+
             <v-list-item two-line class="pa-0">
                 <v-list-item-content>
                     <v-list-item-title class="title">

@@ -197,9 +197,27 @@ func getServer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	relevantSystems, err := database.GetSystemsLinkedToServer(server.Id, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get systems linked to server: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	relevantDbs, err := database.GetDatabasesLinkedToServer(server.Id, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get dbs linked to server: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	jsonWriter.Encode(struct {
-		Server *core.Server
+		Server          *core.Server
+		RelevantSystems []*core.System
+		RelevantDbs     []*core.Database
 	}{
-		Server: server,
+		Server:          server,
+		RelevantSystems: relevantSystems,
+		RelevantDbs:     relevantDbs,
 	})
 }

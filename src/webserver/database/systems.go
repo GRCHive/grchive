@@ -46,6 +46,25 @@ func GetAllSystemsForOrg(orgId int32, role *core.Role) ([]*core.System, error) {
 	return systems, err
 }
 
+func GetAllSystemsForOrgWithDeployment(orgId int32, deploymentType int32, role *core.Role) ([]*core.System, error) {
+	if !role.Permissions.HasAccess(core.ResourceSystems, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	systems := make([]*core.System, 0)
+	err := dbConn.Select(&systems, `
+		SELECT sys.*
+		FROM systems AS sys
+		INNER JOIN deployment_system_link AS link
+			ON link.system_id = sys.id
+		INNER JOIN deployments AS dp
+			ON dp.id = link.deployment_id
+		WHERE sys.org_id = $1
+			AND dp.deployment_type = $2
+	`, orgId, deploymentType)
+	return systems, err
+}
+
 func GetSystem(sysId int64, orgId int32, role *core.Role) (*core.System, error) {
 	if !role.Permissions.HasAccess(core.ResourceSystems, core.AccessView) {
 		return nil, core.ErrorUnauthorized

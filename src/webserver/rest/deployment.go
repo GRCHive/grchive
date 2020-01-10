@@ -62,6 +62,13 @@ func newDeployment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	deployment, err = database.GetDeploymentFromId(deployment.Id, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get full deployment: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	jsonWriter.Encode(deployment)
 }
 
@@ -103,4 +110,92 @@ func updateDeployment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(fullDeployment)
+}
+
+type NewDeploymentServerLinkInputs struct {
+	SystemId core.NullInt64 `json:"systemId"`
+	DbId     core.NullInt64 `json:"dbId"`
+	ServerId int64          `json:"serverId"`
+	OrgId    int32          `json:"orgId"`
+}
+
+func newDeploymentServerLink(w http.ResponseWriter, r *http.Request) {
+	inputs := NewDeploymentServerLinkInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	var deploymentId int64
+	if inputs.SystemId.NullInt64.Valid {
+		deploymentId, err = database.GetSystemDeploymentId(inputs.SystemId.NullInt64.Int64, inputs.OrgId, role)
+	} else if inputs.DbId.NullInt64.Valid {
+		deploymentId, err = database.GetDatabaseDeploymentId(inputs.DbId.NullInt64.Int64, inputs.OrgId, role)
+	}
+
+	if err != nil {
+		core.Warning("Failed to get deployment id: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = database.LinkDeploymentWithServer(deploymentId, inputs.ServerId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to link deployment with server: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+type DeleteDeploymentServerLinkInputs struct {
+	SystemId core.NullInt64 `json:"systemId"`
+	DbId     core.NullInt64 `json:"dbId"`
+	ServerId int64          `json:"serverId"`
+	OrgId    int32          `json:"orgId"`
+}
+
+func deleteDeploymentServerLink(w http.ResponseWriter, r *http.Request) {
+	inputs := DeleteDeploymentServerLinkInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	var deploymentId int64
+	if inputs.SystemId.NullInt64.Valid {
+		deploymentId, err = database.GetSystemDeploymentId(inputs.SystemId.NullInt64.Int64, inputs.OrgId, role)
+	} else if inputs.DbId.NullInt64.Valid {
+		deploymentId, err = database.GetDatabaseDeploymentId(inputs.DbId.NullInt64.Int64, inputs.OrgId, role)
+	}
+
+	if err != nil {
+		core.Warning("Failed to get deployment id: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = database.DeleteDeploymentServerLink(deploymentId, inputs.ServerId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to delete server link: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }

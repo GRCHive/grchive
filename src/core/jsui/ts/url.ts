@@ -237,6 +237,8 @@ export const allDocRequestCommentUrl : string = "/api/comments/requests/all"
 export const newDeploymentUrl : string = "/api/deployment/new"
 export const updateDeploymentUrl : string = "/api/deployment/update"
 
+export const deleteDeploymentServerLinkUrl : string = "/api/deployment/link/servers/delete"
+
 export const newServerUrl : string = "/api/it/servers/new"
 export const allServersUrl : string = "/api/it/servers/all"
 export const getServerUrl : string = "/api/it/servers/get"

@@ -3,12 +3,14 @@ import {
     ControlDocumentationFileHandle,
     extractControlDocumentationFileHandle
 } from './controls'
+import { Server, ServerHandle, extractServerHandle } from './infrastructure'
 
 export const KSelfHosted : number = 0
 export const KVendorHosted : number = 1
 export const KNoHost : number = -1
 
 export interface SelfDeployment {
+    Servers: Server[]
 }
 
 export interface VendorDeployment {
@@ -34,7 +36,9 @@ export function createEmptyVendorDeployment() : VendorDeployment {
 }
 
 export function createEmptySelfDeployment() : SelfDeployment {
-    return {}
+    return {
+        Servers: []
+    }
 }
 
 export function deepCopyFullDeployment(f : FullDeployment) : FullDeployment {
@@ -51,10 +55,13 @@ export function deepCopyFullDeployment(f : FullDeployment) : FullDeployment {
 }
 
 export interface StrippedSelfDeployment {
+    Servers: ServerHandle[]
 }
 
 export function createStrippedSelfDeployment(f : SelfDeployment) : StrippedSelfDeployment {
-    return {}
+    return {
+        Servers: f.Servers.map(extractServerHandle)
+    }
 }
 
 export interface StrippedVendorDeployment {

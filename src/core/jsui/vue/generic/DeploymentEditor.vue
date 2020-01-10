@@ -32,7 +32,6 @@
             :items="typeItems"
             hide-details
             :disabled="!canEdit"
-            @change="changeDeploymentType"
         >
         </v-select>
 
@@ -44,6 +43,61 @@
                 v-model="formValid"
             >
             </v-form>
+
+            <v-row class="title ml-2">
+                Servers
+
+                <v-spacer></v-spacer>
+                
+                <v-dialog
+                    v-model="showHideLinkServer"
+                    persistent
+                    max-width="40%"
+                >
+                    <template v-slot:activator="{ on }">
+                        <v-btn
+                            color="primary"
+                            icon
+                            :disabled="!canEdit"
+                            v-on="on"
+                        >
+                            <v-icon>mdi-plus</v-icon>
+                        </v-btn>
+                    </template>
+
+                    <v-card>
+                        <v-card-title>
+                            Link Servers
+                        </v-card-title>
+                        <v-divider></v-divider>
+
+                        <server-table :resources="linkableServers"
+                                       selectable
+                                       multi
+                                       v-model="serversToLink"
+                        ></server-table>
+
+                        <v-card-actions>
+                            <v-btn color="error" @click="showHideLinkServer = false">
+                                Cancel
+                            </v-btn>
+                            <v-spacer></v-spacer>
+                            <v-btn color="success" @click="linkServers">
+                                Link
+                            </v-btn>
+                        </v-card-actions>
+
+                    </v-card>
+                </v-dialog>
+            </v-row>
+
+            <server-table
+                :resources="editableDeployment.SelfDeployment.Servers"
+                :use-crud-delete="canEdit"
+                confirm-delete
+                @delete="unlinkServer"
+            >
+            </server-table>
 
             <v-divider></v-divider>
         </div>
@@ -202,6 +256,9 @@ import { DocumentRequest } from '../../ts/docRequests'
 import { contactUsUrl } from '../../ts/url'
 import { PageParamsStore } from '../../ts/pageParams'
 import DocRequestTable from './DocRequestTable.vue'
+import ServerTable from './ServerTable.vue'
+import { Server } from '../../ts/infrastructure'
+import { allServers, TAllServerOutput } from '../../ts/api/apiServers'
 
 const VueProps = Vue.extend({
     props: {
@@ -215,7 +272,8 @@ const VueProps = Vue.extend({
         UploadDocumentationForm,
         DocSearcherForm,
         CreateNewRequestForm,
-        DocRequestTable
+        DocRequestTable,
+        ServerTable
     }
 })
 export default class DeploymentEditor extends VueProps {
@@ -228,6 +286,20 @@ export default class DeploymentEditor extends VueProps {
     showAddSoc: boolean = false
 
     showRequestSoc: boolean = false
+    showHideLinkServer : boolean = false
+
+    allAvailableServers: Server[] = []
+    serversToLink : Server[] = []
+
+    get linkableServers() : Server[] {
+        let usedServerIds = new Set<number>()
+        if (this.editableDeployment.SelfDeployment) {
+            for (let s of this.editableDeployment.SelfDeployment.Servers) {
+                usedServerIds.add(s.Id)
+            }
+        }
+        return this.allAvailableServers.filter((ele : Server) => !usedServerIds.has(ele.Id))
+    }
 
     get deploymentType() : number {
         return this.editableDeployment.DeploymentType
@@ -261,9 +333,26 @@ export default class DeploymentEditor extends VueProps {
         this.editableDeployment = deepCopyFullDeployment(this.value)
     }
 
+    reloadServers() {
+        allServers({
+            orgId: PageParamsStore.state.organization!.Id
+        }).then((resp : TAllServerOutput) => {
+            this.allAvailableServers = resp.data
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops. Something went wrong. Try again.",
+                false,
+                "",
+                contactUsUrl,
+                true);
+        })
+    }
+
     mounted() {
         this.resetEditCopyFromProps()
         this.reloadSocRequests()
+        this.reloadServers()
     }
 
     cancel() {
@@ -286,19 +375,6 @@ export default class DeploymentEditor extends VueProps {
                 contactUsUrl,
                 true);
         })
-    }
-
-    changeDeploymentType(val : number) {
-        if (this.deploymentType == KSelfHosted) {
-            this.editableDeployment.VendorDeployment = null
-            this.editableDeployment.SelfDeployment = Vue.observable(createEmptySelfDeployment())
-        } else if (this.deploymentType == KVendorHosted) {
-            this.editableDeployment.VendorDeployment = Vue.observable(createEmptyVendorDeployment())
-            this.editableDeployment.SelfDeployment = null
-        } else {
-            this.editableDeployment.VendorDeployment = null
-            this.editableDeployment.SelfDeployment = null
-        }
     }
 
     onSaveUpload(file : ControlDocumentationFile) {
@@ -340,6 +416,21 @@ export default class DeploymentEditor extends VueProps {
                 contactUsUrl,
                 true);
         })
+    }
+
+    unlinkServer(val : Server) {
+        this.editableDeployment.SelfDeployment!.Servers.splice(
+            this.editableDeployment.SelfDeployment!.Servers.findIndex(
+                (ele : Server) => ele.Id == val.Id
+            ),
+            1
+        )
+    }
+
+    linkServers() {
+        this.editableDeployment.SelfDeployment!.Servers.push(...this.serversToLink)
+        this.showHideLinkServer = false
+        this.serversToLink = []
     }
 }
 

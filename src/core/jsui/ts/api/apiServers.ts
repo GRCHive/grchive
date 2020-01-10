@@ -10,6 +10,8 @@ import {
     updateServerUrl,
     deleteServerUrl,
 } from '../url'
+import { System } from '../systems'
+import { Database } from '../databases'
 
 export interface TNewServerInput {
     orgId: number
@@ -56,6 +58,8 @@ export interface TGetServerInput {
 export interface TGetServerOutput {
     data: {
         Server: Server
+        RelevantSystems: System[]
+        RelevantDbs: Database[]
     }
 }
 

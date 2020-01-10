@@ -184,6 +184,25 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 				},
 			})
 			break
+		case core.NullInt32ReflectType:
+			intValue, err := strconv.ParseInt(data[0], 10, 32)
+			if err != nil {
+				return err
+			}
+			dataValue = reflect.ValueOf(core.NullInt32{
+				sql.NullInt32{
+					Int32: int32(intValue),
+					Valid: true,
+				},
+			})
+			break
+		case core.NullBoolReflectType:
+			boolValue, err := strconv.ParseBool(data[0])
+			if err != nil {
+				return err
+			}
+			dataValue = reflect.ValueOf(core.CreateNullBool(boolValue))
+			break
 		case core.Int32ReflectType:
 			intValue, err := strconv.ParseInt(data[0], 10, 32)
 			if err != nil {

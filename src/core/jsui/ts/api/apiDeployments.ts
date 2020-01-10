@@ -2,7 +2,8 @@ import { postFormJson } from '../http'
 import { getAPIRequestConfig } from './apiUtility'
 import {
     newDeploymentUrl,
-    updateDeploymentUrl
+    updateDeploymentUrl,
+    deleteDeploymentServerLinkUrl
 } from '../url'
 import { FullDeployment, deepCopyFullDeployment, createStrippedDeployment } from '../deployments'
 
@@ -40,4 +41,15 @@ export function updateDeployment(inp : TUpdateDeploymentInput) : Promise<TUpdate
         resp.data = deepCopyFullDeployment(resp.data)
         return resp
     })
+}
+
+export interface TDeleteDeploymentServerLinkInput {
+    systemId? : number
+    dbId? : number
+    serverId: number
+    orgId: number
+}
+
+export function unlinkDeploymentFromServer(inp : TDeleteDeploymentServerLinkInput) : Promise<void> {
+    return postFormJson<void>(deleteDeploymentServerLinkUrl, inp, getAPIRequestConfig())
 }

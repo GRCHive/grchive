@@ -17,7 +17,8 @@ type NewDatabaseInputs struct {
 }
 
 type GetAllDatabaseInputs struct {
-	OrgId int32 `webcore:"orgId"`
+	OrgId          int32          `webcore:"orgId"`
+	DeploymentType core.NullInt32 `webcore:"deploymentType,optional"`
 }
 
 type GetDatabaseInputs struct {
@@ -129,7 +130,13 @@ func getAllDb(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbs, err := database.GetAllDatabasesForOrg(org.Id, role)
+	var dbs []*core.Database
+
+	if !inputs.DeploymentType.NullInt32.Valid {
+		dbs, err = database.GetAllDatabasesForOrg(org.Id, role)
+	} else {
+		dbs, err = database.GetAllDatabasesForOrgWithDeployment(org.Id, inputs.DeploymentType.NullInt32.Int32, role)
+	}
 	if err != nil {
 		core.Warning("Can't get all databases: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
