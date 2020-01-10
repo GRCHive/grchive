@@ -185,7 +185,7 @@ import { KSelfHosted } from '../../../ts/deployments'
 import { getServer, TGetServerOutput } from '../../../ts/api/apiServers'
 import { getAllSystems, TAllSystemsOutputs } from '../../../ts/api/apiSystems'
 import { allDatabase, TAllDatabaseOutputs } from '../../../ts/api/apiDatabases'
-import { unlinkDeploymentFromServer } from '../../../ts/api/apiDeployments'
+import { unlinkDeploymentFromServer, linkDeploymentToServer } from '../../../ts/api/apiDeployments'
 import { deleteServer } from '../../../ts/api/apiServers'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl, createOrgServersUrl } from '../../../ts/url'
@@ -342,13 +342,44 @@ export default class FullEditServerComponent extends Vue {
     }
 
     linkToSystems() {
-        this.systemsToLink = []
-        this.showHideLinkSystems = false
+        linkDeploymentToServer({
+            systemId: this.systemsToLink.map((ele : System) => ele.Id),
+            serverId: this.currentServer.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then(() => {
+            this.relevantSystems.push(...this.systemsToLink)
+            this.systemsToLink = []
+            this.showHideLinkSystems = false
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 
     linkToDatabases() {
-        this.databasesToLink = []
-        this.showHideLinkDatabases = false
+        linkDeploymentToServer({
+            dbId: this.databasesToLink.map((ele : Database) => ele.Id),
+            serverId: this.currentServer.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then(() => {
+            this.relevantDbs.push(...this.databasesToLink)
+            this.databasesToLink = []
+            this.showHideLinkDatabases = false
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+
     }
 
     deleteSystemLink(sys : System) {

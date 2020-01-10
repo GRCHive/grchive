@@ -113,10 +113,10 @@ func updateDeployment(w http.ResponseWriter, r *http.Request) {
 }
 
 type NewDeploymentServerLinkInputs struct {
-	SystemId core.NullInt64 `json:"systemId"`
-	DbId     core.NullInt64 `json:"dbId"`
-	ServerId int64          `json:"serverId"`
-	OrgId    int32          `json:"orgId"`
+	SystemId []int64 `json:"systemId"`
+	DbId     []int64 `json:"dbId"`
+	ServerId int64   `json:"serverId"`
+	OrgId    int32   `json:"orgId"`
 }
 
 func newDeploymentServerLink(w http.ResponseWriter, r *http.Request) {
@@ -135,22 +135,31 @@ func newDeploymentServerLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var deploymentId int64
-	if inputs.SystemId.NullInt64.Valid {
-		deploymentId, err = database.GetSystemDeploymentId(inputs.SystemId.NullInt64.Int64, inputs.OrgId, role)
-	} else if inputs.DbId.NullInt64.Valid {
-		deploymentId, err = database.GetDatabaseDeploymentId(inputs.DbId.NullInt64.Int64, inputs.OrgId, role)
+	deploymentIds := make([]int64, 0)
+
+	for _, sysId := range inputs.SystemId {
+		id, err := database.GetSystemDeploymentId(sysId, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get system deployment id: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		deploymentIds = append(deploymentIds, id)
 	}
 
-	if err != nil {
-		core.Warning("Failed to get deployment id: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	for _, dbId := range inputs.DbId {
+		id, err := database.GetDatabaseDeploymentId(dbId, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get database deployment id: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		deploymentIds = append(deploymentIds, id)
 	}
 
-	err = database.LinkDeploymentWithServer(deploymentId, inputs.ServerId, inputs.OrgId, role)
+	err = database.LinkDeploymentsWithServer(deploymentIds, inputs.ServerId, inputs.OrgId, role)
 	if err != nil {
-		core.Warning("Failed to link deployment with server: " + err.Error())
+		core.Warning("Link deployment with server failed: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -179,23 +188,33 @@ func deleteDeploymentServerLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var deploymentId int64
 	if inputs.SystemId.NullInt64.Valid {
-		deploymentId, err = database.GetSystemDeploymentId(inputs.SystemId.NullInt64.Int64, inputs.OrgId, role)
-	} else if inputs.DbId.NullInt64.Valid {
-		deploymentId, err = database.GetDatabaseDeploymentId(inputs.DbId.NullInt64.Int64, inputs.OrgId, role)
+		deploymentId, err := database.GetSystemDeploymentId(inputs.SystemId.NullInt64.Int64, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get deployment id: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = database.DeleteDeploymentServerLink(deploymentId, inputs.ServerId, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to delete server link: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
-	if err != nil {
-		core.Warning("Failed to get deployment id: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	err = database.DeleteDeploymentServerLink(deploymentId, inputs.ServerId, inputs.OrgId, role)
-	if err != nil {
-		core.Warning("Failed to delete server link: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	if inputs.DbId.NullInt64.Valid {
+		deploymentId, err := database.GetDatabaseDeploymentId(inputs.DbId.NullInt64.Int64, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get deployment id: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = database.DeleteDeploymentServerLink(deploymentId, inputs.ServerId, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to delete server link: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 }

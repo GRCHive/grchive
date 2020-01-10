@@ -279,8 +279,27 @@ func UpdateDeployment(deployment *core.StrippedFullDeployment, role *core.Role) 
 	return tx.Commit()
 }
 
-func LinkDeploymentWithServer(deploymentId int64, serverId int64, orgId int32, role *core.Role) error {
-	return nil
+func LinkDeploymentsWithServer(deploymentIds []int64, serverId int64, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceDeployments, core.AccessEdit) ||
+		!role.Permissions.HasAccess(core.ResourceServers, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+
+	for _, deployId := range deploymentIds {
+		_, err := tx.Exec(`
+			INSERT INTO deployment_server_link (deployment_id, server_id, org_id)
+			VALUES ($1, $2, $3)
+		`, deployId, serverId, orgId)
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
 func DeleteDeploymentServerLink(deploymentId int64, serverId int64, orgId int32, role *core.Role) error {
