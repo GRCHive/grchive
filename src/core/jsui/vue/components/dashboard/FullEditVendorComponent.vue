@@ -402,6 +402,22 @@ export default class FullEditVendorComponent extends Vue {
                 contactUsUrl,
                 true);
         })
+
+        getAllDocRequests({
+            orgId: PageParamsStore.state.organization!.Id,
+            catId: this.currentVendor!.DocCatId,
+            vendorProductId: this.selectedProduct!.Id,
+        }).then((resp : TGetAllDocumentRequestOutput) => {
+            this.productSocRequests = resp.data
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 
     onAddNewSocFile(f : ControlDocumentationFile) {
