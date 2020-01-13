@@ -73,13 +73,15 @@ func getSelfDeploymentHelper(id int64, orgId int32, role *core.Role) (*core.Self
 
 func getVendorDeploymentHelper(id int64, orgId int32, role *core.Role) (*core.VendorDeployment, error) {
 	vendor := core.VendorDeployment{
-		SocFiles: make([]*core.ControlDocumentationFile, 0),
+		Product: &core.VendorProduct{},
 	}
 
 	rows, err := dbConn.Queryx(`
-		SELECT vd.vendor_name, vd.vendor_product
+		SELECT prod.*
 		FROM vendor_deployments AS vd
-		WHERE deployment_id = $1 AND org_id = $2
+		INNER JOIN vendor_products AS prod
+			ON vd.vendor_product_id = prod.id
+		WHERE vd.deployment_id = $1 AND vd.org_id = $2
 	`, id, orgId)
 	if err != nil {
 		return nil, err
@@ -89,12 +91,11 @@ func getVendorDeploymentHelper(id int64, orgId int32, role *core.Role) (*core.Ve
 		return &vendor, nil
 	}
 
-	err = rows.StructScan(&vendor)
+	err = rows.StructScan(vendor.Product)
 	if err != nil {
 		return nil, err
 	}
 
-	vendor.SocFiles = make([]*core.ControlDocumentationFile, 0)
 	return &vendor, nil
 }
 
@@ -202,35 +203,14 @@ func updateSelfDeploymentWithTx(id int64, orgId int32, selfDeploy *core.Stripped
 
 func updateVendorDeploymentWithTx(id int64, orgId int32, vendorDeploy *core.StrippedVendorDeployment, tx *sqlx.Tx) error {
 	_, err := tx.Exec(`
-		INSERT INTO vendor_deployments (deployment_id, org_id, vendor_name, vendor_product)
-		VALUES ($1, $2, $3, $4)
-		ON CONFLICT (deployment_id, org_id) DO UPDATE SET
-			vendor_name = EXCLUDED.vendor_name,
-			vendor_product = EXCLUDED.vendor_product	
-	`, id, orgId, vendorDeploy.VendorName, vendorDeploy.VendorProduct)
+		INSERT INTO vendor_deployments (deployment_id, org_id, vendor_product_id)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (deployment_id, vendor_product_id) DO UPDATE SET
+			vendor_product_id = EXCLUDED.vendor_product_id
+	`, id, orgId, vendorDeploy.ProductId)
 
 	if err != nil {
 		return err
-	}
-
-	_, err = tx.Exec(`
-		DELETE FROM vendor_soc_reports
-		WHERE deployment_id = $1 AND org_id = $2
-	`, id, orgId)
-
-	if err != nil {
-		return err
-	}
-
-	for _, handle := range vendorDeploy.SocFiles {
-		_, err := tx.Exec(`
-			INSERT INTO vendor_soc_reports (deployment_id, org_id, soc_report_file_id, soc_report_cat_id)
-			VALUES ($1, $2, $3, $4)
-		`, id, orgId, handle.Id, handle.CategoryId)
-
-		if err != nil {
-			return err
-		}
 	}
 
 	return nil

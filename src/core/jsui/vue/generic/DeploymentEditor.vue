@@ -79,6 +79,18 @@
 
         <!-- vendor hosted -->
         <div v-if="deploymentType == 1">
+            <v-form
+                v-model="formValid"
+            >
+                <vendor-product-search-form-component
+                    v-model="editableDeployment.VendorDeployment.Product"
+                    :rules="[rules.required]"
+                    :disabled="!canEdit"
+                    :initial-vendor-id="initialVendorId"
+                >
+                </vendor-product-search-form-component>
+            </v-form>
+
         </div>
 
         <v-list-item class="pa-0">
@@ -144,6 +156,8 @@ import DocRequestTable from './DocRequestTable.vue'
 import ServerTable from './ServerTable.vue'
 import { Server } from '../../ts/infrastructure'
 import { allServers, TAllServerOutput } from '../../ts/api/apiServers'
+import VendorProductSearchFormComponent from './VendorProductSearchFormComponent.vue'
+import * as rules from '../../ts/formRules'
 
 const VueProps = Vue.extend({
     props: {
@@ -158,17 +172,30 @@ const VueProps = Vue.extend({
         DocSearcherForm,
         CreateNewRequestForm,
         DocRequestTable,
-        ServerTable
+        ServerTable,
+        VendorProductSearchFormComponent
     }
 })
 export default class DeploymentEditor extends VueProps {
     canEdit: boolean = false
     formValid: boolean = false
+    rules : any = rules
     editableDeployment: FullDeployment = {} as FullDeployment
 
     showHideLinkServer : boolean = false
     allAvailableServers: Server[] = []
     serversToLink : Server[] = []
+
+    get initialVendorId() : number {
+        if (!this.editableDeployment.VendorDeployment) {
+            return -1
+        }
+
+        if (!this.editableDeployment.VendorDeployment.Product) {
+            return -1
+        }
+        return this.editableDeployment.VendorDeployment.Product.VendorId
+    }
 
     get linkableServers() : Server[] {
         let usedServerIds = new Set<number>()

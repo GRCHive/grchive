@@ -11,9 +11,7 @@ type SelfDeployment struct {
 }
 
 type VendorDeployment struct {
-	VendorName    string `db:"vendor_name"`
-	VendorProduct string `db:"vendor_product"`
-	SocFiles      []*ControlDocumentationFile
+	Product *VendorProduct
 }
 
 type FullDeployment struct {
@@ -29,9 +27,8 @@ type StrippedSelfDeployment struct {
 }
 
 type StrippedVendorDeployment struct {
-	VendorName    string
-	VendorProduct string
-	SocFiles      []*ControlDocumentationFileHandle
+	VendorId  int64
+	ProductId int64
 }
 
 type StrippedFullDeployment struct {

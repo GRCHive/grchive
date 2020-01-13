@@ -4,6 +4,7 @@ import {
     extractControlDocumentationFileHandle
 } from './controls'
 import { Server, ServerHandle, extractServerHandle } from './infrastructure'
+import { VendorProduct } from './vendors'
 
 export const KSelfHosted : number = 0
 export const KVendorHosted : number = 1
@@ -14,9 +15,7 @@ export interface SelfDeployment {
 }
 
 export interface VendorDeployment {
-    VendorName: string
-    VendorProduct: string
-    SocFiles: ControlDocumentationFile[]
+    Product: VendorProduct | null
 }
 
 export interface FullDeployment {
@@ -29,9 +28,7 @@ export interface FullDeployment {
 
 export function createEmptyVendorDeployment() : VendorDeployment {
     return {
-        VendorName: "",
-        VendorProduct: "",
-        SocFiles: []
+        Product: null
     }
 }
 
@@ -43,14 +40,6 @@ export function createEmptySelfDeployment() : SelfDeployment {
 
 export function deepCopyFullDeployment(f : FullDeployment) : FullDeployment {
     let copy = JSON.parse(JSON.stringify(f)) as FullDeployment
-    
-    if (!!copy.VendorDeployment) {
-        for (let file of copy.VendorDeployment.SocFiles) {
-            file.UploadTime = new Date(file.UploadTime)
-            file.RelevantTime = new Date(file.RelevantTime)
-        }
-    }
-
     return copy
 }
 
@@ -65,16 +54,20 @@ export function createStrippedSelfDeployment(f : SelfDeployment) : StrippedSelfD
 }
 
 export interface StrippedVendorDeployment {
-    VendorName: string
-    VendorProduct: string
-    SocFiles: ControlDocumentationFileHandle[]
+    VendorId : number
+    ProductId: number
 }
 
 export function createStrippedVendorDeployment(f: VendorDeployment) : StrippedVendorDeployment {
+    if (!f.Product) {
+        return {
+            VendorId: -1,
+            ProductId: -1,
+        }
+    }
     return {
-        VendorName: f.VendorName,
-        VendorProduct: f.VendorProduct,
-        SocFiles: f.SocFiles.map((ele: ControlDocumentationFile) => extractControlDocumentationFileHandle(ele))
+        VendorId: f.Product.VendorId,
+        ProductId: f.Product.Id,
     }
 }
 
