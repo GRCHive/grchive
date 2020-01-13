@@ -161,7 +161,7 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
                     headers: this.finalTableHeaders,
                     items: this.tableItems,
                     showSelect: this.selectable,
-                    singleSelect: this.multi,
+                    singleSelect: !this.multi,
                     search: this.search,
                     showExpand: this.showExpand,
                 },

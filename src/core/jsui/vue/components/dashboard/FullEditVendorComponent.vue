@@ -143,6 +143,7 @@
                                                         color="warning"
                                                         :disabled="!hasSelected"
                                                         @click="unlinkSocFiles(selectedFiles)"
+                                                        class="ml-4"
                                                     >
                                                         Unlink
                                                     </v-btn>

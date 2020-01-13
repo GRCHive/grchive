@@ -9,38 +9,29 @@
 
         <v-divider></v-divider>
         <v-list-item>
-            <span v-if="!disableDelete">
-                <v-list-item-action class="ma-1">
-                    <v-btn icon @click="toggleSelection">
-                        <v-icon v-if="!hasSelected">mdi-checkbox-blank-outline</v-icon>
-                        <v-icon v-else>mdi-minus-box-outline</v-icon>
+            <v-dialog v-model="showHideDeleteFiles" persistent max-width="40%">
+                <template v-slot:activator="{on}">
+                    <v-btn color="error" v-on="on" :disabled="!hasSelected" v-if="!disableDelete">
+                        Delete
                     </v-btn>
-                </v-list-item-action>
+                </template>
 
-                <v-dialog v-model="showHideDeleteFiles" persistent max-width="40%">
-                    <template v-slot:activator="{on}">
-                        <v-btn color="error" v-on="on" :disabled="!hasSelected">
-                            Delete
-                        </v-btn>
-                    </template>
+                <generic-delete-confirmation-form
+                    item-name="documents"
+                    :items-to-delete="selectedFileNames"
+                    v-on:do-cancel="showHideDeleteFiles = false"
+                    v-on:do-delete="deleteSelectedFiles"
+                    :use-global-deletion="false"
+                    :force-global-deletion="true">
+                </generic-delete-confirmation-form>
+            </v-dialog>
 
-                    <generic-delete-confirmation-form
-                        item-name="documents"
-                        :items-to-delete="selectedFileNames"
-                        v-on:do-cancel="showHideDeleteFiles = false"
-                        v-on:do-delete="deleteSelectedFiles"
-                        :use-global-deletion="false"
-                        :force-global-deletion="true">
-                    </generic-delete-confirmation-form>
-                </v-dialog>
-
-                <slot
-                    name="multiActions" 
-                    v-bind:hasSelected="hasSelected"
-                    v-bind:selectedFiles="selectedFiles"
-                >
-                </slot>
-            </span>
+            <slot
+                name="multiActions" 
+                v-bind:hasSelected="hasSelected"
+                v-bind:selectedFiles="selectedFiles"
+            >
+            </slot>
 
             <v-spacer></v-spacer>
 
@@ -136,14 +127,6 @@ export default class DocFileManager extends Props {
 
     get selectedFileNames() : string[] {
         return this.selectedFiles.map((ele) => ele.StorageName)
-    }
-
-    toggleSelection() {
-        if (this.hasSelected) {
-            this.selectedFiles = [] as ControlDocumentationFile[]
-        } else {
-            this.selectedFiles = this.value.slice() as ControlDocumentationFile[]
-        }
     }
 
     deleteSelectedFiles() {
