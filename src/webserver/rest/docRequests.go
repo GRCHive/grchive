@@ -10,12 +10,12 @@ import (
 )
 
 type NewDocumentRequestInputs struct {
-	Name               string `json:"name"`
-	Description        string `json:"description"`
-	CatId              int64  `json:"catId"`
-	OrgId              int32  `json:"orgId"`
-	RequestedUserId    int64  `json:"requestedUserId"`
-	SocRequestDeployId int64  `json:"socRequestDeployId"`
+	Name            string `json:"name"`
+	Description     string `json:"description"`
+	CatId           int64  `json:"catId"`
+	OrgId           int32  `json:"orgId"`
+	RequestedUserId int64  `json:"requestedUserId"`
+	VendorProductId int64  `json:"vendorProductId"`
 }
 
 type UpdateDocumentRequestInputs struct {
@@ -44,9 +44,9 @@ type CompleteDocumentRequestInputs struct {
 }
 
 type AllDocumentRequestsInputs struct {
-	OrgId    int32          `webcore:"orgId"`
-	CatId    core.NullInt64 `webcore:"catId,optional"`
-	DeployId core.NullInt64 `webcore:"deployId,optional"`
+	OrgId           int32          `webcore:"orgId"`
+	CatId           core.NullInt64 `webcore:"catId,optional"`
+	VendorProductId core.NullInt64 `webcore:"vendorProductId,optional"`
 }
 
 func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
@@ -88,11 +88,11 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if inputs.SocRequestDeployId != -1 {
-		err = database.LinkRequestToDeploymentWithTx(inputs.SocRequestDeployId, request.Id, request.CatId, request.OrgId, role, tx)
+	if inputs.VendorProductId != -1 {
+		err = database.LinkRequestToVendorProductWithTx(inputs.VendorProductId, request.Id, request.CatId, request.OrgId, role, tx)
 		if err != nil {
 			tx.Rollback()
-			core.Warning("Failed to link request to deployment: " + err.Error())
+			core.Warning("Failed to link request to vendor product: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -231,8 +231,8 @@ func allDocumentRequests(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var reqs []*core.DocumentRequest
-	if inputs.DeployId.NullInt64.Valid {
-		reqs, err = database.GetAllDocumentRequestsForDeployment(inputs.DeployId.NullInt64.Int64, inputs.OrgId, role)
+	if inputs.VendorProductId.NullInt64.Valid {
+		reqs, err = database.GetAllDocumentRequestsForVendorProduct(inputs.VendorProductId.NullInt64.Int64, inputs.OrgId, role)
 	} else if inputs.CatId.NullInt64.Valid {
 		reqs, err = database.GetAllDocumentRequestsForDocCat(inputs.CatId.NullInt64.Int64, inputs.OrgId, role)
 	} else {

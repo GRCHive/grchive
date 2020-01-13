@@ -94,11 +94,7 @@ func getVendorDeploymentHelper(id int64, orgId int32, role *core.Role) (*core.Ve
 		return nil, err
 	}
 
-	vendor.SocFiles, err = GetSocDocumentationForDeployment(id, orgId, role)
-	if err != nil {
-		return nil, err
-	}
-
+	vendor.SocFiles = make([]*core.ControlDocumentationFile, 0)
 	return &vendor, nil
 }
 

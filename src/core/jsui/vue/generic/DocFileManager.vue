@@ -33,9 +33,19 @@
                         :force-global-deletion="true">
                     </generic-delete-confirmation-form>
                 </v-dialog>
+
+                <slot
+                    name="multiActions" 
+                    v-bind:hasSelected="hasSelected"
+                    v-bind:selectedFiles="selectedFiles"
+                >
+                </slot>
             </span>
 
             <v-spacer></v-spacer>
+
+            <slot name="singleActions">
+            </slot>
 
             <v-list-item-action class="ml-4" v-if="!disableDownload">
                 <v-btn color="success" @click="downloadSelectedFiles" :disabled="!hasSelected">
@@ -188,6 +198,7 @@ export default class DocFileManager extends Props {
         newDoc.RelevantTime = new Date(newDoc.RelevantTime)
         newDoc.UploadTime = new Date(newDoc.RelevantTime)
         this.value.unshift(newDoc)
+        this.$emit('new-doc', newDoc)
         this.$emit('input', this.value)
     }
 }

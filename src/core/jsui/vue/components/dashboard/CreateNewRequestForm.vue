@@ -87,7 +87,7 @@ const Props = Vue.extend({
             type: Boolean,
             default: false
         },
-        socRequestDeployId: {
+        vendorProductId: {
             type: Number,
             default: -1
         },
@@ -152,7 +152,7 @@ export default class CreateNewRequestForm extends Props {
             catId: this.realCatId,
             orgId: PageParamsStore.state.organization!.Id,
             requestedUserId: PageParamsStore.state.user!.Id,
-            socRequestDeployId: this.socRequestDeployId
+            vendorProductId: this.vendorProductId
         }).then((resp : TNewDocRequestOutput) => {
             this.onSuccess(resp)
         }).catch((err : any) => {
@@ -168,7 +168,7 @@ export default class CreateNewRequestForm extends Props {
             catId: this.realCatId!,
             orgId: PageParamsStore.state.organization!.Id,
             requestedUserId: PageParamsStore.state.user!.Id,
-            socRequestDeployId: this.socRequestDeployId
+            vendorProductId: this.vendorProductId
         }).then((resp : TNewDocRequestOutput) => {
             this.onSuccess(resp)
         }).catch((err : any) => {

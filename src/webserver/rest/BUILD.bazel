@@ -25,6 +25,7 @@ go_library(
         "deployment.go",
         "servers.go",
         "vendors.go",
+        "vendorProducts.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",

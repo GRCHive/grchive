@@ -224,18 +224,3 @@ func deleteVendor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
-func newVendorProduct(w http.ResponseWriter, r *http.Request) {
-}
-
-func allVendorProducts(w http.ResponseWriter, r *http.Request) {
-}
-
-func getVendorProduct(w http.ResponseWriter, r *http.Request) {
-}
-
-func updateVendorProduct(w http.ResponseWriter, r *http.Request) {
-}
-
-func deleteVendorProduct(w http.ResponseWriter, r *http.Request) {
-}

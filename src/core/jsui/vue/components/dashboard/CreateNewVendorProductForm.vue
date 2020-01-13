@@ -2,8 +2,12 @@
 
 <v-card>
     <v-card-title>
-        {{ editMode ? "Edit" : "New" }} Vendor
+        {{ editMode ? "Edit" : "New" }} Vendor Product
     </v-card-title>
+
+    <v-card-subtitle>
+        Vendor: {{ parentVendor.Name }}
+    </v-card-subtitle>
     <v-divider></v-divider>
 
     <v-form class="ma-4" ref="form" v-model="formValid">
@@ -62,11 +66,11 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { VendorProduct, Vendor } from '../../../ts/vendors'
 import * as rules from '../../../ts/formRules'
-import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
-import { Vendor } from '../../../ts/vendors'
-import { updateVendor, newVendor, TNewVendorOutput } from '../../../ts/api/apiVendors'
+import { newVendorProduct, updateVendorProduct, TNewVendorProductOutput } from '../../../ts/api/apiVendorProduct'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 const VueComponent = Vue.extend({
     props: {
@@ -74,15 +78,19 @@ const VueComponent = Vue.extend({
             type: Boolean,
             default: false
         },
-        referenceVendor: {
-            type: Object as () => Vendor | null,
+        referenceProduct: {
+            type: Object as () => VendorProduct | null,
             default: null
+        },
+        parentVendor: {
+            type: Object as () => Vendor | null,
+            required: true
         }
     }
 })
 
 @Component
-export default class CreateNewVendorForm extends VueComponent {
+export default class CreateNewVendorProductForm extends VueComponent {
     canEdit : boolean = false
     formValid: boolean = false
     rules: any = rules
@@ -92,12 +100,13 @@ export default class CreateNewVendorForm extends VueComponent {
     description : string = ""
 
     doSave() {
-        newVendor({
+        newVendorProduct({
             orgId: PageParamsStore.state.organization!.Id,
+            vendorId: this.parentVendor!.Id,
             name: this.name,
             url : this.url,
             description: this.description,
-        }).then((resp : TNewVendorOutput) => {
+        }).then((resp : TNewVendorProductOutput) => {
             this.$emit('do-save', resp.data)
         }).catch((err: any) => {
             // @ts-ignore
@@ -111,13 +120,14 @@ export default class CreateNewVendorForm extends VueComponent {
     }
 
     doEdit() {
-        updateVendor({
-            vendorId: this.referenceVendor!.Id,
+        updateVendorProduct({
+            productId: this.referenceProduct!.Id,
+            vendorId: this.parentVendor!.Id,
             orgId: PageParamsStore.state.organization!.Id,
             name: this.name,
             url : this.url,
             description: this.description,
-        }).then((resp : TNewVendorOutput) => {
+        }).then((resp : TNewVendorProductOutput) => {
             this.$emit('do-save', resp.data)
             this.canEdit = false
         }).catch((err: any) => {
@@ -156,10 +166,10 @@ export default class CreateNewVendorForm extends VueComponent {
     }
 
     clearForm() {
-        if (!!this.referenceVendor) {
-            this.name = this.referenceVendor!.Name
-            this.url = this.referenceVendor!.Url
-            this.description = this.referenceVendor!.Description
+        if (!!this.referenceProduct) {
+            this.name = this.referenceProduct!.Name
+            this.url = this.referenceProduct!.Url
+            this.description = this.referenceProduct!.Description
         } else {
             this.name = ""
             this.url = ""

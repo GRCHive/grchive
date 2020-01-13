@@ -169,7 +169,7 @@ func DeleteBatchControlDocumentation(fileIds []int64, catId int64, orgId int32, 
 	return tx.Commit()
 }
 
-func GetSocDocumentationForDeployment(deploymentId int64, orgId int32, role *core.Role) ([]*core.ControlDocumentationFile, error) {
+func GetSocDocumentationForVendorProduct(productId int64, orgId int32, role *core.Role) ([]*core.ControlDocumentationFile, error) {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
@@ -179,15 +179,15 @@ func GetSocDocumentationForDeployment(deploymentId int64, orgId int32, role *cor
 	err := dbConn.Select(&retArr, `
 		SELECT file.*
 		FROM process_flow_control_documentation_file as file
-		INNER JOIN vendor_soc_reports AS soc
-			ON soc.soc_report_file_id = file.id
-				AND soc.soc_report_cat_id = file.category_id
-		WHERE soc.deployment_id = $1
+		INNER JOIN vendor_product_soc_reports AS soc
+			ON soc.file_id = file.id
+				AND soc.cat_id = file.category_id
+		WHERE soc.product_id = $1
 			AND file.org_id = $2
 			AND bucket_id IS NOT NULL
 			AND storage_id IS NOT NULL
 		ORDER BY relevant_time DESC
-	`, deploymentId, orgId)
+	`, productId, orgId)
 
 	return retArr, err
 

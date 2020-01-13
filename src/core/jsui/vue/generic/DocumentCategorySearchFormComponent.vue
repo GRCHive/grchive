@@ -33,6 +33,10 @@ const Props = Vue.extend({
         availableCats: {
             type: Array,
         },
+        initialCatId: {
+            type: Number,
+            default: -1
+        },
         disabled: {
             type: Boolean,
             default: false
@@ -96,6 +100,13 @@ export default class DocumentCategorySearchFormComponent extends Props {
         }).then((resp : TGetAllDocumentationCategoriesOutput) => {
             this.loadedCategories = resp.data
             this.finishedLoading = true
+
+            if (this.initialCatId >= 0) {
+                let idx = this.loadedCategories.findIndex((ele : ControlDocumentationCategory) => ele.Id == this.initialCatId)
+                if (idx != -1) {
+                    this.change(this.loadedCategories[idx])
+                }
+            }
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

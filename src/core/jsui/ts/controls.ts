@@ -48,3 +48,8 @@ export function extractControlDocumentationFileHandle(f : ControlDocumentationFi
         CategoryId: f.CategoryId
     }
 }
+
+export function cleanJsonControlDocumentationFile(f : ControlDocumentationFile) {
+    f.RelevantTime = new Date(f.RelevantTime)
+    f.UploadTime = new Date(f.UploadTime)
+}

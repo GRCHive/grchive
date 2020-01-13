@@ -258,3 +258,12 @@ export const allVendorsUrl : string = "/api/vendor/all"
 export const getVendorUrl : string = "/api/vendor/get"
 export const updateVendorUrl : string = "/api/vendor/update"
 export const deleteVendorUrl : string = "/api/vendor/delete"
+
+export const newVendorProductUrl : string = "/api/vendor/product/new"
+export const allVendorProductsUrl : string = "/api/vendor/product/all"
+export const getVendorProductUrl : string = "/api/vendor/product/get"
+export const updateVendorProductUrl : string = "/api/vendor/product/update"
+export const deleteVendorProductUrl : string = "/api/vendor/product/delete"
+
+export const newVendorProductSocLinkUrl : string = "/api/vendor/product/soc/new"
+export const deleteVendorProductSocLinkUrl : string = "/api/vendor/product/soc/delete"

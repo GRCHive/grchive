@@ -249,6 +249,7 @@ const ApiLinkPrefix = "/link"
 // API - Vendor
 const ApiVendorPrefix = "/vendor"
 const ApiVendorProductPrefix = "/product"
+const ApiVendorProductSocPrefix = "/soc"
 
 // Websocket
 const WebsocketPrefix string = "/ws"

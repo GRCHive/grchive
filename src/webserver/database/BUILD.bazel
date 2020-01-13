@@ -32,6 +32,7 @@ go_library(
         "deployments.go",
         "servers.go",
         "vendors.go",
+        "vendorProducts.go",
     ],
     deps = [
         "@com_github_jmoiron_sqlx//:go_default_library", 

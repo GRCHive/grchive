@@ -11,6 +11,8 @@
             v-model="chosenCat"
             load-cats
             :rules="[rules.required]"
+            :initial-cat-id="forceCatId"
+            :disabled="!canEditCat"
         >
         </document-category-search-form-component>
 
@@ -61,6 +63,14 @@ const Props = Vue.extend({
         excludeFiles: {
             type: Array,
             default: []
+        },
+        forceCat: {
+            type: Object as () => ControlDocumentationCategory | null,
+            default: null
+        },
+        forceCatId: {
+            type: Number,
+            default: -1
         }
     }
 })
@@ -81,6 +91,10 @@ export default class DocSearcher extends Props {
 
     get canSelect() : boolean {
         return this.formValid && this.selectedFiles.length > 0
+    }
+
+    get canEditCat() : boolean {
+        return !this.forceCat && this.forceCatId == -1
     }
 
     @Watch('chosenCat')
@@ -113,12 +127,20 @@ export default class DocSearcher extends Props {
 
     onSelect() {
         this.$emit('do-select', this.selectedFiles)
-        this.chosenCat = null
+        if (this.canEditCat) {
+            this.chosenCat = null
+        }
     }
 
     onCancel() {
         this.$emit('do-cancel')
-        this.chosenCat = null
+        if (this.canEditCat) {
+            this.chosenCat = null
+        }
+    }
+
+    mounted() {
+        this.chosenCat = this.forceCat
     }
 }
 

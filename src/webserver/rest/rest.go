@@ -265,4 +265,12 @@ func registerVendorProductAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiGetEndpoint, getVendorProduct).Methods("GET")
 	s.HandleFunc(core.ApiUpdateEndpoint, updateVendorProduct).Methods("POST")
 	s.HandleFunc(core.ApiDeleteEndpoint, deleteVendorProduct).Methods("POST")
+
+	registerVendorProductSocAPIPaths(s)
+}
+
+func registerVendorProductSocAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiVendorProductSocPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, linkVendorProductSoc).Methods("POST")
+	s.HandleFunc(core.ApiDeleteEndpoint, unlinkVendorProductSoc).Methods("POST")
 }

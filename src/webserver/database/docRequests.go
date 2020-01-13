@@ -142,7 +142,7 @@ func CompleteDocumentRequest(requestId int64, orgId int32, complete bool, role *
 	return tx.Commit()
 }
 
-func GetAllDocumentRequestsForDeployment(deployId int64, orgId int32, role *core.Role) ([]*core.DocumentRequest, error) {
+func GetAllDocumentRequestsForVendorProduct(productId int64, orgId int32, role *core.Role) ([]*core.DocumentRequest, error) {
 	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
@@ -151,10 +151,10 @@ func GetAllDocumentRequestsForDeployment(deployId int64, orgId int32, role *core
 	err := dbConn.Select(&requests, `
 		SELECT req.*
 		FROM document_requests AS req
-		INNER JOIN deployment_request_link AS link
+		INNER JOIN vendor_soc_request_link AS link
 			ON req.id = link.request_id
-		WHERE req.org_id = $1 AND link.deployment_id = $2
-	`, orgId, deployId)
+		WHERE req.org_id = $1 AND link.vendor_product_id = $2
+	`, orgId, productId)
 	return requests, err
 }
 
@@ -288,15 +288,15 @@ func InsertDocumentRequestComment(requestId int64, catId int64, orgId int32, com
 	return tx.Commit()
 }
 
-func LinkRequestToDeploymentWithTx(deployId int64, requestId int64, catId int64, orgId int32, role *core.Role, tx *sqlx.Tx) error {
+func LinkRequestToVendorProductWithTx(productId int64, requestId int64, catId int64, orgId int32, role *core.Role, tx *sqlx.Tx) error {
 	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
 
 	_, err := tx.Exec(`
-		INSERT INTO deployment_request_link (deployment_id, org_id, request_id, category_id)
+		INSERT INTO vendor_soc_request_link (vendor_product_id, org_id, request_id, category_id)
 		VALUES ($1, $2, $3, $4)
-	`, deployId, orgId, requestId, catId)
+	`, productId, orgId, requestId, catId)
 
 	return err
 }

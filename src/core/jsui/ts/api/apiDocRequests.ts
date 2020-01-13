@@ -17,7 +17,7 @@ export interface TNewDocRequestInput {
     catId: number
     orgId: number
     requestedUserId: number
-    socRequestDeployId: number
+    vendorProductId: number
 }
 
 export interface TNewDocRequestOutput {
@@ -55,7 +55,7 @@ export function updateDocRequest(inp : TUpdateDocRequestInput) : Promise<TUpdate
 export interface TGetAllDocumentRequestInput {
     orgId: number
     catId?: number
-    deployId?: number
+    vendorProductId?: number
 }
 
 export interface TGetAllDocumentRequestOutput {
