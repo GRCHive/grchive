@@ -113,6 +113,39 @@ func TestNullTimeCreate(t *testing.T) {
 	}
 }
 
+func TestNullTimeEqual(t *testing.T) {
+	refTimes := loadRefTimes()
+
+	for _, ref := range []struct {
+		a     core.NullTime
+		b     core.NullTime
+		equal bool
+	}{
+		{
+			a:     core.CreateNullTime(refTimes.refTime),
+			b:     core.CreateNullTime(refTimes.refTime2),
+			equal: false,
+		},
+		{
+			a:     core.CreateNullTime(refTimes.refTime),
+			b:     core.CreateNullTime(refTimes.refTime),
+			equal: true,
+		},
+		{
+			a:     core.NullTime{sql.NullTime{time.Now(), false}},
+			b:     core.CreateNullTime(refTimes.refTime),
+			equal: false,
+		},
+		{
+			a:     core.NullTime{sql.NullTime{refTimes.refTime2, false}},
+			b:     core.NullTime{sql.NullTime{refTimes.refTime, false}},
+			equal: true,
+		},
+	} {
+		assert.Equal(t, ref.equal, ref.a.Equal(ref.b), ref.a.NullTime.Time.String(), ref.b.NullTime.Time.String())
+	}
+}
+
 func TestNullInt64MarshalJSON(t *testing.T) {
 	for _, ref := range []struct {
 		data  core.NullInt64

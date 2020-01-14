@@ -34,6 +34,18 @@ func CreateNullTime(v time.Time) NullTime {
 	return NullTime{sql.NullTime{v, true}}
 }
 
+func (a NullTime) Equal(b NullTime) bool {
+	if a.NullTime.Valid != b.NullTime.Valid {
+		return false
+	}
+
+	if !a.NullTime.Valid {
+		return true
+	}
+
+	return a.NullTime.Time.Equal(b.NullTime.Time)
+}
+
 type NullInt64 struct {
 	sql.NullInt64
 }

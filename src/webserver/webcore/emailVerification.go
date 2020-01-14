@@ -30,7 +30,7 @@ func SendEmailVerification(user *core.User) error {
 }
 
 func SendEmailVerificationWithTx(user *core.User, tx *sqlx.Tx) error {
-	veri := core.CreateNewEmailVerification(user)
+	veri := core.CreateNewEmailVerification(user, core.DefaultUuidGen, core.DefaultClock)
 
 	veriLink, err := core.CreateUrlWithParams(MustGetRouteUrlAbsolute(EmailVerifyRouteName), map[string]string{
 		"code": veri.Code,

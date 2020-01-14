@@ -2,8 +2,6 @@ package core
 
 import (
 	"database/sql"
-	"github.com/google/uuid"
-	"time"
 )
 
 type EmailVerification struct {
@@ -13,11 +11,17 @@ type EmailVerification struct {
 	VerificationReceived NullTime `db:"verification_received"`
 }
 
-func CreateNewEmailVerification(user *User) EmailVerification {
+func (a EmailVerification) Equal(b EmailVerification) bool {
+	return a.UserId == b.UserId && a.Code == b.Code &&
+		a.VerificationSent.Equal(b.VerificationSent) &&
+		a.VerificationReceived.Equal(b.VerificationReceived)
+}
+
+func CreateNewEmailVerification(user *User, u UuidGen, c Clock) EmailVerification {
 	veri := EmailVerification{
 		UserId:           user.Id,
-		Code:             uuid.New().String(),
-		VerificationSent: NullTime{sql.NullTime{time.Now(), true}},
+		Code:             u.GenStr(),
+		VerificationSent: NullTime{sql.NullTime{c.Now(), true}},
 	}
 	return veri
 }
