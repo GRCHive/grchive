@@ -1,0 +1,15 @@
+CREATE UNIQUE INDEX ON resource_organization_users_access(role_id);
+CREATE UNIQUE INDEX ON resource_organization_roles_access(role_id);
+CREATE UNIQUE INDEX ON resource_process_flows_access(role_id);
+CREATE UNIQUE INDEX ON resource_controls_access(role_id);
+CREATE UNIQUE INDEX ON resource_control_documentation_access(role_id);
+CREATE UNIQUE INDEX ON resource_control_documentation_metadata_access(role_id);
+CREATE UNIQUE INDEX ON resource_risks_access(role_id);
+CREATE UNIQUE INDEX ON resource_gl_access(role_id);
+CREATE UNIQUE INDEX ON resource_systems_access(role_id);
+CREATE UNIQUE INDEX ON resource_database_access(role_id);
+CREATE UNIQUE INDEX ON resource_db_conn_access(role_id);
+CREATE UNIQUE INDEX ON resource_doc_request_access(role_id);
+CREATE UNIQUE INDEX ON resource_deployment_access(role_id);
+CREATE UNIQUE INDEX ON resource_server_access(role_id);
+CREATE UNIQUE INDEX ON resource_vendor_access(role_id);

@@ -131,5 +131,6 @@ func GetCurrentRequestRole(r *http.Request, orgId int32) (*core.Role, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return ObtainAPIKeyRole(key, orgId)
 }

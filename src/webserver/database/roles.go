@@ -63,7 +63,7 @@ func createRoleSql(cond string) string {
 		`, table, col)
 
 		joinStmts = joinStmts + fmt.Sprintf(`
-			INNER JOIN %s
+			LEFT JOIN %s
 				ON role.id = %s.role_id
 		`, table, table)
 	}
