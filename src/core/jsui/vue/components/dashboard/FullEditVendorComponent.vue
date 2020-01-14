@@ -5,6 +5,21 @@
         </v-overlay>
 
         <div v-if="ready">
+
+            <v-dialog v-model="showHideDeleteVendorProduct"
+                      persistent
+                      max-width="40%"
+                      v-if="!!productToDelete"
+            >
+                <generic-delete-confirmation-form
+                    item-name="products"
+                    :items-to-delete="[productToDelete.Name]"
+                    :use-global-deletion="false"
+                    @do-cancel="cancelDeleteVendorProduct"
+                    @do-delete="confirmDeleteVendorProduct">
+                </generic-delete-confirmation-form>
+            </v-dialog>
+
             <v-list-item two-line class="pa-0">
                 <v-list-item-content>
                     <v-list-item-title class="title">
@@ -38,6 +53,7 @@
                         @do-delete="onDelete">
                     </generic-delete-confirmation-form>
                 </v-dialog>
+
             </v-list-item>
             <v-divider></v-divider>
 
@@ -103,6 +119,12 @@
                                                     {{ product.Name }}
                                                 </v-list-item-title>
                                             </v-list-item-content>
+
+                                            <v-list-item-action>
+                                                <v-btn icon @click.stop="deleteVendorProduct(product)">
+                                                    <v-icon>mdi-delete</v-icon>
+                                                </v-btn>
+                                            </v-list-item-action>
                                         </v-list-item>
 
                                     </v-list-item-group>
@@ -230,7 +252,8 @@ import { deleteVendor, getVendor, TGetVendorOutput } from '../../../ts/api/apiVe
 import { 
     allVendorProducts, TAllVendorProductOutput,
     getVendorProduct, TGetVendorProductOutput,
-    linkVendorProductSocFiles, unlinkVendorProductSocFiles
+    linkVendorProductSocFiles, unlinkVendorProductSocFiles,
+    deleteVendorProduct
 } from '../../../ts/api/apiVendorProduct'
 import { PageParamsStore } from '../../../ts/pageParams'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
@@ -277,6 +300,9 @@ export default class FullEditVendorComponent extends Vue {
 
     showAddSoc: boolean = false
     showRequestSoc: boolean = false
+
+    showHideDeleteVendorProduct : boolean = false
+    productToDelete : VendorProduct | null = null
 
     // Ideally there'd be some shared ControlDocumentationFile[] local repository
     // but there isn't so we need to force the FullEditDocumentationCategoryComponent
@@ -471,6 +497,43 @@ export default class FullEditVendorComponent extends Vue {
     onRequestSOC(req : DocumentRequest) {
         this.productSocRequests.push(req)
         this.showRequestSoc = false
+    }
+
+    deleteVendorProduct(p : VendorProduct) {
+        this.showHideDeleteVendorProduct = true
+        this.productToDelete = p
+    }
+
+    cancelDeleteVendorProduct() {
+        this.showHideDeleteVendorProduct = false
+        this.productToDelete = null
+    }
+
+    confirmDeleteVendorProduct() {
+        deleteVendorProduct({
+            productId: this.productToDelete!.Id,
+            vendorId: this.productToDelete!.VendorId,
+            orgId: PageParamsStore.state.organization!.Id
+        }).then(() => {
+            this.allProducts.splice(
+                this.allProducts.findIndex(
+                    (ele : VendorProduct) => ele.Id == this.productToDelete!.Id
+                ),
+                1
+            )
+            this.selectedProductIndex = 0
+
+            this.showHideDeleteVendorProduct = false
+            this.productToDelete = null
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 }
 

@@ -189,6 +189,27 @@ type DeleteVendorProductInputs struct {
 }
 
 func deleteVendorProduct(w http.ResponseWriter, r *http.Request) {
+	inputs := DeleteVendorProductInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteVendorProduct(inputs.ProductId, inputs.VendorId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to delete vendor product: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 type LinkVendorProductSocInputs struct {

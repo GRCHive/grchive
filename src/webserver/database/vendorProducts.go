@@ -82,6 +82,25 @@ func UpdateVendorProduct(product *core.VendorProduct, role *core.Role) error {
 	return tx.Commit()
 }
 
+func DeleteVendorProduct(productId int64, vendorId int64, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceVendors, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+
+	_, err := tx.Exec(`
+		DELETE FROM vendor_products
+		WHERE id = $1 AND vendor_id = $2 AND org_id = $3
+	`, productId, vendorId, orgId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
 func LinkVendorProductToSocFiles(productId int64, orgId int32, files []*core.ControlDocumentationFileHandle, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceVendors, core.AccessEdit) {
 		return core.ErrorUnauthorized
