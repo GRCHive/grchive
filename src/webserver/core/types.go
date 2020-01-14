@@ -19,12 +19,27 @@ func (v NullTime) MarshalJSON() ([]byte, error) {
 	}
 }
 
+func (v *NullTime) UnmarshalJSON(b []byte) error {
+	var val time.Time
+	err := json.Unmarshal(b, &val)
+	if err != nil || string(b) == "null" {
+		return nil
+	}
+	v.NullTime.Time = val
+	v.NullTime.Valid = true
+	return nil
+}
+
 func CreateNullTime(v time.Time) NullTime {
 	return NullTime{sql.NullTime{v, true}}
 }
 
 type NullInt64 struct {
 	sql.NullInt64
+}
+
+func CreateNullInt64(v int64) NullInt64 {
+	return NullInt64{sql.NullInt64{v, true}}
 }
 
 func (v NullInt64) MarshalJSON() ([]byte, error) {
@@ -58,6 +73,17 @@ func (v NullInt32) MarshalJSON() ([]byte, error) {
 	}
 }
 
+func (v *NullInt32) UnmarshalJSON(b []byte) error {
+	var val int32
+	err := json.Unmarshal(b, &val)
+	if err != nil || string(b) == "null" {
+		return nil
+	}
+	v.NullInt32.Int32 = val
+	v.NullInt32.Valid = true
+	return nil
+}
+
 func CreateNullInt32(v int32) NullInt32 {
 	return NullInt32{sql.NullInt32{v, true}}
 }
@@ -72,6 +98,17 @@ func (v NullBool) MarshalJSON() ([]byte, error) {
 	} else {
 		return json.Marshal(nil)
 	}
+}
+
+func (v *NullBool) UnmarshalJSON(b []byte) error {
+	var val bool
+	err := json.Unmarshal(b, &val)
+	if err != nil || string(b) == "null" {
+		return nil
+	}
+	v.NullBool.Bool = val
+	v.NullBool.Valid = true
+	return nil
 }
 
 func CreateNullBool(v bool) NullBool {
