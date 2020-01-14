@@ -75,4 +75,4 @@ Every time the Vault server is restarted, it must be unsealed.
 ## Run Tests
 
 - `cd $SRC`
-- `bazel test --test_output=errors //...`
+- `bazel test --test_output=errors //test/...`
