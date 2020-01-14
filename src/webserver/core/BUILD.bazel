@@ -45,6 +45,7 @@ go_library(
         "deployments.go",
         "vendors.go",
         "timer.go",
+        "clock.go",
     ],
     deps = [
         "@io_k8s_klog//:go_default_library",

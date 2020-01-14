@@ -29,11 +29,11 @@ func (key ApiKey) Matches(rawKey RawApiKey) bool {
 	return key.HashedKey == hashedRawKey
 }
 
-func (key ApiKey) SecondsToExpiration() int {
-	now := time.Now().UTC()
+func (key ApiKey) SecondsToExpiration(c Clock) int {
+	now := c.Now().UTC()
 	return int(key.ExpirationDate.UTC().Sub(now).Seconds())
 }
 
-func (key ApiKey) IsExpired() bool {
-	return key.SecondsToExpiration() <= 0
+func (key ApiKey) IsExpired(c Clock) bool {
+	return key.SecondsToExpiration(c) <= 0
 }

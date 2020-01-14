@@ -38,7 +38,7 @@ func RefreshGrantAPIKey(userId int64, w http.ResponseWriter, r *http.Request) er
 		forceNeedNewKey = clientKey.Hash() != key.HashedKey
 	}
 
-	if key == nil || forceNeedNewKey || key.IsExpired() {
+	if key == nil || forceNeedNewKey || key.IsExpired(core.DefaultClock) {
 		isNew := (key == nil)
 		rawKey, key := GenerateTemporaryAPIKeyForUser(userId)
 
@@ -51,7 +51,7 @@ func RefreshGrantAPIKey(userId int64, w http.ResponseWriter, r *http.Request) er
 		if err != nil {
 			return err
 		}
-		http.SetCookie(w, CreateCookie("client-api-key", string(rawKey), key.SecondsToExpiration(), false))
+		http.SetCookie(w, CreateCookie("client-api-key", string(rawKey), key.SecondsToExpiration(core.DefaultClock), false))
 	}
 
 	return nil
