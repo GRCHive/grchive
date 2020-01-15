@@ -1,0 +1,10 @@
+package(default_visibility=["//visibility:public"])
+
+py_library(
+    name = "python_files",
+    srcs = [
+        "preview.py",
+        "filetype.py",
+        "__init__.py",
+    ],
+)

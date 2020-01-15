@@ -1,0 +1,10 @@
+py_binary(
+    name = "generator",
+    srcs = [
+        "generator.py"
+    ],
+    main = "generator.py",
+    deps = [
+        "//src/core/python_files:python_files",
+    ],
+)

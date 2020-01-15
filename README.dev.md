@@ -11,6 +11,7 @@ This document will assume that the git checkout directory is set in an environme
 - go 1.13+ 
 - PostgreSQL
 - Node v12.10
+- RabbitMQ
 
 ## Setup
 
