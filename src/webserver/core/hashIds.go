@@ -4,10 +4,10 @@ package core
 // https://hashids.org/
 import "github.com/speps/go-hashids"
 
-var hasher *hashids.HashID = nil
+var Hasher *hashids.HashID = nil
 
-func initializeHasher() {
-	if hasher != nil {
+func InitializeHasher() {
+	if Hasher != nil {
 		return
 	}
 
@@ -16,18 +16,18 @@ func initializeHasher() {
 	data.Salt = EnvConfig.HashId.Salt
 
 	var err error
-	hasher, err = hashids.NewWithData(data)
+	Hasher, err = hashids.NewWithData(data)
 	if err != nil {
 		panic("Failed to initialize hasher: " + err.Error())
 	}
 }
 
 func HashId(c int64) (string, error) {
-	return hasher.EncodeInt64([]int64{c})
+	return Hasher.EncodeInt64([]int64{c})
 }
 
 func ReverseHashId(c string) (int64, error) {
-	d, err := hasher.DecodeInt64WithError(c)
+	d, err := Hasher.DecodeInt64WithError(c)
 	if err != nil {
 		return -1, err
 	}

@@ -2,6 +2,18 @@ package(default_visibility=["//visibility:public"])
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 
 go_test(
+    name = "hashIds_test",
+    srcs = ["hashIds_test.go"],
+    deps = [
+        "//src/webserver/core:webserver_core_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
+    ],
+    data = [
+        "//src/webserver:config_files"
+    ]
+)
+
+go_test(
     name = "emailVerification_test",
     srcs = ["emailVerification_test.go"],
     deps = [
