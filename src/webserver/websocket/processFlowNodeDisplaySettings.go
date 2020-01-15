@@ -50,10 +50,10 @@ func processProcessFlowNodeDisplaySettings(conn *websocket.Conn, r *http.Request
 	// Channel to receive communications from the message hub
 	// about relevant events to send to the user.
 	var hubChannel chan core.MessagePayload = make(chan core.MessagePayload)
-	ele := core.RegisterListener(core.UpdateDisplaySettingsForProcessFlowNode,
+	ele := core.DefaultMessageHub.RegisterListener(core.UpdateDisplaySettingsForProcessFlowNode,
 		core.MessageSubtype(strconv.FormatInt(flowId, 10)),
 		hubChannel)
-	defer core.UnregisterListener(core.UpdateDisplaySettingsForProcessFlowNode,
+	defer core.DefaultMessageHub.UnregisterListener(core.UpdateDisplaySettingsForProcessFlowNode,
 		core.MessageSubtype(strconv.FormatInt(flowId, 10)),
 		ele)
 

@@ -115,7 +115,7 @@ func UpdateDisplaySettingsForProcessFlowNode(nodeId int64, settings map[string]i
 
 	err = tx.Commit()
 	if err == nil {
-		core.SendMessage(core.UpdateDisplaySettingsForProcessFlowNode,
+		core.DefaultMessageHub.SendMessage(core.UpdateDisplaySettingsForProcessFlowNode,
 			core.MessageSubtype(strconv.FormatInt(flowId, 10)),
 			struct {
 				NodeId   int64

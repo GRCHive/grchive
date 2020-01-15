@@ -18,21 +18,54 @@ const (
 	UpdateDisplaySettingsForProcessFlowNode MessageType = iota
 )
 
-type ListenerMap map[MessageType]map[MessageSubtype]*list.List
+type SubtypeListenerMap map[MessageSubtype]*list.List
+type ListenerMap map[MessageType]SubtypeListenerMap
 
-var registeredListeners = make(ListenerMap)
-var registerMutex sync.RWMutex
-
-func SendMessage(typ MessageType, subtyp MessageSubtype, payload MessagePayload) {
-	// TODO: Make this work for multiple instances (e.g. Cloud PubSub?)
-	ReceiveMessage(typ, subtyp, payload)
+type MessageHub interface {
+	SendMessage(typ MessageType, subtyp MessageSubtype, payload MessagePayload)
+	ReceiveMessage(typ MessageType, subtyp MessageSubtype, payload MessagePayload)
+	RegisterListener(typ MessageType, subtyp MessageSubtype, c chan MessagePayload) *list.Element
+	UnregisterListener(typ MessageType, subtyp MessageSubtype, e *list.Element)
 }
 
-func ReceiveMessage(typ MessageType, subtyp MessageSubtype, payload MessagePayload) {
-	registerMutex.RLock()
-	defer registerMutex.RUnlock()
+type RealMessageHub struct {
+	registeredListeners ListenerMap
+	registerMutex       sync.RWMutex
+}
 
-	subtypeListeners, ok := registeredListeners[typ]
+func (m RealMessageHub) NumTotalListeners() int {
+	total := 0
+	for k, _ := range m.registeredListeners {
+		total = total + m.NumMessageTypeListeners(k)
+	}
+	return total
+}
+
+func (m RealMessageHub) NumMessageTypeListeners(typ MessageType) int {
+	total := 0
+	for k, _ := range m.registeredListeners[typ] {
+		total = total + m.NumSubTypeListeners(typ, k)
+	}
+	return total
+}
+
+func (m RealMessageHub) NumSubTypeListeners(typ MessageType, subtyp MessageSubtype) int {
+	return m.registeredListeners[typ][subtyp].Len()
+}
+
+func (m *RealMessageHub) SendMessage(typ MessageType, subtyp MessageSubtype, payload MessagePayload) {
+	m.registerMutex.RLock()
+	defer m.registerMutex.RUnlock()
+
+	// TODO: Make this work for multiple instances (e.g. Cloud PubSub?)
+	m.ReceiveMessage(typ, subtyp, payload)
+}
+
+func (m *RealMessageHub) ReceiveMessage(typ MessageType, subtyp MessageSubtype, payload MessagePayload) {
+	m.registerMutex.RLock()
+	defer m.registerMutex.RUnlock()
+
+	subtypeListeners, ok := m.registeredListeners[typ]
 	if !ok {
 		return
 	}
@@ -48,14 +81,14 @@ func ReceiveMessage(typ MessageType, subtyp MessageSubtype, payload MessagePaylo
 	}
 }
 
-func RegisterListener(typ MessageType, subtyp MessageSubtype, c chan MessagePayload) *list.Element {
-	registerMutex.Lock()
-	defer registerMutex.Unlock()
+func (m *RealMessageHub) RegisterListener(typ MessageType, subtyp MessageSubtype, c chan MessagePayload) *list.Element {
+	m.registerMutex.Lock()
+	defer m.registerMutex.Unlock()
 
-	subtypeListeners, ok := registeredListeners[typ]
+	subtypeListeners, ok := m.registeredListeners[typ]
 	if !ok {
-		registeredListeners[typ] = make(map[MessageSubtype]*list.List)
-		subtypeListeners = registeredListeners[typ]
+		m.registeredListeners[typ] = make(map[MessageSubtype]*list.List)
+		subtypeListeners = m.registeredListeners[typ]
 	}
 
 	listeners, ok := subtypeListeners[subtyp]
@@ -67,11 +100,11 @@ func RegisterListener(typ MessageType, subtyp MessageSubtype, c chan MessagePayl
 	return listeners.PushBack(c)
 }
 
-func UnregisterListener(typ MessageType, subtyp MessageSubtype, e *list.Element) {
-	registerMutex.Lock()
-	defer registerMutex.Unlock()
+func (m *RealMessageHub) UnregisterListener(typ MessageType, subtyp MessageSubtype, e *list.Element) {
+	m.registerMutex.Lock()
+	defer m.registerMutex.Unlock()
 
-	subtypeListeners, ok := registeredListeners[typ]
+	subtypeListeners, ok := m.registeredListeners[typ]
 	if !ok {
 		return
 	}
@@ -83,3 +116,11 @@ func UnregisterListener(typ MessageType, subtyp MessageSubtype, e *list.Element)
 
 	listeners.Remove(e)
 }
+
+func CreateRealMessageHub(m ListenerMap) RealMessageHub {
+	return RealMessageHub{
+		registeredListeners: m,
+	}
+}
+
+var DefaultMessageHub = CreateRealMessageHub(make(ListenerMap))
