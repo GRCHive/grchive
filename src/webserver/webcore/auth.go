@@ -319,7 +319,7 @@ func FindValidUserSession(w http.ResponseWriter, r *http.Request) (*core.UserSes
 	_, accessErr := oktaJwtManager.VerifyJWT(session.AccessToken, true)
 	_, idErr := oktaJwtManager.VerifyJWT(session.IdToken, false)
 	currentSessionId := session.SessionId
-	if core.IsPastTime(time.Now(), session.ExpirationTime, core.EnvConfig.Login.TimeDriftLeewaySeconds) ||
+	if core.IsPastTime(time.Now(), session.ExpirationTime, int(core.EnvConfig.Login.TimeDriftLeewaySeconds)) ||
 		idErr == ExpiredJWTToken || accessErr == ExpiredJWTToken {
 		oldSessionId, err := RefreshUserSession(session, r)
 		if err != nil {
