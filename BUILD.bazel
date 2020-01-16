@@ -1,6 +1,0 @@
-package(default_visibility=["//visibility:public"])
-
-config_setting(
-    name = "production",
-    values = { "compilation_mode" : "opt" }
-)

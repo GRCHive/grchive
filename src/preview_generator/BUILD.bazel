@@ -1,3 +1,5 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+
 py_binary(
     name = "generator",
     srcs = [
@@ -5,6 +7,6 @@ py_binary(
     ],
     main = "generator.py",
     deps = [
-        "//src/core/python_files:python_files",
+        "//src/core/python_files:files",
     ],
 )

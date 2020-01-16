@@ -18,24 +18,30 @@ This document will assume that the git checkout directory is set in an environme
 - Install Blaze.
 
     ```
-    cd $SRC/external
+    cd $SRC/dependencies
     ./bootstrap_blaze.sh
     ```
-- Add the Blaze output directory to your `$PATH` (`$SRC/external/bazel/output`).
+- Add the Blaze output directory to your `$PATH` (`$SRC/dependencies/bazel/output`).
 - Download Flyway.
 
     ```
-    cd $SRC/external
+    cd $SRC/dependencies
     ./download_flyway.sh
     ```
-- Add the Flyway directory to your `$PATH` (`$SRC/external/flyway`).
+- Add the Flyway directory to your `$PATH` (`$SRC/dependencies/flyway`).
 - Download Vault.
 
     ```
-    cd $SRC/external
+    cd $SRC/dependencies
     ./download_vault.sh
     ```
-- Add the Vault directory to your `$PATH` (`$SRC/external/vault`).
+- Add the Vault directory to your `$PATH` (`$SRC/dependencies/vault`).
+- Download Python.
+    
+    ```
+    cd $SRC/dependencies
+    ./download_python.sh
+    ```
 
 
 ## Setup Dev Environment

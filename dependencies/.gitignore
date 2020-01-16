@@ -3,3 +3,4 @@ bazel/
 .bazelrc
 flyway/
 vault/
+python/
