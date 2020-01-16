@@ -10,3 +10,20 @@ py_binary(
         "//src/core/python_files:files",
     ],
 )
+
+
+py_binary(
+    name = "frontend",
+    srcs = [
+        "frontend.py",
+    ],
+    main = "frontend.py",
+    deps = [
+        "//src/core/python_core:core",
+        "//src/core/python_webcore:webcore",
+    ],
+    data = [
+        ":generator",
+        "//src/webserver:config_files",
+    ]
+)
