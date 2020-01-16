@@ -8,9 +8,9 @@ go_library(
         "processFlowNodeDisplaySettings.go"
     ],
     deps = [
-        "//src/webserver/core:webserver_core_library",
-        "//src/webserver/database:webserver_database_library",
-        "//src/webserver/webcore:webserver_webcore_library",
+        "//src/core/golang/core:webserver_core_library",
+        "//src/core/golang/database:webserver_database_library",
+        "//src/core/golang/webcore:webserver_webcore_library",
         "@com_github_gorilla_mux//:go_default_library",
         "@com_github_gorilla_websocket//:go_default_library",
     ],

@@ -60,6 +60,11 @@ type HashIdConfigData struct {
 	MinLength int
 }
 
+type RabbitMQConfig struct {
+	Host string
+	Port int32
+}
+
 type EnvConfigData struct {
 	SelfUri            string
 	DatabaseConnString string
@@ -72,6 +77,7 @@ type EnvConfigData struct {
 	Backblaze          *BackblazeConfig
 	Mail               *MailConfig
 	HashId             *HashIdConfigData
+	RabbitMQ           *RabbitMQConfig
 }
 
 var EnvConfig *EnvConfigData
@@ -154,6 +160,10 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.HashId = new(HashIdConfigData)
 	envConfig.HashId.Salt = tomlConfig.Get("hashids.salt").(string)
 	envConfig.HashId.MinLength = int(tomlConfig.Get("hashids.min_length").(int64))
+
+	envConfig.RabbitMQ = new(RabbitMQConfig)
+	envConfig.RabbitMQ.Host = tomlConfig.Get("rabbitmq.host").(string)
+	envConfig.RabbitMQ.Port = int32(tomlConfig.Get("rabbitmq.port").(int64))
 
 	return envConfig
 }

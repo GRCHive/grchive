@@ -30,6 +30,7 @@ func main() {
 		Url:   core.EnvConfig.Vault.Url,
 		Token: core.EnvConfig.Vault.Token,
 	})
+	webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ)
 
 	r := mux.NewRouter().StrictSlash(true)
 	r.Use(webcore.HTTPRedirectStatusCodes)

@@ -58,3 +58,7 @@ email = "me@mikehbao.com"
 [hashids]
 salt = "7409d5d933caf02affce"
 min_length = 8
+
+[rabbitmq]
+host = "localhost"
+port = 5672

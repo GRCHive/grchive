@@ -142,6 +142,12 @@ go_repository(
     tag = "v2.0.0"
 )
 
+go_repository(
+    name = "com_github_streadway_amqp",
+    importpath = "github.com/streadway/amqp",
+    commit = "1c71cc93ed716f9a6f4c2ae8955c25f9176d9f19"
+)
+
 # NODE
 http_archive(
     name = "build_bazel_rules_nodejs",

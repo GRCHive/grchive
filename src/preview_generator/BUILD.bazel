@@ -7,7 +7,7 @@ py_binary(
     ],
     main = "generator.py",
     deps = [
-        "//src/core/python_files:files",
+        "//src/core/python/files:files",
     ],
 )
 
@@ -19,8 +19,8 @@ py_binary(
     ],
     main = "frontend.py",
     deps = [
-        "//src/core/python_core:core",
-        "//src/core/python_webcore:webcore",
+        "//src/core/python/core:core",
+        "//src/core/python/webcore:webcore",
     ],
     data = [
         ":generator",

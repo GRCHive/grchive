@@ -2,8 +2,8 @@
 
 import argparse
 import sys
-import src.core.python_webcore.rabbitmq as mq
-from src.core.python_core.config import loadConfig
+import src.core.python.webcore.rabbitmq as mq
+from src.core.python.core.config import loadConfig
 
 def receiveFilePreviewMessage(ch, method, properties, body):
     print(method, properties, body)

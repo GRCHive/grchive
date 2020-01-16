@@ -327,6 +327,8 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// At this point we know we can put in a request to generate a preview.
+
 	if inputs.FulfilledRequestId.NullInt64.Valid {
 		err = database.FulfillDocumentRequestWithTx(
 			inputs.FulfilledRequestId.NullInt64.Int64,

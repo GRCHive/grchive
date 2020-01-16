@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from src.core.python_files.preview import generatePreviewForFile
+from src.core.python.files.preview import generatePreviewForFile
 
 def main():
     parser = argparse.ArgumentParser()
