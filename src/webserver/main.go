@@ -1,6 +1,7 @@
 package main
 
 import (
+	"archive/zip"
 	"github.com/gorilla/mux"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
@@ -11,10 +12,62 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/vault_api"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
 	"gitlab.com/b3h47pte/audit-stuff/websocket"
+	"golang.org/x/tools/godoc/vfs"
+	"golang.org/x/tools/godoc/vfs/zipfs"
 	"net/http"
 	"os"
 	"time"
 )
+
+type ZipFile struct {
+	rsc  vfs.ReadSeekCloser
+	name string
+	zip  vfs.FileSystem
+}
+
+func (f ZipFile) Read(p []byte) (n int, err error) {
+	return f.rsc.Read(p)
+}
+
+func (f ZipFile) Close() error {
+	return f.rsc.Close()
+}
+
+func (f ZipFile) Seek(offset int64, whence int) (int64, error) {
+	return f.rsc.Seek(offset, whence)
+}
+
+func (f ZipFile) Readdir(count int) ([]os.FileInfo, error) {
+	files, err := f.zip.ReadDir(f.name)
+	if err != nil {
+		return nil, err
+	}
+	return files[:count], nil
+}
+
+func (f ZipFile) Stat() (os.FileInfo, error) {
+	return f.zip.Stat(f.name)
+}
+
+type ZipFS struct {
+	Prefix string
+	Zip    vfs.FileSystem
+}
+
+func (z ZipFS) Open(name string) (http.File, error) {
+	fullName := z.Prefix + name
+	rsc, err := z.Zip.Open(fullName)
+	if err != nil {
+		core.Info(err.Error())
+		return nil, err
+	}
+
+	return ZipFile{
+		rsc:  rsc,
+		name: fullName,
+		zip:  z.Zip,
+	}, nil
+}
 
 func main() {
 	core.Init()
@@ -40,18 +93,21 @@ func main() {
 	staticRouter := r.PathPrefix("/static").Subrouter()
 
 	// Static assets that can eventually be served by Nginx.
-	_, err := os.Stat("src/core/jsui/dist-smap")
-	if os.IsNotExist(err) {
-		staticRouter.PathPrefix("/corejsui/").Handler(
-			http.StripPrefix(
-				"/static/corejsui/",
-				http.FileServer(http.Dir("src/core/jsui/dist-nosmap"))))
-	} else {
-		staticRouter.PathPrefix("/corejsui/").Handler(
-			http.StripPrefix(
-				"/static/corejsui/",
-				http.FileServer(http.Dir("src/core/jsui/dist-smap"))))
+	z, err := zip.OpenReader("src/core/jsui/corejsui.zip")
+	if err != nil {
+		core.Error("Failed to open corejsui.zip: " + err.Error())
 	}
+	defer z.Close()
+
+	zfs := zipfs.New(z, "corejsui")
+	staticRouter.PathPrefix("/corejsui/").Handler(
+		http.StripPrefix(
+			"/static/corejsui/",
+			http.FileServer(ZipFS{
+				Prefix: "/dist",
+				Zip:    zfs,
+			})))
+
 	staticRouter.PathPrefix("/assets/").Handler(
 		http.StripPrefix(
 			"/static/assets/",

@@ -26,6 +26,8 @@ go_binary(
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",
+        "@org_golang_x_tools//godoc/vfs:go_default_library",
+        "@org_golang_x_tools//godoc/vfs/zipfs:go_default_library",
         "//src/core/golang/core:webserver_core_library",
         "//src/mail_api/golang:mail_golang_api",
         "//src/okta_api/golang:okta_golang_api",
@@ -39,10 +41,8 @@ go_binary(
     data = [
         ":templates",
         "//src/core/jsui:corejsui-assets",
-        ":config_files"
-    ] + select({
-        "//:production": ["//src/core/jsui:corejsui-nosmap"],
-        "//conditions:default": ["//src/core/jsui:corejsui-smap"],
-    })
-
+        "//src/core/jsui:corejsui",
+        "//src/core/jsui:corejsui-loader-templates",
+        ":config_files",
+    ]
 )

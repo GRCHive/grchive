@@ -35,32 +35,14 @@ filegroup(
     ]
 )
 
-CMD_DEV = "\
-        cd src/core/jsui && npx webpack --config ./webpack/dev.config.js && cd ../../../ && \
-        for X in $(OUTS); do \
-            mkdir -p `dirname $$X`; \
-            FNAME=\"src/core/jsui/dist/`basename $$X`\";\
-            cp $$FNAME $$X; \
-        done"
-
-CMD_PROD = "\
-        cd src/core/jsui && npx webpack --config ./webpack/prod.config.js && cd ../../../ && \
-        for X in $(OUTS); do \
-            mkdir -p `dirname $$X`; \
-            FNAME=\"src/core/jsui/dist/`basename $$X`\";\
-            cp $$FNAME $$X; \
-        done"
-
-
+CMD_DEV = "cd src/core/jsui && npx webpack --config ./webpack/dev.config.js && zip -r ../../../$@ dist/"
+CMD_PROD = "cd src/core/jsui && npx webpack --config ./webpack/prod.config.js && zip -r ../../../$@ dist/"
 
 genrule(
     name = "corejsui-nosmap",
-    srcs = [":corejsui-files"],
+    srcs = [":corejsui-files", "loader.ejs"],
     outs = [
-        "dist-nosmap/main.js",
-        "dist-nosmap/main.css",
-        "dist-nosmap/dashboard.js",
-        "dist-nosmap/dashboard.css"
+        "dist-nosmap.zip",
     ],
     cmd = CMD_PROD,
     message = "Run Webpack for corejsui (no smap)",
@@ -69,18 +51,34 @@ genrule(
 
 genrule(
     name = "corejsui-smap",
-    srcs = [":corejsui-files"],
+    srcs = [":corejsui-files", "loader.ejs"],
     outs = [
-        "dist-smap/main.js",
-        "dist-smap/main.css",
-        "dist-smap/main.js.map",
-        "dist-smap/main.css.map",
-        "dist-smap/dashboard.js",
-        "dist-smap/dashboard.css",
-        "dist-smap/dashboard.js.map",
-        "dist-smap/dashboard.css.map"
+        "dist-smap.zip",
     ],
     cmd = CMD_DEV,
     message = "Run Webpack for corejsui (with smap)",
     local=True
+)
+
+genrule(
+    name = "corejsui",
+    srcs = select({
+        "//:production": [":corejsui-nosmap"],
+        "//conditions:default": [":corejsui-smap"],
+    }),
+    outs = ["corejsui.zip"],
+    cmd = "cp $< $@"
+)
+
+genrule(
+    name = "corejsui-loader-templates",
+    srcs = [":corejsui"],
+    outs = [
+        "dashboard.tmpl",
+        "main.tmpl",
+    ],
+    cmd = "unzip $(locations :corejsui) && \
+        for X in $(OUTS); do \
+            cp \"dist/`basename $$X`\" $$X;\
+        done"
 )

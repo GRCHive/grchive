@@ -6,33 +6,33 @@ import MetadataStore from './metadata'
 import RenderLayout from './render/renderLayout'
 import Vue from 'vue'
 import { VApp } from 'vuetify/lib'
-import DashboardOrgHome from '../vue/pages/dashboard/DashboardOrgHome.vue'
-import DashboardOrgProcessFlows from '../vue/pages/dashboard/DashboardOrgProcessFlows.vue'
-import DashboardOrgSingleProcessFlow from '../vue/pages/dashboard/DashboardOrgSingleProcessFlow.vue'
-import DashboardOrgRisks from '../vue/pages/dashboard/DashboardOrgRisks.vue'
-import DashboardOrgSingleRisk from '../vue/pages/dashboard/DashboardOrgSingleRisk.vue'
-import DashboardOrgControls from '../vue/pages/dashboard/DashboardOrgControls.vue'
-import DashboardOrgSingleControl from '../vue/pages/dashboard/DashboardOrgSingleControl.vue'
-import DashboardUserProfile from '../vue/pages/dashboard/DashboardUserProfile.vue'
-import DashboardUserOrgs from '../vue/pages/dashboard/DashboardUserOrgs.vue'
-import DashboardOrgSettingsUsers from '../vue/pages/dashboard/DashboardOrgSettingsUsers.vue'
-import DashboardOrgSettingsRoles from '../vue/pages/dashboard/DashboardOrgSettingsRoles.vue'
-import DashboardOrgSettingsSingleRole from '../vue/pages/dashboard/DashboardOrgSettingsSingleRole.vue'
-import DashboardOrgGeneralLedger from '../vue/pages/dashboard/DashboardOrgGeneralLedger.vue'
-import DashboardOrgSingleGeneralLedgerAccount from '../vue/pages/dashboard/DashboardOrgSingleGeneralLedgerAccount.vue'
-import DashboardOrgSystems from '../vue/pages/dashboard/DashboardOrgSystems.vue'
-import DashboardOrgDatabases from '../vue/pages/dashboard/DashboardOrgDatabases.vue'
-import DashboardOrgServers from '../vue/pages/dashboard/DashboardOrgServers.vue'
-import DashboardOrgSingleSystem from '../vue/pages/dashboard/DashboardOrgSingleSystem.vue'
-import DashboardOrgSingleDb from '../vue/pages/dashboard/DashboardOrgSingleDb.vue'
-import DashboardOrgDocumentation from '../vue/pages/dashboard/DashboardOrgDocumentation.vue'
-import DashboardOrgSingleDocumentation from '../vue/pages/dashboard/DashboardOrgSingleDocumentation.vue'
-import DashboardOrgDocRequests from '../vue/pages/dashboard/DashboardOrgDocRequests.vue'
-import DashboardOrgSingleDocRequest from '../vue/pages/dashboard/DashboardOrgSingleDocRequest.vue'
-import DashboardOrgSingleServer from '../vue/pages/dashboard/DashboardOrgSingleServer.vue'
-import DashboardOrgVendors from '../vue/pages/dashboard/DashboardOrgVendors.vue'
-import DashboardOrgSingleVendor from '../vue/pages/dashboard/DashboardOrgSingleVendor.vue'
-import SnackBar from '../vue/components/SnackBar.vue'
+const DashboardOrgHome = () => import( /* webpackChunkName: "DashboardOrgHome" */ '../vue/pages/dashboard/DashboardOrgHome.vue')
+const DashboardOrgProcessFlows = () => import( /* webpackChunkName: "DashboardOrgProcessFlows" */ '../vue/pages/dashboard/DashboardOrgProcessFlows.vue')
+const DashboardOrgSingleProcessFlow = () => import( /* webpackChunkName: "DashboardOrgSingleProcessFlow" */ '../vue/pages/dashboard/DashboardOrgSingleProcessFlow.vue')
+const DashboardOrgRisks = () => import( /* webpackChunkName: "DashboardOrgRisks" */ '../vue/pages/dashboard/DashboardOrgRisks.vue')
+const DashboardOrgSingleRisk = () => import( /* webpackChunkName: "DashboardOrgSingleRisk" */ '../vue/pages/dashboard/DashboardOrgSingleRisk.vue')
+const DashboardOrgControls = () => import( /* webpackChunkName: "DashboardOrgControls" */ '../vue/pages/dashboard/DashboardOrgControls.vue')
+const DashboardOrgSingleControl = () => import( /* webpackChunkName: "DashboardOrgSingleControl" */ '../vue/pages/dashboard/DashboardOrgSingleControl.vue')
+const DashboardUserProfile = () => import( /* webpackChunkName: "DashboardUserProfile" */ '../vue/pages/dashboard/DashboardUserProfile.vue')
+const DashboardUserOrgs = () => import( /* webpackChunkName: "DashboardUserOrgs" */ '../vue/pages/dashboard/DashboardUserOrgs.vue')
+const DashboardOrgSettingsUsers = () => import( /* webpackChunkName: "DashboardOrgSettingsUsers" */ '../vue/pages/dashboard/DashboardOrgSettingsUsers.vue')
+const DashboardOrgSettingsRoles = () => import( /* webpackChunkName: "DashboardOrgSettingsRoles" */ '../vue/pages/dashboard/DashboardOrgSettingsRoles.vue')
+const DashboardOrgSettingsSingleRole = () => import( /* webpackChunkName: "DashboardOrgSettingsSingleRole" */ '../vue/pages/dashboard/DashboardOrgSettingsSingleRole.vue')
+const DashboardOrgGeneralLedger = () => import( /* webpackChunkName: "DashboardOrgGeneralLedger" */ '../vue/pages/dashboard/DashboardOrgGeneralLedger.vue')
+const DashboardOrgSingleGeneralLedgerAccount = () => import( /* webpackChunkName: "DashboardOrgSingleGeneralLedgerAccount" */ '../vue/pages/dashboard/DashboardOrgSingleGeneralLedgerAccount.vue')
+const DashboardOrgSystems = () => import( /* webpackChunkName: "DashboardOrgSystems" */ '../vue/pages/dashboard/DashboardOrgSystems.vue')
+const DashboardOrgDatabases = () => import( /* webpackChunkName: "DashboardOrgDatabases" */ '../vue/pages/dashboard/DashboardOrgDatabases.vue')
+const DashboardOrgServers = () => import( /* webpackChunkName: "DashboardOrgServers" */ '../vue/pages/dashboard/DashboardOrgServers.vue')
+const DashboardOrgSingleSystem = () => import( /* webpackChunkName: "DashboardOrgSingleSystem" */ '../vue/pages/dashboard/DashboardOrgSingleSystem.vue')
+const DashboardOrgSingleDb = () => import( /* webpackChunkName: "DashboardOrgSingleDb" */ '../vue/pages/dashboard/DashboardOrgSingleDb.vue')
+const DashboardOrgDocumentation = () => import( /* webpackChunkName: "DashboardOrgDocumentation" */ '../vue/pages/dashboard/DashboardOrgDocumentation.vue')
+const DashboardOrgSingleDocumentation = () => import( /* webpackChunkName: "DashboardOrgSingleDocumentation" */ '../vue/pages/dashboard/DashboardOrgSingleDocumentation.vue')
+const DashboardOrgDocRequests = () => import( /* webpackChunkName: "DashboardOrgDocRequests" */ '../vue/pages/dashboard/DashboardOrgDocRequests.vue')
+const DashboardOrgSingleDocRequest = () => import( /* webpackChunkName: "DashboardOrgSingleDocRequest" */ '../vue/pages/dashboard/DashboardOrgSingleDocRequest.vue')
+const DashboardOrgSingleServer = () => import( /* webpackChunkName: "DashboardOrgSingleServer" */ '../vue/pages/dashboard/DashboardOrgSingleServer.vue')
+const DashboardOrgVendors = () => import( /* webpackChunkName: "DashboardOrgVendors" */ '../vue/pages/dashboard/DashboardOrgVendors.vue')
+const DashboardOrgSingleVendor = () => import( /* webpackChunkName: "DashboardOrgSingleVendor" */ '../vue/pages/dashboard/DashboardOrgSingleVendor.vue')
+const SnackBar = () => import( /* webpackChunkName: "SnackBar" */ '../vue/components/SnackBar.vue')
 import { getCurrentCSRF } from './csrf'
 import { PageParamsStore, PageParamsStoreState  } from '../ts/pageParams'
 

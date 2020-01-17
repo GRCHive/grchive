@@ -1,19 +1,20 @@
 import vueOpts from  './vueSetup'
 import Vue from 'vue'
 import { VApp } from 'vuetify/lib'
-import LandingPage from '../vue/pages/LandingPage.vue'
-import ContactUsPage from '../vue/pages/ContactUsPage.vue'
-import LoginPage from '../vue/pages/LoginPage.vue'
-import RegistrationPage from '../vue/pages/RegistrationPage.vue'
-import GettingStartedPage from '../vue/pages/GettingStartedPage.vue'
-import LearnMorePage from '../vue/pages/LearnMorePage.vue'
-import RedirectPage from '../vue/pages/RedirectPage.vue'
-import ErrorPage from '../vue/pages/ErrorPage.vue'
-import SnackBar from '../vue/components/SnackBar.vue'
+const LandingPage = () => import( /* webpackChunkName: "LandingPage" */ '../vue/pages/LandingPage.vue')
+const ContactUsPage = () => import( /* webpackChunkName: "ContactUsPage" */ '../vue/pages/ContactUsPage.vue')
+const LoginPage = () => import( /* webpackChunkName: "LoginPage" */ '../vue/pages/LoginPage.vue')
+const RegistrationPage = () => import( /* webpackChunkName: "RegistrationPage" */ '../vue/pages/RegistrationPage.vue')
+const GettingStartedPage = () => import( /* webpackChunkName: "GettingStartedPage" */ '../vue/pages/GettingStartedPage.vue')
+const LearnMorePage = () => import( /* webpackChunkName: "LearnMorePage" */ '../vue/pages/LearnMorePage.vue')
+const RedirectPage = () => import( /* webpackChunkName: "RedirectPage" */ '../vue/pages/RedirectPage.vue')
+const ErrorPage = () => import( /* webpackChunkName: "ErrorPage" */ '../vue/pages/ErrorPage.vue')
+const SnackBar = () => import( /* webpackChunkName: "SnackBar" */ '../vue/components/SnackBar.vue')
 import '../sass/main.scss'
 import { PageParamsStore, PageParamsStoreState  } from '../ts/pageParams'
 
 function mountApp(inData : PageParamsStoreState) {
+    console.log("MOUNT APP!!!")
     PageParamsStore.commit('replaceState', inData)
     document.title = `${PageParamsStore.state.site!.CompanyName}`
 

@@ -1,8 +1,9 @@
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const VueLoaderPlugin = require('vue-loader/lib/plugin');
-const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const path = require('path')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const cssLoaders = [
     {
@@ -21,28 +22,30 @@ const babelLoader = {
 const badNodeModulesRegex = /node_modules\/(?!(query-string|split-on-first|strict-uri-encode|vuetify)\/).*/
 
 module.exports = {
-    devtool: "source-map",
     entry: {
         main: ['./ts/main.ts'],
         dashboard: ['./ts/dashboard.ts'],
     },
     output: {
-        filename: '[name].js',
         path: path.resolve(__dirname, '../dist'),
         libraryTarget: 'umd',
         library: 'corejsui',
         libraryExport: 'default',
+        publicPath: '/static/corejsui/'
     },
     module: {
         rules: [
             {
                 test: /\.tsx?$/,
                 use: [
+                    "cache-loader",
+                    "thread-loader",
                     babelLoader,
                     {
                         loader: 'ts-loader',
                         options: {
-                            appendTsSuffixTo: [/\.vue$/]
+                            appendTsSuffixTo: [/\.vue$/],
+                            happyPackMode: true,
                         }
                     }
                 ],
@@ -92,7 +95,11 @@ module.exports = {
             },
             {
                 test: /\.jsx?$/,
-                use: babelLoader,
+                use: [
+                    "cache-loader",
+                    "thread-loader",
+                    babelLoader,
+                ],
                 exclude: [ 
                     badNodeModulesRegex
                 ],
@@ -104,14 +111,25 @@ module.exports = {
         ]
     },
     plugins: [
-        new MiniCssExtractPlugin({
-            filename: '[name].css'
-        }),
         new VueLoaderPlugin(),
         new VuetifyLoaderPlugin(),
-        new BundleAnalyzerPlugin({
-            analyzerMode: 'static'
-        })
+        new ForkTsCheckerWebpackPlugin({
+            checkSyntacticErrors: true
+        }),
+        new HtmlWebpackPlugin({
+            chunks: ['main', 'vendors'],
+            filename: 'main.tmpl',
+            inject: false,
+            template: 'loader.ejs',
+            minify: false,
+        }),
+        new HtmlWebpackPlugin({
+            chunks: ['dashboard', 'vendors'],
+            filename: 'dashboard.tmpl',
+            inject: false,
+            template: 'loader.ejs',
+            minify: false,
+        }),
     ],
     resolve: {
         alias: {

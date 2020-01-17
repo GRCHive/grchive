@@ -78,6 +78,10 @@ Every time the Vault server is restarted, it must be unsealed.
 - `bazel build //src/webserver:webserver`
 - `bazel run //src/webserver:webserver`
 
+If you wish to run it in production mode:
+
+- `bazel run -c opt //src/webserver:webserver`
+
 ## Run Tests
 
 - `cd $SRC`

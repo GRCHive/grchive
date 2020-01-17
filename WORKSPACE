@@ -154,6 +154,12 @@ go_repository(
     tag = "v1.0.10"
 )
 
+go_repository(
+    name = "org_golang_x_tools",
+    importpath = "golang.org/x/tools",
+    tag = "gopls/v0.2.2"
+)
+
 # NODE
 http_archive(
     name = "build_bazel_rules_nodejs",

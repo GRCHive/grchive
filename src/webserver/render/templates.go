@@ -58,14 +58,20 @@ func defaultLoadTemplateWithBase(file string) *template.Template {
 	return template.Must(
 		template.New("").
 			Delims("[[", "]]").
-			ParseFiles("src/webserver/templates/base.tmpl", file))
+			ParseFiles(
+				"src/webserver/templates/base.tmpl",
+				"src/core/jsui/main.tmpl",
+				file))
 }
 
 func defaultLoadTemplateWithDashboardBase(file string) *template.Template {
 	return template.Must(
 		template.New("").
 			Delims("[[", "]]").
-			ParseFiles("src/webserver/templates/dashboard/dashboardBase.tmpl", file))
+			ParseFiles(
+				"src/webserver/templates/dashboard/dashboardBase.tmpl",
+				"src/core/jsui/dashboard.tmpl",
+				file))
 }
 
 func RegisterTemplates() {
