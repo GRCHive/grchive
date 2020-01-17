@@ -14,7 +14,6 @@ import '../sass/main.scss'
 import { PageParamsStore, PageParamsStoreState  } from '../ts/pageParams'
 
 function mountApp(inData : PageParamsStoreState) {
-    console.log("MOUNT APP!!!")
     PageParamsStore.commit('replaceState', inData)
     document.title = `${PageParamsStore.state.site!.CompanyName}`
 
