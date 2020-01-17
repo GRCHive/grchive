@@ -17,8 +17,6 @@ func CreateEmailVerificationSubject() string {
 
 const emailVerificationTemplateFname string = "src/webserver/templates/email/verification.tmpl"
 
-var emailVerificationTemplate = template.Must(template.ParseFiles(emailVerificationTemplateFname))
-
 func SendEmailVerification(user *core.User) error {
 	tx := database.CreateTx()
 	err := SendEmailVerificationWithTx(user, tx)
@@ -42,6 +40,11 @@ func SendEmailVerificationWithTx(user *core.User, tx *sqlx.Tx) error {
 	}
 
 	err = database.StoreEmailVerificationWithTx(veri, tx)
+	if err != nil {
+		return err
+	}
+
+	emailVerificationTemplate, err := template.ParseFiles(emailVerificationTemplateFname)
 	if err != nil {
 		return err
 	}

@@ -329,3 +329,33 @@ func GetControlsWithInputDocumentationCategory(catId int64, orgId int32, role *c
 func GetControlsWithOutputDocumentationCategory(catId int64, orgId int32, role *core.Role) ([]*core.Control, error) {
 	return getControlsWithIoDocCat("controls_output_documentation", catId, orgId, role)
 }
+
+func LinkFileWithPreviewWithTx(file core.ControlDocumentationFile, preview core.ControlDocumentationFile, role *core.Role, tx *sqlx.Tx) error {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	_, err := tx.Exec(`
+		INSERT INTO file_previews (original_file_id, preview_file_id, category_id, org_id)
+		VALUES ($1, $2, $3, $4)
+	`, file.Id, preview.Id, file.CategoryId, file.OrgId)
+	return err
+}
+
+func MarkPreviewUnavailable(file core.ControlDocumentationFile, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		INSERT INTO file_previews (original_file_id, preview_file_id, category_id, org_id)
+		VALUES ($1, NULL, $2, $3)
+	`, file.Id, file.CategoryId, file.OrgId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}

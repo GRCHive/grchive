@@ -16,8 +16,6 @@ func CreateInvitationSubject() string {
 	return fmt.Sprintf(base, core.EnvConfig.Company.CompanyName)
 }
 
-var emailInvitationTemplate = template.Must(template.ParseFiles("src/webserver/templates/email/invite.tmpl"))
-
 func SendInviteCodeEmailCode(invite *core.InviteCode, code string) error {
 	user, err := database.FindUserFromId(invite.FromUserId)
 	if err != nil {
@@ -40,6 +38,11 @@ func SendInviteCodeEmailCode(invite *core.InviteCode, code string) error {
 	v, _ := query.Values(params)
 	inviteLink := MustGetRouteUrlAbsolute(AcceptInviteRouteName) + "?" + v.Encode()
 	registerLink := MustGetRouteUrlAbsolute(RegisterRouteName) + "?" + v.Encode()
+
+	emailInvitationTemplate, err := template.ParseFiles("src/webserver/templates/email/invite.tmpl")
+	if err != nil {
+		return err
+	}
 
 	message, err := core.TemplateToString(emailInvitationTemplate, map[string]string{
 		"userFullName":     user.FullName(),

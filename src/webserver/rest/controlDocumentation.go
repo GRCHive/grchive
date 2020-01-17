@@ -328,6 +328,13 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// At this point we know we can put in a request to generate a preview.
+	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
+		Exchange: webcore.DEFAULT_EXCHANGE,
+		Queue:    webcore.FILE_PREVIEW_QUEUE,
+		Body: webcore.FilePreviewMessage{
+			File: internalFile,
+		},
+	})
 
 	if inputs.FulfilledRequestId.NullInt64.Valid {
 		err = database.FulfillDocumentRequestWithTx(

@@ -148,6 +148,12 @@ go_repository(
     commit = "1c71cc93ed716f9a6f4c2ae8955c25f9176d9f19"
 )
 
+go_repository(
+    name = "com_github_h2non_filetype",
+    importpath = "github.com/h2non/filetype",
+    tag = "v1.0.10"
+)
+
 # NODE
 http_archive(
     name = "build_bazel_rules_nodejs",

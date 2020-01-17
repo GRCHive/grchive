@@ -43,7 +43,6 @@ This document will assume that the git checkout directory is set in an environme
     ./download_python.sh
     ```
 
-
 ## Setup Dev Environment
 
 - Setup PostgreSQL
