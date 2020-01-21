@@ -105,6 +105,10 @@ export function createSingleDocCatUrl(org : string, id: number) : string {
     return `/dashboard/org/${org}/documentation/cat/${id}`
 }
 
+export function createSingleDocFileUrl(org : string, id: number) : string {
+    return `/dashboard/org/${org}/documentation/file/${id}`
+}
+
 export function createOrgDocRequestsUrl(org : string) : string {
     return `/dashboard/org/${org}/requests`
 }

@@ -90,12 +90,12 @@ func generatePreview(data []byte) *webcore.RabbitMQError {
 
 		// Create file preview in database and then encrypt/upload to B2.
 		previewFile := core.ControlDocumentationFile{
-			StorageName:  "PREVIEW" + msg.File.StorageName,
+			StorageName:  "PREVIEW" + msg.File.StorageName + ".pdf",
 			RelevantTime: msg.File.RelevantTime,
 			UploadTime:   msg.File.UploadTime,
 			CategoryId:   msg.File.CategoryId,
 			OrgId:        msg.File.OrgId,
-			AltName:      "PREVIEW" + msg.File.AltName,
+			AltName:      "PREVIEW " + msg.File.AltName,
 			Description:  "PREVIEW",
 			UploadUserId: msg.File.UploadUserId,
 		}

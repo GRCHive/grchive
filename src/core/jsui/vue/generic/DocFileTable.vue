@@ -6,6 +6,8 @@ import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
 import MetadataStore from '../../ts/metadata'
 import { createUserString } from '../../ts/users'
+import { createSingleDocFileUrl } from '../../ts/url'
+import { PageParamsStore } from '../../ts/pageParams'
 
 @Component({
     components: {
@@ -40,6 +42,13 @@ export default class DocFileTable extends ResourceTableProps {
 
     get tableItems(): any[] {
         return this.resources.map(this.transformInputResourceToTableItem)
+    }
+
+    goToDocFile(item : any) {
+        window.location.assign(createSingleDocFileUrl(
+            PageParamsStore.state.organization!.OktaGroupName,
+            item.value.Id
+        ))
     }
 
     transformInputResourceToTableItem(inp : any) : any {
@@ -80,6 +89,7 @@ export default class DocFileTable extends ResourceTableProps {
                 on: {
                     input: (items : any[]) => this.$emit('input', items.map((ele : any) => ele.value)),
                     delete: (item : any) => this.$emit('delete', item.value),
+                    'click:row': this.goToDocFile
                 },
                 scopedSlots: {
                     'expanded-item': this.renderExpansion

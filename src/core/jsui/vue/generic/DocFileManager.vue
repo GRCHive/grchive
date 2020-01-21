@@ -1,48 +1,74 @@
 <template>
     <div>
+        <v-dialog v-model="showHideDeleteFiles" persistent max-width="40%">
+            <generic-delete-confirmation-form
+                item-name="documents"
+                :items-to-delete="selectedFileNames"
+                v-on:do-cancel="showHideDeleteFiles = false"
+                v-on:do-delete="deleteSelectedFiles"
+                :use-global-deletion="false"
+                :force-global-deletion="true">
+            </generic-delete-confirmation-form>
+        </v-dialog>
+
         <doc-file-table
             :resources="value"
-            :selectable="!disableDelete"
-            :multi="!disableDelete"
-            v-model="selectedFiles"
         ></doc-file-table>
 
         <v-divider></v-divider>
         <v-list-item>
-            <v-dialog v-model="showHideDeleteFiles" persistent max-width="40%">
+            <v-dialog v-model="showHideSelectFiles" persistent max-width="60%">
                 <template v-slot:activator="{on}">
-                    <v-btn color="error" v-on="on" :disabled="!hasSelected" v-if="!disableDelete">
-                        Delete
+                    <v-btn color="warning" v-on="on">
+                        Select
                     </v-btn>
                 </template>
 
-                <generic-delete-confirmation-form
-                    item-name="documents"
-                    :items-to-delete="selectedFileNames"
-                    v-on:do-cancel="showHideDeleteFiles = false"
-                    v-on:do-delete="deleteSelectedFiles"
-                    :use-global-deletion="false"
-                    :force-global-deletion="true">
-                </generic-delete-confirmation-form>
-            </v-dialog>
+                <v-card>
+                    <v-card-title>
+                        Select Files
+                    </v-card-title>
+                    <v-divider></v-divider>
 
-            <slot
-                name="multiActions" 
-                v-bind:hasSelected="hasSelected"
-                v-bind:selectedFiles="selectedFiles"
-            >
-            </slot>
+                    <doc-file-table
+                        :resources="value"
+                        selectable
+                        multi
+                        v-model="selectedFiles"
+                    ></doc-file-table>
+
+                    <v-card-actions>
+                        <v-btn color="error" @click="showHideSelectFiles = false">
+                            Cancel
+                        </v-btn>
+
+                        <v-spacer></v-spacer>
+
+                        <v-btn color="error" @click="startDeleteFlow" :disabled="!hasSelected || deleteInProgress">
+                            <span v-if="!deleteInProgress">Delete</span>
+                            <v-progress-circular indeterminate size="16" v-else></v-progress-circular>
+                        </v-btn>
+
+                        <slot
+                            name="multiActions" 
+                            v-bind:hasSelected="hasSelected"
+                            v-bind:selectedFiles="selectedFiles"
+                        >
+                        </slot>
+
+                        <v-btn color="success" @click="downloadSelectedFiles" :disabled="!hasSelected || downloadInProgress">
+                            <span v-if="!downloadInProgress">Download</span>
+                            <v-progress-circular indeterminate size="16" v-else></v-progress-circular>
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+
+            </v-dialog>
 
             <v-spacer></v-spacer>
 
             <slot name="singleActions">
             </slot>
-
-            <v-list-item-action class="ml-4" v-if="!disableDownload">
-                <v-btn color="success" @click="downloadSelectedFiles" :disabled="!hasSelected">
-                    Download
-                </v-btn>
-            </v-list-item-action>
 
             <v-list-item-action v-if="!disableUpload">
                 <v-dialog v-model="showHideUpload" persistent max-width="40%">
@@ -104,6 +130,10 @@ const Props = Vue.extend({
             type: Boolean,
             default: false
         },
+        forceEnableSelect: {
+            type: Boolean,
+            default: true,
+        },
     },
     components: {
         DocFileTable,
@@ -118,8 +148,17 @@ const Props = Vue.extend({
 @Component
 export default class DocFileManager extends Props {
     selectedFiles: ControlDocumentationFile[] = []
+    showHideSelectFiles: boolean = false
+
     showHideDeleteFiles: boolean = false
     showHideUpload: boolean = false
+
+    deleteInProgress : boolean = false
+    downloadInProgress : boolean = false
+
+    get canSelect() : boolean {
+        return this.forceEnableSelect || !this.disableDownload || !this.disableDelete
+    }
 
     get hasSelected() : boolean {
         return this.selectedFiles.length > 0
@@ -130,6 +169,9 @@ export default class DocFileManager extends Props {
     }
 
     deleteSelectedFiles() {
+        this.showHideSelectFiles = true
+        this.showHideDeleteFiles = false
+        this.deleteInProgress = true
         deleteControlDocuments({
             orgId: PageParamsStore.state.organization!.Id,
             fileIds: this.selectedFiles.map((ele) => ele.Id),
@@ -144,7 +186,10 @@ export default class DocFileManager extends Props {
             }
             this.selectedFiles = []
             this.showHideDeleteFiles = false
+            this.deleteInProgress = false
+            this.showHideSelectFiles = false
         }).catch((err : any) => {
+            this.deleteInProgress = false
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
                 "Oops! Something went wrong. Try again.",
@@ -156,6 +201,7 @@ export default class DocFileManager extends Props {
     }
 
     downloadSelectedFiles() {
+        this.downloadInProgress = true
         // Download each file individually from the webserver and then
         // ZIP them together before saving the final ZIP to disk.
         downloadControlDocuments({
@@ -163,8 +209,11 @@ export default class DocFileManager extends Props {
             orgId: PageParamsStore.state.organization!.Id,
             catId: this.catId,
         }).then((resp : TDownloadControlDocumentsOutput) => {
+            this.downloadInProgress = false
+            this.showHideSelectFiles = false
             saveAs(resp.data, "download.zip")
         }).catch((err : any) => {
+            this.downloadInProgress = false
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
                 "Oops! Something went wrong. Try again.",
@@ -183,6 +232,11 @@ export default class DocFileManager extends Props {
         this.value.unshift(newDoc)
         this.$emit('new-doc', newDoc)
         this.$emit('input', this.value)
+    }
+
+    startDeleteFlow() {
+        this.showHideSelectFiles = false
+        this.showHideDeleteFiles = true
     }
 }
 
