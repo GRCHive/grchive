@@ -132,10 +132,12 @@ func registerControlDocumentationAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiNewControlDocumentationCategoryEndpoint, newControlDocumentationCategory).Methods("POST")
 	s.HandleFunc(core.ApiEditControlDocumentationCategoryEndpoint, editControlDocumentationCategory).Methods("POST")
 	s.HandleFunc(core.ApiDeleteControlDocumentationCategoryEndpoint, deleteControlDocumentationCategory).Methods("POST")
+
 	s.HandleFunc(core.ApiUploadControlDocumentationEndpoint, uploadControlDocumentation).Methods("POST")
-	s.HandleFunc(core.ApiGetControlDocumentationEndpoint, getControlDocumentation).Methods("GET")
+	s.HandleFunc(core.ApiAllControlDocumentationEndpoint, allControlDocumentation).Methods("GET")
 	s.HandleFunc(core.ApiDeleteControlDocumentationEndpoint, deleteControlDocumentation).Methods("POST")
 	s.HandleFunc(core.ApiDownloadControlDocumentationEndpoint, downloadControlDocumentation).Methods("GET")
+	s.HandleFunc(core.ApiGetControlDocumentationEndpoint, getControlDocumentation).Methods("GET")
 }
 
 func registerRoleAPIPaths(r *mux.Router) {

@@ -36,6 +36,7 @@ const DashboardOrgSystemQueryId string = "sysId"
 const DashboardOrgDbQueryId string = "dbId"
 const DashboardOrgServerQueryId string = "serverId"
 const DashboardOrgDocCatQueryId string = "docCatId"
+const DashboardOrgDocFileQueryId string = "docFileId"
 const DashboardOrgDocRequestQueryId string = "reqId"
 const DashboardOrgVendorQueryId string = "vendorId"
 
@@ -54,6 +55,7 @@ var DashboardOrgRiskEndpoint string = fmt.Sprintf("/risks/{%s}", DashboardOrgRis
 var DashboardOrgControlEndpoint string = fmt.Sprintf("/controls/{%s}", DashboardOrgControlQueryId)
 var DashboardOrgFlowEndpoint string = fmt.Sprintf("/flows/{%s}", DashboardOrgFlowQueryId)
 var DashboardOrgSingleDocCatEndpoint string = fmt.Sprintf("/documentation/cat/{%s}", DashboardOrgDocCatQueryId)
+var DashboardOrgSingleDocFileEndpoint string = fmt.Sprintf("/documentation/file/{%s}", DashboardOrgDocFileQueryId)
 var DashboardOrgSingleDocRequestEndpoint string = fmt.Sprintf("/requests/{%s}", DashboardOrgDocRequestQueryId)
 var DashboardOrgSingleVendorEndpoint string = fmt.Sprintf("/vendors/{%s}", DashboardOrgVendorQueryId)
 
@@ -180,9 +182,10 @@ const ApiAllControlDocumentationCategoryEndpoint string = "/cat/all"
 const ApiGetControlDocumentationCategoryEndpoint string = "/cat/get"
 
 const ApiUploadControlDocumentationEndpoint string = "/file/upload"
-const ApiGetControlDocumentationEndpoint string = "/file/get"
+const ApiAllControlDocumentationEndpoint string = "/file/all"
 const ApiDeleteControlDocumentationEndpoint string = "/file/delete"
 const ApiDownloadControlDocumentationEndpoint string = "/file/download"
+const ApiGetControlDocumentationEndpoint string = "/file/get"
 
 // API - Roles
 const ApiRolePrefix string = "/roles"

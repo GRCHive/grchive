@@ -32,6 +32,7 @@ const DashboardOrgSingleDocRequest = () => import( /* webpackChunkName: "Dashboa
 const DashboardOrgSingleServer = () => import( /* webpackChunkName: "DashboardOrgSingleServer" */ '../vue/pages/dashboard/DashboardOrgSingleServer.vue')
 const DashboardOrgVendors = () => import( /* webpackChunkName: "DashboardOrgVendors" */ '../vue/pages/dashboard/DashboardOrgVendors.vue')
 const DashboardOrgSingleVendor = () => import( /* webpackChunkName: "DashboardOrgSingleVendor" */ '../vue/pages/dashboard/DashboardOrgSingleVendor.vue')
+const DashboardOrgSingleDocFile = () => import( /* webpackChunkName: "DashboardOrgSingleDocFile" */ '../vue/pages/dashboard/DashboardOrgSingleDocFile.vue')
 const SnackBar = () => import( /* webpackChunkName: "SnackBar" */ '../vue/components/SnackBar.vue')
 import { getCurrentCSRF } from './csrf'
 import { PageParamsStore, PageParamsStoreState  } from '../ts/pageParams'
@@ -77,6 +78,7 @@ function mountApp(inData : PageParamsStoreState) {
             DashboardOrgSingleServer,
             DashboardOrgVendors,
             DashboardOrgSingleVendor,
+            DashboardOrgSingleDocFile,
             SnackBar,
         },
         vuetify: vueOpts.vuetify,
@@ -89,7 +91,8 @@ function mountApp(inData : PageParamsStoreState) {
             RenderLayout.store.dispatch('initialize', {
                 host: PageParamsStore.state.site!.Host,
                 csrf: getCurrentCSRF(),
-                processFlowStore: vueOpts.store})
+                processFlowStore: vueOpts.store
+            })
         }
     })
 }

@@ -41,9 +41,14 @@ type UploadControlDocInputs struct {
 	FulfilledRequestId core.NullInt64 `webcore:"fulfilledRequestId,optional"`
 }
 
-type GetControlDocInputs struct {
+type AllControlDocInputs struct {
 	CatId int64 `webcore:"catId"`
 	OrgId int32 `webcore:"orgId"`
+}
+
+type GetControlDocInputs struct {
+	FileId int64 `webcore:"fileId"`
+	OrgId  int32 `webcore:"orgId"`
 }
 
 type DeleteControlDocInputs struct {
@@ -364,11 +369,11 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	jsonWriter.Encode(internalFile)
 }
 
-func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
+func allControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	inputs := GetControlDocInputs{}
+	inputs := AllControlDocInputs{}
 	err := webcore.UnmarshalRequestForm(r, &inputs)
 	if err != nil {
 		core.Warning("Can't parse inputs: " + err.Error())
@@ -602,5 +607,47 @@ func getControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 		Cat:       cat,
 		InputFor:  inputControls,
 		OutputFor: outputControls,
+	})
+}
+
+func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := GetControlDocInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	file, err := database.GetControlDocumentation(inputs.FileId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get doc file: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	category, err := database.GetDocumentationCategory(file.CategoryId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get doc cat: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(struct {
+		File     *core.ControlDocumentationFile
+		Category *core.ControlDocumentationCategory
+	}{
+		File:     file,
+		Category: category,
 	})
 }

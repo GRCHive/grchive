@@ -41,7 +41,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 import { ControlDocumentationFile } from '../../../ts/controls'
-import { getControlDocuments, TGetControlDocumentsOutput } from '../../../ts/api/apiControlDocumentation'
+import { allControlDocuments, TAllControlDocumentsOutput } from '../../../ts/api/apiControlDocumentation'
 import { getAllDocRequests, TGetAllDocumentRequestOutput } from '../../../ts/api/apiDocRequests'
 import { PageParamsStore } from '../../../ts/pageParams'
 import DocFileManager from '../../generic/DocFileManager.vue'
@@ -71,7 +71,7 @@ export default class DocumentationCategoryViewer extends Props {
     
     @Watch('catId')
     reloadFiles() {
-        getControlDocuments({
+        allControlDocuments({
             catId: this.catId,
             orgId: PageParamsStore.state.organization!.Id,
         }).then((resp : TGetControlDocumentsOutput) => {
@@ -88,7 +88,7 @@ export default class DocumentationCategoryViewer extends Props {
     }
 
     refreshData() {
-        getControlDocuments({
+        allControlDocuments({
             catId: this.catId,
             orgId: PageParamsStore.state.organization!.Id,
         }).then((resp : TGetControlDocumentsOutput) => {

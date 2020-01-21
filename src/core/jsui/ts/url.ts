@@ -185,9 +185,10 @@ export const allControlDocCatUrl : string = "/api/documentation/cat/all"
 export const getControlDocCatUrl : string = "/api/documentation/cat/get"
 
 export const uploadControlDocUrl : string = "/api/documentation/file/upload"
-export const getControlDocUrl : string = "/api/documentation/file/get"
+export const allControlDocUrl : string = "/api/documentation/file/all"
 export const deleteControlDocUrl : string = "/api/documentation/file/delete"
 export const downloadControlDocUrl : string = "/api/documentation/file/download"
+export const getControlDocUrl : string = "/api/documentation/file/get"
 
 export const requestVerificationEmailUrl : string = "/api/verification/resend"
 export const inviteUsersToOrgUrl: string = "/api/invite/send"

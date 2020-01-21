@@ -266,3 +266,7 @@ func RenderVendors(w http.ResponseWriter, r *http.Request) {
 func RenderSingleVendor(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardSingleVendorTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
 }
+
+func RenderSingleDocFile(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardSingleDocFileTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+}

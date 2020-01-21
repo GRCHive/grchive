@@ -6,6 +6,7 @@ import { newControlDocCatUrl,
          editControlDocCatUrl,
          deleteControlDocCatUrl,
          uploadControlDocUrl,
+         allControlDocUrl,
          getControlDocUrl,
          deleteControlDocUrl,
          downloadControlDocUrl,
@@ -89,19 +90,19 @@ export function uploadControlDoc(inp : TUploadControlDocInput): Promise<TUploadC
     })
 }
 
-export interface TGetControlDocumentsInput {
+export interface TAllControlDocumentsInput {
     catId: number
     orgId: number
 }
 
-export interface TGetControlDocumentsOutput {
+export interface TAllControlDocumentsOutput {
     data: {
         Files: ControlDocumentationFile[]
     }
 }
 
-export function getControlDocuments(inp: TGetControlDocumentsInput) : Promise<TGetControlDocumentsOutput> {
-    return axios.get(getControlDocUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetControlDocumentsOutput) => {
+export function allControlDocuments(inp: TAllControlDocumentsInput) : Promise<TAllControlDocumentsOutput> {
+    return axios.get(allControlDocUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TAllControlDocumentsOutput) => {
         resp.data.Files = resp.data.Files.map((ele : ControlDocumentationFile) => {
             ele.UploadTime = new Date(ele.UploadTime)
             ele.RelevantTime = new Date(ele.RelevantTime)
@@ -191,4 +192,20 @@ export interface TGetDocCatOutput {
 
 export function getDocumentCategory(inp : TGetDocCatInput) : Promise<TGetDocCatOutput> {
     return axios.get(getControlDocCatUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+}
+
+export interface TGetSingleControlDocumentInput {
+    fileId: number
+    orgId: number
+}
+
+export interface TGetSingleControlDocumentOutput {
+    data: {
+        File: ControlDocumentationFile
+        Category: ControlDocumentationCategory
+    }
+}
+
+export function getSingleControlDocument(inp: TGetSingleControlDocumentInput) : Promise<TGetSingleControlDocumentOutput> {
+    return axios.get(getControlDocUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
 }
