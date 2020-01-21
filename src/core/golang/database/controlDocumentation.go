@@ -219,14 +219,19 @@ func GetControlDocumentationForCategory(catId int64, orgId int32, role *core.Rol
 
 	retArr := make([]*core.ControlDocumentationFile, 0)
 
+	// LEFT JOIN on preview_file_id so that we don't
+	// return files that are previews.
 	err := dbConn.Select(&retArr, `
-		SELECT *
-		FROM process_flow_control_documentation_file
-		WHERE category_id = $1
-			AND org_id = $2
-			AND bucket_id IS NOT NULL
-			AND storage_id IS NOT NULL
-		ORDER BY relevant_time DESC
+		SELECT file.*
+		FROM process_flow_control_documentation_file AS file
+		LEFT JOIN file_previews AS pre
+			ON pre.preview_file_id = file.id
+		WHERE file.category_id = $1
+			AND file.org_id = $2
+			AND file.bucket_id IS NOT NULL
+			AND file.storage_id IS NOT NULL
+			AND pre.original_file_id IS NULL
+		ORDER BY file.relevant_time DESC
 	`, catId, orgId)
 
 	return retArr, err
