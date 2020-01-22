@@ -25,8 +25,8 @@ filegroup(
     ]
 )
 
-CMD_DEV = "cd src/core/jsui && npx webpack --config ./webpack/dev.config.js && zip -r ../../../$@ dist/"
-CMD_PROD = "cd src/core/jsui && npx webpack --config ./webpack/prod.config.js && zip -r ../../../$@ dist/"
+CMD_DEV = "cd src/core/jsui && rm -rf dist/* && npx webpack --config ./webpack/dev.config.js && zip -r ../../../$@ dist/"
+CMD_PROD = "cd src/core/jsui && rm -rf dist/* && npx webpack --config ./webpack/prod.config.js && zip -r ../../../$@ dist/"
 
 genrule(
     name = "corejsui-nosmap",
