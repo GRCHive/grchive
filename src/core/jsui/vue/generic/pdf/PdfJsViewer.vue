@@ -1,22 +1,31 @@
 <template>
-    <div id="viewerContainer" :style="viewerContainerStyle" ref="container" @scroll="scrollContainer">
-        <div :style="canvasContainerStyle" v-if="readyToRender">
-            <pdf-page-renderer
-                v-for="(item, i) in allPages"
-                :key="i"
-                :page="allPages[i]"
-                :viewport="pdfViewports[i]"
-                :visible="pageVisibility[i]"
-                :style="rendererStyle(i)"
-            >
-            </pdf-page-renderer>
-        </div>
+    <div @wheel="onWheel">
+        <pdf-toolbar
+            :scale.sync="scale"
+            :page="currentPage"
+            @update:page="changePage"
+            :total-pages="numPages"
+        ></pdf-toolbar>
 
-        <v-progress-circular
-            indeterminate
-            size="64"
-            v-else
-        ></v-progress-circular>
+        <div id="viewerContainer" :style="viewerContainerStyle" ref="container" @scroll="scrollContainer">
+            <div :style="canvasContainerStyle" v-if="readyToRender">
+                <pdf-page-renderer
+                    v-for="(item, i) in allPages"
+                    :key="i"
+                    :page="allPages[i]"
+                    :viewport="pdfViewports[i]"
+                    :visible="pageVisibility[i]"
+                    :style="rendererStyle(i)"
+                >
+                </pdf-page-renderer>
+            </div>
+
+            <v-progress-circular
+                indeterminate
+                size="64"
+                v-else
+            ></v-progress-circular>
+        </div>
     </div>
 </template>
 
@@ -25,6 +34,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import PdfPageRenderer from './PdfPageRenderer.vue'
+import PdfToolbar from './PdfToolbar.vue'
 import { contactUsUrl } from '../../../ts/url'
 
 import pdfjsLib from 'pdfjs-dist/webpack'
@@ -44,6 +54,7 @@ const PageSpacerPx = 8
 @Component({
     components: {
         PdfPageRenderer,
+        PdfToolbar
     }
 })
 export default class PdfJsViewer extends Props {
@@ -54,6 +65,39 @@ export default class PdfJsViewer extends Props {
 
     $refs! : {
         container : HTMLDivElement
+    }
+
+    onWheel(e : WheelEvent) {
+        if (!e.ctrlKey) {
+            return
+        }
+
+        e.preventDefault()
+        this.scale += Math.sign(e.deltaY) * -0.1
+    }
+
+    get currentPage() : number {
+        if (!this.readyToRender) {
+            return 0
+        }
+
+        let thresholdY = this.currentScroll + this.effectiveMaxViewerHeight / 2
+        for (let i = this.numPages - 1; i >= 0; --i) {
+            if (this.pageRanges[i].contains(thresholdY)) {
+                return i
+            }
+        }
+        return 0
+    }
+
+    changePage(pg : number) {
+        this.$refs.container.scrollTop = this.pageRanges[pg].min
+        this.scrollContainer()
+    }
+
+    get effectiveMaxViewerHeight() : number {
+        // 48 is the height of the toolbar in pixels
+        return this.maxViewerHeight - 48;
     }
 
     get readyToRender() : boolean {
@@ -72,7 +116,7 @@ export default class PdfJsViewer extends Props {
     get viewerContainerStyle() : any {
         return {
             "background-color": "#404040",
-            "height": `${this.maxViewerHeight}px`,
+            "height": `${this.effectiveMaxViewerHeight}px`,
         }
     }
 
@@ -116,18 +160,20 @@ export default class PdfJsViewer extends Props {
         return this.pdfViewports.map((ele : PageViewport) => ele.height).reduce((a,c) => a + c, (this.numPages + 1) * PageSpacerPx)
     }
 
-    get pageVisibility() : Array<boolean> {
-        let vis = new Array<boolean>(this.numPages)
-        let viewerRange = new TRange<number>(this.currentScroll, this.currentScroll + this.maxViewerHeight)
+    get pageRanges() : Array<TRange<number>> {
+        let ranges = new Array<TRange<number>>(this.numPages)
         let currentPageY = PageSpacerPx
-
         for (let i = 0; i < this.numPages; ++i) {
             let pageRange = new TRange<number>(currentPageY, currentPageY + this.pdfViewports[i].height) 
-            vis[i] = pageRange.intersects(viewerRange)
+            ranges[i] = pageRange
             currentPageY = pageRange.max + PageSpacerPx
         }
+        return ranges
+    }
 
-        return vis
+    get pageVisibility() : Array<boolean> {
+        let viewerRange = new TRange<number>(this.currentScroll, this.currentScroll + this.effectiveMaxViewerHeight)
+        return this.pageRanges.map((ele : TRange<number>) => ele.intersects(viewerRange))
     }
 
     scrollContainer() {

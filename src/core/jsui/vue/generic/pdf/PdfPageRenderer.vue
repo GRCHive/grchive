@@ -40,7 +40,9 @@ export default class PdfPageRenderer extends Props {
         textLayer: HTMLDivElement
     }
 
-    @Watch('visible')
+    @Watch("visible")
+    @Watch("viewport")
+    @Watch("page")
     checkRender() {
         if (!this.visible) {
             return

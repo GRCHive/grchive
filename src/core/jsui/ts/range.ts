@@ -13,4 +13,8 @@ export class TRange<T> {
         }
         return true
     }
+
+    contains(n : T) : boolean {
+        return (n > this.min) && (n < this.max)
+    }
 }
