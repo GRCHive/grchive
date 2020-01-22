@@ -212,6 +212,38 @@ func GetControlDocumentation(fileId int64, orgId int32, role *core.Role) (*core.
 	return &retFile, err
 }
 
+func GetControlDocumentationPreview(fileId int64, orgId int32, role *core.Role) (*core.ControlDocumentationFile, error) {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	rows, err := dbConn.Queryx(`
+		SELECT file.*
+		FROM process_flow_control_documentation_file AS file
+		INNER JOIN file_previews AS pre
+			ON file.id = pre.preview_file_id
+		WHERE pre.original_file_id = $1
+			AND pre.org_id = $2
+	`, fileId, orgId)
+	defer rows.Close()
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !rows.Next() {
+		return nil, nil
+	}
+
+	retFile := core.ControlDocumentationFile{}
+	err = rows.StructScan(&retFile)
+	if err != nil {
+		return nil, err
+	}
+
+	return &retFile, err
+}
+
 func GetControlDocumentationForCategory(catId int64, orgId int32, role *core.Role) ([]*core.ControlDocumentationFile, error) {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
 		return nil, core.ErrorUnauthorized

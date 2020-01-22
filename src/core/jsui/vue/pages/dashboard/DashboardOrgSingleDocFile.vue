@@ -1,12 +1,12 @@
 <template>
     <section class="max-height">
-        <dashboard-app-bar ref="dashboardAppBar">
+        <dashboard-app-bar @height-change="onHeightChange">
         </dashboard-app-bar>
 
         <dashboard-home-page-nav-bar></dashboard-home-page-nav-bar>
 
-        <v-content>
-            <full-edit-documentation-component></full-edit-documentation-component>
+        <v-content class="max-height">
+            <full-edit-documentation-component ref="edit"></full-edit-documentation-component>
         </v-content>
     </section>
 </template>
@@ -24,5 +24,22 @@ export default Vue.extend({
         DashboardHomePageNavBar,
         FullEditDocumentationComponent
     },
+    methods: {
+        // This is not ideal -- ideally information about the header changes goes through a vuex store 
+        // and we do the logic inside the edit component.
+        onHeightChange() {
+            // Need to poll for when the element getBoundingClientRect actually changes.
+            // Ideally it changes within a few seconds. Maybe this logic should go inside
+            // the component too...
+            let intId = setInterval(() => {
+                // @ts-ignore
+                this.$refs.edit.updateViewerRect()
+            }, 100)
+
+            setTimeout(() => {
+                clearInterval(intId)
+            }, 3000)
+        }
+    }
 })
 </script>

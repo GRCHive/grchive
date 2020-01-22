@@ -643,11 +643,20 @@ func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	previewFile, err := database.GetControlDocumentationPreview(inputs.FileId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get doc file preview: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	jsonWriter.Encode(struct {
-		File     *core.ControlDocumentationFile
-		Category *core.ControlDocumentationCategory
+		File        *core.ControlDocumentationFile
+		Category    *core.ControlDocumentationCategory
+		PreviewFile *core.ControlDocumentationFile
 	}{
-		File:     file,
-		Category: category,
+		File:        file,
+		Category:    category,
+		PreviewFile: previewFile,
 	})
 }

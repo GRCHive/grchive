@@ -106,6 +106,7 @@ export default Vue.extend({
             } else {
                 this.extensionHeight = 0
             }
+            this.$emit('height-change')
         }
     }
 })

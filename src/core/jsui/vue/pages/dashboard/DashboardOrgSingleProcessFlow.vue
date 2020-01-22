@@ -1,6 +1,6 @@
 <template>
     <div class="max-height">
-        <dashboard-app-bar ref="dashboardAppBar">
+        <dashboard-app-bar ref="dashboardAppBar" @height-change="recomputeProcessFlowHeaderHeight">
         </dashboard-app-bar>
 
         <dashboard-home-page-nav-bar></dashboard-home-page-nav-bar>
@@ -94,6 +94,8 @@ export default Vue.extend({
             }
 
             Vue.nextTick(() => {
+                //@ts-ignore
+                this.appBarClipHeight = this.$refs.dashboardAppBar.$el.offsetHeight
                 //@ts-ignore
                 const contentDiv = this.$refs.sectionDiv.$el.firstElementChild
                 const sectionTop = contentDiv.getBoundingClientRect().top

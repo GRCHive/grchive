@@ -125,6 +125,23 @@ export function deleteControlDocuments(inp: TDeleteControlDocumentsInput) : Prom
     return postFormUrlEncoded<TDeleteControlDocumentsOutput>(deleteControlDocUrl, inp, getAPIRequestConfig())
 }
 
+export interface TDownloadSingleControlDocumentInput {
+    fileId: number
+    orgId: number
+    catId: number
+}
+
+export interface TDownloadSingleControlDocumentOutput {
+    data: Blob
+}
+
+export function downloadSingleControlDocument(inp : TDownloadSingleControlDocumentInput) : Promise<TDownloadSingleControlDocumentOutput> {
+    return axios.get<Blob>(downloadControlDocUrl + '?' + qs.stringify(inp), {
+        ...getAPIRequestConfig(),
+        responseType: "blob"
+    })
+}
+
 export interface TDownloadControlDocumentsInput {
     files: ControlDocumentationFile[]
     orgId: number
@@ -140,13 +157,10 @@ export function downloadControlDocuments(inp: TDownloadControlDocumentsInput) : 
         let zip = new JSZip()
         for (let file of inp.files) {
             try {
-                let blobData = await axios.get<Blob>(downloadControlDocUrl + '?' + qs.stringify({
+                let blobData = await downloadSingleControlDocument({
                     fileId: file.Id,
                     orgId: inp.orgId,
                     catId: inp.catId,
-                }), {
-                    ...getAPIRequestConfig(),
-                    responseType: "blob"
                 })
 
                 zip.folder(file.RelevantTime.toDateString()).file(`${file.Id}-${file.StorageName}`, blobData.data)
@@ -203,6 +217,7 @@ export interface TGetSingleControlDocumentOutput {
     data: {
         File: ControlDocumentationFile
         Category: ControlDocumentationCategory
+        PreviewFile: ControlDocumentationFile | null
     }
 }
 

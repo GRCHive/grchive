@@ -54,7 +54,7 @@ import DocFileTable from './DocFileTable.vue'
 import { ControlDocumentationFile, ControlDocumentationCategory } from '../../ts/controls'
 import { Watch } from 'vue-property-decorator'
 import * as rules from '../../ts/formRules'
-import { getControlDocuments, TGetControlDocumentsOutput } from '../../ts/api/apiControlDocumentation'
+import { allControlDocuments, TAllControlDocumentsOutput } from '../../ts/api/apiControlDocumentation'
 import { contactUsUrl } from '../../ts/url'
 import { PageParamsStore } from '../../ts/pageParams'
 
@@ -105,10 +105,10 @@ export default class DocSearcher extends Props {
 
         this.loadingFiles = true
         this.currentCatFiles = []
-        getControlDocuments({
+        allControlDocuments({
             catId: this.chosenCat!.Id,
             orgId: PageParamsStore.state.organization!.Id,
-        }).then((resp : TGetControlDocumentsOutput) => {
+        }).then((resp : TAllControlDocumentsOutput) => {
             let excludeSet = new Set<number>(this.excludeFiles.map((ele : any) => ele.Id))
             this.currentCatFiles = resp.data.Files.filter(
                 (ele : ControlDocumentationFile) => !excludeSet.has(ele.Id)
