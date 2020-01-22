@@ -22,7 +22,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
-import { PDFPageProxy, PageViewport } from 'pdfjs-dist/build/pdf'
+import { PDFPageProxy, PageViewport, InternalRenderTask } from 'pdfjs-dist/build/pdf'
 import { TextLayerBuilder } from 'pdfjs-dist/web/pdf_viewer'
 
 const Props = Vue.extend({
@@ -35,6 +35,9 @@ const Props = Vue.extend({
 
 @Component
 export default class PdfPageRenderer extends Props {
+    task : InternalRenderTask | null = null
+    stop : boolean = false
+
     $refs! : {
         canvas : HTMLCanvasElement
         textLayer: HTMLDivElement
@@ -55,8 +58,17 @@ export default class PdfPageRenderer extends Props {
                 canvasContext: context,
                 viewport: this.viewport,
             };
-            this.page.render(renderContext).promise.then(() => {
+            this.task = this.page.render(renderContext)
+            this.task.promise.then(() => {
+                this.task = null
+                if (this.stop) {
+                    return
+                }
+
                 this.page.getTextContent().then((textContent) => {
+                    if (this.stop) {
+                        return
+                    }
                     let textBuilder = new TextLayerBuilder({
                         textLayerDiv: this.$refs.textLayer, 
                         pageIndex: this.page.pageIndex,
@@ -66,6 +78,11 @@ export default class PdfPageRenderer extends Props {
                     textBuilder.setTextContent(textContent)
                     textBuilder.render()
                 })
+            }).catch((err) => {
+                if (err.name == "RenderingCancelledException") {
+                    return
+                }
+                throw err
             })
         })
     }
@@ -88,6 +105,13 @@ export default class PdfPageRenderer extends Props {
 
     mounted() {
         this.checkRender()
+    }
+
+    beforeDestroy() {
+        this.stop = true
+        if (!!this.task) {
+            this.task.cancel()
+        }
     }
 }
 

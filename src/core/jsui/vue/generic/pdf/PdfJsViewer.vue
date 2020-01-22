@@ -11,7 +11,7 @@
             <div :style="canvasContainerStyle" v-if="readyToRender">
                 <pdf-page-renderer
                     v-for="(item, i) in allPages"
-                    :key="i"
+                    :key="`${i}-${scale}`"
                     :page="allPages[i]"
                     :viewport="pdfViewports[i]"
                     :visible="pageVisibility[i]"

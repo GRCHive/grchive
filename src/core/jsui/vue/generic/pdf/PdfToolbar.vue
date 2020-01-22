@@ -146,6 +146,7 @@ export default class PdfToolbar extends Props {
     }
 
     changeScale(v : number) {
+        v = Math.min(Math.max(v, 0.1), 10.0)
         this.$emit("update:scale", v)
     }
 
