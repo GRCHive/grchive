@@ -6,6 +6,7 @@ import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
 import MetadataStore from '../../ts/metadata'
 import { createUserString } from '../../ts/users'
+import { standardFormatDate } from '../../ts/time'
 import { createSingleDocFileUrl } from '../../ts/url'
 import { PageParamsStore } from '../../ts/pageParams'
 
@@ -56,8 +57,8 @@ export default class DocFileTable extends ResourceTableProps {
             id: inp.Id,
             name: inp.AltName,
             filename: inp.StorageName,
-            relevantTime: inp.RelevantTime.toDateString(),
-            uploadTime: inp.UploadTime.toDateString(),
+            relevantTime: standardFormatDate(inp.RelevantTime),
+            uploadTime: standardFormatDate(inp.UploadTime),
             user: createUserString(MetadataStore.getters.getUser(inp.UploadUserId)),
             value: inp
         }

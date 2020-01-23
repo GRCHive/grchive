@@ -8,21 +8,21 @@ import (
 	"gitlab.com/b3h47pte/audit-stuff/vault_api"
 )
 
-func UploadNewFileWithTx(file *core.ControlDocumentationFile, buffer []byte, role *core.Role, org *core.Organization, b2Auth *backblaze.B2AuthToken, tx *sqlx.Tx) error {
+func UploadNewFileWithTx(file *core.ControlDocumentationFile, buffer []byte, role *core.Role, org *core.Organization, b2Auth *backblaze.B2AuthToken, tx *sqlx.Tx) (*backblaze.B2File, error) {
 	err := database.CreateControlDocumentationFileWithTx(file, tx, role)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	transitKey := file.UniqueKey()
 	err = vault.TransitCreateNewEngineKey(transitKey)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	encryptedFile, err := vault.TransitEncrypt(transitKey, buffer)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	b2Filename := file.StorageFilename(org)
@@ -32,16 +32,16 @@ func UploadNewFileWithTx(file *core.ControlDocumentationFile, buffer []byte, rol
 		b2Filename,
 		encryptedFile)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	file.BucketId = b2File.BucketId
 	file.StorageId = b2File.FileId
-	err = database.UpdateControlDocumentation(file, tx, role)
+	err = database.UpdateControlDocumentationWithTx(file, tx, role)
 	if err != nil {
 		backblaze.DeleteFile(b2Auth, file.StorageFilename(org), b2File)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &b2File, nil
 }

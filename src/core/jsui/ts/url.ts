@@ -193,6 +193,7 @@ export const allControlDocUrl : string = "/api/documentation/file/all"
 export const deleteControlDocUrl : string = "/api/documentation/file/delete"
 export const downloadControlDocUrl : string = "/api/documentation/file/download"
 export const getControlDocUrl : string = "/api/documentation/file/get"
+export const editControlDocUrl : string = "/api/documentation/file/edit"
 
 export const requestVerificationEmailUrl : string = "/api/verification/resend"
 export const inviteUsersToOrgUrl: string = "/api/invite/send"

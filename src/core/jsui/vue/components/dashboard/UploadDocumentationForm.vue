@@ -11,7 +11,6 @@
             <document-category-search-form-component
                 v-if="catId == -1"
                 v-model="chosenCat"
-                id-mode
                 load-cats
                 :rules="[rules.required]"
             >
@@ -69,6 +68,7 @@ import { TUploadControlDocOutput, uploadControlDoc } from '../../../ts/api/apiCo
 import { contactUsUrl } from '../../../ts/url'
 import * as rules from '../../../ts/formRules'
 import { PageParamsStore } from '../../../ts/pageParams'
+import { createLocalDateFromDateString } from '../../../ts/time'
 import { ControlDocumentationCategory } from '../../../ts/controls'
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 import DocumentCategorySearchFormComponent from '../../generic/DocumentCategorySearchFormComponent.vue'
@@ -87,7 +87,7 @@ export default Vue.extend({
     },
     data : () => ({
         dateMenu: false,
-        dateString: new Date().toISOString().substr(0, 10),
+        dateString: standardFormatDate(new Date()),
         file: null as File | null,
         rules,
         formValid: false,
@@ -118,10 +118,9 @@ export default Vue.extend({
                 return
             }
             this.progressOverlay = true
-            // We need to do this conversion so that when we go into UTC, we're still at the right
-            // day for the local time zone.
-            let currentDate : Date = new Date(this.dateString)
-            currentDate = new Date(currentDate.getTime() + currentDate.getTimezoneOffset() * 60000)
+            // We need to do this conversion since new Date(str) will create the date in UTC.
+            // So we need to make sure the date is valid in the current timezone.
+            let currentDate : Date = createLocalDateFromDateString(this.dateString)
 
             uploadControlDoc({
                 catId: this.finalCatId,

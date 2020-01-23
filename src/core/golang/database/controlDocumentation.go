@@ -128,7 +128,7 @@ func CreateControlDocumentationFileWithTx(file *core.ControlDocumentationFile, t
 	return nil
 }
 
-func UpdateControlDocumentation(file *core.ControlDocumentationFile, tx *sqlx.Tx, role *core.Role) error {
+func UpdateControlDocumentationWithTx(file *core.ControlDocumentationFile, tx *sqlx.Tx, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
@@ -140,12 +140,22 @@ func UpdateControlDocumentation(file *core.ControlDocumentationFile, tx *sqlx.Tx
 			alt_name = :alt_name,
 			description = :description,
 			upload_user_id = :upload_user_id,
-			relevant_time = :relevant_time
+			relevant_time = :relevant_time,
+			category_id = :category_id
 		WHERE id = :id
 			AND org_id = :org_id
-			AND category_id = :category_id
 	`, file)
 	return err
+}
+
+func UpdateControlDocumentation(file *core.ControlDocumentationFile, role *core.Role) error {
+	tx := dbConn.MustBegin()
+	err := UpdateControlDocumentationWithTx(file, tx, role)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
 }
 
 func DeleteBatchControlDocumentation(fileIds []int64, catId int64, orgId int32, role *core.Role) error {

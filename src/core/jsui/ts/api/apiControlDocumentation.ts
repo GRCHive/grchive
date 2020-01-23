@@ -1,13 +1,14 @@
 import axios from 'axios'
 import * as qs from 'query-string'
-import { postFormUrlEncoded, postFormMultipart } from '../http'
-import { ControlDocumentationCategory, ControlDocumentationFile } from '../controls'
+import { postFormUrlEncoded, postFormMultipart, postFormJson } from '../http'
+import { ControlDocumentationCategory, ControlDocumentationFile, cleanJsonControlDocumentationFile } from '../controls'
 import { newControlDocCatUrl,
          editControlDocCatUrl,
          deleteControlDocCatUrl,
          uploadControlDocUrl,
          allControlDocUrl,
          getControlDocUrl,
+         editControlDocUrl,
          deleteControlDocUrl,
          downloadControlDocUrl,
          allControlDocCatUrl,
@@ -89,6 +90,31 @@ export function uploadControlDoc(inp : TUploadControlDocInput): Promise<TUploadC
         return resp
     })
 }
+
+export interface TEditControlDocInput {
+    fileId: number
+    orgId: number
+    relevantTime: Date
+    altName: string
+    description: string
+    uploadUserId: number
+}
+
+export interface TEditControlDocOutput {
+    data: {
+        File: ControlDocumentationFile
+        Category: ControlDocumentationCategory
+        UploadUser: User
+    }
+}
+
+export function editControlDoc(inp : TEditControlDocInput) : Promise<TEditControlDocOutput> {
+    return postFormJson<TEditControlDocOutput>(editControlDocUrl, inp, getAPIRequestConfig()).then((resp : TEditControlDocOutput) => {
+        cleanJsonControlDocumentationFile(resp.data.File)
+        return resp
+    })
+}
+
 
 export interface TAllControlDocumentsInput {
     catId: number
@@ -218,6 +244,7 @@ export interface TGetSingleControlDocumentOutput {
         File: ControlDocumentationFile
         Category: ControlDocumentationCategory
         PreviewFile: ControlDocumentationFile | null
+        UploadUser: User
     }
 }
 

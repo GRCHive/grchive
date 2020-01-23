@@ -73,6 +73,15 @@ type GetControlDocCatInputs struct {
 	Lean  bool  `webcore:"lean"`
 }
 
+type EditControlDocInputs struct {
+	FileId       int64     `json:"fileId"`
+	OrgId        int32     `json:"orgId"`
+	RelevantTime time.Time `json:"relevantTime"`
+	AltName      string    `json:"altName"`
+	Description  string    `json:"description"`
+	UploadUserId int64     `json:"uploadUserId"`
+}
+
 func newControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -282,52 +291,9 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tx := database.CreateTx()
-	err = database.CreateControlDocumentationFileWithTx(&internalFile, tx, role)
+	b2File, err := webcore.UploadNewFileWithTx(&internalFile, buffer.Bytes(), role, org, b2Auth, tx)
 	if err != nil {
-		tx.Rollback()
-		core.Warning("Could not create file: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	transitKey := internalFile.UniqueKey()
-	err = vault.TransitCreateNewEngineKey(transitKey)
-	if err != nil {
-		tx.Rollback()
-		core.Warning("Could not create transit key: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	encryptedFile, err := vault.TransitEncrypt(transitKey, buffer.Bytes())
-	if err != nil {
-		tx.Rollback()
-		core.Warning("Could not encrypt file: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	b2Filename := internalFile.StorageFilename(org)
-
-	b2File, err := backblaze.UploadFile(b2Auth,
-		core.EnvConfig.Backblaze.ControlDocBucketId,
-		b2Filename,
-		encryptedFile)
-	if err != nil {
-		tx.Rollback()
-		core.Warning("Could not upload file: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	internalFile.BucketId = b2File.BucketId
-	internalFile.StorageId = b2File.FileId
-	err = database.UpdateControlDocumentation(&internalFile, tx, role)
-	if err != nil {
-		tx.Rollback()
-		backblaze.DeleteFile(b2Auth, internalFile.StorageFilename(org), b2File)
-
-		core.Warning("Failed to update control documentation: " + err.Error())
+		core.Warning("Failed to upload new file: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -351,7 +317,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 			tx)
 		if err != nil {
 			tx.Rollback()
-			backblaze.DeleteFile(b2Auth, internalFile.StorageFilename(org), b2File)
+			backblaze.DeleteFile(b2Auth, internalFile.StorageFilename(org), *b2File)
 
 			core.Warning("Failed to fulfill request in db: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -650,13 +616,85 @@ func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user, err := database.FindUserFromId(file.UploadUserId)
+	if err != nil {
+		core.Warning("Failed to find upload user: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	jsonWriter.Encode(struct {
 		File        *core.ControlDocumentationFile
 		Category    *core.ControlDocumentationCategory
 		PreviewFile *core.ControlDocumentationFile
+		UploadUser  *core.User
 	}{
 		File:        file,
 		Category:    category,
 		PreviewFile: previewFile,
+		UploadUser:  user,
+	})
+}
+
+func editControlDocumentation(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := EditControlDocInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	file, err := database.GetControlDocumentation(inputs.FileId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get control documentation: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	file.RelevantTime = inputs.RelevantTime
+	file.AltName = inputs.AltName
+	file.Description = inputs.Description
+	file.UploadUserId = inputs.UploadUserId
+
+	err = database.UpdateControlDocumentation(file, role)
+	if err != nil {
+		core.Warning("Failed to edit control documentation: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	category, err := database.GetDocumentationCategory(file.CategoryId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get doc cat: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	user, err := database.FindUserFromId(file.UploadUserId)
+	if err != nil {
+		core.Warning("Failed to find upload user: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(struct {
+		File       *core.ControlDocumentationFile
+		Category   *core.ControlDocumentationCategory
+		UploadUser *core.User
+	}{
+		File:       file,
+		Category:   category,
+		UploadUser: user,
 	})
 }
