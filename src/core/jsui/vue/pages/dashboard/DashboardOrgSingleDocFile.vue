@@ -34,6 +34,8 @@ export default Vue.extend({
             let intId = setInterval(() => {
                 // @ts-ignore
                 this.$refs.edit.updateViewerRect()
+                // @ts-ignore
+                this.$refs.edit.updateMetadataRect()
             }, 100)
 
             setTimeout(() => {
