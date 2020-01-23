@@ -21,7 +21,7 @@
                 <span v-else>No Preview Available</span>
             </v-col>
 
-            <v-col cols="6" v-if="metadataReady">
+            <v-col cols="6" v-if="metadataReady" class="py-0">
                 <div class="mt-2 mr-3">
                     <v-list-item two-line class="pa-0">
                         <v-list-item-content>
@@ -60,8 +60,8 @@
                         <v-tab>Comments</v-tab>
                     </v-tabs>
 
-                    <v-tabs-items v-model="currentTab">
-                        <v-tab-item style="overflow: auto;">
+                    <v-tabs-items v-model="currentTab" ref="tabItems">
+                        <v-tab-item :style="tabItemStyle">
                             <v-form @submit.prevent v-model="formValid" class="ma-4">
 
                                 <v-text-field v-model="editData.File.AltName"
@@ -157,7 +157,7 @@
                             </div>
                         </v-tab-item>
 
-                        <v-tab-item>
+                        <v-tab-item :style="tabItemStyle">
                         </v-tab-item>
                     </v-tabs-items>
                 </div>
@@ -200,6 +200,7 @@ import * as rules from '../../../ts/formRules'
 import { createLocalDateFromDateString, standardFormatDate } from '../../../ts/time'
 import DocumentCategorySearchFormComponent from '../../generic/DocumentCategorySearchFormComponent.vue'
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
+import { VTabsItems } from 'vuetify/lib'
 
 @Component({
     components: {
@@ -213,7 +214,9 @@ export default class FullEditDocumentationComponent extends Vue {
     parentCat : ControlDocumentationCategory | null = null
     metadata : ControlDocumentationFile | null = null
     uploadUser: User | null = null
+
     viewerMaxHeight: number = 100
+    metadataMaxHeight:  number = 100
 
     previewMetadata : ControlDocumentationFile | null = null
     previewData : Blob | null = null
@@ -229,6 +232,7 @@ export default class FullEditDocumentationComponent extends Vue {
 
     $refs!: {
         pdfViewer: PdfJsViewer
+        tabItems: VTabsItems
     }
 
     get fileDateString() : string {
@@ -348,6 +352,7 @@ export default class FullEditDocumentationComponent extends Vue {
     mounted() {
         this.refreshData()
         window.addEventListener("resize", this.updateViewerRect)
+        window.addEventListener("resize", this.updateMetadataRect)
     }
 
     @Watch('previewReady')
@@ -360,6 +365,18 @@ export default class FullEditDocumentationComponent extends Vue {
             let viewerRect = this.$refs.pdfViewer.$el.getBoundingClientRect()
             let windowHeight = window.innerHeight
             this.viewerMaxHeight = windowHeight - viewerRect.y
+        })
+    }
+
+    @Watch('metadataReady')
+    updateMetadataRect() {
+        Vue.nextTick(() => {
+            if (!this.metadataReady) {
+                return
+            }
+            let metadataRect = this.$refs.tabItems.$el.getBoundingClientRect()
+            let windowHeight = window.innerHeight
+            this.metadataMaxHeight = windowHeight - metadataRect.y
         })
     }
 
@@ -391,6 +408,13 @@ export default class FullEditDocumentationComponent extends Vue {
                 contactUsUrl,
                 true);
         })
+    }
+
+    get tabItemStyle() : any {
+        return {
+            "overflow": "auto",
+            "height": `${this.metadataMaxHeight}px`,
+        }
     }
 }
 
