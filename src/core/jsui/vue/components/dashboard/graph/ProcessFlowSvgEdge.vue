@@ -26,7 +26,7 @@
 <script lang="ts">
 
 import Vue from 'vue'
-import VueSetup from '../../../../ts/vueSetup.ts'
+import VueSetup from '../../../../ts/vueSetup'
 import RenderLayout from '../../../../ts/render/renderLayout'
 export default Vue.extend({
     props: {

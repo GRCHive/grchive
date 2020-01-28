@@ -50,7 +50,7 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { Comment, CommentResource } from '../../ts/comments'
+import { Comment } from '../../ts/comments'
 import * as apiComments from '../../ts/api/apiComments'
 import { contactUsUrl } from '../../ts/url'
 import MetadataStore from '../../ts/metadata'

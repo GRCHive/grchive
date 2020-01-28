@@ -79,7 +79,7 @@ import * as rules from "../../../ts/formRules"
 import FrequencyFormComponent from "../../generic/FrequencyFormComponent.vue"
 import UserSearchFormComponent from "../../generic/UserSearchFormComponent.vue"
 import Metadata from "../../../ts/metadata"
-import { lazyGetUserFromId, lazyGetControlTypeFromId } from '../../../ts/metadataUtils.ts'
+import { lazyGetUserFromId, lazyGetControlTypeFromId } from '../../../ts/metadataUtils'
 import { newControl, 
          editControl,
          TNewControlInput,

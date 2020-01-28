@@ -74,7 +74,7 @@ export default class DocumentationCategoryViewer extends Props {
         allControlDocuments({
             catId: this.catId,
             orgId: PageParamsStore.state.organization!.Id,
-        }).then((resp : TGetControlDocumentsOutput) => {
+        }).then((resp : TAllControlDocumentsOutput) => {
             this.allFiles = resp.data.Files
         }).catch((err : any) => {
             // @ts-ignore
@@ -91,7 +91,7 @@ export default class DocumentationCategoryViewer extends Props {
         allControlDocuments({
             catId: this.catId,
             orgId: PageParamsStore.state.organization!.Id,
-        }).then((resp : TGetControlDocumentsOutput) => {
+        }).then((resp : TAllControlDocumentsOutput) => {
             this.allFiles = resp.data.Files
         }).catch((err : any) => {
             // @ts-ignore

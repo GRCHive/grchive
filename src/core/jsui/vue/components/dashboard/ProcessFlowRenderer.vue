@@ -46,7 +46,7 @@
 
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
-import ProcessFlowSvgRenderer from './graph/ProcessFlowSvgRenderer'
+import ProcessFlowSvgRenderer from './graph/ProcessFlowSvgRenderer.vue'
 import RenderLayout from '../../../ts/render/renderLayout'
 
 export default Vue.extend({

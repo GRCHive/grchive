@@ -58,8 +58,8 @@ const PageSpacerPx = 8
     }
 })
 export default class PdfJsViewer extends Props {
-    fullPdf : PDFDocumentProxy | null = null
-    allPages : Array<PDFPageProxy> = []
+    fullPdf : typeof PDFDocumentProxy | null = null
+    allPages : Array<typeof PDFPageProxy> = []
     scale : number = 1.0
     currentScroll : number = 0.0
 
@@ -136,8 +136,8 @@ export default class PdfJsViewer extends Props {
         }
     }
 
-    get pdfViewports() : Array<PageViewport> {
-        return this.allPages.map((ele : PDFPageProxy) => ele.getViewport({scale : this.scale }))
+    get pdfViewports() : Array<typeof PageViewport> {
+        return this.allPages.map((ele : typeof PDFPageProxy) => ele.getViewport({scale : this.scale }))
     }
 
     get binaryData() : string {
@@ -153,11 +153,11 @@ export default class PdfJsViewer extends Props {
     }
 
     get totalWidth() : number {
-        return Math.max(...this.pdfViewports.map((ele : PageViewport) => ele.width))
+        return Math.max(...this.pdfViewports.map((ele : typeof PageViewport) => ele.width))
     }
 
     get totalHeight() : number {
-        return this.pdfViewports.map((ele : PageViewport) => ele.height).reduce((a,c) => a + c, (this.numPages + 1) * PageSpacerPx)
+        return this.pdfViewports.map((ele : typeof PageViewport) => ele.height).reduce((a,c) => a + c, (this.numPages + 1) * PageSpacerPx)
     }
 
     get pageRanges() : Array<TRange<number>> {
@@ -182,12 +182,12 @@ export default class PdfJsViewer extends Props {
 
     refreshData() {
         let task = pdfjsLib.getDocument({data : this.binaryData})
-        task.promise.then((pdf : PDFDocumentProxy) => {
+        task.promise.then((pdf : typeof PDFDocumentProxy) => {
             this.fullPdf = pdf
 
-            this.allPages = new Array<PDFPageProxy>(this.numPages)
+            this.allPages = new Array<typeof PDFPageProxy>(this.numPages)
             for (let i = 1; i <= this.numPages; ++i) {
-                pdf.getPage(i).then((pg : PDFPageProxy) => {
+                pdf.getPage(i).then((pg : typeof PDFPageProxy) => {
                     Vue.set(this.allPages, i - 1, pg)
                 })
             }

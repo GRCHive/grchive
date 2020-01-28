@@ -72,6 +72,7 @@ import { createLocalDateFromDateString } from '../../../ts/time'
 import { ControlDocumentationCategory } from '../../../ts/controls'
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 import DocumentCategorySearchFormComponent from '../../generic/DocumentCategorySearchFormComponent.vue'
+import { standardFormatDate } from '../../../ts/time'
 
 export default Vue.extend({
     props : {

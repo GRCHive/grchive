@@ -18,7 +18,7 @@
 
 import LandingPageAppBar from '../components/LandingPageAppBar.vue'
 import LandingCarousel from '../components/LandingCarousel.vue'
-import { PageParamsStore } from '../../ts/pageParams.ts'
+import { PageParamsStore } from '../../ts/pageParams'
 
 export default {
     components: {

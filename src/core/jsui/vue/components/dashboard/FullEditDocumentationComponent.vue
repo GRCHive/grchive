@@ -220,7 +220,6 @@ import DocumentCategorySearchFormComponent from '../../generic/DocumentCategoryS
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import CommentManager from '../../generic/CommentManager.vue'
-import { VTabsItems } from 'vuetify/lib'
 import { saveAs } from 'file-saver'
 
 @Component({
@@ -257,7 +256,7 @@ export default class FullEditDocumentationComponent extends Vue {
 
     $refs!: {
         pdfViewer: PdfJsViewer
-        tabItems: VTabsItems
+        tabItems: any
     }
 
     get commentParams() : Object {
@@ -395,7 +394,7 @@ export default class FullEditDocumentationComponent extends Vue {
                 return
             }
 
-            let viewerRect = this.$refs.pdfViewer.$el.getBoundingClientRect()
+            let viewerRect = <DOMRect>this.$refs.pdfViewer.$el.getBoundingClientRect()
             let windowHeight = window.innerHeight
             this.viewerMaxHeight = windowHeight - viewerRect.y
         })

@@ -27,15 +27,19 @@ import { TextLayerBuilder } from 'pdfjs-dist/web/pdf_viewer'
 
 const Props = Vue.extend({
     props: {
-        page: PDFPageProxy,
-        viewport: PageViewport,
+        page: {
+            type: Object as () => typeof PDFPageProxy,
+        },
+        viewport: {
+            type: Object as () => typeof PageViewport,
+        },
         visible: Boolean
     }
 })
 
 @Component
 export default class PdfPageRenderer extends Props {
-    task : InternalRenderTask | null = null
+    task : typeof InternalRenderTask | null = null
     stop : boolean = false
 
     $refs! : {
@@ -65,7 +69,7 @@ export default class PdfPageRenderer extends Props {
                     return
                 }
 
-                this.page.getTextContent().then((textContent) => {
+                this.page.getTextContent().then((textContent : any) => {
                     if (this.stop) {
                         return
                     }
@@ -78,7 +82,7 @@ export default class PdfPageRenderer extends Props {
                     textBuilder.setTextContent(textContent)
                     textBuilder.render()
                 })
-            }).catch((err) => {
+            }).catch((err : any) => {
                 if (err.name == "RenderingCancelledException") {
                     return
                 }
