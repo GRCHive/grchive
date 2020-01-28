@@ -37,16 +37,30 @@
                         <v-spacer></v-spacer>
 
                         <v-list-item-action>
-                            <v-btn
-                                color="error"
+                            <v-dialog v-model="showHideDelete"
+                                      persistent
+                                      max-width="40%"
                             >
-                                Delete
-                            </v-btn>
+                                <template v-slot:activator="{ on }">
+                                    <v-btn color="error" v-on="on">
+                                        Delete
+                                    </v-btn>
+                                </template>
+
+                                <generic-delete-confirmation-form
+                                    item-name="files"
+                                    :items-to-delete="[metadata.AltName]"
+                                    :use-global-deletion="false"
+                                    @do-cancel="showHideDelete = false"
+                                    @do-delete="onDelete">
+                                </generic-delete-confirmation-form>
+                            </v-dialog>
                         </v-list-item-action>
 
                         <v-list-item-action>
                             <v-btn
                                 color="success"
+                                @click="onDownload"
                             >
                                 Download
                             </v-btn>
@@ -192,7 +206,8 @@ import {
     downloadSingleControlDocument,
     TDownloadSingleControlDocumentOutput,
     editControlDoc,
-    TEditControlDocOutput
+    TEditControlDocOutput,
+    deleteControlDocuments
 } from '../../../ts/api/apiControlDocumentation'
 import { ControlDocumentationFile, ControlDocumentationCategory, cleanJsonControlDocumentationFile } from '../../../ts/controls'
 import PdfJsViewer from '../../generic/pdf/PdfJsViewer.vue'
@@ -200,13 +215,16 @@ import * as rules from '../../../ts/formRules'
 import { createLocalDateFromDateString, standardFormatDate } from '../../../ts/time'
 import DocumentCategorySearchFormComponent from '../../generic/DocumentCategorySearchFormComponent.vue'
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
+import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import { VTabsItems } from 'vuetify/lib'
+import { saveAs } from 'file-saver'
 
 @Component({
     components: {
         PdfJsViewer,
         DocumentCategorySearchFormComponent,
-        UserSearchFormComponent
+        UserSearchFormComponent,
+        GenericDeleteConfirmationForm
     }
 })
 export default class FullEditDocumentationComponent extends Vue {
@@ -229,6 +247,8 @@ export default class FullEditDocumentationComponent extends Vue {
     editData: EditData | null = null
     rules : any = rules
     canEdit: boolean = false
+
+    showHideDelete: boolean = false
 
     $refs!: {
         pdfViewer: PdfJsViewer
@@ -393,7 +413,7 @@ export default class FullEditDocumentationComponent extends Vue {
             altName: this.editData!.File.AltName,
             description: this.editData!.File.Description,
             uploadUserId: this.editData!.UploadUser.Id
-        }).then((resp : TEditControlDocCatOutput) => {
+        }).then((resp : TEditControlDocOutput) => {
             this.canEdit = false
             this.metadata = resp.data.File
             this.parentCat = resp.data.Category
@@ -415,6 +435,48 @@ export default class FullEditDocumentationComponent extends Vue {
             "overflow": "auto",
             "height": `${this.metadataMaxHeight}px`,
         }
+    }
+
+    onDelete() {
+        let fileIds = [this.metadata!.Id]
+        if (this.hasPreview) {
+            fileIds.push(this.previewMetadata!.Id)
+        }
+
+        deleteControlDocuments({
+            fileIds: fileIds,
+            orgId: PageParamsStore.state.organization!.Id,
+            catId: this.parentCat!.Id,
+        }).then(() => {
+            this.showHideDelete = false
+            window.location.replace(createSingleDocCatUrl(PageParamsStore.state.organization!.OktaGroupName, this.parentCat!.Id))
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    onDownload() {
+        downloadSingleControlDocument({
+            fileId: this.metadata!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            catId: this.metadata!.CategoryId,
+        }).then((resp : TDownloadSingleControlDocumentOutput) => {
+            saveAs(resp.data, this.metadata!.StorageName)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 }
 
