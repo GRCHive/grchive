@@ -60,7 +60,6 @@ import { createUserString } from '../../ts/users'
 const Props = Vue.extend({
     props: {
         params: Object,
-        type: Number
     }
 })
 
@@ -103,14 +102,8 @@ export default class CommentManager extends Props {
     refreshData() {
         this.loading = true
 
-        switch (this.type) {
-        case CommentResource.DocumentRequest:
-            apiComments.allDocumentRequestComments(this.params as apiComments.TDocRequestNewCommentInput).
-                then(this.onRetrieveSuccess).catch(this.onError)
-            break
-        default:
-            break
-        }
+        apiComments.allComments(this.params).
+            then(this.onRetrieveSuccess).catch(this.onError)
     }
 
     mounted() {
@@ -118,19 +111,13 @@ export default class CommentManager extends Props {
     }
 
     submitComment() {
-        switch (this.type) {
-        case CommentResource.DocumentRequest:
-            apiComments.newDocumentRequestComment({
-                comment: {
-                    userId: PageParamsStore.state.user!.Id,
-                    content: this.commentText,
-                },
-                ...this.params
-            } as apiComments.TDocRequestNewCommentInput).then(this.onCommentSuccess).catch(this.onError)
-            break
-        default:
-            break
-        }
+        apiComments.newComment({
+            comment: {
+                userId: PageParamsStore.state.user!.Id,
+                content: this.commentText,
+            },
+            ...this.params
+        }).then(this.onCommentSuccess).catch(this.onError)
     }
 }
 

@@ -222,13 +222,8 @@ func registerDocRequestsAPIPaths(r *mux.Router) {
 
 func registerCommentsAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiCommentsPrefix).Subrouter()
-	registerDocRequestCommentsAPIPaths(s)
-}
-
-func registerDocRequestCommentsAPIPaths(r *mux.Router) {
-	s := r.PathPrefix(core.ApiDocRequestPrefix).Subrouter()
-	s.HandleFunc(core.ApiNewEndpoint, newDocumentRequestComment).Methods("POST")
-	s.HandleFunc(core.ApiAllEndpoint, allDocumentRequestComments).Methods("GET")
+	s.HandleFunc(core.ApiNewEndpoint, newComment).Methods("POST")
+	s.HandleFunc(core.ApiAllEndpoint, allComments).Methods("GET")
 }
 
 func registerDeploymentAPIPaths(r *mux.Router) {

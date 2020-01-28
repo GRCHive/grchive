@@ -2,6 +2,7 @@ package rest
 
 import (
 	"encoding/json"
+	"errors"
 	"gitlab.com/b3h47pte/audit-stuff/core"
 	"gitlab.com/b3h47pte/audit-stuff/database"
 	"gitlab.com/b3h47pte/audit-stuff/webcore"
@@ -14,16 +15,20 @@ type GenericNewCommentInputs struct {
 	Content string `json:"content"`
 }
 
-type DocumentRequestNewCommentInputs struct {
-	Comment   GenericNewCommentInputs `json:"comment"`
-	RequestId int64                   `json:"requestId"`
-	CatId     int64                   `json:"catId"`
-	OrgId     int32                   `json:"orgId"`
+type NewCommentInputs struct {
+	Comment GenericNewCommentInputs `json:"comment"`
+	// Doc Request
+	RequestId core.NullInt64 `json:"requestId"`
+	CatId     core.NullInt64 `json:"catId"`
+	// Document
+	FileId core.NullInt64 `json:"fileId"`
+	OrgId  int32          `json:"orgId"`
 }
 
-type DocumentRequestAllCommentInputs struct {
-	RequestId int64 `webcore:"requestId"`
-	OrgId     int32 `webcore:"orgId"`
+type AllCommentInputs struct {
+	RequestId core.NullInt64 `webcore:"requestId,optional"`
+	FileId    core.NullInt64 `webcore:"fileId,optional"`
+	OrgId     int32          `webcore:"orgId"`
 }
 
 func commentFromInputs(inp GenericNewCommentInputs) *core.Comment {
@@ -34,11 +39,11 @@ func commentFromInputs(inp GenericNewCommentInputs) *core.Comment {
 	}
 }
 
-func newDocumentRequestComment(w http.ResponseWriter, r *http.Request) {
+func newComment(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	inputs := DocumentRequestNewCommentInputs{}
+	inputs := NewCommentInputs{}
 	err := webcore.UnmarshalRequestForm(r, &inputs)
 	if err != nil {
 		core.Warning("Can't parse inputs: " + err.Error())
@@ -54,9 +59,27 @@ func newDocumentRequestComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	comment := commentFromInputs(inputs.Comment)
-	err = database.InsertDocumentRequestComment(inputs.RequestId, inputs.CatId, inputs.OrgId, comment, role)
+
+	if inputs.RequestId.NullInt64.Valid && inputs.CatId.NullInt64.Valid {
+		err = database.InsertDocumentRequestComment(
+			inputs.RequestId.NullInt64.Int64,
+			inputs.CatId.NullInt64.Int64,
+			inputs.OrgId,
+			comment,
+			role)
+	} else if inputs.FileId.NullInt64.Valid && inputs.CatId.NullInt64.Valid {
+		err = database.InsertDocumentComment(
+			inputs.FileId.NullInt64.Int64,
+			inputs.CatId.NullInt64.Int64,
+			inputs.OrgId,
+			comment,
+			role)
+	} else {
+		err = errors.New("Invalid comment type.")
+	}
+
 	if err != nil {
-		core.Warning("Failed to insert doc request comments: " + err.Error())
+		core.Warning("Failed to insert comments: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -64,11 +87,11 @@ func newDocumentRequestComment(w http.ResponseWriter, r *http.Request) {
 	jsonWriter.Encode(comment)
 }
 
-func allDocumentRequestComments(w http.ResponseWriter, r *http.Request) {
+func allComments(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	inputs := DocumentRequestAllCommentInputs{}
+	inputs := AllCommentInputs{}
 	err := webcore.UnmarshalRequestForm(r, &inputs)
 	if err != nil {
 		core.Warning("Can't parse inputs: " + err.Error())
@@ -83,9 +106,17 @@ func allDocumentRequestComments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comments, err := database.GetDocumentRequestComments(inputs.RequestId, inputs.OrgId, role)
+	var comments []*core.Comment
+	if inputs.RequestId.NullInt64.Valid {
+		comments, err = database.GetDocumentRequestComments(inputs.RequestId.NullInt64.Int64, inputs.OrgId, role)
+	} else if inputs.FileId.NullInt64.Valid {
+		comments, err = database.GetDocumentComments(inputs.FileId.NullInt64.Int64, inputs.OrgId, role)
+	} else {
+		err = errors.New("Invalid comment type.")
+	}
+
 	if err != nil {
-		core.Warning("Failed to get doc request comments: " + err.Error())
+		core.Warning("Failed to get comments: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

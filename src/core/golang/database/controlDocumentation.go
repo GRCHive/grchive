@@ -406,3 +406,51 @@ func MarkPreviewUnavailable(file core.ControlDocumentationFile, role *core.Role)
 
 	return tx.Commit()
 }
+
+func GetDocumentComments(fileId int64, orgId int32, role *core.Role) ([]*core.Comment, error) {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	return getComments(`
+		INNER JOIN file_comments AS fc
+			ON fc.comment_id = comments.id
+		WHERE fc.file_id = $1
+			AND fc.org_id = $2
+	`, fileId, orgId)
+}
+
+func InsertDocumentComment(fileId int64, catId int64, orgId int32, comment *core.Comment, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+
+	err := insertCommentWithTx(comment, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.Exec(`
+		INSERT INTO file_comments (
+			file_id,
+			cat_id,
+			org_id,
+			comment_id
+		)
+		VALUES (
+			$1,
+			$2,
+			$3,
+			$4
+		)
+	`, fileId, catId, orgId, comment.Id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}

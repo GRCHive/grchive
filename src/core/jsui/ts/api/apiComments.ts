@@ -4,8 +4,8 @@ import { postFormJson } from '../http'
 import { getAPIRequestConfig } from './apiUtility'
 import { Comment } from '../comments'
 import { 
-    newDocRequestCommentUrl,
-    allDocRequestCommentUrl,
+    newCommentUrl,
+    allCommentUrl,
 } from '../url'
 
 export interface TGenericNewCommentInput {
@@ -21,10 +21,11 @@ export interface TGetAllCommentsOutput {
     data: Comment[]
 }
 
-export interface TDocRequestNewCommentInput {
+export interface TNewCommentInput {
     comment: TGenericNewCommentInput
-    requestId: number
-    catId: number
+    requestId?: number
+    catId?: number
+    fileId?: number
     orgId: number
 }
 
@@ -33,20 +34,21 @@ function cleanComment(comment : Comment) : Comment {
     return comment
 }
 
-export function newDocumentRequestComment(inp : TDocRequestNewCommentInput) : Promise<TNewCommentOutput> {
-    return postFormJson<TNewCommentOutput>(newDocRequestCommentUrl, inp, getAPIRequestConfig()).then((resp : TNewCommentOutput) => {
+export function newComment(inp : TNewCommentInput) : Promise<TNewCommentOutput> {
+    return postFormJson<TNewCommentOutput>(newCommentUrl, inp, getAPIRequestConfig()).then((resp : TNewCommentOutput) => {
         resp.data = cleanComment(resp.data)
         return resp
     })
 }
 
-export interface TDocRequestAllCommentsInput {
-    requestId: number
+export interface TAllCommentsInput {
+    requestId?: number
+    fileId?: number
     orgId: number
 }
 
-export function allDocumentRequestComments(inp : TDocRequestAllCommentsInput) : Promise<TGetAllCommentsOutput> {
-    return axios.get(allDocRequestCommentUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetAllCommentsOutput) => {
+export function allComments(inp : TAllCommentsInput) : Promise<TGetAllCommentsOutput> {
+    return axios.get(allCommentUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetAllCommentsOutput) => {
         resp.data = resp.data.map(cleanComment)
         return resp
     })

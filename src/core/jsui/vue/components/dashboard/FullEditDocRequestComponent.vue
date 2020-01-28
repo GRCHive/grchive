@@ -97,7 +97,6 @@
 
                             <comment-manager
                                 :params="commentParams"
-                                :type="commentType"
                             ></comment-manager>
                         </v-card>
                     </v-col>
@@ -122,7 +121,6 @@ import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import CreateNewRequestForm from './CreateNewRequestForm.vue'
 import DocFileManager from '../../generic/DocFileManager.vue'
 import CommentManager from '../../generic/CommentManager.vue'
-import { CommentResource } from '../../../ts/comments'
 
 @Component({
     components: {
@@ -148,10 +146,6 @@ export default class FullEditDatabaseComponent extends Vue {
             catId: this.currentRequest!.CatId,
             orgId: PageParamsStore.state.organization!.Id,
         }
-    }
-
-    get commentType() : CommentResource {
-        return CommentResource.DocumentRequest
     }
 
     get ready() : boolean {

@@ -172,6 +172,9 @@
                         </v-tab-item>
 
                         <v-tab-item :style="tabItemStyle">
+                            <comment-manager
+                                :params="commentParams"
+                            ></comment-manager>
                         </v-tab-item>
                     </v-tabs-items>
                 </div>
@@ -216,6 +219,7 @@ import { createLocalDateFromDateString, standardFormatDate } from '../../../ts/t
 import DocumentCategorySearchFormComponent from '../../generic/DocumentCategorySearchFormComponent.vue'
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
+import CommentManager from '../../generic/CommentManager.vue'
 import { VTabsItems } from 'vuetify/lib'
 import { saveAs } from 'file-saver'
 
@@ -224,7 +228,8 @@ import { saveAs } from 'file-saver'
         PdfJsViewer,
         DocumentCategorySearchFormComponent,
         UserSearchFormComponent,
-        GenericDeleteConfirmationForm
+        GenericDeleteConfirmationForm,
+        CommentManager
     }
 })
 export default class FullEditDocumentationComponent extends Vue {
@@ -253,6 +258,14 @@ export default class FullEditDocumentationComponent extends Vue {
     $refs!: {
         pdfViewer: PdfJsViewer
         tabItems: VTabsItems
+    }
+
+    get commentParams() : Object {
+        return {
+            fileId: this.metadata!.Id,
+            catId: this.metadata!.CategoryId,
+            orgId: PageParamsStore.state.organization!.Id,
+        }
     }
 
     get fileDateString() : string {

@@ -244,8 +244,8 @@ export const deleteDocRequestUrl : string = "/api/requests/delete"
 export const completeDocRequestUrl : string = "/api/requests/complete"
 export const updateDocRequestUrl : string = "/api/requests/update"
 
-export const newDocRequestCommentUrl : string = "/api/comments/requests/new"
-export const allDocRequestCommentUrl : string = "/api/comments/requests/all"
+export const newCommentUrl : string = "/api/comments/new"
+export const allCommentUrl : string = "/api/comments/all"
 
 export const newDeploymentUrl : string = "/api/deployment/new"
 export const updateDeploymentUrl : string = "/api/deployment/update"

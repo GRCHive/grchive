@@ -114,7 +114,8 @@ module.exports = {
         new VueLoaderPlugin(),
         new VuetifyLoaderPlugin(),
         new ForkTsCheckerWebpackPlugin({
-            checkSyntacticErrors: true
+            checkSyntacticErrors: true,
+            vue: true,
         }),
         new HtmlWebpackPlugin({
             chunks: ['main', 'vendors'],

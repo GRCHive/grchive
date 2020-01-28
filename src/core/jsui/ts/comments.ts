@@ -4,7 +4,3 @@ export interface Comment {
 	PostTime:  Date
 	Content :  string
 }
-
-export enum CommentResource {
-    DocumentRequest = 1 
-}
