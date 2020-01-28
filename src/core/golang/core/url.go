@@ -188,6 +188,8 @@ const ApiDownloadControlDocumentationEndpoint string = "/file/download"
 const ApiGetControlDocumentationEndpoint string = "/file/get"
 const ApiEditControlDocumentationEndpoint string = "/file/edit"
 
+const ApiFileVersionPrefix string = "/file/versions"
+
 // API - Roles
 const ApiRolePrefix string = "/roles"
 const ApiGetOrganizationRolesEndpoint string = "/all"

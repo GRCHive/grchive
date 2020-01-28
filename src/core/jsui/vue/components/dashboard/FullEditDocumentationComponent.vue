@@ -278,7 +278,8 @@ export default class FullEditDocumentationComponent extends Vue {
         if (!this.editData) {
             return ""
         }
-        return standardFormatDate(this.editData.File.UploadTime)
+        //return standardFormatDate(this.editData.File.UploadTime)
+        return ""
     }
 
     changeFileDate(str : string) {
@@ -333,7 +334,6 @@ export default class FullEditDocumentationComponent extends Vue {
         downloadSingleControlDocument({
             fileId: this.previewMetadata!.Id,
             orgId: PageParamsStore.state.organization!.Id,
-            catId: this.previewMetadata!.CategoryId,
         }).then((resp : TDownloadSingleControlDocumentOutput) => {
             this.previewData = resp.data
         }).catch((err : any) => {
@@ -458,7 +458,6 @@ export default class FullEditDocumentationComponent extends Vue {
         deleteControlDocuments({
             fileIds: fileIds,
             orgId: PageParamsStore.state.organization!.Id,
-            catId: this.parentCat!.Id,
         }).then(() => {
             this.showHideDelete = false
             window.location.replace(createSingleDocCatUrl(PageParamsStore.state.organization!.OktaGroupName, this.parentCat!.Id))
@@ -477,7 +476,6 @@ export default class FullEditDocumentationComponent extends Vue {
         downloadSingleControlDocument({
             fileId: this.metadata!.Id,
             orgId: PageParamsStore.state.organization!.Id,
-            catId: this.metadata!.CategoryId,
         }).then((resp : TDownloadSingleControlDocumentOutput) => {
             saveAs(resp.data, this.metadata!.StorageName)
         }).catch((err : any) => {

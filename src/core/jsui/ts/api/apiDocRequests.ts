@@ -9,7 +9,7 @@ import { newDocRequestUrl,
          completeDocRequestUrl,
          updateDocRequestUrl } from '../url'
 import { DocumentRequest } from '../docRequests'
-import { ControlDocumentationCategory, ControlDocumentationFile } from '../controls'
+import { ControlDocumentationCategory, ControlDocumentationFile, cleanJsonControlDocumentationFile } from '../controls'
 
 export interface TNewDocRequestInput {
     name: string
@@ -96,8 +96,7 @@ export function getSingleDocRequest(inp : TGetSingleDocumentRequestInput) : Prom
         resp.data.Request.RequestTime = new Date(resp.data.Request.RequestTime)
 
         resp.data.Files = resp.data.Files.map((ele : ControlDocumentationFile) => {
-            ele.UploadTime = new Date(ele.UploadTime)
-            ele.RelevantTime = new Date(ele.RelevantTime)
+            cleanJsonControlDocumentationFile(ele)
             return ele
         })
 

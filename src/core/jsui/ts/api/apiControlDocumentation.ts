@@ -1,13 +1,19 @@
 import axios from 'axios'
 import * as qs from 'query-string'
 import { postFormUrlEncoded, postFormMultipart, postFormJson } from '../http'
-import { ControlDocumentationCategory, ControlDocumentationFile, cleanJsonControlDocumentationFile } from '../controls'
+import {
+    ControlDocumentationCategory, 
+    ControlDocumentationFile,
+    FileVersion,
+    cleanJsonControlDocumentationFile
+} from '../controls'
 import { newControlDocCatUrl,
          editControlDocCatUrl,
          deleteControlDocCatUrl,
          uploadControlDocUrl,
          allControlDocUrl,
          getControlDocUrl,
+         allControlDocVersionsUrl,
          editControlDocUrl,
          deleteControlDocUrl,
          downloadControlDocUrl,
@@ -85,8 +91,7 @@ export function uploadControlDoc(inp : TUploadControlDocInput): Promise<TUploadC
     }
 
     return postFormMultipart<TUploadControlDocOutput>(uploadControlDocUrl, data, getAPIRequestConfig()).then((resp : TUploadControlDocOutput) => {
-        resp.data.RelevantTime = new Date(resp.data.RelevantTime)
-        resp.data.UploadTime = new Date(resp.data.UploadTime)
+        cleanJsonControlDocumentationFile(resp.data)
         return resp
     })
 }
@@ -130,8 +135,7 @@ export interface TAllControlDocumentsOutput {
 export function allControlDocuments(inp: TAllControlDocumentsInput) : Promise<TAllControlDocumentsOutput> {
     return axios.get(allControlDocUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TAllControlDocumentsOutput) => {
         resp.data.Files = resp.data.Files.map((ele : ControlDocumentationFile) => {
-            ele.UploadTime = new Date(ele.UploadTime)
-            ele.RelevantTime = new Date(ele.RelevantTime)
+            cleanJsonControlDocumentationFile(ele)
             return ele
         })
         return resp
@@ -141,7 +145,6 @@ export function allControlDocuments(inp: TAllControlDocumentsInput) : Promise<TA
 export interface TDeleteControlDocumentsInput {
     fileIds: number[]
     orgId: number
-    catId: number
 }
 
 export interface TDeleteControlDocumentsOutput {
@@ -154,7 +157,6 @@ export function deleteControlDocuments(inp: TDeleteControlDocumentsInput) : Prom
 export interface TDownloadSingleControlDocumentInput {
     fileId: number
     orgId: number
-    catId: number
 }
 
 export interface TDownloadSingleControlDocumentOutput {
@@ -171,7 +173,6 @@ export function downloadSingleControlDocument(inp : TDownloadSingleControlDocume
 export interface TDownloadControlDocumentsInput {
     files: ControlDocumentationFile[]
     orgId: number
-    catId: number
 }
 
 export interface TDownloadControlDocumentsOutput {
@@ -186,7 +187,6 @@ export function downloadControlDocuments(inp: TDownloadControlDocumentsInput) : 
                 let blobData = await downloadSingleControlDocument({
                     fileId: file.Id,
                     orgId: inp.orgId,
-                    catId: inp.catId,
                 })
 
                 zip.folder(file.RelevantTime.toDateString()).file(`${file.Id}-${file.StorageName}`, blobData.data)
@@ -250,4 +250,17 @@ export interface TGetSingleControlDocumentOutput {
 
 export function getSingleControlDocument(inp: TGetSingleControlDocumentInput) : Promise<TGetSingleControlDocumentOutput> {
     return axios.get(getControlDocUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+}
+
+export interface TAllFileVersionsInput {
+    fileId: number
+    orgId: number
+}
+
+export interface TAllFileVersionsOutput {
+    data: FileVersion[]
+}
+
+export function allFileVersions(inp : TAllFileVersionsInput) : Promise<TAllFileVersionsOutput> {
+    return axios.get(allControlDocVersionsUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
 }

@@ -8,11 +8,16 @@ export interface ControlDocumentationFile {
     Id: number
     StorageName: string
     RelevantTime: Date
-    UploadTime: Date
     CategoryId: number
     AltName: string
     Description: string
-    UploadUserId: number
+}
+
+export interface FileVersion {
+	FileId        : number
+	StorageId     : number
+	OrgId         : number
+	VersionNumber : number
 }
 
 export interface ControlDocumentationFileHandle {
@@ -51,5 +56,4 @@ export function extractControlDocumentationFileHandle(f : ControlDocumentationFi
 
 export function cleanJsonControlDocumentationFile(f : ControlDocumentationFile) {
     f.RelevantTime = new Date(f.RelevantTime)
-    f.UploadTime = new Date(f.UploadTime)
 }

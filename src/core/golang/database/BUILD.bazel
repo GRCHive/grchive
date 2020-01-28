@@ -20,6 +20,8 @@ go_library(
         "users.go",
         "controls.go",
         "controlDocumentation.go",
+        "controlDocVersions.go",
+        "controlDocumentationCategory.go",
         "apiKey.go",
         "roles.go",
         "emailVerification.go",

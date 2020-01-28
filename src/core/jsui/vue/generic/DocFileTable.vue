@@ -1,14 +1,17 @@
 <script lang="ts">
 
 import Vue, {VNode} from 'vue'
+import { VChip, VIcon, VMenu, VList, VListItem } from 'vuetify/lib'
 import Component from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
 import MetadataStore from '../../ts/metadata'
 import { createUserString } from '../../ts/users'
 import { standardFormatDate } from '../../ts/time'
-import { createSingleDocFileUrl } from '../../ts/url'
+import { createSingleDocFileUrl, contactUsUrl } from '../../ts/url'
 import { PageParamsStore } from '../../ts/pageParams'
+import { TAllFileVersionsOutput, allFileVersions } from '../../ts/api/apiControlDocumentation' 
+import { FileVersion } from '../../ts/controls'
 
 @Component({
     components: {
@@ -16,6 +19,8 @@ import { PageParamsStore } from '../../ts/pageParams'
     }
 })
 export default class DocFileTable extends ResourceTableProps {
+    fileVersions : Record<number, number[]> = Object()
+
     get tableHeaders() : any[] {
         return [
             {
@@ -29,6 +34,10 @@ export default class DocFileTable extends ResourceTableProps {
             {
                 text: 'Relevant Time',
                 value: 'relevantTime'
+            },
+            {
+                text: 'Version',
+                value: 'version',
             },
             {
                 text: 'Upload Time',
@@ -45,6 +54,31 @@ export default class DocFileTable extends ResourceTableProps {
         return this.resources.map(this.transformInputResourceToTableItem)
     }
 
+    getFileVersions(id : number, obj : any) : number[] {
+        if (!(id in this.fileVersions)) {
+            allFileVersions({
+                fileId: id,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TAllFileVersionsOutput) => {
+                obj.availableVersions = resp.data.map((ele : FileVersion) => ele.VersionNumber)
+                if (obj.availableVersions.length > 0) {
+                    obj.version = obj.availableVersions[0]
+                }
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+            return []
+        }
+
+        return this.fileVersions[id]
+    }
+
     goToDocFile(item : any) {
         window.location.assign(createSingleDocFileUrl(
             PageParamsStore.state.organization!.OktaGroupName,
@@ -53,15 +87,94 @@ export default class DocFileTable extends ResourceTableProps {
     }
 
     transformInputResourceToTableItem(inp : any) : any {
-        return {
+        let obj = {
             id: inp.Id,
             name: inp.AltName,
             filename: inp.StorageName,
             relevantTime: standardFormatDate(inp.RelevantTime),
-            uploadTime: standardFormatDate(inp.UploadTime),
+            availableVersions: [] as number[],
+            version: 0,
+            uploadTime: standardFormatDate(new Date()),
             user: createUserString(MetadataStore.getters.getUser(inp.UploadUserId)),
             value: inp
         }
+
+        obj.availableVersions = this.getFileVersions(inp.Id, obj)
+        if (obj.availableVersions.length > 0) {
+            obj.version = obj.availableVersions[0]
+        }
+        return obj
+    }
+
+    renderVersion(props : any) : VNode {
+        let dropdownIcon = this.$createElement(
+            VIcon,
+            {
+                props: {
+                    small: true
+                },
+            },
+            "mdi-chevron-down"
+        )
+
+        let menuList = this.$createElement(
+            VList,
+            {
+                props: {
+                    dense: true
+                },
+            },
+            props.item.availableVersions.map((ele : number) => {
+                let item = this.$createElement(
+                    VListItem,
+                    {
+                        on: {
+                            click: () => {
+                                props.item.version = ele
+                            }
+                        }
+                    },
+                    ele.toString()
+                )
+                return item
+            })
+        )
+
+        let menu = this.$createElement(
+            VMenu,
+            {
+                props: {
+                    "offset-y": true
+                },
+                scopedSlots: {
+                    activator: (chipProps: any) => {
+                        let chip = this.$createElement(
+                            VChip,
+                            {
+                                props: {
+                                    pill: true
+                                },
+                                on : {
+                                    ...chipProps.on,
+                                    click: (e : MouseEvent) => {
+                                        e.stopPropagation()
+                                        chipProps.on.click(e)
+                                    }
+                                }
+                            },
+                            [
+                                props.item.version,
+                                dropdownIcon
+                            ]
+                        )
+                        return chip
+                    }
+                }
+            },
+            [menuList]
+        )
+
+        return menu
     }
 
     renderExpansion(props : any) : VNode {
@@ -93,7 +206,8 @@ export default class DocFileTable extends ResourceTableProps {
                     'click:row': this.goToDocFile
                 },
                 scopedSlots: {
-                    'expanded-item': this.renderExpansion
+                    'expanded-item': this.renderExpansion,
+                    'item.version': this.renderVersion,
                 }
             }
         )

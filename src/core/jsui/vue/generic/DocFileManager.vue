@@ -101,6 +101,10 @@ import { deleteControlDocuments } from '../../ts/api/apiControlDocumentation'
 import { PageParamsStore } from '../../ts/pageParams'
 import { contactUsUrl } from '../../ts/url'
 import { TDownloadControlDocumentsOutput, downloadControlDocuments } from '../../ts/api/apiControlDocumentation'
+import {
+    cleanJsonControlDocumentationFile
+} from '../../ts/controls'
+
 import { saveAs } from 'file-saver'
 
 const Props = Vue.extend({
@@ -175,7 +179,6 @@ export default class DocFileManager extends Props {
         deleteControlDocuments({
             orgId: PageParamsStore.state.organization!.Id,
             fileIds: this.selectedFiles.map((ele) => ele.Id),
-            catId: this.catId,
         }).then(() => {
             let selectedFileSet = new Set(this.selectedFiles)
             for (let i = this.value.length - 1; i >= 0; --i) {
@@ -207,7 +210,6 @@ export default class DocFileManager extends Props {
         downloadControlDocuments({
             files: this.selectedFiles,
             orgId: PageParamsStore.state.organization!.Id,
-            catId: this.catId,
         }).then((resp : TDownloadControlDocumentsOutput) => {
             this.downloadInProgress = false
             this.showHideSelectFiles = false
@@ -226,9 +228,7 @@ export default class DocFileManager extends Props {
 
     finishUpload(newDoc : ControlDocumentationFile) {
         this.showHideUpload = false
-
-        newDoc.RelevantTime = new Date(newDoc.RelevantTime)
-        newDoc.UploadTime = new Date(newDoc.RelevantTime)
+        cleanJsonControlDocumentationFile(newDoc)
         this.value.unshift(newDoc)
         this.$emit('new-doc', newDoc)
         this.$emit('input', this.value)

@@ -139,6 +139,13 @@ func registerControlDocumentationAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiDownloadControlDocumentationEndpoint, downloadControlDocumentation).Methods("GET")
 	s.HandleFunc(core.ApiGetControlDocumentationEndpoint, getControlDocumentation).Methods("GET")
 	s.HandleFunc(core.ApiEditControlDocumentationEndpoint, editControlDocumentation).Methods("POST")
+
+	registerControlDocVersionsAPIPaths(s)
+}
+
+func registerControlDocVersionsAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiFileVersionPrefix).Subrouter()
+	s.HandleFunc(core.ApiAllEndpoint, allFileVersions).Methods("GET")
 }
 
 func registerRoleAPIPaths(r *mux.Router) {

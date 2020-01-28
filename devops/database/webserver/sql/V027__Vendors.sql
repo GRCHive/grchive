@@ -38,12 +38,11 @@ CREATE TABLE vendor_product_soc_reports (
     product_id BIGINT,
     org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     file_id BIGINT NOT NULL,
-    cat_id BIGINT NOT NULL,
     FOREIGN KEY (product_id, org_id)
         REFERENCES vendor_products(id, org_id)
         ON DELETE CASCADE,
-    FOREIGN KEY (file_id, cat_id, org_id)
-        REFERENCES process_flow_control_documentation_file(id, category_id, org_id)
+    FOREIGN KEY (file_id, org_id)
+        REFERENCES file_metadata(id, org_id)
         ON DELETE CASCADE,
     UNIQUE(product_id, file_id)
 );

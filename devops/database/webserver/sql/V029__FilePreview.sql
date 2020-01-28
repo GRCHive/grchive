@@ -1,12 +1,13 @@
 CREATE TABLE file_previews (
-    original_file_id BIGINT NOT NULL UNIQUE,
-    preview_file_id BIGINT UNIQUE,
-    category_id BIGINT NOT NULL,
+    file_id BIGINT NOT NULL,
+    original_storage_id BIGINT NOT NULL UNIQUE,
+    preview_storage_id BIGINT UNIQUE,
     org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-    FOREIGN KEY(original_file_id, category_id, org_id)
-        REFERENCES process_flow_control_documentation_file(id, category_id, org_id)
+    FOREIGN KEY(file_id, org_id) REFERENCES file_metadata(id, org_id) ON DELETE CASCADE,
+    FOREIGN KEY(original_storage_id, org_id)
+        REFERENCES file_storage(id, org_id)
         ON DELETE CASCADE,
-    FOREIGN KEY(preview_file_id, category_id, org_id)
-        REFERENCES process_flow_control_documentation_file(id, category_id, org_id)
+    FOREIGN KEY(preview_storage_id, org_id)
+        REFERENCES file_storage(id, org_id)
         ON DELETE CASCADE
 );

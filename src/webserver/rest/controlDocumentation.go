@@ -52,15 +52,14 @@ type GetControlDocInputs struct {
 }
 
 type DeleteControlDocInputs struct {
-	CatId   int64   `webcore:"catId"`
 	OrgId   int32   `webcore:"orgId"`
 	FileIds []int64 `webcore:"fileIds"`
 }
 
 type DownloadControlDocInputs struct {
-	FileId int64 `webcore:"fileId"`
-	CatId  int64 `webcore:"catId"`
-	OrgId  int32 `webcore:"orgId"`
+	FileId  int64 `webcore:"fileId"`
+	OrgId   int32 `webcore:"orgId"`
+	Version int32 `webcore:"version"`
 }
 
 type AllControlDocCatInputs struct {
@@ -282,16 +281,14 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	internalFile := core.ControlDocumentationFile{
 		StorageName:  fileHeader.Filename,
 		RelevantTime: inputs.RelevantTime,
-		UploadTime:   time.Now().UTC(),
 		CategoryId:   inputs.CatId,
 		OrgId:        org.Id,
 		AltName:      inputs.AltName,
 		Description:  inputs.Description,
-		UploadUserId: inputs.UploadUserId,
 	}
 
 	tx := database.CreateTx()
-	b2File, err := webcore.UploadNewFileWithTx(&internalFile, buffer.Bytes(), role, org, b2Auth, tx)
+	b2File, err := webcore.UploadNewFileWithTx(&internalFile, buffer.Bytes(), role, org, inputs.UploadUserId, b2Auth, tx)
 	if err != nil {
 		core.Warning("Failed to upload new file: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -402,13 +399,15 @@ func deleteControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// If we fail in deleting anything from Backblaze just log and continue.
-	// TODO: We'll need to develop a utility that runs periodically to
-	// clean up things that failed here.
 	b2Auth, err := backblaze.B2Auth(core.EnvConfig.Backblaze.Key)
 	if err != nil {
 		core.Warning("Could not auth with Backblaze: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	} else {
+		// If we fail in deleting anything from Backblaze just log and continue.
+		// TODO: We'll need to develop a utility that runs periodically to
+		// clean up things that failed here.
 		for _, id := range inputs.FileIds {
 			file, err := database.GetControlDocumentation(id, org.Id, role)
 			if err != nil {
@@ -416,20 +415,28 @@ func deleteControlDocumentation(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
-			// Need to store actual storage filename on the database
-			err = backblaze.DeleteFile(b2Auth, file.StorageFilename(org), backblaze.B2File{
-				BucketId: file.BucketId,
-				FileId:   file.StorageId,
-			})
-
+			versions, err := database.GetAllVersionsFileStorage(id, org.Id, role)
 			if err != nil {
-				core.Warning("Failed to delete control documentation: " + err.Error())
+				core.Warning("Failed to get versions: " + err.Error())
 				continue
+			}
+
+			for _, v := range versions {
+				// Need to store actual storage filename on the database
+				err = backblaze.DeleteFile(b2Auth, file.StorageFilename(org), backblaze.B2File{
+					BucketId: v.BucketId,
+					FileId:   v.StorageId,
+				})
+
+				if err != nil {
+					core.Warning("Failed to delete control documentation: " + err.Error())
+					continue
+				}
 			}
 		}
 	}
 
-	err = database.DeleteBatchControlDocumentation(inputs.FileIds, inputs.CatId, org.Id, role)
+	err = database.DeleteBatchControlDocumentation(inputs.FileIds, org.Id, role)
 	if err != nil {
 		core.Warning("Can't delete database files: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -471,9 +478,16 @@ func downloadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	version, err := database.GetVersionedFileStorage(dbFile.Id, dbFile.OrgId, inputs.Version, role)
+	if err != nil {
+		core.Warning("Can't get file version data: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	encryptedBytes, err := backblaze.DownloadFile(b2Auth, backblaze.B2File{
-		BucketId: dbFile.BucketId,
-		FileId:   dbFile.StorageId,
+		BucketId: version.BucketId,
+		FileId:   version.StorageId,
 	})
 	if err != nil {
 		core.Warning("Can't get file from Backblaze: " + err.Error())
@@ -616,23 +630,14 @@ func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := database.FindUserFromId(file.UploadUserId)
-	if err != nil {
-		core.Warning("Failed to find upload user: " + core.ErrorString(err))
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	jsonWriter.Encode(struct {
 		File        *core.ControlDocumentationFile
 		Category    *core.ControlDocumentationCategory
 		PreviewFile *core.ControlDocumentationFile
-		UploadUser  *core.User
 	}{
 		File:        file,
 		Category:    category,
 		PreviewFile: previewFile,
-		UploadUser:  user,
 	})
 }
 
@@ -665,7 +670,6 @@ func editControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	file.RelevantTime = inputs.RelevantTime
 	file.AltName = inputs.AltName
 	file.Description = inputs.Description
-	file.UploadUserId = inputs.UploadUserId
 
 	err = database.UpdateControlDocumentation(file, role)
 	if err != nil {
@@ -681,20 +685,11 @@ func editControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := database.FindUserFromId(file.UploadUserId)
-	if err != nil {
-		core.Warning("Failed to find upload user: " + core.ErrorString(err))
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	jsonWriter.Encode(struct {
-		File       *core.ControlDocumentationFile
-		Category   *core.ControlDocumentationCategory
-		UploadUser *core.User
+		File     *core.ControlDocumentationFile
+		Category *core.ControlDocumentationCategory
 	}{
-		File:       file,
-		Category:   category,
-		UploadUser: user,
+		File:     file,
+		Category: category,
 	})
 }

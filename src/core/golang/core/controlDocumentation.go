@@ -14,16 +14,29 @@ type ControlDocumentationCategory struct {
 
 type ControlDocumentationFile struct {
 	Id           int64     `db:"id"`
-	BucketId     string    `db:"bucket_id"`
-	StorageId    string    `db:"storage_id"`
 	StorageName  string    `db:"storage_name"`
 	RelevantTime time.Time `db:"relevant_time"`
-	UploadTime   time.Time `db:"upload_time"`
 	CategoryId   int64     `db:"category_id"`
 	OrgId        int32     `db:"org_id"`
 	AltName      string    `db:"alt_name"`
 	Description  string    `db:"description"`
+}
+
+type FileStorageData struct {
+	Id           int64     `db:"id"`
+	MetadataId   int64     `db:"metadata_id"`
+	OrgId        int32     `db:"org_id"`
+	BucketId     string    `db:"bucket_id"`
+	StorageId    string    `db:"storage_id"`
+	UploadTime   time.Time `db:"upload_time"`
 	UploadUserId int64     `db:"upload_user_id"`
+}
+
+type FileVersion struct {
+	FileId        int64 `db:"file_id"`
+	StorageId     int64 `db:"file_storage_id"`
+	OrgId         int32 `db:"org_id"`
+	VersionNumber int32 `db:"version_number"`
 }
 
 type ControlDocumentationFileHandle struct {

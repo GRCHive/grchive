@@ -53,7 +53,7 @@ key = "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"
 
 [mail.verification.from]
 name = "Michael Bao"
-email = "mike@grchive.com"
+email = "me@mikehbao.com"
 
 [hashids]
 salt = "7409d5d933caf02affce"
