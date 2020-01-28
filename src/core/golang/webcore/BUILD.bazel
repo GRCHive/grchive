@@ -41,5 +41,5 @@ go_library(
         "@com_github_streadway_amqp//:go_default_library",
         "//src/backblaze_api/golang:backblaze_golang_api",
     ],
-    importpath = "gitlab.com/b3h47pte/audit-stuff/webcore"
+    importpath = "gitlab.com/grchive/grchive/webcore"
 )

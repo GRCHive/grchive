@@ -1,7 +1,7 @@
 package database
 
 import (
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 )
 
 func GetAllSupportedDatabaseTypes(role *core.Role) ([]*core.DatabaseType, error) {

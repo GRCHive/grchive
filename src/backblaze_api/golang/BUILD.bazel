@@ -13,5 +13,5 @@ go_library(
     ],
     deps = [
     ],
-    importpath = "gitlab.com/b3h47pte/audit-stuff/backblaze_api"
+    importpath = "gitlab.com/grchive/grchive/backblaze_api"
 )

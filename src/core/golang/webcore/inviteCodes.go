@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/google/go-querystring/query"
 	"github.com/jmoiron/sqlx"
-	"gitlab.com/b3h47pte/audit-stuff/core"
-	"gitlab.com/b3h47pte/audit-stuff/database"
-	"gitlab.com/b3h47pte/audit-stuff/mail_api"
+	"gitlab.com/grchive/grchive/core"
+	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/mail_api"
 	"html/template"
 )
 

@@ -37,7 +37,7 @@ go_library(
         "@com_github_google_go_querystring//query:go_default_library",
         "//src/webserver/render:webserver_render_library",
     ],
-    importpath = "gitlab.com/b3h47pte/audit-stuff/rest"
+    importpath = "gitlab.com/grchive/grchive/rest"
 )
 
 

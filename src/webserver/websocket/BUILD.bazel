@@ -14,5 +14,5 @@ go_library(
         "@com_github_gorilla_mux//:go_default_library",
         "@com_github_gorilla_websocket//:go_default_library",
     ],
-    importpath = "gitlab.com/b3h47pte/audit-stuff/websocket"
+    importpath = "gitlab.com/grchive/grchive/websocket"
 )

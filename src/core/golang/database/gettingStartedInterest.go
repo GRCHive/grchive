@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/lib/pq"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 )
 
 // bool: Returns whether or not the inserted data is a duplicate.

@@ -2,7 +2,7 @@ package webcore
 
 import (
 	"github.com/google/uuid"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 	"net/http"
 )
 

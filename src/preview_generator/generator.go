@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/h2non/filetype"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 	"os"
 	"os/exec"
 )

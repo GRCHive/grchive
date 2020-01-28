@@ -10,5 +10,5 @@ go_library(
     deps = [
         "@com_github_google_go_querystring//query:go_default_library"
     ],
-    importpath = "gitlab.com/b3h47pte/audit-stuff/okta_api"
+    importpath = "gitlab.com/grchive/grchive/okta_api"
 )

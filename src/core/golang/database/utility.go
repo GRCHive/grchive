@@ -3,7 +3,7 @@ package database
 import (
 	"encoding/json"
 	"github.com/lib/pq"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 )
 
 var DuplicateEntryJson = struct{ IsDuplicate bool }{

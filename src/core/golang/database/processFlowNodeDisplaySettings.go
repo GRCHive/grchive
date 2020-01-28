@@ -3,7 +3,7 @@ package database
 import (
 	"encoding/json"
 	"github.com/jmoiron/sqlx/types"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 	"strconv"
 )
 

@@ -3,7 +3,7 @@ package render
 import (
 	"encoding/json"
 	"fmt"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 	"html/template"
 	"net/http"
 )

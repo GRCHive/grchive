@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/jmoiron/sqlx"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 )
 
 func NewVendorWithTx(vendor *core.Vendor, role *core.Role, tx *sqlx.Tx) error {

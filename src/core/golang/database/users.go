@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/jmoiron/sqlx"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 )
 
 func FindAllUsersInOrganization(orgId int32, role *core.Role) ([]*core.UserWithRole, error) {

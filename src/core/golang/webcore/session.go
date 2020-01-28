@@ -1,8 +1,8 @@
 package webcore
 
 import (
-	"gitlab.com/b3h47pte/audit-stuff/core"
-	"gitlab.com/b3h47pte/audit-stuff/database"
+	"gitlab.com/grchive/grchive/core"
+	"gitlab.com/grchive/grchive/database"
 )
 
 func ExtractParsedDataFromSession(session *core.UserSession) (*core.UserSessionParsedData, error) {

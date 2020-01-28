@@ -3,7 +3,7 @@ package core_test
 import (
 	"container/list"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 	"sync"
 	"testing"
 )

@@ -3,9 +3,9 @@ package rest
 import (
 	"encoding/json"
 	"errors"
-	"gitlab.com/b3h47pte/audit-stuff/core"
-	"gitlab.com/b3h47pte/audit-stuff/database"
-	"gitlab.com/b3h47pte/audit-stuff/webcore"
+	"gitlab.com/grchive/grchive/core"
+	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/webcore"
 	"net/http"
 	"time"
 )

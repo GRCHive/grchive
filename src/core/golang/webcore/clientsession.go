@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/gorilla/Sessions"
 	"github.com/gorilla/securecookie"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 	"net/http"
 	"time"
 )

@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 )
 
 func getComments(condition string, args ...interface{}) ([]*core.Comment, error) {

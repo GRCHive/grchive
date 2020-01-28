@@ -2,10 +2,10 @@ package webcore
 
 import (
 	"github.com/jmoiron/sqlx"
-	"gitlab.com/b3h47pte/audit-stuff/backblaze_api"
-	"gitlab.com/b3h47pte/audit-stuff/core"
-	"gitlab.com/b3h47pte/audit-stuff/database"
-	"gitlab.com/b3h47pte/audit-stuff/vault_api"
+	"gitlab.com/grchive/grchive/backblaze_api"
+	"gitlab.com/grchive/grchive/core"
+	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/vault_api"
 )
 
 func UploadNewFileWithTx(file *core.ControlDocumentationFile, buffer []byte, role *core.Role, org *core.Organization, b2Auth *backblaze.B2AuthToken, tx *sqlx.Tx) (*backblaze.B2File, error) {

@@ -3,7 +3,7 @@ package webcore
 import (
 	"context"
 	"errors"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 )
 
 type ContextKey string

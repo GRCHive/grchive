@@ -1,7 +1,7 @@
 package database
 
 import (
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 )
 
 func DeleteProcessFlowNodeFromId(nodeId int64, role *core.Role) error {

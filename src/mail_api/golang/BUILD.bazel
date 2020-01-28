@@ -11,5 +11,5 @@ go_library(
         "@com_github_sendgrid_sendgrid_go//:go_default_library",
         "@com_github_sendgrid_sendgrid_go//helpers/mail:go_default_library"
     ],
-    importpath = "gitlab.com/b3h47pte/audit-stuff/mail_api"
+    importpath = "gitlab.com/grchive/grchive/mail_api"
 )

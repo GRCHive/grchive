@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 )
 
 func getProcessFlowIODbName(isInput bool) string {

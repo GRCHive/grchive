@@ -2,8 +2,8 @@ package rest
 
 import (
 	"github.com/gorilla/mux"
-	"gitlab.com/b3h47pte/audit-stuff/core"
-	"gitlab.com/b3h47pte/audit-stuff/webcore"
+	"gitlab.com/grchive/grchive/core"
+	"gitlab.com/grchive/grchive/webcore"
 )
 
 func RegisterPaths(r *mux.Router) {

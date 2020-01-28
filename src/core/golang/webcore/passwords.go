@@ -3,8 +3,8 @@ package webcore
 import (
 	"encoding/hex"
 	"errors"
-	"gitlab.com/b3h47pte/audit-stuff/core"
-	"gitlab.com/b3h47pte/audit-stuff/vault_api"
+	"gitlab.com/grchive/grchive/core"
+	"gitlab.com/grchive/grchive/vault_api"
 	"strings"
 )
 

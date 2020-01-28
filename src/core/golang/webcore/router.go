@@ -3,7 +3,7 @@ package webcore
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 	"net/url"
 )
 

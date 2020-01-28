@@ -13,5 +13,5 @@ go_library(
         "//src/core/golang/core:webserver_core_library",
         "//src/core/golang/webcore:webserver_webcore_library",
     ],
-    importpath = "gitlab.com/b3h47pte/audit-stuff/render"
+    importpath = "gitlab.com/grchive/grchive/render"
 )

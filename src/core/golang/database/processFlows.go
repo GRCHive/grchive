@@ -2,7 +2,7 @@ package database
 
 import (
 	"errors"
-	"gitlab.com/b3h47pte/audit-stuff/core"
+	"gitlab.com/grchive/grchive/core"
 	"time"
 )
 

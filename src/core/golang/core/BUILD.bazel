@@ -57,5 +57,5 @@ go_library(
         "//src/backblaze_api/golang:backblaze_golang_api",
         "//src/mail_api/golang:mail_golang_api",
     ],
-    importpath = "gitlab.com/b3h47pte/audit-stuff/core"
+    importpath = "gitlab.com/grchive/grchive/core"
 )

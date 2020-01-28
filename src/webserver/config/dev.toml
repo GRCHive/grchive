@@ -1,8 +1,8 @@
 self_uri = "http://localhost:8080"
 
 [company]
-company_name = "Audit Stuff"
-domain = "auditstuff.com"
+company_name = "GRCHive"
+domain = "grchive.com"
 
 [database]
 connection = "user=DEVUSER dbname=audit sslmode=disable timezone=UTC"
@@ -53,7 +53,7 @@ key = "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"
 
 [mail.verification.from]
 name = "Michael Bao"
-email = "me@mikehbao.com"
+email = "mike@grchive.com"
 
 [hashids]
 salt = "7409d5d933caf02affce"

@@ -3,8 +3,8 @@ package core
 import (
 	"encoding/hex"
 	"github.com/pelletier/go-toml"
-	"gitlab.com/b3h47pte/audit-stuff/backblaze_api"
-	"gitlab.com/b3h47pte/audit-stuff/mail_api"
+	"gitlab.com/grchive/grchive/backblaze_api"
+	"gitlab.com/grchive/grchive/mail_api"
 	"io/ioutil"
 )
 

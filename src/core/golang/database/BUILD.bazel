@@ -40,5 +40,5 @@ go_library(
         "@com_github_lib_pq//:go_default_library", 
         "//src/core/golang/core:webserver_core_library"
     ],
-    importpath = "gitlab.com/b3h47pte/audit-stuff/database"
+    importpath = "gitlab.com/grchive/grchive/database"
 )
