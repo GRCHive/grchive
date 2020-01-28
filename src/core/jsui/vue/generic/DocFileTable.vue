@@ -10,7 +10,12 @@ import { createUserString } from '../../ts/users'
 import { standardFormatDate } from '../../ts/time'
 import { createSingleDocFileUrl, contactUsUrl } from '../../ts/url'
 import { PageParamsStore } from '../../ts/pageParams'
-import { TAllFileVersionsOutput, allFileVersions } from '../../ts/api/apiControlDocumentation' 
+import { 
+    TAllFileVersionsOutput,
+    allFileVersions,
+    TGetVersionStorageDataOutput,
+    getVersionStorageData
+} from '../../ts/api/apiControlDocumentation' 
 import { FileVersion } from '../../ts/controls'
 
 @Component({
@@ -62,7 +67,7 @@ export default class DocFileTable extends ResourceTableProps {
             }).then((resp : TAllFileVersionsOutput) => {
                 obj.availableVersions = resp.data.map((ele : FileVersion) => ele.VersionNumber)
                 if (obj.availableVersions.length > 0) {
-                    obj.version = obj.availableVersions[0]
+                    this.selectVersion(obj, obj.availableVersions[0])
                 }
             }).catch((err : any) => {
                 // @ts-ignore
@@ -86,6 +91,30 @@ export default class DocFileTable extends ResourceTableProps {
         ))
     }
 
+    selectVersion(obj : any, v : number) {
+        if (!obj.availableVersions.includes(v)) {
+            return
+        }
+        
+        obj.version = v
+        getVersionStorageData({
+            fileId: v,
+            orgId: PageParamsStore.state.organization!.Id,
+            version: v
+        }).then((resp : TGetVersionStorageDataOutput) => {
+            obj.uploadTime = standardFormatDate(resp.data.UploadTime)
+            obj.user = createUserString(MetadataStore.getters.getUser(resp.data.UploadUserId))
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
     transformInputResourceToTableItem(inp : any) : any {
         let obj = {
             id: inp.Id,
@@ -94,14 +123,14 @@ export default class DocFileTable extends ResourceTableProps {
             relevantTime: standardFormatDate(inp.RelevantTime),
             availableVersions: [] as number[],
             version: 0,
-            uploadTime: standardFormatDate(new Date()),
-            user: createUserString(MetadataStore.getters.getUser(inp.UploadUserId)),
+            uploadTime: "Loading...",
+            user: "Loading...",
             value: inp
         }
 
         obj.availableVersions = this.getFileVersions(inp.Id, obj)
         if (obj.availableVersions.length > 0) {
-            obj.version = obj.availableVersions[0]
+            this.selectVersion(obj, obj.availableVersions[0])
         }
         return obj
     }
@@ -130,7 +159,7 @@ export default class DocFileTable extends ResourceTableProps {
                     {
                         on: {
                             click: () => {
-                                props.item.version = ele
+                                this.selectVersion(props.item, ele)
                             }
                         }
                     },

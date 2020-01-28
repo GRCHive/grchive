@@ -146,6 +146,7 @@ func registerControlDocumentationAPIPaths(r *mux.Router) {
 func registerControlDocVersionsAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiFileVersionPrefix).Subrouter()
 	s.HandleFunc(core.ApiAllEndpoint, allFileVersions).Methods("GET")
+	s.HandleFunc(core.ApiGetEndpoint, getFileVersion).Methods("GET")
 }
 
 func registerRoleAPIPaths(r *mux.Router) {

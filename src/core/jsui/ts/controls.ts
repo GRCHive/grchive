@@ -20,6 +20,14 @@ export interface FileVersion {
 	VersionNumber : number
 }
 
+export interface FileStorageData {
+	Id           : number
+	MetadataId   : number
+	OrgId        : number
+	UploadTime   : Date
+	UploadUserId : number
+}
+
 export interface ControlDocumentationFileHandle {
     Id: number
     CategoryId: number
@@ -56,4 +64,8 @@ export function extractControlDocumentationFileHandle(f : ControlDocumentationFi
 
 export function cleanJsonControlDocumentationFile(f : ControlDocumentationFile) {
     f.RelevantTime = new Date(f.RelevantTime)
+}
+
+export function cleanJsonFileStorageData(f : FileStorageData) {
+    f.UploadTime = new Date(f.UploadTime)
 }

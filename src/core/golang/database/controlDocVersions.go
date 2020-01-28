@@ -38,3 +38,21 @@ func AllFileVersions(fileId int64, orgId int32, role *core.Role) ([]core.FileVer
 	`, fileId, orgId)
 	return versions, err
 }
+
+func GetFileVersionStorageData(fileId int64, orgId int32, version int32, role *core.Role) (*core.FileStorageData, error) {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	data := core.FileStorageData{}
+	err := dbConn.Get(&data, `
+		SELECT storage.*
+		FROM file_storage AS storage
+		INNER JOIN file_version_history AS fvh
+			ON storage.id = fvh.file_storage_id
+		WHERE fvh.file_id = $1
+			AND fvh.org_id = $2
+			AND fvh.version_number = $3
+	`, fileId, orgId, version)
+	return &data, err
+}

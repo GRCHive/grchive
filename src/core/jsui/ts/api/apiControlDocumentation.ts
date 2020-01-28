@@ -5,7 +5,9 @@ import {
     ControlDocumentationCategory, 
     ControlDocumentationFile,
     FileVersion,
-    cleanJsonControlDocumentationFile
+    FileStorageData,
+    cleanJsonControlDocumentationFile,
+    cleanJsonFileStorageData
 } from '../controls'
 import { newControlDocCatUrl,
          editControlDocCatUrl,
@@ -13,12 +15,14 @@ import { newControlDocCatUrl,
          uploadControlDocUrl,
          allControlDocUrl,
          getControlDocUrl,
-         allControlDocVersionsUrl,
          editControlDocUrl,
          deleteControlDocUrl,
          downloadControlDocUrl,
          allControlDocCatUrl,
-         getControlDocCatUrl } from '../url'
+         getControlDocCatUrl,
+         allControlDocVersionsUrl,
+         getControlDocVersionsUrl,
+} from '../url'
 import JSZip from 'jszip'
 import { getAPIRequestConfig } from './apiUtility'
 
@@ -263,4 +267,22 @@ export interface TAllFileVersionsOutput {
 
 export function allFileVersions(inp : TAllFileVersionsInput) : Promise<TAllFileVersionsOutput> {
     return axios.get(allControlDocVersionsUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+}
+
+export interface TGetVersionStorageDataInput {
+    fileId: number
+    orgId: number
+    version: number
+}
+
+export interface TGetVersionStorageDataOutput {
+    data: FileStorageData
+}
+
+export function getVersionStorageData(inp : TGetVersionStorageDataInput) : Promise<TGetVersionStorageDataOutput> {
+    return axios.get(getControlDocVersionsUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then(
+        (resp : TGetVersionStorageDataOutput) => {
+            cleanJsonFileStorageData(resp.data)
+            return resp
+        })
 }
