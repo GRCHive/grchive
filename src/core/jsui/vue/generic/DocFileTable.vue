@@ -99,7 +99,7 @@ export default class DocFileTable extends ResourceTableProps {
         
         obj.version = v
         getVersionStorageData({
-            fileId: v,
+            fileId: obj.id,
             orgId: PageParamsStore.state.organization!.Id,
             version: v
         }).then((resp : TGetVersionStorageDataOutput) => {
