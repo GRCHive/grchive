@@ -67,10 +67,9 @@ func newComment(w http.ResponseWriter, r *http.Request) {
 			inputs.OrgId,
 			comment,
 			role)
-	} else if inputs.FileId.NullInt64.Valid && inputs.CatId.NullInt64.Valid {
+	} else if inputs.FileId.NullInt64.Valid {
 		err = database.InsertDocumentComment(
 			inputs.FileId.NullInt64.Int64,
-			inputs.CatId.NullInt64.Int64,
 			inputs.OrgId,
 			comment,
 			role)

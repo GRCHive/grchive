@@ -267,7 +267,7 @@ func GetDocumentComments(fileId int64, orgId int32, role *core.Role) ([]*core.Co
 	`, fileId, orgId)
 }
 
-func InsertDocumentComment(fileId int64, catId int64, orgId int32, comment *core.Comment, role *core.Role) error {
+func InsertDocumentComment(fileId int64, orgId int32, comment *core.Comment, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
@@ -283,17 +283,15 @@ func InsertDocumentComment(fileId int64, catId int64, orgId int32, comment *core
 	_, err = tx.Exec(`
 		INSERT INTO file_comments (
 			file_id,
-			cat_id,
 			org_id,
 			comment_id
 		)
 		VALUES (
 			$1,
 			$2,
-			$3,
-			$4
+			$3
 		)
-	`, fileId, catId, orgId, comment.Id)
+	`, fileId, orgId, comment.Id)
 	if err != nil {
 		tx.Rollback()
 		return err

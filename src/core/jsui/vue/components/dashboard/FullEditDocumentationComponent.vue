@@ -322,7 +322,6 @@ export default class FullEditDocumentationComponent extends Vue {
     get commentParams() : Object {
         return {
             fileId: this.metadata!.Id,
-            catId: this.metadata!.CategoryId,
             orgId: PageParamsStore.state.organization!.Id,
         }
     }
