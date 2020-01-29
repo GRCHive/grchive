@@ -105,8 +105,12 @@ export function createSingleDocCatUrl(org : string, id: number) : string {
     return `/dashboard/org/${org}/documentation/cat/${id}`
 }
 
-export function createSingleDocFileUrl(org : string, id: number) : string {
-    return `/dashboard/org/${org}/documentation/file/${id}`
+export function createSingleDocFileUrl(org : string, id: number, version : number | null) : string {
+    let url = `/dashboard/org/${org}/documentation/file/${id}`
+    if (!!version) {
+        url += `?version=${version}`
+    }
+    return url
 }
 
 export function createOrgDocRequestsUrl(org : string) : string {

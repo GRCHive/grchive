@@ -87,7 +87,8 @@ export default class DocFileTable extends ResourceTableProps {
     goToDocFile(item : any) {
         window.location.assign(createSingleDocFileUrl(
             PageParamsStore.state.organization!.OktaGroupName,
-            item.value.Id
+            item.value.Id,
+            item.version
         ))
     }
 
@@ -121,21 +122,25 @@ export default class DocFileTable extends ResourceTableProps {
             name: inp.AltName,
             filename: inp.StorageName,
             relevantTime: standardFormatDate(inp.RelevantTime),
-            availableVersions: [] as number[],
-            version: 0,
+            availableVersions: null,
+            version: null,
             uploadTime: "Loading...",
             user: "Loading...",
             value: inp
         }
 
-        obj.availableVersions = this.getFileVersions(inp.Id, obj)
-        if (obj.availableVersions.length > 0) {
-            this.selectVersion(obj, obj.availableVersions[0])
-        }
         return obj
     }
 
     renderVersion(props : any) : VNode {
+        if (!props.item.availableVersions) {
+            props.item.availableVersions = this.getFileVersions(props.item.id, props.item)
+        }
+
+        if (props.item.availableVersions.length > 0) {
+            this.selectVersion(props.item, props.item.availableVersions[0])
+        }
+
         let dropdownIcon = this.$createElement(
             VIcon,
             {
@@ -146,6 +151,21 @@ export default class DocFileTable extends ResourceTableProps {
             "mdi-chevron-down"
         )
 
+        let availableVersionsNodes = !!props.item.availableVersions ? props.item.availableVersions.map((ele : number) => {
+            let item = this.$createElement(
+                VListItem,
+                {
+                    on: {
+                        click: () => {
+                            this.selectVersion(props.item, ele)
+                        }
+                    }
+                },
+                ele.toString()
+            )
+            return item
+        }) : []
+
         let menuList = this.$createElement(
             VList,
             {
@@ -153,20 +173,7 @@ export default class DocFileTable extends ResourceTableProps {
                     dense: true
                 },
             },
-            props.item.availableVersions.map((ele : number) => {
-                let item = this.$createElement(
-                    VListItem,
-                    {
-                        on: {
-                            click: () => {
-                                this.selectVersion(props.item, ele)
-                            }
-                        }
-                    },
-                    ele.toString()
-                )
-                return item
-            })
+            availableVersionsNodes
         )
 
         let menu = this.$createElement(
