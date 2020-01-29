@@ -52,7 +52,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import DocumentCategorySearchFormComponent from './DocumentCategorySearchFormComponent.vue'
 import DocFileTable from './DocFileTable.vue'
-import { ControlDocumentationFile, ControlDocumentationCategory } from '../../ts/controls'
+import { ControlDocumentationFile, VersionedMetadata, ControlDocumentationCategory } from '../../ts/controls'
 import { Watch } from 'vue-property-decorator'
 import * as rules from '../../ts/formRules'
 import { allControlDocuments, TAllControlDocumentsOutput } from '../../ts/api/apiControlDocumentation'
@@ -85,7 +85,7 @@ const Props = Vue.extend({
 export default class DocSearcher extends Props {
     chosenCat: ControlDocumentationCategory | null = null
     currentCatFiles : ControlDocumentationFile[] = []
-    selectedFiles : ControlDocumentationFile[] = []
+    selectedFiles : VersionedMetadata[] = []
     loadingFiles: boolean = false
     formValid: boolean = false
     rules: any = rules
@@ -127,7 +127,7 @@ export default class DocSearcher extends Props {
     }
 
     onSelect() {
-        this.$emit('do-select', this.selectedFiles)
+        this.$emit('do-select', this.selectedFiles.map((ele : VersionedMetadata) => ele.File))
         if (this.canEditCat) {
             this.chosenCat = null
         }

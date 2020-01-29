@@ -156,7 +156,7 @@ export default class CreateNewRequestForm extends Props {
         }).then((resp : TNewDocRequestOutput) => {
             this.onSuccess(resp)
         }).catch((err : any) => {
-            this.doSave()
+            this.onError()
         })
     }
 

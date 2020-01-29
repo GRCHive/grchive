@@ -286,15 +286,15 @@ func InsertDocumentRequestComment(requestId int64, catId int64, orgId int32, com
 	return tx.Commit()
 }
 
-func LinkRequestToVendorProductWithTx(productId int64, requestId int64, catId int64, orgId int32, role *core.Role, tx *sqlx.Tx) error {
+func LinkRequestToVendorProductWithTx(productId int64, requestId int64, orgId int32, role *core.Role, tx *sqlx.Tx) error {
 	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
 
 	_, err := tx.Exec(`
-		INSERT INTO vendor_soc_request_link (vendor_product_id, org_id, request_id, category_id)
-		VALUES ($1, $2, $3, $4)
-	`, productId, orgId, requestId, catId)
+		INSERT INTO vendor_soc_request_link (vendor_product_id, org_id, request_id)
+		VALUES ($1, $2, $3)
+	`, productId, orgId, requestId)
 
 	return err
 }

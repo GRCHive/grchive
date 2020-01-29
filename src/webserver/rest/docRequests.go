@@ -89,7 +89,7 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if inputs.VendorProductId != -1 {
-		err = database.LinkRequestToVendorProductWithTx(inputs.VendorProductId, request.Id, request.CatId, request.OrgId, role, tx)
+		err = database.LinkRequestToVendorProductWithTx(inputs.VendorProductId, request.Id, request.OrgId, role, tx)
 		if err != nil {
 			tx.Rollback()
 			core.Warning("Failed to link request to vendor product: " + err.Error())

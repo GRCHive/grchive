@@ -138,11 +138,8 @@ func GetSocDocumentationForVendorProduct(productId int64, orgId int32, role *cor
 		FROM file_metadata as file
 		INNER JOIN vendor_product_soc_reports AS soc
 			ON soc.file_id = file.id
-				AND soc.cat_id = file.category_id
 		WHERE soc.product_id = $1
 			AND file.org_id = $2
-			AND bucket_id IS NOT NULL
-			AND storage_id IS NOT NULL
 		ORDER BY relevant_time DESC
 	`, productId, orgId)
 
