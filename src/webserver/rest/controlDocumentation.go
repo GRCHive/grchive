@@ -60,6 +60,7 @@ type DownloadControlDocInputs struct {
 	FileId  int64 `webcore:"fileId"`
 	OrgId   int32 `webcore:"orgId"`
 	Version int32 `webcore:"version"`
+	Preview bool  `webcore:"preview"`
 }
 
 type AllControlDocCatInputs struct {
@@ -487,7 +488,14 @@ func downloadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	version, err := database.GetVersionedFileStorage(dbFile.Id, dbFile.OrgId, inputs.Version, role)
+	var version *core.FileStorageData
+
+	if inputs.Preview {
+		version, err = database.GetPreviewFileVersionStorageData(dbFile.Id, dbFile.OrgId, inputs.Version, role)
+	} else {
+		version, err = database.GetFileVersionStorageData(dbFile.Id, dbFile.OrgId, inputs.Version, role)
+	}
+
 	if err != nil {
 		core.Warning("Can't get file version data: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -632,21 +640,21 @@ func getControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	previewFile, err := database.GetControlDocumentationPreview(inputs.FileId, inputs.OrgId, role)
+	versions, err := database.AllFileVersions(inputs.FileId, inputs.OrgId, role)
 	if err != nil {
-		core.Warning("Failed to get doc file preview: " + core.ErrorString(err))
+		core.Warning("Failed to get file versions: " + core.ErrorString(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	jsonWriter.Encode(struct {
-		File        *core.ControlDocumentationFile
-		Category    *core.ControlDocumentationCategory
-		PreviewFile *core.ControlDocumentationFile
+		File     *core.ControlDocumentationFile
+		Category *core.ControlDocumentationCategory
+		Versions []core.FileVersion
 	}{
-		File:        file,
-		Category:    category,
-		PreviewFile: previewFile,
+		File:     file,
+		Category: category,
+		Versions: versions,
 	})
 }
 

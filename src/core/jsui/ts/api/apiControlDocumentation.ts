@@ -163,6 +163,7 @@ export interface TDownloadSingleControlDocumentInput {
     fileId: number
     orgId: number
     version: number
+    preview: boolean
 }
 
 export interface TDownloadSingleControlDocumentOutput {
@@ -194,6 +195,7 @@ export function downloadControlDocuments(inp: TDownloadControlDocumentsInput) : 
                     fileId: file.File.Id,
                     orgId: inp.orgId,
                     version: file.Version.VersionNumber,
+                    preview: false,
                 })
 
                 let storage = await getVersionStorageData({
@@ -202,7 +204,7 @@ export function downloadControlDocuments(inp: TDownloadControlDocumentsInput) : 
                     version: file.Version.VersionNumber,
                 })
 
-                zip.folder(file.File.RelevantTime.toDateString()).file(`${file.File.Id}-${storage.data.StorageName}`, blobData.data)
+                zip.folder(file.File.RelevantTime.toDateString()).file(`${file.File.Id}-${storage.data.Storage.StorageName}`, blobData.data)
             } catch (e) {
                 reject(e)
                 return
@@ -256,8 +258,7 @@ export interface TGetSingleControlDocumentOutput {
     data: {
         File: ControlDocumentationFile
         Category: ControlDocumentationCategory
-        PreviewFile: ControlDocumentationFile | null
-        UploadUser: User
+        Versions: FileVersion[]
     }
 }
 
@@ -285,13 +286,16 @@ export interface TGetVersionStorageDataInput {
 }
 
 export interface TGetVersionStorageDataOutput {
-    data: FileStorageData
+    data: {
+        Storage: FileStorageData
+        HasPreview: boolean
+    }
 }
 
 export function getVersionStorageData(inp : TGetVersionStorageDataInput) : Promise<TGetVersionStorageDataOutput> {
     return axios.get(getControlDocVersionsUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then(
         (resp : TGetVersionStorageDataOutput) => {
-            cleanJsonFileStorageData(resp.data)
+            cleanJsonFileStorageData(resp.data.Storage)
             return resp
         })
 }

@@ -166,42 +166,7 @@ func GetControlDocumentation(fileId int64, orgId int32, role *core.Role) (*core.
 	return &retFile, err
 }
 
-func GetAllVersionsFileStorage(fileId int64, orgId int32, role *core.Role) ([]*core.FileStorageData, error) {
-	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
-		return nil, core.ErrorUnauthorized
-	}
-
-	retData := make([]*core.FileStorageData, 0)
-	err := dbConn.Select(&retData, `
-		SELECT storage.*
-		FROM file_storage AS storage
-		INNER JOIN file_version_history AS fvh
-			ON storage.id = fvh.file_storage_id
-		WHERE fvh.file_id = $1
-			AND fvh.org_id = $2
-	`, fileId, orgId)
-	return retData, err
-}
-
-func GetVersionedFileStorage(fileId int64, orgId int32, version int32, role *core.Role) (*core.FileStorageData, error) {
-	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
-		return nil, core.ErrorUnauthorized
-	}
-
-	retData := core.FileStorageData{}
-	err := dbConn.Get(&retData, `
-		SELECT storage.*
-		FROM file_storage AS storage
-		INNER JOIN file_version_history AS fvh
-			ON storage.id = fvh.file_storage_id
-		WHERE fvh.file_id = $1
-			AND fvh.org_id = $2
-			AND fvh.version_number = $3
-	`, fileId, orgId, version)
-	return &retData, err
-}
-
-func GetControlDocumentationPreview(fileId int64, orgId int32, role *core.Role) (*core.ControlDocumentationFile, error) {
+func GetControlDocumentationPreview(fileId int64, orgId int32, role *core.Role) (*core.FileStorageData, error) {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
@@ -214,17 +179,17 @@ func GetControlDocumentationPreview(fileId int64, orgId int32, role *core.Role) 
 		WHERE pre.original_file_id = $1
 			AND pre.org_id = $2
 	`, fileId, orgId)
-	defer rows.Close()
 
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	if !rows.Next() {
 		return nil, nil
 	}
 
-	retFile := core.ControlDocumentationFile{}
+	retFile := core.FileStorageData{}
 	err = rows.StructScan(&retFile)
 	if err != nil {
 		return nil, err

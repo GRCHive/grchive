@@ -74,5 +74,18 @@ func getFileVersion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonWriter.Encode(data)
+	previewStorage, err := database.GetPreviewFileVersionStorageData(inputs.FileId, inputs.OrgId, inputs.Version, role)
+	if err != nil {
+		core.Warning("Failed to get preview file version storage data: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	jsonWriter.Encode(struct {
+		Storage    *core.FileStorageData
+		HasPreview bool
+	}{
+		Storage:    data,
+		HasPreview: (previewStorage != nil),
+	})
 }

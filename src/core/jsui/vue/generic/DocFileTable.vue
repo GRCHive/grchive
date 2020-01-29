@@ -112,9 +112,9 @@ export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
             orgId: PageParamsStore.state.organization!.Id,
             version: v.VersionNumber
         }).then((resp : TGetVersionStorageDataOutput) => {
-            obj.uploadTime = standardFormatDate(resp.data.UploadTime)
-            obj.user = createUserString(MetadataStore.getters.getUser(resp.data.UploadUserId))
-            obj.filename = resp.data.StorageName
+            obj.uploadTime = standardFormatDate(resp.data.Storage.UploadTime)
+            obj.user = createUserString(MetadataStore.getters.getUser(resp.data.Storage.UploadUserId))
+            obj.filename = resp.data.Storage.StorageName
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

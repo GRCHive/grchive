@@ -32,6 +32,18 @@
                             <v-list-item-subtitle>
                                 Parent Category: <a :href="parentCatUrl">{{ parentCat.Name }}</a>
                             </v-list-item-subtitle>
+
+                        </v-list-item-content>
+
+                        <v-list-item-content>
+                            <v-select
+                                v-model="selectedVersion"
+                                :items="versionItems"
+                                solo
+                                flat
+                                hide-details
+                            >
+                            </v-select>
                         </v-list-item-content>
 
                         <v-spacer></v-spacer>
@@ -42,7 +54,11 @@
                                       max-width="40%"
                             >
                                 <template v-slot:activator="{ on }">
-                                    <v-btn color="error" v-on="on">
+                                    <v-btn
+                                        color="error"
+                                        v-on="on"
+                                        :disabled="!versionDataReady"
+                                    >
                                         Delete
                                     </v-btn>
                                 </template>
@@ -61,6 +77,7 @@
                             <v-btn
                                 color="success"
                                 @click="onDownload"
+                                :disabled="!versionDataReady"
                             >
                                 Download
                             </v-btn>
@@ -83,13 +100,6 @@
                                               filled
                                               :rules="[rules.required, rules.createMaxLength(256)]"
                                               :disabled="!canEdit"
-                                ></v-text-field>
-
-                                <v-text-field v-model="editData.File.StorageName"
-                                              label="Filename"
-                                              filled
-                                              :rules="[rules.required, rules.createMaxLength(256)]"
-                                              readonly
                                 ></v-text-field>
 
                                 <document-category-search-form-component
@@ -120,24 +130,12 @@
                                     </v-date-picker>
                                 </v-menu>
 
-                                <v-text-field
-                                    :value="uploadDateString"
-                                    label="Upload Date"
-                                    readonly
-                                >
-                                </v-text-field>
-
                                 <v-textarea v-model="editData.File.Description"
                                             label="Description"
                                             filled
                                             :disabled="!canEdit"
                                 ></v-textarea> 
 
-                                <user-search-form-component
-                                    label="File Owner"
-                                    v-bind:user.sync="editData.UploadUser"
-                                    :disabled="!canEdit"
-                                ></user-search-form-component>
                             </v-form>
 
                             <div 
@@ -169,6 +167,40 @@
                                     Save
                                 </v-btn>
                             </div>
+
+
+                            <v-divider class="mb-2"></v-divider>
+
+                            <div
+                                class="mx-4"
+                                v-if="versionDataReady"
+                            >
+                                <v-text-field v-model="versionStorageData.StorageName"
+                                              label="Filename"
+                                              filled
+                                              :rules="[rules.required, rules.createMaxLength(256)]"
+                                              readonly
+                                ></v-text-field>
+
+                                <v-text-field
+                                    :value="uploadDateString"
+                                    label="Upload Date"
+                                    readonly
+                                >
+                                </v-text-field>
+
+                                <user-search-form-component
+                                    label="Upload User"
+                                    v-bind:user="uploadUser"
+                                    disabled
+                                ></user-search-form-component>
+                            </div>
+
+                            <v-progress-circular
+                                indeterminate
+                                size="64"
+                                v-else
+                            ></v-progress-circular>
                         </v-tab-item>
 
                         <v-tab-item :style="tabItemStyle">
@@ -195,7 +227,6 @@
 interface EditData {
     ParentCat : ControlDocumentationCategory
     File : ControlDocumentationFile
-    UploadUser : User
 }
 
 import Vue from 'vue'
@@ -210,9 +241,17 @@ import {
     TDownloadSingleControlDocumentOutput,
     editControlDoc,
     TEditControlDocOutput,
-    deleteControlDocuments
+    deleteControlDocuments,
+    getVersionStorageData,
+    TGetVersionStorageDataOutput,
 } from '../../../ts/api/apiControlDocumentation'
-import { ControlDocumentationFile, ControlDocumentationCategory, cleanJsonControlDocumentationFile } from '../../../ts/controls'
+import { 
+    ControlDocumentationFile,
+    ControlDocumentationCategory,
+    cleanJsonControlDocumentationFile,
+    FileVersion,
+    FileStorageData
+} from '../../../ts/controls'
 import PdfJsViewer from '../../generic/pdf/PdfJsViewer.vue'
 import * as rules from '../../../ts/formRules'
 import { createLocalDateFromDateString, standardFormatDate } from '../../../ts/time'
@@ -220,6 +259,7 @@ import DocumentCategorySearchFormComponent from '../../generic/DocumentCategoryS
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import CommentManager from '../../generic/CommentManager.vue'
+import MetadataStore from '../../../ts/metadata'
 import { saveAs } from 'file-saver'
 
 @Component({
@@ -233,16 +273,25 @@ import { saveAs } from 'file-saver'
 })
 export default class FullEditDocumentationComponent extends Vue {
     ready: boolean = false
+
+    // Metadata information
     parentCat : ControlDocumentationCategory | null = null
     metadata : ControlDocumentationFile | null = null
+    availableVersions : FileVersion[] | null = null
+    selectedVersion : FileVersion | null = null
+
+    // Version data
+    versionStorageData : FileStorageData | null = null
     uploadUser: User | null = null
+
+    // Preview
+    hasPreview: boolean = true
+    previewData : Blob | null = null
+    previewBase64 : string | null = null
+
 
     viewerMaxHeight: number = 100
     metadataMaxHeight:  number = 100
-
-    previewMetadata : ControlDocumentationFile | null = null
-    previewData : Blob | null = null
-    previewBase64 : string | null = null
 
     currentTab : number | null = null
 
@@ -257,6 +306,17 @@ export default class FullEditDocumentationComponent extends Vue {
     $refs!: {
         pdfViewer: PdfJsViewer
         tabItems: any
+    }
+
+    get versionItems() : any[] {
+        if (!this.availableVersions) {
+            return []
+        }
+
+        return this.availableVersions.map((ele : FileVersion) => ({
+            text: `v${ele.VersionNumber}`,
+            value: ele,
+        }))
     }
 
     get commentParams() : Object {
@@ -275,11 +335,10 @@ export default class FullEditDocumentationComponent extends Vue {
     }
 
     get uploadDateString() : string {
-        if (!this.editData) {
+        if (!this.versionStorageData) {
             return ""
         }
-        //return standardFormatDate(this.editData.File.UploadTime)
-        return ""
+        return standardFormatDate(this.versionStorageData.UploadTime)
     }
 
     changeFileDate(str : string) {
@@ -287,12 +346,12 @@ export default class FullEditDocumentationComponent extends Vue {
         this.showHideDateMenu = false
     }
 
-    get hasPreview() : boolean {
-        return !!this.previewMetadata
-    }
-
     get previewReady() : boolean {
         return !!this.previewBase64
+    }
+
+    get versionDataReady() : boolean {
+        return !!this.versionStorageData
     }
 
     @Watch('previewData')
@@ -327,17 +386,20 @@ export default class FullEditDocumentationComponent extends Vue {
     }
 
     reloadPreview() {
-        if (!this.previewMetadata) {
+        this.previewData = null
+        if (!this.hasPreview) {
             return
         }
 
         downloadSingleControlDocument({
-            fileId: this.previewMetadata!.Id,
+            fileId: this.metadata!.Id,
             orgId: PageParamsStore.state.organization!.Id,
-            version: 1,
+            version: this.selectedVersion!.VersionNumber,
+            preview: true,
         }).then((resp : TDownloadSingleControlDocumentOutput) => {
             this.previewData = resp.data
         }).catch((err : any) => {
+            console.log("reload preview: " + err)
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
                 "Oops! Something went wrong. Try again.",
@@ -352,7 +414,6 @@ export default class FullEditDocumentationComponent extends Vue {
         this.editData = {
             ParentCat: JSON.parse(JSON.stringify(this.parentCat)),
             File: JSON.parse(JSON.stringify(this.metadata)),
-            UploadUser: JSON.parse(JSON.stringify(this.uploadUser))
         }
         cleanJsonControlDocumentationFile(this.editData.File)
     }
@@ -366,12 +427,14 @@ export default class FullEditDocumentationComponent extends Vue {
             orgId: PageParamsStore.state.organization!.Id,
         }).then((resp : TGetSingleControlDocumentOutput) => {
             this.parentCat = resp.data.Category
-            this.previewMetadata = resp.data.PreviewFile
-            this.uploadUser = resp.data.UploadUser
             this.metadata = resp.data.File
+            this.availableVersions = resp.data.Versions
+            if (this.availableVersions.length > 0) {
+                this.selectVersion(this.availableVersions[0])
+            }
             this.generateEditData()
-            this.reloadPreview()
         }).catch((err : any) => {
+            console.log("refresh data: " + err)
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
                 "Oops! Something went wrong. Try again.",
@@ -425,7 +488,7 @@ export default class FullEditDocumentationComponent extends Vue {
             relevantTime: this.editData!.File.RelevantTime,
             altName: this.editData!.File.AltName,
             description: this.editData!.File.Description,
-            uploadUserId: this.editData!.UploadUser.Id
+            uploadUserId: this.uploadUser!.Id,
         }).then((resp : TEditControlDocOutput) => {
             this.canEdit = false
             this.metadata = resp.data.File
@@ -452,10 +515,6 @@ export default class FullEditDocumentationComponent extends Vue {
 
     onDelete() {
         let fileIds = [this.metadata!.Id]
-        if (this.hasPreview) {
-            fileIds.push(this.previewMetadata!.Id)
-        }
-
         deleteControlDocuments({
             fileIds: fileIds,
             orgId: PageParamsStore.state.organization!.Id,
@@ -477,9 +536,33 @@ export default class FullEditDocumentationComponent extends Vue {
         downloadSingleControlDocument({
             fileId: this.metadata!.Id,
             orgId: PageParamsStore.state.organization!.Id,
-            version: 1,
+            version: this.selectedVersion!.VersionNumber,
+            preview: false,
         }).then((resp : TDownloadSingleControlDocumentOutput) => {
-            saveAs(resp.data, "testtest")
+            saveAs(resp.data, this.versionStorageData!.StorageName)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    selectVersion(v : FileVersion) {
+        this.selectedVersion = v
+        this.versionStorageData = null
+        getVersionStorageData({
+            fileId: this.metadata!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            version: this.selectedVersion!.VersionNumber,
+        }).then((resp : TGetVersionStorageDataOutput) => {
+            this.versionStorageData = resp.data.Storage
+            this.uploadUser = MetadataStore.getters.getUser(resp.data.Storage.UploadUserId)
+            this.hasPreview = resp.data.HasPreview
+            this.reloadPreview()
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
