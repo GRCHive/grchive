@@ -22,60 +22,74 @@ func UploadNewFileWithTx(
 	org *core.Organization,
 	useExistingMetadata bool,
 	addToFileVersion bool,
-) (*core.FileStorageData, error) {
+) (string, *core.FileStorageData, error) {
 	var err error
 
 	if !useExistingMetadata {
 		err = database.CreateControlDocumentationFileWithTx(file, tx, role)
 		if err != nil {
-			return nil, err
+			return "", nil, err
 		}
 	}
 
-	if storageName == nil {
-		tmp := file.StorageFilename(org)
-		storageName = &tmp
-	}
-
-	transitKey := file.UniqueKey()
-	err = vault.TransitCreateNewEngineKey(transitKey)
-	if err != nil {
-		return nil, err
-	}
-
-	encryptedFile, err := vault.TransitEncrypt(transitKey, buffer)
-	if err != nil {
-		return nil, err
-	}
-
-	err = gcloud.Upload(bucket, *storageName, encryptedFile)
-	if err != nil {
-		return nil, err
-	}
-
+	// This little sequence is kind shitty since
+	// we want to put in the version number into the filename
+	// but we aren't able to create a new file version until
+	// the storage object is created as well. So we need to
+	// store the FileStorageData in two steps. The first step
+	// we put in a temporary StorageId which will get updated
+	// after creating the FileVersion object.
 	storage := core.FileStorageData{
 		MetadataId:   file.Id,
 		StorageName:  fileName,
 		OrgId:        file.OrgId,
 		BucketId:     bucket,
-		StorageId:    *storageName,
+		StorageId:    "",
 		UploadTime:   time.Now().UTC(),
 		UploadUserId: uploadUserId,
 	}
 
 	err = database.CreateFileStorageWithTx(&storage, tx, role)
 	if err != nil {
-		gcloud.Delete(bucket, *storageName)
-		return nil, err
+		return "", nil, err
 	}
 
+	var latestVersion *core.FileVersion
 	if addToFileVersion {
-		err = database.AddFileVersionWithTx(file, &storage, tx, role)
-		if err != nil {
-			gcloud.Delete(bucket, *storageName)
-			return nil, err
-		}
+		latestVersion, err = database.AddFileVersionWithTx(file, &storage, tx, role)
+	} else {
+		latestVersion, err = database.GetLatestNonPreviewFileVersion(file.Id, file.OrgId, role)
+	}
+	if err != nil {
+		return "", nil, err
 	}
 
-	return &storage, nil
+	if storageName == nil {
+		tmp := file.StorageFilename(org, latestVersion.VersionNumber)
+		storageName = &tmp
+	}
+
+	storage.StorageId = *storageName
+	err = database.UpdateFileStorageStorageIdWithTx(storage.Id, file.OrgId, storage.StorageId, tx, role)
+	if err != nil {
+		return "", nil, err
+	}
+
+	transitKey := file.UniqueKey()
+	err = vault.TransitCreateNewEngineKey(transitKey)
+	if err != nil {
+		return "", nil, err
+	}
+
+	encryptedFile, err := vault.TransitEncrypt(transitKey, buffer)
+	if err != nil {
+		return "", nil, err
+	}
+
+	err = gcloud.Upload(bucket, *storageName, encryptedFile)
+	if err != nil {
+		return "", nil, err
+	}
+
+	return *storageName, &storage, nil
 }

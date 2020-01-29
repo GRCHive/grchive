@@ -50,6 +50,6 @@ func (file ControlDocumentationFile) UniqueKey() string {
 	return fmt.Sprintf("controlDocFile-%d", file.Id)
 }
 
-func (file ControlDocumentationFile) StorageFilename(org *Organization) string {
-	return fmt.Sprintf("org-%d-%s/%s", org.Id, org.Name, file.UniqueKey())
+func (file ControlDocumentationFile) StorageFilename(org *Organization, version int32) string {
+	return fmt.Sprintf("org-%d-%s/%s-v%d", org.Id, org.Name, file.UniqueKey(), version)
 }

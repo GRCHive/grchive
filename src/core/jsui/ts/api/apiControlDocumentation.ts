@@ -76,10 +76,14 @@ export interface TUploadControlDocInput {
     description: string
     uploadUserId: number
     fulfilledRequestId?: number | null
+    fileId? : number | null
 }
 
 export interface TUploadControlDocOutput {
-    data: ControlDocumentationFile
+    data: {
+        File: ControlDocumentationFile
+        Version: FileVersion
+    }
 }
 
 export function uploadControlDoc(inp : TUploadControlDocInput): Promise<TUploadControlDocOutput> {
@@ -95,8 +99,12 @@ export function uploadControlDoc(inp : TUploadControlDocInput): Promise<TUploadC
         data.set('fulfilledRequestId', inp.fulfilledRequestId!.toString())
     }
 
+    if (!!inp.fileId) {
+        data.set('fileId', inp.fileId!.toString())
+    }
+
     return postFormMultipart<TUploadControlDocOutput>(uploadControlDocUrl, data, getAPIRequestConfig()).then((resp : TUploadControlDocOutput) => {
-        cleanJsonControlDocumentationFile(resp.data)
+        cleanJsonControlDocumentationFile(resp.data.File)
         return resp
     })
 }

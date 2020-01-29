@@ -147,7 +147,7 @@ export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
             props.item.availableVersions = this.getFileVersions(props.item.id, props.item)
         }
 
-        if (props.item.availableVersions.length > 0) {
+        if (!props.item.version && props.item.availableVersions.length > 0) {
             this.selectVersion(props.item, props.item.availableVersions[0])
         }
 

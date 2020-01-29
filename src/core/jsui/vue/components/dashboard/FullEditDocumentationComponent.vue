@@ -42,6 +42,7 @@
                                 solo
                                 flat
                                 hide-details
+                                @input="selectVersion"
                             >
                             </v-select>
                         </v-list-item-content>
@@ -78,9 +79,35 @@
                                 color="success"
                                 @click="onDownload"
                                 :disabled="!versionDataReady"
+                                class="ml-4"
                             >
                                 Download
                             </v-btn>
+                        </v-list-item-action>
+
+                        <v-list-item-action>
+                            <v-dialog v-model="showHideUpload"
+                                      persistent
+                                      max-width="40%"
+                            >
+                                <template v-slot:activator="{ on }">
+                                    <v-btn
+                                        color="primary"
+                                        v-on="on"
+                                    >
+                                        Upload
+                                    </v-btn>
+                                </template>
+
+                                <upload-documentation-form
+                                    :cat-id="parentCat.Id"
+                                    :file-id="metadata.Id"
+                                    @do-cancel="showHideUpload = false"
+                                    @do-save="onNewVersion"
+                                >
+                                </upload-documentation-form>
+                            </v-dialog>
+
                         </v-list-item-action>
                     </v-list-item>
 
@@ -260,6 +287,7 @@ import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import CommentManager from '../../generic/CommentManager.vue'
 import MetadataStore from '../../../ts/metadata'
+import UploadDocumentationForm from './UploadDocumentationForm.vue'
 import { saveAs } from 'file-saver'
 
 @Component({
@@ -268,7 +296,8 @@ import { saveAs } from 'file-saver'
         DocumentCategorySearchFormComponent,
         UserSearchFormComponent,
         GenericDeleteConfirmationForm,
-        CommentManager
+        CommentManager,
+        UploadDocumentationForm
     }
 })
 export default class FullEditDocumentationComponent extends Vue {
@@ -302,6 +331,7 @@ export default class FullEditDocumentationComponent extends Vue {
     canEdit: boolean = false
 
     showHideDelete: boolean = false
+    showHideUpload: boolean = false
 
     $refs!: {
         pdfViewer: PdfJsViewer
@@ -582,6 +612,12 @@ export default class FullEditDocumentationComponent extends Vue {
                 contactUsUrl,
                 true);
         })
+    }
+
+    onNewVersion(f : ControlDocumentationFile, v : FileVersion) {
+        this.showHideUpload = false
+        this.availableVersions!.unshift(v)
+        this.selectVersion(v)
     }
 }
 

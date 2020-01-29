@@ -5,22 +5,55 @@ import (
 	"gitlab.com/grchive/grchive/core"
 )
 
-func AddFileVersionWithTx(file *core.ControlDocumentationFile, storage *core.FileStorageData, tx *sqlx.Tx, role *core.Role) error {
+func AddFileVersionWithTx(file *core.ControlDocumentationFile, storage *core.FileStorageData, tx *sqlx.Tx, role *core.Role) (*core.FileVersion, error) {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessEdit) {
-		return core.ErrorUnauthorized
+		return nil, core.ErrorUnauthorized
 	}
 
-	_, err := tx.Exec(`
+	rows, err := tx.Queryx(`
 		INSERT INTO file_version_history (file_id, file_storage_id, org_id, version_number)
 		SELECT $1, $2, $3, COALESCE(MAX(version_number), 0) + 1
 		FROM file_version_history
 		WHERE file_id = $1
+		RETURNING *
 	`, file.Id, storage.Id, file.OrgId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	defer rows.Close()
+	rows.Next()
+
+	v := core.FileVersion{}
+	err = rows.StructScan(&v)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v, nil
+}
+
+func GetLatestNonPreviewFileVersion(fileId int64, orgId int32, role *core.Role) (*core.FileVersion, error) {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	version := core.FileVersion{}
+	err := dbConn.Get(&version, `
+		SELECT sub.file_id, fvh.file_storage_id, sub.org_id, sub.version_number
+		FROM file_version_history AS fvh
+		INNER JOIN (
+			SELECT fvh.file_id, fvh.org_id, MAX(fvh.version_number) AS version_number
+			FROM file_version_history AS fvh
+			WHERE fvh.file_id = $1
+				AND fvh.org_id = $2
+			GROUP BY fvh.file_id, fvh.org_id
+		) AS sub
+			ON fvh.file_id = sub.file_id
+				AND fvh.org_id = sub.org_id
+				AND fvh.version_number = sub.version_number
+	`, fileId, orgId)
+	return &version, err
 }
 
 func AllFileVersions(fileId int64, orgId int32, role *core.Role) ([]core.FileVersion, error) {
@@ -117,6 +150,7 @@ func GetPreviewFileVersionStorageData(fileId int64, orgId int32, version int32, 
 			ON fp.preview_storage_id = storage.id
 		INNER JOIN file_version_history AS fvh
 			ON fp.file_id = fvh.file_id
+        		AND fp.original_storage_id = fvh.file_storage_id
 		WHERE fvh.file_id = $1
 			AND fvh.org_id = $2
 			AND fvh.version_number = $3

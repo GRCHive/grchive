@@ -87,7 +87,7 @@ func generatePreview(data []byte) *webcore.RabbitMQError {
 		storageFilename := msg.Storage.StorageId + "PREVIEW"
 
 		// Create file preview in database and then encrypt/upload to B2.
-		previewStorage, err := webcore.UploadNewFileWithTx(
+		_, previewStorage, err := webcore.UploadNewFileWithTx(
 			storage,
 			&msg.File,
 			msg.Storage.BucketId,

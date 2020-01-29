@@ -44,6 +44,19 @@ func CreateFileStorageWithTx(storage *core.FileStorageData, tx *sqlx.Tx, role *c
 	return nil
 }
 
+func UpdateFileStorageStorageIdWithTx(id int64, orgId int32, storageId string, tx *sqlx.Tx, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	_, err := tx.Exec(`
+		UPDATE file_storage
+		SET storage_id = $1
+		WHERE id = $2 AND org_id = $3	
+	`, storageId, id, orgId)
+	return err
+}
+
 func CreateControlDocumentationFileWithTx(file *core.ControlDocumentationFile, tx *sqlx.Tx, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessManage) {
 		return core.ErrorUnauthorized

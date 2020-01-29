@@ -39,6 +39,7 @@ type UploadControlDocInputs struct {
 	Description        string         `webcore:"description"`
 	UploadUserId       int64          `webcore:"uploadUserId"`
 	FulfilledRequestId core.NullInt64 `webcore:"fulfilledRequestId,optional"`
+	FileId             core.NullInt64 `webcore:"fileId,optional"`
 }
 
 type AllControlDocInputs struct {
@@ -272,20 +273,38 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	internalFile := core.ControlDocumentationFile{
-		RelevantTime: inputs.RelevantTime,
-		CategoryId:   inputs.CatId,
-		OrgId:        org.Id,
-		AltName:      inputs.AltName,
-		Description:  inputs.Description,
+	var internalFile *core.ControlDocumentationFile
+	var useDbFile bool
+
+	if inputs.FileId.NullInt64.Valid {
+		useDbFile = true
+		internalFile, err = database.GetControlDocumentation(inputs.FileId.NullInt64.Int64, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Can't find parent file metadata: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	} else {
+		useDbFile = false
+		internalFile = &core.ControlDocumentationFile{
+			RelevantTime: inputs.RelevantTime,
+			CategoryId:   inputs.CatId,
+			OrgId:        org.Id,
+			AltName:      inputs.AltName,
+			Description:  inputs.Description,
+		}
 	}
 
 	bucket := core.EnvConfig.Gcloud.DocBucket
 
 	tx := database.CreateTx()
-	storageData, err := webcore.UploadNewFileWithTx(
+
+	var storageData *core.FileStorageData
+	var finalFilename string
+
+	finalFilename, storageData, err = webcore.UploadNewFileWithTx(
 		storage,
-		&internalFile,
+		internalFile,
 		bucket,
 		nil,
 		fileHeader.Filename,
@@ -294,22 +313,20 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		inputs.UploadUserId,
 		tx,
 		org,
-		false, // useExistingMetadata
-		true)  // addToFileVersion
+		useDbFile, // useExistingMetadata
+		true)      // addToFileVersion
 	if err != nil {
 		core.Warning("Failed to upload new file: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	storageFilename := internalFile.StorageFilename(org)
-
 	// At this point we know we can put in a request to generate a preview.
 	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
 		Exchange: webcore.DEFAULT_EXCHANGE,
 		Queue:    webcore.FILE_PREVIEW_QUEUE,
 		Body: webcore.FilePreviewMessage{
-			File:    internalFile,
+			File:    *internalFile,
 			Storage: *storageData,
 		},
 	})
@@ -323,7 +340,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 			tx)
 		if err != nil {
 			tx.Rollback()
-			storage.Delete(bucket, storageFilename)
+			storage.Delete(bucket, finalFilename)
 
 			core.Warning("Failed to fulfill request in db: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -338,7 +355,21 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonWriter.Encode(internalFile)
+	// Would be nice to grab this information from the upload.
+	version, err := database.GetLatestNonPreviewFileVersion(internalFile.Id, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get latest version: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(struct {
+		File    *core.ControlDocumentationFile
+		Version *core.FileVersion
+	}{
+		File:    internalFile,
+		Version: version,
+	})
 }
 
 func allControlDocumentation(w http.ResponseWriter, r *http.Request) {

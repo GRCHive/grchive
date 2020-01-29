@@ -16,7 +16,12 @@
             >
             </document-category-search-form-component>
 
-            <v-menu offset-y v-model="dateMenu" :close-on-content-click="false">
+            <v-menu
+                offset-y
+                v-model="dateMenu"
+                :close-on-content-click="false"
+                v-if="!isVersionUpload"
+            >
                 <template v-slot:activator="{ on }">
                     <v-text-field
                         v-model="dateString"
@@ -36,16 +41,19 @@
                           label="Name"
                           filled
                           :rules="[rules.required, rules.createMaxLength(256)]"
+                          v-if="!isVersionUpload"
             ></v-text-field>
 
             <v-textarea v-model="description"
                         label="Description"
                         filled
+                        v-if="!isVersionUpload"
             ></v-textarea> 
 
             <user-search-form-component
                 label="File Owner"
                 v-bind:user.sync="uploadUser"
+                disabled
             ></user-search-form-component>
         </v-form>
 
@@ -80,6 +88,11 @@ export default Vue.extend({
         requestId: {
             type: Number,
             default: -1
+        },
+        // If fileId is set, it means we're uploading a new version of the file.
+        fileId:{
+            type: Number,
+            default: -1
         }
     },
     components: {
@@ -108,6 +121,10 @@ export default Vue.extend({
                 return this.chosenCat.Id
             }
             return this.catId
+        },
+
+        isVersionUpload() : boolean {
+            return this.fileId >= 0
         }
     },
     methods: {
@@ -131,10 +148,11 @@ export default Vue.extend({
                 altName: this.altName,
                 description: this.description,
                 uploadUserId: this.uploadUser.Id,
-                fulfilledRequestId: (this.requestId != -1) ? this.requestId : null
+                fulfilledRequestId: (this.requestId != -1) ? this.requestId : null,
+                fileId: this.isVersionUpload ? this.fileId : null
             }).then((resp : TUploadControlDocOutput) => {
                 this.progressOverlay = false
-                this.$emit('do-save', resp.data)
+                this.$emit('do-save', resp.data.File, resp.data.Version)
             }).catch((err : any) => {
                 this.progressOverlay = false
                 // @ts-ignore
