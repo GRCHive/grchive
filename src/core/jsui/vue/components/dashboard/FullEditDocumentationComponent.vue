@@ -479,7 +479,7 @@ export default class FullEditDocumentationComponent extends Vue {
             orgId: PageParamsStore.state.organization!.Id,
             version: 1,
         }).then((resp : TDownloadSingleControlDocumentOutput) => {
-            saveAs(resp.data, this.metadata!.StorageName)
+            saveAs(resp.data, "testtest")
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

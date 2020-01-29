@@ -13,6 +13,7 @@ func CreateFileStorageWithTx(storage *core.FileStorageData, tx *sqlx.Tx, role *c
 	rows, err := tx.NamedQuery(`
 		INSERT INTO file_storage (
 			metadata_id,
+			storage_name,
 			org_id,
 			bucket_id,
 			storage_id,
@@ -21,6 +22,7 @@ func CreateFileStorageWithTx(storage *core.FileStorageData, tx *sqlx.Tx, role *c
 		)
 		VALUES (
 			:metadata_id,
+			:storage_name,
 			:org_id,
 			:bucket_id,
 			:storage_id,
@@ -49,7 +51,6 @@ func CreateControlDocumentationFileWithTx(file *core.ControlDocumentationFile, t
 
 	rows, err := tx.NamedQuery(`
 		INSERT INTO file_metadata (
-			storage_name,
 			relevant_time,
 			category_id,
 			org_id,
@@ -57,7 +58,6 @@ func CreateControlDocumentationFileWithTx(file *core.ControlDocumentationFile, t
 			description
 		)
 		VALUES (
-			:storage_name,
 			:relevant_time,
 			:category_id,
 			:org_id,

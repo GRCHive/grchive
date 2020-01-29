@@ -9,7 +9,6 @@ CREATE TABLE process_flow_control_documentation_categories (
 
 CREATE TABLE file_metadata (
     id BIGSERIAL,
-    storage_name TEXT NOT NULL,
     relevant_time TIMESTAMPTZ NOT NULL,
     category_id BIGINT NOT NULL,
     org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
@@ -27,6 +26,7 @@ CREATE INDEX file_metadata_cat_index ON file_metadata(category_id);
 CREATE TABLE file_storage (
     id BIGSERIAL,
     metadata_id BIGINT NOT NULL,
+    storage_name TEXT NOT NULL,
     org_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     bucket_id VARCHAR(200) NOT NULL,
     storage_id VARCHAR(200) NOT NULL,

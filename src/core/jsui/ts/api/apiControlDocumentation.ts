@@ -196,7 +196,13 @@ export function downloadControlDocuments(inp: TDownloadControlDocumentsInput) : 
                     version: file.Version.VersionNumber,
                 })
 
-                zip.folder(file.File.RelevantTime.toDateString()).file(`${file.File.Id}-${file.File.StorageName}`, blobData.data)
+                let storage = await getVersionStorageData({
+                    fileId: file.File.Id,
+                    orgId: inp.orgId,
+                    version: file.Version.VersionNumber,
+                })
+
+                zip.folder(file.File.RelevantTime.toDateString()).file(`${file.File.Id}-${storage.data.StorageName}`, blobData.data)
             } catch (e) {
                 reject(e)
                 return

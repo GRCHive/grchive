@@ -279,7 +279,6 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	internalFile := core.ControlDocumentationFile{
-		StorageName:  fileHeader.Filename,
 		RelevantTime: inputs.RelevantTime,
 		CategoryId:   inputs.CatId,
 		OrgId:        org.Id,
@@ -288,7 +287,15 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tx := database.CreateTx()
-	b2File, err := webcore.UploadNewFileWithTx(&internalFile, buffer.Bytes(), role, org, inputs.UploadUserId, b2Auth, tx)
+	b2File, err := webcore.UploadNewFileWithTx(
+		&internalFile,
+		fileHeader.Filename,
+		buffer.Bytes(),
+		role,
+		org,
+		inputs.UploadUserId,
+		b2Auth,
+		tx)
 	if err != nil {
 		core.Warning("Failed to upload new file: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

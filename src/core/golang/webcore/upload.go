@@ -11,6 +11,7 @@ import (
 
 func UploadNewFileWithTx(
 	file *core.ControlDocumentationFile,
+	fileName string,
 	buffer []byte,
 	role *core.Role,
 	org *core.Organization,
@@ -46,6 +47,7 @@ func UploadNewFileWithTx(
 
 	storage := core.FileStorageData{
 		MetadataId:   file.Id,
+		StorageName:  fileName,
 		OrgId:        file.OrgId,
 		BucketId:     b2File.BucketId,
 		StorageId:    b2File.FileId,

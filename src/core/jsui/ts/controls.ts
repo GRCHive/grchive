@@ -6,7 +6,6 @@ export interface ControlDocumentationCategory {
 
 export interface ControlDocumentationFile {
     Id: number
-    StorageName: string
     RelevantTime: Date
     CategoryId: number
     AltName: string
@@ -27,6 +26,7 @@ export interface VersionedMetadata {
 
 export interface FileStorageData {
 	Id           : number
+    StorageName  : string
 	MetadataId   : number
 	OrgId        : number
 	UploadTime   : Date

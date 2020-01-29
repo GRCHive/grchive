@@ -42,16 +42,16 @@ export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
                 value: 'name'
             },
             {
-                text: 'Filename',
-                value: 'filename'
-            },
-            {
                 text: 'Relevant Time',
                 value: 'relevantTime'
             },
             {
                 text: 'Version',
                 value: 'version',
+            },
+            {
+                text: 'Filename',
+                value: 'filename'
             },
             {
                 text: 'Upload Time',
@@ -114,6 +114,7 @@ export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
         }).then((resp : TGetVersionStorageDataOutput) => {
             obj.uploadTime = standardFormatDate(resp.data.UploadTime)
             obj.user = createUserString(MetadataStore.getters.getUser(resp.data.UploadUserId))
+            obj.filename = resp.data.StorageName
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
@@ -129,7 +130,7 @@ export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
         let obj = {
             id: inp.Id,
             name: inp.AltName,
-            filename: inp.StorageName,
+            filename: "Loading...",
             relevantTime: standardFormatDate(inp.RelevantTime),
             availableVersions: null,
             version: null,
