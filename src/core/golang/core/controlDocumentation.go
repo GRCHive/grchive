@@ -26,8 +26,8 @@ type FileStorageData struct {
 	MetadataId   int64     `db:"metadata_id"`
 	StorageName  string    `db:"storage_name"`
 	OrgId        int32     `db:"org_id"`
-	BucketId     string    `db:"bucket_id" json:"-"`
-	StorageId    string    `db:"storage_id" json:"-"`
+	BucketId     string    `db:"bucket_id"`
+	StorageId    string    `db:"storage_id"`
 	UploadTime   time.Time `db:"upload_time"`
 	UploadUserId int64     `db:"upload_user_id"`
 }

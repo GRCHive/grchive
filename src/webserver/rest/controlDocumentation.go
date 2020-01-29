@@ -287,7 +287,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tx := database.CreateTx()
-	b2File, err := webcore.UploadNewFileWithTx(
+	b2File, storage, err := webcore.UploadNewFileWithTx(
 		&internalFile,
 		fileHeader.Filename,
 		buffer.Bytes(),
@@ -295,7 +295,9 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		org,
 		inputs.UploadUserId,
 		b2Auth,
-		tx)
+		tx,
+		false, // useExistingMetadata
+		true)  // addToFileVersion
 	if err != nil {
 		core.Warning("Failed to upload new file: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -307,7 +309,8 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		Exchange: webcore.DEFAULT_EXCHANGE,
 		Queue:    webcore.FILE_PREVIEW_QUEUE,
 		Body: webcore.FilePreviewMessage{
-			File: internalFile,
+			File:    internalFile,
+			Storage: *storage,
 		},
 	})
 

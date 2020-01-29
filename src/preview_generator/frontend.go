@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"gitlab.com/grchive/grchive/backblaze_api"
 	"gitlab.com/grchive/grchive/core"
@@ -27,8 +28,8 @@ func generatePreview(data []byte) *webcore.RabbitMQError {
 
 	// Download file from B2.
 	encryptedBytes, err := backblaze.DownloadFile(b2Auth, backblaze.B2File{
-		BucketId: msg.File.BucketId,
-		FileId:   msg.File.StorageId,
+		BucketId: msg.Storage.BucketId,
+		FileId:   msg.Storage.StorageId,
 	})
 	if err != nil {
 		return &webcore.RabbitMQError{err, true}
@@ -57,14 +58,21 @@ func generatePreview(data []byte) *webcore.RabbitMQError {
 	defer os.RemoveAll(tempdir)
 
 	// Convert. Any failure to convert means the preview is unavailble.
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
 	cmd := exec.Command("./src/preview_generator/linux_amd64_stripped/generator",
 		"-input", tmpfile.Name(),
 		"-outputDir", tempdir)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 
 	err = cmd.Run()
 	if err != nil {
 		core.Warning("Failed to convert: " + err.Error())
-		err = database.MarkPreviewUnavailable(msg.File, core.ServerRole)
+		core.Warning("STDOUT: " + stdout.String())
+		core.Warning("STDERR: " + stderr.String())
+		err = database.MarkPreviewUnavailable(msg.File, msg.Storage, core.ServerRole)
 		if err != nil {
 			return &webcore.RabbitMQError{err, false}
 		}
@@ -89,24 +97,24 @@ func generatePreview(data []byte) *webcore.RabbitMQError {
 		tx := database.CreateTx()
 
 		// Create file preview in database and then encrypt/upload to B2.
-		previewFile := core.ControlDocumentationFile{
-			StorageName:  "PREVIEW" + msg.File.StorageName + ".pdf",
-			RelevantTime: msg.File.RelevantTime,
-			UploadTime:   msg.File.UploadTime,
-			CategoryId:   msg.File.CategoryId,
-			OrgId:        msg.File.OrgId,
-			AltName:      "PREVIEW " + msg.File.AltName,
-			Description:  "PREVIEW",
-			UploadUserId: msg.File.UploadUserId,
-		}
-		err = webcore.UploadNewFileWithTx(&previewFile, previewBytes, core.ServerRole, org, b2Auth, tx)
+		_, previewStorage, err := webcore.UploadNewFileWithTx(
+			&msg.File,
+			"PREVIEW"+msg.Storage.StorageName+".pdf",
+			previewBytes,
+			core.ServerRole,
+			org,
+			msg.Storage.UploadUserId,
+			b2Auth,
+			tx,
+			true,  // useExistingMetadata
+			false) // addToFileVersion
 		if err != nil {
 			tx.Rollback()
 			return &webcore.RabbitMQError{err, true}
 		}
 
 		// Connect file preview to original file.
-		err = database.LinkFileWithPreviewWithTx(msg.File, previewFile, core.ServerRole, tx)
+		err = database.LinkFileWithPreviewWithTx(msg.File, msg.Storage, *previewStorage, core.ServerRole, tx)
 		if err != nil {
 			tx.Rollback()
 			return &webcore.RabbitMQError{err, true}

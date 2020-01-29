@@ -1,12 +1,55 @@
 package main
 
 import (
+	"bytes"
 	"flag"
-	"github.com/h2non/filetype"
 	"gitlab.com/grchive/grchive/core"
 	"os"
 	"os/exec"
+	"strings"
 )
+
+var supportedApplicationMIME []string = []string{
+	"application/msword",
+	"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+	"application/vnd.oasis.opendocument.presentation",
+	"application/vnd.oasis.opendocument.spreadsheet",
+	"application/vnd.oasis.opendocument.text",
+	"application/pdf",
+	"application/vnd.ms-powerpoint",
+	"application/vnd.openxmlformats-officedocument.presentationml.presentation",
+	"application/x-sh",
+	"application/xhtml+xml",
+	"application/vnd.ms-excel",
+	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+}
+
+func isFileSupported(filename string) bool {
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd := exec.Command("python",
+		"src/preview_generator/mime_helper",
+		"--filename", filename)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	if err != nil {
+		core.Error("Failed to get MIME: " + err.Error() + " " + stderr.String())
+	}
+
+	mime := stdout.String()
+	if strings.HasPrefix(mime, "text/") || strings.HasPrefix(mime, "image/") {
+		return true
+	}
+
+	for _, m := range supportedApplicationMIME {
+		if strings.TrimSpace(mime) == m {
+			return true
+		}
+	}
+
+	return false
+}
 
 func main() {
 	inputFilename := flag.String("input", "", "Filename for the file to generate a preview for.")
@@ -23,19 +66,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	file, err := os.Open(*inputFilename)
-	if err != nil {
-		core.Error("Failed to open file: " + err.Error())
-	}
-
-	header := make([]byte, 261)
-	_, err = file.Read(header)
-	if err != nil {
-		core.Error("Failed to read file: " + err.Error())
-	}
-
-	if !filetype.IsImage(header) &&
-		!filetype.IsDocument(header) {
+	if !isFileSupported(*inputFilename) {
 		core.Error("Unsupported filetype.")
 	}
 

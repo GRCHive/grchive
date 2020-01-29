@@ -24,7 +24,8 @@ func (e RabbitMQError) Error() string {
 
 // Pre-defined message types.
 type FilePreviewMessage struct {
-	File core.ControlDocumentationFile
+	File    core.ControlDocumentationFile
+	Storage core.FileStorageData
 }
 
 type RecvMsgFn func([]byte) *RabbitMQError

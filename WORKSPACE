@@ -149,12 +149,6 @@ go_repository(
 )
 
 go_repository(
-    name = "com_github_h2non_filetype",
-    importpath = "github.com/h2non/filetype",
-    tag = "v1.0.10"
-)
-
-go_repository(
     name = "org_golang_x_tools",
     importpath = "golang.org/x/tools",
     tag = "gopls/v0.2.2"

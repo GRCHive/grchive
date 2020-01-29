@@ -253,28 +253,34 @@ func GetControlDocumentationForCategory(catId int64, orgId int32, role *core.Rol
 	return retArr, err
 }
 
-func LinkFileWithPreviewWithTx(file core.ControlDocumentationFile, preview core.ControlDocumentationFile, role *core.Role, tx *sqlx.Tx) error {
+func LinkFileWithPreviewWithTx(
+	file core.ControlDocumentationFile,
+	storage core.FileStorageData,
+	preview core.FileStorageData,
+	role *core.Role,
+	tx *sqlx.Tx,
+) error {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
 
 	_, err := tx.Exec(`
-		INSERT INTO file_previews (original_file_id, preview_file_id, category_id, org_id)
+		INSERT INTO file_previews (file_id, original_storage_id, preview_storage_id, org_id)
 		VALUES ($1, $2, $3, $4)
-	`, file.Id, preview.Id, file.CategoryId, file.OrgId)
+	`, file.Id, storage.Id, preview.Id, file.OrgId)
 	return err
 }
 
-func MarkPreviewUnavailable(file core.ControlDocumentationFile, role *core.Role) error {
+func MarkPreviewUnavailable(file core.ControlDocumentationFile, storage core.FileStorageData, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
 
 	tx := dbConn.MustBegin()
 	_, err := tx.Exec(`
-		INSERT INTO file_previews (original_file_id, preview_file_id, category_id, org_id)
-		VALUES ($1, NULL, $2, $3)
-	`, file.Id, file.CategoryId, file.OrgId)
+		INSERT INTO file_previews (file_id, original_storage_id, preview_storage_id, org_id)
+		VALUES ($1, $2, NULL, $3)
+	`, file.Id, storage.Id, file.OrgId)
 	if err != nil {
 		tx.Rollback()
 		return err

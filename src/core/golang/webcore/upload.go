@@ -18,21 +18,27 @@ func UploadNewFileWithTx(
 	uploadUserId int64,
 	b2Auth *backblaze.B2AuthToken,
 	tx *sqlx.Tx,
-) (*backblaze.B2File, error) {
-	err := database.CreateControlDocumentationFileWithTx(file, tx, role)
-	if err != nil {
-		return nil, err
+	useExistingMetadata bool,
+	addToFileVersion bool,
+) (*backblaze.B2File, *core.FileStorageData, error) {
+	var err error
+
+	if !useExistingMetadata {
+		err = database.CreateControlDocumentationFileWithTx(file, tx, role)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	transitKey := file.UniqueKey()
 	err = vault.TransitCreateNewEngineKey(transitKey)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	encryptedFile, err := vault.TransitEncrypt(transitKey, buffer)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	b2Filename := file.StorageFilename(org)
@@ -42,7 +48,7 @@ func UploadNewFileWithTx(
 		b2Filename,
 		encryptedFile)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	storage := core.FileStorageData{
@@ -58,14 +64,16 @@ func UploadNewFileWithTx(
 	err = database.CreateFileStorageWithTx(&storage, tx, role)
 	if err != nil {
 		backblaze.DeleteFile(b2Auth, file.StorageFilename(org), b2File)
-		return nil, err
+		return nil, nil, err
 	}
 
-	err = database.AddFileVersionWithTx(file, &storage, tx, role)
-	if err != nil {
-		backblaze.DeleteFile(b2Auth, file.StorageFilename(org), b2File)
-		return nil, err
+	if addToFileVersion {
+		err = database.AddFileVersionWithTx(file, &storage, tx, role)
+		if err != nil {
+			backblaze.DeleteFile(b2Auth, file.StorageFilename(org), b2File)
+			return nil, nil, err
+		}
 	}
 
-	return &b2File, nil
+	return &b2File, &storage, nil
 }
