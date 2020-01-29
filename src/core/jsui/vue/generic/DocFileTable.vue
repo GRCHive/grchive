@@ -97,7 +97,7 @@ export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
         window.location.assign(createSingleDocFileUrl(
             PageParamsStore.state.organization!.OktaGroupName,
             item.value.Id,
-            !!item.version ? item.version.Id : null
+            !!item.version ? item.version.VersionNumber : null
         ))
     }
 

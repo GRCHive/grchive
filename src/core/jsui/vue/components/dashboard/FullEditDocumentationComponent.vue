@@ -421,6 +421,10 @@ export default class FullEditDocumentationComponent extends Vue {
         let data = window.location.pathname.split('/')
         let resourceId = Number(data[data.length - 1])
 
+        let url = new URL(window.location.href)
+        let params = url.searchParams
+        let versionString : string | null = params.get("version")
+
         getSingleControlDocument({
             fileId: resourceId,
             orgId: PageParamsStore.state.organization!.Id,
@@ -429,7 +433,16 @@ export default class FullEditDocumentationComponent extends Vue {
             this.metadata = resp.data.File
             this.availableVersions = resp.data.Versions
             if (this.availableVersions.length > 0) {
-                this.selectVersion(this.availableVersions[0])
+                if (!!versionString) {
+                    let idx = this.availableVersions.findIndex((ele : FileVersion) => ele.VersionNumber == Number(versionString))
+                    if (idx == -1) {
+                        this.selectVersion(this.availableVersions[0])
+                    } else {
+                        this.selectVersion(this.availableVersions[idx])
+                    }
+                } else {
+                    this.selectVersion(this.availableVersions[0])
+                }
             }
             this.generateEditData()
         }).catch((err : any) => {
