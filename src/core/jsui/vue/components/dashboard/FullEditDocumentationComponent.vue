@@ -500,12 +500,10 @@ export default class FullEditDocumentationComponent extends Vue {
             relevantTime: this.editData!.File.RelevantTime,
             altName: this.editData!.File.AltName,
             description: this.editData!.File.Description,
-            uploadUserId: this.uploadUser!.Id,
         }).then((resp : TEditControlDocOutput) => {
             this.canEdit = false
             this.metadata = resp.data.File
             this.parentCat = resp.data.Category
-            this.uploadUser = resp.data.UploadUser
             this.generateEditData()
         }).catch((err : any) => {
             // @ts-ignore

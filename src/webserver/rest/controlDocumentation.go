@@ -79,7 +79,6 @@ type EditControlDocInputs struct {
 	RelevantTime time.Time `json:"relevantTime"`
 	AltName      string    `json:"altName"`
 	Description  string    `json:"description"`
-	UploadUserId int64     `json:"uploadUserId"`
 }
 
 func newControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {

@@ -107,14 +107,12 @@ export interface TEditControlDocInput {
     relevantTime: Date
     altName: string
     description: string
-    uploadUserId: number
 }
 
 export interface TEditControlDocOutput {
     data: {
         File: ControlDocumentationFile
         Category: ControlDocumentationCategory
-        UploadUser: User
     }
 }
 
