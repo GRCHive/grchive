@@ -186,14 +186,13 @@ func GetAllDocumentRequestsForDocCat(catId int64, orgId int32, role *core.Role) 
 	return requests, err
 }
 
-func FulfillDocumentRequestWithTx(requestId int64, fileId int64, catId int64, orgId int32, role *core.Role, tx *sqlx.Tx) error {
+func FulfillDocumentRequestWithTx(requestId int64, fileId int64, orgId int32, role *core.Role, tx *sqlx.Tx) error {
 	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
 
 	_, err := tx.Exec(`
 		INSERT INTO document_request_fulfillment (
-			cat_id,
 			org_id,
 			fulfilled_file_id,
 			request_id
@@ -201,23 +200,22 @@ func FulfillDocumentRequestWithTx(requestId int64, fileId int64, catId int64, or
 		VALUES (
 			$1,
 			$2,
-			$3,
-			$4
+			$3
 		)
-	`, catId, orgId, fileId, requestId)
+	`, orgId, fileId, requestId)
 	if err != nil {
 		return err
 	}
 
-	// Check if the request has any linked deployments - need to also link the file to the deployments.
+	// Check if the request has any linked vendors and link if needed.
 	_, err = tx.Exec(`
-		INSERT INTO vendor_soc_reports (deployment_id, org_id, soc_report_file_id, soc_report_cat_id)
-		SELECT link.deployment_id, $2, $3, $4
-		FROM deployment_request_link AS link
+		INSERT INTO vendor_product_soc_reports (product_id, org_id, file_id)
+		SELECT link.vendor_product_id, $2, $3
+		FROM vendor_soc_request_link AS link
 		INNER JOIN document_requests AS req
 			ON req.id = link.request_id
 		WHERE req.id = $1 AND req.org_id = $2
-	`, requestId, orgId, fileId, catId)
+	`, requestId, orgId, fileId)
 	if err != nil {
 		return err
 	}

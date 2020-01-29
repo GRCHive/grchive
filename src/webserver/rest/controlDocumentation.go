@@ -308,7 +308,6 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		err = database.FulfillDocumentRequestWithTx(
 			inputs.FulfilledRequestId.NullInt64.Int64,
 			internalFile.Id,
-			inputs.CatId,
 			inputs.OrgId,
 			role,
 			tx)
