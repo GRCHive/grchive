@@ -1,0 +1,13 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "gcloud_storage_golang_api",
+    srcs = ["api.go"],
+    importpath = "gitlab.com/grchive/grchive/gcloud_api/storage",
+    deps = [
+        "@org_golang_google_api//option:go_default_library",
+        "@com_google_cloud_go//storage:go_default_library",
+    ],
+)

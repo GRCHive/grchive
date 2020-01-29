@@ -37,6 +37,7 @@ go_binary(
         "//src/webserver/render:webserver_render_library",
         "//src/webserver/rest:webserver_rest_library",
         "//src/webserver/websocket:webserver_websocket_library",
+        "//src/gcloud_api/golang:gcloud_golang_api",
     ],
     data = [
         ":templates",

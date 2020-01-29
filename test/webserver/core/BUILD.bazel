@@ -1,209 +1,209 @@
-package(default_visibility=["//visibility:public"])
+package(default_visibility = ["//visibility:public"])
+
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 
 go_test(
     name = "search_test",
     srcs = ["search_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "roles_test",
     srcs = ["roles_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "messageHub_test",
     srcs = ["messageHub_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "hashIds_test",
     srcs = ["hashIds_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "emailVerification_test",
     srcs = ["emailVerification_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "controlDocumentation_test",
     srcs = ["controlDocumentation_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "apiKey_test",
     srcs = ["apiKey_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "maps_test",
     srcs = ["maps_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "constants_test",
     srcs = ["constants_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "encryption_test",
     srcs = ["encryption_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "error_test",
     srcs = ["error_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
-
 
 go_test(
     name = "parser_test",
     srcs = ["parser_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "structs_test",
     srcs = ["structs_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "time_test",
     srcs = ["time_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "types_test",
     srcs = ["types_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "validate_test",
     srcs = ["validate_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
         "//src/webserver/core:webserver_core_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )
 
 go_test(
     name = "config_test",
     srcs = ["config_test.go"],
+    data = [
+        "//src/webserver:config_files",
+    ],
     deps = [
+        "//src/mail_api/golang:mail_golang_api",
         "//src/webserver/core:webserver_core_library",
         "@com_github_pelletier_go_toml//:go_default_library",
         "@com_github_stretchr_testify//assert:go_default_library",
-        "//src/mail_api/golang:mail_golang_api",
     ],
-    data = [
-        "//src/webserver:config_files"
-    ]
 )

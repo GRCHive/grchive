@@ -5,6 +5,17 @@ workspace(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+http_archive(
+    name = "zlib",
+    build_file = "@com_google_protobuf//:third_party/zlib.BUILD",
+    sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
+    strip_prefix = "zlib-1.2.11",
+    urls = [
+        "https://mirror.bazel.build/zlib.net/zlib-1.2.11.tar.gz",
+        "https://zlib.net/zlib-1.2.11.tar.gz",
+    ],
+)
+
 # GO
 http_archive(
     name = "io_bazel_rules_go",
@@ -33,6 +44,18 @@ http_archive(
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
 gazelle_dependencies()
+
+go_repository(
+    name = "io_opencensus_go",
+    importpath = "go.opencensus.io",
+    tag = "v0.22.2",
+)
+
+go_repository(
+    name = "org_golang_x_text",
+    importpath = "golang.org/x/text",
+    tag = "v0.3.2",
+)
 
 go_repository(
     name = "com_github_gorilla_mux",
@@ -95,6 +118,12 @@ go_repository(
 )
 
 go_repository(
+    name = "com_github_golang_groupcache",
+    importpath = "github.com/golang/groupcache",
+    commit = "8c9f03a8e57eb486e42badaed3fb287da51807ba",
+)
+
+go_repository(
     name = "com_github_gorilla_websocket",
     importpath = "github.com/gorilla/websocket",
     tag = "v1.4.1"
@@ -152,6 +181,49 @@ go_repository(
     name = "org_golang_x_tools",
     importpath = "golang.org/x/tools",
     tag = "gopls/v0.2.2"
+)
+
+go_repository(
+    name = "org_golang_google_grpc",
+    importpath = "google.golang.org/grpc",
+    tag = "v1.27.0"
+)
+
+go_repository(
+    name = "com_github_googleapis_gax_go_v2",
+    importpath = "github.com/googleapis/gax-go/v2",
+    sum = "h1:sjZBwGj9Jlw33ImPtvFviGYvseOtDM7hkSKB7+Tv3SM=",
+    version = "v2.0.5",
+)
+
+go_repository(
+    name = "com_google_protobuf",
+    importpath = "github.com/google/protobuf",
+    tag = "v3.11.2"
+)
+
+go_repository(
+    name = "org_golang_x_net",
+    importpath = "golang.org/x/net",
+    commit = "6afb5195e5aab057fda82e27171243402346b0ad"
+)
+
+go_repository(
+    name = "org_golang_x_oauth2",
+    importpath = "golang.org/x/oauth2",
+    commit = "bf48bf16ab8d622ce64ec6ce98d2c98f916b6303"
+)
+
+go_repository(
+    name = "org_golang_google_api",
+    importpath = "google.golang.org/api",
+    tag = "v0.15.0"
+)
+
+go_repository(
+    name = "com_google_cloud_go",
+    importpath = "cloud.google.com/go",
+    tag = "v0.52.0"
 )
 
 # NODE

@@ -1,17 +1,18 @@
-package(default_visibility=["//visibility:public"])
+package(default_visibility = ["//visibility:public"])
+
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "webserver_render_library",
     srcs = [
-        "pages.go",
-        "templates.go",
-        "params.go",
         "error.go",
+        "pages.go",
+        "params.go",
+        "templates.go",
     ],
+    importpath = "gitlab.com/grchive/grchive/render",
     deps = [
         "//src/core/golang/core:webserver_core_library",
         "//src/core/golang/webcore:webserver_webcore_library",
     ],
-    importpath = "gitlab.com/grchive/grchive/render"
 )

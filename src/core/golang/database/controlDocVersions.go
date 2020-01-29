@@ -74,6 +74,37 @@ func GetFileVersionStorageData(fileId int64, orgId int32, version int32, role *c
 	return &data, err
 }
 
+func GetPreviewFileVersionStorageDataFromStorageData(storage *core.FileStorageData, role *core.Role) (*core.FileStorageData, error) {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	rows, err := dbConn.Queryx(`
+		SELECT storage.*
+		FROM file_storage AS storage
+		INNER JOIN file_previews AS fp
+			ON fp.preview_storage_id = storage.id
+		WHERE fp.file_id = $1
+			AND fp.original_storage_id = $2
+			AND fp.org_id = $3
+	`, storage.MetadataId, storage.Id, storage.OrgId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, nil
+	}
+
+	data := core.FileStorageData{}
+	err = rows.StructScan(&data)
+	if err != nil {
+		return nil, err
+	}
+	return &data, err
+}
+
 func GetPreviewFileVersionStorageData(fileId int64, orgId int32, version int32, role *core.Role) (*core.FileStorageData, error) {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
 		return nil, core.ErrorUnauthorized

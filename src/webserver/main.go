@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/gcloud_api"
 	"gitlab.com/grchive/grchive/mail_api"
 	"gitlab.com/grchive/grchive/okta_api"
 	"gitlab.com/grchive/grchive/render"
@@ -83,6 +84,7 @@ func main() {
 		Url:   core.EnvConfig.Vault.Url,
 		Token: core.EnvConfig.Vault.Token,
 	})
+	gcloud.DefaultGCloudApi.InitFromJson(core.EnvConfig.Gcloud.AuthFilename)
 
 	webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ)
 	defer webcore.DefaultRabbitMQ.Cleanup()

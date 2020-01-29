@@ -3,9 +3,9 @@ package rest
 import (
 	"bytes"
 	"encoding/json"
-	"gitlab.com/grchive/grchive/backblaze_api"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/gcloud_api"
 	"gitlab.com/grchive/grchive/vault_api"
 	"gitlab.com/grchive/grchive/webcore"
 	"io"
@@ -214,28 +214,22 @@ func deleteControlDocumentationCategory(w http.ResponseWriter, r *http.Request) 
 }
 
 func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
-	b2Auth, err := backblaze.B2Auth(core.EnvConfig.Backblaze.Key)
-	if err != nil {
-		core.Warning("Could not auth with Backblaze: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	// TODO: Do we want to offload this onto a message queue and have a
 	// separate process handle this?
 	// Steps for uploading control documentation
 	// 	1) Create temporary entry in database for the file
 	// 	2) Create new transit engine key for the file.
 	// 	3) Use transit engine to encrypt file.
-	// 	4) Send file to Backblaze.
+	// 	4) Send file to GCloud.
 	//  5) Finalize details of the file in the database
 	// 	6) Return confirmation of file upload to requester.
+	storage := gcloud.DefaultGCloudApi.GetStorageApi()
 
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
 	inputs := UploadControlDocInputs{}
-	err = webcore.UnmarshalRequestForm(r, &inputs)
+	err := webcore.UnmarshalRequestForm(r, &inputs)
 	if err != nil {
 		core.Warning("Can't parse inputs: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -286,16 +280,20 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		Description:  inputs.Description,
 	}
 
+	bucket := core.EnvConfig.Gcloud.DocBucket
+
 	tx := database.CreateTx()
-	b2File, storage, err := webcore.UploadNewFileWithTx(
+	storageData, err := webcore.UploadNewFileWithTx(
+		storage,
 		&internalFile,
+		bucket,
+		nil,
 		fileHeader.Filename,
 		buffer.Bytes(),
 		role,
-		org,
 		inputs.UploadUserId,
-		b2Auth,
 		tx,
+		org,
 		false, // useExistingMetadata
 		true)  // addToFileVersion
 	if err != nil {
@@ -304,13 +302,15 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	storageFilename := internalFile.StorageFilename(org)
+
 	// At this point we know we can put in a request to generate a preview.
 	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
 		Exchange: webcore.DEFAULT_EXCHANGE,
 		Queue:    webcore.FILE_PREVIEW_QUEUE,
 		Body: webcore.FilePreviewMessage{
 			File:    internalFile,
-			Storage: *storage,
+			Storage: *storageData,
 		},
 	})
 
@@ -323,7 +323,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 			tx)
 		if err != nil {
 			tx.Rollback()
-			backblaze.DeleteFile(b2Auth, internalFile.StorageFilename(org), *b2File)
+			storage.Delete(bucket, storageFilename)
 
 			core.Warning("Failed to fulfill request in db: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -408,39 +408,38 @@ func deleteControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b2Auth, err := backblaze.B2Auth(core.EnvConfig.Backblaze.Key)
-	if err != nil {
-		core.Warning("Could not auth with Backblaze: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	} else {
-		// If we fail in deleting anything from Backblaze just log and continue.
-		// TODO: We'll need to develop a utility that runs periodically to
-		// clean up things that failed here.
-		for _, id := range inputs.FileIds {
-			file, err := database.GetControlDocumentation(id, org.Id, role)
+	storage := gcloud.DefaultGCloudApi.GetStorageApi()
+
+	// TODO: We'll need to develop a utility that runs periodically to
+	// clean up things that failed here.
+	for _, id := range inputs.FileIds {
+		versions, err := database.GetAllVersionsFileStorage(id, org.Id, role)
+		if err != nil {
+			core.Warning("Failed to get versions: " + err.Error())
+			continue
+		}
+
+		for _, v := range versions {
+			err = storage.Delete(v.BucketId, v.StorageId)
 			if err != nil {
-				core.Warning("Failed to find control documentation: " + err.Error())
+				core.Warning("Failed to delete control documentation: " + err.Error())
 				continue
 			}
 
-			versions, err := database.GetAllVersionsFileStorage(id, org.Id, role)
+			previewStorage, err := database.GetPreviewFileVersionStorageDataFromStorageData(v, role)
 			if err != nil {
-				core.Warning("Failed to get versions: " + err.Error())
+				core.Warning("Failed to get preview storage data: " + err.Error())
 				continue
 			}
 
-			for _, v := range versions {
-				// Need to store actual storage filename on the database
-				err = backblaze.DeleteFile(b2Auth, file.StorageFilename(org), backblaze.B2File{
-					BucketId: v.BucketId,
-					FileId:   v.StorageId,
-				})
+			if previewStorage == nil {
+				continue
+			}
 
-				if err != nil {
-					core.Warning("Failed to delete control documentation: " + err.Error())
-					continue
-				}
+			err = storage.Delete(previewStorage.BucketId, previewStorage.StorageId)
+			if err != nil {
+				core.Warning("Failed to delete control documentation preview: " + err.Error())
+				continue
 			}
 		}
 	}
@@ -458,15 +457,8 @@ func deleteControlDocumentation(w http.ResponseWriter, r *http.Request) {
 func downloadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/octet-stream")
 
-	b2Auth, err := backblaze.B2Auth(core.EnvConfig.Backblaze.Key)
-	if err != nil {
-		core.Warning("Could not auth with Backblaze: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	inputs := DownloadControlDocInputs{}
-	err = webcore.UnmarshalRequestForm(r, &inputs)
+	err := webcore.UnmarshalRequestForm(r, &inputs)
 	if err != nil {
 		core.Warning("Can't parse inputs: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -501,10 +493,8 @@ func downloadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encryptedBytes, err := backblaze.DownloadFile(b2Auth, backblaze.B2File{
-		BucketId: version.BucketId,
-		FileId:   version.StorageId,
-	})
+	storage := gcloud.DefaultGCloudApi.GetStorageApi()
+	encryptedBytes, err := storage.Download(version.BucketId, version.StorageId)
 	if err != nil {
 		core.Warning("Can't get file from Backblaze: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

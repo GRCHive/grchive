@@ -1,4 +1,5 @@
-package(default_visibility=["//visibility:public"])
+package(default_visibility = ["//visibility:public"])
+
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@pip//:requirements.bzl", "requirement")
@@ -10,37 +11,33 @@ py_binary(
     ],
     main = "mime_helper.py",
     deps = [
-        requirement("file-magic")
+        requirement("file-magic"),
     ],
 )
 
 go_binary(
-    name ="generator",
-    srcs = [
-        "generator.go",
-    ],
-    deps = [
-        "//src/core/golang/core:webserver_core_library",
-    ],
+    name = "generator",
+    srcs = ["generator.go"],
     data = [
         ":mime_helper",
     ],
+    deps = [
+        "//src/core/golang/core:webserver_core_library",
+    ],
 )
 
 go_binary(
-    name ="frontend",
-    srcs = [
-        "frontend.go",
-    ],
-    deps = [
-        "//src/core/golang/core:webserver_core_library",
-        "//src/core/golang/database:webserver_database_library",
-        "//src/core/golang/webcore:webserver_webcore_library",
-        "//src/backblaze_api/golang:backblaze_golang_api",
-        "//src/vault_api/golang:vault_golang_api",
-    ],
+    name = "frontend",
+    srcs = ["frontend.go"],
     data = [
         "//src/webserver:config_files",
         ":generator",
-    ]
+    ],
+    deps = [
+        "//src/gcloud_api/golang:gcloud_golang_api",
+        "//src/core/golang/core:webserver_core_library",
+        "//src/core/golang/database:webserver_database_library",
+        "//src/core/golang/webcore:webserver_webcore_library",
+        "//src/vault_api/golang:vault_golang_api",
+    ],
 )

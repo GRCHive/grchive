@@ -1,4 +1,5 @@
-package(default_visibility=["//visibility:public"])
+package(default_visibility = ["//visibility:public"])
+
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
@@ -7,9 +8,9 @@ go_library(
         "mail.go",
         "sendgrid.go",
     ],
+    importpath = "gitlab.com/grchive/grchive/mail_api",
     deps = [
         "@com_github_sendgrid_sendgrid_go//:go_default_library",
-        "@com_github_sendgrid_sendgrid_go//helpers/mail:go_default_library"
+        "@com_github_sendgrid_sendgrid_go//helpers/mail:go_default_library",
     ],
-    importpath = "gitlab.com/grchive/grchive/mail_api"
 )

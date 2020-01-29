@@ -49,6 +49,11 @@ type BackblazeConfig struct {
 	ControlDocBucketId string
 }
 
+type GCloudConfig struct {
+	AuthFilename string
+	DocBucket    string
+}
+
 type MailConfig struct {
 	Provider      mail.MailAPIProvider
 	Key           string
@@ -75,6 +80,7 @@ type EnvConfigData struct {
 	Company            *CompanyConfig
 	Vault              *VaultConfig
 	Backblaze          *BackblazeConfig
+	Gcloud             *GCloudConfig
 	Mail               *MailConfig
 	HashId             *HashIdConfigData
 	RabbitMQ           *RabbitMQConfig
@@ -150,6 +156,10 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.Backblaze.ControlDocBucketId = tomlConfig.Get("backblaze.control_doc_bucket").(string)
 	envConfig.Backblaze.Key.Id = tomlConfig.Get("backblaze.keyId").(string)
 	envConfig.Backblaze.Key.Key = tomlConfig.Get("backblaze.key").(string)
+
+	envConfig.Gcloud = new(GCloudConfig)
+	envConfig.Gcloud.AuthFilename = tomlConfig.Get("gcloud.credentials_file").(string)
+	envConfig.Gcloud.DocBucket = tomlConfig.Get("gcloud.storage.doc_bucket").(string)
 
 	envConfig.Mail = new(MailConfig)
 	envConfig.Mail.Provider = mail.MailAPIProvider(tomlConfig.Get("mail.provider").(string))

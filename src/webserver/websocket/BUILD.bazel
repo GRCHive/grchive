@@ -1,12 +1,14 @@
-package(default_visibility=["//visibility:public"])
+package(default_visibility = ["//visibility:public"])
+
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "webserver_websocket_library",
     srcs = [
+        "processFlowNodeDisplaySettings.go",
         "websocket.go",
-        "processFlowNodeDisplaySettings.go"
     ],
+    importpath = "gitlab.com/grchive/grchive/websocket",
     deps = [
         "//src/core/golang/core:webserver_core_library",
         "//src/core/golang/database:webserver_database_library",
@@ -14,5 +16,4 @@ go_library(
         "@com_github_gorilla_mux//:go_default_library",
         "@com_github_gorilla_websocket//:go_default_library",
     ],
-    importpath = "gitlab.com/grchive/grchive/websocket"
 )

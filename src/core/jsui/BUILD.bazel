@@ -1,10 +1,10 @@
-package(default_visibility=["//visibility:public"])
+package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "corejsui-assets",
     srcs = glob([
-        "assets/*.jpg"
-    ])
+        "assets/*.jpg",
+    ]),
 )
 
 filegroup(
@@ -21,33 +21,40 @@ filegroup(
         "webpack/base.config.js",
         "webpack/dev.config.js",
         "webpack/prod.config.js",
-        "package.json"
-    ]
+        "package.json",
+    ],
 )
 
 CMD_DEV = "cd src/core/jsui && rm -rf dist/* && npx webpack --config ./webpack/dev.config.js && zip -r ../../../$@ dist/"
+
 CMD_PROD = "cd src/core/jsui && rm -rf dist/* && npx webpack --config ./webpack/prod.config.js && zip -r ../../../$@ dist/"
 
 genrule(
     name = "corejsui-nosmap",
-    srcs = [":corejsui-files", "loader.ejs"],
+    srcs = [
+        ":corejsui-files",
+        "loader.ejs",
+    ],
     outs = [
         "dist-nosmap.zip",
     ],
     cmd = CMD_PROD,
     message = "Run Webpack for corejsui (no smap)",
-    local=True
+    local = True,
 )
 
 genrule(
     name = "corejsui-smap",
-    srcs = [":corejsui-files", "loader.ejs"],
+    srcs = [
+        ":corejsui-files",
+        "loader.ejs",
+    ],
     outs = [
         "dist-smap.zip",
     ],
     cmd = CMD_DEV,
     message = "Run Webpack for corejsui (with smap)",
-    local=True
+    local = True,
 )
 
 genrule(
@@ -57,7 +64,7 @@ genrule(
         "//conditions:default": [":corejsui-smap"],
     }),
     outs = ["corejsui.zip"],
-    cmd = "cp $< $@"
+    cmd = "cp $< $@",
 )
 
 genrule(
@@ -70,5 +77,5 @@ genrule(
     cmd = "unzip $(locations :corejsui) && \
         for X in $(OUTS); do \
             cp \"dist/`basename $$X`\" $$X;\
-        done"
+        done",
 )

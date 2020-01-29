@@ -1,14 +1,18 @@
-package(default_visibility=["//visibility:public"])
+package(default_visibility = ["//visibility:public"])
+
 load("@rules_python//python:defs.bzl", "py_runtime_pair")
 
 py_runtime(
     name = "python_3.8.1",
-    files = glob([
-        "python/python-3.8.1/bin/**",
-    ], exclude=[
-        "python/python-3.8.1/bin/lib/python3.8/site-packages/setuptools/script (dev).tmpl",
-        "python/python-3.8.1/bin/lib/python3.8/site-packages/setuptools/command/launcher manifest.xml",
-    ]),
+    files = glob(
+        [
+            "python/python-3.8.1/bin/**",
+        ],
+        exclude = [
+            "python/python-3.8.1/bin/lib/python3.8/site-packages/setuptools/script (dev).tmpl",
+            "python/python-3.8.1/bin/lib/python3.8/site-packages/setuptools/command/launcher manifest.xml",
+        ],
+    ),
     interpreter = "python/python-3.8.1/bin/bin/python3",
     python_version = "PY3",
 )

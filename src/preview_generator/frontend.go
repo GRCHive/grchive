@@ -3,9 +3,9 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"gitlab.com/grchive/grchive/backblaze_api"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/gcloud_api"
 	"gitlab.com/grchive/grchive/vault_api"
 	"gitlab.com/grchive/grchive/webcore"
 	"io/ioutil"
@@ -21,16 +21,10 @@ func generatePreview(data []byte) *webcore.RabbitMQError {
 		return &webcore.RabbitMQError{err, false}
 	}
 
-	b2Auth, err := backblaze.B2Auth(core.EnvConfig.Backblaze.Key)
-	if err != nil {
-		return &webcore.RabbitMQError{err, true}
-	}
+	storage := gcloud.DefaultGCloudApi.GetStorageApi()
 
 	// Download file from B2.
-	encryptedBytes, err := backblaze.DownloadFile(b2Auth, backblaze.B2File{
-		BucketId: msg.Storage.BucketId,
-		FileId:   msg.Storage.StorageId,
-	})
+	encryptedBytes, err := storage.Download(msg.Storage.BucketId, msg.Storage.StorageId)
 	if err != nil {
 		return &webcore.RabbitMQError{err, true}
 	}
@@ -88,24 +82,22 @@ func generatePreview(data []byte) *webcore.RabbitMQError {
 			return &webcore.RabbitMQError{err, true}
 		}
 
-		// Get the relevant organization.
-		org, err := database.FindOrganizationFromId(msg.File.OrgId)
-		if err != nil {
-			return &webcore.RabbitMQError{err, true}
-		}
-
 		tx := database.CreateTx()
 
+		storageFilename := msg.Storage.StorageId + "PREVIEW"
+
 		// Create file preview in database and then encrypt/upload to B2.
-		_, previewStorage, err := webcore.UploadNewFileWithTx(
+		previewStorage, err := webcore.UploadNewFileWithTx(
+			storage,
 			&msg.File,
+			msg.Storage.BucketId,
+			&storageFilename,
 			"PREVIEW"+msg.Storage.StorageName+".pdf",
 			previewBytes,
 			core.ServerRole,
-			org,
 			msg.Storage.UploadUserId,
-			b2Auth,
 			tx,
+			nil,
 			true,  // useExistingMetadata
 			false) // addToFileVersion
 		if err != nil {
@@ -135,6 +127,7 @@ func main() {
 		Url:   core.EnvConfig.Vault.Url,
 		Token: core.EnvConfig.Vault.Token,
 	})
+	gcloud.DefaultGCloudApi.InitFromJson(core.EnvConfig.Gcloud.AuthFilename)
 
 	webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ)
 	defer webcore.DefaultRabbitMQ.Cleanup()
