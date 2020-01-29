@@ -132,5 +132,19 @@ func GetCurrentRequestRole(r *http.Request, orgId int32) (*core.Role, error) {
 		return nil, err
 	}
 
-	return ObtainAPIKeyRole(key, orgId)
+	role, err := ObtainAPIKeyRole(key, orgId)
+	if err != nil {
+		return nil, err
+	}
+
+	verified, err := database.IsUserVerified(key.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	if !verified {
+		role.SetMax(core.AccessView)
+	}
+
+	return role, nil
 }

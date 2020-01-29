@@ -195,6 +195,78 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 	return AccessNone
 }
 
+func (p *PermissionsMap) SetAccessType(resource ResourceType, access AccessType) {
+	switch resource {
+	case ResourceOrgUsers:
+		p.OrgUsersAccess = access
+		break
+	case ResourceOrgRoles:
+		p.OrgRolesAccess = access
+		break
+	case ResourceProcessFlows:
+		p.ProcessFlowsAccess = access
+		break
+	case ResourceControls:
+		p.ControlsAccess = access
+		break
+	case ResourceControlDocumentation:
+		p.ControlDocumentationAccess = access
+		break
+	case ResourceControlDocumentationMetadata:
+		p.ControlDocMetadataAccess = access
+		break
+	case ResourceRisks:
+		p.RisksAccess = access
+		break
+	case ResourceGeneralLedger:
+		p.GLAccess = access
+		break
+	case ResourceSystems:
+		p.SystemAccess = access
+		break
+	case ResourceDatabases:
+		p.DbAccess = access
+		break
+	case ResourceDbConnections:
+		p.DbConnectionAccess = access
+		break
+	case ResourceDocRequests:
+		p.DocRequestAccess = access
+		break
+	case ResourceDeployments:
+		p.DeploymentAccess = access
+		break
+	case ResourceServers:
+		p.ServerAccess = access
+		break
+	case ResourceVendors:
+		p.VendorAccess = access
+		break
+	}
+}
+
 func (p PermissionsMap) HasAccess(resource ResourceType, access AccessType) bool {
 	return (p.GetAccessType(resource) & access) != 0
+}
+
+func MaxAccessType(a AccessType, b AccessType) AccessType {
+	if a < b {
+		return b
+	}
+	return a
+}
+
+func MinAccessType(a AccessType, b AccessType) AccessType {
+	if a > b {
+		return b
+	}
+	return a
+}
+
+func (r *Role) SetMax(access AccessType) {
+	for _, resource := range AvailableResources {
+		r.Permissions.SetAccessType(
+			resource,
+			MinAccessType(access, r.Permissions.GetAccessType(resource)))
+	}
 }
