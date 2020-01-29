@@ -6,6 +6,7 @@ import {
     ControlDocumentationFile,
     FileVersion,
     FileStorageData,
+    VersionedMetadata,
     cleanJsonControlDocumentationFile,
     cleanJsonFileStorageData
 } from '../controls'
@@ -161,6 +162,7 @@ export function deleteControlDocuments(inp: TDeleteControlDocumentsInput) : Prom
 export interface TDownloadSingleControlDocumentInput {
     fileId: number
     orgId: number
+    version: number
 }
 
 export interface TDownloadSingleControlDocumentOutput {
@@ -175,7 +177,7 @@ export function downloadSingleControlDocument(inp : TDownloadSingleControlDocume
 }
 
 export interface TDownloadControlDocumentsInput {
-    files: ControlDocumentationFile[]
+    files: VersionedMetadata[]
     orgId: number
 }
 
@@ -189,11 +191,12 @@ export function downloadControlDocuments(inp: TDownloadControlDocumentsInput) : 
         for (let file of inp.files) {
             try {
                 let blobData = await downloadSingleControlDocument({
-                    fileId: file.Id,
+                    fileId: file.File.Id,
                     orgId: inp.orgId,
+                    version: file.Version.VersionNumber,
                 })
 
-                zip.folder(file.RelevantTime.toDateString()).file(`${file.Id}-${file.StorageName}`, blobData.data)
+                zip.folder(file.File.RelevantTime.toDateString()).file(`${file.File.Id}-${file.File.StorageName}`, blobData.data)
             } catch (e) {
                 reject(e)
                 return

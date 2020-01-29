@@ -260,7 +260,7 @@ import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import CreateNewVendorForm from './CreateNewVendorForm.vue'
 import FullEditDocumentationCategoryComponent from './FullEditDocumentationCategoryComponent.vue'
 import CreateNewVendorProductForm from './CreateNewVendorProductForm.vue'
-import { ControlDocumentationFile, extractControlDocumentationFileHandle } from '../../../ts/controls'
+import { ControlDocumentationFile, VersionedMetadata, extractControlDocumentationFileHandle } from '../../../ts/controls'
 import { DocumentRequest } from '../../../ts/docRequests'
 import {
     TGetAllDocumentRequestOutput,
@@ -474,14 +474,14 @@ export default class FullEditVendorComponent extends Vue {
         })
     }
 
-    unlinkSocFiles(files : ControlDocumentationFile[]) {
+    unlinkSocFiles(files : VersionedMetadata[]) {
         unlinkVendorProductSocFiles({
             productId: this.selectedProduct!.Id,
             vendorId: this.currentVendor!.Id,
             orgId: PageParamsStore.state.organization!.Id,
-            socFiles: files.map(extractControlDocumentationFileHandle)
+            socFiles: files.map((ele : VersionedMetadata) => extractControlDocumentationFileHandle(ele.File))
         }).then(() => {
-            let idSet = new Set<number>(files.map((ele : ControlDocumentationFile) => ele.Id))
+            let idSet = new Set<number>(files.map((ele : VersionedMetadata) => ele.File.Id))
             this.productSocFiles = this.productSocFiles.filter((ele : ControlDocumentationFile) => !idSet.has(ele.Id))
         }).catch((err : any) => {
             // @ts-ignore

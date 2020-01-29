@@ -23,6 +23,7 @@
                 selectable
                 multi
                 :resources="currentCatFiles"
+                disable-version-select
             >
             </doc-file-table>
 

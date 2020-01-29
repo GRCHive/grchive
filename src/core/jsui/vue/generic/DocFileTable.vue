@@ -2,7 +2,7 @@
 
 import Vue, {VNode} from 'vue'
 import { VChip, VIcon, VMenu, VList, VListItem } from 'vuetify/lib'
-import Component from 'vue-class-component'
+import Component, { mixins } from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
 import MetadataStore from '../../ts/metadata'
@@ -16,14 +16,23 @@ import {
     TGetVersionStorageDataOutput,
     getVersionStorageData
 } from '../../ts/api/apiControlDocumentation' 
-import { FileVersion } from '../../ts/controls'
+import { VersionedMetadata, FileVersion } from '../../ts/controls'
+
+const DocProps = Vue.extend({
+    props: {
+        disableVersionSelect: {
+            type: Boolean,
+            default: false
+        }
+    }
+})
 
 @Component({
     components: {
         BaseResourceTable
     }
 })
-export default class DocFileTable extends ResourceTableProps {
+export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
     fileVersions : Record<number, number[]> = Object()
 
     get tableHeaders() : any[] {
@@ -65,7 +74,7 @@ export default class DocFileTable extends ResourceTableProps {
                 fileId: id,
                 orgId: PageParamsStore.state.organization!.Id,
             }).then((resp : TAllFileVersionsOutput) => {
-                obj.availableVersions = resp.data.map((ele : FileVersion) => ele.VersionNumber)
+                obj.availableVersions = resp.data
                 if (obj.availableVersions.length > 0) {
                     this.selectVersion(obj, obj.availableVersions[0])
                 }
@@ -88,12 +97,12 @@ export default class DocFileTable extends ResourceTableProps {
         window.location.assign(createSingleDocFileUrl(
             PageParamsStore.state.organization!.OktaGroupName,
             item.value.Id,
-            item.version
+            !!item.version ? item.version.Id : null
         ))
     }
 
-    selectVersion(obj : any, v : number) {
-        if (!obj.availableVersions.includes(v)) {
+    selectVersion(obj : any, v : FileVersion) {
+        if (obj.availableVersions.findIndex((ele : FileVersion) => ele.VersionNumber == v.VersionNumber) == -1) {
             return
         }
         
@@ -101,7 +110,7 @@ export default class DocFileTable extends ResourceTableProps {
         getVersionStorageData({
             fileId: obj.id,
             orgId: PageParamsStore.state.organization!.Id,
-            version: v
+            version: v.VersionNumber
         }).then((resp : TGetVersionStorageDataOutput) => {
             obj.uploadTime = standardFormatDate(resp.data.UploadTime)
             obj.user = createUserString(MetadataStore.getters.getUser(resp.data.UploadUserId))
@@ -151,7 +160,7 @@ export default class DocFileTable extends ResourceTableProps {
             "mdi-chevron-down"
         )
 
-        let availableVersionsNodes = !!props.item.availableVersions ? props.item.availableVersions.map((ele : number) => {
+        let availableVersionsNodes = !!props.item.availableVersions ? props.item.availableVersions.map((ele : FileVersion) => {
             let item = this.$createElement(
                 VListItem,
                 {
@@ -161,7 +170,7 @@ export default class DocFileTable extends ResourceTableProps {
                         }
                     }
                 },
-                ele.toString()
+                ele.VersionNumber.toString()
             )
             return item
         }) : []
@@ -180,7 +189,8 @@ export default class DocFileTable extends ResourceTableProps {
             VMenu,
             {
                 props: {
-                    "offset-y": true
+                    "offset-y": true,
+                    "disabled": this.disableVersionSelect
                 },
                 scopedSlots: {
                     activator: (chipProps: any) => {
@@ -199,7 +209,7 @@ export default class DocFileTable extends ResourceTableProps {
                                 }
                             },
                             [
-                                props.item.version,
+                                !!props.item.version ? props.item.version.VersionNumber : "Loading...",
                                 dropdownIcon
                             ]
                         )
@@ -237,7 +247,10 @@ export default class DocFileTable extends ResourceTableProps {
                     showExpand: true
                 },
                 on: {
-                    input: (items : any[]) => this.$emit('input', items.map((ele : any) => ele.value)),
+                    input: (items : any[]) => this.$emit('input', items.map((ele : any) => ({
+                        File: ele.value,
+                        Version: ele.version,
+                    } as VersionedMetadata))),
                     delete: (item : any) => this.$emit('delete', item.value),
                     'click:row': this.goToDocFile
                 },

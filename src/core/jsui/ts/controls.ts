@@ -20,6 +20,11 @@ export interface FileVersion {
 	VersionNumber : number
 }
 
+export interface VersionedMetadata {
+    File: ControlDocumentationFile
+    Version: FileVersion
+}
+
 export interface FileStorageData {
 	Id           : number
 	MetadataId   : number

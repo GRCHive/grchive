@@ -96,7 +96,7 @@ import Component from 'vue-class-component'
 import DocFileTable from './DocFileTable.vue'
 import GenericDeleteConfirmationForm from '../components/dashboard/GenericDeleteConfirmationForm.vue'
 import UploadDocumentationForm from '../components/dashboard/UploadDocumentationForm.vue'
-import { ControlDocumentationFile } from '../../ts/controls'
+import { ControlDocumentationFile, VersionedMetadata } from '../../ts/controls'
 import { deleteControlDocuments } from '../../ts/api/apiControlDocumentation'
 import { PageParamsStore } from '../../ts/pageParams'
 import { contactUsUrl } from '../../ts/url'
@@ -151,7 +151,7 @@ const Props = Vue.extend({
 // upload/delete/sampling).
 @Component
 export default class DocFileManager extends Props {
-    selectedFiles: ControlDocumentationFile[] = []
+    selectedFiles: VersionedMetadata[] = []
     showHideSelectFiles: boolean = false
 
     showHideDeleteFiles: boolean = false
@@ -169,20 +169,22 @@ export default class DocFileManager extends Props {
     }
 
     get selectedFileNames() : string[] {
-        return this.selectedFiles.map((ele) => ele.StorageName)
+        return this.selectedFiles.map((ele) => ele.File.AltName)
     }
 
     deleteSelectedFiles() {
         this.showHideSelectFiles = true
         this.showHideDeleteFiles = false
         this.deleteInProgress = true
+
+        let selectedFileIds = this.selectedFiles.map((ele :VersionedMetadata) => ele.File.Id)
         deleteControlDocuments({
             orgId: PageParamsStore.state.organization!.Id,
-            fileIds: this.selectedFiles.map((ele) => ele.Id),
+            fileIds: selectedFileIds,
         }).then(() => {
-            let selectedFileSet = new Set(this.selectedFiles)
+            let selectedFileSet = new Set<number>(selectedFileIds)
             for (let i = this.value.length - 1; i >= 0; --i) {
-                if (selectedFileSet.has(this.value[i] as ControlDocumentationFile)) {
+                if (selectedFileSet.has((this.value[i] as ControlDocumentationFile).Id)) {
                     this.value.splice(i, 1)
                     this.$emit('input', this.value)
                 }

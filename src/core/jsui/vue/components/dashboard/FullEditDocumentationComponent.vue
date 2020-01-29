@@ -334,6 +334,7 @@ export default class FullEditDocumentationComponent extends Vue {
         downloadSingleControlDocument({
             fileId: this.previewMetadata!.Id,
             orgId: PageParamsStore.state.organization!.Id,
+            version: 1,
         }).then((resp : TDownloadSingleControlDocumentOutput) => {
             this.previewData = resp.data
         }).catch((err : any) => {
@@ -476,6 +477,7 @@ export default class FullEditDocumentationComponent extends Vue {
         downloadSingleControlDocument({
             fileId: this.metadata!.Id,
             orgId: PageParamsStore.state.organization!.Id,
+            version: 1,
         }).then((resp : TDownloadSingleControlDocumentOutput) => {
             saveAs(resp.data, this.metadata!.StorageName)
         }).catch((err : any) => {
