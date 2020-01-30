@@ -1,1 +1,6 @@
 common --experimental_allow_incremental_repository_updates
+
+build --action_env RABBITMQ_USER
+build --action_env RABBITMQ_PASSWORD
+build --action_env RABBITMQ_HOST
+build --action_env RABBITMQ_PORT

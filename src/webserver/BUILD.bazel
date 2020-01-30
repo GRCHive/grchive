@@ -8,16 +8,6 @@ filegroup(
     ])
 )
 
-genrule(
-    name = "config_files",
-    srcs = select({
-        "//:production": ["config/prod.toml"],
-        "//conditions:default": ["config/dev.toml"],
-    }),
-    outs = ["config/config.toml"],
-    cmd = "cp $< $@"
-)
-
 go_binary(
     name = "webserver",
     srcs = [
@@ -44,6 +34,6 @@ go_binary(
         "//src/core/jsui:corejsui-assets",
         "//src/core/jsui:corejsui",
         "//src/core/jsui:corejsui-loader-templates",
-        ":config_files",
+        "//src/webserver/config:config",
     ]
 )

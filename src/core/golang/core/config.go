@@ -3,7 +3,6 @@ package core
 import (
 	"encoding/hex"
 	"github.com/pelletier/go-toml"
-	"gitlab.com/grchive/grchive/backblaze_api"
 	"gitlab.com/grchive/grchive/mail_api"
 	"io/ioutil"
 )
@@ -44,11 +43,6 @@ type VaultConfig struct {
 	Token string
 }
 
-type BackblazeConfig struct {
-	Key                backblaze.B2Key
-	ControlDocBucketId string
-}
-
 type GCloudConfig struct {
 	AuthFilename string
 	DocBucket    string
@@ -66,8 +60,10 @@ type HashIdConfigData struct {
 }
 
 type RabbitMQConfig struct {
-	Host string
-	Port int32
+	Username string
+	Password string
+	Host     string
+	Port     int32
 }
 
 type EnvConfigData struct {
@@ -79,7 +75,6 @@ type EnvConfigData struct {
 	UseSecureCookies   bool
 	Company            *CompanyConfig
 	Vault              *VaultConfig
-	Backblaze          *BackblazeConfig
 	Gcloud             *GCloudConfig
 	Mail               *MailConfig
 	HashId             *HashIdConfigData
@@ -152,11 +147,6 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.Vault.Url = tomlConfig.Get("vault.url").(string)
 	envConfig.Vault.Token = tomlConfig.Get("vault.token").(string)
 
-	envConfig.Backblaze = new(BackblazeConfig)
-	envConfig.Backblaze.ControlDocBucketId = tomlConfig.Get("backblaze.control_doc_bucket").(string)
-	envConfig.Backblaze.Key.Id = tomlConfig.Get("backblaze.keyId").(string)
-	envConfig.Backblaze.Key.Key = tomlConfig.Get("backblaze.key").(string)
-
 	envConfig.Gcloud = new(GCloudConfig)
 	envConfig.Gcloud.AuthFilename = tomlConfig.Get("gcloud.credentials_file").(string)
 	envConfig.Gcloud.DocBucket = tomlConfig.Get("gcloud.storage.doc_bucket").(string)
@@ -172,6 +162,8 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.HashId.MinLength = int(tomlConfig.Get("hashids.min_length").(int64))
 
 	envConfig.RabbitMQ = new(RabbitMQConfig)
+	envConfig.RabbitMQ.Username = tomlConfig.Get("rabbitmq.username").(string)
+	envConfig.RabbitMQ.Password = tomlConfig.Get("rabbitmq.password").(string)
 	envConfig.RabbitMQ.Host = tomlConfig.Get("rabbitmq.host").(string)
 	envConfig.RabbitMQ.Port = int32(tomlConfig.Get("rabbitmq.port").(int64))
 

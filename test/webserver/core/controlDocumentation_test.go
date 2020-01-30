@@ -32,6 +32,7 @@ func TestStorageFilename(t *testing.T) {
 	for _, ref := range []struct {
 		file     core.ControlDocumentationFile
 		org      core.Organization
+		version  int32
 		filename string
 	}{
 		{
@@ -42,7 +43,8 @@ func TestStorageFilename(t *testing.T) {
 				Id:   1,
 				Name: "Test",
 			},
-			filename: "org-1-Test/controlDocFile-3",
+			version:  0,
+			filename: "org-1-Test/controlDocFile-3-v0",
 		},
 		{
 			file: core.ControlDocumentationFile{
@@ -52,10 +54,11 @@ func TestStorageFilename(t *testing.T) {
 				Id:   3,
 				Name: "Blah Blah",
 			},
-			filename: "org-3-Blah Blah/controlDocFile-392",
+			version:  3655,
+			filename: "org-3-Blah Blah/controlDocFile-392-v3655",
 		},
 	} {
-		assert.Equal(t, ref.filename, ref.file.StorageFilename(&ref.org))
+		assert.Equal(t, ref.filename, ref.file.StorageFilename(&ref.org, ref.version))
 	}
 
 }

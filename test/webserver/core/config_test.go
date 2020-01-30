@@ -51,13 +51,14 @@ func getNestedField(val reflect.Value, field string) reflect.Value {
 func generateTestToml(config GenerateTomlConfig) (*toml.Tree, *core.EnvConfigData) {
 	newTree, _ := toml.TreeFromMap(map[string]interface{}{})
 	newData := core.EnvConfigData{
-		Okta:      new(core.OktaConfig),
-		Login:     new(core.LoginConfig),
-		Company:   new(core.CompanyConfig),
-		Vault:     new(core.VaultConfig),
-		Backblaze: new(core.BackblazeConfig),
-		Mail:      new(core.MailConfig),
-		HashId:    new(core.HashIdConfigData),
+		Okta:     new(core.OktaConfig),
+		Login:    new(core.LoginConfig),
+		Company:  new(core.CompanyConfig),
+		Vault:    new(core.VaultConfig),
+		Gcloud:   new(core.GCloudConfig),
+		Mail:     new(core.MailConfig),
+		HashId:   new(core.HashIdConfigData),
+		RabbitMQ: new(core.RabbitMQConfig),
 	}
 
 	newDataVal := reflect.ValueOf(&newData).Elem()
@@ -65,6 +66,7 @@ func generateTestToml(config GenerateTomlConfig) (*toml.Tree, *core.EnvConfigDat
 	for _, paramCfg := range config.Params {
 		newTree.Set(paramCfg.TomlFieldName, paramCfg.Value)
 		field := getNestedField(newDataVal, paramCfg.StructFieldName)
+
 		if paramCfg.ConfigValue != nil {
 			field.Set(reflect.ValueOf(paramCfg.ConfigValue))
 		} else {
@@ -122,15 +124,18 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"Company.Domain", "company.domain", "domain", nil},
 					{"Vault.Url", "vault.url", "url", nil},
 					{"Vault.Token", "vault.token", "token", nil},
-					{"Backblaze.ControlDocBucketId", "backblaze.control_doc_bucket", "bucketId", nil},
-					{"Backblaze.Key.Id", "backblaze.keyId", "keyId", nil},
-					{"Backblaze.Key.Key", "backblaze.key", "key", nil},
+					{"Gcloud.AuthFilename", "gcloud.credentials_file", "filenamegoeshere", nil},
+					{"Gcloud.DocBucket", "gcloud.storage.doc_bucket", "bucketname", nil},
 					{"Mail.Provider", "mail.provider", "provider", mail.MailAPIProvider("provider")},
 					{"Mail.Key", "mail.key", "key", nil},
 					{"Mail.VeriEmailFrom.Name", "mail.verification.from.name", "name", nil},
 					{"Mail.VeriEmailFrom.Email", "mail.verification.from.email", "email", nil},
 					{"HashId.Salt", "hashids.salt", "salt", nil},
 					{"HashId.MinLength", "hashids.min_length", int64(100), 100},
+					{"RabbitMQ.Username", "rabbitmq.username", "name", nil},
+					{"RabbitMQ.Password", "rabbitmq.password", "asdfasdf", nil},
+					{"RabbitMQ.Host", "rabbitmq.host", "hostname", nil},
+					{"RabbitMQ.Port", "rabbitmq.port", int64(64), int32(64)},
 				},
 			},
 			parseError: false,

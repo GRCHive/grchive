@@ -66,5 +66,7 @@ salt = "7409d5d933caf02affce"
 min_length = 8
 
 [rabbitmq]
-host = "localhost"
-port = 5672
+username = "${RABBITMQ_USER}"
+password = "${RABBITMQ_PASSWORD}"
+host = "${RABBITMQ_HOST}"
+port = ${RABBITMQ_PORT}

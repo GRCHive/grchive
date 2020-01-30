@@ -1,0 +1,40 @@
+package(default_visibility=["//visibility:public"])
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+
+PID_FILE="/var/lib/rabbitmq/mnesia/rabbitmq"
+
+genrule(
+    name = "run_rabbitmq",
+    srcs = [
+        "run_rabbitmq.sh.tmpl"
+    ],
+    outs = [
+        "run_rabbitmq.sh"
+    ],
+    cmd = "envsubst '$${RABBITMQ_USER} $${RABBITMQ_PASSWORD}' < $< > $@"
+)
+
+genrule(
+    name = "rabbitmq_env",
+    srcs = [
+        "rabbitmq-env.conf.tmpl"
+    ],
+    outs = [
+        "etc/rabbitmq/rabbitmq-env.conf"
+    ],
+    cmd = "envsubst '$${RABBITMQ_PORT}' < $< > $@"
+)
+
+container_image(
+    name = "rabbitmq",
+    base = "@rabbitmq//image",
+    files = [
+        ":run_rabbitmq",
+        ":rabbitmq_env"
+    ],
+    data_path = ".",
+    cmd = "./run_rabbitmq.sh",
+    env = {
+        "RABBITMQ_PID_FILE" : PID_FILE
+    }
+)

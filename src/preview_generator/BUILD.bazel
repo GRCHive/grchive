@@ -30,7 +30,7 @@ go_binary(
     name = "frontend",
     srcs = ["frontend.go"],
     data = [
-        "//src/webserver:config_files",
+        "//src/webserver/config:config",
         ":generator",
     ],
     deps = [

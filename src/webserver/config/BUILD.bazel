@@ -1,0 +1,11 @@
+package(default_visibility=["//visibility:public"])
+
+genrule(
+    name = "config",
+    srcs = select({
+        "//:production": ["prod.toml.tmpl"],
+        "//conditions:default": ["dev.toml.tmpl"],
+    }),
+    outs = ["config.toml"],
+    cmd = "envsubst < $< > $@",
+)

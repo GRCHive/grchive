@@ -72,7 +72,20 @@ This document will assume that the git checkout directory is set in an environme
 Note that the Vault server must be started before attempting to run the webserver.
 Every time the Vault server is restarted, it must be unsealed.
 
+## Environment Variables
+
+The build depends on the presence on a number of environment variables to properly generate configuration files.
+
+- `RABBITMQ_USER`: The username to use to connect to the RabbitMQ server in the Docker container.
+- `RABBITMQ_PASSWORD`: The password to use to connect to the RabbitMQ server in the Docker container.
+- `RABBITMQ_HOST`: The hostname/IP address of the RabbitMQ server to connect to.
+- `RABBITMQ_PORT`: The port the RabbitMQ server is listening on.
+
+## Run RabbitMQ
+
 ## Build and Run
+
+Note that this steps relies on having an unsealed Vault, a running RabbitMQ server (Docker), and a running PostgreSQL database.
 
 - `cd $SRC`
 - `bazel build //src/webserver:webserver`
