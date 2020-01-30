@@ -12,6 +12,7 @@ This document will assume that the git checkout directory is set in an environme
 - PostgreSQL
 - Node v12.10
 - RabbitMQ
+- Docker
 
 ## Setup
 
@@ -82,6 +83,10 @@ The build depends on the presence on a number of environment variables to proper
 - `RABBITMQ_PORT`: The port the RabbitMQ server is listening on.
 
 ## Run RabbitMQ
+
+- `cd $SRC`
+- `bazel run //devops/docker/rabbitmq:rabbitmq`
+- `docker run -p ${RABBITMQ_PORT}:${RABBITMQ_PORT} bazel/devops/docker/rabbitmq:rabbitmq`
 
 ## Build and Run
 

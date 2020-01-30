@@ -168,7 +168,7 @@ type RealRabbitMQInterface struct {
 }
 
 func generateUrlFromConfig(cfg core.RabbitMQConfig) string {
-	return fmt.Sprintf("amqp://%s:%d/", cfg.Host, cfg.Port)
+	return fmt.Sprintf("amqp://%s:%s@%s:%d/", cfg.Username, cfg.Password, cfg.Host, cfg.Port)
 }
 
 func (r *RealRabbitMQInterface) Connect(cfg core.RabbitMQConfig) {
