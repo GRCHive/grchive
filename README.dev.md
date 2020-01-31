@@ -71,7 +71,7 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
     ./download_python.sh
     ```
 
-## Setup Dev Environment
+## Setup PostgreSQL
 
 - Setup PostgreSQL
     ```
