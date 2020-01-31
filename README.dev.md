@@ -12,6 +12,7 @@ This document will assume that the git checkout directory is set in an environme
 - PostgreSQL
 - Node v12.10
 - Docker
+- Libreoffice
 
 ## Build Variables
 
@@ -147,6 +148,9 @@ Thus this step also relies on having an unsealed Vault (Docker), a running Rabbi
 - `bazel build //src/preview_generator:frontend`
 - `bazel run //src/preview_generator:frontend`
 
+If you wish to run the Docker container:
+
+- `bazel run //devops/docker/preview_generator:docker_preview_generator`
 
 ## Run Tests
 
