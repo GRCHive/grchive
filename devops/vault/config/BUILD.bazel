@@ -1,0 +1,13 @@
+package(default_visibility=["//visibility:public"])
+
+genrule(
+    name = "vault_config",
+    srcs = select({
+        "//:production": ["prod.hcl.tmpl"],
+        "//conditions:default": ["dev.hcl.tmpl"],
+    }),
+    outs = [
+        "config.hcl"
+    ],
+    cmd = "envsubst < $< > $@"
+)

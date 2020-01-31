@@ -4,3 +4,13 @@ build --action_env RABBITMQ_USER
 build --action_env RABBITMQ_PASSWORD
 build --action_env RABBITMQ_HOST
 build --action_env RABBITMQ_PORT
+
+build --action_env VAULT_USER
+build --action_env VAULT_PASSWORD
+build --action_env VAULT_HOST
+build --action_env VAULT_PORT
+
+build --action_env POSTGRES_USER
+build --action_env POSTGRES_PASSWORD
+build --action_env POSTGRES_HOST
+build --action_env POSTGRES_PORT

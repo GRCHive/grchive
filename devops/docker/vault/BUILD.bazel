@@ -1,0 +1,25 @@
+package(default_visibility=["//visibility:public"])
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+
+
+genrule(
+    name = "run_vault",
+    srcs = [
+        "run_vault.sh.tmpl"
+    ],
+    outs = [
+        "run_vault.sh"
+    ],
+    cmd = "envsubst < $< > $@"
+)
+
+container_image(
+    name = "vault",
+    base = "@vault//image",
+    files = [
+        ":run_vault",
+        "//devops/vault/config:vault_config"
+    ],
+    data_path = ".",
+    cmd = "sh ./run_vault.sh",
+)

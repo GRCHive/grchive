@@ -1,5 +1,3 @@
-#!/bin/bash
-
-echo "========= YOU MUST ALREADY BE LOGGED IN WITH A SUFFICIENTLY PRIVILEGED TOKEN FOR THIS TO WORK ========="
-vault secrets enable $@ transit
-vault write $@ -f transit/keys/passwords
+#!/bin/sh
+vault secrets enable -address="${VAULT_HOST}:${VAULT_PORT}" transit
+vault write -address="${VAULT_HOST}:${VAULT_PORT}" -f transit/keys/passwords

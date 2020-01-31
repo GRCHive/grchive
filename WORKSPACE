@@ -308,3 +308,10 @@ container_pull(
     repository = "library/rabbitmq",
     tag = "3.8.2"
 )
+
+container_pull(
+    name = "vault",
+    registry = "index.docker.io",
+    repository = "library/vault",
+    tag = "1.3.2"
+)

@@ -5,7 +5,7 @@ company_name = "GRCHive"
 domain = "grchive.com"
 
 [database]
-connection = "user=DEVUSER dbname=audit sslmode=disable timezone=UTC"
+connection = "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/audit?sslmode=disable&timezone=UTC"
 
 [okta]
 url = "https://dev-578359.okta.com"
@@ -39,13 +39,11 @@ session_keys = [
 use_secure_cookies = false
 
 [vault]
-url = "http://localhost:8081"
-token = "s.Rp3t8tUgBAs3Syq6lznrat5m"
+url = "${VAULT_HOST}:${VAULT_PORT}"
 
-[backblaze]
-control_doc_bucket = "bb0980597ea911e162ed011e"
-keyId = "000b909e9112d1e0000000002"
-key = "K000CqPXF9PgSIcGA+B8P0lvRW/6h3M"
+[vault.userpass]
+username = "${VAULT_USER}"
+password = "${VAULT_PASSWORD}"
 
 [gcloud]
 credentials_file = "/opt/gcloud/grchive-web-server-account.json"
