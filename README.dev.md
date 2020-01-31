@@ -85,17 +85,18 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
     cd $SRC/devops/database/webserver
     flyway -configFiles=./flyway/dev-flyway.conf migrate
     ```
-## Setup and Unseal Vault
+## Setup and Unseal Vault (Docker)
+
+Replace `${VAULT_HOST}` and `${VAULT_PORT}` with the corresponding values in the `variables.bzl` file.
 
 - `cd $SRC`
-- `vault server -config=devops/vault/config/dev.hcl &`
-- `vault operator init -address="http://localhost:8081" -n 1 -t 1`
+- `bazel run //devops/docker/vault:vault`
+- `docker run --network=host bazel/devops/docker/vault:vault`
+- `vault operator init -address="${VAULT_HOST}:${VAULT_PORT}" -n 1 -t 1`
 - Store the unseal key and the root token somehwere.
-- `vault operator unseal -address="http://localhost:8081"`
-- Past the previously copied unseal key to unseal the vault.
-- `vault login -address="http://localhost:8081" $ROOT_TOKEN_HERE`
-- `cd $SRC/devops/vault`
-- `./init_dev_vault.sh -address="http://localhost:8081"`
+- `vault operator unseal -address="${VAULT_HOST}:${VAULT_PORT}"`
+- Paste the previously copied unseal key to unseal the vault.
+- `bazel run --action_env VAULT_TOKEN="$YOUR_ROOT_TOKEN" //devops/vault:dev_init_vault`
 
 Note that the Vault server must be started before attempting to run the webserver.
 Every time the Vault server is restarted, it must be unsealed.

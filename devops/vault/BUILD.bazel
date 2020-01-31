@@ -1,0 +1,16 @@
+package(default_visibility=["//visibility:public"])
+
+genrule(
+    name = "dev_init_vault",
+    srcs = [
+        "init_dev_vault.sh.tmpl"
+    ],
+    outs = [
+        "init_dev_vault.sh"
+    ],
+    executable = True,
+    cmd = ". $(location //build:bash_env) && envsubst < $< > $@",
+    tools = [
+        "//build:bash_env"
+    ]
+)
