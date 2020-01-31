@@ -19,7 +19,7 @@ func mustDecodeString(str string) []byte {
 func TestInitializeConfig(t *testing.T) {
 	// Just test that it initializes TomlConfig and EnvConfig to non-null
 	// pointers.
-	core.InitializeConfig("../../../src/webserver/config/config.toml")
+	core.InitializeConfig("../../../../src/webserver/config/config.toml")
 	assert.NotNil(t, core.TomlConfig)
 	assert.NotNil(t, core.EnvConfig)
 }
@@ -123,7 +123,8 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"Company.CompanyName", "company.company_name", "company_name", nil},
 					{"Company.Domain", "company.domain", "domain", nil},
 					{"Vault.Url", "vault.url", "url", nil},
-					{"Vault.Token", "vault.token", "token", nil},
+					{"Vault.Username", "vault.userpass.username", "username", nil},
+					{"Vault.Password", "vault.userpass.password", "password", nil},
 					{"Gcloud.AuthFilename", "gcloud.credentials_file", "filenamegoeshere", nil},
 					{"Gcloud.DocBucket", "gcloud.storage.doc_bucket", "bucketname", nil},
 					{"Mail.Provider", "mail.provider", "provider", mail.MailAPIProvider("provider")},

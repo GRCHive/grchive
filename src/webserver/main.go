@@ -81,8 +81,9 @@ func main() {
 		ApiDomain: core.EnvConfig.Okta.BaseUrl,
 	})
 	vault.Initialize(vault.VaultConfig{
-		Url:   core.EnvConfig.Vault.Url,
-		Token: core.EnvConfig.Vault.Token,
+		Url:      core.EnvConfig.Vault.Url,
+		Username: core.EnvConfig.Vault.Username,
+		Password: core.EnvConfig.Vault.Password,
 	})
 	gcloud.DefaultGCloudApi.InitFromJson(core.EnvConfig.Gcloud.AuthFilename)
 

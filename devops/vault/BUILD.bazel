@@ -9,8 +9,9 @@ genrule(
         "init_dev_vault.sh"
     ],
     executable = True,
-    cmd = ". $(location //build:bash_env) && envsubst < $< > $@",
+    cmd = ". $(location //build:bash_env) && VAULT_USER_POLICY=$(location //devops/vault/policies:user-policy.hcl) envsubst < $< > $@",
     tools = [
-        "//build:bash_env"
+        "//build:bash_env",
+        "//devops/vault/policies:user-policy.hcl",
     ]
 )

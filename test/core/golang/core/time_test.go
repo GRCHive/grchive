@@ -8,7 +8,7 @@ import (
 )
 
 func TestIsPastTime(t *testing.T) {
-	core.InitializeConfig("../../../src/webserver/config/config.toml")
+	core.InitializeConfig("../../../../src/webserver/config/config.toml")
 	utcLoc, _ := time.LoadLocation("UTC")
 	nyLoc, _ := time.LoadLocation("America/New_York")
 

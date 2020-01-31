@@ -39,8 +39,9 @@ type OktaConfig struct {
 }
 
 type VaultConfig struct {
-	Url   string
-	Token string
+	Url      string
+	Username string
+	Password string
 }
 
 type GCloudConfig struct {
@@ -145,7 +146,8 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 
 	envConfig.Vault = new(VaultConfig)
 	envConfig.Vault.Url = tomlConfig.Get("vault.url").(string)
-	envConfig.Vault.Token = tomlConfig.Get("vault.token").(string)
+	envConfig.Vault.Username = tomlConfig.Get("vault.userpass.username").(string)
+	envConfig.Vault.Password = tomlConfig.Get("vault.userpass.password").(string)
 
 	envConfig.Gcloud = new(GCloudConfig)
 	envConfig.Gcloud.AuthFilename = tomlConfig.Get("gcloud.credentials_file").(string)

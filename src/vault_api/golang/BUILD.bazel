@@ -6,6 +6,7 @@ go_library(
     name = "vault_golang_api",
     srcs = [
         "transit.go",
+        "auth.go",
         "vault.go",
     ],
     importpath = "gitlab.com/grchive/grchive/vault_api",

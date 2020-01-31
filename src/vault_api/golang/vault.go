@@ -10,14 +10,19 @@ import (
 )
 
 type VaultConfig struct {
-	Url   string
-	Token string
+	Url      string
+	Username string
+	Password string
+	token    string
 }
 
 var GlobalConfig VaultConfig = VaultConfig{}
 
 func Initialize(config VaultConfig) {
 	GlobalConfig = config
+	if err := userPassAuth(config.Username, config.Password); err != nil {
+		panic("Failed to auth with Vault: " + err.Error())
+	}
 }
 
 func sendVaultRequest(method string, endpoint string, data interface{}) (map[string]*json.RawMessage, error) {
@@ -37,7 +42,7 @@ func sendVaultRequest(method string, endpoint string, data interface{}) (map[str
 		return nil, err
 	}
 
-	req.Header.Set("X-Vault-Token", GlobalConfig.Token)
+	req.Header.Set("X-Vault-Token", GlobalConfig.token)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err

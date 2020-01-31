@@ -1,7 +1,9 @@
 #!/bin/sh
 vault login -address="${VAULT_HOST}:${VAULT_PORT}" token=${VAULT_TOKEN}
-vault auth enable -address="${VAULT_HOST}:${VAULT_PORT}" userpass
-vault write -address="${VAULT_HOST}:${VAULT_PORT}" auth/userpass/users/${VAULT_USER} password=${VAULT_PASSWORD} policies=admins
 
+vault auth enable -address="${VAULT_HOST}:${VAULT_PORT}" userpass
 vault secrets enable -address="${VAULT_HOST}:${VAULT_PORT}" transit
+
+vault policy write -address="${VAULT_HOST}:${VAULT_PORT}"  user ${VAULT_USER_POLICY}
+vault write -address="${VAULT_HOST}:${VAULT_PORT}" auth/userpass/users/${VAULT_USER} password=${VAULT_PASSWORD} policies=user
 vault write -address="${VAULT_HOST}:${VAULT_PORT}"  -f transit/keys/passwords
