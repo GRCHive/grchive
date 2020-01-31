@@ -120,7 +120,7 @@ Replace `${RABBITMQ_PORT}` with the corresponding value in the `variables.bzl` f
 
 - `cd $SRC`
 - `bazel run //devops/docker/rabbitmq:rabbitmq`
-- `docker run -p ${RABBITMQ_PORT}:${RABBITMQ_PORT} bazel/devops/docker/rabbitmq:rabbitmq`
+- `docker run --hostname rabbitmq --mount source=rabbitmqmnt,target=/var/lib/rabbitmq -p ${RABBITMQ_PORT}:${RABBITMQ_PORT} bazel/devops/docker/rabbitmq:rabbitmq`
 
 ## Build and Run Webserver
 
