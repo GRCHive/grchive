@@ -17,6 +17,7 @@ if [ ! -d python ]; then
 fi
 
 cd python/python-${FULL_VERSION}
-./configure --enable-optimizations --prefix="${PWD}/bin"
-make -j`nproc`
+cp ../../python-helper/Setup Modules/Setup
+./configure LDFLAGS="-static -static-libgcc" CPPFLAGS="-static" --enable-optimizations --disable-shared --prefix="${PWD}/bin"
+make LDFLAGS="-static" LINKFORSHARED=" " -j`nproc`
 make install

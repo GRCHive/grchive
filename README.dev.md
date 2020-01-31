@@ -11,7 +11,6 @@ This document will assume that the git checkout directory is set in an environme
 - go 1.13+ 
 - PostgreSQL
 - Node v12.10
-- RabbitMQ
 - Docker
 
 ## Build Variables
@@ -41,7 +40,7 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `VAULT_USER` : The username to authenticate with the Vault server.
 - `VAULT_PASSWORD` : The passowrd to authenticate with the Vault server.
 
-## Setup
+## Setup Dependencies
 
 - Install Blaze.
 
@@ -63,13 +62,27 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
     cd $SRC/dependencies
     ./download_vault.sh
     ```
+
 - Add the Vault directory to your `$PATH` (`$SRC/dependencies/vault`).
+- Download libffi.
+
+    ```
+    cd $SRC/dependencies
+    ./download_libffi.sh
+    ```
 - Download Python.
     
     ```
     cd $SRC/dependencies
     ./download_python.sh
     ```
+## Setup Google Cloud
+
+Obtain a service account JSON key with the permissions
+- `storage.objects.delete`
+- `storage.objects.get`
+- `storage.objects.create`
+and place this file in `$SRC/devops/gcloud` and name it `gcloud-webserver-account.json`.
 
 ## Setup PostgreSQL
 
@@ -109,9 +122,9 @@ Replace `${RABBITMQ_PORT}` with the corresponding value in the `variables.bzl` f
 - `bazel run //devops/docker/rabbitmq:rabbitmq`
 - `docker run -p ${RABBITMQ_PORT}:${RABBITMQ_PORT} bazel/devops/docker/rabbitmq:rabbitmq`
 
-## Build and Run
+## Build and Run Webserver
 
-Note that this steps relies on having an unsealed Vault, a running RabbitMQ server (Docker), and a running PostgreSQL database.
+Note that this step relies on having an unsealed Vault (Docker), a running RabbitMQ server (Docker), and a running PostgreSQL database.
 
 - `cd $SRC`
 - `bazel build //src/webserver:webserver`
@@ -120,6 +133,20 @@ Note that this steps relies on having an unsealed Vault, a running RabbitMQ serv
 If you wish to run it in production mode:
 
 - `bazel run -c opt //src/webserver:webserver`
+
+If you wish to run the Docker container:
+
+- `bazel run //devops/docker/webserver:docker_webserver`
+
+## Build and Run Preview Generator
+
+The preview generator worker listens on RabbitMQ for an files that clients upload and generates a PDF preview.
+Thus this step also relies on having an unsealed Vault (Docker), a running RabbitMQ server (Docker), and a running PostgreSQL database.
+
+- `cd $SRC`
+- `bazel build //src/preview_generator:frontend`
+- `bazel run //src/preview_generator:frontend`
+
 
 ## Run Tests
 

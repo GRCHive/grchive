@@ -31,6 +31,7 @@ go_binary(
     srcs = ["frontend.go"],
     data = [
         "//src/webserver/config:config",
+        "//devops/gcloud:gcloud-webserver-account.json",
         ":generator",
     ],
     deps = [

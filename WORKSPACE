@@ -315,3 +315,17 @@ container_pull(
     repository = "library/vault",
     tag = "1.3.2"
 )
+
+container_pull(
+    name = "go-buster",
+    registry = "index.docker.io",
+    repository = "library/golang",
+    tag = "1.13.7-buster"
+)
+
+load(
+    "@io_bazel_rules_docker//go:image.bzl",
+    _go_image_repos = "repositories",
+)
+
+_go_image_repos()
