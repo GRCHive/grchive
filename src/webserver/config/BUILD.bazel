@@ -7,5 +7,9 @@ genrule(
         "//conditions:default": ["dev.toml.tmpl"],
     }),
     outs = ["config.toml"],
-    cmd = "envsubst < $< > $@",
+    cmd = ". $(location //build:bash_env) && envsubst < $< > $@",
+    tools = [
+        "//build:bash_env"
+    ]
+
 )

@@ -9,5 +9,8 @@ genrule(
     outs = [
         "config.hcl"
     ],
-    cmd = "envsubst < $< > $@"
+    cmd = ". $(location //build:bash_env) && envsubst < $< > $@",
+    tools = [
+        "//build:bash_env"
+    ]
 )

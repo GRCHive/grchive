@@ -10,7 +10,10 @@ genrule(
     outs = [
         "run_vault.sh"
     ],
-    cmd = "envsubst < $< > $@"
+    cmd = ". $(location //build:bash_env) && envsubst < $< > $@",
+    tools = [
+        "//build:bash_env"
+    ]
 )
 
 container_image(

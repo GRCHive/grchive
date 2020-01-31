@@ -1,4 +1,4 @@
-# Audit Stuff
+# GRCHive
 
 This document will assume that the git checkout directory is set in an environment variable `$SRC`.
 
@@ -13,6 +13,33 @@ This document will assume that the git checkout directory is set in an environme
 - Node v12.10
 - RabbitMQ
 - Docker
+
+## Build Variables
+
+The build depends on the presence on a number of properly configured variables to properly generate configuration files.
+These variables are stored in `$SRC/build/variables.bzl`.
+To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/variables.bzl` and replace variables with values valid for your configuration.
+
+### RabbitMQ
+
+- `RABBITMQ_USER`: The username to use to connect to the RabbitMQ server in the Docker container.
+- `RABBITMQ_PASSWORD`: The password to use to connect to the RabbitMQ server in the Docker container.
+- `RABBITMQ_HOST`: The hostname/IP address of the RabbitMQ server to connect to.
+- `RABBITMQ_PORT`: The port the RabbitMQ server is listening on.
+
+### PostgreSQL
+
+- `POSTGRES_USER` : The username to use to connect to the PostgreSQL server.
+- `POSTGRES_PASSWORD` : The password to use to connect to the PostgreSQL server.
+- `POSTGRES_HOST` : The hostname/IP address of the PostgreSQL server to connect to.
+- `POSTGRES_PORT` : The port the PostgreSQL server is listening on.
+
+### Vault
+
+- `VAULT_HOST` : The hostname/IP address of the Vault server to connect to.
+- `VAULT_PORT` : The port the Vault server is listening on.
+- `VAULT_USER` : The username to authenticate with the Vault server.
+- `VAULT_PASSWORD` : The passowrd to authenticate with the Vault server.
 
 ## Setup
 
@@ -58,31 +85,6 @@ This document will assume that the git checkout directory is set in an environme
     cd $SRC/devops/database/webserver
     flyway -configFiles=./flyway/dev-flyway.conf migrate
     ```
-## Environment Variables
-
-The build depends on the presence on a number of environment variables to properly generate configuration files.
-
-# RabbitMQ
-
-- `RABBITMQ_USER`: The username to use to connect to the RabbitMQ server in the Docker container.
-- `RABBITMQ_PASSWORD`: The password to use to connect to the RabbitMQ server in the Docker container.
-- `RABBITMQ_HOST`: The hostname/IP address of the RabbitMQ server to connect to.
-- `RABBITMQ_PORT`: The port the RabbitMQ server is listening on.
-
-# PostgreSQL
-
-- `POSTGRES_USER` : The username to use to connect to the PostgreSQL server.
-- `POSTGRES_PASSWORD` : The password to use to connect to the PostgreSQL server.
-- `POSTGRES_HOST` : The hostname/IP address of the PostgreSQL server to connect to.
-- `POSTGRES_PORT` : The port the PostgreSQL server is listening on.
-
-# Vault
-
-- `VAULT_HOST` : The hostname/IP address of the Vault server to connect to.
-- `VAULT_PORT` : The port the Vault server is listening on.
-- `VAULT_USER` : The username to authenticate with the Vault server.
-- `VAULT_PASSWORD` : The passowrd to authenticate with the Vault server.
-
 ## Setup and Unseal Vault
 
 - `cd $SRC`
@@ -99,6 +101,8 @@ Note that the Vault server must be started before attempting to run the webserve
 Every time the Vault server is restarted, it must be unsealed.
 
 ## Run RabbitMQ (Docker)
+
+Replace `${RABBITMQ_PORT}` with the corresponding value in the `variables.bzl` file.
 
 - `cd $SRC`
 - `bazel run //devops/docker/rabbitmq:rabbitmq`

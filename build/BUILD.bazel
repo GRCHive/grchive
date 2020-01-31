@@ -1,0 +1,11 @@
+package(default_visibility=["//visibility:public"])
+load("//build:env.bzl", "generateBashEnvironment")
+
+genrule(
+    name = "bash_env",
+    srcs = [],
+    outs = [
+        "bash_env.sh",
+    ],
+    cmd = "echo \'" + generateBashEnvironment() + "\' > $@"
+)

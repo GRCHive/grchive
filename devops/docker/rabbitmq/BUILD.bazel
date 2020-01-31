@@ -11,7 +11,10 @@ genrule(
     outs = [
         "run_rabbitmq.sh"
     ],
-    cmd = "envsubst '$${RABBITMQ_USER} $${RABBITMQ_PASSWORD}' < $< > $@"
+    cmd = ". $(location //build:bash_env) && envsubst '$${RABBITMQ_USER} $${RABBITMQ_PASSWORD}' < $< > $@",
+    tools = [
+        "//build:bash_env"
+    ]
 )
 
 genrule(
@@ -22,7 +25,10 @@ genrule(
     outs = [
         "etc/rabbitmq/rabbitmq-env.conf"
     ],
-    cmd = "envsubst '$${RABBITMQ_PORT}' < $< > $@"
+    cmd = ". $(location //build:bash_env) && envsubst '$${RABBITMQ_PORT}' < $< > $@",
+    tools = [
+        "//build:bash_env"
+    ]
 )
 
 container_image(
