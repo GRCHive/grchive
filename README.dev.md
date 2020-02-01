@@ -77,6 +77,41 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
     cd $SRC/dependencies
     ./download_python.sh
     ```
+- Download Kubectl.
+
+    ```
+    cd $SRC/dependencies
+    ./download_kubectl.sh
+    ```
+- Add the Kubectl directory to your `$PATH` (`$SRC/dependencies/kubectl`).
+- Download Minikube.
+
+    ```
+    cd $SRC/dependencies
+    ./download_minikube.sh
+    ```
+- Add the Minikube directory to your `$PATH` (`$SRC/dependencies/minikube`).
+
+## Setup Minikube
+
+- Ensure that you have a virtualization driver installed. See <https://kubernetes.io/docs/setup/learning-environment/minikube/#specifying-the-vm-driver>. kvm2 is what this guide will use.
+- Run `minikube start --vm-driver=kvm2`. 
+
+If you encounter errors when running the command:
+- Ensure both libvirt and QEMU are installed.
+- Ensure that `lsmod | grep kvm` returns something like `kvm                   790528  1 kvm_amd`.
+- Ensure that your current user is added to the `libvirt` group: `sudo usermod --append --groups libvirt $(whoami)`
+- Ensure that you have the `ebtables`, `iptables`, and `dnsmasq` packages installed.
+- Ensure that `virt-host-validate` passes all tests.
+
+After ensuring all these things, you may need to
+
+- Reboot
+- Restart the libvirt service (e.g. `sudo systemctl restart libvirtd.service`)
+- Run `minikube delete`
+
+Finally, run `eval $(minikube docker-env)` to ensure docker containers are available to minikube.
+
 ## Setup Google Cloud
 
 Obtain a service account JSON key with the permissions
@@ -156,3 +191,34 @@ If you wish to run the Docker container:
 
 - `cd $SRC`
 - `bazel test --test_output=errors //test/...`
+
+## Running on Kubernetes (Minikube)
+
+### PostgreSQL
+
+- Modify your `postgresql.conf` file (e.g. `/var/lib/postgres/data/postgresql.conf`) to have
+
+    ```
+    listen_addresses = '*'
+    ```
+- Find the IPv4 address of your current ethernet link using `ip addr` (e.g. `192.168.1.160`).
+- Modify your `pg_hba.conf` file (e.g. `/var/lib/postgres/data/pg_hba.conf`) to have
+
+    ```
+    host    all             all             192.168.1.160/16        trust
+    ``` 
+
+  where `192.168.1.160` is the IP address found by `ip addr`.
+- Set the `POSTGRES_HOST` build variable to be `postgresql-dev-service`.
+- `cd $SRC/devops/k8s/postgresql`
+- `cp endpoint.yaml.tmpl endpoint.yaml`
+- Modify `endpoint.yaml` to have the correct IP address (as found by `ip addr` earlier).
+- `kubectl apply -f .`
+
+### Vault
+
+- `cd $SRC/devops/k8s/vault`
+- `kubectl apply -f ./deployment.dev.yaml`
+- `kubectl apply -f ./service.yaml`
+
+### RabbitMQ

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: vault-deployment
+    labels:
+        app: vault
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: vault
+    template:
+        metadata:
+            labels:
+                app: vault
+        spec:
+            containers:
+                - name: vault-container
+                  image: bazel/devops/docker/vault:vault
+                  imagePullPolicy: Never
+                  ports:
+                    - containerPort: 8200

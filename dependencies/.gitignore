@@ -5,3 +5,5 @@ flyway/
 vault/
 python/
 libffi/
+kubectl/
+minikube/
