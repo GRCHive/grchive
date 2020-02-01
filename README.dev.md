@@ -194,6 +194,11 @@ If you wish to run the Docker container:
 
 ## Running on Kubernetes (Minikube)
 
+### Storage
+
+- `cd $SRC/devops/k8s/storage/dev`
+- `kubectl apply -f .`
+
 ### PostgreSQL
 
 - Modify your `postgresql.conf` file (e.g. `/var/lib/postgres/data/postgresql.conf`) to have
@@ -222,3 +227,7 @@ If you wish to run the Docker container:
 - `kubectl apply -f ./service.yaml`
 
 ### RabbitMQ
+
+- `cd $SRC/devops/k8s/rabbitmq`
+- `kubectl apply -f ./service.yaml`
+- `kubectl apply -f ./statefulset.dev.yaml`
