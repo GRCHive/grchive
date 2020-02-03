@@ -1,11 +1,23 @@
 stages:
     - ciImage
 
+services:
+  - docker:19.03.1-dind
+
+variables:
+    # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+
+before_script:
+    - apt-get update -qq
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTERY_ACCESS_KEY $CI_REGISTRY
+
 Build CI Image:
     stage: ciImage
     image: debian:10.2
     script:
-        - apt-get update -qq && apt-get install -y curl unzip
+        - apt-get install -y curl unzip openjdk-11-jdk
         - cd dependencies && ./bootstrap_bazel.sh && cd ../
         - export PATH=$PWD/dependencies/bazel/output:$PATH
         - echo $PATH
