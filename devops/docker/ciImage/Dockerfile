@@ -1,5 +1,4 @@
 FROM debian:10.2
-
 RUN apt-get update && apt-get install -y openjdk-11-jdk \
     apt-transport-https \
     ca-certificates \
