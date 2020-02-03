@@ -33,7 +33,7 @@ Build CI Image:
         - docker build --tag $CI_REGISTRY/ci-image:$CI_COMMIT_SHA --tag $CI_REGISTRY/ci-image:latest .
         - docker push $CI_REGISTRY/ci-image:$CI_COMMIT_SHA
         - docker push $CI_REGISTRY/ci-image:latest
-    chage: {}
+    cache: {}
     only:
         refs:
             - master
@@ -43,3 +43,5 @@ Build CI Image:
 Compile Web Server:
     stage: compile
     image: $CI_REGISTRY/ci-image:latest
+    script:
+        - bazel build //src/webserver:webserver
