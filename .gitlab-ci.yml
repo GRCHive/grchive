@@ -1,6 +1,8 @@
 stages:
     - ciImage
     - compile
+    - test
+    - package
 
 cache:
     key: "${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}"
@@ -16,17 +18,17 @@ variables:
     # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
     DOCKER_HOST: tcp://docker:2376
     DOCKER_TLS_CERTDIR: "/certs"
+    CI_FULL_REGISTRY: $CI_REGISTRY/grchive/grchive
 
 before_script:
     - apt-get update && apt-get install -y bash
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_ACCESS_KEY $CI_REGISTRY
     - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
     - cd dependencies
-    - ls
     - "[ ! -d bazel ] && apt-get update && apt-get install -y curl unzip openjdk-11-jdk && bash bootstrap_bazel.sh"
     - cd ../
     - export PATH=$PWD/dependencies/bazel/output:$PATH
-    - echo $PWD
+    - cp build/variables.bzl.tmpl build/variables.bzl
 
 Build CI Image:
     stage: ciImage
@@ -35,9 +37,9 @@ Build CI Image:
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_ACCESS_KEY $CI_REGISTRY
     script:
         - cd devops/docker/ciImage
-        - docker build --tag $CI_REGISTRY/ci-image:$CI_COMMIT_SHA --tag $CI_REGISTRY/ci-image:latest .
-        - docker push $CI_REGISTRY/ci-image:$CI_COMMIT_SHA
-        - docker push $CI_REGISTRY/ci-image:latest
+        - docker build --tag $CI_FULL_REGISTRY/ci-image:$CI_COMMIT_SHA --tag $CI_FULL_REGISTRY/ci-image:latest .
+        - docker push $CI_FULL_REGISTRY/ci-image:$CI_COMMIT_SHA
+        - docker push $CI_FULL_REGISTRY/ci-image:latest
     cache: {}
     only:
         refs:
@@ -47,6 +49,18 @@ Build CI Image:
 
 Compile Web Server:
     stage: compile
-    image: $CI_REGISTRY/ci-image:latest
+    image: $CI_FULL_REGISTRY/ci-image:latest
     script:
         - bazel build //src/webserver:webserver
+
+Compile Preview Generator:
+    stage: compile
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - bazel build //src/preview_generator:frontend
+
+Run All Tests:
+    stage: test
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - bazel test --test_output=errors //test/...
