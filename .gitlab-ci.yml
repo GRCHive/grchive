@@ -14,6 +14,6 @@ Build CI Image:
     image: docker:stable
     script:
         - cd devops/docker/ciImage
-        - docker build --tag $CI_CONTAINER_REGISTRY:$CI_COMMIT_SHA --tag $CI_REGISTRY:latest .
+        - docker build --tag $CI_REGISTRY:$CI_COMMIT_SHA --tag $CI_REGISTRY:latest .
         - docker push $CI_REGISTRY:$CI_COMMIT_SHA
         - docker push $CI_REGISTRY:latest
