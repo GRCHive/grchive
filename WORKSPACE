@@ -330,6 +330,13 @@ container_pull(
     tag = "1.17.8"
 )
 
+container_pull(
+    name = "debian",
+    registry = "index.docker.io",
+    repository = "library/debian",
+    tag = "10.2"
+)
+
 load(
     "@io_bazel_rules_docker//go:image.bzl",
     _go_image_repos = "repositories",
