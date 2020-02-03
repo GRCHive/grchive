@@ -31,7 +31,8 @@ before_script:
 Build CI Image:
     stage: ciImage
     image: docker:stable
-    before_script: []
+    before_script:
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_ACCESS_KEY $CI_REGISTRY
     script:
         - cd devops/docker/ciImage
         - docker build --tag $CI_REGISTRY/ci-image:$CI_COMMIT_SHA --tag $CI_REGISTRY/ci-image:latest .
