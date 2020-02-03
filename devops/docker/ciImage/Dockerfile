@@ -1,5 +1,4 @@
 FROM debian:10.2
-
 RUN apt-get update && apt-get install -y openjdk-11-jdk \
     openjdk-8-jdk \ 
     apt-transport-https \
@@ -19,5 +18,4 @@ RUN apt-get update && apt-get install -y docker-ce docker-ce-cli
 
 ENV DOCKER_TLS_CERTDIR=/certs
 RUN mkdir /certs /certs/client && chmod 1777 /certs /certs/client
-
 CMD ["bash"]
