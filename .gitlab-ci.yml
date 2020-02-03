@@ -18,11 +18,12 @@ variables:
     DOCKER_TLS_CERTDIR: "/certs"
 
 before_script:
+    - apt-get update && apt-get install -y bash
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_ACCESS_KEY $CI_REGISTRY
     - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
     - cd dependencies
     - ls
-    - "[ ! -d bazel ] && apt-get update && apt-get install -y curl unzip openjdk-11-jdk && sh bootstrap_bazel.sh"
+    - "[ ! -d bazel ] && apt-get update && apt-get install -y curl unzip openjdk-11-jdk && bash bootstrap_bazel.sh"
     - cd ../
     - export PATH=$PWD/dependencies/bazel/output:$PATH
     - echo $PWD
