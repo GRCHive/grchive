@@ -7,7 +7,8 @@ RUN apt-get update && apt-get install -y openjdk-11-jdk \
     unzip \
     gnupg2 \
     software-properties-common \
-    openssh-client
+    openssh-client \
+    gettext-base
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 RUN add-apt-repository \
     "deb [arch=amd64] https://download.docker.com/linux/debian \
