@@ -16,6 +16,7 @@ RUN add-apt-repository \
          stable"
 RUN apt-get update && apt-get install -y docker-ce docker-ce-cli
 RUN apt-get -y upgrade
+RUN apt-get install -y zip
 
 COPY docker-entrypoint.sh /usr/local/bin/
 ENV DOCKER_TLS_CERTDIR=/certs
@@ -23,7 +24,8 @@ RUN mkdir /certs /certs/client && chmod 1777 /certs /certs/client
 
 # Rely on the CI system to copy this file into this directory.
 COPY bootstrap_bazel.sh /
-RUN "cd / && /bin/bash bootstrap_bazel.sh"
+WORKDIR /
+RUN ["/bin/bash", "./bootstrap_bazel.sh"]
 ENV PATH="/bazel/output:${PATH}"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
