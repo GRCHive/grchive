@@ -15,6 +15,10 @@ RUN add-apt-repository \
          stable"
 RUN apt-get update && apt-get install -y docker-ce docker-ce-cli
 
+COPY docker-entrypoint.sh /usr/local/bin/
 ENV DOCKER_TLS_CERTDIR=/certs
 RUN mkdir /certs /certs/client && chmod 1777 /certs /certs/client
+
+
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["bash"]

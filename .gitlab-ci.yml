@@ -23,7 +23,7 @@ variables:
     CI_FULL_REGISTRY: registry.gitlab.com/grchive/grchive
 
 before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_ACCESS_KEY $CI_REGISTRY
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
     - cd dependencies
     - "[ ! -d bazel ] && apt-get update && apt-get install -y curl unzip openjdk-11-jdk && bash bootstrap_bazel.sh"
@@ -37,7 +37,7 @@ Build CI Image:
     variables:
         FULL_IMAGE_URL: $CI_FULL_REGISTRY/ci-image
     before_script:
-        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_ACCESS_KEY $CI_REGISTRY
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     script:
         - cd devops/docker/ciImage
         - docker build --tag $FULL_IMAGE_URL:latest .
