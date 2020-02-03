@@ -20,10 +20,12 @@ variables:
 before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_ACCESS_KEY $CI_REGISTRY
     - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
-    - "[ ! -d dependencies/bazel ] && cd dependencies && ./bootstrap_bazel.sh && cd ../"
+    - cd dependencies
+    - ls
+    - "[ ! -d bazel ] && bash bootstrap_bazel.sh"
+    - cd ../
     - export PATH=$PWD/dependencies/bazel/output:$PATH
     - echo $PWD
-    - ls $PWD
 
 Build CI Image:
     stage: ciImage
