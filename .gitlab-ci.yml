@@ -11,10 +11,6 @@ cache:
 
 services:
     - docker:19.03.1-dind
-    - cd dependencies
-    - [ ! -d "bazel" ] && ./bootstrap_bazel.sh 
-    - cd ../
-    - export PATH=$PWD/dependencies/bazel/output:$PATH
 
 variables:
     # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
@@ -24,6 +20,10 @@ variables:
 before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_ACCESS_KEY $CI_REGISTRY
     - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
+    - cd dependencies
+    - [ ! -d "bazel" ] && ./bootstrap_bazel.sh 
+    - cd ../
+    - export PATH=$PWD/dependencies/bazel/output:$PATH
 
 Build CI Image:
     stage: ciImage
