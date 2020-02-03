@@ -10,7 +10,6 @@ cache:
     paths:
         - .cache/
         - src/core/jsui/node_modules/
-        - dependencies/bazel/
 
 services:
     - docker:19.03.1-dind
@@ -25,10 +24,6 @@ variables:
 before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
-    - cd dependencies
-    - "[ ! -d bazel ] && apt-get update && apt-get install -y curl unzip openjdk-11-jdk && bash bootstrap_bazel.sh"
-    - cd ../
-    - export PATH=$PWD/dependencies/bazel/output:$PATH
     - envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
 
 Build CI Image:
@@ -39,6 +34,7 @@ Build CI Image:
     before_script:
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     script:
+        - cp dependencies/bootstrap_bazel.sh devops/docker/ciImage/
         - cd devops/docker/ciImage
         - docker build --tag $FULL_IMAGE_URL:latest .
         - docker push $FULL_IMAGE_URL:latest
@@ -47,6 +43,7 @@ Build CI Image:
         refs:
             - master
         changes:
+            - dependencies/bootstrap_bazel.sh
             - devops/docker/ciImage/**/*
 
 Prepare:
