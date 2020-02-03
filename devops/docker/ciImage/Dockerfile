@@ -1,4 +1,5 @@
 FROM debian:10.2
+
 RUN apt-get update && apt-get install -y openjdk-11-jdk \
     apt-transport-https \
     ca-certificates \
@@ -12,4 +13,5 @@ RUN add-apt-repository \
       $(lsb_release -cs) \
          stable"
 RUN apt-get update && apt-get install -y docker-ce docker-ce-cli
+
 CMD ["bash"]
