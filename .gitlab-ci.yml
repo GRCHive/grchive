@@ -2,7 +2,7 @@ stages:
     - ciImage
     - compile
     - test
-    - package
+    - containers
 
 cache:
     key: "${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}"
@@ -28,18 +28,19 @@ before_script:
     - "[ ! -d bazel ] && apt-get update && apt-get install -y curl unzip openjdk-11-jdk && bash bootstrap_bazel.sh"
     - cd ../
     - export PATH=$PWD/dependencies/bazel/output:$PATH
-    - cp build/variables.bzl.tmpl build/variables.bzl
+    - envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
 
 Build CI Image:
     stage: ciImage
     image: docker:stable
+    variables:
+        FULL_IMAGE_URL: $CI_FULL_REGISTRY/ci-image
     before_script:
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_ACCESS_KEY $CI_REGISTRY
     script:
         - cd devops/docker/ciImage
-        - docker build --tag $CI_FULL_REGISTRY/ci-image:$CI_COMMIT_SHA --tag $CI_FULL_REGISTRY/ci-image:latest .
-        - docker push $CI_FULL_REGISTRY/ci-image:$CI_COMMIT_SHA
-        - docker push $CI_FULL_REGISTRY/ci-image:latest
+        - docker build --tag $FULL_IMAGE_URL:latest .
+        - docker push $FULL_IMAGE_URL:latest
     cache: {}
     only:
         refs:
@@ -64,3 +65,48 @@ Run All Tests:
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
         - bazel test --test_output=errors //test/...
+
+Build NGINX Container:
+    stage: containers
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    variables:
+        FULL_IMAGE_URL: $CI_FULL_REGISTRY/nginx
+    script:
+        - bazel run /devops/docker/nginx:nginx 
+        - docker tag bazel/devops/docker/nginx:nginx $FULL_IMAGE_URL:$CI_COMMIT_SHA
+        - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
+    only:
+        refs:
+            - master
+        changes:
+            - devops/docker/nginx/**/*
+
+Build Vault Container:
+    stage: containers
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    variables:
+        FULL_IMAGE_URL: $CI_FULL_REGISTRY/vault
+    script:
+        - bazel run /devops/docker/vault:vault 
+        - docker tag bazel/devops/docker/vault:vault $FULL_IMAGE_URL:$CI_COMMIT_SHA
+        - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
+    only:
+        refs:
+            - master
+        changes:
+            - devops/docker/vault/**/*
+
+Build RabbitMQ Container:
+    stage: containers
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    variables:
+        FULL_IMAGE_URL: $CI_FULL_REGISTRY/rabbitmq
+    script:
+        - bazel run /devops/docker/rabbitmq:rabbitmq 
+        - docker tag bazel/devops/docker/rabbitmq:rabbitmq $FULL_IMAGE_URL:$CI_COMMIT_SHA
+        - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
+    only:
+        refs:
+            - master
+        changes:
+            - devops/docker/rabbitmq/**/*

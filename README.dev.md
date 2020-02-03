@@ -253,6 +253,8 @@ At this point you will need to rebuild all Docker containers.
 
 ### Webserver
 
+- `cd $SRC`
+- `bazel run //devops/docker/nginx:nginx`
 - `cd $SRC/devops/k8s/webserver`
 - `kubectl apply -f ./deployment.dev.yaml`
 - `kubectl apply -f ./loadbalancer.yaml`
