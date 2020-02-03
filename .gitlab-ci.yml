@@ -22,7 +22,7 @@ before_script:
     - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
     - cd dependencies
     - ls
-    - "[ ! -d bazel ] && bash bootstrap_bazel.sh"
+    - "[ ! -d bazel ] && sh bootstrap_bazel.sh"
     - cd ../
     - export PATH=$PWD/dependencies/bazel/output:$PATH
     - echo $PWD
