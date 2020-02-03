@@ -21,7 +21,7 @@ before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_ACCESS_KEY $CI_REGISTRY
     - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
     - cd dependencies
-    - [ ! -d "bazel" ] && ./bootstrap_bazel.sh 
+    - "[ ! -d bazel ] && ./bootstrap_bazel.sh "
     - cd ../
     - export PATH=$PWD/dependencies/bazel/output:$PATH
 
