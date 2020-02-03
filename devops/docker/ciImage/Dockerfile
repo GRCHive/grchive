@@ -23,7 +23,7 @@ RUN mkdir /certs /certs/client && chmod 1777 /certs /certs/client
 
 # Rely on the CI system to copy this file into this directory.
 COPY bootstrap_bazel.sh /
-RUN "/bin/bash bootstrap_bazel.sh"
+RUN "cd / && /bin/bash bootstrap_bazel.sh"
 ENV PATH="/bazel/output:${PATH}"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
