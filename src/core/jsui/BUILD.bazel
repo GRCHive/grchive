@@ -1,4 +1,5 @@
 package(default_visibility = ["//visibility:public"])
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
 
 filegroup(
     name = "corejsui-assets",
@@ -25,9 +26,9 @@ filegroup(
     ],
 )
 
-CMD_DEV = "cd src/core/jsui && rm -rf dist/* && npx webpack --config ./webpack/dev.config.js && zip -r ../../../$@ dist/"
+CMD_DEV = "cd src/core/jsui && rm -rf dist/* && npx webpack --config ./webpack/dev.config.js && tar czvf ../../../$@ dist/"
 
-CMD_PROD = "cd src/core/jsui && rm -rf dist/* && npx webpack --config ./webpack/prod.config.js && zip -r ../../../$@ dist/"
+CMD_PROD = "cd src/core/jsui && rm -rf dist/* && npx webpack --config ./webpack/prod.config.js && tar czvf ../../../$@ dist/"
 
 genrule(
     name = "corejsui-nosmap",
@@ -36,7 +37,7 @@ genrule(
         "loader.ejs",
     ],
     outs = [
-        "dist-nosmap.zip",
+        "dist-nosmap.tar.gz",
     ],
     cmd = CMD_PROD,
     message = "Run Webpack for corejsui (no smap)",
@@ -50,7 +51,7 @@ genrule(
         "loader.ejs",
     ],
     outs = [
-        "dist-smap.zip",
+        "dist-smap.tar.gz",
     ],
     cmd = CMD_DEV,
     message = "Run Webpack for corejsui (with smap)",
@@ -64,7 +65,17 @@ genrule(
         "//conditions:default": [":corejsui-smap"],
     }),
     outs = ["corejsui.zip"],
-    cmd = "cp $< $@",
+    cmd = "tar xvf $< -C corejsui && cd corejsui && zip -r $@ .",
+)
+
+genrule(
+    name = "corejsui.tar",
+    srcs = select({
+        "//:production": [":corejsui-nosmap"],
+        "//conditions:default": [":corejsui-smap"],
+    }),
+    outs = ["corejsui.tar.gz"],
+    cmd = "cp $< $@"
 )
 
 genrule(
@@ -79,3 +90,4 @@ genrule(
             cp \"dist/`basename $$X`\" $$X;\
         done",
 )
+

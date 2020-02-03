@@ -1,0 +1,25 @@
+package(default_visibility=["//visibility:public"])
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+
+genrule(
+    name = "config",
+    srcs = [
+        "nginx.dev.conf"
+    ],
+    outs = [
+        "etc/nginx/nginx.conf"
+    ],
+    cmd = "cp $< $@"
+)
+
+container_image(
+    name = "nginx",
+    base = "@nginx//image",
+    files = [
+        ":config",
+    ],
+    tars = [
+        "//src/core/jsui:corejsui.tar",
+    ],
+    data_path = ".",
+)

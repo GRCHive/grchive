@@ -92,26 +92,6 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
     ```
 - Add the Minikube directory to your `$PATH` (`$SRC/dependencies/minikube`).
 
-## Setup Minikube
-
-- Ensure that you have a virtualization driver installed. See <https://kubernetes.io/docs/setup/learning-environment/minikube/#specifying-the-vm-driver>. kvm2 is what this guide will use.
-- Run `minikube start --vm-driver=kvm2`. 
-
-If you encounter errors when running the command:
-- Ensure both libvirt and QEMU are installed.
-- Ensure that `lsmod | grep kvm` returns something like `kvm                   790528  1 kvm_amd`.
-- Ensure that your current user is added to the `libvirt` group: `sudo usermod --append --groups libvirt $(whoami)`
-- Ensure that you have the `ebtables`, `iptables`, and `dnsmasq` packages installed.
-- Ensure that `virt-host-validate` passes all tests.
-
-After ensuring all these things, you may need to
-
-- Reboot
-- Restart the libvirt service (e.g. `sudo systemctl restart libvirtd.service`)
-- Run `minikube delete`
-
-Finally, run `eval $(minikube docker-env)` to ensure docker containers are available to minikube.
-
 ## Setup Google Cloud
 
 Obtain a service account JSON key with the permissions
@@ -193,6 +173,27 @@ If you wish to run the Docker container:
 - `bazel test --test_output=errors //test/...`
 
 ## Running on Kubernetes (Minikube)
+
+### Setup Minikube
+
+- Ensure that you have a virtualization driver installed. See <https://kubernetes.io/docs/setup/learning-environment/minikube/#specifying-the-vm-driver>. kvm2 is what this guide will use.
+- Run `minikube start --vm-driver=kvm2`. 
+
+If you encounter errors when running the command:
+- Ensure both libvirt and QEMU are installed.
+- Ensure that `lsmod | grep kvm` returns something like `kvm                   790528  1 kvm_amd`.
+- Ensure that your current user is added to the `libvirt` group: `sudo usermod --append --groups libvirt $(whoami)`
+- Ensure that you have the `ebtables`, `iptables`, and `dnsmasq` packages installed.
+- Ensure that `virt-host-validate` passes all tests.
+
+After ensuring all these things, you may need to
+
+- Reboot
+- Restart the libvirt service (e.g. `sudo systemctl restart libvirtd.service`)
+- Run `minikube delete`
+
+Finally, run `eval $(minikube docker-env)` to ensure docker containers are available to minikube.
+At this point you will need to rebuild all Docker containers.
 
 ### Storage
 
