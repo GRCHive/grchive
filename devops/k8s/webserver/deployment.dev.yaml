@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: webserver-deployment
+    labels:
+        app: webserver
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: webserver
+    template:
+        metadata:
+            labels:
+                app: webserver
+        spec:
+            containers:
+                - name: webserver-container
+                  image: bazel/devops/docker/webserver:docker_webserver
+                  imagePullPolicy: Never
+                  ports:
+                    - containerPort: 8080

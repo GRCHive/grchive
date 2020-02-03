@@ -224,10 +224,35 @@ If you wish to run the Docker container:
 
 - `cd $SRC/devops/k8s/vault`
 - `kubectl apply -f ./deployment.dev.yaml`
-- `kubectl apply -f ./service.yaml`
+- `kubectl apply -f ./service-internal.yaml`
+- `kubectl apply -f ./service-external.dev.yaml`
+- Set the `VAULT_HOST` build variable to be `internal-vault-service` (this will require you to rebuild some Docker containers).
+- Run `kubectl get services -l app=vault` and get the external port of the service. For example
+
+    ```
+    external-vault-service   NodePort    10.96.203.250   <none>        8200:30296/TCP   75s
+    ```
+
+  would indicate that the external port is `30296`.
+- Check that you can reach the Vault server: `vault status -address="http://$(minikube ip):30296`
+- Proceed to init/unseal the Vault server using the steps from the Docker Vault but using the new address.
+
 
 ### RabbitMQ
 
 - `cd $SRC/devops/k8s/rabbitmq`
 - `kubectl apply -f ./service.yaml`
 - `kubectl apply -f ./statefulset.dev.yaml`
+- Set the `RABBITMQ_HOST` build variable to be `rabbitmq-service` (this will require you to rebuild some Docker containers).
+
+### Preview Generator
+
+- `cd $SRC/devops/k8s/preview_generator`
+- `kubectl apply -f ./deployment.dev.yaml`
+
+### Webserver
+
+- `cd $SRC/devops/k8s/webserver`
+- `kubectl apply -f ./deployment.dev.yaml`
+- `kubectl apply -f ./loadbalancer.yaml`
+- Run `minikube service external-webserver-service --url` to obtain the URL to put into your web browser to access the webserver.
