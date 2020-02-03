@@ -118,3 +118,23 @@ Build RabbitMQ Container:
             - master
         changes:
             - devops/docker/rabbitmq/**/*
+
+Build Preview Generator Container:
+    stage: containers
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    variables:
+        FULL_IMAGE_URL: $CI_FULL_REGISTRY/preview_generator
+    script:
+        - bazel build //devops/docker/preview_generator:docker_preview_generator 
+        - docker tag bazel/devops/docker/preview_generator:docker_preview_generator $FULL_IMAGE_URL:$CI_COMMIT_SHA
+        - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
+
+Build Webserver Container:
+    stage: containers
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    variables:
+        FULL_IMAGE_URL: $CI_FULL_REGISTRY/webserver
+    script:
+        - bazel build //devops/docker/webserver:docker_webserver 
+        - docker tag bazel/devops/docker/webserver:docker_webserver $FULL_IMAGE_URL:$CI_COMMIT_SHA
+        - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
