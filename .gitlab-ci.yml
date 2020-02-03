@@ -1,0 +1,11 @@
+stages:
+    - ciImage
+
+Build CI Image:
+    stage: ciImage
+    image: debian:10.2
+    script:
+        - apt-get update -qq
+        - cd dependencies && ./bootstrap_bazel.sh && cd ../
+        - export PATH=$PWD/dependencies/bazel/output:$PATH
+        - echo $PATH

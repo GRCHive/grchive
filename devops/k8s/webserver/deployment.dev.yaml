@@ -20,3 +20,8 @@ spec:
                   imagePullPolicy: Never
                   ports:
                     - containerPort: 8080
+                - name: nginx-container
+                  image: bazel/devops/docker/nginx:nginx
+                  imagePullPolicy: Never
+                  ports:
+                    - containerPort: 80
