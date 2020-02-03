@@ -23,6 +23,7 @@ before_script:
     - "[ ! -d dependencies/bazel ] && cd dependencies && ./bootstrap_bazel.sh && cd ../"
     - export PATH=$PWD/dependencies/bazel/output:$PATH
     - echo $PWD
+    - ls $PWD
 
 Build CI Image:
     stage: ciImage
