@@ -1,5 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("@build_bazel_rules_nodejs//:index.bzl", "nodejs_binary")
 
 filegroup(
     name = "corejsui-assets",
@@ -26,9 +27,9 @@ filegroup(
     ],
 )
 
-CMD_DEV = "cd src/core/jsui && rm -rf dist/* && npx webpack --config ./webpack/dev.config.js && tar czvf ../../../$@ dist/"
+CMD_DEV = "export NPX_BIN=`readlink -f $(location @nodejs_linux_amd64//:bin/nodejs/bin/npx)` && cd src/core/jsui && rm -rf dist/* && $$NPX_BIN webpack --config ./webpack/dev.config.js && tar czvf ../../../$@ dist/"
 
-CMD_PROD = "cd src/core/jsui && rm -rf dist/* && npx webpack --config ./webpack/prod.config.js && tar czvf ../../../$@ dist/"
+CMD_PROD = "export NPX_BIN=`readlink -f $(location @nodejs_linux_amd64//:bin/nodejs/bin/npx)` && cd src/core/jsui && rm -rf dist/* && $$NPX_BIN webpack --config ./webpack/prod.config.js && tar czvf ../../../$@ dist/"
 
 genrule(
     name = "corejsui-nosmap",
@@ -42,6 +43,9 @@ genrule(
     cmd = CMD_PROD,
     message = "Run Webpack for corejsui (no smap)",
     local = True,
+    tools = [
+        "@nodejs_linux_amd64//:bin/nodejs/bin/npx"
+    ]
 )
 
 genrule(
@@ -56,6 +60,9 @@ genrule(
     cmd = CMD_DEV,
     message = "Run Webpack for corejsui (with smap)",
     local = True,
+    tools = [
+        "@nodejs_linux_amd64//:bin/nodejs/bin/npx"
+    ]
 )
 
 genrule(
@@ -65,7 +72,7 @@ genrule(
         "//conditions:default": [":corejsui-smap"],
     }),
     outs = ["corejsui.zip"],
-    cmd = "tar xvf $< -C corejsui && cd corejsui && zip -r $@ .",
+    cmd = "mkdir corejsui && tar xvf $< -C corejsui && cd corejsui && mkdir -p ../`dirname $@` && echo $@ && zip -r ../$@ .",
 )
 
 genrule(
