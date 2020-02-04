@@ -27,9 +27,9 @@ filegroup(
     ],
 )
 
-CMD_DEV = "export NPX_BIN=`readlink -f $(location @nodejs_linux_amd64//:bin/nodejs/bin/npx)` && cd src/core/jsui && rm -rf dist/* && $$NPX_BIN webpack --config ./webpack/dev.config.js && tar czvf ../../../$@ dist/"
+CMD_DEV = "export NPX_BIN=`readlink -f $(location @nodejs_linux_amd64//:bin/nodejs/bin/npx)` && export NODE_BIN=`readlink -f $(location @nodejs_linux_amd64//:bin/node)` && cd src/core/jsui && rm -rf dist/* && $$NODE_BIN $$NPX_BIN webpack --config ./webpack/dev.config.js && tar czvf ../../../$@ dist/"
 
-CMD_PROD = "export NPX_BIN=`readlink -f $(location @nodejs_linux_amd64//:bin/nodejs/bin/npx)` && cd src/core/jsui && rm -rf dist/* && $$NPX_BIN webpack --config ./webpack/prod.config.js && tar czvf ../../../$@ dist/"
+CMD_PROD = "export NPX_BIN=`readlink -f $(location @nodejs_linux_amd64//:bin/nodejs/bin/npx)` && export NODE_BIN=`readlink -f $(location @nodejs_linux_amd64//:bin/node)` && cd src/core/jsui && rm -rf dist/* && $$NODE_BIN $$NPX_BIN webpack --config ./webpack/prod.config.js && tar czvf ../../../$@ dist/"
 
 genrule(
     name = "corejsui-nosmap",
@@ -44,7 +44,8 @@ genrule(
     message = "Run Webpack for corejsui (no smap)",
     local = True,
     tools = [
-        "@nodejs_linux_amd64//:bin/nodejs/bin/npx"
+        "@nodejs_linux_amd64//:bin/nodejs/bin/npx",
+        "@nodejs_linux_amd64//:bin/node"
     ]
 )
 
@@ -61,7 +62,8 @@ genrule(
     message = "Run Webpack for corejsui (with smap)",
     local = True,
     tools = [
-        "@nodejs_linux_amd64//:bin/nodejs/bin/npx"
+        "@nodejs_linux_amd64//:bin/nodejs/bin/npx",
+        "@nodejs_linux_amd64//:bin/node"
     ]
 )
 
