@@ -6,7 +6,7 @@ stages:
     - containers
 
 cache:
-    key: "${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}"
+    key: "${CI_COMMIT_REF_SLUG}"
     paths:
         - .cache/
         - src/core/jsui/node_modules/
@@ -27,6 +27,7 @@ before_script:
     - envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
     - cp -r /python ./dependencies/python
     - echo $GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
+    - which docker && docker version
 
 Build CI Image:
     stage: ciImage
@@ -56,7 +57,6 @@ Prepare:
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
         - bazel version
-        - docker version
 
 Compile Web Server:
     stage: compile
@@ -127,7 +127,7 @@ Build Preview Generator Container:
     variables:
         FULL_IMAGE_URL: $CI_FULL_REGISTRY/preview_generator
     script:
-        - bazel build //devops/docker/preview_generator:docker_preview_generator 
+        - bazel run //devops/docker/preview_generator:docker_preview_generator 
         - docker tag bazel/devops/docker/preview_generator:docker_preview_generator $FULL_IMAGE_URL:$CI_COMMIT_SHA
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
 
@@ -137,6 +137,6 @@ Build Webserver Container:
     variables:
         FULL_IMAGE_URL: $CI_FULL_REGISTRY/webserver
     script:
-        - bazel build //devops/docker/webserver:docker_webserver 
+        - bazel run //devops/docker/webserver:docker_webserver 
         - docker tag bazel/devops/docker/webserver:docker_webserver $FULL_IMAGE_URL:$CI_COMMIT_SHA
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
