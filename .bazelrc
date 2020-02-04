@@ -1,5 +1,7 @@
 common --experimental_allow_incremental_repository_updates
-common --loading_phase_threads=1
+
+build --loading_phase_threads=1
+run --loading_phase_threads=1
 
 build --action_env RABBITMQ_USER
 build --action_env RABBITMQ_PASSWORD
