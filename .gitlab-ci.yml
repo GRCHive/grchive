@@ -139,8 +139,13 @@ Build Preview Generator Container:
     variables:
         FULL_IMAGE_URL: $CI_FULL_REGISTRY/preview_generator
     script:
-        - bazel run //devops/docker/preview_generator:docker_preview_generator || echo "Build OK"
+        - df -h
+        - bazel build //devops/docker/preview_generator:docker_preview_generator.tar
+        - df -h
+        - docker load -i bazel-bin/devops/docker/preview_generator/docker_preview_generator.tar
+        - df -h
         - docker tag bazel/devops/docker/preview_generator:docker_preview_generator $FULL_IMAGE_URL:$CI_COMMIT_SHA
+        - df -h
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
 
 Build Webserver Container:
@@ -149,6 +154,7 @@ Build Webserver Container:
     variables:
         FULL_IMAGE_URL: $CI_FULL_REGISTRY/webserver
     script:
-        - bazel run //devops/docker/webserver:docker_webserver || echo "Build OK"
+        - bazel build //devops/docker/webserver:docker_webserver.tar
+        - docker load -i bazel-bin/devops/docker/webserver/docker_webserver.tar
         - docker tag bazel/devops/docker/webserver:docker_webserver $FULL_IMAGE_URL:$CI_COMMIT_SHA
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
