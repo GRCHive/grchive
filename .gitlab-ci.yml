@@ -4,6 +4,7 @@ stages:
     - compile
     - test
     - containers
+    - provision
 
 cache:
     key: "${CI_COMMIT_REF_SLUG}"
@@ -39,6 +40,7 @@ before_script:
     - envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
     - cp -r /python ./dependencies/python
     - echo $GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
+    - echo $GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
     - which docker && docker info
 
 Build CI Image:
@@ -144,6 +146,9 @@ Build Preview Generator Container:
         - docker load -i bazel-bin/devops/docker/preview_generator/docker_preview_generator.tar
         - docker tag bazel/devops/docker/preview_generator:docker_preview_generator $FULL_IMAGE_URL:$CI_COMMIT_SHA
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
+    only:
+        refs:
+            - master
 
 Build Webserver Container:
     stage: containers
@@ -155,3 +160,19 @@ Build Webserver Container:
         - docker load -i bazel-bin/devops/docker/webserver/docker_webserver.tar
         - docker tag bazel/devops/docker/webserver:docker_webserver $FULL_IMAGE_URL:$CI_COMMIT_SHA
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
+    only:
+        refs:
+            - master
+
+Terraform:
+    stage: provision
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - cd devops/terraform/prod
+        - terraform init
+          terraform apply -auto-approve
+    only:
+        refs:
+            - master
+        changes:
+            - devops/terraform/prod/**/*
