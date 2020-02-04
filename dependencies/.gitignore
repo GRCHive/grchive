@@ -8,3 +8,4 @@ libffi/
 kubectl/
 minikube/
 terraform/
+gcloud/
