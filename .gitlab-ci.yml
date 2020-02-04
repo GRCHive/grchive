@@ -26,6 +26,7 @@ before_script:
     - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
     - envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
     - cp -r /python ./dependencies/python
+    - echo $GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
 
 Build CI Image:
     stage: ciImage
