@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y openjdk-11-jdk \
     gnupg2 \
     software-properties-common \
     openssh-client \
+    openssl \
     gettext-base \
     python \
     python3-pip \
@@ -19,6 +20,7 @@ RUN add-apt-repository \
 RUN apt-get update && apt-get install -y docker-ce docker-ce-cli
 RUN apt-get -y upgrade
 RUN apt-get install -y zip
+RUN apt-get install -y zlib1g zlib1g-dev
 
 COPY docker-entrypoint.sh /usr/local/bin/
 ENV DOCKER_TLS_CERTDIR=/certs
@@ -31,6 +33,8 @@ COPY download_python.sh /
 WORKDIR /
 RUN ["/bin/bash", "./bootstrap_bazel.sh"]
 RUN ["/bin/bash", "./download_libffi.sh"]
+
+COPY python-helper/ /python-helper/
 RUN ["/bin/bash", "./download_python.sh"]
 ENV PATH="/bazel/output:${PATH}"
 

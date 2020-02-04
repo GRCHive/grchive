@@ -25,6 +25,7 @@ before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
     - envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
+    - cp -r /python ./dependencies/python
 
 Build CI Image:
     stage: ciImage
@@ -37,6 +38,7 @@ Build CI Image:
         - cp dependencies/bootstrap_bazel.sh devops/docker/ciImage/
         - cp dependencies/download_libffi.sh devops/docker/ciImage/
         - cp dependencies/download_python.sh devops/docker/ciImage/
+        - cp -r dependencies/python-helper devops/docker/ciImage/
         - cd devops/docker/ciImage
         - docker build --tag $FULL_IMAGE_URL:latest .
         - docker push $FULL_IMAGE_URL:latest
