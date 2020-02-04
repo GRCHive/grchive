@@ -334,7 +334,7 @@ container_pull(
     name = "preview-generator-base",
     registry = "registry.gitlab.com",
     repository = "grchive/grchive/preview_generator_base",
-    tag = "tag"
+    tag = "latest"
 )
 
 load(
