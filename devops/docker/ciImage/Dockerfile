@@ -8,7 +8,9 @@ RUN apt-get update && apt-get install -y openjdk-11-jdk \
     software-properties-common \
     openssh-client \
     gettext-base \
-    python
+    python \
+    python3-pip \
+    python3-distutils
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 RUN add-apt-repository \
     "deb [arch=amd64] https://download.docker.com/linux/debian \
@@ -22,10 +24,14 @@ COPY docker-entrypoint.sh /usr/local/bin/
 ENV DOCKER_TLS_CERTDIR=/certs
 RUN mkdir /certs /certs/client && chmod 1777 /certs /certs/client
 
-# Rely on the CI system to copy this file into this directory.
+# Rely on the CI system to copy these files into this directory.
 COPY bootstrap_bazel.sh /
+COPY download_libffi.sh /
+COPY download_python.sh /
 WORKDIR /
 RUN ["/bin/bash", "./bootstrap_bazel.sh"]
+RUN ["/bin/bash", "./download_libffi.sh"]
+RUN ["/bin/bash", "./download_python.sh"]
 ENV PATH="/bazel/output:${PATH}"
 
 ENTRYPOINT ["docker-entrypoint.sh"]

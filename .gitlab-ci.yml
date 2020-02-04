@@ -35,6 +35,8 @@ Build CI Image:
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     script:
         - cp dependencies/bootstrap_bazel.sh devops/docker/ciImage/
+        - cp dependencies/download_libffi.sh devops/docker/ciImage/
+        - cp dependencies/download_python.sh devops/docker/ciImage/
         - cd devops/docker/ciImage
         - docker build --tag $FULL_IMAGE_URL:latest .
         - docker push $FULL_IMAGE_URL:latest
