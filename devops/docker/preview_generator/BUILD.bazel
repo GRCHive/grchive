@@ -1,32 +1,32 @@
 package(default_visibility=["//visibility:public"])
 load("@io_bazel_rules_docker//go:image.bzl", "go_image")
-load("@io_bazel_rules_docker//container:container.bzl", "container_image")
-load("@io_bazel_rules_docker//docker/package_managers:download_pkgs.bzl", "download_pkgs")
-load("@io_bazel_rules_docker//docker/package_managers:install_pkgs.bzl", "install_pkgs")
-
-download_pkgs(
-    name = "preview_req_packages",
-    image_tar = "@go-buster//image",
-    packages = [
-        "libmagic1",
-        "libreoffice",
-    ]
-)
-
-install_pkgs(
-    name = "preview_req_image",
-    image_tar = "@go-buster//image",
-    installables_tar = ":preview_req_packages.tar",
-    output_image_name = "preview_req_image"
-)
-
-container_image(
-    name = "preview_generator_base",
-    base = ":preview_req_image.tar",
-)
+#load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+#load("@io_bazel_rules_docker//docker/package_managers:download_pkgs.bzl", "download_pkgs")
+#load("@io_bazel_rules_docker//docker/package_managers:install_pkgs.bzl", "install_pkgs")
+#
+#download_pkgs(
+#    name = "preview_req_packages",
+#    image_tar = "@go-buster//image",
+#    packages = [
+#        "libmagic1",
+#        "libreoffice",
+#    ]
+#)
+#
+#install_pkgs(
+#    name = "preview_req_image",
+#    image_tar = "@go-buster//image",
+#    installables_tar = ":preview_req_packages.tar",
+#    output_image_name = "preview_req_image"
+#)
+#
+#container_image(
+#    name = "preview_generator_base",
+#    base = ":preview_req_image.tar",
+#)
 
 go_image(
     name = "docker_preview_generator",
     binary = "//src/preview_generator:frontend",
-    base = ":preview_generator_base"
+    base = "@preview-generator-base//image"
 )

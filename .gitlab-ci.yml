@@ -52,6 +52,7 @@ Build CI Image:
         - cp dependencies/bootstrap_bazel.sh devops/docker/ciImage/
         - cp dependencies/download_libffi.sh devops/docker/ciImage/
         - cp dependencies/download_python.sh devops/docker/ciImage/
+        - cp dependencies/download_terraform.sh devops/docker/ciImage/
         - cp -r dependencies/python-helper devops/docker/ciImage/
         - cd devops/docker/ciImage
         - docker build --tag $FULL_IMAGE_URL:latest .
@@ -139,13 +140,9 @@ Build Preview Generator Container:
     variables:
         FULL_IMAGE_URL: $CI_FULL_REGISTRY/preview_generator
     script:
-        - df -h
         - bazel build //devops/docker/preview_generator:docker_preview_generator.tar
-        - df -h
         - docker load -i bazel-bin/devops/docker/preview_generator/docker_preview_generator.tar
-        - df -h
         - docker tag bazel/devops/docker/preview_generator:docker_preview_generator $FULL_IMAGE_URL:$CI_COMMIT_SHA
-        - df -h
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
 
 Build Webserver Container:

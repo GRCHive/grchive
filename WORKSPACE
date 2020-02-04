@@ -317,13 +317,6 @@ container_pull(
 )
 
 container_pull(
-    name = "go-buster",
-    registry = "index.docker.io",
-    repository = "library/golang",
-    tag = "1.13.7-buster"
-)
-
-container_pull(
     name = "nginx",
     registry = "index.docker.io",
     repository = "library/nginx",
@@ -335,6 +328,13 @@ container_pull(
     registry = "index.docker.io",
     repository = "library/debian",
     tag = "10.2"
+)
+
+container_pull(
+    name = "preview-generator-base",
+    registry = "registry.gitlab.com",
+    repository = "grchive/grchive/preview_generator_base",
+    tag = "tag"
 )
 
 load(

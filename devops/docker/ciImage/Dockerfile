@@ -38,5 +38,9 @@ COPY python-helper/ /python-helper/
 RUN ["/bin/bash", "./download_python.sh"]
 ENV PATH="/bazel/output:${PATH}"
 
+COPY download_terraform.sh /
+RUN ["/bin/bash", "./download_terraform.sh"]
+ENV PATH="/terraform:${PATH}"
+
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["bash"]
