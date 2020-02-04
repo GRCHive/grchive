@@ -5,9 +5,10 @@ stages:
     - test
     - containers
     - provision
+    - deploy
 
 cache:
-    key: "${CI_COMMIT_REF_SLUG}"
+    key: "${CI_COMMIT_REF_SLUG}-$CI_COMMIT_SHA"
     paths:
         - .cache/
         - src/core/jsui/node_modules/
@@ -41,7 +42,10 @@ before_script:
     - cp -r /python ./dependencies/python
     - echo $GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
     - echo $GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
-    - which docker && docker info
+    - echo $GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
+    - gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
+    - gcloud config set project grchive
+    - gcloud config set compute/zone us-central1-c
 
 Build CI Image:
     stage: ciImage
@@ -51,15 +55,10 @@ Build CI Image:
     before_script:
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     script:
-        - cp dependencies/bootstrap_bazel.sh devops/docker/ciImage/
-        - cp dependencies/download_libffi.sh devops/docker/ciImage/
-        - cp dependencies/download_python.sh devops/docker/ciImage/
-        - cp dependencies/download_terraform.sh devops/docker/ciImage/
-        - cp -r dependencies/python-helper devops/docker/ciImage/
         - cd devops/docker/ciImage
-        - docker build --tag $FULL_IMAGE_URL:latest .
-        - docker push $FULL_IMAGE_URL:latest
+        - ./create_ciimage.sh $FULL_IMAGE_URL:latest
     cache: {}
+    when: manual
     only:
         refs:
             - master
@@ -72,17 +71,13 @@ Prepare:
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
         - bazel version
+        - docker info
 
-Compile Web Server:
+Compile All:
     stage: compile
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
         - bazel build //src/webserver:webserver
-
-Compile Preview Generator:
-    stage: compile
-    image: $CI_FULL_REGISTRY/ci-image:latest
-    script:
         - bazel build //src/preview_generator:frontend
 
 Run All Tests:
@@ -176,3 +171,18 @@ Terraform:
             - master
         changes:
             - devops/terraform/prod/**/*
+
+Deploy Vault:
+    stage: deploy
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - export VAULT_IMAGE=$CI_FULL_REGISTRY/vault:$CI_COMMIT_SHA
+        - cd devops/k8s/vault
+        - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+        - kubectl apply -f service-internal.yaml -f deployment.prod.yaml
+    only:
+        refs:
+            - master
+    needs:
+        - "Build Vault Container"
