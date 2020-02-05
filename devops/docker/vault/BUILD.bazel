@@ -20,7 +20,8 @@ container_image(
     base = "@vault//image",
     files = [
         ":run_vault",
-        "//devops/vault/config:vault_config"
+        "//devops/vault/config:vault_config",
+        "//devops/vault/policies:user-policy.hcl",
     ],
     data_path = ".",
     cmd = "sh ./run_vault.sh",
