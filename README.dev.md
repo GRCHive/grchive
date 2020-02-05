@@ -53,6 +53,10 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `SECURITY_KEY_0`: A key used to encrypt webserver cookies.
 - `SECURITY_KEY_1`: A key used to encrypt webserver cookies.
 
+### Sendgrid
+
+- `SENDGRID_KEY`: API Key used for Sendgrid.
+
 ## Setup Dependencies
 
 - Install Blaze.
