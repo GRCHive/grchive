@@ -2,6 +2,9 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
     name: external-webserver-service
+    annotations:
+        kubernetes
+        kubernetes.io/ingress.global-static-ip-name: webserver-static-ip
     labels:
         app: webserver
 spec:
