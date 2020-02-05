@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: internal-webserver-service
+    labels:
+        app: webserver
+spec:
+    ports:
+        - port: 80
+          protocol: TCP
+    selector:
+        app: webserver
