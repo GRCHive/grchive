@@ -114,6 +114,7 @@ Build Vault Container:
         refs:
             - master
         changes:
+            - devops/vault/**/*
             - devops/docker/vault/**/*
 
 Build RabbitMQ Container:
@@ -200,5 +201,8 @@ Deploy Vault:
     only:
         refs:
             - master
+        changes:
+            - devops/docker/vault/**/*
+            - devops/vault/**/*
     needs:
         - "Build Vault Container"
