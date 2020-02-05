@@ -183,6 +183,9 @@ Flyway Vault:
     stage: migrate
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
+        - gcloud auth activate-service-account --key-file devops/gcloud/gcloud-terraform-account.json
+        - cloud_sql_proxy -instances=grchive:us-central1:${POSTGRES_INSTANCE_NAME}=tcp:5432 &
+        - sleep 1
         - cd devops/database/vault
         - envsubst < flyway/prod-flyway.conf.tmpl > flyway/prod-flyway.conf
         - flyway -configFiles=./flyway/prod-flyway.conf migrate
@@ -196,6 +199,9 @@ Flyway Webserver:
     stage: migrate
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
+        - gcloud auth activate-service-account --key-file devops/gcloud/gcloud-terraform-account.json
+        - cloud_sql_proxy -instances=grchive:us-central1:${POSTGRES_INSTANCE_NAME}=tcp:5432 &
+        - sleep 1
         - cd devops/database/webserver
         - envsubst < flyway/prod-flyway.conf.tmpl > flyway/prod-flyway.conf
         - flyway -configFiles=./flyway/prod-flyway.conf migrate
