@@ -216,7 +216,7 @@ Deploy Secrets:
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
         - gcloud container clusters get-credentials webserver-gke-cluster
-        - kubectl create secret generic gke-service-account --from-file=gke-service-account.json=devops/gcloud/gcloud-kubernetes-account.json -o yaml --dry-run --save-config | kubectl apply -f -
+        - kubectl create secret generic gke-service-account --from-file=gcloud-service-account.json=devops/gcloud/gcloud-kubernetes-account.json -o yaml --dry-run --save-config | kubectl apply -f -
         - kubectl create secret docker-registry regcred --docker-server=registry.gitlab.com --docker-username=${GKE_REGISTRY_USER} --docker-password=${GKE_REGISTRY_PASSWORD} -o yaml --dry-run --save-config | kubectl apply -f -
     only:
         refs:
@@ -230,7 +230,7 @@ Deploy Vault:
         - export VAULT_IMAGE=$CI_FULL_REGISTRY/vault:$CI_COMMIT_SHA
         - cd devops/k8s/vault
         - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
-        - kubectl apply -f service-internal.yaml -f service-external.dev.yaml -f deployment.prod.yaml
+        - kubectl apply -f service-internal.yaml -f deployment.prod.yaml
     only:
         refs:
             - master
