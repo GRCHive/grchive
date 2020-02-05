@@ -1,8 +1,7 @@
 storage "postgresql" {
-    connection_url = "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/vault?sslmode=verify-full&timezone=UTC"
+    connection_url = "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/vault?sslmode=disable&timezone=UTC"
     table = "vault_kv_store"
 }
-
 
 listener "tcp" {
     address     = "0.0.0.0:${VAULT_PORT}"
