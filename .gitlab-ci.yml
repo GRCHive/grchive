@@ -216,10 +216,7 @@ Deploy Secrets:
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
         - gcloud container clusters get-credentials webserver-gke-cluster
-        - cd devops/k8s/secrets
-        - export SECRET=`cat ../../gcloud/gcloud-kubernetes-account.json | base64 -w 0`
-        - envsubst < gke-service-account.yaml.tmpl > gke-service-account.yaml
-        - kubectl apply -f ./gke-service-account.yaml
+        - kubectl create secret generic gke-service-account --from-file=gke-service-account.json=devops/gcloud/gcloud-kubernetes-account.json -o yaml --dry-run --save-config | kubectl apply -f -
         - kubectl create secret docker-registry regcred --docker-server=registry.gitlab.com --docker-username=${GKE_REGISTRY_USER} --docker-password=${GKE_REGISTRY_PASSWORD} -o yaml --dry-run --save-config | kubectl apply -f -
     only:
         refs:
