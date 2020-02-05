@@ -8,8 +8,8 @@ domain = "grchive.com"
 connection = "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/audit?sslmode=disable&timezone=UTC"
 
 [okta]
-url = "https://dev-578359.okta.com"
-api_key = "00AtXv7F_M7soQyw1OTli4OfNMZ2498tL9Bdq9oT51"
+url = "${OKTA_URL}"
+api_key = "${OKTA_KEY}"
 api_endpoint = "/api"
 users_endpoint = "/v1/users"
 
@@ -23,8 +23,8 @@ auth_audience = "api://default"
 time_drift_leeway_seconds = 60
 
 [login.params]
-client_id = "0oa1g8kug3Rsscja0357"
-client_secret = "0l7rXztFrZs4AnpuYVirn5aLaDpqcdDJLBBV4GPq"
+client_id = "${OKTA_CLIENT_ID}"
+client_secret = "${OKTA_CLIENT_SECRET}"
 response_type = "code" 
 response_mode = "query"
 scope = "openid email offline_access groups profile"
@@ -33,8 +33,8 @@ grant_type = "authorization_code"
 
 [security]
 session_keys = [
-    "3c979da76c13832faccc7a2518e5caa211b04b5bbd69ac7a7e0a02da117f4fc6",
-    "7d0c32642cf37e8fedf87e706919b9f4395b911fdf79b451b4cad74b51b946cf"
+    "${SECURITY_KEY_0}",
+    "${SECURITY_KEY_1}"
 ]
 use_secure_cookies = false
 

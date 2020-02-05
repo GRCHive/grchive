@@ -48,6 +48,11 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `OKTA_CLIENT_ID` : The client application Client ID (Applications > Client Credentials > Client ID).
 - `OKTA_CLIENT_SECRET` : The client application Client secret (Applications > Client Credentials > Client secret).
 
+### Webserver
+
+- `SECURITY_KEY_0`: A key used to encrypt webserver cookies.
+- `SECURITY_KEY_1`: A key used to encrypt webserver cookies.
+
 ## Setup Dependencies
 
 - Install Blaze.

@@ -33,10 +33,10 @@ grant_type = "authorization_code"
 
 [security]
 session_keys = [
-    "3c979da76c13832faccc7a2518e5caa211b04b5bbd69ac7a7e0a02da117f4fc6",
-    "7d0c32642cf37e8fedf87e706919b9f4395b911fdf79b451b4cad74b51b946cf"
+    "${SECURITY_KEY_0}",
+    "${SECURITY_KEY_1}"
 ]
-use_secure_cookies = false
+use_secure_cookies = true
 
 [vault]
 url = "${VAULT_HOST}:${VAULT_PORT}"
