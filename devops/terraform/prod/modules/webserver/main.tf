@@ -38,6 +38,6 @@ resource "google_container_node_pool" "webserver-node-pool" {
     }
 }
 
-resource "google_compute_address" "webserver-static-ip" {
+resource "google_compute_global_address" "webserver-static-ip" {
     name = "webserver-static-ip"
 }
