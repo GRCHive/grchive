@@ -8,6 +8,7 @@ stages:
     - migrate
     - predeploy
     - deploy0
+    - deploy1
 
 cache:
     key: "${CI_COMMIT_REF_SLUG}-$CI_COMMIT_SHA"
@@ -102,8 +103,6 @@ Build NGINX Container:
     only:
         refs:
             - master
-        changes:
-            - devops/docker/nginx/**/*
 
 Build Vault Container:
     stage: containers
@@ -263,5 +262,31 @@ Deploy RabbitMQ:
         refs:
             - master
         changes:
-            - devops/docker/vault/**/*
-            - devops/vault/**/*
+            - devops/docker/rabbitmq/**/*
+
+Deploy Preview Generator:
+    stage: deploy1
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - export PREVIEW_IMAGE=$CI_FULL_REGISTRY/preview_generator:$CI_COMMIT_SHA
+        - cd devops/k8s/preview_generator
+        - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+        - kubectl apply -f deployment.prod.yaml
+    only:
+        refs:
+            - master
+
+Deploy Webserver:
+    stage: deploy1
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - export WEBSERVER_IMAGE=$CI_FULL_REGISTRY/webserver:$CI_COMMIT_SHA
+        - export NGINX_IMAGE=$CI_FULL_REGISTRY/nginx:$CI_COMMIT_SHA
+        - cd devops/k8s/webserver
+        - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+        - kubectl apply -f deployment.prod.yaml -f service.prod.yaml -f ingress.prod.yaml
+    only:
+        refs:
+            - master
