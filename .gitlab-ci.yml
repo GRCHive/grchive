@@ -27,6 +27,8 @@ variables:
 
 before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - echo "build -c opt" >> .bazelrc
+    - echo "run -c opt" >> .bazelrc
     - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
     - echo "build --action_env=DOCKER_HOST" >> .bazelrc
     - echo "run --action_env=DOCKER_HOST" >> .bazelrc
