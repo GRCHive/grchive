@@ -34,6 +34,6 @@ resource "google_container_node_pool" "webserver-node-pool" {
         labels = {
             app = "webserver"
         }
-        machine_type = "n1-standard-1"
+        machine_type = "n1-standard-2"
     }
 }
