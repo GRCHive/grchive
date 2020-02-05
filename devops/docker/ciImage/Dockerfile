@@ -47,5 +47,10 @@ RUN export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" && \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
     apt-get update -y && apt-get install google-cloud-sdk -y
 
+RUN mkdir -p /gcloud
+RUN curl -o /gcloud/cloud_sql_proxy https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+RUN chmod +x /gcloud/cloud_sql_proxy
+ENV PATH="/gcloud:${PATH}"
+
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["bash"]
