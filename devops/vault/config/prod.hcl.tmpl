@@ -3,6 +3,7 @@ storage "postgresql" {
     table = "vault_kv_store"
 }
 
+
 listener "tcp" {
     address     = "0.0.0.0:${VAULT_PORT}"
     tls_disable = 1

@@ -92,7 +92,7 @@ Build NGINX Container:
     variables:
         FULL_IMAGE_URL: $CI_FULL_REGISTRY/nginx
     script:
-        - bazel run /devops/docker/nginx:nginx 
+        - bazel run //devops/docker/nginx:nginx 
         - docker tag bazel/devops/docker/nginx:nginx $FULL_IMAGE_URL:$CI_COMMIT_SHA
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
     only:
@@ -107,7 +107,7 @@ Build Vault Container:
     variables:
         FULL_IMAGE_URL: $CI_FULL_REGISTRY/vault
     script:
-        - bazel run /devops/docker/vault:vault 
+        - bazel run //devops/docker/vault:vault 
         - docker tag bazel/devops/docker/vault:vault $FULL_IMAGE_URL:$CI_COMMIT_SHA
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
     only:
@@ -123,7 +123,7 @@ Build RabbitMQ Container:
     variables:
         FULL_IMAGE_URL: $CI_FULL_REGISTRY/rabbitmq
     script:
-        - bazel run /devops/docker/rabbitmq:rabbitmq 
+        - bazel run //devops/docker/rabbitmq:rabbitmq 
         - docker tag bazel/devops/docker/rabbitmq:rabbitmq $FULL_IMAGE_URL:$CI_COMMIT_SHA
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
     only:
