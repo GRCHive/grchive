@@ -1,1 +1,70 @@
-TODO
+self_uri = "http://localhost:8080"
+
+[company]
+company_name = "GRCHive"
+domain = "grchive.com"
+
+[database]
+connection = "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/audit?sslmode=verify-full&timezone=UTC"
+
+[okta]
+url = "${OKTA_URL}"
+api_key = "${OKTA_KEY}"
+api_endpoint = "/api"
+users_endpoint = "/v1/users"
+
+[login]
+authserver_endpoint = "/oauth2/default"
+auth_endpoint = "/v1/authorize"
+token_endpoint = "/v1/token"
+key_endpoint = "/v1/keys"
+logout_endpoint = "/v1/logout"
+auth_audience = "api://default"
+time_drift_leeway_seconds = 60
+
+[login.params]
+client_id = "${OKTA_CLIENT_ID}"
+client_secret = "${OKTA_CLIENT_SECRET}"
+response_type = "code" 
+response_mode = "query"
+scope = "openid email offline_access groups profile"
+redirect_uri = "/authorization-code/callback"
+grant_type = "authorization_code"
+
+[security]
+session_keys = [
+    "3c979da76c13832faccc7a2518e5caa211b04b5bbd69ac7a7e0a02da117f4fc6",
+    "7d0c32642cf37e8fedf87e706919b9f4395b911fdf79b451b4cad74b51b946cf"
+]
+use_secure_cookies = false
+
+[vault]
+url = "${VAULT_HOST}:${VAULT_PORT}"
+
+[vault.userpass]
+username = "${VAULT_USER}"
+password = "${VAULT_PASSWORD}"
+
+[gcloud]
+credentials_file = "devops/gcloud/gcloud-webserver-account.json"
+
+[gcloud.storage]
+doc_bucket = "grchive-dev"
+
+[mail]
+provider = "sendgrid"
+key = "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"
+
+[mail.verification.from]
+name = "Michael Bao"
+email = "me@mikehbao.com"
+
+[hashids]
+salt = "7409d5d933caf02affce"
+min_length = 8
+
+[rabbitmq]
+username = "${RABBITMQ_USER}"
+password = "${RABBITMQ_PASSWORD}"
+host = "${RABBITMQ_HOST}"
+port = ${RABBITMQ_PORT}

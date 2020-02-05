@@ -41,6 +41,13 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `VAULT_USER` : The username to authenticate with the Vault server.
 - `VAULT_PASSWORD` : The passowrd to authenticate with the Vault server.
 
+### Okta
+
+- `OKTA_URL`: The Org URL for Okta.
+- `OKTA_KEY`: The API Key to use for the given org (API > Tokens).
+- `OKTA_CLIENT_ID` : The client application Client ID (Applications > Client Credentials > Client ID).
+- `OKTA_CLIENT_SECRET` : The client application Client secret (Applications > Client Credentials > Client secret).
+
 ## Setup Dependencies
 
 - Install Blaze.
