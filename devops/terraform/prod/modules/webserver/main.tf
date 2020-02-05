@@ -28,6 +28,6 @@ resource "google_container_node_pool" "webserver-node-pool" {
         labels = {
             app = "webserver"
         }
-        machine_type = "f1-micro"
+        machine_type = "n1-standard-1"
     }
 }
