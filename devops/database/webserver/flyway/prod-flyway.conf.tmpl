@@ -1,4 +1,4 @@
-flyway.url=jdbc:postgresql://%DATABASE%
-flyway.user=%USERNAME%
-flyway.password=%PASSWORD%
+flyway.url=jdbc:postgresql://localhost:5432/audit
+flyway.user=${POSTGRES_USER}
+flyway.password=${POSTGRES_PASSWORD}
 flyway.locations=filesystem:./sql

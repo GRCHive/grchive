@@ -5,6 +5,7 @@ stages:
     - test
     - containers
     - provision
+    - migrate
     - deploy
 
 cache:
@@ -177,6 +178,32 @@ Terraform:
             - master
         changes:
             - devops/terraform/prod/**/*
+
+Flyway Vault:
+    stage: migrate
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - cd devops/database/vault
+        - envsubst < flyway/prod-flyway.conf.tmpl > flyway/prod-flyway.conf
+        - flyway -configFiles=./flyway/prod-flyway.conf migrate
+    only:
+        refs:
+            - master
+        changes:
+            - devops/database/vault/**/*
+
+Flyway Webserver:
+    stage: migrate
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - cd devops/database/webserver
+        - envsubst < flyway/prod-flyway.conf.tmpl > flyway/prod-flyway.conf
+        - flyway -configFiles=./flyway/prod-flyway.conf migrate
+    only:
+        refs:
+            - master
+        changes:
+            - devops/database/webserver/**/*
 
 Deploy Secrets:
     stage: deploy

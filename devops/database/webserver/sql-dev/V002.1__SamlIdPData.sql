@@ -1,2 +1,2 @@
 INSERT INTO saml_idp (domain, idpIdenOkta)
-VALUES ('mikehbao.com', '0oa1ga1cpoZa6X6Ne357');
+VALUES ('grchive.com', '0oa1ak8a2pyrUBpPK4x6');
