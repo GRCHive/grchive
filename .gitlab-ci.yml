@@ -204,5 +204,3 @@ Deploy Vault:
         changes:
             - devops/docker/vault/**/*
             - devops/vault/**/*
-    needs:
-        - "Build Vault Container"
