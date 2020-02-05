@@ -165,7 +165,7 @@ Terraform:
     script:
         - cd devops/terraform/prod
         - terraform init
-          terraform apply -auto-approve
+        - terraform apply -auto-approve
     only:
         refs:
             - master
