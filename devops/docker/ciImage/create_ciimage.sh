@@ -1,7 +1,7 @@
 #!/bin/bash
 
 IMAGE_NAME=$1
-DEPENDENCIES="bootstrap_bazel.sh download_libffi.sh download_python.sh download_terraform.sh python-helper"
+DEPENDENCIES="bootstrap_bazel.sh download_libffi.sh download_python.sh download_terraform.sh download_flyway.sh download_kubectl.sh python-helper"
 
 # Copy needed files
 for DEPEND in ${DEPENDENCIES};
