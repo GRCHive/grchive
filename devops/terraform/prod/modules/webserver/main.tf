@@ -1,9 +1,15 @@
+data "google_container_engine_versions" "gke-version-central1c" {
+    location       = "us-central1-c"
+    version_prefix = "1.15."
+}
+
 resource "google_container_cluster" "webserver-gke" {
     name     = "webserver-gke-cluster"
     location = "us-central1-c"
 
     remove_default_node_pool = true
     initial_node_count       = 1
+    min_master_version       = data.google_container_engine_versions.gke-version-central1c.latest_master_version
 
     master_auth {
         username = ""
