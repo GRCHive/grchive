@@ -6,7 +6,8 @@ stages:
     - containers
     - provision
     - migrate
-    - deploy
+    - predeploy
+    - deploy0
 
 cache:
     key: "${CI_COMMIT_REF_SLUG}-$CI_COMMIT_SHA"
@@ -212,7 +213,7 @@ Flyway Webserver:
             - devops/database/webserver/**/*
 
 Deploy Secrets:
-    stage: deploy
+    stage: predeploy
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
         - gcloud container clusters get-credentials webserver-gke-cluster
@@ -222,8 +223,19 @@ Deploy Secrets:
         refs:
             - master
 
+Deploy Storage:
+    stage: predeploy
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - cd devops/k8s/storage/prod
+        - kubectl apply -f .
+    only:
+        refs:
+            - master
+
 Deploy Vault:
-    stage: deploy
+    stage: deploy0
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
         - gcloud container clusters get-credentials webserver-gke-cluster
@@ -231,6 +243,22 @@ Deploy Vault:
         - cd devops/k8s/vault
         - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
         - kubectl apply -f service-internal.yaml -f deployment.prod.yaml
+    only:
+        refs:
+            - master
+        changes:
+            - devops/docker/vault/**/*
+            - devops/vault/**/*
+
+Deploy RabbitMQ:
+    stage: deploy0
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - export RABBITMQ_IMAGE=$CI_FULL_REGISTRY/rabbitmq:$CI_COMMIT_SHA
+        - cd devops/k8s/rabbitmq
+        - envsubst < statefulset.prod.yaml.tmpl > statefulset.prod.yaml
+        - kubectl apply -f service.yaml -f statefulset.prod.yaml
     only:
         refs:
             - master
