@@ -19,3 +19,19 @@ spec:
                   image: ${VAULT_IMAGE}
                   ports:
                     - containerPort: 8200
+                - name: cloudsql-proxy
+                  image: grc.io/cloudsql-docker/gce-proxy:1.16
+                  command: ["/cloud_sql_proxy",
+                             "-instances=grchive:us-central1:${POSTGRES_INSTANCE_NAME}=tcp:5432",
+                             "-credential_file=/secrets/gke/gcloud-kubernetes-account.json"]
+                  securityContext:
+                      runAsUser: 2  # non-root user
+                      allowPrivilegeEscalation: false
+                  volumeMounts:
+                      - name: gke-service-account
+                        mountPath: /secrets/gke
+                        readOnly: true
+            volumes:
+                - name: gke-service-account
+                  secret:
+                    secretName: gke-service-account

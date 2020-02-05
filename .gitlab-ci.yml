@@ -164,6 +164,9 @@ Terraform:
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
         - cd devops/terraform/prod
+        - export TF_VAR_postgres_user=${POSTGRES_USER}
+        - export TF_VAR_postgres_password=${POSTGRES_PASSWORD}
+        - export TF_VAR_postgres_instance_name=${POSTGRES_INSTANCE_NAME}
         - terraform init
         - terraform apply -auto-approve
     only:
@@ -171,6 +174,19 @@ Terraform:
             - master
         changes:
             - devops/terraform/prod/**/*
+
+Deploy Secrets:
+    stage: deploy
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - cd devops/k8s/secrets
+        - export SECRET=`cat ../../gcloud/gcloud-kubernetes-account.json | base64 -w 0`
+        - envsubst < gke-service-account.yaml.tmpl > gke-service-account.yaml
+        - kubectl apply -f ./gke-service-account.yaml
+    only:
+        refs:
+            - master
 
 Deploy Vault:
     stage: deploy
@@ -180,7 +196,7 @@ Deploy Vault:
         - export VAULT_IMAGE=$CI_FULL_REGISTRY/vault:$CI_COMMIT_SHA
         - cd devops/k8s/vault
         - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
-        - kubectl apply -f service-internal.yaml -f deployment.prod.yaml
+        - kubectl apply -f service-internal.yaml -f service-external.dev.yaml -f deployment.prod.yaml
     only:
         refs:
             - master

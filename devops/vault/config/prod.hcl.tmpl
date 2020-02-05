@@ -1,1 +1,12 @@
-TODO
+storage "postgresql" {
+    connection_url = "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/vault?sslmode=verify-full&timezone=UTC"
+    table = "vault_kv_store"
+}
+
+listener "tcp" {
+    address     = "0.0.0.0:${VAULT_PORT}"
+    tls_disable = 1
+//    tls_disable = 0
+//    tls_cert_file = "/etc/letsencrypt/live/grchive.com/fullchain.pem"
+//    tls_key_file = "/etc/letsencrypt/live/grchive.com/privkey.pem"
+}

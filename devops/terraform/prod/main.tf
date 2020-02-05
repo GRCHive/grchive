@@ -1,24 +1,34 @@
+terraform {
+    backend "gcs" {
+        credentials = "../../gcloud/gcloud-terraform-account.json"
+        bucket = "grchive-tf-state-prod"
+        prefix = "terraform/state"
+    }
+}
+
 provider "google" {
-    credentials = file(var.terraform-credentials-file)
+    credentials = file("../../gcloud/gcloud-terraform-account.json")
     project     = "grchive"
     region      = "us-central1"
     zone        = "us-central1-c"
+    version     =  "~> 3.7"
+    scopes      = [
+        "https://www.googleapis.com/auth/compute",
+        "https://www.googleapis.com/auth/cloud-platform",
+        "https://www.googleapis.com/auth/ndev.clouddns.readwrite",
+        "https://www.googleapis.com/auth/devstorage.full_control",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/cloud-platform",
+        "https://www.googleapis.com/auth/sqlservice.admin",
+    ]
 }
 
-resource "google_storage_bucket" "gc-terraform-store" {
-    name = var.terraform-bucket-name
-    location = "US-CENTRAL1"
-    versioning = {
-        enabled = true
-    }
-}
+module "database" {
+    source = "./modules/database"
 
-terraform {
-    backend "gcs" {
-        credentials = var.terraform-credentials-file
-        bucket = var.terraform-bucket-name
-        prefix = "terraform/state"
-    }
+    postgres_user = var.postgres_user
+    postgres_password = var.postgres_password
+    postgres_instance_name = var.postgres_instance_name
 }
 
 module "webserver" {

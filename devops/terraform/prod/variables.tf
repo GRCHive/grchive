@@ -1,9 +1,11 @@
-variable "terraform-bucket-name" {
+variable "postgres_user" {
     type = string
-    default = "grchive-tf-state-prod"
 }
 
-variable "terraform-credentials-file" {
+variable "postgres_password" {
     type = string
-    default = "../../gcloud/gcloud-terraform-account.json"
+}
+
+variable "postgres_instance_name" {
+    type = string
 }
