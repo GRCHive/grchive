@@ -220,6 +220,7 @@ Deploy Secrets:
         - export SECRET=`cat ../../gcloud/gcloud-kubernetes-account.json | base64 -w 0`
         - envsubst < gke-service-account.yaml.tmpl > gke-service-account.yaml
         - kubectl apply -f ./gke-service-account.yaml
+        - kubectl create secret docker-registry regcred --docker-server=registry.gitlab.com --docker-username=${GKE_REGISTRY_USER} --docker-password=${GKE_REGISTRY_PASSWORD} -o yaml --dry-run --save-config | kubectl apply -f -
     only:
         refs:
             - master
