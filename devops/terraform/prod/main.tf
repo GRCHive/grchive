@@ -31,6 +31,10 @@ module "database" {
     postgres_instance_name = var.postgres_instance_name
 }
 
+module "vault" {
+    source = "./modules/vault"
+}
+
 module "webserver" {
     source = "./modules/webserver"
 }

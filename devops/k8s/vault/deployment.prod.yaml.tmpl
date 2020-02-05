@@ -19,6 +19,10 @@ spec:
                   image: ${VAULT_IMAGE}
                   ports:
                     - containerPort: 8200
+                  volumeMounts:
+                      - name: gke-service-account
+                        mountPath: /secrets/gke
+                        readOnly: true
                 - name: cloudsql-proxy
                   image: gcr.io/cloudsql-docker/gce-proxy:1.16
                   command: ["/cloud_sql_proxy",
