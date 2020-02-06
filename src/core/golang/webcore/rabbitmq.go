@@ -9,6 +9,7 @@ import (
 
 const DEFAULT_EXCHANGE string = ""
 const FILE_PREVIEW_QUEUE string = "filepreview"
+const CHANNEL_BUFFER int = 12
 
 type RabbitMQError struct {
 	Err     error
@@ -69,27 +70,29 @@ type RabbitMQConnection struct {
 }
 
 func (r *RabbitMQConnection) publishWorker(idx int) {
-	msg := <-r.publishChannel
+	for {
+		msg := <-r.publishChannel
 
-	byteMsg, err := json.Marshal(msg.Body)
-	if err != nil {
-		core.Error("Failed to marshal message: " + err.Error())
-	}
+		byteMsg, err := json.Marshal(msg.Body)
+		if err != nil {
+			core.Error("Failed to marshal message: " + err.Error())
+		}
 
-	err = r.Channels[idx].Publish(
-		msg.Exchange,
-		msg.Queue,
-		false, // mandatory
-		false, // immediate
-		amqp.Publishing{
-			ContentType:  "application/json",
-			Body:         byteMsg,
-			DeliveryMode: amqp.Persistent,
-		},
-	)
+		err = r.Channels[idx].Publish(
+			msg.Exchange,
+			msg.Queue,
+			false, // mandatory
+			false, // immediate
+			amqp.Publishing{
+				ContentType:  "application/json",
+				Body:         byteMsg,
+				DeliveryMode: amqp.Persistent,
+			},
+		)
 
-	if err != nil {
-		core.Warning("Failed to publish : " + err.Error())
+		if err != nil {
+			core.Warning("Failed to publish : " + err.Error())
+		}
 	}
 }
 
@@ -102,7 +105,7 @@ func CreateRabbitMQConnection(url string, numChannels int) *RabbitMQConnection {
 	c := RabbitMQConnection{
 		Connection:     connection,
 		Channels:       make([]*amqp.Channel, numChannels),
-		publishChannel: make(chan PublishMessage),
+		publishChannel: make(chan PublishMessage, CHANNEL_BUFFER),
 	}
 
 	for i := 0; i < numChannels; i++ {
