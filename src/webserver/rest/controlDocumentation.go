@@ -351,6 +351,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	core.Debug("\tCommit")
 	err = tx.Commit()
 	if err != nil {
 		core.Warning("Failed to commit file: " + err.Error())
@@ -366,6 +367,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	core.Debug("\tRespond")
 	jsonWriter.Encode(struct {
 		File    *core.ControlDocumentationFile
 		Version *core.FileVersion
