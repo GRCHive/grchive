@@ -27,8 +27,7 @@ var supportedApplicationMIME []string = []string{
 func isFileSupported(filename string) bool {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
-	cmd := exec.Command("python",
-		"src/preview_generator/mime_helper",
+	cmd := exec.Command("./src/preview_generator/mime_helper",
 		"--filename", filename)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
