@@ -4,6 +4,8 @@ metadata:
     name: external-webserver-service
     annotations:
         kubernetes.io/ingress.global-static-ip-name: webserver-static-ip
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        acme.cert-manager.io/http01-edit-in-place: "true"
     labels:
         app: webserver
 spec:
@@ -13,3 +15,8 @@ spec:
                 - backend:
                     serviceName: internal-webserver-service
                     servicePort: 80
+    tls:
+        - hosts:
+            - "grchive.com"
+            - "www.grchive.com"
+          secretName: grchive-cert-prod

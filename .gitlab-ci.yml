@@ -233,6 +233,19 @@ Deploy Storage:
         refs:
             - master
 
+Deploy Lets Encrypt:
+    stage: predeploy
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - cd devops/k8s/cert-manager
+        - kubectl apply -f ./letsencrypt-staging.yaml -f ./letsencrypt-prod.yaml
+    only:
+        refs:
+            - master
+        changes:
+            - devops/k8s/cert-manager/**/*
+
 Deploy Vault:
     stage: deploy0
     image: $CI_FULL_REGISTRY/ci-image:latest
