@@ -11,11 +11,11 @@
         </template>
 
         <v-row align="center">
-            <v-col class="pl-4 py-0 grow">
+            <v-col class="pl-4 py-0 flex-grow-1 flex-shrink-0">
                 Please verify your email address to access all available functionality.
             </v-col>
 
-            <v-col class="py-0 pr-2 shrink">
+            <v-col class="py-0 pr-2 flex-grow-0 flex-shrink-1">
                 <v-btn small outlined @click="sendVerification" v-if="!sentEmail">
                     Resend Verification Email
                 </v-btn>

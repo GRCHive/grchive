@@ -21,5 +21,4 @@ module.exports = merge(base, {
         filename: 'gen/[name].[contenthash].js',
         chunkFilename: 'gen/[id].[chunkhash].js',
     }
-
 })
