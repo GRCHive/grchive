@@ -17,6 +17,7 @@ container_image(
     base = "@nginx//image",
     files = [
         ":config",
+        "//src/core/jsui:corejsui-assets",
     ],
     tars = [
         "//src/core/jsui:corejsui.tar",
