@@ -69,6 +69,7 @@ type RabbitMQConfig struct {
 
 type EnvConfigData struct {
 	SelfUri            string
+	SelfDomain         string
 	DatabaseConnString string
 	Login              *LoginConfig
 	Okta               *OktaConfig
@@ -106,6 +107,7 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 
 	envConfig := new(EnvConfigData)
 	envConfig.SelfUri = tomlConfig.Get("self_uri").(string)
+	envConfig.SelfDomain = tomlConfig.Get("self_domain").(string)
 	envConfig.DatabaseConnString = tomlConfig.Get("database.connection").(string)
 
 	envConfig.Okta = new(OktaConfig)

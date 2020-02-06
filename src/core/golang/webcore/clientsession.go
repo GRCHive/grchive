@@ -25,7 +25,8 @@ func CreateCookie(name string, value string, maxAge int, httpOnly bool) *http.Co
 		MaxAge:   maxAge,
 		Secure:   core.EnvConfig.UseSecureCookies,
 		HttpOnly: httpOnly,
-		Path:     MustGetRouteUrl(LandingPageRouteName),
+		Domain:   core.EnvConfig.SelfDomain,
+		Path:     "/",
 	}
 }
 
@@ -93,7 +94,8 @@ func DeleteCookie(cookieName string, w http.ResponseWriter) {
 		MaxAge:   -1,
 		Secure:   core.EnvConfig.UseSecureCookies,
 		HttpOnly: true,
-		Path:     MustGetRouteUrl(LandingPageRouteName),
+		Domain:   core.EnvConfig.SelfDomain,
+		Path:     "/",
 	}
 	http.SetCookie(w, cookie)
 }

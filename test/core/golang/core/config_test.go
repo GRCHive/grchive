@@ -95,6 +95,7 @@ func TestLoadEnvConfig(t *testing.T) {
 			cfg: GenerateTomlConfig{
 				Params: []SingleFieldConfig{
 					{"SelfUri", "self_uri", "test_uri", nil},
+					{"SelfDomain", "self_domain", "test_domain", nil},
 					{"DatabaseConnString", "database.connection", "connection_string", nil},
 					{"Okta.BaseUrl", "okta.url", "okta_base_url", nil},
 					{"Okta.ApiEndpoint", "okta.api_endpoint", "okta_apiendpoint", nil},
