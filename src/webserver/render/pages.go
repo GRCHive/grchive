@@ -7,16 +7,18 @@ import (
 	"strconv"
 )
 
+var emptyParams = map[string]interface{}{}
+
 func RenderGettingStartedPage(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, GettingStartedPageTemplateKey, "base", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, GettingStartedPageTemplateKey, "base", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderContactUsPage(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, ContactUsPageTemplateKey, "base", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, ContactUsPageTemplateKey, "base", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderHomePage(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, LandingPageTemplateKey, "base", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, LandingPageTemplateKey, "base", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderLoginPage(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +29,7 @@ func RenderLoginPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	RenderTemplate(w, LoginPageTemplateKey, "base", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, LoginPageTemplateKey, "base", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderRegisterPage(w http.ResponseWriter, r *http.Request) {
@@ -38,11 +40,11 @@ func RenderRegisterPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	RenderTemplate(w, RegistrationPageTemplateKey, "base", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, RegistrationPageTemplateKey, "base", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderLearnMorePage(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, LearnMorePageTemplateKey, "base", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, LearnMorePageTemplateKey, "base", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDashboardHomePage(w http.ResponseWriter, r *http.Request) {
@@ -135,53 +137,53 @@ func RenderDashboardUserHomePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func RenderDashboardUserOrgsPage(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardUserOrgsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardUserOrgsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDashboardUserProfilePage(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardUserProfileTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardUserProfileTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDashboardProcessFlowsPage(w http.ResponseWriter, r *http.Request) {
 	if verifyContextForOrgDashboard(w, r) != nil {
 		return
 	}
-	RenderTemplate(w, DashboardProcessFlowsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardProcessFlowsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDashboardRisksPage(w http.ResponseWriter, r *http.Request) {
 	if verifyContextForOrgDashboard(w, r) != nil {
 		return
 	}
-	RenderTemplate(w, DashboardRisksTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardRisksTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDashboardSingleRiskPage(w http.ResponseWriter, r *http.Request) {
 	if verifyContextForOrgDashboard(w, r) != nil {
 		return
 	}
-	RenderTemplate(w, DashboardSingleRiskTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardSingleRiskTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDashboardControlsPage(w http.ResponseWriter, r *http.Request) {
 	if verifyContextForOrgDashboard(w, r) != nil {
 		return
 	}
-	RenderTemplate(w, DashboardControlsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardControlsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDashboardSingleControlPage(w http.ResponseWriter, r *http.Request) {
 	if verifyContextForOrgDashboard(w, r) != nil {
 		return
 	}
-	RenderTemplate(w, DashboardSingleControlTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardSingleControlTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDashboardSingleFlowPage(w http.ResponseWriter, r *http.Request) {
 	if verifyContextForOrgDashboard(w, r) != nil {
 		return
 	}
-	RenderTemplate(w, DashboardSingleFlowTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardSingleFlowTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDashboardOrgSettingsHome(w http.ResponseWriter, r *http.Request) {
@@ -200,73 +202,81 @@ func RenderDashboardOrgSettingsHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func RenderDashboardOrgSettingsUsers(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardOrgSettingsUsersTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardOrgSettingsUsersTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDashboardOrgSettingsRoles(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardOrgSettingsRolesTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardOrgSettingsRolesTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDashboardOrgSettingsSingleRole(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardOrgSettingsSingleRoleTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardOrgSettingsSingleRoleTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDashboardGeneralLedger(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardGeneralLedgerTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardGeneralLedgerTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDashboardGLAccount(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardGLAccountTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardGLAccountTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderSystemHome(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardSystemHomeTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardSystemHomeTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderSingleSystem(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardSingleSystemTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardSingleSystemTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDbSystems(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardDbSystemsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardDbSystemsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderSingleDb(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardSingleDbTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardSingleDbTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderServers(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardServersTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardServersTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderSingleServer(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardSingleServerTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardSingleServerTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDocumentation(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardDocumentationTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardDocumentationTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderSingleDocCat(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardSingleDocumentationTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardSingleDocumentationTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderDocRequest(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardDocRequestsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardDocRequestsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderSingleDocRequest(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardSingleDocRequestTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardSingleDocRequestTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderVendors(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardVendorsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardVendorsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderSingleVendor(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardSingleVendorTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardSingleVendorTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
 func RenderSingleDocFile(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, DashboardSingleDocFileTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r))
+	RenderTemplate(w, DashboardSingleDocFileTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
+}
+
+func RenderRedirectPage(w http.ResponseWriter, r *http.Request, url string) {
+	RenderTemplate(w, RedirectTemplateKey, "base",
+		BuildPageTemplateParametersFull(r),
+		CreateRedirectParams(w, r, "Oops!",
+			"Something went wrong! Please try again.",
+			url))
 }

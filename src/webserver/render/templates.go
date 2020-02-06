@@ -172,14 +172,14 @@ func RetrieveTemplate(name templateKey) *template.Template {
 	return nil
 }
 
-func RenderTemplate(w http.ResponseWriter, key templateKey, name string, params PageTemplateParameters) {
+func RenderTemplate(w http.ResponseWriter, key templateKey, name string, params PageTemplateParameters, extraParams map[string]interface{}) {
 	// Handle error?
 	jsonRaw, _ := json.Marshal(params)
 	RetrieveTemplate(key).
 		ExecuteTemplate(
 			w,
 			name,
-			map[string]interface{}{
+			core.MergeMaps(map[string]interface{}{
 				"Params": string(jsonRaw),
-			})
+			}, extraParams))
 }

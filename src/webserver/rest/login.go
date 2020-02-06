@@ -152,14 +152,7 @@ func postLogin(w http.ResponseWriter, r *http.Request) {
 
 func getSamlLoginCallbackError(prefix string, err error, w http.ResponseWriter, r *http.Request) {
 	core.Warning(prefix + " :: " + core.ErrorString(err))
-	webcore.ClearCSRFTokenFromSession(w, r)
-	render.RetrieveTemplate(render.RedirectTemplateKey).
-		ExecuteTemplate(
-			w,
-			"base",
-			render.CreateRedirectParams(w, r, "Oops!",
-				"Something went wrong! Please try again.",
-				webcore.MustGetRouteUrl(webcore.LoginRouteName)))
+	render.RenderRedirectPage(w, r, webcore.MustGetRouteUrl(webcore.LoginRouteName))
 }
 
 func getSamlLoginCallback(w http.ResponseWriter, r *http.Request) {
@@ -175,11 +168,12 @@ func getSamlLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ok, err := webcore.VerifyCSRFToken(state[0], r); !ok || err != nil {
+	core.Info("VERIFY CSRF: " + state[0])
+
+	if _, err := webcore.VerifyCSRFToken(state[0], r); true || err != nil {
 		getSamlLoginCallbackError("Failed CSRF check for SAML Login Callback.", err, w, r)
 		return
 	}
-	webcore.ClearCSRFTokenFromSession(w, r)
 
 	// Retrieve the access/ID token from Okta and redirect if successful.
 	// Note that core.OktaObtainTokens will store the tokens where necessary.
@@ -212,14 +206,7 @@ func getSamlLoginCallback(w http.ResponseWriter, r *http.Request) {
 
 func getLogoutCallbackError(prefix string, err error, w http.ResponseWriter, r *http.Request) {
 	core.Warning(prefix + " :: " + core.ErrorString(err))
-	webcore.ClearCSRFTokenFromSession(w, r)
-	render.RetrieveTemplate(render.RedirectTemplateKey).
-		ExecuteTemplate(
-			w,
-			"base",
-			render.CreateRedirectParams(w, r, "Oops!",
-				"Something went wrong! Please try again.",
-				webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName)))
+	render.RenderRedirectPage(w, r, webcore.MustGetRouteUrl(webcore.LoginRouteName))
 }
 
 func getLogout(w http.ResponseWriter, r *http.Request) {
@@ -234,7 +221,6 @@ func getLogout(w http.ResponseWriter, r *http.Request) {
 		getLogoutCallbackError("Failed to logout (bad csrf)", err, w, r)
 		return
 	}
-	webcore.ClearCSRFTokenFromSession(w, r)
 
 	session, err := webcore.FindSessionInContext(r.Context())
 	if err != nil {
