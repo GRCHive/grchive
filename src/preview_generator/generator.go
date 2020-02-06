@@ -27,11 +27,14 @@ var supportedApplicationMIME []string = []string{
 func isFileSupported(filename string) bool {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
-	cmd := exec.Command("python3",
+	cmd := exec.Command("dependencies/python/python-3.8.1/bin/bin/python3",
 		"src/preview_generator/mime_helper",
 		"--filename", filename)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
+	cmd.Env = append(os.Environ(),
+		"PYTHONHOME=./dependencies/python/python-3.8.1/bin/lib/python3.8",
+		"PYTHONPATH=./dependencies/python/python-3.8.1/bin/lib/python3.8")
 	err := cmd.Run()
 	if err != nil {
 		core.Error("Failed to get MIME: " + err.Error() + " " + stderr.String())

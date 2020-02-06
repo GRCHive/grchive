@@ -1,2 +1,4 @@
-FROM golang:1.13.7-alpine3.11
-RUN apk update && apk add libreoffice libmagic libc6-compat python3
+FROM debian:buster-slim
+RUN mkdir -p /usr/share/man/man1mkdir -p /usr/share/man/man1
+RUN apt-get update && apt-get install -y libmagic1 \
+    libreoffice
