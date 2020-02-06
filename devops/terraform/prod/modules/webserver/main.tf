@@ -47,6 +47,6 @@ resource "google_storage_bucket" "webserver-control-doc-store" {
     location = "US-CENTRAL1"
 
     versioning {
-        enabled: true
+        enabled = true
     }
 }
