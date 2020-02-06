@@ -1,6 +1,7 @@
 package webcore
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"gitlab.com/grchive/grchive/core"
 	"net/http"
@@ -40,7 +41,13 @@ func VerifyCSRFToken(token string, r *http.Request) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return session.Values["csrf"].(string) == token, nil
+
+	val := session.Values["csrf"]
+	if val == nil {
+		return false, errors.New("Failed to find CSRF in session.")
+	}
+
+	return val.(string) == token, nil
 }
 
 func ClearCSRFTokenFromSession(w http.ResponseWriter, r *http.Request) {
