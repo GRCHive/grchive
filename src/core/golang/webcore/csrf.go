@@ -20,7 +20,6 @@ func AddCSRFTokenToRequest(w http.ResponseWriter, r *http.Request) error {
 	// encounter where uuid.Must will fail? Famous last words.
 	token := uuid.New().String()
 	session.Values["csrf"] = token
-	core.Info("GRANT NEW CSRF: " + token)
 	err = session.Save(r, w)
 	if err != nil {
 		core.Warning("Failed to save to session: " + err.Error())
@@ -41,8 +40,7 @@ func VerifyCSRFToken(token string, r *http.Request) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	core.Info("GET CURRENT CSRF: " + session.Values["csrf"].(string))
-	return session.Values["csrf"] == token, nil
+	return session.Values["csrf"].(string) == token, nil
 }
 
 func ClearCSRFTokenFromSession(w http.ResponseWriter, r *http.Request) {
