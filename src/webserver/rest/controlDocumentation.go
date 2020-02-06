@@ -237,6 +237,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	core.Debug("\tUpload Control Document Inputs")
 	org, err := database.FindOrganizationFromId(inputs.OrgId)
 	if err != nil {
 		core.Warning("Can't find organization: " + err.Error())
@@ -302,6 +303,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	var storageData *core.FileStorageData
 	var finalFilename string
 
+	core.Debug("\tStart Upload")
 	finalFilename, storageData, err = webcore.UploadNewFileWithTx(
 		storage,
 		internalFile,
@@ -321,6 +323,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	core.Debug("\tPost to RabbitMQ")
 	// At this point we know we can put in a request to generate a preview.
 	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
 		Exchange: webcore.DEFAULT_EXCHANGE,

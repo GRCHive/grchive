@@ -25,6 +25,7 @@ func UploadNewFileWithTx(
 ) (string, *core.FileStorageData, error) {
 	var err error
 
+	core.Debug("\tCreate Metadata")
 	if !useExistingMetadata {
 		err = database.CreateControlDocumentationFileWithTx(file, tx, role)
 		if err != nil {
@@ -49,6 +50,7 @@ func UploadNewFileWithTx(
 		UploadUserId: uploadUserId,
 	}
 
+	core.Debug("\tCreate Storage")
 	err = database.CreateFileStorageWithTx(&storage, tx, role)
 	if err != nil {
 		return "", nil, err
@@ -69,23 +71,27 @@ func UploadNewFileWithTx(
 		storageName = &tmp
 	}
 
+	core.Debug("\tUpdate Database")
 	storage.StorageId = *storageName
 	err = database.UpdateFileStorageStorageIdWithTx(storage.Id, file.OrgId, storage.StorageId, tx, role)
 	if err != nil {
 		return "", nil, err
 	}
 
+	core.Debug("\tCreate Engine Key")
 	transitKey := file.UniqueKey()
 	err = vault.TransitCreateNewEngineKey(transitKey)
 	if err != nil {
 		return "", nil, err
 	}
 
+	core.Debug("\tEncrypt")
 	encryptedFile, err := vault.TransitEncrypt(transitKey, buffer)
 	if err != nil {
 		return "", nil, err
 	}
 
+	core.Debug("\tUpload")
 	err = gcloud.Upload(bucket, *storageName, encryptedFile)
 	if err != nil {
 		return "", nil, err
