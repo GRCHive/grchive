@@ -168,7 +168,7 @@ func getSamlLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := webcore.VerifyCSRFToken(state[0], r); true || err != nil {
+	if ok, err := webcore.VerifyCSRFToken(state[0], r); !ok || err != nil {
 		getSamlLoginCallbackError("Failed CSRF check for SAML Login Callback.", err, w, r)
 		return
 	}

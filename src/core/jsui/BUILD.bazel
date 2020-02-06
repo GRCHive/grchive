@@ -71,7 +71,8 @@ genrule(
     name = "corejsui",
     srcs = select({
         "//:production": [":corejsui-nosmap"],
-        "//conditions:default": [":corejsui-smap"],
+        "//:debug": [":corejsui-smap"],
+        "//conditions:default": [":corejsui-nosmap"],
     }),
     outs = ["corejsui.zip"],
     cmd = "mkdir corejsui && tar xvf $< -C corejsui && cd corejsui && mkdir -p ../`dirname $@` && echo $@ && zip -r ../$@ .",
@@ -81,7 +82,8 @@ genrule(
     name = "corejsui.tar",
     srcs = select({
         "//:production": [":corejsui-nosmap"],
-        "//conditions:default": [":corejsui-smap"],
+        "//:debug": [":corejsui-smap"],
+        "//conditions:default": [":corejsui-nosmap"],
     }),
     outs = ["corejsui.tar.gz"],
     cmd = "cp $< $@"
