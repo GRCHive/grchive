@@ -9,10 +9,10 @@ cd ../../../
 
 cd devops/database/vault
 envsubst < flyway/prod-flyway.conf.tmpl > flyway/prod-flyway.conf
-flyway -configFiles=./flyway/prod-flyway.conf migrate
+flyway -configFiles=./flyway/prod-flyway.conf -url="jdbc:postgresql://localhost:5555/vault" migrate
 cd ../../../
 
 cd devops/database/webserver
 envsubst < flyway/prod-flyway.conf.tmpl > flyway/prod-flyway.conf
-flyway -configFiles=./flyway/prod-flyway.conf migrate
+flyway -configFiles=./flyway/prod-flyway.conf -url="jdbc:postgresql://localhost:5555/audit" migrate
 cd ../../../
