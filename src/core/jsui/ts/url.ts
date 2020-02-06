@@ -198,6 +198,7 @@ export const deleteControlDocUrl : string = "/api/documentation/file/delete"
 export const downloadControlDocUrl : string = "/api/documentation/file/download"
 export const getControlDocUrl : string = "/api/documentation/file/get"
 export const editControlDocUrl : string = "/api/documentation/file/edit"
+export const regenPreviewControlDocUrl : string = "/api/documentation/file/preview"
 
 export const allControlDocVersionsUrl : string = "/api/documentation/file/versions/all"
 export const getControlDocVersionsUrl : string = "/api/documentation/file/versions/get"

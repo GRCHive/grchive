@@ -23,6 +23,7 @@ import { newControlDocCatUrl,
          getControlDocCatUrl,
          allControlDocVersionsUrl,
          getControlDocVersionsUrl,
+         regenPreviewControlDocUrl,
 } from '../url'
 import JSZip from 'jszip'
 import { getAPIRequestConfig } from './apiUtility'
@@ -304,4 +305,14 @@ export function getVersionStorageData(inp : TGetVersionStorageDataInput) : Promi
             cleanJsonFileStorageData(resp.data.Storage)
             return resp
         })
+}
+
+export interface TRenegeratePreviewInput {
+    fileId: number
+    orgId: number
+    version: number
+}
+
+export function regeneratePreview(inp : TRenegeratePreviewInput) : Promise<void> {
+    return postFormJson<void>(regenPreviewControlDocUrl, inp, getAPIRequestConfig())
 }

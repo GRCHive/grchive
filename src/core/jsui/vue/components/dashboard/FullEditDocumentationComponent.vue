@@ -18,7 +18,16 @@
                     v-if="hasPreview"
                 ></v-progress-circular>
 
-                <span v-else>No Preview Available</span>
+                <div v-else>
+                    <div>No Preview Available</div>
+                    <v-btn
+                        color="primary"
+                        @click="regeneratePreview"
+                        :disabled="didRegenerate"
+                    >
+                        Retry Preview Generation
+                    </v-btn>
+                </div>
             </v-col>
 
             <v-col cols="6" v-if="metadataReady" class="py-0">
@@ -271,6 +280,7 @@ import {
     deleteControlDocuments,
     getVersionStorageData,
     TGetVersionStorageDataOutput,
+    regeneratePreview,
 } from '../../../ts/api/apiControlDocumentation'
 import { 
     ControlDocumentationFile,
@@ -332,6 +342,7 @@ export default class FullEditDocumentationComponent extends Vue {
 
     showHideDelete: boolean = false
     showHideUpload: boolean = false
+    didRegenerate : boolean = false
 
     $refs!: {
         pdfViewer: PdfJsViewer
@@ -618,6 +629,31 @@ export default class FullEditDocumentationComponent extends Vue {
         this.showHideUpload = false
         this.availableVersions!.unshift(v)
         this.selectVersion(v)
+    }
+
+    regeneratePreview() {
+        this.didRegenerate = true
+        regeneratePreview({
+            fileId: this.metadata!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            version: this.selectedVersion!.VersionNumber,
+        }).then(() => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Your request is in progress. Please check back soon!",
+                false,
+                "",
+                "",
+                false);
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 }
 

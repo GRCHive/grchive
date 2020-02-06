@@ -179,18 +179,15 @@ func GetControlDocumentation(fileId int64, orgId int32, role *core.Role) (*core.
 	return &retFile, err
 }
 
-func GetControlDocumentationPreview(fileId int64, orgId int32, role *core.Role) (*core.FileStorageData, error) {
+func GetControlDocumentationStorage(fileId int64, orgId int32, role *core.Role) (*core.FileStorageData, error) {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
 
 	rows, err := dbConn.Queryx(`
-		SELECT file.*
-		FROM file_metadata AS file
-		INNER JOIN file_previews AS pre
-			ON file.id = pre.preview_file_id
-		WHERE pre.original_file_id = $1
-			AND pre.org_id = $2
+		SELECT storage.*
+		FROM file_storage AS storage
+		WHERE storage.metadata_id = $1 AND org_id = $2
 	`, fileId, orgId)
 
 	if err != nil {
@@ -245,6 +242,9 @@ func LinkFileWithPreviewWithTx(
 	_, err := tx.Exec(`
 		INSERT INTO file_previews (file_id, original_storage_id, preview_storage_id, org_id)
 		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (original_storage_id)
+			DO UPDATE
+				SET preview_storage_id = EXCLUDED.preview_storage_id
 	`, file.Id, storage.Id, preview.Id, file.OrgId)
 	return err
 }
@@ -258,6 +258,9 @@ func MarkPreviewUnavailable(file core.ControlDocumentationFile, storage core.Fil
 	_, err := tx.Exec(`
 		INSERT INTO file_previews (file_id, original_storage_id, preview_storage_id, org_id)
 		VALUES ($1, $2, NULL, $3)
+		ON CONFLICT (original_storage_id)
+			DO UPDATE
+				SET preview_storage_id = EXCLUDED.preview_storage_id
 	`, file.Id, storage.Id, file.OrgId)
 	if err != nil {
 		tx.Rollback()

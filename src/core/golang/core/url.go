@@ -187,6 +187,7 @@ const ApiDeleteControlDocumentationEndpoint string = "/file/delete"
 const ApiDownloadControlDocumentationEndpoint string = "/file/download"
 const ApiGetControlDocumentationEndpoint string = "/file/get"
 const ApiEditControlDocumentationEndpoint string = "/file/edit"
+const ApiRegenPreviewControlDocumentationEndpoint string = "/file/preview"
 
 const ApiFileVersionPrefix string = "/file/versions"
 

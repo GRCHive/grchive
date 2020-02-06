@@ -82,6 +82,12 @@ type EditControlDocInputs struct {
 	Description  string    `json:"description"`
 }
 
+type RegenPreviewInputs struct {
+	FileId  int64 `json:"fileId"`
+	OrgId   int32 `json:"orgId"`
+	Version int32 `json:"version"`
+}
+
 func newControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -733,5 +739,45 @@ func editControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}{
 		File:     file,
 		Category: category,
+	})
+}
+
+func regeneratePreview(w http.ResponseWriter, r *http.Request) {
+	inputs := RegenPreviewInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	file, err := database.GetControlDocumentation(inputs.FileId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get control documentation: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	storageData, err := database.GetControlDocumentationStorage(inputs.FileId, inputs.OrgId, role)
+	if err != nil || storageData == nil {
+		core.Warning("Failed to get storage: " + core.ErrorString(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
+		Exchange: webcore.DEFAULT_EXCHANGE,
+		Queue:    webcore.FILE_PREVIEW_QUEUE,
+		Body: webcore.FilePreviewMessage{
+			File:    *file,
+			Storage: *storageData,
+		},
 	})
 }
