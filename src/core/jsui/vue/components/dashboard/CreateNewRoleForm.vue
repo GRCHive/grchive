@@ -117,6 +117,12 @@
             v-model="permissions.VendorAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+
+        <access-type-editor
+            label="SQL Data"
+            v-model="permissions.DbSqlAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
     </v-form>
 
     <v-card-actions>
@@ -204,6 +210,7 @@ export default Vue.extend({
             DeploymentAccess: AccessType.NoAccess,
             ServerAccess: AccessType.NoAccess,
             VendorAccess: AccessType.NoAccess,
+            DbSqlAccess: AccessType.NoAccess,
         },
     }),
     computed: {

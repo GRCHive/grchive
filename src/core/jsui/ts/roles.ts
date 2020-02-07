@@ -30,6 +30,7 @@ export interface Permissions {
     DeploymentAccess          : AccessType
     ServerAccess              : AccessType
     VendorAccess              : AccessType
+    DbSqlAccess               : AccessType
 }
 
 export interface FullRole {
