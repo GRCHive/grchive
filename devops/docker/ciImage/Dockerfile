@@ -1,26 +1,42 @@
-FROM debian:10.2
-RUN apt-get update && apt-get install -y openjdk-11-jdk \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    unzip \
+FROM debian:buster-slim
+RUN mkdir -p /usr/share/man/man1mkdir -p /usr/share/man/man1
+RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests \
     gnupg2 \
-    software-properties-common \
-    openssh-client \
-    openssl \
-    gettext-base \
-    python \
-    python3-pip \
-    python3-distutils
+    curl \
+    ca-certificates \
+    lsb-release \
+    software-properties-common && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 RUN add-apt-repository \
     "deb [arch=amd64] https://download.docker.com/linux/debian \
       $(lsb_release -cs) \
          stable"
-RUN apt-get update && apt-get install -y docker-ce docker-ce-cli
-RUN apt-get -y upgrade
-RUN apt-get install -y zip
-RUN apt-get install -y zlib1g zlib1g-dev
+RUN export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" && \
+    echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - 
+
+RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests\
+    openjdk-11-jdk \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    unzip \
+    openssh-client \
+    openssl \
+    gettext-base \
+    python \
+    python3-pip \
+    python3-distutils \
+    jpegoptim \
+    docker-ce \
+    docker-ce-cli \
+    google-cloud-sdk \
+    build-essential \
+    zip \
+    zlib1g \
+    zlib1g-dev && rm -rf /var/lib/apt/lists/*
 
 COPY docker-entrypoint.sh /usr/local/bin/
 ENV DOCKER_TLS_CERTDIR=/certs
@@ -30,30 +46,23 @@ RUN mkdir /certs /certs/client && chmod 1777 /certs /certs/client
 COPY bootstrap_bazel.sh /
 COPY download_libffi.sh /
 COPY download_python.sh /
-WORKDIR /
-RUN ["/bin/bash", "./bootstrap_bazel.sh"]
-RUN ["/bin/bash", "./download_libffi.sh"]
-
 COPY python-helper/ /python-helper/
-RUN ["/bin/bash", "./download_python.sh"]
-ENV PATH="/bazel/output:${PATH}"
-
 COPY download_terraform.sh /
-RUN ["/bin/bash", "./download_terraform.sh"]
-ENV PATH="/terraform:${PATH}"
-
 COPY download_flyway.sh /
-RUN ["/bin/bash", "./download_flyway.sh"]
-ENV PATH="/flyway:${PATH}"
-
 COPY download_kubectl.sh /
-RUN ["/bin/bash", "./download_kubectl.sh"]
-ENV PATH="/kubectl:${PATH}"
 
-RUN export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" && \
-    echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
-    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
-    apt-get update -y && apt-get install google-cloud-sdk -y
+WORKDIR /
+RUN /bootstrap_bazel.sh && mv /bazel/output /bazel-bin && rm -rf /bazel
+RUN /download_libffi.sh
+RUN /download_python.sh && mv /python/python-3.8.1/bin /python-bin && rm -rf /python && mkdir -p /python/python-3.8.1 && mv /python-bin /python/python-3.8.1/bin
+RUN /download_terraform.sh
+RUN /download_flyway.sh
+RUN /download_kubectl.sh
+
+ENV PATH="/bazel-bin:${PATH}"
+ENV PATH="/terraform:${PATH}"
+ENV PATH="/flyway:${PATH}"
+ENV PATH="/kubectl:${PATH}"
 
 RUN mkdir -p /gcloud
 RUN curl -o /gcloud/cloud_sql_proxy https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
