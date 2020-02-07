@@ -34,6 +34,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
     docker-ce-cli \
     google-cloud-sdk \
     build-essential \
+    git \
     zip \
     zlib1g \
     zlib1g-dev && rm -rf /var/lib/apt/lists/*
