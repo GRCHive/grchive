@@ -14,6 +14,7 @@ This document will assume that the git checkout directory is set in an environme
 - Docker
 - Libreoffice
 - jpegoptim
+- imagemagick
 
 ## Build Variables
 
