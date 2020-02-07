@@ -76,3 +76,11 @@ func FindApiKey(hashedRawKey string) (*core.ApiKey, error) {
 
 	return &key, err
 }
+
+func DeleteApiKeyForUserId(userId int64) error {
+	_, err := dbConn.Exec(`
+		DELETE FROM api_keys
+		WHERE user_id = $1
+	`, userId)
+	return err
+}

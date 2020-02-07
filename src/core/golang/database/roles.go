@@ -343,12 +343,10 @@ func DeleteRoleMetadata(orgId int32, roleId int64, actionRole *core.Role) error 
 	return tx.Commit()
 }
 
-func AddUsersToRole(userIds []int64, orgId int32, roleId int64, actionRole *core.Role) error {
+func AddUsersToRoleWithTx(userIds []int64, orgId int32, roleId int64, actionRole *core.Role, tx *sqlx.Tx) error {
 	if !actionRole.Permissions.HasAccess(core.ResourceOrgRoles, core.AccessManage) {
 		return core.ErrorUnauthorized
 	}
-
-	tx := dbConn.MustBegin()
 
 	for _, userId := range userIds {
 		_, err := tx.Exec(`
@@ -359,10 +357,19 @@ func AddUsersToRole(userIds []int64, orgId int32, roleId int64, actionRole *core
 		`, roleId, userId, orgId)
 
 		if err != nil {
-			tx.Rollback()
 			return err
 		}
 	}
 
+	return nil
+}
+
+func AddUsersToRole(userIds []int64, orgId int32, roleId int64, actionRole *core.Role) error {
+	tx := dbConn.MustBegin()
+	err := AddUsersToRoleWithTx(userIds, orgId, roleId, actionRole, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 	return tx.Commit()
 }

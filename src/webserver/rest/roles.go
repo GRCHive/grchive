@@ -324,9 +324,29 @@ func addUsersToRole(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = database.AddUsersToRole(inputs.UserIds, inputs.OrgId, inputs.RoleId, role)
+	tx := database.CreateTx()
+	err = database.AddUsersToRoleWithTx(inputs.UserIds, inputs.OrgId, inputs.RoleId, role, tx)
 	if err != nil {
+		tx.Rollback()
 		core.Warning("Failed to add users to role: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Force a regrant of the API key.
+	for _, userId := range inputs.UserIds {
+		err = database.DeleteApiKeyForUserId(userId)
+		if err != nil {
+			tx.Rollback()
+			core.Warning("Failed to delete user API key: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		core.Warning("Failed to commit role changes: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
