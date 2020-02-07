@@ -96,6 +96,23 @@ func GetDb(dbId int64, orgId int32, role *core.Role) (*core.Database, error) {
 	return &db, err
 }
 
+func GetDbType(dbId int64, orgId int32, role *core.Role) (*core.DatabaseType, error) {
+	if !role.Permissions.HasAccess(core.ResourceDatabases, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	dbType := core.DatabaseType{}
+	err := dbConn.Get(&dbType, `
+		SELECT sd.*
+		FROM supported_databases AS sd
+		INNER JOIN database_resources AS dr
+			ON sd.id = dr.type_id
+		WHERE dr.id = $1
+			AND dr.org_id = $2
+	`, dbId, orgId)
+	return &dbType, err
+}
+
 func EditDb(db *core.Database, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceDatabases, core.AccessEdit) {
 		return core.ErrorUnauthorized

@@ -12,6 +12,7 @@ go_library(
         "controlDocumentationCategory.go",
         "controls.go",
         "database.go",
+        "databaseRefresh.go",
         "deployments.go",
         "docRequests.go",
         "emailVerification.go",

@@ -52,142 +52,156 @@
             <v-divider></v-divider>
 
             <v-container fluid>
-                <v-row>
-                    <v-col cols="6">
-                        <create-new-database-form
-                            ref="editForm"
-                            :edit-mode="true"
-                            :reference-db="currentDb"
-                            @do-save="onEdit">
-                        </create-new-database-form>
-                    </v-col>
+                <v-tabs>
+                    <v-tab>Overview</v-tab>
+                    <v-tab-item>
+                        <v-row>
+                            <v-col cols="6">
+                                <create-new-database-form
+                                    ref="editForm"
+                                    :edit-mode="true"
+                                    :reference-db="currentDb"
+                                    @do-save="onEdit">
+                                </create-new-database-form>
+                            </v-col>
 
-                    <v-col cols="6">
-                        <v-card class="mb-4">
-                            <v-card-title>
-                                Relevant Systems
-                                <v-spacer></v-spacer>
+                            <v-col cols="6">
+                                <v-card class="mb-4">
+                                    <v-card-title>
+                                        Relevant Systems
+                                        <v-spacer></v-spacer>
 
-                                <v-dialog persistent
-                                          max-width="40%"
-                                          v-model="showHideLinkSystem">
-                                    <template v-slot:activator="{ on }">
-                                        <v-btn color="primary" icon v-on="on">
-                                            <v-icon>mdi-plus</v-icon>
-                                        </v-btn>
-                                    </template>
+                                        <v-dialog persistent
+                                                  max-width="40%"
+                                                  v-model="showHideLinkSystem">
+                                            <template v-slot:activator="{ on }">
+                                                <v-btn color="primary" icon v-on="on">
+                                                    <v-icon>mdi-plus</v-icon>
+                                                </v-btn>
+                                            </template>
 
-                                    <v-card>
-                                        <v-card-title>
-                                            Link Systems
-                                        </v-card-title>
-                                        <v-divider></v-divider>
+                                            <v-card>
+                                                <v-card-title>
+                                                    Link Systems
+                                                </v-card-title>
+                                                <v-divider></v-divider>
 
-                                        <systems-table :resources="allSystems"
-                                                       selectable
-                                                       multi
-                                                       v-model="systemsToLink"
-                                        ></systems-table>
+                                                <systems-table :resources="allSystems"
+                                                               selectable
+                                                               multi
+                                                               v-model="systemsToLink"
+                                                ></systems-table>
 
-                                        <v-card-actions>
-                                            <v-btn color="error" @click="showHideLinkSystem = false">
-                                                Cancel
-                                            </v-btn>
-                                            <v-spacer></v-spacer>
-                                            <v-btn color="success" @click="linkSystems">
-                                                Link
-                                            </v-btn>
-                                        </v-card-actions>
-                                    </v-card>
-                                </v-dialog>
-                            </v-card-title>
-                            <v-divider></v-divider>
-                            <systems-table
-                                :resources="relatedSystems"
-                                use-crud-delete
-                                @delete="onDeleteSysLink"
-                            ></systems-table>
-                        </v-card>
+                                                <v-card-actions>
+                                                    <v-btn color="error" @click="showHideLinkSystem = false">
+                                                        Cancel
+                                                    </v-btn>
+                                                    <v-spacer></v-spacer>
+                                                    <v-btn color="success" @click="linkSystems">
+                                                        Link
+                                                    </v-btn>
+                                                </v-card-actions>
+                                            </v-card>
+                                        </v-dialog>
+                                    </v-card-title>
+                                    <v-divider></v-divider>
+                                    <systems-table
+                                        :resources="relatedSystems"
+                                        use-crud-delete
+                                        @delete="onDeleteSysLink"
+                                    ></systems-table>
+                                </v-card>
 
-                        <v-card class="mb-4">
-                            <v-card-title>
-                                Connection Info
+                                <v-card class="mb-4">
+                                    <v-card-title>
+                                        Connection Info
 
-                                <v-spacer></v-spacer>
-                                <v-btn color="error"
-                                       outlined
-                                       fab
-                                       small
-                                       v-if="hasDb"
-                                       @click="showHideDeleteConnection=true"
-                                    >
-                                    <v-icon>mdi-delete</v-icon>
-                                </v-btn>
-
-                            </v-card-title>
-                            <v-divider></v-divider>
-
-                            <v-row align="center" justify="center" v-if="!hasDb">
-                                <v-dialog v-model="showHideNewConn"
-                                          persistent
-                                          max-width="40%"
-                                >
-                                    <template v-slot:activator="{ on }">
-                                        <v-btn color="primary"
-                                               v-on="on"
-                                               fab
+                                        <v-spacer></v-spacer>
+                                        <v-btn color="error"
                                                outlined
-                                               x-large
-                                               class="my-6"
-                                               :disabled="!canConnectToDb">
-                                            <v-icon>mdi-plus</v-icon>
+                                               fab
+                                               small
+                                               v-if="hasDb"
+                                               @click="showHideDeleteConnection=true"
+                                            >
+                                            <v-icon>mdi-delete</v-icon>
                                         </v-btn>
-                                    </template>
 
-                                    <create-new-db-connection-form
-                                        :db-id="currentDb.Id"
-                                        @do-cancel="showHideNewConn = false"
-                                        @do-save="onNewDbConn">
-                                    </create-new-db-connection-form>
-                                </v-dialog>
-                            </v-row>
+                                    </v-card-title>
+                                    <v-divider></v-divider>
 
-                            <database-connection-read-only-component v-else
-                                :connection="dbConn">
-                            </database-connection-read-only-component>
-                        </v-card>
+                                    <v-row align="center" justify="center" v-if="!hasDb">
+                                        <v-dialog v-model="showHideNewConn"
+                                                  persistent
+                                                  max-width="40%"
+                                        >
+                                            <template v-slot:activator="{ on }">
+                                                <v-btn color="primary"
+                                                       v-on="on"
+                                                       fab
+                                                       outlined
+                                                       x-large
+                                                       class="my-6"
+                                                       :disabled="!canConnectToDb">
+                                                    <v-icon>mdi-plus</v-icon>
+                                                </v-btn>
+                                            </template>
 
-                        <v-card>
-                            <v-card-title>
-                                Deployment
-                            </v-card-title>
-                            <v-divider></v-divider>
+                                            <create-new-db-connection-form
+                                                :db-id="currentDb.Id"
+                                                @do-cancel="showHideNewConn = false"
+                                                @do-save="onNewDbConn">
+                                            </create-new-db-connection-form>
+                                        </v-dialog>
+                                    </v-row>
 
-                            <div v-if="!deployment">
-                                <v-row align="center" justify="center">
-                                    <v-btn color="primary"
-                                           fab
-                                           outlined
-                                           x-large
-                                           class="my-6"
-                                           @click="addDeployment">
-                                        <v-icon>mdi-plus</v-icon>
-                                    </v-btn>
-                                </v-row>
-                            </div>
+                                    <database-connection-read-only-component v-else
+                                        :connection="dbConn">
+                                    </database-connection-read-only-component>
+                                </v-card>
 
-                            <div v-else>
-                                <deployment-editor
-                                    class="pa-4"
-                                    v-model="deployment"
-                                    :db-id="currentDb.Id"
-                                >
-                                </deployment-editor>
-                            </div>
-                        </v-card>
+                                <v-card>
+                                    <v-card-title>
+                                        Deployment
+                                    </v-card-title>
+                                    <v-divider></v-divider>
 
-                    </v-col>
-                </v-row>
+                                    <div v-if="!deployment">
+                                        <v-row align="center" justify="center">
+                                            <v-btn color="primary"
+                                                   fab
+                                                   outlined
+                                                   x-large
+                                                   class="my-6"
+                                                   @click="addDeployment">
+                                                <v-icon>mdi-plus</v-icon>
+                                            </v-btn>
+                                        </v-row>
+                                    </div>
+
+                                    <div v-else>
+                                        <deployment-editor
+                                            class="pa-4"
+                                            v-model="deployment"
+                                            :db-id="currentDb.Id"
+                                        >
+                                        </deployment-editor>
+                                    </div>
+                                </v-card>
+
+                            </v-col>
+                        </v-row>
+                    </v-tab-item>
+
+                    <v-tab :disabled="!canConnectToDb">SQL</v-tab>
+                    <v-tab-item>
+                        <database-sql-editor
+                            :db-id="currentDb.Id"
+                        >
+                        </database-sql-editor>
+                    </v-tab-item>
+                </v-tabs>
+
             </v-container>
         </div>
     </div>
@@ -215,6 +229,7 @@ import SystemsTable from '../../generic/SystemsTable.vue'
 import { System } from '../../../ts/systems'
 import { FullDeployment } from '../../../ts/deployments'
 import DeploymentEditor from '../../generic/DeploymentEditor.vue'
+import DatabaseSqlEditor from '../../generic/DatabaseSqlEditor.vue'
 import { newDeployment, TNewDeploymentOutput } from '../../../ts/api/apiDeployments'
 
 @Component({
@@ -224,7 +239,8 @@ import { newDeployment, TNewDeploymentOutput } from '../../../ts/api/apiDeployme
         CreateNewDbConnectionForm,
         DatabaseConnectionReadOnlyComponent,
         SystemsTable,
-        DeploymentEditor
+        DeploymentEditor,
+        DatabaseSqlEditor,
     }
 })
 export default class FullEditDatabaseComponent extends Vue {

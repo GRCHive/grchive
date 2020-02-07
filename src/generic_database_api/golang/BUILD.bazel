@@ -1,0 +1,14 @@
+package(default_visibility = ["//visibility:public"])
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "library",
+    srcs = [
+        "api.go",
+        "interface.go",
+    ],
+    importpath = "gitlab.com/grchive/grchive/db_api",
+    deps = [
+        "//src/core/golang/core:webserver_core_library",
+    ]
+)

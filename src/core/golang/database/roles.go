@@ -22,6 +22,7 @@ var resourceToDatabaseMap = map[core.ResourceType]string{
 	core.ResourceDeployments:                  "resource_deployment_access",
 	core.ResourceServers:                      "resource_server_access",
 	core.ResourceVendors:                      "resource_vendor_access",
+	core.ResourceDbSql:                        "resource_db_sql_access",
 }
 
 var resourceToColumnName = map[core.ResourceType]string{
@@ -40,6 +41,7 @@ var resourceToColumnName = map[core.ResourceType]string{
 	core.ResourceDeployments:                  "permissions.deployment_access",
 	core.ResourceServers:                      "permissions.server_access",
 	core.ResourceVendors:                      "permissions.vendor_access",
+	core.ResourceDbSql:                        "permissions.db_sql_access",
 }
 
 func createRoleSql(cond string) string {
