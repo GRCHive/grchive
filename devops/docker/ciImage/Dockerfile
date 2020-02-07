@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
     python \
     python3-pip \
     python3-distutils \
+    imagemagick \ 
     jpegoptim \
     docker-ce \
     docker-ce-cli \
