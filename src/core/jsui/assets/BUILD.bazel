@@ -1,0 +1,26 @@
+package(default_visibility = ["//visibility:public"])
+
+asset_files = glob([
+    "raw/*.jpg",
+])
+
+filegroup(
+    name = "corejsui-raw-assets",
+    srcs = asset_files,
+)
+
+genrule(
+    name = "corejsui-assets",
+    srcs = [
+        ":corejsui-raw-assets",
+    ],
+    outs = [f.replace("raw/", "") for f in asset_files],
+    cmd = "for S in $(SRCS); \
+           do \
+               convert -resize '1920>' $$S `basename $$S` && jpegoptim -s -m 50 `basename $$S`;\
+           done && \
+           for O in $(OUTS); \
+           do \
+               cp `basename $$O` $$O;\
+           done"
+)

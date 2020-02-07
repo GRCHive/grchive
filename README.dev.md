@@ -13,6 +13,7 @@ This document will assume that the git checkout directory is set in an environme
 - Node v12.10
 - Docker
 - Libreoffice
+- jpegoptim
 
 ## Build Variables
 

@@ -3,13 +3,6 @@ load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@build_bazel_rules_nodejs//:index.bzl", "nodejs_binary")
 
 filegroup(
-    name = "corejsui-assets",
-    srcs = glob([
-        "assets/*.jpg",
-    ]),
-)
-
-filegroup(
     name = "corejsui-files",
     srcs = glob([
         "ts/**/*.ts",
