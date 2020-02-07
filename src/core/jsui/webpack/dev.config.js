@@ -2,6 +2,7 @@ const base = require('./base.config.js')
 const merge = require('webpack-merge')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const webpack = require('webpack')
 
 module.exports = merge(base, {
     mode: 'development',
@@ -13,6 +14,9 @@ module.exports = merge(base, {
         new MiniCssExtractPlugin({
             filename: 'gen/[name].[contenthash].css',
             chunkFilename: 'gen/chunk-[name].[chunkhash].css',
+        }),
+        new webpack.DefinePlugin({
+            __WEBSOCKET_PROTOCOL: JSON.stringify("ws://")
         }),
     ],
     output: {
