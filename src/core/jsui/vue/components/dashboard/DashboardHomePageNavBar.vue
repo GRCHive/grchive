@@ -48,7 +48,7 @@ export default Vue.extend({
                     ]
                 },
                 {
-                    title: 'Audit',
+                    title: 'GRC',
                     icon: 'mdi-lock',
                     disabled : false,
                     children: [
