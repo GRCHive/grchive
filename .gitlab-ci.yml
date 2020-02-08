@@ -299,7 +299,7 @@ Deploy Webserver:
         - export NGINX_IMAGE=$CI_FULL_REGISTRY/nginx:$CI_COMMIT_SHA
         - cd devops/k8s/webserver
         - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
-        - kubectl apply -f deployment.prod.yaml -f service.prod.yaml -f ingress.prod.yaml
+        - kubectl apply -f deployment.prod.yaml -f service.prod.yaml -f ingress.prod.yaml -f backendconfig.prod.yaml
     only:
         refs:
             - master

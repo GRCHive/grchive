@@ -32,5 +32,5 @@ export WEBSERVER_IMAGE=registry.gitlab.com/grchive/grchive/webserver:`git rev-pa
 export NGINX_IMAGE=registry.gitlab.com/grchive/grchive/nginx:`git rev-parse HEAD`
 cd webserver
 envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
-kubectl apply -f deployment.prod.yaml -f service.prod.yaml -f ingress.prod.yaml
+kubectl apply -f deployment.prod.yaml -f service.prod.yaml -f ingress.prod.yaml -f backendconfig.prod.yaml
 cd ../
