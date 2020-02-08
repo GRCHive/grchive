@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
+	"time"
 )
 
 type ProcessFlowNodeDisplaySettingsPayload struct {
@@ -57,6 +58,8 @@ func processProcessFlowNodeDisplaySettings(conn *websocket.Conn, r *http.Request
 		core.MessageSubtype(strconv.FormatInt(flowId, 10)),
 		ele)
 
+	isDone := false
+
 	// The user needs to know what the current settings are so do a query
 	// for the display settings of every node in the process flow. I think this
 	// needs to happen after the channel gets registered successfully so the
@@ -75,6 +78,7 @@ func processProcessFlowNodeDisplaySettings(conn *websocket.Conn, r *http.Request
 	waitGroup.Add(1)
 	go func() {
 		defer waitGroup.Done()
+		defer func() { isDone = true }()
 
 		for {
 			data := ProcessFlowNodeDisplaySettingsPayload{}
@@ -111,17 +115,21 @@ func processProcessFlowNodeDisplaySettings(conn *websocket.Conn, r *http.Request
 			}
 		}
 
-		for {
-			payload := <-hubChannel
-			jsonMessage, err := json.Marshal(payload)
-			if err != nil {
-				core.Warning("Failed to marshal paylod: " + err.Error())
-				break
-			}
-			err = conn.WriteMessage(websocket.TextMessage, jsonMessage)
-			if err != nil {
-				core.Warning("Failed to write message to websocket: " + err.Error())
-				break
+		for !isDone {
+			select {
+			case payload := <-hubChannel:
+				jsonMessage, err := json.Marshal(payload)
+				if err != nil {
+					core.Warning("Failed to marshal paylod: " + err.Error())
+					break
+				}
+				err = conn.WriteMessage(websocket.TextMessage, jsonMessage)
+				if err != nil {
+					core.Warning("Failed to write message to websocket: " + err.Error())
+					break
+				}
+			case <-time.After(5 * time.Second):
+				continue
 			}
 		}
 	}()

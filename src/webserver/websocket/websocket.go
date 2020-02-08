@@ -6,7 +6,10 @@ import (
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/webcore"
 	"net/http"
+	"time"
 )
+
+const HeartbeatInterval int = 30
 
 var upgrader = websocket.Upgrader{}
 
@@ -24,6 +27,27 @@ func RegisterPaths(r *mux.Router) {
 		createWebsocketWrapper(processProcessFlowNodeDisplaySettings))
 }
 
+// This is mainly just for keep alive to ensure that we don't trigger
+// NGINX or GKE's timeouts.
+func websocketHeartbeat(conn *websocket.Conn) {
+	go func() {
+		for {
+			err := conn.WriteControl(
+				websocket.PingMessage,
+				[]byte{},
+				time.Now().UTC().Add(time.Second*time.Duration(5)))
+
+			if err != nil {
+				conn.Close()
+				core.Warning("Failed to send ping: " + err.Error())
+				break
+			}
+
+			time.Sleep(time.Second * time.Duration(HeartbeatInterval))
+		}
+	}()
+}
+
 func createWebsocketWrapper(handler WebsocketHandler) HTTPHandler {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c, err := upgrader.Upgrade(w, r, nil)
@@ -31,6 +55,8 @@ func createWebsocketWrapper(handler WebsocketHandler) HTTPHandler {
 			core.Warning("Failed to upgrade to websocket: " + err.Error())
 			return
 		}
+
+		websocketHeartbeat(c)
 
 		defer c.Close()
 		handler(c, r)
