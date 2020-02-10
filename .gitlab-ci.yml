@@ -77,6 +77,8 @@ include:
     - local: '/devops/gitlabci/flyway.yaml'
     - local: '/devops/gitlabci/terraform.yaml'
     - local: '/devops/gitlabci/deploy.yaml'
+    - local: '/devops/gitlabci/build_test.yaml'
+    - local: '/devops/gitlabci/containers.yaml'
 
 default:
     cache:
