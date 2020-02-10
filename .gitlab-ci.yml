@@ -39,29 +39,30 @@ variables:
     - envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
     - cp -r /python ./dependencies/python
 
-.production-before-script: &production-before-script:
-    - *common-before-script
-    - echo $GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
-    - echo $GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
-    - echo $GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
-    - gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
-    - gcloud config set project grchive
-    - gcloud config set compute/zone us-central1-c
+.production-before-script: &production-before-script
+    before_script:
+        - *common-before-script
+        - echo $GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
+        - echo $GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
+        - echo $GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
+        - gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
+        - gcloud config set project grchive
+        - gcloud config set compute/zone us-central1-c
 
-.staging-before-script: &staging-before-script:
-    - *common-before-script
-    - echo $STAGING_GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
-    - echo $STAGING_GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
-    - echo $STAGING_GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
-    - gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
-    - gcloud config set project grchive
-    - gcloud config set compute/zone us-central1-c
+.staging-before-script: &staging-before-script
+    before_script:
+        - *common-before-script
+        - echo $STAGING_GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
+        - echo $STAGING_GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
+        - echo $STAGING_GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
+        - gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
+        - gcloud config set project grchive
+        - gcloud config set compute/zone us-central1-c
 
 include:
     - local: '/devops/gitlabci/flyway.yaml'
     - local: '/devops/gitlabci/terraform.yaml'
     - local: '/devops/gitlabci/deploy.yaml'
-    - local: '/devops/gitlabci/environment.yaml'
 
 default:
     cache:
@@ -189,8 +190,7 @@ Build Webserver Container:
 
 Terraform (Production):
     extends: .terraform
-    before_script:
-        - *production-before-script
+    <<: *production-before-script
     variables:
         TERRAFORM_FOLDER: "prod"
         RELEASE_BRANCH: "production"
@@ -199,8 +199,7 @@ Terraform (Production):
 
 Terraform (Staging):
     extends: .terraform
-    before_script:
-        - *staging-before-script
+    <<: *staging-before-script
     variables:
         TERRAFORM_FOLDER: "staging"
         RELEASE_BRANCH: "staging"
@@ -209,8 +208,7 @@ Terraform (Staging):
 
 Flyway Vault (Production):
     extends: .flyway-vault
-    before_script:
-        - *production-before-script
+    <<: *production-before-script
     variables:
         GRCHIVE_PROJECT: "$PRODUCTION_GRCHIVE_PROJECT"
         RELEASE_BRANCH: "production"
@@ -219,8 +217,7 @@ Flyway Vault (Production):
 
 Flyway Webserver (Production):
     extends: .flyway-webserver
-    before_script:
-        - *production-before-script
+    <<: *production-before-script
     variables:
         GRCHIVE_PROJECT: "$PRODUCTION_GRCHIVE_PROJECT"
         RELEASE_BRANCH: "production"
@@ -229,8 +226,7 @@ Flyway Webserver (Production):
 
 Flyway Vault (Staging):
     extends: .flyway-vault
-    before_script:
-        - *staging-before-script
+    <<: *staging-before-script
     variables:
         GRCHIVE_PROJECT: "$STAGING_GRCHIVE_PROJECT"
         RELEASE_BRANCH: "staging"
@@ -239,8 +235,7 @@ Flyway Vault (Staging):
 
 Flyway Webserver (Staging):
     extends: .flyway-webserver
-    before_script:
-        - *staging-before-script
+    <<: *staging-before-script
     variables:
         GRCHIVE_PROJECT: "$STAGING_GRCHIVE_PROJECT"
         RELEASE_BRANCH: "staging"
@@ -248,9 +243,8 @@ Flyway Webserver (Staging):
         name: Staging
 
 Deploy Secrets (Production):
-    extends: .deploy-secrest
-    before_script:
-        - *production-before-script
+    extends: .deploy-secrets
+    <<: *production-before-script
     variables:
         RELEASE_BRANCH: "production"
     environment:
@@ -258,8 +252,7 @@ Deploy Secrets (Production):
 
 Deploy Storage (Production):
     extends: .deploy-storage
-    before_script:
-        - *production-before-script
+    <<: *production-before-script
     variables:
         RELEASE_BRANCH: "production"
     environment:
@@ -267,8 +260,7 @@ Deploy Storage (Production):
 
 Deploy Lets Encrypt (Production):
     extends: .deploy-lets-encrypt
-    before_script:
-        - *production-before-script
+    <<: *production-before-script
     variables:
         RELEASE_BRANCH: "production"
     environment:
@@ -276,8 +268,7 @@ Deploy Lets Encrypt (Production):
 
 Deploy Vault (Production):
     extends: .deploy-vault
-    before_script:
-        - *production-before-script
+    <<: *production-before-script
     variables:
         RELEASE_BRANCH: "production"
     environment:
@@ -285,8 +276,7 @@ Deploy Vault (Production):
 
 Deploy RabbitMQ (Production):
     extends: .deploy-rabbitmq
-    before_script:
-        - *production-before-script
+    <<: *production-before-script
     variables:
         RELEASE_BRANCH: "production"
     environment:
@@ -294,8 +284,7 @@ Deploy RabbitMQ (Production):
 
 Deploy Preview Generator (Production):
     extends: .deploy-preview-generator
-    before_script:
-        - *production-before-script
+    <<: *production-before-script
     variables:
         RELEASE_BRANCH: "production"
     environment:
@@ -303,17 +292,15 @@ Deploy Preview Generator (Production):
 
 Deploy Webserver (Production):
     extends: .deploy-webserver
-    before_script:
-        - *production-before-script
+    <<: *production-before-script
     variables:
         RELEASE_BRANCH: "production"
     environment:
         name: Production
 
 Deploy Secrets (Staging):
-    extends: .deploy-secrest
-    before_script:
-        - *staging-before-script
+    extends: .deploy-secrets
+    <<: *staging-before-script
     variables:
         RELEASE_BRANCH: "staging"
     environment:
@@ -321,8 +308,7 @@ Deploy Secrets (Staging):
 
 Deploy Storage (Staging):
     extends: .deploy-storage
-    before_script:
-        - *staging-before-script
+    <<: *staging-before-script
     variables:
         RELEASE_BRANCH: "staging"
     environment:
@@ -330,8 +316,7 @@ Deploy Storage (Staging):
 
 Deploy Lets Encrypt (Staging):
     extends: .deploy-lets-encrypt
-    before_script:
-        - *staging-before-script
+    <<: *staging-before-script
     variables:
         RELEASE_BRANCH: "staging"
     environment:
@@ -339,8 +324,7 @@ Deploy Lets Encrypt (Staging):
 
 Deploy Vault (Staging):
     extends: .deploy-vault
-    before_script:
-        - *staging-before-script
+    <<: *staging-before-script
     variables:
         RELEASE_BRANCH: "staging"
     environment:
@@ -348,8 +332,7 @@ Deploy Vault (Staging):
 
 Deploy RabbitMQ (Staging):
     extends: .deploy-rabbitmq
-    before_script:
-        - *staging-before-script
+    <<: *staging-before-script
     variables:
         RELEASE_BRANCH: "staging"
     environment:
@@ -357,8 +340,7 @@ Deploy RabbitMQ (Staging):
 
 Deploy Preview Generator (Staging):
     extends: .deploy-preview-generator
-    before_script:
-        - *staging-before-script
+    <<: *staging-before-script
     variables:
         RELEASE_BRANCH: "staging"
     environment:
@@ -366,8 +348,7 @@ Deploy Preview Generator (Staging):
 
 Deploy Webserver (Staging):
     extends: .deploy-webserver
-    before_script:
-        - *staging-before-script
+    <<: *staging-before-script
     variables:
         RELEASE_BRANCH: "staging"
     environment:
