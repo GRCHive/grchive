@@ -238,6 +238,8 @@ func OktaObtainTokens(code string, isRefresh bool) (*OktaTokens, error) {
 		return nil, err
 	}
 
+	core.Info("BODY: " + string(body))
+
 	var data *OktaTokens = new(OktaTokens)
 	err = json.Unmarshal(body, data)
 	if err != nil || data == nil {
