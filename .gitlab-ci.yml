@@ -320,6 +320,7 @@ Deploy Webserver (Production):
     extends: .deploy-webserver
     <<: *production-before-script
     variables:
+        INGRESS_ENV: "prod"
         RELEASE_BRANCH: "production"
     environment:
         name: Production
@@ -376,6 +377,7 @@ Deploy Webserver (Staging):
     extends: .deploy-webserver
     <<: *staging-before-script
     variables:
+        INGRESS_ENV: "staging"
         RELEASE_BRANCH: "staging"
     environment:
         name: Staging
