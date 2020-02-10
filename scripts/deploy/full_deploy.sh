@@ -46,15 +46,18 @@ esac
 
 envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
 
-gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
-gcloud config set project ${GRCHIVE_PROJECT}
-gcloud config set compute/zone us-central1-c
-
 ${DIR}/build_nginx_container.sh
 ${DIR}/build_rabbitmq_container.sh
 ${DIR}/build_vault_container.sh
 ${DIR}/build_preview_generator_container.sh
 ${DIR}/build_webserver_container.sh
 
+gcloud auth activate-service-account --key-file devops/gcloud/gcloud-terraform-account.json
+gcloud config set project ${GRCHIVE_PROJECT}
+gcloud config set compute/zone us-central1-c
 ${DIR}/terraform.sh
+
+gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
+gcloud config set project ${GRCHIVE_PROJECT}
+gcloud config set compute/zone us-central1-c
 ${DIR}/deploy_k8s.sh
