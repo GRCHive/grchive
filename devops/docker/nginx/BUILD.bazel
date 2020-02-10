@@ -3,9 +3,10 @@ load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 
 genrule(
     name = "config",
-    srcs = [
-        "nginx.dev.conf"
-    ],
+    srcs = select({
+        "//:production": ["nginx.prod.conf"],
+        "//conditions:default": ["nginx.dev.conf"],
+    }),
     outs = [
         "etc/nginx/nginx.conf"
     ],
@@ -18,6 +19,7 @@ container_image(
     files = [
         ":config",
         "common-http-headers.conf",
+        "common-proxy.conf",
         "//src/core/jsui/assets:corejsui-assets",
     ],
     tars = [
