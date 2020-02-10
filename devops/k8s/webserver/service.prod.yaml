@@ -14,7 +14,7 @@ spec:
           protocol: TCP
           name: http-port
         - port: 443
-          protocl: TCP
+          protocol: TCP
           name: https-port
     selector:
         app: webserver

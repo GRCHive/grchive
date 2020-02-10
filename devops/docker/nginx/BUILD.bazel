@@ -20,6 +20,7 @@ container_image(
         ":config",
         "common-http-headers.conf",
         "common-proxy.conf",
+        "etc/nginx/dhparam.pem",
         "//src/core/jsui/assets:corejsui-assets",
     ],
     tars = [
