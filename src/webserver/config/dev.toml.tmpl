@@ -1,5 +1,5 @@
-self_uri = "http://localhost:8080"
-self_domain = "localhost"
+self_uri = "${GRCHIVE_URI}"
+self_domain = "${GRCHIVE_DOMAIN}"
 
 [company]
 company_name = "GRCHive"
@@ -50,7 +50,7 @@ password = "${VAULT_PASSWORD}"
 credentials_file = "devops/gcloud/gcloud-webserver-account.json"
 
 [gcloud.storage]
-doc_bucket = "grchive-dev"
+doc_bucket = "${GRCHIVE_DOC_BUCKET}"
 
 [mail]
 provider = "sendgrid"

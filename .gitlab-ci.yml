@@ -36,8 +36,8 @@ variables:
     - echo "run --action_env=DOCKER_TLS_VERIFY" >> .bazelrc
     - echo "build --action_env=DOCKER_CERT_PATH" >> .bazelrc
     - echo "run --action_env=DOCKER_CERT_PATH" >> .bazelrc
-    - envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
     - cp -r /python ./dependencies/python
+    - envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
 
 .production-before-script: &production-before-script
     before_script:
@@ -51,6 +51,10 @@ variables:
         - export GRCHIVE_PROJECT=$PRODUCTION_GRCHIVE_PROJECT
         - export OKTA_CLIENT_SECRET=$PRODUCTION_OKTA_CLIENT_SECRET
         - export OKTA_KEY=$PRODUCTION_OKTA_KEY
+        - export GRCHIVE_URI="https://www.grchive.com"
+        - export GRCHIVE_DOMAIN="grchive.com"
+        - export GRCHIVE_DOC_BUCKET="grchive-prod"
+        - rm build/variables.bzl && envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
 
 .staging-before-script: &staging-before-script
     before_script:
@@ -64,6 +68,10 @@ variables:
         - export GRCHIVE_PROJECT=$STAGING_GRCHIVE_PROJECT
         - export OKTA_CLIENT_SECRET=$STAGING_OKTA_CLIENT_SECRET
         - export OKTA_KEY=$STAGING_OKTA_KEY
+        - export GRCHIVE_URI="https://staging.grchive.com"
+        - export GRCHIVE_DOMAIN="staging.grchive.com"
+        - export GRCHIVE_DOC_BUCKET="grchive-staging"
+        - rm build/variables.bzl && envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
 
 include:
     - local: '/devops/gitlabci/flyway.yaml'

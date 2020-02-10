@@ -59,6 +59,12 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 
 - `SENDGRID_KEY`: API Key used for Sendgrid.
 
+### GRCHive
+
+- `GRCHIVE_URI`: The URI to access the running webserver (with the http/https prefix).
+- `GRCHIVE_DOMAIN`: The domain name of the webserver (without the http or https prefix and port number).
+- `GRCHIVE_DOC_BUCKET`: The Google Cloud Storage bucket in which to store the documentation files.
+
 ## Setup Dependencies
 
 - Install Blaze.
