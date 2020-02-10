@@ -4,6 +4,8 @@ metadata:
     name: internal-webserver-service
     labels:
         app: webserver
+    annotations:
+        beta.cloud.google.com/backend-config: '{"ports": {"80": "webserver-backendconfig"}}'
 spec:
     type: NodePort
     ports:
