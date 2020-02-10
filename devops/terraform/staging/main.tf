@@ -1,14 +1,14 @@
 terraform {
     backend "gcs" {
         credentials = "../../gcloud/gcloud-terraform-account.json"
-        bucket = "grchive-tf-state-prod"
+        bucket = "grchive-tf-state-staging"
         prefix = "terraform/state"
     }
 }
 
 provider "google" {
     credentials = file("../../gcloud/gcloud-terraform-account.json")
-    project     = "grchive"
+    project     = "grchive-staging"
     region      = "us-central1"
     zone        = "us-central1-c"
     version     =  "~> 3.7"

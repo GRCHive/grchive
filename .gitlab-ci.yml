@@ -10,15 +10,6 @@ stages:
     - deploy0
     - deploy1
 
-cache:
-    key: "${CI_COMMIT_REF_SLUG}-$CI_COMMIT_SHA"
-    paths:
-        - .cache/
-        - src/core/jsui/node_modules/
-
-services:
-    - docker:19.03.1-dind
-
 variables:
     # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
     DOCKER_HOST: tcp://docker:2376
@@ -27,30 +18,44 @@ variables:
     DOCKER_TLS_VERIFY: 1
     DOCKER_CERT_PATH: "/certs/client"
     CI_FULL_REGISTRY: registry.gitlab.com/grchive/grchive
+    PRODUCTION_GRCHIVE_PROJECT: "grchive"
+    STAGING_GRCHIVE_PROJECT: "grchive-staging"
 
-before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - echo "build -c opt" >> .bazelrc
-    - echo "run -c opt" >> .bazelrc
-    - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
-    - echo "build --action_env=DOCKER_HOST" >> .bazelrc
-    - echo "run --action_env=DOCKER_HOST" >> .bazelrc
-    - echo "build --action_env=DOCKER_DRIVER" >> .bazelrc
-    - echo "run --action_env=DOCKER_DRIVER" >> .bazelrc
-    - echo "build --action_env=DOCKER_TLS_CERTDIR" >> .bazelrc
-    - echo "run --action_env=DOCKER_TLS_CERTDIR" >> .bazelrc
-    - echo "build --action_env=DOCKER_TLS_VERIFY" >> .bazelrc
-    - echo "run --action_env=DOCKER_TLS_VERIFY" >> .bazelrc
-    - echo "build --action_env=DOCKER_CERT_PATH" >> .bazelrc
-    - echo "run --action_env=DOCKER_CERT_PATH" >> .bazelrc
-    - envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
-    - cp -r /python ./dependencies/python
-    - echo $GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
-    - echo $GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
-    - echo $GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
-    - gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
-    - gcloud config set project grchive
-    - gcloud config set compute/zone us-central1-c
+include:
+    - local: '/devops/gitlabci/flyway.yaml'
+    - local: '/devops/gitlabci/terraform.yaml'
+
+default:
+    cache:
+        key: "${CI_COMMIT_REF_SLUG}-$CI_COMMIT_SHA"
+        paths:
+            - .cache/
+            - src/core/jsui/node_modules/
+    services:
+        - docker:19.03.1-dind
+    before_script:
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        - echo "build -c opt" >> .bazelrc
+        - echo "run -c opt" >> .bazelrc
+        - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
+        - echo "build --action_env=DOCKER_HOST" >> .bazelrc
+        - echo "run --action_env=DOCKER_HOST" >> .bazelrc
+        - echo "build --action_env=DOCKER_DRIVER" >> .bazelrc
+        - echo "run --action_env=DOCKER_DRIVER" >> .bazelrc
+        - echo "build --action_env=DOCKER_TLS_CERTDIR" >> .bazelrc
+        - echo "run --action_env=DOCKER_TLS_CERTDIR" >> .bazelrc
+        - echo "build --action_env=DOCKER_TLS_VERIFY" >> .bazelrc
+        - echo "run --action_env=DOCKER_TLS_VERIFY" >> .bazelrc
+        - echo "build --action_env=DOCKER_CERT_PATH" >> .bazelrc
+        - echo "run --action_env=DOCKER_CERT_PATH" >> .bazelrc
+        - envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
+        - cp -r /python ./dependencies/python
+        - echo $GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
+        - echo $GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
+        - echo $GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
+        - gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
+        - gcloud config set project grchive
+        - gcloud config set compute/zone us-central1-c
 
 Build CI Image:
     stage: ciImage
@@ -64,12 +69,11 @@ Build CI Image:
         - ./create_ciimage.sh $FULL_IMAGE_URL:latest
     cache: {}
     when: manual
-    only:
-        refs:
-            - master
-        changes:
+    rules:
+        - changes:
             - dependencies/bootstrap_bazel.sh
             - devops/docker/ciImage/**/*
+        - if: '$CI_COMMIT_BRANCH == "master"'
 
 Prepare:
     stage: prep
@@ -100,9 +104,9 @@ Build NGINX Container:
         - bazel run //devops/docker/nginx:nginx 
         - docker tag bazel/devops/docker/nginx:nginx $FULL_IMAGE_URL:$CI_COMMIT_SHA
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
-    only:
-        refs:
-            - master
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master"'
+          when: never
 
 Build Vault Container:
     stage: containers
@@ -113,12 +117,13 @@ Build Vault Container:
         - bazel run //devops/docker/vault:vault 
         - docker tag bazel/devops/docker/vault:vault $FULL_IMAGE_URL:$CI_COMMIT_SHA
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
-    only:
-        refs:
-            - master
-        changes:
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master"'
+          when: never
+        - changes:
             - devops/vault/**/*
             - devops/docker/vault/**/*
+        - when: never
 
 Build RabbitMQ Container:
     stage: containers
@@ -129,11 +134,12 @@ Build RabbitMQ Container:
         - bazel run //devops/docker/rabbitmq:rabbitmq 
         - docker tag bazel/devops/docker/rabbitmq:rabbitmq $FULL_IMAGE_URL:$CI_COMMIT_SHA
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
-    only:
-        refs:
-            - master
-        changes:
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master"'
+          when: never
+        - changes:
             - devops/docker/rabbitmq/**/*
+        - when: never
 
 Build Preview Generator Container:
     stage: containers
@@ -145,9 +151,9 @@ Build Preview Generator Container:
         - docker load -i bazel-bin/devops/docker/preview_generator/docker_preview_generator.tar
         - docker tag bazel/devops/docker/preview_generator:docker_preview_generator $FULL_IMAGE_URL:$CI_COMMIT_SHA
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
-    only:
-        refs:
-            - master
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master"'
+          when: never
 
 Build Webserver Container:
     stage: containers
@@ -159,94 +165,101 @@ Build Webserver Container:
         - docker load -i bazel-bin/devops/docker/webserver/docker_webserver.tar
         - docker tag bazel/devops/docker/webserver:docker_webserver $FULL_IMAGE_URL:$CI_COMMIT_SHA
         - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
-    only:
-        refs:
-            - master
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master"'
+          when: never
 
-Terraform:
-    stage: provision
-    image: $CI_FULL_REGISTRY/ci-image:latest
-    script:
-        - cd devops/terraform/prod
-        - export TF_VAR_postgres_user=${POSTGRES_USER}
-        - export TF_VAR_postgres_password=${POSTGRES_PASSWORD}
-        - export TF_VAR_postgres_instance_name=${POSTGRES_INSTANCE_NAME}
-        - terraform init
-        - terraform apply -auto-approve
-    only:
-        refs:
-            - master
-        changes:
-            - devops/terraform/prod/**/*
+Terraform (Production):
+    extends: .terraform
+    variables:
+        TERRAFORM_FOLDER: "prod"
+        RELEASE_BRANCH: "production"
+    environment:
+        name: Production
 
-Flyway Vault:
-    stage: migrate
-    image: $CI_FULL_REGISTRY/ci-image:latest
-    script:
-        - gcloud auth activate-service-account --key-file devops/gcloud/gcloud-terraform-account.json
-        - cloud_sql_proxy -instances=grchive:us-central1:${POSTGRES_INSTANCE_NAME}=tcp:5432 &
-        - sleep 1
-        - cd devops/database/vault
-        - envsubst < flyway/prod-flyway.conf.tmpl > flyway/prod-flyway.conf
-        - flyway -configFiles=./flyway/prod-flyway.conf migrate
-    only:
-        refs:
-            - master
-        changes:
-            - devops/database/vault/**/*
+Terraform (Staging):
+    extends: .terraform
+    variables:
+        TERRAFORM_FOLDER: "staging"
+        RELEASE_BRANCH: "staging"
+    environment:
+        name: Staging
 
-Flyway Webserver:
-    stage: migrate
-    image: $CI_FULL_REGISTRY/ci-image:latest
-    script:
-        - gcloud auth activate-service-account --key-file devops/gcloud/gcloud-terraform-account.json
-        - cloud_sql_proxy -instances=grchive:us-central1:${POSTGRES_INSTANCE_NAME}=tcp:5432 &
-        - sleep 1
-        - cd devops/database/webserver
-        - envsubst < flyway/prod-flyway.conf.tmpl > flyway/prod-flyway.conf
-        - flyway -configFiles=./flyway/prod-flyway.conf migrate
-    only:
-        refs:
-            - master
-        changes:
-            - devops/database/webserver/**/*
+Flyway Vault (Production):
+    extends: .flyway-vault
+    variables:
+        GRCHIVE_PROJECT: "$PRODUCTION_GRCHIVE_PROJECT"
+        RELEASE_BRANCH: "production"
+    environment:
+        name: Production
 
-Deploy Secrets:
+Flyway Webserver (Production):
+    extends: .flyway-webserver
+    variables:
+        GRCHIVE_PROJECT: "$PRODUCTION_GRCHIVE_PROJECT"
+        RELEASE_BRANCH: "production"
+    environment:
+        name: Production
+
+Flyway Vault (Staging):
+    extends: .flyway-vault
+    variables:
+        GRCHIVE_PROJECT: "$STAGING_GRCHIVE_PROJECT"
+        RELEASE_BRANCH: "staging"
+    environment:
+        name: Staging
+
+Flyway Webserver (Staging):
+    extends: .flyway-webserver
+    variables:
+        GRCHIVE_PROJECT: "$STAGING_GRCHIVE_PROJECT"
+        RELEASE_BRANCH: "staging"
+    environment:
+        name: Staging
+
+Deploy Secrets (Production):
     stage: predeploy
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
         - gcloud container clusters get-credentials webserver-gke-cluster
         - kubectl create secret generic gke-service-account --from-file=gcloud-service-account.json=devops/gcloud/gcloud-kubernetes-account.json -o yaml --dry-run --save-config | kubectl apply -f -
         - kubectl create secret docker-registry regcred --docker-server=registry.gitlab.com --docker-username=${GKE_REGISTRY_USER} --docker-password=${GKE_REGISTRY_PASSWORD} -o yaml --dry-run --save-config | kubectl apply -f -
-    only:
-        refs:
-            - master
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "production"'
+          when: on_success
+    environment:
+        name: Production
 
-Deploy Storage:
+Deploy Storage (Production):
     stage: predeploy
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
         - gcloud container clusters get-credentials webserver-gke-cluster
         - cd devops/k8s/storage/prod
         - kubectl apply -f .
-    only:
-        refs:
-            - master
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "production"'
+          when: on_success
+    environment:
+        name: Production
 
-Deploy Lets Encrypt:
+Deploy Lets Encrypt (Production):
     stage: predeploy
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
         - gcloud container clusters get-credentials webserver-gke-cluster
         - cd devops/k8s/cert-manager
         - kubectl apply -f ./letsencrypt-staging.yaml -f ./letsencrypt-prod.yaml
-    only:
-        refs:
-            - master
-        changes:
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "production"'
+          when: on_success
+        - changes:
             - devops/k8s/cert-manager/**/*
+        - when: never
+    environment:
+        name: Production
 
-Deploy Vault:
+Deploy Vault (Production):
     stage: deploy0
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
@@ -255,14 +268,17 @@ Deploy Vault:
         - cd devops/k8s/vault
         - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
         - kubectl apply -f service-internal.yaml -f deployment.prod.yaml
-    only:
-        refs:
-            - master
-        changes:
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "production"'
+          when: on_success
+        - changes:
             - devops/docker/vault/**/*
             - devops/vault/**/*
+        - when: never
+    environment:
+        name: Production
 
-Deploy RabbitMQ:
+Deploy RabbitMQ (Production):
     stage: deploy0
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
@@ -271,13 +287,16 @@ Deploy RabbitMQ:
         - cd devops/k8s/rabbitmq
         - envsubst < statefulset.prod.yaml.tmpl > statefulset.prod.yaml
         - kubectl apply -f service.yaml -f statefulset.prod.yaml
-    only:
-        refs:
-            - master
-        changes:
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "production"'
+          when: on_success
+        - changes:
             - devops/docker/rabbitmq/**/*
+        - when: never
+    environment:
+        name: Production
 
-Deploy Preview Generator:
+Deploy Preview Generator (Production):
     stage: deploy1
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
@@ -286,11 +305,13 @@ Deploy Preview Generator:
         - cd devops/k8s/preview_generator
         - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
         - kubectl apply -f deployment.prod.yaml
-    only:
-        refs:
-            - master
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "production"'
+          when: on_success
+    environment:
+        name: Production
 
-Deploy Webserver:
+Deploy Webserver (Production):
     stage: deploy1
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
@@ -300,6 +321,8 @@ Deploy Webserver:
         - cd devops/k8s/webserver
         - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
         - kubectl apply -f deployment.prod.yaml -f service.prod.yaml -f ingress.prod.yaml -f backendconfig.prod.yaml
-    only:
-        refs:
-            - master
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "production"'
+          when: on_success
+    environment:
+        name: Production
