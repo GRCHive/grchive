@@ -19,6 +19,7 @@ case "$ENV" in
         echo $GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
         echo $GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
         GRCHIVE_PROJECT="grchive"
+        export OKTA_CLIENT_ID="0oa1n0o8fPR0iSsIC4x6"
         export OKTA_CLIENT_SECRET=$PRODUCTION_OKTA_CLIENT_SECRET
         export OKTA_KEY=$PRODUCTION_OKTA_KEY
         export GRCHIVE_PROJECT="grchive"
@@ -35,6 +36,7 @@ case "$ENV" in
         echo $STAGING_GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
         GRCHIVE_PROJECT="grchive-staging"
         export GRCHIVE_PROJECT=$STAGING_GRCHIVE_PROJECT
+        export OKTA_CLIENT_ID="0oa25j979s1Txrkiz4x6"
         export OKTA_CLIENT_SECRET=$STAGING_OKTA_CLIENT_SECRET
         export OKTA_KEY=$STAGING_OKTA_KEY
         export GRCHIVE_PROJECT="grchive-staging"
