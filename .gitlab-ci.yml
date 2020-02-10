@@ -68,12 +68,14 @@ Build CI Image:
         - cd devops/docker/ciImage
         - ./create_ciimage.sh $FULL_IMAGE_URL:latest
     cache: {}
-    when: manual
     rules:
         - changes:
             - dependencies/bootstrap_bazel.sh
             - devops/docker/ciImage/**/*
+          when: manual
         - if: '$CI_COMMIT_BRANCH == "master"'
+          when: manual
+        - when: never
 
 Prepare:
     stage: prep
