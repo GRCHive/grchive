@@ -26,6 +26,7 @@ case "$ENV" in
         export GRCHIVE_DOMAIN="grchive.com"
         export GRCHIVE_DOC_BUCKET="grchive-prod"
         export TERRAFORM_FOLDER="prod"
+        export INGRESS_ENV="prod"
         ;;
 
     staging)
@@ -41,6 +42,7 @@ case "$ENV" in
         export GRCHIVE_DOMAIN="staging.grchive.com"
         export GRCHIVE_DOC_BUCKET="grchive-staging"
         export TERRAFORM_FOLDER="staging"
+        export INGRESS_ENV="staging"
         ;;
 esac
 
@@ -55,9 +57,15 @@ ${DIR}/build_webserver_container.sh
 gcloud auth activate-service-account --key-file devops/gcloud/gcloud-terraform-account.json
 gcloud config set project ${GRCHIVE_PROJECT}
 gcloud config set compute/zone us-central1-c
+
+cloud_sql_proxy -instances=${GRCHIVE_PROJECT}:us-central1:${POSTGRES_INSTANCE_NAME}=tcp:5555 &
+PROXY_PID=$!
+
 ${DIR}/terraform.sh
 
 gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
 gcloud config set project ${GRCHIVE_PROJECT}
 gcloud config set compute/zone us-central1-c
 ${DIR}/deploy_k8s.sh
+
+kill -9 $PROXY_PID
