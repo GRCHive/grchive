@@ -6,30 +6,30 @@ kubectl create secret docker-registry regcred --docker-server=registry.gitlab.co
 
 cd devops/k8s
 
-kubectl apply --wait -f storage/prod
-kubectl apply --wait -f ./cert-manager/letsencrypt-staging.yaml -f ./cert-manager/letsencrypt-prod.yaml
+kubectl apply -f storage/prod
+kubectl apply -f ./cert-manager/letsencrypt-staging.yaml -f ./cert-manager/letsencrypt-prod.yaml
 
 export VAULT_IMAGE=registry.gitlab.com/grchive/grchive/vault:`git rev-parse HEAD`
 cd vault
 envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
-kubectl apply --wait -f service-internal.yaml -f deployment.prod.yaml
+kubectl apply -f service-internal.yaml -f deployment.prod.yaml
 cd ../
 
 export RABBITMQ_IMAGE=registry.gitlab.com/grchive/grchive/rabbitmq:`git rev-parse HEAD`
 cd rabbitmq
 envsubst < statefulset.prod.yaml.tmpl > statefulset.prod.yaml
-kubectl apply --wait -f service.yaml -f statefulset.prod.yaml
+kubectl apply -f service.yaml -f statefulset.prod.yaml
 cd ../
 
 export PREVIEW_IMAGE=registry.gitlab.com/grchive/grchive/preview_generator:`git rev-parse HEAD`
 cd preview_generator
 envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
-kubectl apply --wait -f deployment.prod.yaml
+kubectl apply -f deployment.prod.yaml
 cd ../
 
 export WEBSERVER_IMAGE=registry.gitlab.com/grchive/grchive/webserver:`git rev-parse HEAD`
 export NGINX_IMAGE=registry.gitlab.com/grchive/grchive/nginx:`git rev-parse HEAD`
 cd webserver
 envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
-kubectl apply --wait -f deployment.prod.yaml -f service.prod.yaml -f ingress.${INGRESS_ENV}.yaml -f backendconfig.prod.yaml
+kubectl apply -f deployment.prod.yaml -f service.prod.yaml -f ingress.${INGRESS_ENV}.yaml -f backendconfig.prod.yaml
 cd ../
