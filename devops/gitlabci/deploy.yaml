@@ -1,0 +1,95 @@
+.deploy-secrets:
+    stage: predeploy
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - kubectl create secret generic gke-service-account --from-file=gcloud-service-account.json=devops/gcloud/gcloud-kubernetes-account.json -o yaml --dry-run --save-config | kubectl apply -f -
+        - kubectl create secret docker-registry regcred --docker-server=registry.gitlab.com --docker-username=${GKE_REGISTRY_USER} --docker-password=${GKE_REGISTRY_PASSWORD} -o yaml --dry-run --save-config | kubectl apply -f -
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
+          when: on_success
+
+.deploy-storage:
+    stage: predeploy
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - cd devops/k8s/storage/prod
+        - kubectl apply -f .
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
+          when: on_success
+
+.deploy-lets-encrypt:
+    stage: predeploy
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - cd devops/k8s/cert-manager
+        - kubectl apply -f ./letsencrypt-staging.yaml -f ./letsencrypt-prod.yaml
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
+          when: on_success
+        - changes:
+            - devops/k8s/cert-manager/**/*
+        - when: never
+
+.deploy-vault:
+    stage: deploy0
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - export VAULT_IMAGE=$CI_FULL_REGISTRY/vault:$CI_COMMIT_SHA
+        - cd devops/k8s/vault
+        - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+        - kubectl apply -f service-internal.yaml -f deployment.prod.yaml
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
+          when: on_success
+        - changes:
+            - devops/docker/vault/**/*
+            - devops/vault/**/*
+        - when: never
+
+.deploy-rabbitmq:
+    stage: deploy0
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - export RABBITMQ_IMAGE=$CI_FULL_REGISTRY/rabbitmq:$CI_COMMIT_SHA
+        - cd devops/k8s/rabbitmq
+        - envsubst < statefulset.prod.yaml.tmpl > statefulset.prod.yaml
+        - kubectl apply -f service.yaml -f statefulset.prod.yaml
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
+          when: on_success
+        - changes:
+            - devops/docker/rabbitmq/**/*
+        - when: never
+
+.deploy-preview-generator:
+    stage: deploy1
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - export PREVIEW_IMAGE=$CI_FULL_REGISTRY/preview_generator:$CI_COMMIT_SHA
+        - cd devops/k8s/preview_generator
+        - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+        - kubectl apply -f deployment.prod.yaml
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
+          when: on_success
+
+.deploy-webserver:
+    stage: deploy1
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - export WEBSERVER_IMAGE=$CI_FULL_REGISTRY/webserver:$CI_COMMIT_SHA
+        - export NGINX_IMAGE=$CI_FULL_REGISTRY/nginx:$CI_COMMIT_SHA
+        - cd devops/k8s/webserver
+        - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+        - kubectl apply -f deployment.prod.yaml -f service.prod.yaml -f ingress.prod.yaml -f backendconfig.prod.yaml
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
+          when: on_success

@@ -24,6 +24,8 @@ variables:
 include:
     - local: '/devops/gitlabci/flyway.yaml'
     - local: '/devops/gitlabci/terraform.yaml'
+    - local: '/devops/gitlabci/deploy.yaml'
+    - local: '/devops/gitlabci/environment.yaml'
 
 default:
     cache:
@@ -34,28 +36,7 @@ default:
     services:
         - docker:19.03.1-dind
     before_script:
-        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - echo "build -c opt" >> .bazelrc
-        - echo "run -c opt" >> .bazelrc
-        - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
-        - echo "build --action_env=DOCKER_HOST" >> .bazelrc
-        - echo "run --action_env=DOCKER_HOST" >> .bazelrc
-        - echo "build --action_env=DOCKER_DRIVER" >> .bazelrc
-        - echo "run --action_env=DOCKER_DRIVER" >> .bazelrc
-        - echo "build --action_env=DOCKER_TLS_CERTDIR" >> .bazelrc
-        - echo "run --action_env=DOCKER_TLS_CERTDIR" >> .bazelrc
-        - echo "build --action_env=DOCKER_TLS_VERIFY" >> .bazelrc
-        - echo "run --action_env=DOCKER_TLS_VERIFY" >> .bazelrc
-        - echo "build --action_env=DOCKER_CERT_PATH" >> .bazelrc
-        - echo "run --action_env=DOCKER_CERT_PATH" >> .bazelrc
-        - envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
-        - cp -r /python ./dependencies/python
-        - echo $GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
-        - echo $GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
-        - echo $GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
-        - gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
-        - gcloud config set project grchive
-        - gcloud config set compute/zone us-central1-c
+        - *common-before-script
 
 Build CI Image:
     stage: ciImage
@@ -172,6 +153,8 @@ Build Webserver Container:
 
 Terraform (Production):
     extends: .terraform
+    before_script:
+        - *production-before-script
     variables:
         TERRAFORM_FOLDER: "prod"
         RELEASE_BRANCH: "production"
@@ -180,6 +163,8 @@ Terraform (Production):
 
 Terraform (Staging):
     extends: .terraform
+    before_script:
+        - *staging-before-script
     variables:
         TERRAFORM_FOLDER: "staging"
         RELEASE_BRANCH: "staging"
@@ -188,6 +173,8 @@ Terraform (Staging):
 
 Flyway Vault (Production):
     extends: .flyway-vault
+    before_script:
+        - *production-before-script
     variables:
         GRCHIVE_PROJECT: "$PRODUCTION_GRCHIVE_PROJECT"
         RELEASE_BRANCH: "production"
@@ -196,6 +183,8 @@ Flyway Vault (Production):
 
 Flyway Webserver (Production):
     extends: .flyway-webserver
+    before_script:
+        - *production-before-script
     variables:
         GRCHIVE_PROJECT: "$PRODUCTION_GRCHIVE_PROJECT"
         RELEASE_BRANCH: "production"
@@ -204,6 +193,8 @@ Flyway Webserver (Production):
 
 Flyway Vault (Staging):
     extends: .flyway-vault
+    before_script:
+        - *staging-before-script
     variables:
         GRCHIVE_PROJECT: "$STAGING_GRCHIVE_PROJECT"
         RELEASE_BRANCH: "staging"
@@ -212,6 +203,8 @@ Flyway Vault (Staging):
 
 Flyway Webserver (Staging):
     extends: .flyway-webserver
+    before_script:
+        - *staging-before-script
     variables:
         GRCHIVE_PROJECT: "$STAGING_GRCHIVE_PROJECT"
         RELEASE_BRANCH: "staging"
@@ -219,111 +212,127 @@ Flyway Webserver (Staging):
         name: Staging
 
 Deploy Secrets (Production):
-    stage: predeploy
-    image: $CI_FULL_REGISTRY/ci-image:latest
-    script:
-        - gcloud container clusters get-credentials webserver-gke-cluster
-        - kubectl create secret generic gke-service-account --from-file=gcloud-service-account.json=devops/gcloud/gcloud-kubernetes-account.json -o yaml --dry-run --save-config | kubectl apply -f -
-        - kubectl create secret docker-registry regcred --docker-server=registry.gitlab.com --docker-username=${GKE_REGISTRY_USER} --docker-password=${GKE_REGISTRY_PASSWORD} -o yaml --dry-run --save-config | kubectl apply -f -
-    rules:
-        - if: '$CI_COMMIT_BRANCH == "production"'
-          when: on_success
+    extends: .deploy-secrest
+    before_script:
+        - *production-before-script
+    variables:
+        RELEASE_BRANCH: "production"
     environment:
         name: Production
 
 Deploy Storage (Production):
-    stage: predeploy
-    image: $CI_FULL_REGISTRY/ci-image:latest
-    script:
-        - gcloud container clusters get-credentials webserver-gke-cluster
-        - cd devops/k8s/storage/prod
-        - kubectl apply -f .
-    rules:
-        - if: '$CI_COMMIT_BRANCH == "production"'
-          when: on_success
+    extends: .deploy-storage
+    before_script:
+        - *production-before-script
+    variables:
+        RELEASE_BRANCH: "production"
     environment:
         name: Production
 
 Deploy Lets Encrypt (Production):
-    stage: predeploy
-    image: $CI_FULL_REGISTRY/ci-image:latest
-    script:
-        - gcloud container clusters get-credentials webserver-gke-cluster
-        - cd devops/k8s/cert-manager
-        - kubectl apply -f ./letsencrypt-staging.yaml -f ./letsencrypt-prod.yaml
-    rules:
-        - if: '$CI_COMMIT_BRANCH == "production"'
-          when: on_success
-        - changes:
-            - devops/k8s/cert-manager/**/*
-        - when: never
+    extends: .deploy-lets-encrypt
+    before_script:
+        - *production-before-script
+    variables:
+        RELEASE_BRANCH: "production"
     environment:
         name: Production
 
 Deploy Vault (Production):
-    stage: deploy0
-    image: $CI_FULL_REGISTRY/ci-image:latest
-    script:
-        - gcloud container clusters get-credentials webserver-gke-cluster
-        - export VAULT_IMAGE=$CI_FULL_REGISTRY/vault:$CI_COMMIT_SHA
-        - cd devops/k8s/vault
-        - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
-        - kubectl apply -f service-internal.yaml -f deployment.prod.yaml
-    rules:
-        - if: '$CI_COMMIT_BRANCH == "production"'
-          when: on_success
-        - changes:
-            - devops/docker/vault/**/*
-            - devops/vault/**/*
-        - when: never
+    extends: .deploy-vault
+    before_script:
+        - *production-before-script
+    variables:
+        RELEASE_BRANCH: "production"
     environment:
         name: Production
 
 Deploy RabbitMQ (Production):
-    stage: deploy0
-    image: $CI_FULL_REGISTRY/ci-image:latest
-    script:
-        - gcloud container clusters get-credentials webserver-gke-cluster
-        - export RABBITMQ_IMAGE=$CI_FULL_REGISTRY/rabbitmq:$CI_COMMIT_SHA
-        - cd devops/k8s/rabbitmq
-        - envsubst < statefulset.prod.yaml.tmpl > statefulset.prod.yaml
-        - kubectl apply -f service.yaml -f statefulset.prod.yaml
-    rules:
-        - if: '$CI_COMMIT_BRANCH == "production"'
-          when: on_success
-        - changes:
-            - devops/docker/rabbitmq/**/*
-        - when: never
+    extends: .deploy-rabbitmq
+    before_script:
+        - *production-before-script
+    variables:
+        RELEASE_BRANCH: "production"
     environment:
         name: Production
 
 Deploy Preview Generator (Production):
-    stage: deploy1
-    image: $CI_FULL_REGISTRY/ci-image:latest
-    script:
-        - gcloud container clusters get-credentials webserver-gke-cluster
-        - export PREVIEW_IMAGE=$CI_FULL_REGISTRY/preview_generator:$CI_COMMIT_SHA
-        - cd devops/k8s/preview_generator
-        - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
-        - kubectl apply -f deployment.prod.yaml
-    rules:
-        - if: '$CI_COMMIT_BRANCH == "production"'
-          when: on_success
+    extends: .deploy-preview-generator
+    before_script:
+        - *production-before-script
+    variables:
+        RELEASE_BRANCH: "production"
     environment:
         name: Production
 
 Deploy Webserver (Production):
-    stage: deploy1
-    image: $CI_FULL_REGISTRY/ci-image:latest
-    script:
-        - gcloud container clusters get-credentials webserver-gke-cluster
-        - export WEBSERVER_IMAGE=$CI_FULL_REGISTRY/webserver:$CI_COMMIT_SHA
-        - export NGINX_IMAGE=$CI_FULL_REGISTRY/nginx:$CI_COMMIT_SHA
-        - cd devops/k8s/webserver
-        - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
-        - kubectl apply -f deployment.prod.yaml -f service.prod.yaml -f ingress.prod.yaml -f backendconfig.prod.yaml
-    rules:
-        - if: '$CI_COMMIT_BRANCH == "production"'
-          when: on_success
+    extends: .deploy-webserver
+    before_script:
+        - *production-before-script
+    variables:
+        RELEASE_BRANCH: "production"
     environment:
         name: Production
+
+Deploy Secrets (Staging):
+    extends: .deploy-secrest
+    before_script:
+        - *staging-before-script
+    variables:
+        RELEASE_BRANCH: "staging"
+    environment:
+        name: Staging
+
+Deploy Storage (Staging):
+    extends: .deploy-storage
+    before_script:
+        - *staging-before-script
+    variables:
+        RELEASE_BRANCH: "staging"
+    environment:
+        name: Staging
+
+Deploy Lets Encrypt (Staging):
+    extends: .deploy-lets-encrypt
+    before_script:
+        - *staging-before-script
+    variables:
+        RELEASE_BRANCH: "staging"
+    environment:
+        name: Staging
+
+Deploy Vault (Staging):
+    extends: .deploy-vault
+    before_script:
+        - *staging-before-script
+    variables:
+        RELEASE_BRANCH: "staging"
+    environment:
+        name: Staging
+
+Deploy RabbitMQ (Staging):
+    extends: .deploy-rabbitmq
+    before_script:
+        - *staging-before-script
+    variables:
+        RELEASE_BRANCH: "staging"
+    environment:
+        name: Staging
+
+Deploy Preview Generator (Staging):
+    extends: .deploy-preview-generator
+    before_script:
+        - *staging-before-script
+    variables:
+        RELEASE_BRANCH: "staging"
+    environment:
+        name: Staging
+
+Deploy Webserver (Staging):
+    extends: .deploy-webserver
+    before_script:
+        - *staging-before-script
+    variables:
+        RELEASE_BRANCH: "staging"
+    environment:
+        name: Staging
