@@ -103,7 +103,6 @@ func (this *RawJWT) verifyAud(isAccessToken bool) error {
 }
 
 func ReadRawJWTFromString(input string) (*RawJWT, error) {
-	core.Info("RAW JWT: " + input)
 	var err error
 	data := strings.Split(input, ".")
 	if len(data) < 3 {
