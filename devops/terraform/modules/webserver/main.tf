@@ -43,7 +43,7 @@ resource "google_compute_global_address" "webserver-static-ip" {
 }
 
 resource "google_storage_bucket" "webserver-control-doc-store" {
-    name     = "grchive-prod"
+    name     = var.doc_storage_bucket
     location = "US-CENTRAL1"
     bucket_policy_only = true
 

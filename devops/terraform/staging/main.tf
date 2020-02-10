@@ -37,4 +37,6 @@ module "vault" {
 
 module "webserver" {
     source = "../modules/webserver"
+
+    doc_storage_bucket = "grchive-staging"
 }
