@@ -193,13 +193,13 @@ Build RabbitMQ Container:
         - when: never
 
 Build Preview Generator Container (Production):
-    extends: .preview_generator_container
+    extends: .preview-generator-container
     <<: *production-before-script
     variables:
         RELEASE_BRANCH: "production"
 
 Build Preview Generator Container (Staging):
-    extends: .preview_generator_container
+    extends: .preview-generator-container
     <<: *staging-before-script
     variables:
         RELEASE_BRANCH: "staging"
