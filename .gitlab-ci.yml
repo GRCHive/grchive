@@ -115,18 +115,39 @@ Prepare:
         - bazel version
         - docker info
 
-Compile All:
-    stage: compile
-    image: $CI_FULL_REGISTRY/ci-image:latest
-    script:
-        - bazel build //src/webserver:webserver
-        - bazel build //src/preview_generator:frontend
+Compile All (Master):
+    extends: .compile
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master"'
 
-Run All Tests:
-    stage: test
-    image: $CI_FULL_REGISTRY/ci-image:latest
-    script:
-        - bazel test --test_output=errors //test/...
+Run All Tests (Master):
+    extends: .tests
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master"'
+
+Compile All (Staging):
+    extends: .compile
+    <<: *staging-before-script
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "staging"'
+
+Run All Tests (Staging):
+    extends: .tests
+    <<: *staging-before-script
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "staging"'
+
+Compile All (Production):
+    extends: .compile
+    <<: *production-before-script
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "production"'
+
+Run All Tests (Production):
+    extends: .tests
+    <<: *production-before-script
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "production"'
 
 Build NGINX Container:
     stage: containers
@@ -141,22 +162,17 @@ Build NGINX Container:
         - if: '$CI_COMMIT_BRANCH == "master"'
           when: never
 
-Build Vault Container:
-    stage: containers
-    image: $CI_FULL_REGISTRY/ci-image:latest
+Build Vault Container (Production):
+    extends: .vault-container
+    <<: *production-before-script
     variables:
-        FULL_IMAGE_URL: $CI_FULL_REGISTRY/vault
-    script:
-        - bazel run //devops/docker/vault:vault 
-        - docker tag bazel/devops/docker/vault:vault $FULL_IMAGE_URL:$CI_COMMIT_SHA
-        - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
-    rules:
-        - if: '$CI_COMMIT_BRANCH == "master"'
-          when: never
-        - changes:
-            - devops/vault/**/*
-            - devops/docker/vault/**/*
-        - when: never
+        RELEASE_BRANCH: "production"
+
+Build Vault Container (Staging):
+    extends: .vault-container
+    <<: *staging-before-script
+    variables:
+        RELEASE_BRANCH: "staging"
 
 Build RabbitMQ Container:
     stage: containers
@@ -174,33 +190,29 @@ Build RabbitMQ Container:
             - devops/docker/rabbitmq/**/*
         - when: never
 
-Build Preview Generator Container:
-    stage: containers
-    image: $CI_FULL_REGISTRY/ci-image:latest
+Build Preview Generator Container (Production):
+    extends: .preview_generator_container
+    <<: *production-before-script
     variables:
-        FULL_IMAGE_URL: $CI_FULL_REGISTRY/preview_generator
-    script:
-        - bazel build //devops/docker/preview_generator:docker_preview_generator.tar
-        - docker load -i bazel-bin/devops/docker/preview_generator/docker_preview_generator.tar
-        - docker tag bazel/devops/docker/preview_generator:docker_preview_generator $FULL_IMAGE_URL:$CI_COMMIT_SHA
-        - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
-    rules:
-        - if: '$CI_COMMIT_BRANCH == "master"'
-          when: never
+        RELEASE_BRANCH: "production"
 
-Build Webserver Container:
-    stage: containers
-    image: $CI_FULL_REGISTRY/ci-image:latest
+Build Preview Generator Container (Staging):
+    extends: .preview_generator_container
+    <<: *staging-before-script
     variables:
-        FULL_IMAGE_URL: $CI_FULL_REGISTRY/webserver
-    script:
-        - bazel build //devops/docker/webserver:docker_webserver.tar
-        - docker load -i bazel-bin/devops/docker/webserver/docker_webserver.tar
-        - docker tag bazel/devops/docker/webserver:docker_webserver $FULL_IMAGE_URL:$CI_COMMIT_SHA
-        - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
-    rules:
-        - if: '$CI_COMMIT_BRANCH == "master"'
-          when: never
+        RELEASE_BRANCH: "staging"
+
+Build Webserver Container (Production):
+    extends: .webserver-container
+    <<: *production-before-script
+    variables:
+        RELEASE_BRANCH: "production"
+
+Build Webserver Container (Staging):
+    extends: .webserver-container
+    <<: *staging-before-script
+    variables:
+        RELEASE_BRANCH: "staging"
 
 Terraform (Production):
     extends: .terraform

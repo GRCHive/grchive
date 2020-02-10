@@ -61,6 +61,7 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 
 ### GRCHive
 
+- `GRCHIVE_PROJECT`: The Google Cloud project to use.
 - `GRCHIVE_URI`: The URI to access the running webserver (with the http/https prefix).
 - `GRCHIVE_DOMAIN`: The domain name of the webserver (without the http or https prefix and port number).
 - `GRCHIVE_DOC_BUCKET`: The Google Cloud Storage bucket in which to store the documentation files.

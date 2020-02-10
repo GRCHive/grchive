@@ -1,0 +1,12 @@
+.compile:
+    stage: compile
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - bazel build //src/webserver:webserver
+        - bazel build //src/preview_generator:frontend
+
+.tests:
+    stage: test
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - bazel test --test_output=errors //test/...

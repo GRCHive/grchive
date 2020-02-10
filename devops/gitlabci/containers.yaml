@@ -1,0 +1,42 @@
+.vault-container:
+    stage: containers
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    variables:
+        FULL_IMAGE_URL: $CI_FULL_REGISTRY/vault
+    script:
+        - bazel run //devops/docker/vault:vault 
+        - docker tag bazel/devops/docker/vault:vault $FULL_IMAGE_URL:$CI_COMMIT_SHA
+        - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
+          when: never
+        - changes:
+            - devops/vault/**/*
+            - devops/docker/vault/**/*
+        - when: never
+
+.preview-generator-container:
+    stage: containers
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    variables:
+        FULL_IMAGE_URL: $CI_FULL_REGISTRY/preview_generator
+    script:
+        - bazel build //devops/docker/preview_generator:docker_preview_generator.tar
+        - docker load -i bazel-bin/devops/docker/preview_generator/docker_preview_generator.tar
+        - docker tag bazel/devops/docker/preview_generator:docker_preview_generator $FULL_IMAGE_URL:$CI_COMMIT_SHA
+        - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
+
+.webserver-container:
+    stage: containers
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    variables:
+        FULL_IMAGE_URL: $CI_FULL_REGISTRY/webserver
+    script:
+        - bazel build //devops/docker/webserver:docker_webserver.tar
+        - docker load -i bazel-bin/devops/docker/webserver/docker_webserver.tar
+        - docker tag bazel/devops/docker/webserver:docker_webserver $FULL_IMAGE_URL:$CI_COMMIT_SHA
+        - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
