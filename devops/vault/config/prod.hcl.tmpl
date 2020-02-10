@@ -5,7 +5,7 @@ storage "postgresql" {
 
 seal "gcpckms" {
     credentials = "/secrets/gke/gcloud-service-account.json"
-    project     = "grchive"
+    project     = "${GRCHIVE_PROJECT}"
     region      = "us-central1"
     key_ring    = "vault-keyring"
     crypto_key  = "vault-key"

@@ -46,8 +46,11 @@ variables:
         - echo $GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
         - echo $GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
         - gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
-        - gcloud config set project grchive
+        - gcloud config set project $PRODUCTION_GRCHIVE_PROJECT
         - gcloud config set compute/zone us-central1-c
+        - export GRCHIVE_PROJECT=$PRODUCTION_GRCHIVE_PROJECT
+        - export OKTA_CLIENT_SECRET=$PRODUCTION_OKTA_CLIENT_SECRET
+        - export OKTA_KEY=$PRODUCTION_OKTA_KEY
 
 .staging-before-script: &staging-before-script
     before_script:
@@ -56,8 +59,11 @@ variables:
         - echo $STAGING_GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
         - echo $STAGING_GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
         - gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
-        - gcloud config set project grchive
+        - gcloud config set project $STAGING_GRCHIVE_PROJECT
         - gcloud config set compute/zone us-central1-c
+        - export GRCHIVE_PROJECT=$STAGING_GRCHIVE_PROJECT
+        - export OKTA_CLIENT_SECRET=$STAGING_OKTA_CLIENT_SECRET
+        - export OKTA_KEY=$STAGING_OKTA_KEY
 
 include:
     - local: '/devops/gitlabci/flyway.yaml'
@@ -210,7 +216,6 @@ Flyway Vault (Production):
     extends: .flyway-vault
     <<: *production-before-script
     variables:
-        GRCHIVE_PROJECT: "$PRODUCTION_GRCHIVE_PROJECT"
         RELEASE_BRANCH: "production"
     environment:
         name: Production
@@ -219,7 +224,6 @@ Flyway Webserver (Production):
     extends: .flyway-webserver
     <<: *production-before-script
     variables:
-        GRCHIVE_PROJECT: "$PRODUCTION_GRCHIVE_PROJECT"
         RELEASE_BRANCH: "production"
     environment:
         name: Production
@@ -228,7 +232,6 @@ Flyway Vault (Staging):
     extends: .flyway-vault
     <<: *staging-before-script
     variables:
-        GRCHIVE_PROJECT: "$STAGING_GRCHIVE_PROJECT"
         RELEASE_BRANCH: "staging"
     environment:
         name: Staging
@@ -237,7 +240,6 @@ Flyway Webserver (Staging):
     extends: .flyway-webserver
     <<: *staging-before-script
     variables:
-        GRCHIVE_PROJECT: "$STAGING_GRCHIVE_PROJECT"
         RELEASE_BRANCH: "staging"
     environment:
         name: Staging

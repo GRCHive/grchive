@@ -19,4 +19,5 @@ spec:
         - hosts:
             - "grchive.com"
             - "www.grchive.com"
+            - "staging.grchive.com"
           secretName: grchive-cert-prod
