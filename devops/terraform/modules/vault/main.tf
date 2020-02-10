@@ -1,5 +1,4 @@
 resource "google_kms_key_ring" "vault-keyring" {
-    project         = "grchive"
     name            = "vault-keyring"
     location        = "us-central1"
 }
