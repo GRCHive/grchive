@@ -68,6 +68,7 @@ Build CI Image:
         - cd devops/docker/ciImage
         - ./create_ciimage.sh $FULL_IMAGE_URL:latest
     cache: {}
+    allow_failure: true
     rules:
         - changes:
             - dependencies/bootstrap_bazel.sh
