@@ -14,8 +14,6 @@ spec:
             labels:
                 app: vault
         spec:
-            strategy:
-                type: Recreate
             containers:
                 - name: vault-container
                   image: ${VAULT_IMAGE}
@@ -43,3 +41,5 @@ spec:
                     secretName: gke-service-account
             imagePullSecrets:
                 - name: regcred
+    strategy:
+        type: Recreate
