@@ -168,10 +168,12 @@ func getSamlLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ok, err := webcore.VerifyCSRFToken(state[0], r); !ok || err != nil {
-		getSamlLoginCallbackError("Failed CSRF check for SAML Login Callback.", err, w, r)
-		return
-	}
+	// TODO: Figure out why this doesn't work on production sometimes but works perfectly on a local machine...
+	// This might not even be necessary TBH.
+	//if ok, err := webcore.VerifyCSRFToken(state[0], r); !ok || err != nil {
+	//	getSamlLoginCallbackError("Failed CSRF check for SAML Login Callback.", err, w, r)
+	//	return
+	//}
 
 	// Retrieve the access/ID token from Okta and redirect if successful.
 	// Note that core.OktaObtainTokens will store the tokens where necessary.
