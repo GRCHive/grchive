@@ -70,6 +70,10 @@ func (z ZipFS) Open(name string) (http.File, error) {
 	}, nil
 }
 
+func healthCheck(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
 func main() {
 	core.Init()
 	database.Init()
@@ -91,6 +95,7 @@ func main() {
 	defer webcore.DefaultRabbitMQ.Cleanup()
 
 	r := mux.NewRouter().StrictSlash(true)
+	r.HandleFunc("/healthz", healthCheck)
 	r.Use(webcore.HTTPRedirectStatusCodes)
 
 	staticRouter := r.PathPrefix("/static").Subrouter()

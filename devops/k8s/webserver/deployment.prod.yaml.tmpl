@@ -19,6 +19,18 @@ spec:
                   image: ${WEBSERVER_IMAGE}
                   ports:
                     - containerPort: 8080
+                  readinessProbe:
+                    httpGet:
+                        path: /healthz
+                        port: 80
+                    initialDelaySeconds: 5
+                    periodSeconds: 10
+                  livelinessProbe:
+                    httpGet:
+                        path: /healthz
+                        port: 80
+                    initialDelaySeconds: 15
+                    periodSeconds: 20
                 - name: nginx-container
                   image: ${NGINX_IMAGE}
                   ports:
@@ -28,6 +40,18 @@ spec:
                     - name: ssl-certificate
                       mountPath: "/etc/letsencrypt/live/grchive.com"
                       readOnly: true
+                  readinessProbe:
+                    httpGet:
+                        path: /healthz
+                        port: 80
+                    initialDelaySeconds: 5
+                    periodSeconds: 10
+                  livelinessProbe:
+                    httpGet:
+                        path: /healthz
+                        port: 80
+                    initialDelaySeconds: 15
+                    periodSeconds: 20
                 - name: cloudsql-proxy
                   image: gcr.io/cloudsql-docker/gce-proxy:1.16
                   command: ["/cloud_sql_proxy",
