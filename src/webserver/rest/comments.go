@@ -19,10 +19,11 @@ type NewCommentInputs struct {
 	Comment GenericNewCommentInputs `json:"comment"`
 	// Doc Request
 	RequestId core.NullInt64 `json:"requestId"`
-	CatId     core.NullInt64 `json:"catId"`
 	// Document
 	FileId core.NullInt64 `json:"fileId"`
 	OrgId  int32          `json:"orgId"`
+
+	CatId core.NullInt64 `json:"catId"`
 }
 
 type AllCommentInputs struct {
@@ -60,10 +61,9 @@ func newComment(w http.ResponseWriter, r *http.Request) {
 
 	comment := commentFromInputs(inputs.Comment)
 
-	if inputs.RequestId.NullInt64.Valid && inputs.CatId.NullInt64.Valid {
+	if inputs.RequestId.NullInt64.Valid {
 		err = database.InsertDocumentRequestComment(
 			inputs.RequestId.NullInt64.Int64,
-			inputs.CatId.NullInt64.Int64,
 			inputs.OrgId,
 			comment,
 			role)
