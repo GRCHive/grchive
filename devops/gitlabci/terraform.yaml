@@ -10,7 +10,7 @@
         - terraform apply -auto-approve
     rules:
         - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
-          when: on_success
-        - changes:
+          changes:
             - devops/terraform/${TERRAFORM_FOLDER}/**/*
+          when: on_success
         - when: never

@@ -10,9 +10,9 @@
         - flyway -configFiles=./flyway/prod-flyway.conf migrate
     rules:
         - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
-          when: never
-        - changes:
+          changes:
             - devops/database/vault/**/*
+          when: on_success
         - when: never
 
 .flyway-webserver:
@@ -27,7 +27,7 @@
         - flyway -configFiles=./flyway/prod-flyway.conf migrate
     rules:
         - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
-          when: never
-        - changes:
+          changes:
             - devops/database/webserver/**/*
+          when: on_success
         - when: never
