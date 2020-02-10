@@ -70,13 +70,11 @@ Build CI Image:
     cache: {}
     allow_failure: true
     rules:
-        - changes:
+        - if: '$CI_COMMIT_BRANCH == "master"'
+          changes:
             - dependencies/bootstrap_bazel.sh
             - devops/docker/ciImage/**/*
           when: manual
-        - if: '$CI_COMMIT_BRANCH == "master"'
-          when: manual
-        - when: never
 
 Prepare:
     stage: prep
