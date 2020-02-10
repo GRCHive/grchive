@@ -14,7 +14,7 @@ spec:
             paths:
                 - backend:
                     serviceName: internal-webserver-service
-                    servicePort: 80
+                    servicePort: 443
     tls:
         - hosts:
             - "staging.grchive.com"
