@@ -47,10 +47,6 @@ func FindAllEdgesForProcessFlow(flowId int64, role *core.Role) ([]*core.ProcessF
 }
 
 func CreateNewProcessFlowEdge(edge *core.ProcessFlowEdge, role *core.Role) (*core.ProcessFlowEdge, error) {
-	if edge.InputIoId == edge.OutputIoId {
-		return nil, errors.New("Can not create an edge from a node to itself.")
-	}
-
 	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
 		return nil, core.ErrorUnauthorized
 	}
@@ -93,6 +89,11 @@ func CreateNewProcessFlowEdge(edge *core.ProcessFlowEdge, role *core.Role) (*cor
 	if err != nil {
 		tx.Rollback()
 		return nil, err
+	}
+
+	if result.Input.ParentNodeId == result.Output.ParentNodeId {
+		tx.Rollback()
+		return nil, errors.New("Can not create an edge from a node to itself.")
 	}
 
 	// Sanity checks to make sure that the edge is valid.
