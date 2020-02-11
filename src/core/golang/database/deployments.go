@@ -234,7 +234,7 @@ func UpdateDeployment(deployment *core.StrippedFullDeployment, role *core.Role) 
 		return err
 	}
 
-	if deployment.SelfDeployment != nil {
+	if deployment.SelfDeployment != nil && deployment.DeploymentType == core.KSelfDeployment {
 		err = updateSelfDeploymentWithTx(deployment.Id, deployment.OrgId, deployment.SelfDeployment, tx)
 	}
 
@@ -243,7 +243,7 @@ func UpdateDeployment(deployment *core.StrippedFullDeployment, role *core.Role) 
 		return err
 	}
 
-	if deployment.VendorDeployment != nil {
+	if deployment.VendorDeployment != nil && deployment.DeploymentType == core.KVendorDeployment {
 		err = updateVendorDeploymentWithTx(deployment.Id, deployment.OrgId, deployment.VendorDeployment, tx)
 	}
 
