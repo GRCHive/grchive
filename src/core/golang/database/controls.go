@@ -179,24 +179,30 @@ func AddControlsToRisk(riskId int64, controlIds []int64, role *core.Role) error 
 	return tx.Commit()
 }
 
-func AddControlsToNode(nodeId int64, controlIds []int64, role *core.Role) error {
+func AddControlsToNodeWithTx(nodeId int64, controlIds []int64, tx *sqlx.Tx, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
 	var err error
-	tx := dbConn.MustBegin()
-
 	for _, controlId := range controlIds {
 		_, err = tx.Exec(`
 			INSERT INTO process_flow_control_node (control_id, node_id)
 			VALUES ($1, $2)
 		`, controlId, nodeId)
 		if err != nil {
-			tx.Rollback()
 			return err
 		}
 	}
+	return nil
+}
 
+func AddControlsToNode(nodeId int64, controlIds []int64, role *core.Role) error {
+	tx := dbConn.MustBegin()
+	err := AddControlsToNodeWithTx(nodeId, controlIds, tx, role)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 	return tx.Commit()
 }
 

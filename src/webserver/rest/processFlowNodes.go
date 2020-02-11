@@ -9,6 +9,11 @@ import (
 	"strconv"
 )
 
+type DuplicateProcessFlowNodeInputs struct {
+	NodeId int64 `json:"nodeId"`
+	OrgId  int32 `json:"orgId"`
+}
+
 type EditProcessFlowNodeInputs struct {
 	NodeId      int64  `webcore:"nodeId"`
 	Name        string `webcore:"name"`
@@ -150,6 +155,112 @@ func editProcessFlowNode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(node)
+}
+
+func duplicateProcessFlowNode(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := DuplicateProcessFlowNodeInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	node, err := database.FindNodeFromId(inputs.NodeId, role)
+	if err != nil {
+		core.Warning("Failed to find node: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	tx := database.CreateTx()
+
+	newNode, err := database.CreateNewProcessFlowNodeWithTypeIdWithTx(node.NodeTypeId, node.ProcessFlowId, tx, role)
+	if err != nil {
+		tx.Rollback()
+		core.Warning("Failed to create new node: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	newNode.Name = node.Name
+	newNode.Description = node.Description
+	newNode.NodeTypeId = node.NodeTypeId
+
+	_, err = database.EditProcessFlowNodeWithTx(newNode, tx, role)
+	if err != nil {
+		tx.Rollback()
+		core.Warning("Failed to edit new node: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	duplicateIO := func(io []core.ProcessFlowInputOutput, isInput bool) error {
+		for _, singleIo := range io {
+			newIo := core.ProcessFlowInputOutput{
+				Name:         singleIo.Name,
+				ParentNodeId: newNode.Id,
+				TypeId:       singleIo.TypeId,
+			}
+
+			_, err = database.CreateNewProcessFlowIOWithTx(&newIo, isInput, tx, role)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	err = duplicateIO(node.Inputs, true)
+	if err != nil {
+		tx.Rollback()
+		core.Warning("Failed to duplicate inputs: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = duplicateIO(node.Outputs, false)
+	if err != nil {
+		tx.Rollback()
+		core.Warning("Failed to duplicate outputs: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = database.AddRisksToNodeWithTx(node.RiskIds, newNode.Id, tx, role)
+	if err != nil {
+		tx.Rollback()
+		core.Warning("Failed to duplicate risk connections: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = database.AddControlsToNodeWithTx(newNode.Id, node.ControlIds, tx, role)
+	if err != nil {
+		tx.Rollback()
+		core.Warning("Failed to duplicate control connections: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if err = tx.Commit(); err != nil {
+		core.Warning("Failed to commit: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(newNode)
 }
 
 func deleteProcessFlowNode(w http.ResponseWriter, r *http.Request) {

@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
 )
 
@@ -24,21 +25,19 @@ func GetAllProcessFlowIOTypes(role *core.Role) ([]*core.ProcessFlowIOType, error
 	return result, err
 }
 
-func CreateNewProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool, role *core.Role) (*core.ProcessFlowInputOutput, error) {
+func CreateNewProcessFlowIOWithTx(io *core.ProcessFlowInputOutput, isInput bool, tx *sqlx.Tx, role *core.Role) (*core.ProcessFlowInputOutput, error) {
 	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
 		return nil, core.ErrorUnauthorized
 	}
 	var err error
 	var dbName string = getProcessFlowIODbName(isInput)
 
-	tx := dbConn.MustBegin()
 	rows, err := tx.Queryx(fmt.Sprintf(`
 		INSERT INTO %s (name, parent_node_id, io_type_id)
 		VALUES ($1, $2, $3)
 		RETURNING *
 	`, dbName), io.Name, io.ParentNodeId, io.TypeId)
 	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 
@@ -46,13 +45,20 @@ func CreateNewProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool, role 
 	rows.Next()
 	err = rows.StructScan(&outIo)
 	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 	rows.Close()
+	return &outIo, nil
+}
 
-	err = tx.Commit()
-	return &outIo, err
+func CreateNewProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool, role *core.Role) (*core.ProcessFlowInputOutput, error) {
+	tx := dbConn.MustBegin()
+	outIo, err := CreateNewProcessFlowIOWithTx(io, isInput, tx, role)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	return outIo, tx.Commit()
 }
 
 func DeleteProcessFlowIO(ioId int64, isInput bool, role *core.Role) error {

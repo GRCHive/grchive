@@ -87,6 +87,7 @@ func registerProcessFlowNodesAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiProcessFlowNodesNewUrl, newProcessFlowNode).Methods("POST")
 	s.HandleFunc(core.ApiProcessFlowNodesEditUrl, editProcessFlowNode).Methods("POST")
 	s.HandleFunc(core.ApiProcessFlowNodesDeleteUrl, deleteProcessFlowNode).Methods("POST")
+	s.HandleFunc(core.ApiDuplicateEndpoint, duplicateProcessFlowNode).Methods("POST")
 }
 
 func registerProcessFlowIOAPIPaths(r *mux.Router) {

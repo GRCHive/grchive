@@ -3,8 +3,10 @@ import * as qs from 'query-string'
 import { getAllProcessFlowNodeTypesAPIUrl,
          editProcessFlowNodeAPIUrl,
          deleteProcessFlowNodeAPIUrl,
-         newProcessFlowNodeAPIUrl } from '../url'
-import { postFormUrlEncoded } from '../http'
+         newProcessFlowNodeAPIUrl,
+         duplicateProcessFlowNodeAPIUrl 
+} from '../url'
+import { postFormUrlEncoded, postFormJson } from '../http'
 import { getAPIRequestConfig } from './apiUtility'
 
 export interface TGetProcessFlowNodeTypesInput { 
@@ -59,4 +61,18 @@ export interface TNewProcessFlowNodeOutput {
 export function newProcessFlowNode(inp : TNewProcessFlowNodeInput) : 
         Promise<TNewProcessFlowNodeOutput> {
     return postFormUrlEncoded<TNewProcessFlowNodeOutput>(newProcessFlowNodeAPIUrl, inp, getAPIRequestConfig())
+}
+
+export interface TDuplicateProcessFlowNodeInput { 
+    nodeId: number
+    orgId: number
+}
+
+export interface TDuplicateProcessFlowNodeOutput { 
+    data: ProcessFlowNode
+}
+
+export function duplicateProcessFlowNode(inp : TDuplicateProcessFlowNodeInput) : 
+        Promise<TDuplicateProcessFlowNodeOutput> {
+    return postFormJson<TDuplicateProcessFlowNodeOutput>(duplicateProcessFlowNodeAPIUrl, inp, getAPIRequestConfig())
 }

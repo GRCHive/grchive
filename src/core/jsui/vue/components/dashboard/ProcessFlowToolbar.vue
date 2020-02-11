@@ -1,6 +1,25 @@
 <template>
     <v-toolbar flat height="30px">
         <v-toolbar-items>
+            <v-menu offset-y>
+                <template v-slot:activator="{ on }">
+                    <v-btn text color="accent" v-on="on">
+                        File
+                        <v-icon small color="accent">mdi-chevron-down</v-icon>
+                    </v-btn>
+                </template>
+
+                <v-list dense>
+                    <v-list-item dense @click="duplicateNode" :disabled="!hasSelectedNode">
+                        <v-list-item-title>
+                            Duplicate Node
+                        </v-list-item-title>
+                    </v-list-item>
+                    <v-divider></v-divider>
+                </v-list>
+            </v-menu>
+
+
             <v-divider vertical></v-divider>
             <v-menu offset-y>
                 <template v-slot:activator="{ on }">
@@ -72,7 +91,7 @@
                 <v-list dense>
                     <v-list-item v-for="(item, index) in rawTypeOptions"
                                  :key="index"
-                                 @click="createNewNode($event, item.Id)"
+                                 @click="createNewNode(item.Id)"
                                  dense
                     >
                         <v-list-item-action>
@@ -103,9 +122,12 @@ import VueSetup from '../../../ts/vueSetup'
 import MetadataStore from '../../../ts/metadata'
 import RenderLayout from '../../../ts/render/renderLayout'
 import LocalSettings from '../../../ts/localSettings'
+import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
 import { nodeTypeToClass } from '../../../ts/render/nodeCssUtils'
 import { TNewProcessFlowNodeInput, TNewProcessFlowNodeOutput, newProcessFlowNode } from '../../../ts/api/apiProcessFlowNodes'
+import { editProcessFlowNode, TEditProcessFlowNodeOutput } from '../../../ts/api/apiProcessFlowNodes'
+import { duplicateProcessFlowNode, TDuplicateProcessFlowNodeOutput } from '../../../ts/api/apiProcessFlowNodes'
 
 export default Vue.extend({
     computed: {
@@ -118,11 +140,37 @@ export default Vue.extend({
         },
         showHideLegend() : boolean {
             return LocalSettings.state.showHideLegend
+        },
+        hasSelectedNode() : boolean {
+            return VueSetup.store.state.selectedNodeId != -1
         }
     },
     methods: {
         nodeTypeToClass: nodeTypeToClass,
-        createNewNode(_ : MouseEvent, nodeTypeId : number) {
+        
+        duplicateNode() {
+            let node : ProcessFlowNode | null = VueSetup.store.getters.nodeInfo(VueSetup.store.state.selectedNodeId)
+            if (!node) {
+                return
+            }
+
+            duplicateProcessFlowNode({
+                nodeId: node!.Id,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TEditProcessFlowNodeOutput) => {
+                VueSetup.store.dispatch('refreshCurrentProcessFlowFullData', VueSetup.store.state.currentProcessFlowBasicData!.Id)
+            }).catch(() => {
+                //@ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong, please reload the page and try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
+
+        createNewNode(nodeTypeId : number, onSuccess : () => void | null) {
             // Create a new node of the given type.
             newProcessFlowNode(<TNewProcessFlowNodeInput>{
                 typeId: nodeTypeId,
@@ -132,6 +180,10 @@ export default Vue.extend({
                 //       That'd require some more syncing stuff...which is fancier.
                 // Force a refresh of the data for the currently selected process flow.
                 VueSetup.store.dispatch('refreshCurrentProcessFlowFullData', VueSetup.store.state.currentProcessFlowBasicData!.Id)
+
+                if (!!onSuccess) {
+                    onSuccess()
+                }
             }).catch((err : any) => {
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(

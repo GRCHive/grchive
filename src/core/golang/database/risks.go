@@ -70,11 +70,10 @@ func DeleteRisks(nodeId int64, riskIds []int64, global bool, orgId int32, role *
 	return tx.Commit()
 }
 
-func AddRisksToNode(riskIds []int64, nodeId int64, role *core.Role) error {
+func AddRisksToNodeWithTx(riskIds []int64, nodeId int64, tx *sqlx.Tx, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
-	tx := dbConn.MustBegin()
 	for _, id := range riskIds {
 		_, err := tx.Exec(`
 			INSERT INTO process_flow_risk_node (risk_id, node_id)
@@ -82,9 +81,18 @@ func AddRisksToNode(riskIds []int64, nodeId int64, role *core.Role) error {
 		`, id, nodeId)
 
 		if err != nil {
-			tx.Rollback()
 			return err
 		}
+	}
+	return nil
+}
+
+func AddRisksToNode(riskIds []int64, nodeId int64, role *core.Role) error {
+	tx := dbConn.MustBegin()
+	err := AddRisksToNodeWithTx(riskIds, nodeId, tx, role)
+	if err != nil {
+		tx.Rollback()
+		return err
 	}
 	return tx.Commit()
 }

@@ -15,4 +15,5 @@ type ProcessFlowNode struct {
 	Inputs        []ProcessFlowInputOutput
 	Outputs       []ProcessFlowInputOutput
 	RiskIds       []int64
+	ControlIds    []int64
 }
