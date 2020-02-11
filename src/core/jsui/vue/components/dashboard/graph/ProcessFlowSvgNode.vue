@@ -33,41 +33,44 @@
                   ref="title"
             >{{ node.Name }}</text> 
 
-            <g v-for="(group, index) in nodeLayout.groupKeys" :key="index"
-               :transform="`translate(
-                ${nodeLayout.groupLayout[group].transform.tx},
-                ${nodeLayout.groupLayout[group].transform.ty})`">
-                <text dominant-baseline="hanging"
-                      :class="`subtitle-1 font-weight-bold ` + styleClass + `-text`"
-                      text-rendering="optimizeLegibility"
-                      :transform="`translate(
-                       ${nodeLayout.groupLayout[group].titleTransform.tx},
-                       ${nodeLayout.groupLayout[group].titleTransform.ty})`">
-                    {{ group }}
-                </text>
-                
-                <text dominant-baseline="hanging"
-                      :class="`body-2 input-text ` + styleClass + `-text`"
-                      text-rendering="optimizeLegibility"
-                      v-for="(input, iIndex) in nodeLayout.groupLayout[group].relevantInputs"
-                      :key="`input` + iIndex.toString()"
-                      :transform="`translate(
-                        ${nodeLayout.groupLayout[group].inputLayouts[input.Id].textTransform.tx},
-                        ${nodeLayout.groupLayout[group].inputLayouts[input.Id].textTransform.ty})`">
-                    {{ input.Name }}
-                </text>
+            <g v-if="!isSimplified">
+                <g v-for="(group, index) in nodeLayout.groupKeys" :key="index"
+                   :transform="`translate(
+                    ${nodeLayout.groupLayout[group].transform.tx},
+                    ${nodeLayout.groupLayout[group].transform.ty})`"
+                >
+                    <text dominant-baseline="hanging"
+                          :class="`subtitle-1 font-weight-bold ` + styleClass + `-text`"
+                          text-rendering="optimizeLegibility"
+                          :transform="`translate(
+                           ${nodeLayout.groupLayout[group].titleTransform.tx},
+                           ${nodeLayout.groupLayout[group].titleTransform.ty})`">
+                        {{ group }}
+                    </text>
+                    
+                    <text dominant-baseline="hanging"
+                          :class="`body-2 input-text ` + styleClass + `-text`"
+                          text-rendering="optimizeLegibility"
+                          v-for="(input, iIndex) in nodeLayout.groupLayout[group].relevantInputs"
+                          :key="`input` + iIndex.toString()"
+                          :transform="`translate(
+                            ${nodeLayout.groupLayout[group].inputLayouts[input.Id].textTransform.tx},
+                            ${nodeLayout.groupLayout[group].inputLayouts[input.Id].textTransform.ty})`">
+                        {{ input.Name }}
+                    </text>
 
-                <text dominant-baseline="hanging"
-                      :class="`body-2 output-text ` + styleClass + `-text`"
-                      text-rendering="optimizeLegibility"
-                      text-anchor="end"
-                      v-for="(output, oIndex) in nodeLayout.groupLayout[group].relevantOutputs"
-                      :key="`output` + oIndex.toString()"
-                      :transform="`translate(
-                        ${nodeLayout.groupLayout[group].outputLayouts[output.Id].textTransform.tx},
-                        ${nodeLayout.groupLayout[group].outputLayouts[output.Id].textTransform.ty})`">
-                    {{ output.Name }}
-                </text>
+                    <text dominant-baseline="hanging"
+                          :class="`body-2 output-text ` + styleClass + `-text`"
+                          text-rendering="optimizeLegibility"
+                          text-anchor="end"
+                          v-for="(output, oIndex) in nodeLayout.groupLayout[group].relevantOutputs"
+                          :key="`output` + oIndex.toString()"
+                          :transform="`translate(
+                            ${nodeLayout.groupLayout[group].outputLayouts[output.Id].textTransform.tx},
+                            ${nodeLayout.groupLayout[group].outputLayouts[output.Id].textTransform.ty})`">
+                        {{ output.Name }}
+                    </text>
+                </g>
             </g>
         </g>
 
@@ -129,6 +132,7 @@ import VueSetup from '../../../../ts/vueSetup'
 import MetadataStore from '../../../../ts/metadata'
 import RenderLayout from '../../../../ts/render/renderLayout'
 import ProcessFlowSvgRiskControlDropdown from './ProcessFlowSvgRiskControlDropdown.vue'
+import LocalSettings from '../../../../ts/localSettings'
 import { nodeTypeToClass } from '../../../../ts/render/nodeCssUtils'
 
 export default Vue.extend({
@@ -199,6 +203,9 @@ export default Vue.extend({
         isNodeSelected() : boolean {
             return VueSetup.store.state.selectedNodeId == this.node.Id
         },
+        isSimplified() : boolean {
+            return LocalSettings.state.simplifiedMode
+        }
     },
     watch: {
         ready(val: boolean) {

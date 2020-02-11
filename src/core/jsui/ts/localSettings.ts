@@ -1,11 +1,12 @@
 import Vuex, { StoreOptions } from 'vuex'
 
-interface LocalSettingsStoreState {
+export interface LocalSettingsStoreState {
     miniNavBar: boolean
     showHideAttributeEditor: boolean
     viewBoxTransform: TransformData
     viewBoxZoom: number
     showHideLegend: boolean
+    simplifiedMode: boolean
 }
 
 const MiniNavBarLocalStorageKey : string = "miniNavBar"
@@ -13,6 +14,7 @@ const ShowHideAttributeEditorLocalStorageKey : string = "showHideAttributeEditor
 const ViewBoxTransformLocalStorageKey : string = "viewBoxTransform"
 const ViewBoxZoomLocalStorageKey : string = "viewBoxZoom"
 const ShowHideLegendLocalStorageKey : string = "showHideLegend"
+const SimplifiedModeLocalStorageKey : string = "simplifiedMode"
 
 const MinZoom = 0.1
 const MaxZoom = 10.00
@@ -26,7 +28,8 @@ const localSettingStore: StoreOptions<LocalSettingsStoreState> = {
             ty: 0
         },
         viewBoxZoom: 1.0,
-        showHideLegend : true
+        showHideLegend : true,
+        simplifiedMode: false,
     },
     mutations: {
         setMiniNavBar(state, val) {
@@ -56,6 +59,11 @@ const localSettingStore: StoreOptions<LocalSettingsStoreState> = {
         setShowHideLegend(state, val) {
             state.showHideLegend = val
             window.localStorage.setItem(ShowHideLegendLocalStorageKey,
+                val ? "true" : "false")
+        },
+        setSimplifiedMode(state, val) {
+            state.simplifiedMode = val
+            window.localStorage.setItem(SimplifiedModeLocalStorageKey,
                 val ? "true" : "false")
         }
     },
@@ -88,5 +96,12 @@ let showHideLegend = window.localStorage.getItem(ShowHideLegendLocalStorageKey)
 if (showHideLegend != null) {
     store.commit('setShowHideLegend', showHideLegend == "true")
 }
+
+let simplifiedMode = window.localStorage.getItem(SimplifiedModeLocalStorageKey)
+if (showHideLegend != null) {
+    store.commit('setSimplifiedMode', simplifiedMode == "true")
+}
+
+
 
 export default store

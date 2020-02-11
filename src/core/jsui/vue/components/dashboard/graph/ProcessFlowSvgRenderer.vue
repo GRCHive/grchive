@@ -299,6 +299,10 @@ export default Vue.extend({
                 return
             }
 
+            if (LocalSettings.state.simplifiedMode) {
+                return
+            }
+
             VueSetup.store.commit('setSelectedProcessFlowEdge', -1)
             this.drawingEdge = true
             this.tempEdgeStart.nodeId = nodeId
@@ -316,9 +320,17 @@ export default Vue.extend({
                 return
             }
 
+            if (LocalSettings.state.simplifiedMode) {
+                return
+            }
+
             this.saveTemporaryEdge(io, isInput)
         },
         onEdgeClick(e : MouseEvent, edgeId: number) {
+            if (LocalSettings.state.simplifiedMode) {
+                return
+            }
+
             VueSetup.store.commit('setSelectedProcessFlowEdge', edgeId)
             VueSetup.store.commit('setSelectedProcessFlowNode', -1)
             e.stopPropagation()

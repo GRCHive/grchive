@@ -4,7 +4,7 @@ import MetadataStore from '../metadata'
 import { connectProcessFlowNodeDisplaySettingsWebsocket } from '../websocket/processFlowNodeDisplaySettings'
 import { FullProcessFlowData } from '../processFlow'
 import VuexState from '../processFlowState'
-import LocalSettings from '../localSettings'
+import LocalSettings, { LocalSettingsStoreState } from '../localSettings'
 
 // A Vuex store to share the layout of the process flow (nodes, plugs, etc.)
 // across the entire application.
@@ -74,7 +74,7 @@ function processIOGroupLayout(layout : IOGroupLayout, initialTransform: Transfor
 
     let inputStartTransform = <TransformData>{
         tx: 0,
-        ty: subtitleHeight + NodeIOMargins.betweenPlugs
+        ty: LocalSettings.state.simplifiedMode ? 0 : subtitleHeight + NodeIOMargins.betweenPlugs
     }
 
     for (let input of layout.relevantInputs) {
@@ -88,12 +88,15 @@ function processIOGroupLayout(layout : IOGroupLayout, initialTransform: Transfor
                 ty: inputStartTransform.ty + 5
             }
         }
-        inputStartTransform.ty += bodyHeight + NodeIOMargins.betweenPlugs
+
+        if (!LocalSettings.state.simplifiedMode) {
+            inputStartTransform.ty += bodyHeight + NodeIOMargins.betweenPlugs
+        }
     }
 
     let outputStartTransform = <TransformData>{
         tx: 0,
-        ty: subtitleHeight + NodeIOMargins.betweenPlugs
+        ty: LocalSettings.state.simplifiedMode ? 0 : subtitleHeight + NodeIOMargins.betweenPlugs
     }
     for (let output of layout.relevantOutputs) {
         let outputLayout = <IOPlugLayout>{
@@ -108,10 +111,15 @@ function processIOGroupLayout(layout : IOGroupLayout, initialTransform: Transfor
         }
 
         layout.outputLayouts[output.Id] = outputLayout
-        outputStartTransform.ty += bodyHeight + NodeIOMargins.betweenPlugs
+
+        if (!LocalSettings.state.simplifiedMode) {
+            outputStartTransform.ty += bodyHeight + NodeIOMargins.betweenPlugs
+        }
     }
 
-    initialTransform.ty += Math.max(inputStartTransform.ty, outputStartTransform.ty)
+    if (!LocalSettings.state.simplifiedMode) {
+        initialTransform.ty += Math.max(inputStartTransform.ty, outputStartTransform.ty)
+    }
 }
 
 // This function merely makes sure the group exists in groupLayout/groupKeys.
@@ -183,12 +191,14 @@ function createDefaultNodeLayout(node : ProcessFlowNode, rendererRect : IDOMRect
 
     let currentGroupTransform: TransformData = <TransformData>{
         tx: 0,
-        ty: titleHeight
+        ty: LocalSettings.state.simplifiedMode ? 0 : titleHeight
     }
 
     // Finally, process each group to determine where their input/output elements should lie.
     for (let groupKey of layout.groupKeys) {
-        currentGroupTransform.ty += NodeIOMargins.betweenGroups
+        if (!LocalSettings.state.simplifiedMode) {
+            currentGroupTransform.ty += NodeIOMargins.betweenGroups
+        }
         processIOGroupLayout(layout.groupLayout[groupKey], currentGroupTransform)
     }
 
@@ -281,7 +291,7 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
             right: 0,
             width: 0,
             height: 0
-        }
+        },
     },
     mutations: {
         setRendererRect(state, val) {
@@ -354,6 +364,16 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
 
             }, {
                 deep: true
+            })
+
+            LocalSettings.watch((state : LocalSettingsStoreState) => {
+                return state.simplifiedMode
+            }, () => {
+                if (this.state.ready) {
+                    context.dispatch(
+                        'mergeLayout',
+                        processFlowStore.state.currentProcessFlowFullData)
+                }
             })
         },
         // Assumes that we're looking at a new process flow and want to re-render

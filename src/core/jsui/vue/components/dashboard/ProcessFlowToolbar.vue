@@ -30,6 +30,17 @@
                 </template>
 
                 <v-list dense>
+                    <v-list-item dense @click="toggleSimplify">
+                        <v-list-item-action>
+                            <v-checkbox :input-value="simplifiedMode">
+                            </v-checkbox>
+                        </v-list-item-action>
+                        <v-list-item-title>
+                            Simplified Mode
+                        </v-list-item-title>
+                    </v-list-item>
+                    <v-divider></v-divider>
+
                     <v-list-item dense @click="toggleLegend">
                         <v-list-item-action>
                             <v-checkbox :input-value="showHideLegend">
@@ -143,6 +154,9 @@ export default Vue.extend({
         },
         hasSelectedNode() : boolean {
             return VueSetup.store.state.selectedNodeId != -1
+        },
+        simplifiedMode() : boolean {
+            return LocalSettings.state.simplifiedMode
         }
     },
     methods: {
@@ -206,6 +220,9 @@ export default Vue.extend({
             } else {
                 this.decreaseZoom()
             }
+        },
+        toggleSimplify() {
+            LocalSettings.commit('setSimplifiedMode', !LocalSettings.state.simplifiedMode)
         },
         toggleLegend() {
             LocalSettings.commit('setShowHideLegend', !LocalSettings.state.showHideLegend)
