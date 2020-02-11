@@ -11,31 +11,31 @@
                       label="Name"
                       filled
                       :rules="[rules.required]"
-                      :disabled="!canEdit">
+                      :readonly="!canEdit">
         </v-text-field>
 
         <v-text-field v-model="os"
                       label="Operating System"
                       filled
-                      :disabled="!canEdit">
+                      :readonly="!canEdit">
         </v-text-field>
 
         <v-text-field v-model="location"
                       label="Location"
                       filled
-                      :disabled="!canEdit">
+                      :readonly="!canEdit">
         </v-text-field>
 
         <v-text-field v-model="ip"
                       label="IP Address"
                       filled
-                      :disabled="!canEdit">
+                      :readonly="!canEdit">
         </v-text-field>
 
         <v-textarea v-model="description"
                     label="Description"
                     filled
-                    :disabled="!canEdit">
+                    :readonly="!canEdit">
         </v-textarea> 
     </v-form>
 

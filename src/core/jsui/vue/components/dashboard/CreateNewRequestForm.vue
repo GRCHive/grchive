@@ -11,13 +11,13 @@
                       label="Name"
                       filled
                       :rules="[rules.required]"
-                      :disabled="!canEdit"
+                      :readonly="!canEdit"
         ></v-text-field>
 
         <v-textarea v-model="description"
                     label="Description"
                     filled
-                    :disabled="!canEdit"
+                    :readonly="!canEdit"
         ></v-textarea> 
         
         <document-category-search-form-component
@@ -26,7 +26,7 @@
             :available-cats="availableCats"
             :load-cats="loadCats"
             :rules="[rules.required]"
-            :disabled="!canEdit"
+            :readonly="!canEdit"
         ></document-category-search-form-component>
     </v-form>
 

@@ -4,6 +4,7 @@
             label="Is Manually Run"
             :value="isManual"
             :disabled="disabled"
+            :readonly="readonly"
             @change="changeManual">
         </v-checkbox>
         <v-text-field
@@ -15,6 +16,7 @@
             v-if="!isManual"
             :value="freqInterval"
             :disabled="disabled"
+            :readonly="readonly"
             @change="changeInterval"
         >
             <template v-slot:append-outer v-bind:freqType="freqType">
@@ -41,6 +43,10 @@ export default Vue.extend({
         freqInterval : Number,
         freqType: Number,
         disabled: {
+            type: Boolean,
+            default: false
+        },
+        readonly: {
             type: Boolean,
             default: false
         }

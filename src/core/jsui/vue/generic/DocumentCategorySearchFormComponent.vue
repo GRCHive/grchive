@@ -6,10 +6,11 @@
         :items="displayItems"
         hide-no-data
         hide-selected
-        clearable
+        :clearable="!readonly && !disabled"
         :value="value"
         @change="change"
         :disabled="disabled"
+        :readonly="readonly"
         :value-comparator="compare"
         :rules="rules"
         :loading="!finishedLoading"
@@ -46,6 +47,10 @@ const Props = Vue.extend({
             default: () => []
         },
         loadCats: {
+            type: Boolean,
+            default: false
+        },
+        readonly: {
             type: Boolean,
             default: false
         }

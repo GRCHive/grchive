@@ -11,20 +11,20 @@
                       label="Identifier"
                       filled
                       :rules="[rules.required]"
-                      :disabled="!canEdit">
+                      :readonly="!canEdit">
         </v-text-field>
 
         <v-text-field v-model="name"
                       label="Name"
                       filled
                       :rules="[rules.required]"
-                      :disabled="!canEdit">
+                      :readonly="!canEdit">
         </v-text-field>
 
         <v-textarea v-model="description"
                     label="Description"
                     filled
-                    :disabled="!canEdit">
+                    :readonly="!canEdit">
         </v-textarea> 
 
         <v-autocomplete
@@ -32,8 +32,8 @@
             label="Parent Category"
             deletable-chips
             chips
-            clearable
-            :disabled="!canEdit"
+            :clearable="canEdit"
+            :readonly="!canEdit"
             hide-no-data
             hide-selected
             filled

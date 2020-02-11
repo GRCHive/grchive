@@ -7,10 +7,11 @@
         :loading="loading"
         hide-no-data
         hide-selected
-        clearable
+        :clearable="!readonly && !disabled"
         :value="user"
         @change="changeUser"
         :disabled="disabled"
+        :readonly="readonly"
         :value-comparator="compare"
     ></v-autocomplete>
 </template>
@@ -28,6 +29,10 @@ export default Vue.extend({
             type: Object as () => User
         },
         disabled: {
+            type: Boolean,
+            default: false
+        },
+        readonly: {
             type: Boolean,
             default: false
         }

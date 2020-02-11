@@ -11,19 +11,19 @@
                       label="Name"
                       filled
                       :rules="[rules.required]"
-                      :disabled="!canEdit">
+                      :readonly="!canEdit">
         </v-text-field>
 
         <v-text-field v-model="purpose"
                       label="Purpose"
                       filled
-                      :disabled="!canEdit">
+                      :readonly="!canEdit">
         </v-text-field> 
 
         <v-textarea v-model="description"
                     label="Description"
                     filled
-                    :disabled="!canEdit">
+                    :readonly="!canEdit">
         </v-textarea> 
 
     </v-form>

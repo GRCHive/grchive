@@ -11,7 +11,7 @@
                       label="Name"
                       filled
                       :rules="[rules.required]"
-                      :disabled="!canEdit">
+                      :readonly="!canEdit">
         </v-text-field>
 
         <v-autocomplete
@@ -21,7 +21,7 @@
             label="Type"
             hide-no-data
             :rules="[rules.required]"
-            :disabled="!canEdit"
+            :readonly="!canEdit"
         >
         </v-autocomplete>
 
@@ -30,14 +30,14 @@
                       label="Please Specify"
                       filled
                       :rules="[rules.required]"
-                      :disabled="!canEdit">
+                      :readonly="!canEdit">
         </v-text-field>
 
         <v-text-field v-model="version"
                       label="Version"
                       filled
                       :rules="[rules.required]"
-                      :disabled="!canEdit">
+                      :readonly="!canEdit">
         </v-text-field>
     </v-form>
 

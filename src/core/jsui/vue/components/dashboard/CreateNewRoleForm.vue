@@ -11,13 +11,13 @@
                       label="Name"
                       filled
                       :rules="[rules.required, rules.createMaxLength(256)]"
-                      :disabled="!canEdit">
+                      :readonly="!canEdit">
         </v-text-field>
 
         <v-textarea v-model="description"
                     label="Description"
                     filled
-                    :disabled="!canEdit"
+                    :readonly="!canEdit"
                     hide-details
                     class="mb-2">
         </v-textarea> 

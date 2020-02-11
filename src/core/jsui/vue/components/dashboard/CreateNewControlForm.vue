@@ -12,11 +12,11 @@
                       label="Name"
                       filled
                       :rules="[rules.required, rules.createMaxLength(256)]"
-                      :disabled="!canEdit">
+                      :readonly="!canEdit">
         </v-text-field>
 
         <v-textarea v-model="description" label="Description" filled
-                    :disabled="!canEdit">
+                    :readonly="!canEdit">
         </v-textarea> 
 
         <v-select
@@ -25,18 +25,18 @@
             v-model="controlType"
             :items="controlTypeItems"
             :rules="[rules.required]"
-            :disabled="!canEdit"
+            :readonly="!canEdit"
         ></v-select>
 
         <user-search-form-component
             label="Control Owner"
             v-bind:user.sync="controlOwner"
-            :disabled="!canEdit"
+            :readonly="!canEdit"
         ></user-search-form-component>
         <frequency-form-component
             v-bind:freqInterval.sync="frequencyData.freqInterval"
             v-bind:freqType.sync="frequencyData.freqType"
-            :disabled="!canEdit"
+            :readonly="!canEdit"
         ></frequency-form-component>
 
     </v-form>
