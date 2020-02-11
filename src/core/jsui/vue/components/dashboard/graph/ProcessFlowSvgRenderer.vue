@@ -206,7 +206,8 @@ export default Vue.extend({
                     true);
             })
         },
-        endMoveNode(nodeId: number) {
+        endMoveNode() {
+            let nodeId = VueSetup.store.state.selectedNodeId
             if (this.moveNodeActive && nodeId != -1) {
                 RenderLayout.store.dispatch('syncNodeTransform', {nodeId})
             }
@@ -263,7 +264,7 @@ export default Vue.extend({
                 return
             }
 
-            this.endMoveNode(nodeId)
+            this.endMoveNode()
             this.drawingEdge = false
         },
         onMouseDown(e : MouseEvent) {
@@ -286,7 +287,7 @@ export default Vue.extend({
             }
         },
         onMouseLeave(e : MouseEvent) {
-            this.endMoveNode(VueSetup.store.state.selectedNodeId) 
+            this.endMoveNode() 
             this.moveViewBoxActive = false
             this.drawingEdge = false
         },
@@ -307,6 +308,11 @@ export default Vue.extend({
         },
         onMouseUpPlug(e : MouseEvent, nodeId : number, io : ProcessFlowInputOutput, isInput: boolean) {
             if (e.button != 0) {
+                return
+            }
+
+            if (!this.drawingEdge) {
+                this.onMouseUpNode(e, nodeId)
                 return
             }
 

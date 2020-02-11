@@ -29,6 +29,32 @@ const plugHeight: number = 20
 
 let websocketConnection : WebSocket
 
+function connectWebsocket(context : any, host : string, csrf : string, processFlowStore : any) {
+    if (!!websocketConnection && websocketConnection.readyState == WebSocket.OPEN) {
+        websocketConnection.close()
+    }
+
+    websocketConnection = connectProcessFlowNodeDisplaySettingsWebsocket(host, csrf, processFlowStore.state.currentProcessFlowFullData.FlowId)
+    websocketConnection.onopen = () => {
+        context.commit('setReady')
+    }
+    websocketConnection.onclose = () => {
+        // Automatically try to reconnect?
+        connectWebsocket(context, host, csrf, processFlowStore)
+    }
+    websocketConnection.onmessage = (e : MessageEvent) => {
+        // For now only grab the node's transform since everything else
+        // can just be computed.
+        let data : { NodeId: number, Settings: NodeLayout }= JSON.parse(e.data)
+        context.commit('setNodeDisplayTranslation', {
+            nodeId: data.NodeId,
+            tx: data.Settings.transform.tx,
+            ty: data.Settings.transform.ty,
+            sendUpdate: false  
+        })
+    }
+}
+
 function processIOGroupLayout(layout : IOGroupLayout, initialTransform: TransformData) {
     let groupStartTransform = {...initialTransform}
     layout.transform = {...groupStartTransform}
@@ -307,28 +333,7 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
                         processFlowStore.state.currentProcessFlowFullData)
 
                     if (newFlow) {
-                        if (!!websocketConnection && websocketConnection.readyState == WebSocket.OPEN) {
-                            websocketConnection.close()
-                        }
-
-                        websocketConnection = connectProcessFlowNodeDisplaySettingsWebsocket(host, csrf, processFlowStore.state.currentProcessFlowFullData.FlowId)
-                        websocketConnection.onopen = () => {
-                            this.commit('setReady')
-                        }
-                        websocketConnection.onclose = () => {
-                            // TODO Need to notify user of the close and tell them to refresh when relevant?
-                        }
-                        websocketConnection.onmessage = (e : MessageEvent) => {
-                            // For now only grab the node's transform since everything else
-                            // can just be computed.
-                            let data : { NodeId: number, Settings: NodeLayout }= JSON.parse(e.data)
-                            context.commit('setNodeDisplayTranslation', {
-                                nodeId: data.NodeId,
-                                tx: data.Settings.transform.tx,
-                                ty: data.Settings.transform.ty,
-                                sendUpdate: false  
-                            })
-                        }
+                        connectWebsocket(context, host, csrf, processFlowStore)
                     }
 
             }, {
