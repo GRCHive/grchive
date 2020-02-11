@@ -95,17 +95,27 @@ const store : StoreOptions<VuexState> = {
             if (!state.currentProcessFlowFullData) {
                 return
             }
-            let relevantArr : ProcessFlowInputOutput[] = 
+
+            let relevantNodeArr : ProcessFlowInputOutput[] = 
                 isInput ? 
                     state.currentProcessFlowFullData.Nodes[nodeId].Inputs :
                     state.currentProcessFlowFullData.Nodes[nodeId].Outputs;
 
-            let idx : number = relevantArr.findIndex(
+            let nodeIdx : number = relevantNodeArr.findIndex(
                 (ele : ProcessFlowInputOutput) => {
                     return ele.Id == io.Id
                 })
-            if (idx != -1) {
-                Vue.set(relevantArr, idx, io)
+            if (nodeIdx != -1) {
+                Vue.set(relevantNodeArr, nodeIdx, io)
+            }
+
+            let relevantArr : Record<number, ProcessFlowInputOutput> = 
+                isInput ?
+                    state.currentProcessFlowFullData.Inputs :
+                    state.currentProcessFlowFullData.Outputs;
+
+            if (!!relevantArr[io.Id]) {
+                Vue.set(relevantArr, io.Id, io)
             }
         },
         updateNodePartial(state, {nodeId, node}) {

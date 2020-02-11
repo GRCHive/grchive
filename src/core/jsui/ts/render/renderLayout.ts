@@ -41,6 +41,7 @@ function processIOGroupLayout(layout : IOGroupLayout, initialTransform: Transfor
         tx: 0,
         ty: subtitleHeight + NodeIOMargins.betweenPlugs
     }
+
     for (let input of layout.relevantInputs) {
         layout.inputLayouts[input.Id] = <IOPlugLayout>{
             textTransform: <TransformData>{
