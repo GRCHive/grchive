@@ -109,7 +109,7 @@ function addIOToGroupLayout(layout: NodeLayout, io : ProcessFlowInputOutput, isI
     }
 }
 
-function createDefaultNodeLayout(node : ProcessFlowNode) : NodeLayout {
+function createDefaultNodeLayout(node : ProcessFlowNode, rendererRect : IDOMRect) : NodeLayout {
     let layout = <NodeLayout>{
         transform: {...LocalSettings.state.viewBoxTransform},
         titleTransform: <TransformData>{
@@ -125,6 +125,9 @@ function createDefaultNodeLayout(node : ProcessFlowNode) : NodeLayout {
         boxHeight: 200
     }
 
+    layout.transform.tx += rendererRect.width / 2
+    layout.transform.ty += rendererRect.height / 2
+    
     // Group the input and outputs by their type first.
     for (let input of node.Inputs) {
         addIOToGroupLayout(layout, input, true)
@@ -157,8 +160,8 @@ function createDefaultNodeLayout(node : ProcessFlowNode) : NodeLayout {
     return layout
 }
 
-function mergeNodeLayout(node : ProcessFlowNode, existingLayout: NodeLayout) : NodeLayout {
-    let defaultLayout : NodeLayout = createDefaultNodeLayout(node)
+function mergeNodeLayout(node : ProcessFlowNode, existingLayout: NodeLayout, rendererRect : IDOMRect) : NodeLayout {
+    let defaultLayout : NodeLayout = createDefaultNodeLayout(node, rendererRect)
     if (!existingLayout) {
         return defaultLayout
     }
@@ -341,7 +344,7 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
             for (let nodeKey of processFlow.NodeKeys) {
                 context.commit('setNodeLayout', {
                     nodeId: nodeKey,
-                    layout: createDefaultNodeLayout(processFlow.Nodes[nodeKey]),
+                    layout: createDefaultNodeLayout(processFlow.Nodes[nodeKey], context.state.rendererRect),
                     isDefault: true
                 })
             }
@@ -354,7 +357,8 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
                     nodeId: nodeKey,
                     layout: mergeNodeLayout(
                                 processFlow.Nodes[nodeKey],
-                                context.state.nodeLayouts[nodeKey]),
+                                context.state.nodeLayouts[nodeKey],
+                                context.state.rendererRect),
                     isDefault: false
                 })
             }
