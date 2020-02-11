@@ -90,8 +90,7 @@ default:
             - src/core/jsui/node_modules/
     services:
         - docker:19.03.1-dind
-    before_script:
-        - *production-before-script
+    <<: *production-before-script
 
 Build CI Image:
     stage: ciImage
