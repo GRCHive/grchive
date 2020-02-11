@@ -38,9 +38,11 @@ function connectWebsocket(context : any, host : string, csrf : string, processFl
     websocketConnection.onopen = () => {
         context.commit('setReady')
     }
-    websocketConnection.onclose = () => {
-        // Automatically try to reconnect?
-        connectWebsocket(context, host, csrf, processFlowStore)
+    websocketConnection.onclose = (e : CloseEvent) => {
+        if (e.code != 1001) {
+            // Automatically try to reconnect?
+            connectWebsocket(context, host, csrf, processFlowStore)
+        }
     }
     websocketConnection.onmessage = (e : MessageEvent) => {
         // For now only grab the node's transform since everything else
