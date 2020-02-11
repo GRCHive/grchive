@@ -17,9 +17,35 @@ func LoggedRequestMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func VerifyAPIKeyHasAccessToUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		key, err := FindApiKeyInContext(r.Context())
+		if err != nil {
+			core.Warning("Failed to find API Key in context: " + err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		userId, err := GetUserIdFromRequestUrl(r)
+		if err != nil {
+			core.Warning("Failed to find user id in request URL: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		if key.UserId != userId {
+			core.Warning("Invalid API key for user: " + err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func ObtainAPIKeyRoleInContextMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		apiKey, err := GetAPIKeyFromRequest(r)
+		apiKey, err := GetAPIKeyFromRequest(w, r)
 		if err != nil {
 			core.Warning("Failed to find API Key: " + err.Error())
 			w.WriteHeader(http.StatusUnauthorized)

@@ -47,19 +47,6 @@ func getAllOrganizationsForUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	apiKey, err := webcore.GetAPIKeyFromRequest(r)
-	if apiKey == nil || err != nil {
-		core.Warning("No API Key: " + core.ErrorString(err))
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	if userId != apiKey.UserId {
-		core.Warning("Unauthorized access")
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
 	orgs, err := database.FindAccessibleOrganizationsForUser(userId)
 	if err != nil {
 		core.Warning("Can't find orgs: " + err.Error())
@@ -89,14 +76,7 @@ func updateUserProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	apiKey, err := webcore.GetAPIKeyFromRequest(r)
-	if apiKey == nil || err != nil {
-		core.Warning("No API Key: " + core.ErrorString(err))
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	apiUser, err := database.FindUserFromId(apiKey.UserId)
+	apiUser, err := database.FindUserFromId(userId)
 	if err != nil || apiUser.Id != userId {
 		core.Warning("Can't verify API user access: " + core.ErrorString(err))
 		w.WriteHeader(http.StatusUnauthorized)
@@ -146,23 +126,10 @@ func requestResendUserVerificationEmail(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	apiKey, err := webcore.GetAPIKeyFromRequest(r)
-	if apiKey == nil || err != nil {
-		core.Warning("No API Key: " + core.ErrorString(err))
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
 	user, err := database.FindUserFromId(inputs.UserId)
 	if err != nil {
 		core.Warning("Can't find user: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	if apiKey.UserId != user.Id {
-		core.Warning("Unauthorized requesting request.")
-		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 

@@ -194,13 +194,6 @@ func getControlTypes(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	apiKey, err := webcore.GetAPIKeyFromRequest(r)
-	if apiKey == nil || err != nil {
-		core.Warning("No API Key: " + core.ErrorString(err))
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
 	types, err := database.GetControlTypes(core.ServerRole)
 	if err != nil {
 		core.Warning("Failed to get control types: " + err.Error())

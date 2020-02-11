@@ -57,8 +57,22 @@ func RefreshGrantAPIKey(userId int64, w http.ResponseWriter, r *http.Request) er
 	return nil
 }
 
-func GetAPIKeyFromRequest(r *http.Request) (*core.ApiKey, error) {
+func GetAPIKeyFromRequest(w http.ResponseWriter, r *http.Request) (*core.ApiKey, error) {
 	rawApiKey := GetRawClientAPIKeyFromRequest(r)
 	hashedRawKey := rawApiKey.Hash()
-	return database.FindApiKey(hashedRawKey)
+	key, err := database.FindApiKey(hashedRawKey)
+	if err != nil {
+		return nil, err
+	}
+
+	if key.IsExpired(core.DefaultClock) {
+		// For convenience we need to regenerate the API key.
+		// TODO: Protect ourselves against replay attacks?
+		err = RefreshGrantAPIKey(key.UserId, w, r)
+		if err != nil {
+			return nil, err
+		}
+		return database.FindApiKeyForUser(key.UserId)
+	}
+	return key, nil
 }

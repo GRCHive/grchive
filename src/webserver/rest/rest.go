@@ -62,6 +62,7 @@ func registerVerificationAPIPaths(r *mux.Router) {
 
 func registerUserAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiUserPrefix).Subrouter()
+	s.Use(webcore.VerifyAPIKeyHasAccessToUser)
 	s.HandleFunc(core.ApiUserProfileEndpoint, updateUserProfile).Methods("POST")
 	s.HandleFunc(core.ApiUserOrgsEndpoint, getAllOrganizationsForUser).Methods("GET")
 }
