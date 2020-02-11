@@ -1,13 +1,16 @@
 DROP TRIGGER IF EXISTS ensure_edges_valid_on_input_io_update ON process_flow_node_inputs;
 DROP TRIGGER IF EXISTS ensure_edges_valid_on_output_io_update ON process_flow_node_outputs;
+DROP TRIGGER IF EXISTS ensure_edges_valid_on_edge_update ON process_flow_edges;
 DROP FUNCTION IF EXISTS ensure_edges_valid_on_input_update;
 DROP FUNCTION IF EXISTS ensure_edges_valid_on_output_update;
+DROP FUNCTION IF EXISTS ensure_edges_valid_on_edge_update;
 DROP FUNCTION IF EXISTS check_edge_valid;
 
 DROP VIEW IF EXISTS full_process_flow_edges_view;
 
 CREATE VIEW full_process_flow_edges_view AS
     SELECT 
+        edge.id AS edge_id,
         input_node.id AS input_node_id,
         input.io_type_id AS input_io_type_id,
         input.id AS input_io_id,
@@ -46,7 +49,7 @@ $ensure_edges_valid_on_input_update$
     BEGIN
         SELECT check_edge_valid(v.*) INTO tmp
         FROM full_process_flow_edges_view AS v
-        WHERE v.input_io_id = OLD.id;
+        WHERE v.input_io_id = NEW.id;
 
         RETURN NEW;
     END;
@@ -65,7 +68,7 @@ $ensure_edges_valid_on_output_update$
     BEGIN
         SELECT check_edge_valid(v.*) INTO tmp
         FROM full_process_flow_edges_view AS v
-        WHERE v.output_io_id = OLD.id;
+        WHERE v.output_io_id = NEW.id;
 
         RETURN NEW;
     END;
@@ -75,3 +78,22 @@ CREATE TRIGGER ensure_edges_valid_on_output_io_update
     AFTER UPDATE OF io_type_id ON process_flow_node_outputs
     FOR EACH ROW
     EXECUTE FUNCTION ensure_edges_valid_on_output_update();
+
+CREATE OR REPLACE FUNCTION ensure_edges_valid_on_edge_update()
+    RETURNS trigger AS
+$ensure_edges_valid_on_edge_update$
+    DECLARE
+        tmp RECORD;
+    BEGIN
+        SELECT check_edge_valid(v.*) INTO tmp
+        FROM full_process_flow_edges_view AS v
+        WHERE v.edge_id = NEW.id;
+
+        RETURN NEW;
+    END;
+$ensure_edges_valid_on_edge_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER ensure_edges_valid_on_edge_update
+    AFTER INSERT OR UPDATE OF input_id, output_id ON process_flow_edges
+    FOR EACH ROW
+    EXECUTE FUNCTION ensure_edges_valid_on_edge_update();
