@@ -40,6 +40,7 @@ func CreateNewProcessFlowIOWithTx(io *core.ProcessFlowInputOutput, isInput bool,
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	outIo := core.ProcessFlowInputOutput{}
 	rows.Next()
@@ -47,7 +48,6 @@ func CreateNewProcessFlowIOWithTx(io *core.ProcessFlowInputOutput, isInput bool,
 	if err != nil {
 		return nil, err
 	}
-	rows.Close()
 	return &outIo, nil
 }
 
@@ -100,6 +100,7 @@ func EditProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool, role *core
 	rows.Next()
 	err = rows.StructScan(io)
 	if err != nil {
+		rows.Close()
 		tx.Rollback()
 		return nil, err
 	}

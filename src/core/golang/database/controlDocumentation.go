@@ -34,13 +34,13 @@ func CreateFileStorageWithTx(storage *core.FileStorageData, tx *sqlx.Tx, role *c
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	rows.Next()
 	err = rows.Scan(&storage.Id)
 	if err != nil {
 		return err
 	}
-	rows.Close()
 	return nil
 }
 
@@ -82,13 +82,13 @@ func CreateControlDocumentationFileWithTx(file *core.ControlDocumentationFile, t
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	rows.Next()
 	err = rows.Scan(&file.Id)
 	if err != nil {
 		return err
 	}
-	rows.Close()
 	return nil
 }
 

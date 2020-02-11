@@ -188,6 +188,7 @@ func InsertOrgRole(metadata *core.RoleMetadata, role *core.Role, actionRole *cor
 	rows.Next()
 	err = rows.Scan(&role.Id)
 	if err != nil {
+		rows.Close()
 		tx.Rollback()
 		return err
 	}
@@ -300,6 +301,7 @@ func UpdateRole(role *core.Role, actionRole *core.Role) error {
 	rows.Next()
 	err = rows.StructScan(&role.RoleMetadata)
 	if err != nil {
+		rows.Close()
 		tx.Rollback()
 		return err
 	}

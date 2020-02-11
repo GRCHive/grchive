@@ -18,13 +18,13 @@ func NewVendorWithTx(vendor *core.Vendor, role *core.Role, tx *sqlx.Tx) error {
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	rows.Next()
 	err = rows.Scan(&vendor.Id)
 	if err != nil {
 		return err
 	}
-	rows.Close()
 
 	_, err = tx.Exec(`
 		INSERT INTO vendor_documentation_category_link (vendor_id, org_id, doc_cat_id)

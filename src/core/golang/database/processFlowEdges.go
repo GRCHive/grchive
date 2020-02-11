@@ -87,13 +87,9 @@ func CreateNewProcessFlowEdge(edge *core.ProcessFlowEdge, role *core.Role) (*cor
 	rows.Next()
 	err = rows.StructScan(&result)
 	if err != nil {
+		rows.Close()
 		tx.Rollback()
 		return nil, err
-	}
-
-	if result.Input.ParentNodeId == result.Output.ParentNodeId {
-		tx.Rollback()
-		return nil, errors.New("Can not create an edge from a node to itself.")
 	}
 
 	// Sanity checks to make sure that the edge is valid.
@@ -102,11 +98,13 @@ func CreateNewProcessFlowEdge(edge *core.ProcessFlowEdge, role *core.Role) (*cor
 	// 	  gets resolved by the SQL query?]
 	// 3) The edge must not be from the node to the same node.
 	if result.Input.TypeId != result.Output.TypeId {
+		rows.Close()
 		tx.Rollback()
 		return nil, errors.New("Edge Type ID mismatch.")
 	}
 
 	if result.Input.ParentNodeId == result.Output.ParentNodeId {
+		rows.Close()
 		tx.Rollback()
 		return nil, errors.New("Node loop edge.")
 	}

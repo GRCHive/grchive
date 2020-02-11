@@ -23,6 +23,7 @@ func NewServer(server *core.Server, role *core.Role) error {
 	rows.Next()
 	err = rows.Scan(&server.Id)
 	if err != nil {
+		rows.Close()
 		tx.Rollback()
 		return err
 	}

@@ -54,6 +54,7 @@ func CreateNewGLCategory(cat *core.GeneralLedgerCategory, role *core.Role) error
 	rows.Next()
 	err = rows.Scan(&cat.Id)
 	if err != nil {
+		rows.Close()
 		tx.Rollback()
 		return err
 	}
@@ -104,6 +105,7 @@ func CreateNewGLAccount(acc *core.GeneralLedgerAccount, role *core.Role) error {
 	rows.Next()
 	err = rows.Scan(&acc.Id)
 	if err != nil {
+		rows.Close()
 		tx.Rollback()
 		return err
 	}

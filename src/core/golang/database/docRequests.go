@@ -34,13 +34,13 @@ func CreateNewDocumentRequestWithTx(request *core.DocumentRequest, role *core.Ro
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	rows.Next()
 	err = rows.Scan(&request.Id)
 	if err != nil {
 		return err
 	}
-	rows.Close()
 	return nil
 }
 
@@ -78,6 +78,7 @@ func UpdateDocumentRequest(request *core.DocumentRequest, role *core.Role) error
 	rows.Next()
 	err = rows.StructScan(request)
 	if err != nil {
+		rows.Close()
 		tx.Rollback()
 		return err
 	}

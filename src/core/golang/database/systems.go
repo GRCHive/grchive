@@ -24,6 +24,7 @@ func CreateNewSystem(system *core.System, role *core.Role) error {
 	rows.Next()
 	err = rows.Scan(&system.Id)
 	if err != nil {
+		rows.Close()
 		tx.Rollback()
 		return err
 	}

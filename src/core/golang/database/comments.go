@@ -35,12 +35,12 @@ func insertCommentWithTx(comment *core.Comment, tx *sqlx.Tx) error {
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	rows.Next()
 	err = rows.Scan(&comment.Id)
 	if err != nil {
 		return err
 	}
-	rows.Close()
 	return nil
 }

@@ -42,13 +42,13 @@ func CreateNewUserWithTx(user *core.User, tx *sqlx.Tx) error {
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	rows.Next()
 	err = rows.Scan(&user.Id)
 	if err != nil {
 		return err
 	}
-	rows.Close()
 
 	return nil
 }
@@ -110,6 +110,7 @@ func UpdateUserFromEmail(user *core.User) error {
 	rows.Next()
 	err = rows.StructScan(user)
 	if err != nil {
+		rows.Close()
 		tx.Rollback()
 		return err
 	}

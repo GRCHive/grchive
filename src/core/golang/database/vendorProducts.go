@@ -24,6 +24,7 @@ func NewVendorProduct(product *core.VendorProduct, role *core.Role) error {
 	rows.Next()
 	err = rows.Scan(&product.Id)
 	if err != nil {
+		rows.Close()
 		tx.Rollback()
 		return err
 	}

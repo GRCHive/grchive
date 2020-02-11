@@ -324,6 +324,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		useDbFile, // useExistingMetadata
 		true)      // addToFileVersion
 	if err != nil {
+		tx.Rollback()
 		core.Warning("Failed to upload new file: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return

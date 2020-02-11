@@ -118,6 +118,7 @@ func InsertNewRisk(risk *core.Risk, role *core.Role) error {
 	rows.Next()
 	err = rows.Scan(&risk.Id)
 	if err != nil {
+		rows.Close()
 		tx.Rollback()
 		return err
 	}

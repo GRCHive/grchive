@@ -50,6 +50,7 @@ func CreateNewProcessFlowNodeWithTypeIdWithTx(typeId int32, flowId int64, tx *sq
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	node := core.ProcessFlowNode{}
 	rows.Next()
@@ -57,7 +58,6 @@ func CreateNewProcessFlowNodeWithTypeIdWithTx(typeId int32, flowId int64, tx *sq
 	if err != nil {
 		return nil, err
 	}
-	rows.Close()
 	return &node, nil
 }
 
@@ -178,13 +178,13 @@ func EditProcessFlowNodeWithTx(node *core.ProcessFlowNode, tx *sqlx.Tx, role *co
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	rows.Next()
 	err = rows.StructScan(node)
 	if err != nil {
 		return nil, err
 	}
-	rows.Close()
 
 	return node, nil
 }

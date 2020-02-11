@@ -19,13 +19,13 @@ func NewControlDocumentationCategoryWithTx(cat *core.ControlDocumentationCategor
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	rows.Next()
 	err = rows.Scan(&cat.Id)
 	if err != nil {
 		return err
 	}
-	rows.Close()
 	return nil
 }
 

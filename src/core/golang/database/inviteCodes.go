@@ -21,12 +21,12 @@ func InsertInviteCodeWithTx(code *core.InviteCode, role *core.Role, tx *sqlx.Tx)
 		return "", err
 	}
 
+	defer rows.Close()
 	rows.Next()
 	err = rows.Scan(&code.Id)
 	if err != nil {
 		return "", err
 	}
-	rows.Close()
 
 	hash, err := core.HashId(code.Id)
 	if err != nil {

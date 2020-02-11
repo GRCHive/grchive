@@ -24,14 +24,13 @@ func CreateNewEmptyDeploymentWithTx(orgId int32, role *core.Role, tx *sqlx.Tx) (
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	rows.Next()
 	err = rows.Scan(&deployment.Id)
 	if err != nil {
 		return nil, err
 	}
-	rows.Close()
-
 	return &deployment, nil
 }
 
@@ -86,6 +85,7 @@ func getVendorDeploymentHelper(id int64, orgId int32, role *core.Role) (*core.Ve
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	if !rows.Next() {
 		return &vendor, nil
@@ -113,6 +113,7 @@ func getDeploymentHelper(condition string, lite bool, role *core.Role, args ...i
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	if !rows.Next() {
 		return nil, nil

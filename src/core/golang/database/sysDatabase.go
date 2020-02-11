@@ -37,6 +37,7 @@ func InsertNewDatabase(db *core.Database, role *core.Role) error {
 	rows.Next()
 	err = rows.Scan(&db.Id)
 	if err != nil {
+		rows.Close()
 		tx.Rollback()
 		return err
 	}
@@ -182,6 +183,7 @@ func InsertNewDatabaseConnection(conn *core.DatabaseConnection, role *core.Role)
 	rows.Next()
 	err = rows.Scan(&conn.Id)
 	if err != nil {
+		rows.Close()
 		tx.Rollback()
 		return err
 	}
@@ -205,6 +207,8 @@ func FindDatabaseConnectionForDatabase(dbId int64, orgId int32, role *core.Role)
 	if err != nil {
 		return nil, err
 	}
+
+	defer rows.Close()
 
 	if !rows.Next() {
 		return nil, nil

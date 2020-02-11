@@ -109,8 +109,10 @@ func UpdateDisplaySettingsForProcessFlowNode(nodeId int64, settings map[string]i
 	rows.Next()
 	err = rows.Scan(&flowId)
 	if err != nil {
+		rows.Close()
 		return err
 	}
+
 	rows.Close()
 
 	err = tx.Commit()
