@@ -47,7 +47,7 @@
                 </text>
                 
                 <text dominant-baseline="hanging"
-                      :class="`body-2 ` + styleClass + `-text`"
+                      :class="`body-2 input-text ` + styleClass + `-text`"
                       text-rendering="optimizeLegibility"
                       v-for="(input, iIndex) in nodeLayout.groupLayout[group].relevantInputs"
                       :key="`input` + iIndex.toString()"
@@ -58,7 +58,7 @@
                 </text>
 
                 <text dominant-baseline="hanging"
-                      :class="`body-2 ` + styleClass + `-text`"
+                      :class="`body-2 output-text ` + styleClass + `-text`"
                       text-rendering="optimizeLegibility"
                       text-anchor="end"
                       v-for="(output, oIndex) in nodeLayout.groupLayout[group].relevantOutputs"

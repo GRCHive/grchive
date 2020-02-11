@@ -178,6 +178,22 @@ function onUpdateAssociatedNode(layout : NodeLayout) {
     //@ts-ignore
     const textgroup : SVGGraphicsElement = layout.associatedNode.$refs.textgroup
     layout.textWidth = textgroup.getBBox().width
+
+    const allInputText : HTMLCollection = textgroup.getElementsByClassName("input-text")
+    const allOutputText : HTMLCollection = textgroup.getElementsByClassName("output-text")
+
+    let inputWidth = 0
+    for (let i = 0; i < allInputText.length; ++i) {
+        inputWidth = Math.max(inputWidth, (<SVGTextElement>allInputText[i]).getBBox().width)
+    }
+
+    let outputWidth = 0
+    for (let i = 0; i < allOutputText.length; ++i) {
+        outputWidth = Math.max(outputWidth, (<SVGTextElement>allOutputText[i]).getBBox().width)
+    }
+
+    // The 50 is the margin between the two text boxes.
+    layout.textWidth = Math.max(layout.textWidth, inputWidth + outputWidth + 50)
     layout.textHeight = textgroup.getBBox().height
 
     layout.boxWidth = layout.textWidth + NodeMargins.left + NodeMargins.left
