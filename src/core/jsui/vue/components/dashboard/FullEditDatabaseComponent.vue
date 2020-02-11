@@ -58,7 +58,6 @@
                         <v-row>
                             <v-col cols="6">
                                 <create-new-database-form
-                                    ref="editForm"
                                     :edit-mode="true"
                                     :reference-db="currentDb"
                                     @do-save="onEdit">
@@ -285,17 +284,6 @@ export default class FullEditDatabaseComponent extends Vue {
 
     get ready() : boolean { 
         return !!this.currentDb && MetadataStore.state.dbTypesInitialized
-    }
-
-    @Watch('ready')
-    onReady() {
-        Vue.nextTick(() => {
-            this.$refs.editForm.clearForm()
-        })
-    }
-
-    $refs!: {
-        editForm: CreateNewDatabaseForm
     }
 
     get fullTypeString() : string {

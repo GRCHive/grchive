@@ -192,6 +192,7 @@ export default class CreateNewDatabaseForm extends VueComponent {
 
     mounted() {
         this.canEdit = !this.editMode
+        this.clearForm()
     }
 
     clearForm() {
