@@ -91,7 +91,7 @@ default:
     services:
         - docker:19.03.1-dind
     before_script:
-        - *common-before-script
+        - *production-before-script
 
 Build CI Image:
     stage: ciImage
