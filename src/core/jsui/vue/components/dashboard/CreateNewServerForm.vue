@@ -110,6 +110,10 @@ export default class CreateNewServerForm extends VueComponent {
         if (this.editMode) {
             this.canEdit = false
         }
+
+        if (!this.editMode) {
+            this.clearForm()
+        }
     }
 
     onError() {

@@ -135,6 +135,7 @@ export default class CreateNewDatabaseForm extends VueComponent {
             version: this.version,
         }).then((resp : TNewDatabaseOutputs) => {
             this.$emit('do-save', resp.data)
+            this.clearForm()
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

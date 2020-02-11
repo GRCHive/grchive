@@ -125,6 +125,7 @@ export default class CreateNewRequestForm extends Props {
         this.$emit('do-cancel')
         if (this.editMode) {
             this.canEdit = false
+            this.clearForm()
         }
     }
 
@@ -155,6 +156,7 @@ export default class CreateNewRequestForm extends Props {
             vendorProductId: this.vendorProductId
         }).then((resp : TNewDocRequestOutput) => {
             this.onSuccess(resp)
+            this.clearForm()
         }).catch((err : any) => {
             this.onError()
         })
@@ -195,6 +197,7 @@ export default class CreateNewRequestForm extends Props {
         } else {
             this.name = ""
             this.description = ""
+            this.realCat = null
         }
     }
 }

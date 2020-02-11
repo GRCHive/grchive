@@ -76,6 +76,12 @@ export default class CreateNewDbConnectionForm extends VueComponent {
         this.$emit('do-cancel')
     }
 
+    clearForm() {
+        this.connString = ""
+        this.username = ""
+        this.password = ""
+    }
+
     save() {
         newDatabaseConnection({
             dbId: this.dbId,
@@ -85,6 +91,7 @@ export default class CreateNewDbConnectionForm extends VueComponent {
             password: this.password,
         }).then((resp : TNewDbConnOutputs) => {
             this.$emit('do-save', resp.data)
+            this.clearForm()
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

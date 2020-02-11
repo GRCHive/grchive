@@ -135,6 +135,7 @@ export default class CreateNewGeneralLedgerCategoryForm extends VueComponent {
             description: this.description
         }).then((resp : TNewGLCategoryOutputs) => {
             this.$emit('do-save', resp.data)
+            this.resetForm()
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

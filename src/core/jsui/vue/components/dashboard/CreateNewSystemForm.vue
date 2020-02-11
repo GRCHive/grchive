@@ -105,6 +105,7 @@ export default class CreateNewSystemForm extends VueComponent {
             description: this.description,
         }).then((resp : TNewSystemOutputs) => {
             this.$emit('do-save', resp.data)
+            this.clearForm()
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

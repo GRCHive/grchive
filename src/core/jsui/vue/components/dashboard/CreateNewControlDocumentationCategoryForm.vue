@@ -127,8 +127,10 @@ export default class CreateNewControlDocumentationCategoryForm extends FormProps
     }
 
     onSuccess(cat : ControlDocumentationCategory) {
-        this.clearForm()
         this.$emit('do-save', cat)
+        if (!this.editMode) {
+            this.clearForm()
+        }
     }
 
     onError( err: any) {

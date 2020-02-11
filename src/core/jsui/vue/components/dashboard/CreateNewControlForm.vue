@@ -198,6 +198,9 @@ export default Vue.extend({
         },
         onSuccess(control : ProcessFlowControl) {
             this.$emit('do-save', control, this.riskId)
+            if (!this.editMode) {
+                this.clearForm()
+            }
         },
         onError(err : any) {
             if (!!err.response && err.response.data.IsDuplicate) {

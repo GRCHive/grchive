@@ -99,6 +99,7 @@ export default class CreateNewVendorForm extends VueComponent {
             description: this.description,
         }).then((resp : TNewVendorOutput) => {
             this.$emit('do-save', resp.data)
+            this.clearForm()
         }).catch((err: any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

@@ -238,8 +238,8 @@ export default Vue.extend({
                 description: this.description,
                 permissions: this.permissions
             }).then((resp : TNewRoleOutput) => {
-                this.canEdit = false
                 this.$emit('do-save', resp.data)
+                this.refreshFromReference()
             }).catch((err : any) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
@@ -275,11 +275,31 @@ export default Vue.extend({
         },
         refreshFromReference() {
             if (!this.referenceRole) {
-                return
+                this.name = ""
+                this.description = ""
+                this.permissions = <Permissions>{
+                    OrgUsersAccess: AccessType.NoAccess,
+                    OrgRolesAccess: AccessType.NoAccess,
+                    ProcessFlowsAccess: AccessType.NoAccess,
+                    ControlsAccess: AccessType.NoAccess,
+                    ControlDocumentationAccess: AccessType.NoAccess,
+                    ControlDocMetadataAccess: AccessType.NoAccess,
+                    RisksAccess: AccessType.NoAccess,
+                    GLAccess: AccessType.NoAccess,
+                    SystemAccess: AccessType.NoAccess,
+                    DbAccess: AccessType.NoAccess,
+                    DbConnectionAccess: AccessType.NoAccess,
+                    DocRequestAccess: AccessType.NoAccess,
+                    DeploymentAccess: AccessType.NoAccess,
+                    ServerAccess: AccessType.NoAccess,
+                    VendorAccess: AccessType.NoAccess,
+                    DbSqlAccess: AccessType.NoAccess,
+                }
+            } else {
+                this.name = this.referenceRole.RoleMetadata.Name
+                this.description = this.referenceRole.RoleMetadata.Description
+                this.permissions = Object.assign({}, this.referenceRole.Permissions)
             }
-            this.name = this.referenceRole.RoleMetadata.Name
-            this.description = this.referenceRole.RoleMetadata.Description
-            this.permissions = Object.assign({}, this.referenceRole.Permissions)
         }
     },
     mounted() {

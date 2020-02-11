@@ -142,6 +142,7 @@ export default class CreateNewGeneralLedgerAccountForm extends VueComponent {
             financiallyRelevant: this.financiallyRelevant
         }).then((resp : TNewGLAccountOutputs) => {
             this.$emit('do-save', resp.data)
+            this.resetForm()
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
