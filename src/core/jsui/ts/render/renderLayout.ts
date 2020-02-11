@@ -28,6 +28,7 @@ const plugWidth : number = 20
 const plugHeight: number = 20
 
 let websocketConnection : WebSocket
+let wsBuffer : any[] = []
 
 function connectWebsocket(context : any, host : string, csrf : string, processFlowStore : any) {
     if (!!websocketConnection && websocketConnection.readyState == WebSocket.OPEN) {
@@ -36,6 +37,12 @@ function connectWebsocket(context : any, host : string, csrf : string, processFl
 
     websocketConnection = connectProcessFlowNodeDisplaySettingsWebsocket(host, csrf, processFlowStore.state.currentProcessFlowFullData.FlowId)
     websocketConnection.onopen = () => {
+        if (wsBuffer.length > 0) {
+            for (let b of wsBuffer) {
+                websocketConnection.send(b)
+            }
+            wsBuffer = []
+        }
         context.commit('setReady')
     }
     websocketConnection.onclose = (e : CloseEvent) => {
@@ -249,10 +256,17 @@ function sendWebsocketUpdate(nodeId: number, layout: NodeLayout) {
     //@ts-ignore
     delete data.associatedNode
 
-    websocketConnection.send(JSON.stringify({
+    let sendData = JSON.stringify({
         NodeId: nodeId,
         Settings: data
-    }))
+    })
+
+    if (websocketConnection.readyState != WebSocket.OPEN) {
+        wsBuffer.push(sendData)
+        return
+    }
+
+    websocketConnection.send(sendData)
 }
 
 const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
