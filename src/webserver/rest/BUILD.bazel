@@ -24,6 +24,7 @@ go_library(
         "risks.go",
         "roles.go",
         "servers.go",
+        "sqlRefresh.go",
         "sqlSchemas.go",
         "sqlQueries.go",
         "systems.go",

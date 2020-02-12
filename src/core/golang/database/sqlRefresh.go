@@ -6,6 +6,35 @@ import (
 	"time"
 )
 
+func GetAllDatabaseSchemaForRefresh(refreshId int64, orgId int32, role *core.Role) ([]*core.DbSchema, error) {
+	if !role.Permissions.HasAccess(core.ResourceDbSql, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	data := make([]*core.DbSchema, 0)
+	err := dbConn.Select(&data, `
+		SELECT *
+		FROM database_schemas
+		WHERE refresh_id = $1 AND org_id = $2
+		ORDER BY schema_name ASC
+	`, refreshId, orgId)
+	return data, err
+}
+
+func GetDatabaseRefresh(refreshId int64, orgId int32, role *core.Role) (*core.DbRefresh, error) {
+	if !role.Permissions.HasAccess(core.ResourceDbSql, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	refresh := core.DbRefresh{}
+	err := dbConn.Get(&refresh, `
+		SELECT *
+		FROM database_refresh
+		WHERE id = $1 AND org_id = $2
+	`, refreshId, orgId)
+	return &refresh, err
+}
+
 func MarkSuccessfulRefreshWithTx(refreshId int64, tx *sqlx.Tx, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceDbSql, core.AccessEdit) {
 		return core.ErrorUnauthorized

@@ -242,6 +242,7 @@ const ApiITDbConnDeleteEndpoint = "/delete"
 
 // API - IT - DB SQL
 const ApiITSqlPrefix = "/sql"
+const ApiITSqlRefreshPrefix = "/refresh"
 const ApiITSqlSchemaPrefix = "/schema"
 const ApiITSqlQueriesPrefix = "/query"
 

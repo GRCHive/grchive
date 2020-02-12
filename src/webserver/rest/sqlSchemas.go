@@ -8,40 +8,6 @@ import (
 	"net/http"
 )
 
-type AllDatabaseRefreshInputs struct {
-	DbId  int64 `webcore:"dbId"`
-	OrgId int32 `webcore:"orgId"`
-}
-
-func allDatabaseRefresh(w http.ResponseWriter, r *http.Request) {
-	jsonWriter := json.NewEncoder(w)
-	w.Header().Set("Content-Type", "application/json")
-
-	inputs := AllDatabaseRefreshInputs{}
-	err := webcore.UnmarshalRequestForm(r, &inputs)
-	if err != nil {
-		core.Warning("Can't parse inputs: " + err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
-	if err != nil {
-		core.Warning("Bad access: " + err.Error())
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	refresh, err := database.GetAllDatabaseRefresh(inputs.DbId, inputs.OrgId, role)
-	if err != nil {
-		core.Warning("Failed to get refresh: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	jsonWriter.Encode(refresh)
-}
-
 type AllDatabaseSchemasInputs struct {
 	RefreshId int64 `webcore:"refreshId"`
 	OrgId     int32 `webcore:"orgId"`

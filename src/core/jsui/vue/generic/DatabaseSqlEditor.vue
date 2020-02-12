@@ -60,7 +60,11 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { PageParamsStore } from '../../ts/pageParams'
-import { allSqlRefresh, TAllSqlRefreshOutput } from '../../ts/api/apiSqlSchemas'
+import {
+    allSqlRefresh, TAllSqlRefreshOutput,
+    newSqlRefresh, TNewSqlRefreshOutput,
+    getSqlRefresh, TGetSqlRefreshOutput,
+} from '../../ts/api/apiSqlRefresh'
 import { contactUsUrl } from '../../ts/url'
 import {
     DbRefresh,
@@ -75,6 +79,8 @@ const Props = Vue.extend({
         dbId: Number,
     }
 })
+
+const refreshIntervalSeconds : number = 15
 
 @Component({
     components: {
@@ -100,6 +106,13 @@ export default class DatabaseSqlEditor extends Props {
         return (this.schemaRefreshes == null)
     }
 
+    initialSelectRefresh(ref : DbRefresh) {
+        this.selectedRefresh = ref
+        if (!this.selectedRefresh.RefreshFinishTime) {
+            this.startRefreshPoll(this.selectedRefresh.Id)
+        }
+    }
+
     refreshData() {
         allSqlRefresh({
             dbId: this.dbId,
@@ -107,7 +120,7 @@ export default class DatabaseSqlEditor extends Props {
         }).then((resp : TAllSqlRefreshOutput) => {
             this.schemaRefreshes = resp.data
             if (this.schemaRefreshes!.length > 0) {
-                this.selectedRefresh = this.schemaRefreshes![0]
+                this.initialSelectRefresh(this.schemaRefreshes![0])
             }
         }).catch((err : any) => {
             // @ts-ignore
@@ -122,6 +135,49 @@ export default class DatabaseSqlEditor extends Props {
 
     requestRefreshSchema() {
         this.refreshInProgress = true
+        newSqlRefresh({
+            dbId: this.dbId,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TNewSqlRefreshOutput) => {
+            this.schemaRefreshes!.unshift(resp.data)
+            this.initialSelectRefresh(resp.data)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    startRefreshPoll(refreshId : number) {
+        this.refreshInProgress = true
+
+        // Silently ignore any polling errors.
+        let intervalId = setInterval(() => {
+            getSqlRefresh({
+                refreshId : refreshId,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TNewSqlRefreshOutput) => {
+                if (!resp.data.RefreshFinishTime) {
+                    return
+                }
+
+                this.refreshInProgress = false
+                let idx = this.schemaRefreshes!.findIndex((ele : DbRefresh) => ele.Id == refreshId)
+                if (idx == -1) {
+                    return
+                }
+
+                this.schemaRefreshes![idx] = resp.data
+                if (!!this.selectedRefresh && this.selectedRefresh.Id == refreshId) {
+                    this.selectedRefresh = resp.data
+                }
+
+            }).catch((err : any) => {})
+        }, refreshIntervalSeconds * 1000)
     }
 
     mounted() {
