@@ -1,7 +1,7 @@
 <template>
     <div v-if="hasRefresh">
         <v-row v-if="isPending" align="center" justify="center">
-            <p class="display-1">We are working on refreshing the schemas. Check back later!</p>
+            <p class="display-1">We are retrieving your schemas. Check back soon!</p>
         </v-row>
 
         <v-row v-else-if="isLoading" align="center" justify="center">
