@@ -176,6 +176,7 @@ export default class DatabaseSqlEditor extends Props {
                     this.selectedRefresh = resp.data
                 }
 
+                clearInterval(intervalId)
             }).catch((err : any) => {})
         }, refreshIntervalSeconds * 1000)
     }
