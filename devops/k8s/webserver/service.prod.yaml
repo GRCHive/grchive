@@ -5,14 +5,11 @@ metadata:
     labels:
         app: webserver
     annotations:
-        beta.cloud.google.com/backend-config: '{"ports": {"80": "webserver-backendconfig", "443": "webserver-backendconfig"}}'
-        cloud.google.com/app-protocols: '{"http-port": "HTTP", "https-port": "HTTPS" }'
+        beta.cloud.google.com/backend-config: '{"ports": {"443": "webserver-backendconfig"}}'
+        cloud.google.com/app-protocols: '{"https-port": "HTTPS" }'
 spec:
     type: NodePort
     ports:
-        - port: 80
-          protocol: TCP
-          name: http-port
         - port: 443
           protocol: TCP
           name: https-port
