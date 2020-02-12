@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const HeartbeatInterval int = 30
+const HeartbeatInterval int = 360
 
 var upgrader = websocket.Upgrader{}
 
