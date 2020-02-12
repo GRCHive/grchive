@@ -8,9 +8,11 @@ import (
 	"gitlab.com/grchive/grchive/db_api"
 	"gitlab.com/grchive/grchive/vault_api"
 	"gitlab.com/grchive/grchive/webcore"
+	"strings"
 )
 
-func onRefreshError(refresh *core.DbRefresh, err string) {
+func onRefreshError(conn *core.DatabaseConnection, refresh *core.DbRefresh, err string) {
+	err = strings.Replace(err, conn.Password, "*******", -1)
 	database.MarkFailureRefresh(refresh.Id, err, core.ServerRole)
 	core.Error(err)
 }
@@ -67,7 +69,8 @@ func main() {
 
 	driver, err := db_api.CreateDriver(dbType, conn)
 	if err != nil {
-		core.Error("Failed to connect to database: " + err.Error())
+		// Don't put error here just in case there's a PW lurking around.
+		core.Error("Failed to connect to database.")
 	}
 
 	if !driver.ConnectionReadOnly() {
@@ -85,7 +88,7 @@ func main() {
 	schemas, err := driver.GetSchemas()
 	if err != nil {
 		tx.Rollback()
-		onRefreshError(refresh, "Failed to get schemas: "+err.Error())
+		onRefreshError(conn, refresh, "Failed to get schemas: "+err.Error())
 	}
 
 	for _, sch := range schemas {
@@ -94,13 +97,13 @@ func main() {
 		err = database.CreateNewDatabaseSchemaWithTx(sch, tx, core.ServerRole)
 		if err != nil {
 			tx.Rollback()
-			onRefreshError(refresh, "Failed to store schema ["+sch.SchemaName+"]: "+err.Error())
+			onRefreshError(conn, refresh, "Failed to store schema ["+sch.SchemaName+"]: "+err.Error())
 		}
 
 		tables, err := driver.GetTables(sch)
 		if err != nil {
 			tx.Rollback()
-			onRefreshError(refresh, "Failed to get tables ["+sch.SchemaName+"]: "+err.Error())
+			onRefreshError(conn, refresh, "Failed to get tables ["+sch.SchemaName+"]: "+err.Error())
 		}
 
 		for _, tbl := range tables {
@@ -109,13 +112,13 @@ func main() {
 			err = database.CreateNewDatabaseTableWithTx(tbl, tx, core.ServerRole)
 			if err != nil {
 				tx.Rollback()
-				onRefreshError(refresh, "Failed to store table ["+tbl.TableName+"]: "+err.Error())
+				onRefreshError(conn, refresh, "Failed to store table ["+tbl.TableName+"]: "+err.Error())
 			}
 
 			columns, err := driver.GetColumns(sch, tbl)
 			if err != nil {
 				tx.Rollback()
-				onRefreshError(refresh, "Failed to get columns ["+tbl.TableName+"]: "+err.Error())
+				onRefreshError(conn, refresh, "Failed to get columns ["+tbl.TableName+"]: "+err.Error())
 			}
 
 			for _, col := range columns {
@@ -124,7 +127,7 @@ func main() {
 				err = database.CreateNewDatabaseColumnWithTx(col, tx, core.ServerRole)
 				if err != nil {
 					tx.Rollback()
-					onRefreshError(refresh, "Failed to store column ["+col.ColumnName+"]: "+err.Error())
+					onRefreshError(conn, refresh, "Failed to store column ["+col.ColumnName+"]: "+err.Error())
 				}
 			}
 		}
@@ -133,7 +136,7 @@ func main() {
 	err = onRefreshSuccess(refresh, tx)
 	if err != nil {
 		tx.Rollback()
-		onRefreshError(refresh, "Failed to mark successful refresh: "+err.Error())
+		onRefreshError(conn, refresh, "Failed to mark successful refresh: "+err.Error())
 	}
 
 	err = tx.Commit()
