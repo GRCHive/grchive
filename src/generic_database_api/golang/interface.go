@@ -10,5 +10,5 @@ type DbDriver interface {
 
 	GetSchemas() ([]*core.DbSchema, error)
 	GetTables(*core.DbSchema) ([]*core.DbTable, error)
-	GetColumns(*core.DbTable) ([]*core.DbColumn, error)
+	GetColumns(*core.DbSchema, *core.DbTable) ([]*core.DbColumn, error)
 }

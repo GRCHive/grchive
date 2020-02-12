@@ -6,19 +6,28 @@ import (
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/db_api"
+	"gitlab.com/grchive/grchive/vault_api"
+	"gitlab.com/grchive/grchive/webcore"
 )
 
 func onRefreshError(refresh *core.DbRefresh, err string) {
+	database.MarkFailureRefresh(refresh.Id, err, core.ServerRole)
 	core.Error(err)
 }
 
 func onRefreshSuccess(refresh *core.DbRefresh, tx *sqlx.Tx) error {
-	return nil
+	return database.MarkSuccessfulRefreshWithTx(refresh.Id, tx, core.ServerRole)
 }
 
 func main() {
 	core.Init()
 	database.Init()
+	webcore.InitializeWebcore()
+	vault.Initialize(vault.VaultConfig{
+		Url:      core.EnvConfig.Vault.Url,
+		Username: core.EnvConfig.Vault.Username,
+		Password: core.EnvConfig.Vault.Password,
+	})
 
 	dbId := flag.Int64("dbId", -1, "Database ID to retrieve data for.")
 	orgId := flag.Int("orgId", -1, "Organization ID to retrieve data for.")
@@ -51,6 +60,11 @@ func main() {
 		core.Error("Failed to Get DB Connection: " + core.ErrorString(err))
 	}
 
+	conn.Password, err = webcore.DecryptSaltedEncryptedPassword(conn.Password, conn.Salt)
+	if err != nil {
+		core.Error("Failed to decrypt password: " + err.Error())
+	}
+
 	driver, err := db_api.CreateDriver(dbType, conn)
 	if err != nil {
 		core.Error("Failed to connect to database: " + err.Error())
@@ -76,6 +90,7 @@ func main() {
 
 	for _, sch := range schemas {
 		sch.RefreshId = refresh.Id
+		sch.OrgId = refresh.OrgId
 		err = database.CreateNewDatabaseSchemaWithTx(sch, tx, core.ServerRole)
 		if err != nil {
 			tx.Rollback()
@@ -90,13 +105,14 @@ func main() {
 
 		for _, tbl := range tables {
 			tbl.SchemaId = sch.Id
+			tbl.OrgId = sch.OrgId
 			err = database.CreateNewDatabaseTableWithTx(tbl, tx, core.ServerRole)
 			if err != nil {
 				tx.Rollback()
 				onRefreshError(refresh, "Failed to store table ["+tbl.TableName+"]: "+err.Error())
 			}
 
-			columns, err := driver.GetColumns(tbl)
+			columns, err := driver.GetColumns(sch, tbl)
 			if err != nil {
 				tx.Rollback()
 				onRefreshError(refresh, "Failed to get columns ["+tbl.TableName+"]: "+err.Error())
@@ -104,6 +120,7 @@ func main() {
 
 			for _, col := range columns {
 				col.TableId = tbl.Id
+				col.OrgId = tbl.OrgId
 				err = database.CreateNewDatabaseColumnWithTx(col, tx, core.ServerRole)
 				if err != nil {
 					tx.Rollback()
@@ -115,6 +132,7 @@ func main() {
 
 	err = onRefreshSuccess(refresh, tx)
 	if err != nil {
+		tx.Rollback()
 		onRefreshError(refresh, "Failed to mark successful refresh: "+err.Error())
 	}
 

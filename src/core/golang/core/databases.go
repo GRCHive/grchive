@@ -29,12 +29,13 @@ type DatabaseConnection struct {
 }
 
 type DbRefresh struct {
-	Id             int64    `db:"id"`
-	DbId           int64    `db:"db_id"`
-	OrgId          int32    `db:"org_id"`
-	RefreshTime    NullTime `db:"refresh_time"`
-	RefreshSuccess bool     `db:"refresh_success"`
-	RefreshErrors  string   `db:"refresh_errors"`
+	Id                int64    `db:"id"`
+	DbId              int64    `db:"db_id"`
+	OrgId             int32    `db:"org_id"`
+	RefreshTime       NullTime `db:"refresh_time"`
+	RefreshFinishTime NullTime `db:"refresh_finish_time"`
+	RefreshSuccess    bool     `db:"refresh_success"`
+	RefreshErrors     string   `db:"refresh_errors"`
 }
 
 type DbSchema struct {

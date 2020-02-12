@@ -7,7 +7,9 @@ go_binary(
     deps = [
         "//src/core/golang/core:webserver_core_library",
         "//src/core/golang/database:webserver_database_library",
+        "//src/core/golang/webcore:webserver_webcore_library",
         "//src/generic_database_api/golang:library",
+        "//src/vault_api/golang:vault_golang_api",
         "@com_github_jmoiron_sqlx//:go_default_library",
     ],
     data = [
