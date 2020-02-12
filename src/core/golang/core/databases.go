@@ -16,13 +16,16 @@ type Database struct {
 }
 
 type DatabaseConnection struct {
-	Id         int64  `db:"id"`
-	DbId       int64  `db:"db_id"`
-	OrgId      int32  `db:"org_id"`
-	ConnString string `db:"connection_string"`
-	Username   string `db:"username"`
-	Password   string `db:"password" json:"-"`
-	Salt       string `db:"salt" json:"-"`
+	Id         int64             `db:"id"`
+	DbId       int64             `db:"db_id"`
+	OrgId      int32             `db:"org_id"`
+	Host       string            `db:"host"`
+	Port       int32             `db:"port"`
+	DbName     string            `db:"dbName"`
+	Parameters map[string]string `db:"parameters"`
+	Username   string            `db:"username"`
+	Password   string            `db:"password" json:"-"`
+	Salt       string            `db:"salt" json:"-"`
 }
 
 type DbRefresh struct {

@@ -41,11 +41,14 @@ type DeleteDatabaseInputs struct {
 }
 
 type NewDbConnectionInputs struct {
-	DbId       int64  `json:"dbId"`
-	OrgId      int32  `json:"orgId"`
-	ConnString string `json:"connectionString"`
-	Username   string `json:"username"`
-	Password   string `json:"password"`
+	DbId       int64             `json:"dbId"`
+	OrgId      int32             `json:"orgId"`
+	Host       string            `json:"host"`
+	Port       int32             `json:"port"`
+	DbName     string            `json:"dbName"`
+	Parameters map[string]string `json:"parameters"`
+	Username   string            `json:"username"`
+	Password   string            `json:"password"`
 }
 
 type DeleteDatabaseConnectionInputs struct {
@@ -322,14 +325,7 @@ func newDbConnection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := database.FindOrganizationFromId(inputs.OrgId)
-	if err != nil {
-		core.Warning("No organization: " + err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	role, err := webcore.GetCurrentRequestRole(r, org.Id)
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
 	if err != nil {
 		core.Warning("Bad access: " + err.Error())
 		w.WriteHeader(http.StatusUnauthorized)
@@ -345,8 +341,11 @@ func newDbConnection(w http.ResponseWriter, r *http.Request) {
 
 	conn := core.DatabaseConnection{
 		DbId:       inputs.DbId,
-		OrgId:      org.Id,
-		ConnString: inputs.ConnString,
+		OrgId:      inputs.OrgId,
+		Host:       inputs.Host,
+		Port:       inputs.Port,
+		DbName:     inputs.DbName,
+		Parameters: inputs.Parameters,
 		Username:   inputs.Username,
 		Password:   encPassword,
 		Salt:       salt,

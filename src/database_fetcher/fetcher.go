@@ -47,8 +47,8 @@ func main() {
 	}
 
 	conn, err := database.FindDatabaseConnectionForDatabase(db.Id, db.OrgId, core.ServerRole)
-	if err != nil {
-		core.Error("Failed to Get DB Connection: " + err.Error())
+	if err != nil || conn == nil {
+		core.Error("Failed to Get DB Connection: " + core.ErrorString(err))
 	}
 
 	driver, err := db_api.CreateDriver(dbType, conn)

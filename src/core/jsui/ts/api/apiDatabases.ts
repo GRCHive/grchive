@@ -100,7 +100,10 @@ export function getDatabase(inp : TGetDatabaseInputs) : Promise<TGetDatabaseOutp
 export interface TNewDbConnInputs {
     dbId: number
     orgId: number
-    connectionString: string
+    host: string
+    port: number
+    dbName: string
+    parameters: Record<string, string>
     username: string
     password: string
 }

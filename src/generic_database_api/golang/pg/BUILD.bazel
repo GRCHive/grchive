@@ -5,9 +5,12 @@ go_library(
     name = "library",
     srcs = [
         "driver.go",
+        "connection.go",
+        "schema.go",
     ],
     importpath = "gitlab.com/grchive/grchive/db_api/pg_api",
     deps = [
         "//src/core/golang/core:webserver_core_library",
+        "@com_github_jmoiron_sqlx//:go_default_library",
     ]
 )

@@ -9,7 +9,7 @@ export function createMinLength(len : number) : (_: string) => boolean | string 
 }
 
 export function required(v : any) : boolean | string {
-    return (!!v && v != Object()) || (Array.isArray(v) && v.length == 0)  || "Input required.";
+    return (!!v && v != Object()) || (Array.isArray(v) && v.length == 0) || (v === 0) || "Input required.";
 }
 
 export function email(v : string) : boolean | string {

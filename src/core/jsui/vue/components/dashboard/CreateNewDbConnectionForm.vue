@@ -7,8 +7,22 @@
     <v-divider></v-divider>
 
     <v-form class="ma-4" ref="form" v-model="formValid">
-        <v-text-field v-model="connString"
-                      label="Connection String"
+        <v-text-field v-model="host"
+                      label="Host"
+                      filled
+                      :rules="[rules.required]">
+        </v-text-field>
+
+        <v-text-field :value="port"
+                      @input="port = Number(arguments[0])"
+                      label="Port"
+                      filled
+                      type="number"
+                      :rules="[rules.required]">
+        </v-text-field>
+
+        <v-text-field v-model="dbName"
+                      label="Database Name"
                       filled
                       :rules="[rules.required]">
         </v-text-field>
@@ -25,6 +39,13 @@
                       :rules="[rules.required]"
                       type="password">
         </v-text-field>
+
+        <span class="body-1">Extra Parameters</span>
+        <v-divider></v-divider>
+        <string-dict-form-component
+            v-model="parameters"
+        >
+        </string-dict-form-component>
     </v-form>
 
     <v-card-actions>
@@ -56,6 +77,7 @@ import * as rules from '../../../ts/formRules'
 import { TNewDbConnOutputs, newDatabaseConnection } from '../../../ts/api/apiDatabases'
 import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
+import StringDictFormComponent from '../../generic/StringDictFormComponent.vue'
 
 const VueComponent = Vue.extend({
     props: {
@@ -63,12 +85,20 @@ const VueComponent = Vue.extend({
     }
 })
 
-@Component
+@Component({
+    components: {
+        StringDictFormComponent
+    }
+})
 export default class CreateNewDbConnectionForm extends VueComponent {
     formValid: boolean = false
     rules: any = rules
 
-    connString : string = ""
+    host : string = ""
+    port : number = 0
+    dbName : string = ""
+    parameters : Record<string, string> = Object()
+
     username : string = ""
     password: string = ""
 
@@ -77,7 +107,9 @@ export default class CreateNewDbConnectionForm extends VueComponent {
     }
 
     clearForm() {
-        this.connString = ""
+        this.host = ""
+        this.port = 0
+        this.dbName = ""
         this.username = ""
         this.password = ""
     }
@@ -86,7 +118,10 @@ export default class CreateNewDbConnectionForm extends VueComponent {
         newDatabaseConnection({
             dbId: this.dbId,
             orgId: PageParamsStore.state.organization!.Id,
-            connectionString: this.connString,
+            host: this.host,
+            port: this.port,
+            dbName: this.dbName,
+            parameters: this.parameters,
             username: this.username,
             password: this.password,
         }).then((resp : TNewDbConnOutputs) => {

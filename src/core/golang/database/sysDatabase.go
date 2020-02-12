@@ -1,6 +1,7 @@
 package database
 
 import (
+	"encoding/json"
 	"gitlab.com/grchive/grchive/core"
 )
 
@@ -156,24 +157,45 @@ func InsertNewDatabaseConnection(conn *core.DatabaseConnection, role *core.Role)
 	if !role.Permissions.HasAccess(core.ResourceDbConnections, core.AccessManage) {
 		return core.ErrorUnauthorized
 	}
+
+	connectionParameters, err := json.Marshal(conn.Parameters)
+	if err != nil {
+		return err
+	}
+
 	tx := dbConn.MustBegin()
-	rows, err := tx.NamedQuery(`
+	rows, err := tx.Queryx(`
 		INSERT INTO database_connection_info (
 			db_id,
 			org_id,
-			connection_string, 
+			host, 
+			port,
+			dbName,
+			parameters,
 			username,
 			password,
 			salt)
 		VALUES (
-			:db_id,
-			:org_id,
-			:connection_string,
-			:username,
-			:password,
-			:salt)
-		RETURNING id
-	`, conn)
+			$1,
+			$2,
+			$3,
+			$4,
+			$5,
+			$6,
+			$7,
+			$8,
+			$9)
+		RETURNING id`,
+		conn.DbId,
+		conn.OrgId,
+		conn.Host,
+		conn.Port,
+		conn.DbName,
+		string(connectionParameters),
+		conn.Username,
+		conn.Password,
+		conn.Salt,
+	)
 
 	if err != nil {
 		tx.Rollback()
