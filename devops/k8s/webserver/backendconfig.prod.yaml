@@ -3,6 +3,6 @@ kind: BackendConfig
 metadata:
     name: webserver-backendconfig
 spec:
-    timeoutSec: 60
+    timeoutSec: 3600
     connectionDraining:
         drainingTimeoutSec: 60
