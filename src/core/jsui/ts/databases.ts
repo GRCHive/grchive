@@ -18,8 +18,11 @@ export interface DatabaseConnection {
     Id: number
     DbId: number
     OrgId: number
-    ConnString: string
+    Host: string
+    Port: number
+    DbName: string
     Username: string
+    Parameters: Record<string,string>
 }
 
 export const otherTypeId = 2

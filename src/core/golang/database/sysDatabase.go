@@ -2,6 +2,7 @@ package database
 
 import (
 	"encoding/json"
+	"github.com/jmoiron/sqlx/types"
 	"gitlab.com/grchive/grchive/core"
 )
 
@@ -170,7 +171,7 @@ func InsertNewDatabaseConnection(conn *core.DatabaseConnection, role *core.Role)
 			org_id,
 			host, 
 			port,
-			dbName,
+			dbname,
 			parameters,
 			username,
 			password,
@@ -237,10 +238,28 @@ func FindDatabaseConnectionForDatabase(dbId int64, orgId int32, role *core.Role)
 	}
 
 	conn := core.DatabaseConnection{}
-	err = rows.StructScan(&conn)
+	rawParameters := types.JSONText{}
+
+	err = rows.Scan(&conn.Id,
+		&conn.DbId,
+		&conn.OrgId,
+		&conn.Username,
+		&conn.Password,
+		&conn.Salt,
+		&conn.Host,
+		&conn.Port,
+		&rawParameters,
+		&conn.DbName,
+	)
 	if err != nil {
 		return nil, err
 	}
+
+	err = rawParameters.Unmarshal(&conn.Parameters)
+	if err != nil {
+		return nil, err
+	}
+
 	return &conn, nil
 }
 

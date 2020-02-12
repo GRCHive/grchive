@@ -21,7 +21,7 @@ type DatabaseConnection struct {
 	OrgId      int32             `db:"org_id"`
 	Host       string            `db:"host"`
 	Port       int32             `db:"port"`
-	DbName     string            `db:"dbName"`
+	DbName     string            `db:"dbname"`
 	Parameters map[string]string `db:"parameters"`
 	Username   string            `db:"username"`
 	Password   string            `db:"password" json:"-"`

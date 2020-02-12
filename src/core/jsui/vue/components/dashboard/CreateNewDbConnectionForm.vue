@@ -81,7 +81,7 @@ import StringDictFormComponent from '../../generic/StringDictFormComponent.vue'
 
 const VueComponent = Vue.extend({
     props: {
-        dbId: Number
+        dbId: Number,
     }
 })
 

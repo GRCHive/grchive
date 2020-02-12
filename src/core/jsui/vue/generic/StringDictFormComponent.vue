@@ -14,6 +14,7 @@
                         label="Key"
                         hide-details
                         dense
+                        :readonly="readonly"
                     >
                     </v-text-field>
                 </v-list-item-content>
@@ -26,6 +27,7 @@
                         label="Value"
                         hide-details
                         dense
+                        :readonly="readonly"
                     >
                     </v-text-field>
 
@@ -34,6 +36,7 @@
 
             <v-list-item
                 class="pa-0"
+                v-if="!readonly"
             >
                 <v-btn
                     @click="addEntry"
@@ -57,7 +60,10 @@ import Component from 'vue-class-component'
 const Props = Vue.extend({
     props: {
         value: Object,
-        default: Object() as () => Record<string,string>
+        readonly: {
+            type: Boolean,
+            default: false,
+        }
     }
 })
 
