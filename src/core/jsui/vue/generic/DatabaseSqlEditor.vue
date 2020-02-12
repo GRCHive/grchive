@@ -8,6 +8,40 @@
             <v-tabs vertical>
                 <v-tab>Schemas</v-tab>
                 <v-tab-item>
+                    <v-list-item>
+                        <v-list-item-content>
+                            <v-select
+                                v-model="selectedRefresh"
+                                label="Versions"
+                                filled
+                                :items="refreshItems"
+                                hide-details
+                                dense
+                            >
+                            </v-select>
+                        </v-list-item-content>
+
+                        <v-spacer></v-spacer>
+
+                        <v-list-item-action>
+                            <v-btn
+                                color="primary"
+                                icon
+                                :loading="refreshInProgress"
+                                @click="requestRefreshSchema"
+                            >
+                                <v-icon>
+                                    mdi-refresh
+                                </v-icon>
+                            </v-btn>
+                        </v-list-item-action>
+                    </v-list-item>
+
+                    <database-refresh-viewer
+                        class="px-4"
+                        :refresh="selectedRefresh"
+                    >
+                    </database-refresh-viewer>
                 </v-tab-item>
 
                 <v-tab>Queries</v-tab>
@@ -26,21 +60,72 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { PageParamsStore } from '../../ts/pageParams'
+import { allSqlRefresh, TAllSqlRefreshOutput } from '../../ts/api/apiSqlSchemas'
+import { contactUsUrl } from '../../ts/url'
+import {
+    DbRefresh,
+    dbRefreshIdentifier,
+    DbSchema
+} from '../../ts/sql'
+import { standardFormatTime } from '../../ts/time'
+import DatabaseRefreshViewer from './DatabaseRefreshViewer.vue'
 
 const Props = Vue.extend({
     props: {
-        dbId: Number
+        dbId: Number,
     }
 })
 
-@Component
+@Component({
+    components: {
+        DatabaseRefreshViewer,
+    }
+})
 export default class DatabaseSqlEditor extends Props {
-    isLoading: boolean = true
+    schemaRefreshes : DbRefresh[] | null = null
+    selectedRefresh : DbRefresh | null = null
+    refreshInProgress : boolean = false
+
+    get refreshItems() : any[] {
+        if (!this.schemaRefreshes) {
+            return []
+        }
+        return this.schemaRefreshes.map((ele : DbRefresh, idx : number) => ({
+            text: `#${this.schemaRefreshes!.length - idx} :: ${dbRefreshIdentifier(ele)}`,
+            value: ele,
+        }))
+    }
+
+    get isLoading() : boolean {
+        return (this.schemaRefreshes == null)
+    }
 
     refreshData() {
+        allSqlRefresh({
+            dbId: this.dbId,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TAllSqlRefreshOutput) => {
+            this.schemaRefreshes = resp.data
+            if (this.schemaRefreshes!.length > 0) {
+                this.selectedRefresh = this.schemaRefreshes![0]
+            }
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    requestRefreshSchema() {
+        this.refreshInProgress = true
     }
 
     mounted() {
+        this.refreshData()
     }
 }
 

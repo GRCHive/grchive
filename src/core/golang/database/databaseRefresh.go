@@ -148,3 +148,18 @@ func CreateNewDatabaseColumnWithTx(column *core.DbColumn, tx *sqlx.Tx, role *cor
 	err = rows.Scan(&column.Id)
 	return err
 }
+
+func GetAllDatabaseRefresh(dbId int64, orgId int32, role *core.Role) ([]*core.DbRefresh, error) {
+	if !role.Permissions.HasAccess(core.ResourceDbSql, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	data := make([]*core.DbRefresh, 0)
+	err := dbConn.Select(&data, `
+		SELECT *
+		FROM database_refresh
+		WHERE db_id = $1 AND org_id = $2
+		ORDER BY refresh_time DESC
+	`, dbId, orgId)
+	return data, err
+}

@@ -240,6 +240,11 @@ const ApiITDbConnPrefix = "/connection"
 const ApiITDbConnNewEndpoint = "/new"
 const ApiITDbConnDeleteEndpoint = "/delete"
 
+// API - IT - DB SQL
+const ApiITSqlPrefix = "/sql"
+const ApiITSqlSchemaPrefix = "/schema"
+const ApiITSqlQueriesPrefix = "/query"
+
 // API - IT - Server
 const ApiITServerPrefix = "/servers"
 

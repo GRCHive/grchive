@@ -204,12 +204,31 @@ func registerITDbAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiITDbLinkSysEndpoint, linkSystemsToDatabase).Methods("POST")
 
 	registerITDbConnAPIPaths(s)
+	registerITSqlAPIPaths(s)
 }
 
 func registerITDbConnAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiITDbConnPrefix).Subrouter()
 	s.HandleFunc(core.ApiITDbConnNewEndpoint, newDbConnection).Methods("POST")
 	s.HandleFunc(core.ApiITDbConnDeleteEndpoint, deleteDbConnection).Methods("POST")
+}
+
+func registerITSqlAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiITSqlPrefix).Subrouter()
+	s.HandleFunc(core.ApiAllEndpoint, allDatabaseRefresh).Methods("GET")
+
+	registerITSqlSchemaAPIPaths(s)
+	registerITSqlQueriesAPIPaths(s)
+}
+
+func registerITSqlSchemaAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiITSqlSchemaPrefix).Subrouter()
+	s.HandleFunc(core.ApiAllEndpoint, allDatabaseSchemas).Methods("GET")
+	s.HandleFunc(core.ApiGetEndpoint, getDatabaseSchema).Methods("GET")
+}
+
+func registerITSqlQueriesAPIPaths(r *mux.Router) {
+	//s := r.PathPrefix(core.ApiITSqlQueriesPrefix).Subrouter()
 }
 
 func registerITServerAPIPaths(r *mux.Router) {

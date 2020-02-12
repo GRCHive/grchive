@@ -239,6 +239,10 @@ export const editDatabaseUrl : string = "/api/it/db/edit"
 export const deleteDatabaseUrl : string = "/api/it/db/delete"
 export const getDatabaseUrl : string = "/api/it/db/get"
 
+export const allSqlRefreshUrl : string = "/api/it/db/sql/all"
+export const allSqlSchemasUrl : string = "/api/it/db/sql/schema/all"
+export const getSqlSchemaUrl : string = "/api/it/db/sql/schema/get"
+
 export const newDbConnUrl : string = "/api/it/db/connection/new"
 export const deleteDbConnUrl : string = "/api/it/db/connection/delete"
 

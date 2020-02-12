@@ -24,6 +24,8 @@ go_library(
         "risks.go",
         "roles.go",
         "servers.go",
+        "sqlSchemas.go",
+        "sqlQueries.go",
         "systems.go",
         "user.go",
         "vendorProducts.go",
