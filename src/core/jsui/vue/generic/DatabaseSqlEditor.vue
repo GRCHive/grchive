@@ -21,6 +21,20 @@
                             </v-select>
                         </v-list-item-content>
 
+                        <v-list-item-action>
+                            <v-btn
+                                color="error"
+                                icon
+                                @click="deleteCurrentRefresh"
+                                :disabled="!selectedRefresh"
+                            >
+                                <v-icon>
+                                    mdi-delete
+                                </v-icon>
+                            </v-btn>
+                        </v-list-item-action>
+
+
                         <v-spacer></v-spacer>
 
                         <v-list-item-action>
@@ -64,6 +78,7 @@ import {
     allSqlRefresh, TAllSqlRefreshOutput,
     newSqlRefresh, TNewSqlRefreshOutput,
     getSqlRefresh, TGetSqlRefreshOutput,
+    deleteSqlRefresh,
 } from '../../ts/api/apiSqlRefresh'
 import { contactUsUrl } from '../../ts/url'
 import {
@@ -152,11 +167,52 @@ export default class DatabaseSqlEditor extends Props {
         })
     }
 
+
+    deleteCurrentRefresh() {
+        if (!this.selectedRefresh) {
+            return
+        }
+
+        deleteSqlRefresh({
+            refreshId: this.selectedRefresh!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then(() => {
+            let idx = this.schemaRefreshes!.findIndex((ele : DbRefresh) => ele.Id == this.selectedRefresh!.Id)
+            if (idx == -1) {
+                return
+            }
+
+            if (!this.selectedRefresh!.RefreshFinishTime) {
+                this.refreshInProgress = false
+            }
+
+            this.schemaRefreshes!.splice(idx, 1)
+            this.selectedRefresh = null
+            if (this.schemaRefreshes!.length > 0) {
+                this.initialSelectRefresh(this.schemaRefreshes![0])
+            }
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
     startRefreshPoll(refreshId : number) {
         this.refreshInProgress = true
 
         // Silently ignore any polling errors.
         let intervalId = setInterval(() => {
+            let idx = this.schemaRefreshes!.findIndex((ele : DbRefresh) => ele.Id == refreshId)
+            if (idx == -1) {
+                clearInterval(intervalId)
+                return
+            }
+
             getSqlRefresh({
                 refreshId : refreshId,
                 orgId: PageParamsStore.state.organization!.Id,
@@ -168,10 +224,11 @@ export default class DatabaseSqlEditor extends Props {
                 this.refreshInProgress = false
                 let idx = this.schemaRefreshes!.findIndex((ele : DbRefresh) => ele.Id == refreshId)
                 if (idx == -1) {
+                    clearInterval(intervalId)
                     return
                 }
 
-                this.schemaRefreshes![idx] = resp.data
+                Vue.set(this.schemaRefreshes!, idx, resp.data)
                 if (!!this.selectedRefresh && this.selectedRefresh.Id == refreshId) {
                     this.selectedRefresh = resp.data
                 }

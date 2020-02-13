@@ -100,7 +100,7 @@ func newDatabaseRefresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	refresh, err := database.CreateNewDatabaseRefresh(inputs.DbId, inputs.OrgId, role)
+	refresh, err := webcore.CreateNewDatabaseRefresh(inputs.DbId, inputs.OrgId, role)
 	if err != nil {
 		core.Warning("Failed to create DB Refresh: " + err.Error())
 		w.WriteHeader(http.StatusUnauthorized)
@@ -108,4 +108,35 @@ func newDatabaseRefresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(refresh)
+}
+
+type DeleteDatabaseRefreshInputs struct {
+	RefreshId int64 `json:"refreshId"`
+	OrgId     int32 `json:"orgId"`
+}
+
+func deleteDatabaseRefresh(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := DeleteDatabaseRefreshInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteDatabaseRefresh(inputs.RefreshId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to delete refresh: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 }

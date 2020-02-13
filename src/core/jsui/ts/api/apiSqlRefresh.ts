@@ -4,6 +4,7 @@ import {
     allSqlRefreshUrl,
     newSqlRefreshUrl,
     getSqlRefreshUrl,
+    deleteSqlRefreshUrl,
 } from '../url'
 import { postFormJson } from '../http'
 import { getAPIRequestConfig } from './apiUtility'
@@ -61,4 +62,13 @@ export function getSqlRefresh(inp : TGetSqlRefreshInput) : Promise<TGetSqlRefres
             cleanDbRefreshFromJson(resp.data)
             return resp
         })
+}
+
+export interface TDeleteSqlRefreshInput {
+    refreshId: number
+    orgId: number
+}
+
+export function deleteSqlRefresh(inp : TDeleteSqlRefreshInput) : Promise<void> {
+    return postFormJson<void>(deleteSqlRefreshUrl, inp, getAPIRequestConfig())
 }

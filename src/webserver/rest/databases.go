@@ -366,6 +366,10 @@ func newDbConnection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Doesn't particularly matter if creating the database refresh here fails
+	// since the user can just request a refresh later if necessary.
+	webcore.CreateNewDatabaseRefresh(inputs.DbId, inputs.OrgId, role)
+
 	jsonWriter.Encode(conn)
 }
 

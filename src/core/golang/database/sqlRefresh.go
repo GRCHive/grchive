@@ -35,6 +35,25 @@ func GetDatabaseRefresh(refreshId int64, orgId int32, role *core.Role) (*core.Db
 	return &refresh, err
 }
 
+func DeleteDatabaseRefresh(refreshId int64, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceDbSql, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		DELETE FROM database_refresh
+		WHERE id = $1 AND org_id = $2
+	`, refreshId, orgId)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
 func MarkSuccessfulRefreshWithTx(refreshId int64, tx *sqlx.Tx, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceDbSql, core.AccessEdit) {
 		return core.ErrorUnauthorized

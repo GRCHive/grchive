@@ -12,6 +12,7 @@ go_library(
         "constants.go",
         "context.go",
         "csrf.go",
+        "databases.go",
         "emailVerification.go",
         "handlers.go",
         "inviteCodes.go",

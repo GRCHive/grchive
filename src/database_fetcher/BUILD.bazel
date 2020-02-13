@@ -3,7 +3,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 
 go_binary(
     name = "fetcher",
-    srcs = ["fetcher.go"],
+    srcs = [
+        "fetcher.go",
+        "refresh.go",
+    ],
     deps = [
         "//src/core/golang/core:webserver_core_library",
         "//src/core/golang/database:webserver_database_library",

@@ -9,6 +9,8 @@ import (
 
 const DEFAULT_EXCHANGE string = ""
 const FILE_PREVIEW_QUEUE string = "filepreview"
+const DATABASE_REFRESH_QUEUE string = "dbrefresh"
+
 const CHANNEL_BUFFER int = 12
 
 type RabbitMQError struct {
@@ -29,6 +31,10 @@ type FilePreviewMessage struct {
 	Storage core.FileStorageData
 }
 
+type DatabaseRefreshMessage struct {
+	Refresh core.DbRefresh
+}
+
 type RecvMsgFn func([]byte) *RabbitMQError
 
 func SetupChannel(channel *amqp.Channel) {
@@ -42,7 +48,20 @@ func SetupChannel(channel *amqp.Channel) {
 	)
 
 	if err != nil {
-		core.Error("Failed to declare queue: " + err.Error())
+		core.Error("Failed to declare file preview queue: " + err.Error())
+	}
+
+	_, err = channel.QueueDeclare(
+		DATABASE_REFRESH_QUEUE, // name
+		true,                   // durable
+		false,                  // auto delete
+		false,                  // exclusive
+		false,                  // no wait
+		nil,                    // arguments
+	)
+
+	if err != nil {
+		core.Error("Failed to declare database refresh queue: " + err.Error())
 	}
 }
 

@@ -226,6 +226,7 @@ func registerITSqlRefreshAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiAllEndpoint, allDatabaseRefresh).Methods("GET")
 	s.HandleFunc(core.ApiGetEndpoint, getDatabaseRefresh).Methods("GET")
 	s.HandleFunc(core.ApiNewEndpoint, newDatabaseRefresh).Methods("POST")
+	s.HandleFunc(core.ApiDeleteEndpoint, deleteDatabaseRefresh).Methods("POST")
 }
 
 func registerITSqlSchemaAPIPaths(r *mux.Router) {
