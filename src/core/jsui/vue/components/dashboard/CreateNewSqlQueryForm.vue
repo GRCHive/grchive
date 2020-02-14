@@ -11,7 +11,7 @@
         <v-text-field v-model="name"
                       label="Name"
                       filled
-                      :rules="[rules.required, rules.createMaxLength(256)]"
+                      :rules="[rules.required, rules.createMaxLength(255)]"
                       :readonly="!canEdit"
         ></v-text-field>
 
