@@ -141,7 +141,8 @@ export default class PdfJsViewer extends Props {
     }
 
     get binaryData() : string {
-        return atob(this.pdf)
+        let data : string = atob(this.pdf)
+        return data
     }
 
     get numPages() : number {

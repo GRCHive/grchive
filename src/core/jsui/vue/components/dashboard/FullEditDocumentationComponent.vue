@@ -408,7 +408,25 @@ export default class FullEditDocumentationComponent extends Vue {
             }
 
             let blobStr : string = <string>e.target.result
-            this.previewBase64 = blobStr.replace(/^data:.*\/.*;base64,/g, '')
+            // This should be enough to find the data URL prefix.
+            let prefix : string = blobStr.substr(0, 255)
+            let match : any | null = prefix.match(/^data:.*\/.*;base64,/)
+            if (!match || match.length == 0) {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+                return
+            }
+            blobStr = blobStr.slice(match.index + match[0].length, -1)
+            if (blobStr.slice(-2) != '==') {
+                // Not sure why but atob might bug out if this isn't here.
+                blobStr = blobStr + '='
+            }
+            this.previewBase64 = blobStr
         }
         reader.readAsDataURL(this.previewData!)
     }
@@ -439,7 +457,6 @@ export default class FullEditDocumentationComponent extends Vue {
         }).then((resp : TDownloadSingleControlDocumentOutput) => {
             this.previewData = resp.data
         }).catch((err : any) => {
-            console.log("reload preview: " + err)
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
                 "Oops! Something went wrong. Try again.",
