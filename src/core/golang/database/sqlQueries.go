@@ -125,3 +125,22 @@ func CreateSqlQueryWithTx(query *core.DbSqlQuery, role *core.Role, tx *sqlx.Tx) 
 	}
 	return nil
 }
+
+func DeleteSqlQuery(metadataId int64, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceDbSqlQuery, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		DELETE FROM database_sql_metadata 
+		WHERE id = $1
+			AND org_id = $2
+	`, metadataId, orgId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}

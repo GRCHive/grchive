@@ -1,6 +1,5 @@
 <template>
-    <div class="hljs" id="editor">
-        <pre><code>{{ value }}</code></pre>
+    <div class="hljs" :id="uniqueKey">
     </div>
 </template>
 
@@ -11,6 +10,7 @@ import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 
 import Quill from 'quill'
+import uuidv1 from 'uuid/v1'
 
 const Props = Vue.extend({
     props: {
@@ -21,13 +21,17 @@ const Props = Vue.extend({
         readonly: {
             type: Boolean,
             default: false,
-        }
+        },
     }
 })
 
 @Component
 export default class SqlTextArea extends Props {
     quill : Quill | null = null
+
+    get uniqueKey() : string {
+        return 'editor-' + uuidv1()
+    }
 
     createQuillEditor() {
         let options = {
@@ -40,7 +44,8 @@ export default class SqlTextArea extends Props {
             theme: 'snow',
             readOnly: this.readonly,
         }
-        this.quill = new Quill('#editor', options)
+        this.quill = new Quill(`#${this.uniqueKey}`, options)
+        this.quill!.setText(this.value)
         this.quill!.formatLine(0, this.quill!.getLength(), { 'code-block': true });
         this.quill!.on('text-change', () => {
             this.$emit('input', this.quill!.getText().trim())

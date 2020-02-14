@@ -35,30 +35,16 @@
                         </v-list-item-content>
 
                         <v-list-item-action>
-                            <v-menu offset-y>
-                                <template v-slot:activator="{ on }">
-                                    <v-btn
-                                        color="error"
-                                        icon
-                                        v-on="on"
-                                        :disabled="!canDelete"
-                                    >
-                                        <v-icon>
-                                            mdi-delete
-                                        </v-icon>
-                                    </v-btn>
-                                </template>
-
-                                <v-list dense>
-                                    <v-list-item>
-                                        <v-list-item-title>Delete Query</v-list-item-title>
-                                    </v-list-item>
-
-                                    <v-list-item :disabled="canDeleteVersion">
-                                        <v-list-item-title>Delete Version</v-list-item-title>
-                                    </v-list-item>
-                                </v-list>
-                            </v-menu>
+                            <v-btn
+                                color="error"
+                                icon
+                                @click="deleteQuery"
+                                :disabled="!canDelete"
+                            >
+                                <v-icon>
+                                    mdi-delete
+                                </v-icon>
+                            </v-btn>
                         </v-list-item-action>
 
                         <v-spacer></v-spacer>
@@ -126,77 +112,76 @@
                 </v-col>
 
                 <v-col cols="6">
-                    <v-list-item class="pa-0">
-                        <v-spacer></v-spacer>
+                    <div v-if="!!currentVersion">
+                        <v-list-item class="pa-0">
+                            <v-spacer></v-spacer>
 
-                        <v-list-item-action>
-                            <v-btn
-                                color="warning"
-                                icon
-                                x-small
-                                @click="resetQuery"
-                            >
-                                <v-icon>mdi-bug</v-icon>
-                            </v-btn>
-                        </v-list-item-action>
+                            <v-list-item-action>
+                                <v-btn
+                                    color="warning"
+                                    icon
+                                    x-small
+                                    @click="resetQuery"
+                                >
+                                    <v-icon>mdi-bug</v-icon>
+                                </v-btn>
+                            </v-list-item-action>
 
-                        <v-list-item-action>
-                            <v-btn
-                                color="primary"
-                                icon
-                                x-small
-                                @click="runQuery"
-                                :loading="queryRunning"
-                            >
-                                <v-icon>mdi-play</v-icon>
-                            </v-btn>
-                        </v-list-item-action>
-                    </v-list-item>
+                            <v-list-item-action>
+                                <v-btn
+                                    color="primary"
+                                    icon
+                                    x-small
+                                    @click="runQuery"
+                                    :loading="queryRunning"
+                                >
+                                    <v-icon>mdi-play</v-icon>
+                                </v-btn>
+                            </v-list-item-action>
+                        </v-list-item>
 
+                        <sql-text-area
+                            v-model="editableQuery"
+                            :readonly="!canEditQuery"
+                            :key="`MANAGER-${queryKey}`"
+                        >
+                        </sql-text-area>
 
+                        <v-list-item class="pa-0">
+                            <v-list-item-action>
+                                <v-btn
+                                    color="error"
+                                    @click="cancelEditQuery"
+                                    v-if="canEditQuery"
+                                >
+                                    Cancel
+                                </v-btn>
+                            </v-list-item-action>
+                            <v-spacer></v-spacer>
 
-                    <sql-text-area
-                        v-model="editableQuery"
-                        :readonly="!canEditQuery"
-                        :key="queryKey"
-                    >
-                    </sql-text-area>
+                            <v-list-item-action>
+                                <v-btn
+                                    color="success"
+                                    @click="saveEditQuery"
+                                    v-if="canEditQuery"
+                                >
+                                    Save
+                                </v-btn>
+                            </v-list-item-action>
 
-                    <v-list-item class="pa-0">
-                        <v-list-item-action>
-                            <v-btn
-                                color="error"
-                                @click="cancelEditQuery"
-                                v-if="canEditQuery"
-                            >
-                                Cancel
-                            </v-btn>
-                        </v-list-item-action>
-                        <v-spacer></v-spacer>
+                            <v-list-item-action>
+                                <v-btn
+                                    color="success"
+                                    @click="canEditQuery = true"
+                                    v-if="!canEditQuery"
+                                >
+                                    Edit
+                                </v-btn>
+                            </v-list-item-action>
+                        </v-list-item>
 
-                        <v-list-item-action>
-                            <v-btn
-                                color="success"
-                                @click="saveEditQuery"
-                                v-if="canEditQuery"
-                            >
-                                Save
-                            </v-btn>
-                        </v-list-item-action>
-
-                        <v-list-item-action>
-                            <v-btn
-                                color="success"
-                                @click="canEditQuery = true"
-                                v-if="!canEditQuery"
-                            >
-                                Edit
-                            </v-btn>
-                        </v-list-item-action>
-                    </v-list-item>
-
-                    <v-divider></v-divider>
-
+                        <v-divider></v-divider>
+                    </div>
                 </v-col>
             </v-row>
         </div>
@@ -213,7 +198,8 @@ import { DbSqlQueryMetadata , DbSqlQuery } from '../../ts/sql'
 import {
     TAllSqlQueryOutput, allSqlQuery,
     TGetSqlQueryOutput, getSqlQuery,
-    TUpdateSqlQueryOutput, updateSqlQuery
+    TUpdateSqlQueryOutput, updateSqlQuery,
+    deleteSqlQuery
 } from '../../ts/api/apiSqlQueries'
 import { contactUsUrl } from '../../ts/url'
 import { PageParamsStore } from '../../ts/pageParams'
@@ -275,13 +261,6 @@ export default class DatabaseQueryManager extends Props {
         return this.allMetadata!.length > 0 && !!this.currentMetadata
     }
 
-    get canDeleteVersion() : boolean {
-        if (!this.allVersions) {
-            return false
-        }
-        return this.allVersions.length > 1
-    }
-
     get isLoading() : boolean {
         return !this.allMetadata || !this.allVersions
     }
@@ -328,12 +307,10 @@ export default class DatabaseQueryManager extends Props {
     selectMetadata(meta : DbSqlQueryMetadata | null, refresh: boolean = true) {
         this.currentMetadata = meta
 
-        if (!refresh) {
-            return
-        }
-
         if (!!this.currentMetadata) {
-            this.refreshVersions()
+            if (refresh) {
+                this.refreshVersions()
+            }
         } else {
             this.allVersions = []
             this.currentVersion = null
@@ -368,11 +345,13 @@ export default class DatabaseQueryManager extends Props {
 
     onSaveNewQuery(metadata: DbSqlQueryMetadata, query : DbSqlQuery) {
         this.showHideNewQuery = false
-        this.allMetadata!.unshift(metadata)
-        this.allVersions!.unshift(query)
+        Vue.nextTick(() => {
+            this.allMetadata!.unshift(metadata)
+            this.allVersions!.unshift(query)
 
-        this.selectMetadata(this.allMetadata![0], false)
-        this.selectVersion(this.allVersions![0])
+            this.selectMetadata(this.allMetadata![0], false)
+            this.selectVersion(this.allVersions![0])
+        })
     }
 
     onEditQueryMetadata(metadata: DbSqlQueryMetadata) {
@@ -387,8 +366,8 @@ export default class DatabaseQueryManager extends Props {
     }
 
     cancelEditQuery() {
-        this.queryKey += 1
         this.editableQuery = this.currentVersion!.Query
+        this.queryKey += 1
         this.canEditQuery = false
     }
 
@@ -407,6 +386,35 @@ export default class DatabaseQueryManager extends Props {
                 this.canEditQuery = false
             } else {
                 throw "Did not receive a response query."
+            }
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    deleteQuery() {
+        let id = this.currentMetadata!.Id
+
+        deleteSqlQuery({
+            orgId: PageParamsStore.state.organization!.Id,
+            metadataId: id,
+        }).then(() => {
+            let idx = this.allMetadata!.findIndex((ele : DbSqlQueryMetadata) => ele.Id == id)
+            if (idx == -1) {
+                return
+            }
+
+            this.allMetadata!.splice(idx, 1)
+            if (this.allMetadata!.length > 0) {
+                this.selectMetadata(this.allMetadata![0])
+            } else {
+                this.selectMetadata(null)
             }
         }).catch((err : any) => {
             // @ts-ignore

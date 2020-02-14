@@ -233,3 +233,32 @@ func updateDatabaseQuery(w http.ResponseWriter, r *http.Request) {
 		Query:    retQuery,
 	})
 }
+
+type DeleteDatabaseQueryInput struct {
+	OrgId      int32 `json:"orgId"`
+	MetadataId int64 `json:"metadataId"`
+}
+
+func deleteDatabaseQuery(w http.ResponseWriter, r *http.Request) {
+	inputs := DeleteDatabaseQueryInput{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteSqlQuery(inputs.MetadataId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to delete query: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}

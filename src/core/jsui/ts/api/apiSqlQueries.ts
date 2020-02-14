@@ -5,6 +5,7 @@ import {
     getSqlQueryUrl,
     newSqlQueryUrl,
     updateSqlQueryUrl,
+    deleteSqlQueryUrl,
 } from '../url'
 import { getAPIRequestConfig } from './apiUtility'
 import { postFormJson } from '../http'
@@ -94,4 +95,13 @@ export function updateSqlQuery(inp : TUpdateSqlQueryInput) : Promise<TUpdateSqlQ
         }
         return resp
     })
+}
+
+export interface TDeleteSqlQueryInput {
+    orgId: number
+    metadataId: number
+}
+
+export function deleteSqlQuery(inp : TDeleteSqlQueryInput) : Promise<void> {
+    return postFormJson<void>(deleteSqlQueryUrl, inp, getAPIRequestConfig())
 }
