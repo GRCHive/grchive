@@ -35,6 +35,7 @@ const (
 	ResourceServers
 	ResourceVendors
 	ResourceDbSql
+	ResourceDbSqlQuery
 )
 
 var AvailableResources []ResourceType = []ResourceType{
@@ -54,6 +55,7 @@ var AvailableResources []ResourceType = []ResourceType{
 	ResourceServers,
 	ResourceVendors,
 	ResourceDbSql,
+	ResourceDbSqlQuery,
 }
 
 type PermissionsMap struct {
@@ -73,6 +75,7 @@ type PermissionsMap struct {
 	ServerAccess               AccessType `db:"server_access"`
 	VendorAccess               AccessType `db:"vendor_access"`
 	DbSqlAccess                AccessType `db:"db_sql_access"`
+	DbSqlQueryAccess           AccessType `db:"db_sql_query_access"`
 }
 
 type RoleMetadata struct {
@@ -111,6 +114,7 @@ func CreateViewOnlyAccessPermission() PermissionsMap {
 		ServerAccess:               AccessView,
 		VendorAccess:               AccessView,
 		DbSqlAccess:                AccessView,
+		DbSqlQueryAccess:           AccessView,
 	}
 }
 
@@ -132,6 +136,7 @@ func CreateAllAccessPermission() PermissionsMap {
 		ServerAccess:               CreateOwnerAccessType(),
 		VendorAccess:               CreateOwnerAccessType(),
 		DbSqlAccess:                CreateOwnerAccessType(),
+		DbSqlQueryAccess:           CreateOwnerAccessType(),
 	}
 }
 
@@ -198,6 +203,8 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 		return p.VendorAccess
 	case ResourceDbSql:
 		return p.DbSqlAccess
+	case ResourceDbSqlQuery:
+		return p.DbSqlQueryAccess
 	}
 	return AccessNone
 }
@@ -252,6 +259,8 @@ func (p *PermissionsMap) SetAccessType(resource ResourceType, access AccessType)
 	case ResourceDbSql:
 		p.DbSqlAccess = access
 		break
+	case ResourceDbSqlQuery:
+		p.DbSqlQueryAccess = access
 	}
 }
 

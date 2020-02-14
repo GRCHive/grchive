@@ -54,3 +54,25 @@ export interface DbColumn {
     ColumnName  : string
     ColumnType  : string
 }
+
+export interface DbSqlQueryMetadata {
+    Id          : number
+    DbId        : number
+    OrgId       : number
+    Name        : string
+    Description : string
+}
+
+export interface DbSqlQuery {
+    Id           : number
+    MetadataId   : number
+    Version      : number
+    UploadTime   : Date
+    UploadUserId : number
+    OrgId        : number
+    Query        : string
+}
+
+export function cleanDbSqlQueryFromJson(q : DbSqlQuery) {
+    q.UploadTime = new Date(q.UploadTime)
+}

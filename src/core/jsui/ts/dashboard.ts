@@ -1,5 +1,6 @@
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
+import './highlight'
 
 import vueOpts from  './vueSetup'
 import MetadataStore from './metadata'
@@ -96,6 +97,7 @@ function mountApp(inData : PageParamsStoreState) {
         }
     })
 }
+
 
 export default {
     mountApp

@@ -247,6 +247,11 @@ export const deleteSqlRefreshUrl : string = "/api/it/db/sql/refresh/delete"
 export const allSqlSchemasUrl : string = "/api/it/db/sql/schema/all"
 export const getSqlSchemaUrl : string = "/api/it/db/sql/schema/get"
 
+export const allSqlQueryUrl : string = "/api/it/db/sql/query/all"
+export const getSqlQueryUrl : string = "/api/it/db/sql/query/get"
+export const newSqlQueryUrl : string = "/api/it/db/sql/query/new"
+export const updateSqlQueryUrl : string = "/api/it/db/sql/query/update"
+
 export const newDbConnUrl : string = "/api/it/db/connection/new"
 export const deleteDbConnUrl : string = "/api/it/db/connection/delete"
 

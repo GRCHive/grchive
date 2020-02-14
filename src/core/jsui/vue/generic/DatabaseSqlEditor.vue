@@ -1,71 +1,22 @@
 <template>
     <v-container fluid>
-        <v-row v-if="isLoading" align="center" justify="center">
-            <v-progress-circular indeterminate size="64"></v-progress-circular>
-        </v-row>
+        <v-tabs vertical>
+            <v-tab>Schemas</v-tab>
+            <v-tab-item>
+                <database-refresh-manager
+                    :db-id="dbId"
+                >
+                </database-refresh-manager>
+            </v-tab-item>
 
-        <div v-else>
-            <v-tabs vertical>
-                <v-tab>Schemas</v-tab>
-                <v-tab-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                            <v-select
-                                v-model="selectedRefresh"
-                                label="Versions"
-                                filled
-                                :items="refreshItems"
-                                hide-details
-                                dense
-                            >
-                            </v-select>
-                        </v-list-item-content>
-
-                        <v-list-item-action>
-                            <v-btn
-                                color="error"
-                                icon
-                                @click="deleteCurrentRefresh"
-                                :disabled="!selectedRefresh"
-                            >
-                                <v-icon>
-                                    mdi-delete
-                                </v-icon>
-                            </v-btn>
-                        </v-list-item-action>
-
-
-                        <v-spacer></v-spacer>
-
-                        <v-list-item-action>
-                            <v-btn
-                                color="primary"
-                                icon
-                                :loading="refreshInProgress"
-                                @click="requestRefreshSchema"
-                            >
-                                <v-icon>
-                                    mdi-refresh
-                                </v-icon>
-                            </v-btn>
-                        </v-list-item-action>
-                    </v-list-item>
-
-                    <database-refresh-viewer
-                        class="px-4"
-                        :refresh="selectedRefresh"
-                    >
-                    </database-refresh-viewer>
-                </v-tab-item>
-
-                <v-tab>Queries</v-tab>
-                <v-tab-item>
-                </v-tab-item>
-            </v-tabs>
-
-            <div id="queryOutput">
-            </div>
-        </div>
+            <v-tab>Queries</v-tab>
+            <v-tab-item>
+                <database-query-manager
+                    :db-id="dbId"
+                >
+                </database-query-manager>
+            </v-tab-item>
+        </v-tabs>
     </v-container>
 </template>
 
@@ -73,21 +24,8 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { PageParamsStore } from '../../ts/pageParams'
-import {
-    allSqlRefresh, TAllSqlRefreshOutput,
-    newSqlRefresh, TNewSqlRefreshOutput,
-    getSqlRefresh, TGetSqlRefreshOutput,
-    deleteSqlRefresh,
-} from '../../ts/api/apiSqlRefresh'
-import { contactUsUrl } from '../../ts/url'
-import {
-    DbRefresh,
-    dbRefreshIdentifier,
-    DbSchema
-} from '../../ts/sql'
-import { standardFormatTime } from '../../ts/time'
-import DatabaseRefreshViewer from './DatabaseRefreshViewer.vue'
+import DatabaseRefreshManager from './DatabaseRefreshManager.vue'
+import DatabaseQueryManager from './DatabaseQueryManager.vue'
 
 const Props = Vue.extend({
     props: {
@@ -95,152 +33,14 @@ const Props = Vue.extend({
     }
 })
 
-const refreshIntervalSeconds : number = 15
-
 @Component({
     components: {
-        DatabaseRefreshViewer,
+        DatabaseRefreshManager,
+        DatabaseQueryManager,
     }
 })
 export default class DatabaseSqlEditor extends Props {
-    schemaRefreshes : DbRefresh[] | null = null
-    selectedRefresh : DbRefresh | null = null
-    refreshInProgress : boolean = false
 
-    get refreshItems() : any[] {
-        if (!this.schemaRefreshes) {
-            return []
-        }
-        return this.schemaRefreshes.map((ele : DbRefresh, idx : number) => ({
-            text: `#${this.schemaRefreshes!.length - idx} :: ${dbRefreshIdentifier(ele)}`,
-            value: ele,
-        }))
-    }
-
-    get isLoading() : boolean {
-        return (this.schemaRefreshes == null)
-    }
-
-    initialSelectRefresh(ref : DbRefresh) {
-        this.selectedRefresh = ref
-        if (!this.selectedRefresh.RefreshFinishTime) {
-            this.startRefreshPoll(this.selectedRefresh.Id)
-        }
-    }
-
-    refreshData() {
-        allSqlRefresh({
-            dbId: this.dbId,
-            orgId: PageParamsStore.state.organization!.Id,
-        }).then((resp : TAllSqlRefreshOutput) => {
-            this.schemaRefreshes = resp.data
-            if (this.schemaRefreshes!.length > 0) {
-                this.initialSelectRefresh(this.schemaRefreshes![0])
-            }
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
-    }
-
-    requestRefreshSchema() {
-        this.refreshInProgress = true
-        newSqlRefresh({
-            dbId: this.dbId,
-            orgId: PageParamsStore.state.organization!.Id,
-        }).then((resp : TNewSqlRefreshOutput) => {
-            this.schemaRefreshes!.unshift(resp.data)
-            this.initialSelectRefresh(resp.data)
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
-    }
-
-
-    deleteCurrentRefresh() {
-        if (!this.selectedRefresh) {
-            return
-        }
-
-        deleteSqlRefresh({
-            refreshId: this.selectedRefresh!.Id,
-            orgId: PageParamsStore.state.organization!.Id,
-        }).then(() => {
-            let idx = this.schemaRefreshes!.findIndex((ele : DbRefresh) => ele.Id == this.selectedRefresh!.Id)
-            if (idx == -1) {
-                return
-            }
-
-            if (!this.selectedRefresh!.RefreshFinishTime) {
-                this.refreshInProgress = false
-            }
-
-            this.schemaRefreshes!.splice(idx, 1)
-            this.selectedRefresh = null
-            if (this.schemaRefreshes!.length > 0) {
-                this.initialSelectRefresh(this.schemaRefreshes![0])
-            }
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
-    }
-
-    startRefreshPoll(refreshId : number) {
-        this.refreshInProgress = true
-
-        // Silently ignore any polling errors.
-        let intervalId = setInterval(() => {
-            let idx = this.schemaRefreshes!.findIndex((ele : DbRefresh) => ele.Id == refreshId)
-            if (idx == -1) {
-                clearInterval(intervalId)
-                return
-            }
-
-            getSqlRefresh({
-                refreshId : refreshId,
-                orgId: PageParamsStore.state.organization!.Id,
-            }).then((resp : TNewSqlRefreshOutput) => {
-                if (!resp.data.RefreshFinishTime) {
-                    return
-                }
-
-                this.refreshInProgress = false
-                let idx = this.schemaRefreshes!.findIndex((ele : DbRefresh) => ele.Id == refreshId)
-                if (idx == -1) {
-                    clearInterval(intervalId)
-                    return
-                }
-
-                Vue.set(this.schemaRefreshes!, idx, resp.data)
-                if (!!this.selectedRefresh && this.selectedRefresh.Id == refreshId) {
-                    this.selectedRefresh = resp.data
-                }
-
-                clearInterval(intervalId)
-            }).catch((err : any) => {})
-        }, refreshIntervalSeconds * 1000)
-    }
-
-    mounted() {
-        this.refreshData()
-    }
 }
 
 </script>

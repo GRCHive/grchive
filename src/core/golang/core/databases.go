@@ -1,5 +1,9 @@
 package core
 
+import (
+	"time"
+)
+
 type DatabaseType struct {
 	Id            int32  `db:"id"`
 	Name          string `db:"name"`
@@ -58,4 +62,22 @@ type DbColumn struct {
 	TableId    int64  `db:"table_id"`
 	ColumnName string `db:"column_name"`
 	ColumnType string `db:"column_type"`
+}
+
+type DbSqlQueryMetadata struct {
+	Id          int64  `db:"id"`
+	DbId        int64  `db:"db_id"`
+	OrgId       int32  `db:"org_id"`
+	Name        string `db:"name"`
+	Description string `db:"description"`
+}
+
+type DbSqlQuery struct {
+	Id           int64     `db:"id"`
+	MetadataId   int64     `db:"metadata_id"`
+	Version      int32     `db:"version_number"`
+	UploadTime   time.Time `db:"upload_time"`
+	UploadUserId int64     `db:"upload_user_id"`
+	OrgId        int32     `db:"org_id"`
+	Query        string    `db:"query"`
 }

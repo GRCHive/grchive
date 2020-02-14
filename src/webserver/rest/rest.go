@@ -236,7 +236,11 @@ func registerITSqlSchemaAPIPaths(r *mux.Router) {
 }
 
 func registerITSqlQueriesAPIPaths(r *mux.Router) {
-	//s := r.PathPrefix(core.ApiITSqlQueriesPrefix).Subrouter()
+	s := r.PathPrefix(core.ApiITSqlQueriesPrefix).Subrouter()
+	s.HandleFunc(core.ApiAllEndpoint, allDatabaseQuery).Methods("GET")
+	s.HandleFunc(core.ApiGetEndpoint, getDatabaseQuery).Methods("GET")
+	s.HandleFunc(core.ApiNewEndpoint, newDatabaseQuery).Methods("POST")
+	s.HandleFunc(core.ApiUpdateEndpoint, updateDatabaseQuery).Methods("POST")
 }
 
 func registerITServerAPIPaths(r *mux.Router) {

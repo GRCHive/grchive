@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package sqlQuery;
+
+service Runner {
+    rpc RunSqlQuery(SqlRunnerRequest) returns (SqlRunnerReply) {}
+}
+
+message SqlRunnerRequest {
+    string vaultQueryPath = 1;
+    bytes encryptedQuery = 2;
+    string vaultResultPath = 3;
+}
+
+message SqlRunnerReply {
+    bytes encryptedData = 1;
+    bool success = 2;
+}

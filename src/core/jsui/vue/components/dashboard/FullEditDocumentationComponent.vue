@@ -135,14 +135,14 @@
                                               label="Name"
                                               filled
                                               :rules="[rules.required, rules.createMaxLength(256)]"
-                                              :disabled="!canEdit"
+                                              :readonly="!canEdit"
                                 ></v-text-field>
 
                                 <document-category-search-form-component
                                     v-model="editData.ParentCat"
                                     load-cats
                                     :rules="[rules.required]"
-                                    disabled
+                                    readonly
                                 >
                                 </document-category-search-form-component>
 
@@ -169,7 +169,7 @@
                                 <v-textarea v-model="editData.File.Description"
                                             label="Description"
                                             filled
-                                            :disabled="!canEdit"
+                                            :readonly="!canEdit"
                                 ></v-textarea> 
 
                             </v-form>
@@ -228,7 +228,7 @@
                                 <user-search-form-component
                                     label="Upload User"
                                     v-bind:user="uploadUser"
-                                    disabled
+                                    readonly
                                 ></user-search-form-component>
                             </div>
 
