@@ -24,6 +24,12 @@ func main() {
 	flag.Parse()
 
 	if *queryId >= 0 && *orgId >= 0 && *versionNum >= 0 {
+		result, err := runQuery(*queryId, int32(*orgId), int32(*versionNum))
+		if err != nil {
+			core.Error("Failed to run query: " + err.Error())
+		}
+		core.Info(result.Columns)
+		core.Info(result.CsvText)
 	} else {
 	}
 }

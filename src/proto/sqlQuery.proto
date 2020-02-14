@@ -7,9 +7,10 @@ service Runner {
 }
 
 message SqlRunnerRequest {
-    string vaultQueryPath = 1;
-    bytes encryptedQuery = 2;
-    string vaultResultPath = 3;
+    string vaultResultPath = 1;
+    int64 queryId = 2;
+    int32 orgId = 3;
+    int32 version = 4;
 }
 
 message SqlRunnerReply {

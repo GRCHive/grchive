@@ -4,14 +4,12 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "library",
     srcs = [
-        "api.go",
-        "interface.go",
+        "result.go",
     ],
-    importpath = "gitlab.com/grchive/grchive/db_api",
+    importpath = "gitlab.com/grchive/grchive/db_api/utility",
     deps = [
         "//src/core/golang/core:webserver_core_library",
-        "//src/generic_database_api/golang/pg:library",
-        "//src/generic_database_api/golang/utility:library",
         "@com_github_jmoiron_sqlx//:go_default_library",
     ]
 )
+

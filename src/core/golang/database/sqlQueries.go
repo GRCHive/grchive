@@ -35,20 +35,35 @@ func GetAllSqlQueryVersionsForMetadata(metadataId int64, orgId int32, role *core
 	return data, err
 }
 
-func GetSqlQueryMetadata(queryId int64, orgId int32, role *core.Role) (*core.DbSqlQueryMetadata, error) {
+func GetSqlMetadataFromId(metadataId int64, orgId int32, role *core.Role) (*core.DbSqlQueryMetadata, error) {
 	if !role.Permissions.HasAccess(core.ResourceDbSqlQuery, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
 
-	return nil, nil
+	data := core.DbSqlQueryMetadata{}
+	err := dbConn.Get(&data, `
+		SELECT *
+		FROM database_sql_metadata
+		WHERE id = $1
+			AND org_id = $2
+	`, metadataId, orgId)
+	return &data, err
 }
 
-func GetSqlQueryFromMetadataId(metadataId int64, orgId int32, version int32, role *core.Role) (*core.DbSqlQuery, error) {
+func GetSqlQueryFromIdAndVersion(queryId int64, orgId int32, version int32, role *core.Role) (*core.DbSqlQuery, error) {
 	if !role.Permissions.HasAccess(core.ResourceDbSqlQuery, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
 
-	return nil, nil
+	data := core.DbSqlQuery{}
+	err := dbConn.Get(&data, `
+		SELECT *
+		FROM database_sql_queries
+		WHERE id = $1
+			AND org_id = $2
+			AND version_number = $3
+	`, queryId, orgId, version)
+	return &data, err
 }
 
 func CreateSqlQueryMetadataWithTx(metadata *core.DbSqlQueryMetadata, role *core.Role, tx *sqlx.Tx) error {
