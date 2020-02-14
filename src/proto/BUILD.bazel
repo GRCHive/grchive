@@ -1,0 +1,17 @@
+package(default_visibility=["//visibility:public"])
+load("@build_stack_rules_proto//go:go_grpc_library.bzl", "go_grpc_library")
+
+proto_library(
+    name = "proto_sql_query",
+    srcs = ["sqlQuery.proto"],
+)
+
+go_grpc_library(
+    name = "go_proto_sql_query",
+    go_deps = [
+        "@org_golang_google_grpc//codes:go_default_library",
+        "@org_golang_google_grpc//status:go_default_library",
+    ],
+    deps = [":proto_sql_query"],
+    importpath = "gitlab.com/grchive/grchive/proto/sqlQuery"
+)

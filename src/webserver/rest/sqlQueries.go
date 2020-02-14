@@ -1,10 +1,16 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/db_api/utility"
+	"gitlab.com/grchive/grchive/proto/sqlQuery"
+	"gitlab.com/grchive/grchive/vault_api"
 	"gitlab.com/grchive/grchive/webcore"
+	"google.golang.org/grpc"
 	"net/http"
 	"time"
 )
@@ -260,5 +266,105 @@ func deleteDatabaseQuery(w http.ResponseWriter, r *http.Request) {
 		core.Warning("Failed to delete query: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+}
+
+type RunDatabaseQueryInput struct {
+	QueryId int64 `json:"queryId"`
+	OrgId   int32 `json:"orgId"`
+}
+
+func runDatabaseQuery(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := RunDatabaseQueryInput{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	// Ideally we have some sort of execute permission??
+	if !role.Permissions.HasAccess(core.ResourceDbSqlQuery, core.AccessView) {
+		core.Warning("Can not execute query." + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", core.EnvConfig.Grpc.QueryRunnerHost, core.EnvConfig.Grpc.QueryRunnerPort),
+		grpc.WithInsecure(),
+		grpc.WithBlock(),
+		grpc.WithTimeout(time.Second*30))
+
+	if err != nil {
+		core.Warning("Failed to connect to GRPC: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	defer conn.Close()
+
+	client := sqlQuery.NewQueryRunnerClient(conn)
+
+	// 30 seconds is probably sufficient...this probably needs to be configurable at some point though.
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	transitKey := fmt.Sprintf("sqlquery-%d", inputs.QueryId)
+
+	resp, err := client.RunSqlQuery(ctx, &sqlQuery.SqlRunnerRequest{
+		VaultResultPath: transitKey,
+		QueryId:         inputs.QueryId,
+		OrgId:           inputs.OrgId,
+	})
+
+	if err != nil {
+		core.Warning("Failed to run query: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	decrypt, err := vault.TransitDecrypt(transitKey, resp.EncryptedData)
+	if err != nil {
+		core.Warning("Failed to decrypt result: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Decrypt is either an utility.SqlQueryResult or a string depending on whether
+	// Success is true or false.
+	if !resp.Success {
+		jsonWriter.Encode(struct {
+			Data    string
+			Success bool
+		}{
+			Data:    string(decrypt),
+			Success: false,
+		})
+	} else {
+		data := struct {
+			Data    *utility.SqlQueryResult
+			Success bool
+		}{
+			Data:    nil,
+			Success: true,
+		}
+
+		err = json.Unmarshal(decrypt, &data.Data)
+		if err != nil {
+			core.Warning("Failed to parse result: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		jsonWriter.Encode(data)
 	}
 }

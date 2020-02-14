@@ -6,12 +6,14 @@ import {
     newSqlQueryUrl,
     updateSqlQueryUrl,
     deleteSqlQueryUrl,
+    runSqlQueryUrl,
 } from '../url'
 import { getAPIRequestConfig } from './apiUtility'
 import { postFormJson } from '../http'
 import { 
     DbSqlQueryMetadata,
     DbSqlQuery,
+    SqlResult,
     cleanDbSqlQueryFromJson
 } from '../sql'
 
@@ -104,4 +106,20 @@ export interface TDeleteSqlQueryInput {
 
 export function deleteSqlQuery(inp : TDeleteSqlQueryInput) : Promise<void> {
     return postFormJson<void>(deleteSqlQueryUrl, inp, getAPIRequestConfig())
+}
+
+export interface TRunSqlQueryInput {
+    queryId: number
+    orgId : number
+}
+
+export interface TRunSqlQueryOutput {
+    data: {
+        Data: string | SqlResult
+        Success: boolean
+    }
+}
+
+export function runSqlQuery(inp : TRunSqlQueryInput) : Promise<TRunSqlQueryOutput> {
+    return postFormJson<TRunSqlQueryOutput>(runSqlQueryUrl, inp, getAPIRequestConfig())
 }

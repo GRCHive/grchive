@@ -73,6 +73,11 @@ export interface DbSqlQuery {
     Query        : string
 }
 
+export interface SqlResult {
+    Columns: string[]
+    CsvText: string
+}
+
 export function cleanDbSqlQueryFromJson(q : DbSqlQuery) {
     q.UploadTime = new Date(q.UploadTime)
 }

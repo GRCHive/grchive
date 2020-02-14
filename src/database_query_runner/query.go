@@ -9,8 +9,8 @@ import (
 	"gitlab.com/grchive/grchive/webcore"
 )
 
-func runQuery(queryId int64, orgId int32, version int32) (*utility.SqlQueryResult, error) {
-	query, err := database.GetSqlQueryFromIdAndVersion(queryId, orgId, version, core.ServerRole)
+func runQuery(queryId int64, orgId int32) (*utility.SqlQueryResult, error) {
+	query, err := database.GetSqlQueryFromId(queryId, orgId, core.ServerRole)
 	if err != nil {
 		return nil, err
 	}

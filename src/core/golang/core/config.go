@@ -67,6 +67,11 @@ type RabbitMQConfig struct {
 	Port     int32
 }
 
+type GrpcEndpoints struct {
+	QueryRunnerHost string
+	QueryRunnerPort int32
+}
+
 type EnvConfigData struct {
 	SelfUri            string
 	SelfDomain         string
@@ -81,6 +86,7 @@ type EnvConfigData struct {
 	Mail               *MailConfig
 	HashId             *HashIdConfigData
 	RabbitMQ           *RabbitMQConfig
+	Grpc               *GrpcEndpoints
 }
 
 var EnvConfig *EnvConfigData
@@ -170,6 +176,10 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.RabbitMQ.Password = tomlConfig.Get("rabbitmq.password").(string)
 	envConfig.RabbitMQ.Host = tomlConfig.Get("rabbitmq.host").(string)
 	envConfig.RabbitMQ.Port = int32(tomlConfig.Get("rabbitmq.port").(int64))
+
+	envConfig.Grpc = new(GrpcEndpoints)
+	envConfig.Grpc.QueryRunnerHost = tomlConfig.Get("grpc.query_runner.host").(string)
+	envConfig.Grpc.QueryRunnerPort = int32(tomlConfig.Get("grpc.query_runner.port").(int64))
 
 	return envConfig
 }

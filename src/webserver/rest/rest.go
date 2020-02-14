@@ -242,6 +242,7 @@ func registerITSqlQueriesAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiNewEndpoint, newDatabaseQuery).Methods("POST")
 	s.HandleFunc(core.ApiUpdateEndpoint, updateDatabaseQuery).Methods("POST")
 	s.HandleFunc(core.ApiDeleteEndpoint, deleteDatabaseQuery).Methods("POST")
+	s.HandleFunc(core.ApiRunEndpoint, runDatabaseQuery).Methods("POST")
 }
 
 func registerITServerAPIPaths(r *mux.Router) {

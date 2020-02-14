@@ -5,16 +5,17 @@ workspace(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+# Rules Proto
 http_archive(
-    name = "zlib",
-    build_file = "@com_google_protobuf//:third_party/zlib.BUILD",
-    sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
-    strip_prefix = "zlib-1.2.11",
-    urls = [
-        "https://mirror.bazel.build/zlib.net/zlib-1.2.11.tar.gz",
-        "https://zlib.net/zlib-1.2.11.tar.gz",
-    ],
+    name = "build_stack_rules_proto",
+    urls = ["https://github.com/stackb/rules_proto/archive/734b8d41d39a903c70132828616f26cb2c7f908c.tar.gz"],
+    sha256 = "c89348b73f4bc59c0add4074cc0c620a5a2a08338eb4ef207d57eaa8453b82e8",
+    strip_prefix = "rules_proto-734b8d41d39a903c70132828616f26cb2c7f908c",
 )
+
+load("@build_stack_rules_proto//go:deps.bzl", "go_grpc_library")
+
+go_grpc_library()
 
 # GO
 http_archive(
@@ -197,12 +198,6 @@ go_repository(
 )
 
 go_repository(
-    name = "com_google_protobuf",
-    importpath = "github.com/google/protobuf",
-    tag = "v3.11.2"
-)
-
-go_repository(
     name = "org_golang_x_net",
     importpath = "golang.org/x/net",
     commit = "6afb5195e5aab057fda82e27171243402346b0ad"
@@ -224,6 +219,12 @@ go_repository(
     name = "com_google_cloud_go",
     importpath = "cloud.google.com/go",
     tag = "v0.52.0"
+)
+
+go_repository(
+    name = "org_golang_google_grpc",
+    importpath = "google.golang.org/grpc",
+    tag = "v1.27.1"
 )
 
 # NODE

@@ -14,7 +14,9 @@ go_binary(
         "//src/generic_database_api/golang:library",
         "//src/generic_database_api/golang/utility:library",
         "//src/vault_api/golang:vault_golang_api",
+        "//src/proto:go_proto_sql_query",
         "@com_github_jmoiron_sqlx//:go_default_library",
+        "@org_golang_google_grpc//:go_default_library",
     ],
     data = [
         "//src/webserver/config:config",

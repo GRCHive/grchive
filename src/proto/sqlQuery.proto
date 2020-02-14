@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package sqlQuery;
 
-service Runner {
+service QueryRunner {
     rpc RunSqlQuery(SqlRunnerRequest) returns (SqlRunnerReply) {}
 }
 
@@ -10,7 +10,6 @@ message SqlRunnerRequest {
     string vaultResultPath = 1;
     int64 queryId = 2;
     int32 orgId = 3;
-    int32 version = 4;
 }
 
 message SqlRunnerReply {

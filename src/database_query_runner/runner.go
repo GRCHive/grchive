@@ -1,12 +1,70 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"flag"
+	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/proto/sqlQuery"
 	"gitlab.com/grchive/grchive/vault_api"
 	"gitlab.com/grchive/grchive/webcore"
+	"google.golang.org/grpc"
+	"net"
+	"time"
 )
+
+type server struct {
+	sqlQuery.UnimplementedQueryRunnerServer
+}
+
+func createErrorReply(err error, encryptPath string) (*sqlQuery.SqlRunnerReply, error) {
+	errStr := "Failed to run query: " + err.Error()
+
+	buffer := []byte(errStr)
+	if encryptPath != "" {
+		var newErr error
+		buffer, newErr = vault.TransitEncrypt(encryptPath, buffer)
+		if newErr != nil {
+			return createErrorReply(newErr, "")
+		}
+	}
+
+	return &sqlQuery.SqlRunnerReply{
+		EncryptedData: buffer,
+		Success:       false,
+	}, nil
+}
+
+func (s *server) RunSqlQuery(ctx context.Context, in *sqlQuery.SqlRunnerRequest) (*sqlQuery.SqlRunnerReply, error) {
+	core.Info("Run Query: ", in.QueryId, in.OrgId, in.VaultResultPath)
+	// Ignore this error. Should be fine?
+	err := vault.TransitCreateNewEngineKey(in.VaultResultPath)
+	if err != nil {
+		return createErrorReply(err, "")
+	}
+
+	result, err := runQuery(in.QueryId, in.OrgId)
+	if err != nil {
+		return createErrorReply(err, in.VaultResultPath)
+	}
+
+	marshal, err := json.Marshal(result)
+	if err != nil {
+		return createErrorReply(err, in.VaultResultPath)
+	}
+
+	encrypted, err := vault.TransitEncrypt(in.VaultResultPath, marshal)
+	if err != nil {
+		return createErrorReply(err, "")
+	}
+
+	return &sqlQuery.SqlRunnerReply{
+		EncryptedData: encrypted,
+		Success:       true,
+	}, nil
+}
 
 func main() {
 	core.Init()
@@ -20,16 +78,67 @@ func main() {
 
 	queryId := flag.Int64("queryId", -1, "Refresh ID to retrieve data for. Will not read from gRPC if specified.")
 	orgId := flag.Int64("orgId", -1, "Org ID to retrieve data for. Will not read from gRPC if specified.")
-	versionNum := flag.Int64("version", -1, "Version to retrieve data for. Will not read from gRPC if specified.")
+	rpcClient := flag.Bool("rpc", false, "If query ID and org ID specified, will use an RPC client to execute.")
 	flag.Parse()
 
-	if *queryId >= 0 && *orgId >= 0 && *versionNum >= 0 {
-		result, err := runQuery(*queryId, int32(*orgId), int32(*versionNum))
-		if err != nil {
-			core.Error("Failed to run query: " + err.Error())
+	if *queryId >= 0 && *orgId >= 0 {
+		if *rpcClient {
+			url := fmt.Sprintf("%s:%d", core.EnvConfig.Grpc.QueryRunnerHost, core.EnvConfig.Grpc.QueryRunnerPort)
+			core.Info(url)
+			conn, err := grpc.Dial(url,
+				grpc.WithInsecure(),
+				grpc.WithBlock())
+
+			if err != nil {
+				core.Error("Failed to connect to GRPC: " + err.Error())
+			}
+
+			defer conn.Close()
+
+			client := sqlQuery.NewQueryRunnerClient(conn)
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
+
+			transitKey := fmt.Sprintf("sqlquery-%d", *queryId)
+
+			resp, err := client.RunSqlQuery(ctx, &sqlQuery.SqlRunnerRequest{
+				VaultResultPath: transitKey,
+				QueryId:         *queryId,
+				OrgId:           int32(*orgId),
+			})
+
+			if err != nil {
+				core.Error("Failed to run query: " + err.Error())
+			}
+
+			decrypt, err := vault.TransitDecrypt(transitKey, resp.EncryptedData)
+			if err != nil {
+				core.Error("Failed to decrypt result: " + err.Error())
+			}
+
+			core.Info(string(decrypt))
+			core.Info(resp.Success)
+		} else {
+			result, err := runQuery(*queryId, int32(*orgId))
+			if err != nil {
+				core.Error("Failed to run query: " + err.Error())
+			}
+			core.Info(result.Columns)
+			core.Info(result.CsvText)
 		}
-		core.Info(result.Columns)
-		core.Info(result.CsvText)
 	} else {
+		url := fmt.Sprintf(":%d", core.EnvConfig.Grpc.QueryRunnerPort)
+		core.Info(url)
+		lis, err := net.Listen("tcp", url)
+		if err != nil {
+			core.Error("Failed to listen: " + err.Error())
+		}
+
+		s := grpc.NewServer()
+		sqlQuery.RegisterQueryRunnerServer(s, &server{})
+		if err := s.Serve(lis); err != nil {
+			core.Error("Failed to serve: " + err.Error())
+		}
 	}
 }

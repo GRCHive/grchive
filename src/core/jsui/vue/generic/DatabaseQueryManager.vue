@@ -181,6 +181,12 @@
                         </v-list-item>
 
                         <v-divider></v-divider>
+
+                        <sql-result-display
+                            v-if="!!currentResult"
+                            :result="currentResult"
+                        >
+                        </sql-result-display>
                     </div>
                 </v-col>
             </v-row>
@@ -199,13 +205,16 @@ import {
     TAllSqlQueryOutput, allSqlQuery,
     TGetSqlQueryOutput, getSqlQuery,
     TUpdateSqlQueryOutput, updateSqlQuery,
+    TRunSqlQueryOutput, runSqlQuery,
     deleteSqlQuery
 } from '../../ts/api/apiSqlQueries'
 import { contactUsUrl } from '../../ts/url'
 import { PageParamsStore } from '../../ts/pageParams'
 import MetadataStore from '../../ts/metadata'
 import SqlTextArea from './SqlTextArea.vue'
+import SqlResultDisplay from './SqlResultDisplay.vue'
 import { standardFormatTime } from '../../ts/time'
+import { SqlResult } from '../../ts/sql'
 
 const Props = Vue.extend({
     props: {
@@ -217,7 +226,8 @@ const Props = Vue.extend({
     components: {
         CreateNewSqlQueryForm,
         UserSearchFormComponent,
-        SqlTextArea
+        SqlTextArea,
+        SqlResultDisplay
     }
 })
 export default class DatabaseQueryManager extends Props {
@@ -227,12 +237,26 @@ export default class DatabaseQueryManager extends Props {
     currentMetadata : DbSqlQueryMetadata | null = null
     currentVersion : DbSqlQuery | null = null
 
+    versionIdToResult : Record<number, TRunSqlQueryOutput> = Object()
+
     editableQuery : string = ""
     canEditQuery : boolean = false
     queryKey : number = 0
     queryRunning : boolean = false
 
     showHideNewQuery : boolean = false
+
+    get currentResult() : TRunSqlQueryOutput | null {
+        if (!this.currentVersion) {
+            return null
+        }
+
+        if (!(this.currentVersion.Id in this.versionIdToResult)) {
+            return null
+        }
+
+        return this.versionIdToResult[this.currentVersion.Id]
+    }
 
     get metadataItems() : any[] {
         if (!this.allMetadata) {
@@ -433,6 +457,22 @@ export default class DatabaseQueryManager extends Props {
 
     runQuery() {
         this.queryRunning = true
+        runSqlQuery({
+            queryId: this.currentVersion!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TRunSqlQueryOutput) => {
+            this.queryRunning = false
+            Vue.set(this.versionIdToResult, this.currentVersion!.Id, resp)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+            this.queryRunning = false
+        })
     }
 }
 
