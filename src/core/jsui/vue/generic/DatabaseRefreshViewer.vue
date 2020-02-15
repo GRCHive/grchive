@@ -27,11 +27,19 @@
             >
             </v-select>
 
-            <database-schema-viewer
-                class="mt-2"
-                :schema="selectedSchema"
-            >
-            </database-schema-viewer>
+            <div class="mt-2">
+                <database-function-viewer
+                    :schema="selectedSchema"
+                    v-if="fnMode"
+                >
+                </database-function-viewer>
+
+                <database-schema-viewer
+                    :schema="selectedSchema"
+                    v-else
+                >
+                </database-schema-viewer>
+            </div>
         </div>
     </div>
 </template>
@@ -49,12 +57,17 @@ import { Watch } from 'vue-property-decorator'
 import { PageParamsStore } from '../../ts/pageParams'
 import { contactUsUrl } from '../../ts/url'
 import DatabaseSchemaViewer from './DatabaseSchemaViewer.vue'
+import DatabaseFunctionViewer from './DatabaseFunctionViewer.vue'
 
 const Props = Vue.extend({
     props: {
         refresh: {
             type: Object,
             default: Object() as () => DbRefresh | null
+        },
+        fnMode: {
+            type: Boolean,
+            default: false,
         }
     }
 })
@@ -62,6 +75,7 @@ const Props = Vue.extend({
 @Component({
     components: {
         DatabaseSchemaViewer,
+        DatabaseFunctionViewer,
     }
 })
 export default class DatabaseRefreshViewer extends Props {

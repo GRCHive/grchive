@@ -45,6 +45,7 @@ func allDatabaseSchemas(w http.ResponseWriter, r *http.Request) {
 type GetDatabaseSchemasInput struct {
 	SchemaId int64 `webcore:"schemaId"`
 	OrgId    int32 `webcore:"orgId"`
+	FnMode   bool  `webcore:"fnMode"`
 }
 
 func getDatabaseSchema(w http.ResponseWriter, r *http.Request) {
@@ -66,30 +67,49 @@ func getDatabaseSchema(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tables, err := database.GetAllTablesForSchema(inputs.SchemaId, inputs.OrgId, role)
-	if err != nil {
-		core.Warning("Failed to get tables: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	type ColumnMap map[int64][]*core.DbColumn
+	type SchemaOutput struct {
+		Tables  []*core.DbTable
+		Columns ColumnMap
 	}
 
-	type ColumnMap map[int64][]*core.DbColumn
-	allColumns := ColumnMap{}
+	retStruct := struct {
+		Schema    *SchemaOutput
+		Functions *[]*core.DbFunction
+	}{}
 
-	for _, tbl := range tables {
-		allColumns[tbl.Id], err = database.GetAllColumnsForTable(tbl.Id, inputs.OrgId, role)
+	if inputs.FnMode {
+		functions, err := database.GetAllFunctionsForSchema(inputs.SchemaId, inputs.OrgId, role)
 		if err != nil {
-			core.Warning("Failed to get columns: " + err.Error())
+			core.Warning("Failed to get functions: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		retStruct.Functions = &functions
+	} else {
+		tables, err := database.GetAllTablesForSchema(inputs.SchemaId, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get tables: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		allColumns := ColumnMap{}
+
+		for _, tbl := range tables {
+			allColumns[tbl.Id], err = database.GetAllColumnsForTable(tbl.Id, inputs.OrgId, role)
+			if err != nil {
+				core.Warning("Failed to get columns: " + err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		}
+
+		retStruct.Schema = &SchemaOutput{
+			Tables:  tables,
+			Columns: allColumns,
+		}
 	}
 
-	jsonWriter.Encode(struct {
-		Tables  []*core.DbTable
-		Columns ColumnMap
-	}{
-		Tables:  tables,
-		Columns: allColumns,
-	})
+	jsonWriter.Encode(retStruct)
 }

@@ -40,6 +40,15 @@ export interface DbSchema {
     SchemaName  : string
 }
 
+export interface DbFunction {
+    Id          : number
+    OrgId       : number
+    SchemaId    : number
+    Name        : string
+    Src         : string
+    RetType     : string | null
+}
+
 export interface DbTable {
     Id          : number
     OrgId       : number

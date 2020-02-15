@@ -51,6 +51,7 @@
             <database-refresh-viewer
                 class="px-4"
                 :refresh="selectedRefresh"
+                :fn-mode="fnMode"
             >
             </database-refresh-viewer>
         </div>
@@ -80,7 +81,11 @@ import DatabaseRefreshViewer from './DatabaseRefreshViewer.vue'
 const Props = Vue.extend({
     props: {
         dbId: Number,
-    }
+        fnMode: {
+            type: Boolean,
+            default: false,
+        }
+    },
 })
 
 const refreshIntervalSeconds : number = 15
@@ -154,7 +159,6 @@ export default class DatabaseRefreshManager extends Props {
                 true);
         })
     }
-
 
     deleteCurrentRefresh() {
         if (!this.selectedRefresh) {

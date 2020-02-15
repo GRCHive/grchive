@@ -9,6 +9,15 @@
                 </database-refresh-manager>
             </v-tab-item>
 
+            <v-tab>Functions</v-tab>
+            <v-tab-item>
+                <database-refresh-manager
+                    :db-id="dbId"
+                    fn-mode
+                >
+                </database-refresh-manager>
+            </v-tab-item>
+
             <v-tab>Queries</v-tab>
             <v-tab-item>
                 <database-query-manager
@@ -44,3 +53,11 @@ export default class DatabaseSqlEditor extends Props {
 }
 
 </script>
+
+<style scoped>
+
+>>>.v-tab {
+    justify-content: left !important;
+}
+
+</style>

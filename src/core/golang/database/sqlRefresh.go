@@ -197,6 +197,28 @@ func CreateNewDatabaseColumnWithTx(column *core.DbColumn, tx *sqlx.Tx, role *cor
 	return err
 }
 
+func CreateNewDatabaseFunctionWithTx(fn *core.DbFunction, tx *sqlx.Tx, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceDbSql, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
+	rows, err := tx.NamedQuery(`
+		INSERT INTO database_functions (org_id, schema_id, name, src, ret_type)
+		VALUES (:org_id, :schema_id, :name, :src, :ret_type)
+		RETURNING id
+	`, fn)
+
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	rows.Next()
+	err = rows.Scan(&fn.Id)
+	return err
+}
+
 func GetAllDatabaseRefresh(dbId int64, orgId int32, role *core.Role) ([]*core.DbRefresh, error) {
 	if !role.Permissions.HasAccess(core.ResourceDbSql, core.AccessView) {
 		return nil, core.ErrorUnauthorized

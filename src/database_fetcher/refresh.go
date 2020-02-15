@@ -76,6 +76,22 @@ func processRefreshRequest(refresh *core.DbRefresh) *webcore.RabbitMQError {
 			return onRefreshError(conn, refresh, "Failed to store schema ["+sch.SchemaName+"]: "+err.Error())
 		}
 
+		fns, err := driver.GetFunctions(sch)
+		if err != nil {
+			tx.Rollback()
+			return onRefreshError(conn, refresh, "Failed to get functions ["+sch.SchemaName+"]: "+err.Error())
+		}
+
+		for _, fn := range fns {
+			fn.SchemaId = sch.Id
+			fn.OrgId = sch.OrgId
+			err = database.CreateNewDatabaseFunctionWithTx(fn, tx, core.ServerRole)
+			if err != nil {
+				tx.Rollback()
+				return onRefreshError(conn, refresh, "Failed to store function ["+fn.Name+"]: "+err.Error())
+			}
+		}
+
 		tables, err := driver.GetTables(sch)
 		if err != nil {
 			tx.Rollback()

@@ -125,9 +125,10 @@ export default class DatabaseSchemaViewer extends Props {
         getSqlSchema({
             schemaId: this.schema!.Id,
             orgId: PageParamsStore.state.organization!.Id,
+            fnMode: false,
         }).then((resp : TGetSqlSchemaOutput) => {
-            this.allTables = resp.data.Tables
-            this.allColumns = resp.data.Columns
+            this.allTables = resp.data.Schema!.Tables
+            this.allColumns = resp.data.Schema!.Columns
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

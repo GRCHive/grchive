@@ -7,6 +7,29 @@ import (
 	"time"
 )
 
+type NullString struct {
+	sql.NullString
+}
+
+func (v NullString) MarshalJSON() ([]byte, error) {
+	if v.Valid {
+		return json.Marshal(v.String)
+	} else {
+		return json.Marshal(nil)
+	}
+}
+
+func (v *NullString) UnmarshalJSON(b []byte) error {
+	var val string
+	err := json.Unmarshal(b, &val)
+	if err != nil || string(b) == "null" {
+		return nil
+	}
+	v.NullString.String = val
+	v.NullString.Valid = true
+	return nil
+}
+
 type NullTime struct {
 	sql.NullTime
 }
@@ -133,6 +156,7 @@ var Int64ReflectType = reflect.TypeOf((int64)(0))
 var NullInt64ReflectType = reflect.TypeOf(NullInt64{})
 var NullInt32ReflectType = reflect.TypeOf(NullInt32{})
 var NullBoolReflectType = reflect.TypeOf(NullBool{})
+var NullStringReflectType = reflect.TypeOf(NullString{})
 var Int32ReflectType = reflect.TypeOf((int32)(0))
 var StringReflectType = reflect.TypeOf((string)(""))
 var Int64ArrayReflectType = reflect.TypeOf([]int64{})

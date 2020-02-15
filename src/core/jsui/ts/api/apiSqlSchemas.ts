@@ -9,7 +9,8 @@ import { getAPIRequestConfig } from './apiUtility'
 import { 
     DbSchema,
     DbTable,
-    DbColumn
+    DbColumn,
+    DbFunction
 } from '../sql'
 
 export interface TAllSqlSchemasInput {
@@ -28,12 +29,17 @@ export function allSqlSchemas(inp : TAllSqlSchemasInput) : Promise<TAllSqlSchema
 export interface TGetSqlSchemaInput {
     schemaId: number
     orgId: number
+    fnMode: boolean
 }
 
 export interface TGetSqlSchemaOutput {
     data: {
-        Tables: DbTable[]
-        Columns: Record<number, DbColumn[]>
+        Schema: {
+            Tables: DbTable[]
+            Columns: Record<number, DbColumn[]>
+        } | null
+        
+        Functions: DbFunction[] | null
     }
 }
 

@@ -64,6 +64,15 @@ type DbColumn struct {
 	ColumnType string `db:"column_type"`
 }
 
+type DbFunction struct {
+	Id       int64      `db:"id"`
+	OrgId    int32      `db:"org_id"`
+	SchemaId int64      `db:"schema_id"`
+	Name     string     `db:"name"`
+	Src      string     `db:"src"`
+	RetType  NullString `db:"ret_type"`
+}
+
 type DbSqlQueryMetadata struct {
 	Id          int64  `db:"id"`
 	DbId        int64  `db:"db_id"`

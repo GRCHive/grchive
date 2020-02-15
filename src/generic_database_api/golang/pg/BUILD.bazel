@@ -8,6 +8,7 @@ go_library(
         "connection.go",
         "schema.go",
         "query.go",
+        "functions.go",
     ],
     importpath = "gitlab.com/grchive/grchive/db_api/pg_api",
     deps = [

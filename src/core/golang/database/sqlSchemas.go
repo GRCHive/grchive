@@ -33,3 +33,17 @@ func GetAllColumnsForTable(tableId int64, orgId int32, role *core.Role) ([]*core
 	`, tableId, orgId)
 	return data, err
 }
+
+func GetAllFunctionsForSchema(schemaId int64, orgId int32, role *core.Role) ([]*core.DbFunction, error) {
+	if !role.Permissions.HasAccess(core.ResourceDbSql, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+	data := make([]*core.DbFunction, 0)
+	err := dbConn.Select(&data, `
+		SELECT *
+		FROM database_functions
+		WHERE schema_id = $1 AND org_id = $2
+		ORDER BY name ASC
+	`, schemaId, orgId)
+	return data, err
+}
