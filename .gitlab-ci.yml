@@ -9,6 +9,7 @@ stages:
     - predeploy
     - deploy0
     - deploy1
+    - deploy2
 
 variables:
     # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
@@ -205,6 +206,30 @@ Build Preview Generator Container (Staging):
     variables:
         RELEASE_BRANCH: "staging"
 
+Build Database Refresh Container (Production):
+    extends: .database-refresh-container
+    <<: *production-before-script
+    variables:
+        RELEASE_BRANCH: "production"
+
+Build Database Refresh Container (Staging):
+    extends: .database-refresh-container
+    <<: *staging-before-script
+    variables:
+        RELEASE_BRANCH: "staging"
+
+Build Database Runner Container (Production):
+    extends: .database-runner-container
+    <<: *production-before-script
+    variables:
+        RELEASE_BRANCH: "production"
+
+Build Database Runner Container (Staging):
+    extends: .database-runner-container
+    <<: *staging-before-script
+    variables:
+        RELEASE_BRANCH: "staging"
+
 Build Webserver Container (Production):
     extends: .webserver-container
     <<: *production-before-script
@@ -315,6 +340,22 @@ Deploy Preview Generator (Production):
     environment:
         name: Production
 
+Deploy Database Runner (Production):
+    extends: .deploy-database-runner
+    <<: *production-before-script
+    variables:
+        RELEASE_BRANCH: "production"
+    environment:
+        name: Production
+
+Deploy Database Fetcher (Production):
+    extends: .deploy-database-fetcher
+    <<: *production-before-script
+    variables:
+        RELEASE_BRANCH: "production"
+    environment:
+        name: Production
+
 Deploy Webserver (Production):
     extends: .deploy-webserver
     <<: *production-before-script
@@ -366,6 +407,22 @@ Deploy RabbitMQ (Staging):
 
 Deploy Preview Generator (Staging):
     extends: .deploy-preview-generator
+    <<: *staging-before-script
+    variables:
+        RELEASE_BRANCH: "staging"
+    environment:
+        name: Staging
+
+Deploy Database Runner (Staging):
+    extends: .deploy-database-runner
+    <<: *staging-before-script
+    variables:
+        RELEASE_BRANCH: "staging"
+    environment:
+        name: Staging
+
+Deploy Database Fetcher (Staging):
+    extends: .deploy-database-fetcher
     <<: *staging-before-script
     variables:
         RELEASE_BRANCH: "staging"

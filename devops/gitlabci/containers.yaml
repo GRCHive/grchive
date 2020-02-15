@@ -28,6 +28,32 @@
     rules:
         - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
 
+.database-runner-container:
+    stage: containers
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    variables:
+        FULL_IMAGE_URL: $CI_FULL_REGISTRY/database_query_runner
+    script:
+        - bazel build //devops/docker/database_query_runner:docker_database_query_runner.tar
+        - docker load -i bazel-bin/devops/docker/database_query_runner/docker_database_query_runner.tar
+        - docker tag bazel/devops/docker/database_query_runner:docker_database_query_runner $FULL_IMAGE_URL:$CI_COMMIT_SHA
+        - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
+
+.database-refresh-container:
+    stage: containers
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    variables:
+        FULL_IMAGE_URL: $CI_FULL_REGISTRY/database_fetcher
+    script:
+        - bazel build //devops/docker/database_fetcher:docker_database_fetcher.tar
+        - docker load -i bazel-bin/devops/docker/database_fetcher/docker_database_fetcher.tar
+        - docker tag bazel/devops/docker/database_fetcher:docker_database_fetcher $FULL_IMAGE_URL:$CI_COMMIT_SHA
+        - docker push $FULL_IMAGE_URL:$CI_COMMIT_SHA
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
+
 .webserver-container:
     stage: containers
     image: $CI_FULL_REGISTRY/ci-image:latest

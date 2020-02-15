@@ -53,6 +53,8 @@ ${DIR}/build_rabbitmq_container.sh
 ${DIR}/build_vault_container.sh
 ${DIR}/build_preview_generator_container.sh
 ${DIR}/build_webserver_container.sh
+${DIR}/build_database_refresh_worker.sh
+${DIR}/build_database_runner_worker.sh
 
 gcloud auth activate-service-account --key-file devops/gcloud/gcloud-terraform-account.json
 gcloud config set project ${GRCHIVE_PROJECT}

@@ -27,6 +27,18 @@ envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
 kubectl apply -f deployment.prod.yaml
 cd ../
 
+export RUNNER_IMAGE=registry.gitlab.com/grchive/grchive/database_query_runner:`git rev-parse HEAD`
+cd database_query_runner
+envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+kubectl apply -f deployment.prod.yaml -f service.yaml
+cd ../
+
+export FETCHER_IMAGE=registry.gitlab.com/grchive/grchive/database_fetcher:`git rev-parse HEAD`
+cd database_fetcher
+envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+kubectl apply -f deployment.prod.yaml
+cd ../
+
 export WEBSERVER_IMAGE=registry.gitlab.com/grchive/grchive/webserver:`git rev-parse HEAD`
 export NGINX_IMAGE=registry.gitlab.com/grchive/grchive/nginx:`git rev-parse HEAD`
 cd webserver

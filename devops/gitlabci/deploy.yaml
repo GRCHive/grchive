@@ -80,8 +80,34 @@
         - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
           when: on_success
 
-.deploy-webserver:
+.deploy-database-runner:
     stage: deploy1
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - export PREVIEW_IMAGE=$CI_FULL_REGISTRY/database_query_runner:$CI_COMMIT_SHA
+        - cd devops/k8s/database_query_runner
+        - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+        - kubectl apply -f deployment.prod.yaml -f service.yaml
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
+          when: on_success
+
+.deploy-database-fetcher:
+    stage: deploy1
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - export PREVIEW_IMAGE=$CI_FULL_REGISTRY/database_fetcher:$CI_COMMIT_SHA
+        - cd devops/k8s/database_fetcher
+        - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+        - kubectl apply -f deployment.prod.yaml
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
+          when: on_success
+
+.deploy-webserver:
+    stage: deploy2
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
         - gcloud container clusters get-credentials webserver-gke-cluster
