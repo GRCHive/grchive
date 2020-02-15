@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: database-query-runner-deployment
+    name: database-fetcher-deployment
     labels:
-        app: database-query-runner
+        app: database-fetcher
 spec:
     replicas: 1
     selector:
         matchLabels:
-            app: database-query-runner
+            app: database-fetcher
     template:
         metadata:
             labels:
-                app: database-query-runner
+                app: database-fetcher
         spec:
             containers:
-                - name: database-query-runner-container
-                  image: ${RUNNER_IMAGE}
+                - name: database-fetcher-container
+                  image: registry.gitlab.com/grchive/grchive/database_fetcher:368caf7bf44797976b71617a82d19dafbc6e808c
                 - name: cloudsql-proxy
                   image: gcr.io/cloudsql-docker/gce-proxy:1.16
                   command: ["/cloud_sql_proxy",
-                             "-instances=${GRCHIVE_PROJECT}:us-central1:${POSTGRES_INSTANCE_NAME}=tcp:5432",
+                             "-instances=grchive-staging:us-central1:grchive-postgresql-primary-instance=tcp:5432",
                              "-credential_file=/secrets/gke/gcloud-service-account.json"]
                   securityContext:
                       runAsUser: 2  # non-root user
@@ -29,11 +29,6 @@ spec:
                       - name: gke-service-account
                         mountPath: /secrets/gke
                         readOnly: true
-                  resources:
-                        requests:
-                            cpu: "10m"
-                        limits:
-                            cpu: "100m"
             volumes:
                 - name: gke-service-account
                   secret:

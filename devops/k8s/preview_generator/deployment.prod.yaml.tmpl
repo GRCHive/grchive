@@ -29,6 +29,11 @@ spec:
                       - name: gke-service-account
                         mountPath: /secrets/gke
                         readOnly: true
+                  resources:
+                        requests:
+                            cpu: "10m"
+                        limits:
+                            cpu: "100m"
             volumes:
                 - name: gke-service-account
                   secret:
