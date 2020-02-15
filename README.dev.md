@@ -192,9 +192,9 @@ If you wish to run the Docker container:
 
 - `bazel run //devops/docker/preview_generator:docker_preview_generator`
 
-## Build and Run Database Worker
+## Build and Run Database Refresh Worker
 
-The database worker is the one that retrieves client database schemas and runs SQL queries.
+The database worker is the one that retrieves client database schemas and functions.
 This relies on having a running RabbitMQ server (Docker) and a running PostgreSQL database.
 
 - `cd $SRC`
@@ -202,6 +202,21 @@ This relies on having a running RabbitMQ server (Docker) and a running PostgreSQ
 - `bazel run //src/database_fetcher:fetcher`
 
 If you wish to run the Docker container:
+
+- `bazel run //devops/docker/database_fetcher:docker_database_fetcher`
+
+## Build and Run Database Runner Worker
+
+The database worker is the one that runs SQL queries.
+This relies on having a running PostgreSQL database.
+
+- `cd $SRC`
+- `bazel build //src/database_query_runner:runner`
+- `bazel run //src/database_query_runner:runner`
+
+If you wish to run the Docker container:
+
+- `bazel run //devops/docker/database_query_runner:docker_database_query_runner`
 
 ## Run Tests
 
