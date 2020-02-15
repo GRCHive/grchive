@@ -11,7 +11,9 @@ import (
 )
 
 func onRefreshError(conn *core.DatabaseConnection, refresh *core.DbRefresh, err string) *webcore.RabbitMQError {
-	err = strings.Replace(err, conn.Password, "*******", -1)
+	if conn != nil {
+		err = strings.Replace(err, conn.Password, "*******", -1)
+	}
 	database.MarkFailureRefresh(refresh.Id, err, core.ServerRole)
 	return &webcore.RabbitMQError{errors.New(err), true}
 }
@@ -23,40 +25,40 @@ func onRefreshSuccess(refresh *core.DbRefresh, tx *sqlx.Tx) error {
 func processRefreshRequest(refresh *core.DbRefresh) *webcore.RabbitMQError {
 	db, err := database.GetDb(refresh.DbId, refresh.OrgId, core.ServerRole)
 	if err != nil {
-		return &webcore.RabbitMQError{err, true}
+		return onRefreshError(nil, refresh, "Failed to get DB: "+err.Error())
 	}
 
 	dbType, err := database.GetDbType(db.Id, db.OrgId, core.ServerRole)
 	if err != nil {
-		return &webcore.RabbitMQError{err, true}
+		return onRefreshError(nil, refresh, "Failed to get DB type: "+err.Error())
 	}
 
 	if !dbType.HasSqlSupport {
-		return &webcore.RabbitMQError{errors.New("Database type unsupported."), false}
+		return onRefreshError(nil, refresh, "Database type unsupported.")
 	}
 
 	conn, err := database.FindDatabaseConnectionForDatabase(db.Id, db.OrgId, core.ServerRole)
 	if err != nil {
-		return &webcore.RabbitMQError{err, true}
+		return onRefreshError(nil, refresh, "Failed to find database connection: "+err.Error())
 	}
 
 	if conn == nil {
-		return &webcore.RabbitMQError{errors.New("Failed to find database connection."), false}
+		return onRefreshError(nil, refresh, "Failed to find database connection.")
 	}
 
 	conn.Password, err = webcore.DecryptSaltedEncryptedPassword(conn.Password, conn.Salt)
 	if err != nil {
-		return &webcore.RabbitMQError{err, true}
+		return onRefreshError(conn, refresh, "Failed to decrypt password: "+err.Error())
 	}
 
 	driver, err := db_api.CreateDriver(dbType, conn)
 	if err != nil {
 		// Don't put error here just in case there's a PW lurking around.
-		return &webcore.RabbitMQError{errors.New("Failed to connect to database."), false}
+		return onRefreshError(conn, refresh, "Failed to connect to database.")
 	}
 
 	if !driver.ConnectionReadOnly() {
-		return &webcore.RabbitMQError{errors.New("The database user has non-read permissions."), false}
+		return onRefreshError(conn, refresh, "The database user has non-read permissions.")
 	}
 
 	tx := database.CreateTx()
@@ -133,7 +135,7 @@ func processRefreshRequest(refresh *core.DbRefresh) *webcore.RabbitMQError {
 
 	err = tx.Commit()
 	if err != nil {
-		return &webcore.RabbitMQError{err, true}
+		return onRefreshError(conn, refresh, "Failed to commit results: "+err.Error())
 	}
 
 	return nil

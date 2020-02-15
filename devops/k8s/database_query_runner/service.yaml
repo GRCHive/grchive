@@ -9,4 +9,4 @@ spec:
         - port: 6000
           protocol: TCP
     selector:
-        app: query-runner-service
+        app: database-query-runner

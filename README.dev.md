@@ -280,7 +280,7 @@ At this point you will need to rebuild all Docker containers.
 - `kubectl apply -f ./deployment.dev.yaml`
 - `kubectl apply -f ./service-internal.yaml`
 - `kubectl apply -f ./service-external.dev.yaml`
-- Set the `VAULT_HOST` build variable to be `internal-vault-service.grchive.com` (this will require you to rebuild some Docker containers).
+- Set the `VAULT_HOST` build variable to be `http://internal-vault-service` (this will require you to rebuild some Docker containers).
 - Run `kubectl get services -l app=vault` and get the external port of the service. For example
 
     ```
