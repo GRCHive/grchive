@@ -65,6 +65,8 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `GRCHIVE_URI`: The URI to access the running webserver (with the http/https prefix).
 - `GRCHIVE_DOMAIN`: The domain name of the webserver (without the http or https prefix and port number).
 - `GRCHIVE_DOC_BUCKET`: The Google Cloud Storage bucket in which to store the documentation files.
+- `GRPC_QUERY_RUNNER_HOST`: The hostname of the database_query_runner worker.
+- `GRPC_QUERY_RUNNER_PORT`: The port the database_query_runner worker is listening on.
 
 ## Setup Dependencies
 
@@ -301,6 +303,17 @@ At this point you will need to rebuild all Docker containers.
 
 - `cd $SRC/devops/k8s/preview_generator`
 - `kubectl apply -f ./deployment.dev.yaml`
+
+### Database Refresh Worker
+
+- `cd $SRC/devops/k8s/database_fetcher`
+- `kubectl apply -f ./deployment.dev.yaml`
+
+### Database Runner Worker
+
+- `cd $SRC/devops/k8s/database_query_runner`
+- `kubectl apply -f ./deployment.dev.yaml -f ./service.yaml`
+- Set the `GRPC_QUERY_RUNNER_HOST` build variable to be `query-runner-service` (this will require you to rebuild some Docker containers).
 
 ### Webserver
 

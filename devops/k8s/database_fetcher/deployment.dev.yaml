@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: database-fetcher-deployment
+    labels:
+        app: database-fetcher
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: database-fetcher
+    template:
+        metadata:
+            labels:
+                app: database-fetcher
+        spec:
+            containers:
+                - name: database-fetcher-container
+                  image: bazel/devops/docker/database_fetcher:docker_database_fetcher
+                  imagePullPolicy: Never
