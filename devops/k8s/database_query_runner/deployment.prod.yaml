@@ -16,7 +16,7 @@ spec:
         spec:
             containers:
                 - name: database-query-runner-container
-                  image: registry.gitlab.com/grchive/grchive/database_query_runner:368caf7bf44797976b71617a82d19dafbc6e808c
+                  image: registry.gitlab.com/grchive/grchive/database_query_runner:4c26a0f67db7a86252f95eb8a0122a1261231f4b
                 - name: cloudsql-proxy
                   image: gcr.io/cloudsql-docker/gce-proxy:1.16
                   command: ["/cloud_sql_proxy",
@@ -29,6 +29,11 @@ spec:
                       - name: gke-service-account
                         mountPath: /secrets/gke
                         readOnly: true
+                  resources:
+                        requests:
+                            cpu: "10m"
+                        limits:
+                            cpu: "100m"
             volumes:
                 - name: gke-service-account
                   secret:
