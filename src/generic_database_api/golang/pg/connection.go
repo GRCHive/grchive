@@ -207,3 +207,7 @@ func (pg *PgDriver) ConnectionReadOnly() bool {
 
 	return pg.grants.IsReadOnly()
 }
+
+func (pg *PgDriver) Close() {
+	pg.connection.Close()
+}

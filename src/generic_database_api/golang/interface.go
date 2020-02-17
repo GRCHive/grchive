@@ -8,6 +8,7 @@ import (
 type DbDriver interface {
 	Connect(*core.DatabaseConnection) error
 	ConnectionReadOnly() bool
+	Close()
 
 	GetSchemas() ([]*core.DbSchema, error)
 	GetTables(*core.DbSchema) ([]*core.DbTable, error)

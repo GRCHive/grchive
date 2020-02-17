@@ -46,11 +46,13 @@ func (pg *PgDriver) Connect(conn *core.DatabaseConnection) error {
 
 	pg.currentRole, err = retrieveRole(pg.connection, pg.connInfo.Username)
 	if err != nil {
+		pg.Close()
 		return err
 	}
 
 	pg.grants, err = retrieveSchemaGrants(pg.connection, pg.connInfo.Username, pg.connInfo.DbName)
 	if err != nil {
+		pg.Close()
 		return err
 	}
 

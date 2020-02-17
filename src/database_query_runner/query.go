@@ -43,6 +43,7 @@ func runQuery(queryId int64, orgId int32) (*utility.SqlQueryResult, error) {
 	if err != nil {
 		return nil, errors.New("Failed to connect to database.")
 	}
+	defer driver.Close()
 
 	result, err := driver.RunQuery(query.Query)
 	if err != nil {

@@ -56,6 +56,7 @@ func processRefreshRequest(refresh *core.DbRefresh) *webcore.RabbitMQError {
 		// Don't put error here just in case there's a PW lurking around.
 		return onRefreshError(conn, refresh, "Failed to connect to database.")
 	}
+	defer driver.Close()
 
 	if !driver.ConnectionReadOnly() {
 		return onRefreshError(conn, refresh, "The database user has non-read permissions.")
