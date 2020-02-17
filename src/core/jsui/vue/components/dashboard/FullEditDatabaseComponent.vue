@@ -199,6 +199,15 @@
                         >
                         </database-sql-editor>
                     </v-tab-item>
+
+                    <v-tab>Requests</v-tab>
+                    <v-tab-item>
+                        <dashboard-sql-request-list
+                            class="px-2"
+                            :db-id="currentDb.Id"
+                        >
+                        </dashboard-sql-request-list>
+                    </v-tab-item>
                 </v-tabs>
 
             </v-container>
@@ -229,6 +238,7 @@ import { System } from '../../../ts/systems'
 import { FullDeployment } from '../../../ts/deployments'
 import DeploymentEditor from '../../generic/DeploymentEditor.vue'
 import DatabaseSqlEditor from '../../generic/DatabaseSqlEditor.vue'
+import DashboardSqlRequestList from './DashboardSqlRequestList.vue'
 import { newDeployment, TNewDeploymentOutput } from '../../../ts/api/apiDeployments'
 
 @Component({
@@ -240,6 +250,7 @@ import { newDeployment, TNewDeploymentOutput } from '../../../ts/api/apiDeployme
         SystemsTable,
         DeploymentEditor,
         DatabaseSqlEditor,
+        DashboardSqlRequestList
     }
 })
 export default class FullEditDatabaseComponent extends Vue {

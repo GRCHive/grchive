@@ -33,15 +33,19 @@ export function allSqlQuery(inp : TAllSqlQueryInput) : Promise<TAllSqlQueryOutpu
 export interface TGetSqlQueryInput {
     metadataId: number
     orgId: number
+    queryId: number
 }
 
 export interface TGetSqlQueryOutput {
-    data: DbSqlQuery[]
+    data: {
+        Queries: DbSqlQuery[]
+        Metadata: DbSqlQueryMetadata
+    }
 }
 
 export function getSqlQuery(inp : TGetSqlQueryInput) : Promise<TGetSqlQueryOutput> {
     return axios.get(getSqlQueryUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetSqlQueryOutput) => {
-        resp.data.forEach(cleanDbSqlQueryFromJson)
+        resp.data.Queries.forEach(cleanDbSqlQueryFromJson)
         return resp
     })
 }

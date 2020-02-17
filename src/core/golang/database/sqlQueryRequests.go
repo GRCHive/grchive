@@ -6,7 +6,7 @@ import (
 )
 
 func CreateNewSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.Role, tx *sqlx.Tx) error {
-	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessView) {
+	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessManage) {
 		return core.ErrorUnauthorized
 	}
 
@@ -36,4 +36,23 @@ func CreateNewSqlQueryRequest(request *core.DbSqlQueryRequest, role *core.Role) 
 		return err
 	}
 	return tx.Commit()
+}
+
+func GetAllSqlRequestsForDb(dbId int64, orgId int32, role *core.Role) ([]*core.DbSqlQueryRequest, error) {
+	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	data := make([]*core.DbSqlQueryRequest, 0)
+	err := dbConn.Select(&data, `
+		SELECT req.*
+		FROM database_sql_query_requests AS req
+		INNER JOIN database_sql_queries AS query
+			ON req.query_id = query.id
+		INNER JOIN database_sql_metadata AS meta
+			ON query.metadata_id = meta.id
+		WHERE meta.db_id = $1 AND meta.org_id = $2
+		ORDER BY req.upload_time DESC
+	`, dbId, orgId)
+	return data, err
 }

@@ -52,6 +52,7 @@ func allDatabaseQuery(w http.ResponseWriter, r *http.Request) {
 type GetDatabaseQueryInput struct {
 	MetadataId int64 `webcore:"metadataId"`
 	OrgId      int32 `webcore:"orgId"`
+	QueryId    int64 `webcore:"queryId"`
 }
 
 func getDatabaseQuery(w http.ResponseWriter, r *http.Request) {
@@ -73,14 +74,42 @@ func getDatabaseQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	queries, err := database.GetAllSqlQueryVersionsForMetadata(inputs.MetadataId, inputs.OrgId, role)
+	var queries []*core.DbSqlQuery
+	var desiredMetadataId int64
+	if inputs.MetadataId != -1 {
+		queries, err = database.GetAllSqlQueryVersionsForMetadata(inputs.MetadataId, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get all metadata version: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		desiredMetadataId = inputs.MetadataId
+	} else {
+		q, err := database.GetSqlQueryFromId(inputs.QueryId, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get query: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		queries = append(queries, q)
+
+		desiredMetadataId = q.MetadataId
+	}
+
+	metadata, err := database.GetSqlMetadataFromId(desiredMetadataId, inputs.OrgId, role)
 	if err != nil {
-		core.Warning("Failed to get all metadata version: " + err.Error())
+		core.Warning("Failed to get metadata: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	jsonWriter.Encode(queries)
+	jsonWriter.Encode(struct {
+		Queries  []*core.DbSqlQuery
+		Metadata *core.DbSqlQueryMetadata
+	}{
+		Queries:  queries,
+		Metadata: metadata,
+	})
 }
 
 type NewDatabaseQueryInput struct {

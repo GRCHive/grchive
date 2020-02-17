@@ -1,29 +1,40 @@
 import Vue from 'vue'
 import { Store, StoreOptions } from 'vuex'
-import { DbRefresh } from '../sql'
+import { DbRefresh, DbSqlQueryRequest } from '../sql'
 import { PageParamsStore } from '../pageParams'
 import {
     allSqlRefresh, TAllSqlRefreshOutput,
     getSqlRefresh, TGetSqlRefreshOutput,
 } from '../api/apiSqlRefresh'
+import {
+    allSqlRequest, TAllSqlRequestOutput,
+} from '../api/apiSqlRequests'
 
 interface DatabaseStoreState {
+    dbId : number
     allRefreshes: DbRefresh[] | null
     allRefreshInProgress: boolean 
 
     selectedRefresh : DbRefresh | null
     isPollingRefresh : boolean
+
+    allRequests : DbSqlQueryRequest[] | null
 }
 
 const refreshIntervalSeconds : number = 15
 const databaseStore : StoreOptions<DatabaseStoreState> = {
     state: {
+        dbId : -1,
         allRefreshes: null,
         allRefreshInProgress : false,
         selectedRefresh: null,
-        isPollingRefresh: false
+        isPollingRefresh: false,
+        allRequests: null
     },
     mutations: {
+        setDbId(state : DatabaseStoreState, id : number) {
+            state.dbId = id
+        },
         startAllRefresh(state : DatabaseStoreState) {
             state.allRefreshInProgress = true
         },
@@ -49,6 +60,9 @@ const databaseStore : StoreOptions<DatabaseStoreState> = {
         selectNewRefresh(state : DatabaseStoreState, ref : DbRefresh | null) {
             state.selectedRefresh = ref
             state.isPollingRefresh = false
+        },
+        setAllRequests(state : DatabaseStoreState, all : DbSqlQueryRequest[]) {
+            state.allRequests = all
         },
     },
     actions: {
@@ -129,6 +143,14 @@ const databaseStore : StoreOptions<DatabaseStoreState> = {
                 context.state.allRefreshes!.length > 0 ? 
                     context.state.allRefreshes![0] :
                     null)
+        },
+        pullRequests(context) {
+            allSqlRequest({
+                dbId: context.state.dbId,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TAllSqlRequestOutput) => {
+                context.commit('setAllRequests', resp.data)
+            })
         }
     }
 }
@@ -139,6 +161,7 @@ export type DatabaseStore = Store<DatabaseStoreState>
 export function getStoreForDatabase(id : number) : DatabaseStore {
     if (!(id in allDatabaseStores)) {
         let store = new Store<DatabaseStoreState>(databaseStore)
+        store.commit('setDbId', id)
         store.dispatch('getRefreshesForDb', id)
         allDatabaseStores[id] = store
     }

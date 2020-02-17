@@ -219,8 +219,9 @@ export default class DatabaseQueryManager extends Props {
         getSqlQuery({
             metadataId: this.currentMetadata!.Id,
             orgId: PageParamsStore.state.organization!.Id,
+            queryId: -1,
         }).then((resp : TGetSqlQueryOutput) => {
-            this.allVersions = resp.data
+            this.allVersions = resp.data.Queries
             if (this.allVersions!.length > 0) {
                 this.selectVersion(this.allVersions![0])
             }
