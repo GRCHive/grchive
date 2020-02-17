@@ -1,7 +1,7 @@
 <script lang="ts">
 
 import Vue, {VNode} from 'vue'
-import { VIcon } from 'vuetify/lib'
+import { VIcon, VRow, VCol } from 'vuetify/lib'
 import Component from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
@@ -12,6 +12,7 @@ import { PageParamsStore } from '../../ts/pageParams'
 import { standardFormatTime } from '../../ts/time'
 import { DbSqlQuery, DbSqlQueryMetadata } from '../../ts/sql'
 import { getSqlQuery, TGetSqlQueryOutput } from '../../ts/api/apiSqlQueries'
+import SqlTextArea from './SqlTextArea.vue'
 
 interface QueryMetadataPacket {
     query: DbSqlQuery
@@ -21,6 +22,7 @@ interface QueryMetadataPacket {
 @Component({
     components: {
         BaseResourceTable,
+        SqlTextArea
     }
 })
 export default class SqlRequestTable extends ResourceTableProps {
@@ -112,6 +114,42 @@ export default class SqlRequestTable extends ResourceTableProps {
     }
 
     renderExpansion(props : any) : VNode {
+        let descriptionCol = this.$createElement(
+            VCol,
+            {
+                props: {
+                    cols: 4,
+                }
+            },
+            props.item.value.Description
+        )
+
+        let queryColChildren : VNode[] = []
+
+        if (!!this.idToQuery[props.item.value.QueryId])  {
+            queryColChildren.push(
+                this.$createElement(
+                    SqlTextArea,
+                    {
+                        props: {
+                            value: this.idToQuery[props.item.value.QueryId].query.Query,
+                            readonly: true,
+                        },
+                    },
+                )
+            )
+        }
+
+        let queryCol = this.$createElement(
+            VCol,
+            {
+                props: {
+                    cols: 8,
+                }
+            },
+            queryColChildren
+        )
+
         return this.$createElement(
             'td',
             {
@@ -119,7 +157,18 @@ export default class SqlRequestTable extends ResourceTableProps {
                     colspan: props.headers.length
                 },
             },
-            props.item.value.Description
+            [this.$createElement(
+                VRow,
+                {
+                    props: {
+                        align: "center",
+                        justify: "center",
+                    }
+                },
+                [
+                    descriptionCol, queryCol,
+                ]
+            )]
         )
     }
 
