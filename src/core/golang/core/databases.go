@@ -100,3 +100,21 @@ type DbSqlQueryRequest struct {
 	Name         string    `db:"name"`
 	Description  string    `db:"description"`
 }
+
+type DbSqlQueryRequestApproval struct {
+	RequestId        int64     `db:"request_id"`
+	OrgId            int32     `db:"org_id"`
+	ResponseTime     time.Time `db:"response_time"`
+	ResponsderUserId int64     `db:"responsder_user_id"`
+	Response         bool      `db:"response"`
+	Reason           string    `db:"reason"`
+}
+
+type DbSqlQueryRunCode struct {
+	RequestId      int64     `db:"request_id"`
+	OrgId          int32     `db:"org_id"`
+	ExpirationTime time.Time `db:"expiration_time"`
+	UsedTime       NullTime  `db:"used_time"`
+	HashedCode     string    `db:"hashed_code"`
+	Salt           string    `db:"salt"`
+}

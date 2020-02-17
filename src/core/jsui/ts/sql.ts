@@ -104,3 +104,16 @@ export function cleanDbSqlQueryFromJson(q : DbSqlQuery) {
 export function cleanDbSqlRequestFromJson(q : DbSqlQueryRequest) {
     q.UploadTime = new Date(q.UploadTime)
 }
+
+export interface DbSqlQueryRequestApproval {
+	RequestId        : number
+	OrgId            : number
+	ResponseTime     : Date
+	ResponsderUserId : number
+	Response         : boolean
+	Reason           : string
+}
+
+export function cleanDbSqlRequestApprovalFromJson(q : DbSqlQueryRequestApproval) {
+    q.ResponseTime = new Date(q.ResponseTime)
+}

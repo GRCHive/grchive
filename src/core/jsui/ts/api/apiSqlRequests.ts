@@ -3,12 +3,15 @@ import * as qs from 'query-string'
 import { 
     newSqlRequestUrl,
     allSqlRequestUrl,
+    statusSqlRequestUrl,
 } from '../url'
 import { getAPIRequestConfig } from './apiUtility'
 import { postFormJson } from '../http'
 import { 
     DbSqlQueryRequest,
-    cleanDbSqlRequestFromJson
+    DbSqlQueryRequestApproval,
+    cleanDbSqlRequestFromJson,
+    cleanDbSqlRequestApprovalFromJson
 } from '../sql'
 
 export interface TNewSqlRequestInput {
@@ -41,6 +44,24 @@ export interface TAllSqlRequestOutput {
 export function allSqlRequest(inp : TAllSqlRequestInput) : Promise<TAllSqlRequestOutput> {
     return axios.get(allSqlRequestUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TAllSqlRequestOutput) => {
         resp.data.forEach(cleanDbSqlRequestFromJson)
+        return resp
+    })
+}
+
+export interface TStatusSqlRequestInput {
+    requestId : number
+    orgId : number
+}
+
+export interface TStatusSqlRequestOutput {
+    data: DbSqlQueryRequestApproval | null
+}
+
+export function statusSqlRequest(inp : TStatusSqlRequestInput) : Promise<TStatusSqlRequestOutput> {
+    return axios.get(statusSqlRequestUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TStatusSqlRequestOutput) => {
+        if (!!resp.data) {
+            cleanDbSqlRequestApprovalFromJson(resp.data)
+        }
         return resp
     })
 }

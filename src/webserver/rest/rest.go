@@ -250,6 +250,7 @@ func registerITSqlRequestsAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiITSqlRequestsPrefix).Subrouter()
 	s.HandleFunc(core.ApiNewEndpoint, newSqlRequest).Methods("POST")
 	s.HandleFunc(core.ApiAllEndpoint, allSqlRequest).Methods("GET")
+	s.HandleFunc(core.ApiITSqlRequestsStatusEndpoint, statusSqlRequest).Methods("GET")
 }
 
 func registerITServerAPIPaths(r *mux.Router) {

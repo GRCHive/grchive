@@ -71,3 +71,31 @@ func GetAllSqlRequestsForOrg(orgId int32, role *core.Role) ([]*core.DbSqlQueryRe
 	`, orgId)
 	return data, err
 }
+
+func GetSqlRequestStatus(requestId int64, orgId int32, role *core.Role) (*core.DbSqlQueryRequestApproval, error) {
+	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	rows, err := dbConn.Queryx(`
+		SELECT *
+		FROM database_sql_query_requests_approvals
+		WHERE request_id = $1 AND org_id = $2
+	`, requestId, orgId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, nil
+	}
+
+	approval := core.DbSqlQueryRequestApproval{}
+	err = rows.StructScan(&approval)
+	if err != nil {
+		return nil, err
+	}
+
+	return &approval, nil
+}

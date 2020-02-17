@@ -1,7 +1,7 @@
 <script lang="ts">
 
 import Vue, {VNode} from 'vue'
-import { VIcon, VRow, VCol } from 'vuetify/lib'
+import { VIcon, VRow, VCol, VTooltip } from 'vuetify/lib'
 import Component from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
@@ -10,8 +10,11 @@ import { createUserString } from '../../ts/users'
 import { contactUsUrl } from '../../ts/url'
 import { PageParamsStore } from '../../ts/pageParams'
 import { standardFormatTime } from '../../ts/time'
-import { DbSqlQuery, DbSqlQueryMetadata } from '../../ts/sql'
+import { DbSqlQuery, DbSqlQueryMetadata, DbSqlQueryRequestApproval } from '../../ts/sql'
 import { getSqlQuery, TGetSqlQueryOutput } from '../../ts/api/apiSqlQueries'
+import {
+    statusSqlRequest, TStatusSqlRequestOutput
+} from '../../ts/api/apiSqlRequests'
 import SqlTextArea from './SqlTextArea.vue'
 
 interface QueryMetadataPacket {
@@ -27,7 +30,10 @@ interface QueryMetadataPacket {
 })
 export default class SqlRequestTable extends ResourceTableProps {
     idToQuery : Record<number, QueryMetadataPacket> = Object()
-    pendingRequests : Set<number> = new Set<number>()
+    pendingQueryRequests : Set<number> = new Set<number>()
+
+    idToApproval : Record<number, DbSqlQueryRequestApproval | null> = Object()
+    pendingApprovalRequests : Set<number> = new Set<number>()
 
     get tableHeaders() : any[] {
         return [
@@ -47,6 +53,10 @@ export default class SqlRequestTable extends ResourceTableProps {
                 text: 'Request Time',
                 value: 'requestTime',
             },
+            {
+                text: 'Approval',
+                value: 'approval',
+            },
         ]
     }
 
@@ -55,11 +65,11 @@ export default class SqlRequestTable extends ResourceTableProps {
             return
         }
 
-        if (this.pendingRequests.has(id)) {
+        if (this.pendingQueryRequests.has(id)) {
             return
         }
 
-        this.pendingRequests.add(id)
+        this.pendingQueryRequests.add(id)
         new Promise<QueryMetadataPacket>((resolve, reject) => {
             getSqlQuery({
                 metadataId: -1,
@@ -75,7 +85,7 @@ export default class SqlRequestTable extends ResourceTableProps {
             })
         }).then((val : QueryMetadataPacket) => {
             Vue.set(this.idToQuery, id, val)
-            this.pendingRequests.delete(id)
+            this.pendingQueryRequests.delete(id)
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
@@ -87,6 +97,38 @@ export default class SqlRequestTable extends ResourceTableProps {
         })
     }
 
+    loadApproval(id : number) {
+        if (id in this.idToApproval) {
+            return
+        }
+
+        if (this.pendingApprovalRequests.has(id)) {
+            return
+        }
+
+        this.pendingApprovalRequests.add(id)
+        new Promise<DbSqlQueryRequestApproval | null>((resolve, reject) => {
+            statusSqlRequest({
+                requestId: id,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp: TStatusSqlRequestOutput) => {
+                resolve(resp.data)
+            }).catch(() => {
+                reject()
+            })
+        }).then((val : DbSqlQueryRequestApproval | null) => {
+            Vue.set(this.idToApproval, id, val)
+            this.pendingApprovalRequests.delete(id)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
 
     get tableItems(): any[] {
         return this.resources.map(this.transformInputResourceToTableItem)
@@ -98,6 +140,7 @@ export default class SqlRequestTable extends ResourceTableProps {
 
     transformInputResourceToTableItem(inp : any) : any {
         this.loadQuery(inp.QueryId)
+        this.loadApproval(inp.Id)
 
         let queryName = !!this.idToQuery[inp.QueryId] ? 
             `${this.idToQuery[inp.QueryId].metadata.Name} v${this.idToQuery[inp.QueryId].query.Version}` :
@@ -109,7 +152,61 @@ export default class SqlRequestTable extends ResourceTableProps {
             query: queryName,
             requester: createUserString(MetadataStore.getters.getUser(inp.UploadUserId)),
             requestTime: standardFormatTime(inp.UploadTime),
+            approval: this.idToApproval[inp.Id],
             value: inp
+        }
+    }
+
+    renderApproval(props : any) : VNode {
+        let approval : DbSqlQueryRequestApproval | null = props.item.approval
+
+        if (!approval) {
+            return this.$createElement(
+                VIcon,
+                {
+                    props: {
+                        small : true,
+                        color: 'warning'
+                    }
+                },
+                'mdi-help-circle'
+            )
+        } else if (approval.Response) {
+            return this.$createElement(
+                VIcon,
+                {
+                    props: {
+                        small : true,
+                        color: 'success'
+                    }
+                },
+                'mdi-check'
+            )
+        } else {
+            let renderIcon = (props : any) => {
+                return this.$createElement(
+                    VIcon,
+                    {
+                        props: {
+                            small : true,
+                            color: 'error'
+                        },
+                        on: props.on,
+                    },
+                    'mdi-close'
+                )
+            }
+
+            return this.$createElement(
+                VTooltip,
+                {
+                    props: {
+                        bottom: true,
+                    }
+                },
+                approval.Reason
+            )
+
         }
     }
 
@@ -189,6 +286,7 @@ export default class SqlRequestTable extends ResourceTableProps {
                 },
                 scopedSlots: {
                     'expanded-item': this.renderExpansion,
+                    'item.approval': this.renderApproval,
                 }
             }
         )

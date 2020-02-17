@@ -247,6 +247,7 @@ const ApiITSqlRefreshPrefix = "/refresh"
 const ApiITSqlSchemaPrefix = "/schema"
 const ApiITSqlQueriesPrefix = "/query"
 const ApiITSqlRequestsPrefix = "/requests"
+const ApiITSqlRequestsStatusEndpoint = "/status"
 
 // API - IT - Server
 const ApiITServerPrefix = "/servers"
