@@ -32,6 +32,7 @@ export interface Permissions {
     VendorAccess              : AccessType
     DbSqlAccess               : AccessType
     DbSqlQueryAccess          : AccessType
+    DbSqlRequestAccess        : AccessType
 }
 
 export interface FullRole {
