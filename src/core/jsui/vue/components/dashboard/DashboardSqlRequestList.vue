@@ -21,19 +21,6 @@
 
                 <v-spacer></v-spacer>
 
-                <v-list-item-action>
-                    <v-dialog v-model="showHideNew"
-                              persistent
-                              max-width="40%"
-                    >
-                        <template v-slot:activator="{ on }">
-                            <v-btn color="primary" v-on="on">
-                                New
-                            </v-btn>
-                        </template>
-
-                    </v-dialog>
-                </v-list-item-action>
             </v-list-item>
             <v-divider></v-divider>
 
