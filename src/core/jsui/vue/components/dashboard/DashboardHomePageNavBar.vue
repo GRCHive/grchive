@@ -70,6 +70,13 @@ export default Vue.extend({
                             url: PageParamsStore.state.organization!.Url + 'documentation',
                             disabled : false
                         },
+                    ],
+                },
+                {
+                    title: 'Audit',
+                    icon: 'mdi-handshake',
+                    disabled : false,
+                    children: [
                         {
                             title: 'Requests',
                             icon: 'mdi-shield-search',

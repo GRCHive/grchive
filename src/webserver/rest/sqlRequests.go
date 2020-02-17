@@ -88,6 +88,8 @@ func allSqlRequest(w http.ResponseWriter, r *http.Request) {
 	var data []*core.DbSqlQueryRequest
 	if inputs.DbId.NullInt64.Valid {
 		data, err = database.GetAllSqlRequestsForDb(inputs.DbId.NullInt64.Int64, inputs.OrgId, role)
+	} else {
+		data, err = database.GetAllSqlRequestsForOrg(inputs.OrgId, role)
 	}
 
 	if err != nil {

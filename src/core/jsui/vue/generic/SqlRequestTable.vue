@@ -21,7 +21,6 @@ interface QueryMetadataPacket {
 @Component({
     components: {
         BaseResourceTable,
-        SqlTextArea
     }
 })
 export default class SqlRequestTable extends ResourceTableProps {

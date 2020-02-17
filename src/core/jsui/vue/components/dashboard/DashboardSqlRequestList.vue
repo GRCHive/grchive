@@ -53,6 +53,11 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { DbSqlQueryRequest } from '../../../ts/sql'
 import { DatabaseStore, getStoreForDatabase } from '../../../ts/vuex/databaseStore'
+import { PageParamsStore } from '../../../ts/pageParams'
+import { contactUsUrl } from '../../../ts/url'
+import {
+    allSqlRequest, TAllSqlRequestOutput,
+} from '../../../ts/api/apiSqlRequests'
 import SqlRequestTable from '../../generic/SqlRequestTable.vue'
 
 const Props = Vue.extend({
@@ -73,17 +78,32 @@ export default class DashboardSqlRequestList extends Props {
     showHideNew : boolean = false
     filterText : string = ""
     store : DatabaseStore | null = this.dbId != -1 ? getStoreForDatabase(this.dbId) : null
+    orgRequests : DbSqlQueryRequest[] = []
 
     get requestsToDisplay() :  DbSqlQueryRequest[] | null {
         if (!!this.store) {
             return this.store.state.allRequests
         }
-        return []
+        return this.orgRequests
     }
 
     refreshData() {
         if (!!this.store) {
             this.store.dispatch('pullRequests')
+        } else {
+            allSqlRequest({
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TAllSqlRequestOutput) => {
+                this.orgRequests = resp.data
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops. Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
         }
     }
 

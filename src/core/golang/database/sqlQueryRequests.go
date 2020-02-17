@@ -56,3 +56,18 @@ func GetAllSqlRequestsForDb(dbId int64, orgId int32, role *core.Role) ([]*core.D
 	`, dbId, orgId)
 	return data, err
 }
+
+func GetAllSqlRequestsForOrg(orgId int32, role *core.Role) ([]*core.DbSqlQueryRequest, error) {
+	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	data := make([]*core.DbSqlQueryRequest, 0)
+	err := dbConn.Select(&data, `
+		SELECT req.*
+		FROM database_sql_query_requests AS req
+		WHERE req.org_id = $1
+		ORDER BY req.upload_time DESC
+	`, orgId)
+	return data, err
+}
