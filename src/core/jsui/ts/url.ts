@@ -254,6 +254,8 @@ export const updateSqlQueryUrl : string = "/api/it/db/sql/query/update"
 export const deleteSqlQueryUrl : string = "/api/it/db/sql/query/delete"
 export const runSqlQueryUrl : string = "/api/it/db/sql/query/run"
 
+export const newSqlRequestUrl : string = "/api/it/db/sql/requests/new"
+
 export const newDbConnUrl : string = "/api/it/db/connection/new"
 export const deleteDbConnUrl : string = "/api/it/db/connection/delete"
 

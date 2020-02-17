@@ -112,82 +112,11 @@
                 </v-col>
 
                 <v-col cols="6">
-                    <div v-if="!!currentVersion">
-                        <v-list-item class="pa-0">
-                            <v-spacer></v-spacer>
-
-                            <v-list-item-action>
-                                <v-btn
-                                    color="warning"
-                                    icon
-                                    x-small
-                                    @click="resetQuery"
-                                >
-                                    <v-icon>mdi-bug</v-icon>
-                                </v-btn>
-                            </v-list-item-action>
-
-                            <v-list-item-action>
-                                <v-btn
-                                    color="primary"
-                                    icon
-                                    x-small
-                                    @click="runQuery"
-                                    :loading="queryRunning"
-                                >
-                                    <v-icon>mdi-play</v-icon>
-                                </v-btn>
-                            </v-list-item-action>
-                        </v-list-item>
-
-                        <sql-text-area
-                            v-model="editableQuery"
-                            :readonly="!canEditQuery"
-                            :key="`MANAGER-${queryKey}`"
-                        >
-                        </sql-text-area>
-
-                        <v-list-item class="pa-0">
-                            <v-list-item-action>
-                                <v-btn
-                                    color="error"
-                                    @click="cancelEditQuery"
-                                    v-if="canEditQuery"
-                                >
-                                    Cancel
-                                </v-btn>
-                            </v-list-item-action>
-                            <v-spacer></v-spacer>
-
-                            <v-list-item-action>
-                                <v-btn
-                                    color="success"
-                                    @click="saveEditQuery"
-                                    v-if="canEditQuery"
-                                >
-                                    Save
-                                </v-btn>
-                            </v-list-item-action>
-
-                            <v-list-item-action>
-                                <v-btn
-                                    color="success"
-                                    @click="canEditQuery = true"
-                                    v-if="!canEditQuery"
-                                >
-                                    Edit
-                                </v-btn>
-                            </v-list-item-action>
-                        </v-list-item>
-
-                        <v-divider></v-divider>
-
-                        <sql-result-display
-                            v-if="!!currentResult"
-                            :result="currentResult"
-                        >
-                        </sql-result-display>
-                    </div>
+                    <database-query-runner
+                        :query="currentVersion"
+                        @on-new-version="saveEditQuery"
+                    >
+                    </database-query-runner>
                 </v-col>
             </v-row>
         </div>
@@ -211,8 +140,7 @@ import {
 import { contactUsUrl } from '../../ts/url'
 import { PageParamsStore } from '../../ts/pageParams'
 import MetadataStore from '../../ts/metadata'
-import SqlTextArea from './SqlTextArea.vue'
-import SqlResultDisplay from './SqlResultDisplay.vue'
+import DatabaseQueryRunner from './DatabaseQueryRunner.vue'
 import { standardFormatTime } from '../../ts/time'
 import { SqlResult } from '../../ts/sql'
 
@@ -226,8 +154,7 @@ const Props = Vue.extend({
     components: {
         CreateNewSqlQueryForm,
         UserSearchFormComponent,
-        SqlTextArea,
-        SqlResultDisplay
+        DatabaseQueryRunner,
     }
 })
 export default class DatabaseQueryManager extends Props {
@@ -237,26 +164,7 @@ export default class DatabaseQueryManager extends Props {
     currentMetadata : DbSqlQueryMetadata | null = null
     currentVersion : DbSqlQuery | null = null
 
-    versionIdToResult : Record<number, TRunSqlQueryOutput> = Object()
-
-    editableQuery : string = ""
-    canEditQuery : boolean = false
-    queryKey : number = 0
-    queryRunning : boolean = false
-
     showHideNewQuery : boolean = false
-
-    get currentResult() : TRunSqlQueryOutput | null {
-        if (!this.currentVersion) {
-            return null
-        }
-
-        if (!(this.currentVersion.Id in this.versionIdToResult)) {
-            return null
-        }
-
-        return this.versionIdToResult[this.currentVersion.Id]
-    }
 
     get metadataItems() : any[] {
         if (!this.allMetadata) {
@@ -305,7 +213,6 @@ export default class DatabaseQueryManager extends Props {
 
     selectVersion(version : DbSqlQuery) {
         this.currentVersion = version
-        this.cancelEditQuery()
     }
 
     refreshVersions() {
@@ -389,25 +296,18 @@ export default class DatabaseQueryManager extends Props {
         }
     }
 
-    cancelEditQuery() {
-        this.editableQuery = this.currentVersion!.Query
-        this.queryKey += 1
-        this.canEditQuery = false
-    }
-
-    saveEditQuery() {
+    saveEditQuery(newQuery : string) {
         updateSqlQuery({
             orgId: PageParamsStore.state.organization!.Id,
             metadataId: this.currentMetadata!.Id,
             query: {
-                query: this.editableQuery,
+                query: newQuery,
                 uploadUserId: PageParamsStore.state.user!.Id,
             }
         }).then((resp : TUpdateSqlQueryOutput) => {
             if (resp.data.Query) {
                 this.allVersions!.unshift(resp.data.Query)
                 this.selectVersion(this.allVersions![0])
-                this.canEditQuery = false
             } else {
                 throw "Did not receive a response query."
             }
@@ -448,30 +348,6 @@ export default class DatabaseQueryManager extends Props {
                 "Contact Us",
                 contactUsUrl,
                 true);
-        })
-    }
-
-    resetQuery() {
-        this.queryKey += 1
-    }
-
-    runQuery() {
-        this.queryRunning = true
-        runSqlQuery({
-            queryId: this.currentVersion!.Id,
-            orgId: PageParamsStore.state.organization!.Id,
-        }).then((resp : TRunSqlQueryOutput) => {
-            this.queryRunning = false
-            Vue.set(this.versionIdToResult, this.currentVersion!.Id, resp)
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-            this.queryRunning = false
         })
     }
 }

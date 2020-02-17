@@ -93,6 +93,7 @@ type RoleMetadata struct {
 type Role struct {
 	RoleMetadata `db:"role" json:"RoleMetadata"`
 	Permissions  PermissionsMap `db:"permissions"`
+	UserId       int64
 }
 
 func CreateOwnerAccessType() AccessType {

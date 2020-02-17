@@ -106,6 +106,8 @@ func GrantAPIKeyDefaultRole(key *core.ApiKey, orgId int32) (*core.Role, error) {
 		return nil, err
 	}
 
+	var retRole *core.Role = nil
+
 	adminUserIds, err := database.FindUserIdsWithRole(adminRole.Id, orgId, core.ServerRole)
 	if err != nil {
 		return nil, err
@@ -114,8 +116,10 @@ func GrantAPIKeyDefaultRole(key *core.ApiKey, orgId int32) (*core.Role, error) {
 	// If this user is the first in their organization to login, they are the de-facto admin.
 	if len(adminUserIds) == 0 {
 		err = database.InsertUserRoleForOrg(user.Id, orgId, adminRole.Id, core.ServerRole)
+		retRole = adminRole
 	} else {
 		err = database.InsertUserRoleForOrg(user.Id, orgId, defaultRole.Id, core.ServerRole)
+		retRole = defaultRole
 	}
 
 	// It's ok if there's a duplicate because it means we've added the role already. OK!
@@ -123,7 +127,7 @@ func GrantAPIKeyDefaultRole(key *core.ApiKey, orgId int32) (*core.Role, error) {
 		return nil, err
 	}
 
-	return defaultRole, nil
+	return retRole, nil
 }
 
 func GetCurrentRequestRole(r *http.Request, orgId int32) (*core.Role, error) {

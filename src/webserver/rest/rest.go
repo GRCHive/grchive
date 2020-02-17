@@ -219,6 +219,7 @@ func registerITSqlAPIPaths(r *mux.Router) {
 	registerITSqlRefreshAPIPaths(s)
 	registerITSqlSchemaAPIPaths(s)
 	registerITSqlQueriesAPIPaths(s)
+	registerITSqlRequestsAPIPaths(s)
 }
 
 func registerITSqlRefreshAPIPaths(r *mux.Router) {
@@ -243,6 +244,11 @@ func registerITSqlQueriesAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiUpdateEndpoint, updateDatabaseQuery).Methods("POST")
 	s.HandleFunc(core.ApiDeleteEndpoint, deleteDatabaseQuery).Methods("POST")
 	s.HandleFunc(core.ApiRunEndpoint, runDatabaseQuery).Methods("POST")
+}
+
+func registerITSqlRequestsAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiITSqlRequestsPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, newSqlRequest).Methods("POST")
 }
 
 func registerITServerAPIPaths(r *mux.Router) {

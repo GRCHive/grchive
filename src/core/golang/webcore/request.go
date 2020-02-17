@@ -245,3 +245,11 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 	}
 	return nil
 }
+
+func GetUserIdFromApiRequestContext(r *http.Request) (int64, error) {
+	key, err := FindApiKeyInContext(r.Context())
+	if err != nil {
+		return -1, err
+	}
+	return key.UserId, nil
+}

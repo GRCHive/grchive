@@ -33,6 +33,7 @@ go_library(
         "sqlRefresh.go",
         "sqlSchemas.go",
         "sqlQueries.go",
+        "sqlQueryRequests.go",
         "sysDatabase.go",
         "systems.go",
         "users.go",

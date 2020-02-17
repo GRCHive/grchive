@@ -87,6 +87,20 @@ export interface SqlResult {
     CsvText: string
 }
 
+export interface DbSqlQueryRequest {
+    Id              : number
+    QueryId         : number
+    UploadTime      : Date
+    UploadUserId    : number
+    OrgId           : number
+    Name            : string
+    Description     : string
+}
+
 export function cleanDbSqlQueryFromJson(q : DbSqlQuery) {
+    q.UploadTime = new Date(q.UploadTime)
+}
+
+export function cleanDbSqlRequestFromJson(q : DbSqlQueryRequest) {
     q.UploadTime = new Date(q.UploadTime)
 }

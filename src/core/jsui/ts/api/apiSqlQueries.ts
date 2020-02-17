@@ -111,6 +111,7 @@ export function deleteSqlQuery(inp : TDeleteSqlQueryInput) : Promise<void> {
 export interface TRunSqlQueryInput {
     queryId: number
     orgId : number
+    runCode: string
 }
 
 export interface TRunSqlQueryOutput {

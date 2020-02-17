@@ -270,14 +270,12 @@ func deleteDatabaseQuery(w http.ResponseWriter, r *http.Request) {
 }
 
 type RunDatabaseQueryInput struct {
-	QueryId int64 `json:"queryId"`
-	OrgId   int32 `json:"orgId"`
+	QueryId int64  `json:"queryId"`
+	OrgId   int32  `json:"orgId"`
+	RunCode string `json:"runCode"`
 }
 
 func runDatabaseQuery(w http.ResponseWriter, r *http.Request) {
-	jsonWriter := json.NewEncoder(w)
-	w.Header().Set("Content-Type", "application/json")
-
 	inputs := RunDatabaseQueryInput{}
 	err := webcore.UnmarshalRequestForm(r, &inputs)
 	if err != nil {
@@ -293,9 +291,12 @@ func runDatabaseQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
 	// Ideally we have some sort of execute permission??
 	if !role.Permissions.HasAccess(core.ResourceDbSqlQuery, core.AccessView) {
-		core.Warning("Can not execute query." + err.Error())
+		core.Warning("No permission to execute query.")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -367,4 +368,5 @@ func runDatabaseQuery(w http.ResponseWriter, r *http.Request) {
 		}
 		jsonWriter.Encode(data)
 	}
+
 }

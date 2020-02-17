@@ -27,6 +27,7 @@ go_library(
         "sqlRefresh.go",
         "sqlSchemas.go",
         "sqlQueries.go",
+        "sqlRequests.go",
         "systems.go",
         "user.go",
         "vendorProducts.go",
