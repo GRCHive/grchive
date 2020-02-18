@@ -13,7 +13,7 @@
             <div :style="contentContainerStyle" v-if="ready">
                 <process-flow-editor @on-change="recomputeProcessFlowHeaderHeight"></process-flow-editor>
                 <v-divider></v-divider>
-                <process-flow-toolbar></process-flow-toolbar>
+                <process-flow-toolbar ref="toolbar"></process-flow-toolbar>
                 <v-divider ref="headerDivider"></v-divider>
                 <process-flow-renderer :content-max-height-clip="headerClipHeight"
                                    :content-max-width-clip="attrEditorClipWidth"
@@ -197,6 +197,15 @@ export default Vue.extend({
         ready() {
             Vue.nextTick(() => {
                 this.recomputeProcessFlowHeaderHeight()
+
+
+                if (this.ready) {
+                    // Add events here to let toolbar handle input events.
+                    //@ts-ignore
+                    this.$refs.rendererVue.$el.addEventListener('keydown', this.$refs.toolbar.handleHotKeys)
+                    //@ts-ignore
+                    this.$refs.rendererVue.$el.addEventListener('wheel', this.$refs.toolbar.handleScroll)
+                }
             })
         }
     }

@@ -257,10 +257,6 @@ export default Vue.extend({
             LocalSettings.commit('setViewBoxZoom', Math.min(zoomX, zoomY))
         }
     },
-    mounted() {
-        document.addEventListener('keydown', this.handleHotkeys)
-        document.addEventListener('wheel', this.handleScroll)
-    }
 })
 
 </script>
