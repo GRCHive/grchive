@@ -3,7 +3,7 @@
         <v-form>
             <v-text-field v-model="currentNode.Name"
                   label="Name"
-                  :disabled="!canEditAttr"
+                  :readonly="!canEditAttr"
                   filled
                   :rules="[rules.required, rules.createMaxLength(256)]"
                   v-on:keydown.stop
@@ -12,14 +12,14 @@
             <v-textarea v-model="currentNode.Description"
                         label="Description"
                         filled
-                        :disabled="!canEditAttr"
+                        :readonly="!canEditAttr"
                         v-on:keydown.stop
             ></v-textarea> 
 
             <v-select v-model="currentNode.NodeTypeId"
                       :items="nodeTypeItems"
                       filled
-                      :disabled="!canEditAttr"
+                      :readonly="!canEditAttr"
                       label="Type">
             </v-select>
         </v-form>
