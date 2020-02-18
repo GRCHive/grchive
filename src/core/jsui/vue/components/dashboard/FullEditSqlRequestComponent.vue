@@ -40,16 +40,55 @@
                 <v-spacer></v-spacer>
 
                 <v-list-item-action>
-                    <v-btn 
-                        color="error"
-                    >
-                        Deny
-                    </v-btn>
+                    <v-dialog persistent max-width="40%" v-model="showHideDenyReason">
+                        <template v-slot:activator="{on}">
+                            <v-btn 
+                                color="error"
+                                v-on="on"
+                            >
+                                Deny
+                            </v-btn>
+                        </template>
+
+                        <v-card>
+                            <v-card-title>
+                                Denial Reason
+                            </v-card-title>
+                            <v-divider></v-divider>
+
+                            <div class="ma-4">
+                                <v-textarea v-model="reason"
+                                            label="Reason"
+                                            filled
+                                            hide-details
+                                ></v-textarea> 
+                            </div>
+
+                            <v-card-actions>
+                                <v-btn
+                                    color="error"
+                                    @click="showHideDenyReason = false"
+                                >
+                                    Cancel
+                                </v-btn>
+                                <v-spacer></v-spacer>
+                                <v-btn
+                                    color="success"
+                                    @click="approveDeny(false, reason)"
+                                >
+                                    Save
+                                </v-btn>
+                            </v-card-actions>
+                        </v-card>
+
+
+                    </v-dialog>
                 </v-list-item-action>
 
                 <v-list-item-action>
                     <v-btn 
                         color="success"
+                        @click="approveDeny(true)"
                     >
                         Approve
                     </v-btn>
@@ -114,7 +153,7 @@
                                         </v-icon>
                                     </span>
 
-                                    <span v-else-if="currentApproval.Success">
+                                    <span v-else-if="currentApproval.Response">
                                         Approved
 
                                         <v-icon
@@ -151,11 +190,11 @@
                                         {{ responseTime }}
                                     </p>
 
-                                    <p class="long-text" v-if="!currentApproval.Success">
+                                    <p v-if="!currentApproval.Response">
                                         <span class="font-weight-bold">
                                             Reason:
                                         </span>
-                                        {{ currentApproval.Reason }}
+                                        <pre class="pb-4">{{ currentApproval.Reason }}</pre>
                                     </p>
                                 </div>
                             </div>
@@ -185,6 +224,7 @@ import { standardFormatTime } from '../../../ts/time'
 import { DbSqlQueryRequest, DbSqlQueryRequestApproval, DbSqlQuery, DbSqlQueryMetadata } from '../../../ts/sql'
 import { 
     getSqlRequest, TGetSqlRequestOutput,
+    modifyStatusSqlRequest, TModifyStatusSqlRequestOutput,
     deleteSqlRequest,
 } from '../../../ts/api/apiSqlRequests'
 import { getSqlQuery, TGetSqlQueryOutput } from '../../../ts/api/apiSqlQueries'
@@ -193,17 +233,22 @@ import CommentManager from '../../generic/CommentManager.vue'
 import CreateNewSqlRequestForm from './CreateNewSqlRequestForm.vue'
 import SqlTextArea from '../../generic/SqlTextArea.vue'
 import MetadataStore from '../../../ts/metadata'
+import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 
 @Component({
     components: {
         GenericDeleteConfirmationForm,
         CommentManager,
         CreateNewSqlRequestForm,
+        UserSearchFormComponent,
         SqlTextArea
     }
 })
 export default class FullEditSqlRequestComponent extends Vue {
     showHideDelete: boolean = false
+    showHideDenyReason : boolean = false
+
+    reason : string = ""
 
     currentRequest: DbSqlQueryRequest | null = null
     currentApproval : DbSqlQueryRequestApproval | null = null
@@ -297,6 +342,27 @@ export default class FullEditSqlRequestComponent extends Vue {
 
     onEditRequest(req : DbSqlQueryRequest) {
         this.currentRequest = req
+    }
+
+    approveDeny(status : boolean, reason : string = "") {
+        modifyStatusSqlRequest({
+            requestId: this.currentRequest!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            approve: status,
+            reason: reason,
+        }).then((resp : TModifyStatusSqlRequestOutput) => {
+            this.reason = ""
+            this.showHideDenyReason = false
+            this.currentApproval = resp.data
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 }
 

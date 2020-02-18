@@ -91,7 +91,6 @@ export function statusSqlRequest(inp : TStatusSqlRequestInput) : Promise<TStatus
     })
 }
 
-
 export interface TUpdateSqlRequestInput {
     requestId: number
     orgId : number
@@ -118,3 +117,23 @@ export interface TDeleteSqlRequestInput {
 export function deleteSqlRequest(inp : TDeleteSqlRequestInput) : Promise<void> {
     return postFormJson<void>(deleteSqlRequestUrl, inp, getAPIRequestConfig())
 }
+
+export interface TModifyStatusSqlRequestInput {
+    requestId : number
+    orgId : number
+    approve: boolean
+    reason : string
+}
+
+export interface TModifyStatusSqlRequestOutput {
+    data: DbSqlQueryRequestApproval
+}
+
+export function modifyStatusSqlRequest(inp : TModifyStatusSqlRequestInput) : Promise<TModifyStatusSqlRequestOutput> {
+    return postFormJson<TModifyStatusSqlRequestOutput>(statusSqlRequestUrl, inp, getAPIRequestConfig()).then((resp : TModifyStatusSqlRequestOutput) => {
+        cleanDbSqlRequestApprovalFromJson(resp.data)
+        return resp
+    })
+}
+
+

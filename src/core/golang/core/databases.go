@@ -105,7 +105,7 @@ type DbSqlQueryRequestApproval struct {
 	RequestId        int64     `db:"request_id"`
 	OrgId            int32     `db:"org_id"`
 	ResponseTime     time.Time `db:"response_time"`
-	ResponsderUserId int64     `db:"responsder_user_id"`
+	ResponsderUserId int64     `db:"responder_user_id"`
 	Response         bool      `db:"response"`
 	Reason           string    `db:"reason"`
 }

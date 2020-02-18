@@ -253,3 +253,90 @@ func deleteSqlRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+type ModifyStatusSqlRequestInput struct {
+	RequestId int64  `json:"requestId"`
+	OrgId     int32  `json:"orgId"`
+	Approve   bool   `json:"approve"`
+	Reason    string `json:"reason"`
+}
+
+func modifyStatusSqlRequest(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := ModifyStatusSqlRequestInput{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	userId, err := webcore.GetUserIdFromApiRequestContext(r)
+	if err != nil {
+		core.Warning("Failed to obtain key user id: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	approval := core.DbSqlQueryRequestApproval{
+		RequestId:        inputs.RequestId,
+		OrgId:            inputs.OrgId,
+		ResponseTime:     time.Now().UTC(),
+		ResponsderUserId: userId,
+		Response:         inputs.Approve,
+		Reason:           inputs.Reason,
+	}
+
+	tx := database.CreateTx()
+
+	err = database.UpdateRequestStatusWithTx(&approval, role, tx)
+	if err != nil {
+		tx.Rollback()
+		core.Warning("Failed to update SQL request status: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if inputs.Approve {
+		runCode, rawCode, err := webcore.GenerateRandomRunCode(approval.RequestId, approval.OrgId)
+		if err != nil {
+			tx.Rollback()
+			core.Warning("Failed to generate random run code: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		err = database.CreateNewRunCodeWithTx(runCode, role, tx)
+		if err != nil {
+			tx.Rollback()
+			core.Warning("Failed to create new run code in DB: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		err = webcore.SendRunCodeViaEmail(runCode, rawCode)
+		if err != nil {
+			tx.Rollback()
+			core.Warning("Failed to send run code via email: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		core.Warning("Failed to commit SQL request status: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(approval)
+}

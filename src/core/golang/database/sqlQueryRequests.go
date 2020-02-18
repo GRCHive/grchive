@@ -167,3 +167,50 @@ func GetSqlRequestStatus(requestId int64, orgId int32, role *core.Role) (*core.D
 
 	return &approval, nil
 }
+
+func UpdateRequestStatusWithTx(approval *core.DbSqlQueryRequestApproval, role *core.Role, tx *sqlx.Tx) error {
+	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	rows, err := tx.NamedQuery(`
+		INSERT INTO database_sql_query_requests_approvals (request_id, org_id, response_time, responder_user_id, response, reason)
+		VALUES (:request_id, :org_id, :response_time, :responder_user_id, :response, :reason)
+		ON CONFLICT (request_id) DO UPDATE
+			SET response_time = EXCLUDED.response_time,
+				responder_user_id = EXCLUDED.responder_user_id,
+				response = EXCLUDED.response,
+				reason = EXCLUDED.reason
+		RETURNING *
+	`, approval)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	rows.Next()
+
+	err = rows.StructScan(approval)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateNewRunCodeWithTx(runCode *core.DbSqlQueryRunCode, role *core.Role, tx *sqlx.Tx) error {
+	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	_, err := tx.NamedExec(`
+		INSERT INTO database_sql_query_run_codes (request_id, org_id, expiration_time, used_time, hashed_code, salt)
+		VALUES (:request_id, :org_id, :expiration_time, NULL, :hashed_code, :salt)
+		ON CONFLICT (request_id) DO UPDATE
+			SET expiration_time = EXCLUDED.expiration_time,
+				used_time = EXCLUDED.used_time,
+				hashed_code = EXCLUDED.hashed_code,
+				salt = EXCLUDED.salt
+	`, runCode)
+
+	return err
+}
