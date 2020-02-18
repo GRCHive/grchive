@@ -7,7 +7,7 @@ import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
 import MetadataStore from '../../ts/metadata'
 import { createUserString } from '../../ts/users'
-import { contactUsUrl } from '../../ts/url'
+import { contactUsUrl, createSingleSqlRequestUrl } from '../../ts/url'
 import { PageParamsStore } from '../../ts/pageParams'
 import { standardFormatTime } from '../../ts/time'
 import { DbSqlQuery, DbSqlQueryMetadata, DbSqlQueryRequestApproval } from '../../ts/sql'
@@ -135,7 +135,10 @@ export default class SqlRequestTable extends ResourceTableProps {
     }
 
     goToSqlRequest(item : any) {
-        window.location.assign('#')
+        window.location.assign(createSingleSqlRequestUrl(
+            PageParamsStore.state.organization!.OktaGroupName,
+            item.value.Id
+        ))
     }
 
     transformInputResourceToTableItem(inp : any) : any {

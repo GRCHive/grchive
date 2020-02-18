@@ -47,6 +47,7 @@ const (
 	DashboardSingleDocumentationTemplateKey
 	DashboardDocRequestsTemplateKey
 	DashboardSingleDocRequestTemplateKey
+	DashboardSingleSqlRequestTemplateKey
 	DashboardVendorsTemplateKey
 	DashboardSingleVendorTemplateKey
 	DashboardSingleDocFileTemplateKey
@@ -136,6 +137,8 @@ func RegisterTemplates() {
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardDocRequests.tmpl")
 	allTemplates[DashboardSingleDocRequestTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardSingleDocRequest.tmpl")
+	allTemplates[DashboardSingleSqlRequestTemplateKey] =
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardSingleSqlRequest.tmpl")
 
 	allTemplates[DashboardVendorsTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardVendors.tmpl")

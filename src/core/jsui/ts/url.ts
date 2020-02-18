@@ -118,7 +118,11 @@ export function createOrgDocRequestsUrl(org : string) : string {
 }
 
 export function createSingleDocRequestUrl(org : string, id: number) : string {
-    return `/dashboard/org/${org}/requests/${id}`
+    return `/dashboard/org/${org}/requests/doc/${id}`
+}
+
+export function createSingleSqlRequestUrl(org : string, id: number) : string {
+    return `/dashboard/org/${org}/requests/sql/${id}`
 }
 
 export function createUserProfileEditAPIUrl(id : number) : string {

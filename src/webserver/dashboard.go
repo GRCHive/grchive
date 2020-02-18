@@ -37,6 +37,7 @@ func createOrganizationSubrouter(r *mux.Router) {
 	s.HandleFunc(core.DashboardOrgSingleDocCatEndpoint, render.RenderSingleDocCat)
 	s.HandleFunc(core.DashboardOrgAllDocRequestsEndpoint, render.RenderDocRequest)
 	s.HandleFunc(core.DashboardOrgSingleDocRequestEndpoint, render.RenderSingleDocRequest)
+	s.HandleFunc(core.DashboardOrgSingleSqlRequestEndpoint, render.RenderSingleSqlRequest)
 	s.HandleFunc(core.DashboardOrgAllVendorsEndpoint, render.RenderVendors)
 	s.HandleFunc(core.DashboardOrgSingleVendorEndpoint, render.RenderSingleVendor)
 	s.HandleFunc(core.DashboardOrgSingleDocFileEndpoint, render.RenderSingleDocFile)

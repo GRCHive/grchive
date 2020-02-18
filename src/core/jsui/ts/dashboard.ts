@@ -30,6 +30,7 @@ const DashboardOrgDocumentation = () => import( /* webpackChunkName: "DashboardO
 const DashboardOrgSingleDocumentation = () => import( /* webpackChunkName: "DashboardOrgSingleDocumentation" */ '../vue/pages/dashboard/DashboardOrgSingleDocumentation.vue')
 const DashboardOrgDocRequests = () => import( /* webpackChunkName: "DashboardOrgDocRequests" */ '../vue/pages/dashboard/DashboardOrgDocRequests.vue')
 const DashboardOrgSingleDocRequest = () => import( /* webpackChunkName: "DashboardOrgSingleDocRequest" */ '../vue/pages/dashboard/DashboardOrgSingleDocRequest.vue')
+const DashboardOrgSingleSqlRequest = () => import( /* webpackChunkName: "DashboardOrgSingleSqlRequest" */ '../vue/pages/dashboard/DashboardOrgSingleSqlRequest.vue')
 const DashboardOrgSingleServer = () => import( /* webpackChunkName: "DashboardOrgSingleServer" */ '../vue/pages/dashboard/DashboardOrgSingleServer.vue')
 const DashboardOrgVendors = () => import( /* webpackChunkName: "DashboardOrgVendors" */ '../vue/pages/dashboard/DashboardOrgVendors.vue')
 const DashboardOrgSingleVendor = () => import( /* webpackChunkName: "DashboardOrgSingleVendor" */ '../vue/pages/dashboard/DashboardOrgSingleVendor.vue')
@@ -80,6 +81,7 @@ function mountApp(inData : PageParamsStoreState) {
             DashboardOrgVendors,
             DashboardOrgSingleVendor,
             DashboardOrgSingleDocFile,
+            DashboardOrgSingleSqlRequest,
             SnackBar,
         },
         vuetify: vueOpts.vuetify,

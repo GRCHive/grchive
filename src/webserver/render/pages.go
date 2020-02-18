@@ -261,6 +261,10 @@ func RenderSingleDocRequest(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardSingleDocRequestTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
+func RenderSingleSqlRequest(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardSingleSqlRequestTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
+}
+
 func RenderVendors(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardVendorsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
