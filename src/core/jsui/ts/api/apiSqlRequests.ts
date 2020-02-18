@@ -2,6 +2,8 @@ import axios from 'axios'
 import * as qs from 'query-string'
 import { 
     newSqlRequestUrl,
+    updateSqlRequestUrl,
+    deleteSqlRequestUrl,
     allSqlRequestUrl,
     getSqlRequestUrl,
     statusSqlRequestUrl,
@@ -89,3 +91,30 @@ export function statusSqlRequest(inp : TStatusSqlRequestInput) : Promise<TStatus
     })
 }
 
+
+export interface TUpdateSqlRequestInput {
+    requestId: number
+    orgId : number
+    name: string
+    description: string
+}
+
+export interface TUpdateSqlRequestOutput {
+    data: DbSqlQueryRequest
+}
+
+export function updateSqlRequest(inp : TUpdateSqlRequestInput) : Promise<TUpdateSqlRequestOutput> {
+    return postFormJson<TUpdateSqlRequestOutput>(updateSqlRequestUrl, inp, getAPIRequestConfig()).then((resp : TUpdateSqlRequestOutput) => {
+        cleanDbSqlRequestFromJson(resp.data)
+        return resp
+    })
+}
+
+export interface TDeleteSqlRequestInput {
+    requestId: number
+    orgId : number
+}
+
+export function deleteSqlRequest(inp : TDeleteSqlRequestInput) : Promise<void> {
+    return postFormJson<void>(deleteSqlRequestUrl, inp, getAPIRequestConfig())
+}

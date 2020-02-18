@@ -38,6 +38,60 @@ func CreateNewSqlQueryRequest(request *core.DbSqlQueryRequest, role *core.Role) 
 	return tx.Commit()
 }
 
+func UpdateSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.Role, tx *sqlx.Tx) error {
+	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	rows, err := tx.NamedQuery(`
+		UPDATE database_sql_query_requests
+		SET name = :name,
+			description = :description
+		WHERE id = :id
+			AND org_id = :org_id
+		RETURNING *
+	`, request)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	rows.Next()
+	err = rows.StructScan(request)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateSqlQueryRequest(request *core.DbSqlQueryRequest, role *core.Role) error {
+	tx := dbConn.MustBegin()
+	err := UpdateSqlQueryRequestWithTx(request, role, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
+func DeleteSqlQueryRequest(requestId int64, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessManage) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		DELETE FROM database_sql_query_requests
+		WHERE id = $1 AND org_id = $2
+	`, requestId, orgId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
 func GetAllSqlRequestsForDb(dbId int64, orgId int32, role *core.Role) ([]*core.DbSqlQueryRequest, error) {
 	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessView) {
 		return nil, core.ErrorUnauthorized

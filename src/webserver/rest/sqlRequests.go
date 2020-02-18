@@ -181,3 +181,75 @@ func getSqlRequest(w http.ResponseWriter, r *http.Request) {
 		Approval: approval,
 	})
 }
+
+type UpdateSqlRequestInput struct {
+	RequestId   int64  `json:"requestId"`
+	OrgId       int32  `json:"orgId"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+func updateSqlRequest(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := UpdateSqlRequestInput{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	request := core.DbSqlQueryRequest{
+		Id:          inputs.RequestId,
+		OrgId:       inputs.OrgId,
+		Name:        inputs.Name,
+		Description: inputs.Description,
+	}
+
+	err = database.UpdateSqlQueryRequest(&request, role)
+	if err != nil {
+		core.Warning("Failed to create sql query request: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(request)
+}
+
+type DeleteSqlRequestInput struct {
+	RequestId int64 `json:"requestId"`
+	OrgId     int32 `json:"orgId"`
+}
+
+func deleteSqlRequest(w http.ResponseWriter, r *http.Request) {
+	inputs := UpdateSqlRequestInput{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteSqlQueryRequest(inputs.RequestId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to create sql query request: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}

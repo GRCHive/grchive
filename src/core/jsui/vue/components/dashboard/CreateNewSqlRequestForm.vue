@@ -21,6 +21,25 @@
                     :readonly="!canEdit"
                     hide-details
         ></v-textarea> 
+
+        <user-search-form-component
+            class="mt-4"
+            label="Requester"
+            :user="requestUser"
+            readonly
+            v-if="!!referenceRequest"
+        >
+        </user-search-form-component>
+
+        <v-text-field
+            :value="requestTime"
+            label="Request Time"
+            prepend-icon="mdi-calendar"
+            readonly
+            v-if="!!referenceRequest"
+        >
+        </v-text-field>
+
     </v-form>
 
     <v-card-actions>
@@ -61,6 +80,7 @@ import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 import {
     TNewSqlRequestOutput, newSqlRequest,
+    TUpdateSqlRequestOutput, updateSqlRequest,
 } from '../../../ts/api/apiSqlRequests'
 import {
     DbSqlQueryRequest
@@ -68,6 +88,9 @@ import {
 import * as rules from '../../../ts/formRules'
 import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
+import MetadataStore from '../../../ts/metadata'
+import { standardFormatTime } from '../../../ts/time'
+import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 
 const Props = Vue.extend({
     props: {
@@ -86,7 +109,11 @@ const Props = Vue.extend({
     }
 })
 
-@Component
+@Component({
+    components: {
+        UserSearchFormComponent,
+    }
+})
 export default class CreateNewSqlRequestForm extends Props {
     canEdit: boolean = false
     formValid: boolean = false
@@ -100,6 +127,20 @@ export default class CreateNewSqlRequestForm extends Props {
             return this.forceQueryId
         }
         return -1
+    }
+
+    get requestUser() : User | null {
+        if (!this.referenceRequest) {
+            return null
+        }
+        return MetadataStore.getters.getUser(this.referenceRequest.UploadUserId)
+    }
+
+    get requestTime() : string {
+        if (!this.referenceRequest) {
+            return ""
+        }
+        return standardFormatTime(this.referenceRequest.UploadTime)
     }
 
     cancel() {
@@ -124,6 +165,23 @@ export default class CreateNewSqlRequestForm extends Props {
     }
 
     doEdit() {
+        updateSqlRequest({
+            requestId: this.referenceRequest!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            name: this.name,
+            description: this.description,
+        }).then((resp : TUpdateSqlRequestOutput) => {
+            this.$emit('do-save', resp.data)
+            this.canEdit = false
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 
     doSave() {
@@ -131,7 +189,7 @@ export default class CreateNewSqlRequestForm extends Props {
             queryId: this.queryId,
             orgId: PageParamsStore.state.organization!.Id,
             name: this.name,
-            description: this.name,
+            description: this.description,
         }).then((resp : TNewSqlRequestOutput) => {
             this.$emit('do-save', resp.data)
             this.clearForm()

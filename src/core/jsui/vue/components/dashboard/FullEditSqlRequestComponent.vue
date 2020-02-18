@@ -97,8 +97,8 @@
                             </v-card-title>
                             <v-divider></v-divider>
 
-                            <div class="pt-4 px-4">
-                                <p>
+                            <div class="px-4">
+                                <p class="ma-0 py-4">
                                     <span class="font-weight-bold">
                                         Status:
                                     </span>
@@ -180,10 +180,13 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 import { PageParamsStore } from '../../../ts/pageParams'
-import { contactUsUrl } from '../../../ts/url'
+import { contactUsUrl, createOrgDocRequestsUrl } from '../../../ts/url'
 import { standardFormatTime } from '../../../ts/time'
 import { DbSqlQueryRequest, DbSqlQueryRequestApproval, DbSqlQuery, DbSqlQueryMetadata } from '../../../ts/sql'
-import { getSqlRequest, TGetSqlRequestOutput } from '../../../ts/api/apiSqlRequests'
+import { 
+    getSqlRequest, TGetSqlRequestOutput,
+    deleteSqlRequest,
+} from '../../../ts/api/apiSqlRequests'
 import { getSqlQuery, TGetSqlQueryOutput } from '../../../ts/api/apiSqlQueries'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import CommentManager from '../../generic/CommentManager.vue'
@@ -276,6 +279,20 @@ export default class FullEditSqlRequestComponent extends Vue {
     }
 
     onDelete() {
+        deleteSqlRequest({
+            requestId: this.currentRequest!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then(() => {
+            window.location.replace(createOrgDocRequestsUrl(PageParamsStore.state.organization!.OktaGroupName))
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 
     onEditRequest(req : DbSqlQueryRequest) {
