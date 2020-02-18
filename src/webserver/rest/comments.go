@@ -18,6 +18,8 @@ type GenericNewCommentInputs struct {
 type NewCommentInputs struct {
 	Comment GenericNewCommentInputs `json:"comment"`
 	// Doc Request
+	SqlRequestId core.NullInt64 `json:"sqlRequestId"`
+	// Sql Request
 	RequestId core.NullInt64 `json:"requestId"`
 	// Document
 	FileId core.NullInt64 `json:"fileId"`
@@ -27,9 +29,10 @@ type NewCommentInputs struct {
 }
 
 type AllCommentInputs struct {
-	RequestId core.NullInt64 `webcore:"requestId,optional"`
-	FileId    core.NullInt64 `webcore:"fileId,optional"`
-	OrgId     int32          `webcore:"orgId"`
+	SqlRequestId core.NullInt64 `webcore:"sqlRequestId,optional"`
+	RequestId    core.NullInt64 `webcore:"requestId,optional"`
+	FileId       core.NullInt64 `webcore:"fileId,optional"`
+	OrgId        int32          `webcore:"orgId"`
 }
 
 func commentFromInputs(inp GenericNewCommentInputs) *core.Comment {
@@ -61,7 +64,13 @@ func newComment(w http.ResponseWriter, r *http.Request) {
 
 	comment := commentFromInputs(inputs.Comment)
 
-	if inputs.RequestId.NullInt64.Valid {
+	if inputs.SqlRequestId.NullInt64.Valid {
+		err = database.InsertSqlRequestComment(
+			inputs.SqlRequestId.NullInt64.Int64,
+			inputs.OrgId,
+			comment,
+			role)
+	} else if inputs.RequestId.NullInt64.Valid {
 		err = database.InsertDocumentRequestComment(
 			inputs.RequestId.NullInt64.Int64,
 			inputs.OrgId,
@@ -106,7 +115,9 @@ func allComments(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var comments []*core.Comment
-	if inputs.RequestId.NullInt64.Valid {
+	if inputs.SqlRequestId.NullInt64.Valid {
+		comments, err = database.GetSqlRequestComments(inputs.SqlRequestId.NullInt64.Int64, inputs.OrgId, role)
+	} else if inputs.RequestId.NullInt64.Valid {
 		comments, err = database.GetDocumentRequestComments(inputs.RequestId.NullInt64.Int64, inputs.OrgId, role)
 	} else if inputs.FileId.NullInt64.Valid {
 		comments, err = database.GetDocumentComments(inputs.FileId.NullInt64.Int64, inputs.OrgId, role)

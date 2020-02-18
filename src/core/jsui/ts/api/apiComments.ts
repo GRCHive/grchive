@@ -24,6 +24,7 @@ export interface TGetAllCommentsOutput {
 export interface TNewCommentInput {
     comment: TGenericNewCommentInput
     requestId?: number
+    sqlRequestId?: number
     catId?: number
     fileId?: number
     orgId: number

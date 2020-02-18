@@ -253,3 +253,49 @@ func MarkRunCodeAsUsed(hashCode string, requestId int64, orgId int32, role *core
 	}
 	return tx.Commit()
 }
+
+func GetSqlRequestComments(requestId int64, orgId int32, role *core.Role) ([]*core.Comment, error) {
+	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	return getComments(`
+		INNER JOIN sql_request_comments AS src
+			ON src.comment_id = comments.id
+		WHERE src.sql_request_id = $1
+			AND src.org_id = $2
+	`, requestId, orgId)
+}
+
+func InsertSqlRequestComment(requestId int64, orgId int32, comment *core.Comment, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+
+	err := insertCommentWithTx(comment, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.Exec(`
+		INSERT INTO sql_request_comments (
+			sql_request_id,
+			org_id,
+			comment_id
+		)
+		VALUES (
+			$1,
+			$2,
+			$3
+		)
+	`, requestId, orgId, comment.Id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}

@@ -205,6 +205,10 @@
                                 Comments
                             </v-card-title>
                             <v-divider></v-divider>
+
+                            <comment-manager
+                                :params="commentParams"
+                            ></comment-manager>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -272,6 +276,13 @@ export default class FullEditSqlRequestComponent extends Vue {
         }
 
         return standardFormatTime(this.currentApproval.ResponseTime) 
+    }
+
+    get commentParams() : Object {
+        return {
+            sqlRequestId: this.currentRequest!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }
     }
 
     refreshQuery() {
