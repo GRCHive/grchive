@@ -21,13 +21,13 @@
             @change="changeInterval"
         >
             <template v-slot:append-outer v-bind:freqType="freqType">
-                <section id="choices">
+                <div id="choices">
                     <v-select :items="frequencyChoices"
                               outlined
                               :value="freqType"
                               @change="changeType">
                     </v-select>
-                </section>
+                </div>
             </template>
         </v-text-field>
     </section>
@@ -102,6 +102,7 @@ export default Vue.extend({
 
 #choices {
     transform: translateY(-16px);
+    min-width: 150px;
 }
 
 </style>
