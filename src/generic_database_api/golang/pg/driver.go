@@ -1,10 +1,12 @@
 package pg_api
 
 import (
+	"context"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
 	"strings"
+	"time"
 )
 
 type PgDriver struct {
@@ -33,13 +35,19 @@ func CreateDatabaseConnectionString(conn *core.DatabaseConnection) string {
 			core.Error("Failed to add parameters to connection string: " + err.Error())
 		}
 	}
+
+	// Force a timeout
+	build.WriteString(fmt.Sprintf("%s=%d", "connect_timeout", 10))
 	return build.String()
 }
 
 func (pg *PgDriver) Connect(conn *core.DatabaseConnection) error {
 	var err error
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
 	pg.connInfo = conn
-	pg.connection, err = sqlx.Connect("postgres", CreateDatabaseConnectionString(conn))
+	pg.connection, err = sqlx.ConnectContext(ctx, "postgres", CreateDatabaseConnectionString(conn))
 	if err != nil {
 		return err
 	}

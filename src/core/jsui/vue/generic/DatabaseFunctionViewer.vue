@@ -48,7 +48,7 @@ const Props = Vue.extend({
     props: {
         schema: {
             type: Object,
-            default: Object() as () => DbSchema | null
+            default: () => null as DbSchema | null
         }
     }
 })

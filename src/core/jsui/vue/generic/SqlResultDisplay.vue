@@ -39,7 +39,7 @@ const Props = Vue.extend({
     props: {
         result: {
             type: Object,
-            default: Object() as () => TRunSqlQueryOutput
+            default: () => Object() as TRunSqlQueryOutput
         }
     }
 })

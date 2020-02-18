@@ -118,7 +118,7 @@ const Props = Vue.extend({
     props : {
         query: {
             type: Object,
-            default: Object() as () => DbSqlQuery | null
+            default: () => null as DbSqlQuery | null
         }
     }
 })

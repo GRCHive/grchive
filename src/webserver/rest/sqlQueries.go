@@ -320,6 +320,27 @@ func runDatabaseQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userId, err := webcore.GetUserIdFromApiRequestContext(r)
+	if err != nil {
+		core.Warning("Failed to obtain key user id: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	code, err := database.FindRunCodeForQueryForUser(inputs.QueryId, inputs.OrgId, userId, role)
+	if err != nil {
+		core.Warning("Failed to existing code: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if code.HashedCode != webcore.HashRunCode(inputs.RunCode, code.Salt) ||
+		core.IsPastTime(time.Now().UTC(), code.ExpirationTime, 10) {
+		core.Warning("Run code mismatch or expiration.")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 

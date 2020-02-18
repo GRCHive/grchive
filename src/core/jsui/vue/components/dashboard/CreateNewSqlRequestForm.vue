@@ -104,7 +104,7 @@ const Props = Vue.extend({
         },
         referenceRequest: {
             type: Object,
-            default: Object() as () => DbSqlQueryRequest | null
+            default: () => null as DbSqlQueryRequest | null
         },
     }
 })

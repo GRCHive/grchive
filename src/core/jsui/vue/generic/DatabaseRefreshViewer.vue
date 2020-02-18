@@ -63,7 +63,7 @@ const Props = Vue.extend({
     props: {
         refresh: {
             type: Object,
-            default: Object() as () => DbRefresh | null
+            default: () => null as DbRefresh | null
         },
         fnMode: {
             type: Boolean,

@@ -15,7 +15,7 @@ func onRefreshError(conn *core.DatabaseConnection, refresh *core.DbRefresh, err 
 		err = strings.Replace(err, conn.Password, "*******", -1)
 	}
 	database.MarkFailureRefresh(refresh.Id, err, core.ServerRole)
-	return &webcore.RabbitMQError{errors.New(err), true}
+	return &webcore.RabbitMQError{errors.New(err), false}
 }
 
 func onRefreshSuccess(refresh *core.DbRefresh, tx *sqlx.Tx) error {

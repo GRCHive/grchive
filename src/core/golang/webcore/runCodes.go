@@ -15,6 +15,14 @@ import (
 
 var RunCodeExpirationTime = time.Hour * 48
 
+func HashRunCode(rawCode string, salt string) string {
+	base64Code := base64.StdEncoding.EncodeToString([]byte(rawCode))
+	saltedCode := base64Code + "." + salt
+
+	hashedCode := sha256.Sum256([]byte(saltedCode))
+	return base64.StdEncoding.EncodeToString(hashedCode[:])
+}
+
 func GenerateRandomRunCode(requestId int64, orgId int32) (*core.DbSqlQueryRunCode, string, error) {
 	rawCode := strings.ReplaceAll(uuid.New().String(), "-", "")
 	salt, err := core.RandomHexString(numBytesForSalt)
@@ -22,16 +30,11 @@ func GenerateRandomRunCode(requestId int64, orgId int32) (*core.DbSqlQueryRunCod
 		return nil, "", err
 	}
 
-	base64Code := base64.StdEncoding.EncodeToString([]byte(rawCode))
-	saltedCode := base64Code + "." + salt
-
-	hashedCode := sha256.Sum256([]byte(saltedCode))
-
 	runCode := core.DbSqlQueryRunCode{
 		RequestId:      requestId,
 		OrgId:          orgId,
 		ExpirationTime: time.Now().UTC().Add(RunCodeExpirationTime),
-		HashedCode:     base64.StdEncoding.EncodeToString(hashedCode[:]),
+		HashedCode:     HashRunCode(rawCode, salt),
 		Salt:           salt,
 	}
 

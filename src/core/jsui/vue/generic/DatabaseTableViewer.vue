@@ -36,7 +36,7 @@ const Props = Vue.extend({
     props: {
         table: {
             type: Object,
-            default: Object() as () => DbTable | null
+            default: () => null as DbTable | null
         },
         columns: Array,
         height: {

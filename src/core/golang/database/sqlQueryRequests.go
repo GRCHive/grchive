@@ -214,3 +214,22 @@ func CreateNewRunCodeWithTx(runCode *core.DbSqlQueryRunCode, role *core.Role, tx
 
 	return err
 }
+
+func FindRunCodeForQueryForUser(queryId int64, orgId int32, userId int64, role *core.Role) (*core.DbSqlQueryRunCode, error) {
+	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	code := core.DbSqlQueryRunCode{}
+	err := dbConn.Get(&code, `
+		SELECT code.*
+		FROM database_sql_query_run_codes AS code
+		INNER JOIN database_sql_query_requests AS req
+			ON code.request_id = req.id
+		WHERE req.query_id = $1
+			AND req.org_id = $2
+			AND req.upload_user_id = $3
+			AND code.used_time IS NULL
+	`, queryId, orgId, userId)
+	return &code, err
+}
