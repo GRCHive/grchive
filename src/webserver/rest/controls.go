@@ -18,6 +18,7 @@ type NewControlInputs struct {
 	NodeId            int64          `webcore:"nodeId"`
 	RiskId            int64          `webcore:"riskId"`
 	OrgName           string         `webcore:"orgName"`
+	Manual            bool           `webcore:"manual"`
 }
 
 type EditControlInputs struct {
@@ -31,6 +32,7 @@ type EditControlInputs struct {
 	RiskId            int64          `webcore:"riskId"`
 	ControlId         int64          `webcore:"controlId"`
 	OrgName           string         `webcore:"orgName"`
+	Manual            bool           `webcore:"manual"`
 }
 
 type GetAllControlsInputs struct {
@@ -98,6 +100,7 @@ func editControl(w http.ResponseWriter, r *http.Request) {
 		FrequencyType:     inputs.FrequencyType,
 		FrequencyInterval: inputs.FrequencyInterval,
 		OwnerId:           inputs.OwnerId,
+		Manual:            inputs.Manual,
 	}
 
 	err = database.EditControl(&control, role)
@@ -152,6 +155,7 @@ func newControl(w http.ResponseWriter, r *http.Request) {
 		FrequencyType:     inputs.FrequencyType,
 		FrequencyInterval: inputs.FrequencyInterval,
 		OwnerId:           inputs.OwnerId,
+		Manual:            inputs.Manual,
 	}
 
 	err = database.InsertNewControl(&control, role)

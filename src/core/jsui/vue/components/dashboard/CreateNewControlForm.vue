@@ -33,6 +33,15 @@
             v-bind:user.sync="controlOwner"
             :readonly="!canEdit"
         ></user-search-form-component>
+
+        <v-checkbox
+            label="Is Manual"
+            v-model="isManual"
+            :readonly="!canEdit"
+            hide-details
+        >
+        </v-checkbox>
+
         <frequency-form-component
             v-bind:freqInterval.sync="frequencyData.freqInterval"
             v-bind:freqType.sync="frequencyData.freqType"
@@ -123,6 +132,7 @@ export default Vue.extend({
             freqInterval : 0,
             freqType: 0
         },
+        isManual: false,
         controlType: Object() as ProcessFlowControlType,
         controlOwner: Object() as User,
         canEdit: true
@@ -157,6 +167,7 @@ export default Vue.extend({
                 lazyGetControlTypeFromId(control.ControlTypeId).then((typ : ProcessFlowControlType) => {
                     this.controlType = typ
                 })
+                this.isManual = control.Manual
             } else {
                 this.name = ""
                 this.description = ""
@@ -164,6 +175,7 @@ export default Vue.extend({
                 this.frequencyData.freqType = 0
                 this.controlOwner = Object() as User
                 this.refreshDefaultControlType()
+                this.isManual = false
             }
         },
         cancel() {
@@ -231,7 +243,8 @@ export default Vue.extend({
                 ownerId : !!this.controlOwner ? this.controlOwner.Id : undefined,
                 nodeId: this.nodeId,
                 riskId: this.riskId,
-                orgName: PageParamsStore.state.organization!.OktaGroupName
+                orgName: PageParamsStore.state.organization!.OktaGroupName,
+                manual: this.isManual,
             }).then((resp : TNewControlOutput) => {
                 this.onSuccess(resp.data)
             }).catch((err : any) => {
@@ -249,7 +262,8 @@ export default Vue.extend({
                 nodeId: this.nodeId,
                 riskId: this.riskId,
                 controlId: this.control.Id,
-                orgName: PageParamsStore.state.organization!.OktaGroupName
+                orgName: PageParamsStore.state.organization!.OktaGroupName,
+                manual: this.isManual,
             }).then((resp : TEditControlOutput) => {
                 this.onSuccess(resp.data)
             }).catch((err : any) => {

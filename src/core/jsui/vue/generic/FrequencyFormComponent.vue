@@ -6,6 +6,7 @@
             :disabled="disabled"
             :readonly="readonly"
             @change="changeAdHoc">
+            hide-details
         </v-checkbox>
         <v-text-field
             label="Interval"

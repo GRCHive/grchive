@@ -45,7 +45,8 @@ func EditControl(control *core.Control, role *core.Role) error {
 			control_type = :control_type,
 			freq_type = :freq_type,
 			freq_interval = :freq_interval,
-			owner_id = :owner_id
+			owner_id = :owner_id,
+			is_manual = :is_manual
 		WHERE id = :id
 	`, control)
 	if err != nil {
@@ -66,14 +67,14 @@ func InsertNewControl(control *core.Control, role *core.Role) error {
 	tx := dbConn.MustBegin()
 	if control.OwnerId.Valid {
 		rows, err = tx.NamedQuery(`
-			INSERT INTO process_flow_controls (name, description, control_type, org_id, freq_type, freq_interval, owner_id)
-			VALUES (:name, :description, :control_type, :org_id, :freq_type, :freq_interval, :owner_id)
+			INSERT INTO process_flow_controls (name, description, control_type, org_id, freq_type, freq_interval, owner_id, is_manual)
+			VALUES (:name, :description, :control_type, :org_id, :freq_type, :freq_interval, :owner_id, :is_manual)
 			RETURNING id
 		`, control)
 	} else {
 		rows, err = tx.NamedQuery(`
-			INSERT INTO process_flow_controls (name, description, control_type, org_id, freq_type, freq_interval)
-			VALUES (:name, :description, :control_type, :org_id, :freq_type, :freq_interval)
+			INSERT INTO process_flow_controls (name, description, control_type, org_id, freq_type, freq_interval, is_manual)
+			VALUES (:name, :description, :control_type, :org_id, :freq_type, :freq_interval, :is_manual)
 			RETURNING id
 		`, control)
 	}

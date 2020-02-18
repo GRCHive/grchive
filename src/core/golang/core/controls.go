@@ -15,4 +15,5 @@ type Control struct {
 	FrequencyType     int32     `db:"freq_type"`
 	FrequencyInterval int32     `db:"freq_interval"`
 	OwnerId           NullInt64 `db:"owner_id"`
+	Manual            bool      `db:"is_manual"`
 }

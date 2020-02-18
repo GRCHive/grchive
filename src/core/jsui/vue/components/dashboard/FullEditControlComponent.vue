@@ -237,6 +237,7 @@ export default Vue.extend({
             this.fullControlData!.Control.FrequencyType = control.FrequencyType
             this.fullControlData!.Control.FrequencyInterval = control.FrequencyInterval
             this.fullControlData!.Control.OwnerId = control.OwnerId
+            this.fullControlData!.Control.Manual = control.Manual
 
             Vue.nextTick(() => {
                 //@ts-ignore

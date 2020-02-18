@@ -34,6 +34,7 @@ export interface TNewControlInput {
     nodeId:  number
     riskId : number
     orgName : string
+    manual: boolean
 }
 
 export interface TNewControlOutput {

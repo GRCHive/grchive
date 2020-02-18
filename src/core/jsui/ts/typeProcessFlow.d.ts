@@ -31,6 +31,7 @@ interface ProcessFlowControl {
     FrequencyType: number
     FrequencyInterval: number 
     OwnerId: number | null
+    Manual: boolean
 }
 
 interface ProcessFlowNode {
