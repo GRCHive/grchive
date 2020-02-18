@@ -133,3 +133,80 @@ func allComments(w http.ResponseWriter, r *http.Request) {
 
 	jsonWriter.Encode(comments)
 }
+
+type UpdateCommentInputs struct {
+	CommentId int64  `json:"commentId"`
+	Content   string `json:"content"`
+}
+
+func updateComment(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := UpdateCommentInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	userId, err := webcore.GetUserIdFromApiRequestContext(r)
+	if err != nil {
+		core.Warning("Failed to obtain key user id: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tx := database.CreateTx()
+
+	comment := core.Comment{
+		Id:      inputs.CommentId,
+		UserId:  userId,
+		Content: inputs.Content,
+	}
+
+	if err = database.UpdateCommentWithTx(&comment, tx); err != nil {
+		tx.Rollback()
+		core.Warning("Failed to edit comment: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if err = tx.Commit(); err != nil {
+		tx.Rollback()
+		core.Warning("Failed to commit comment edit: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(comment)
+}
+
+type DeleteCommentInputs struct {
+	CommentId int64 `json:"commentId"`
+}
+
+func deleteComment(w http.ResponseWriter, r *http.Request) {
+	inputs := DeleteCommentInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	userId, err := webcore.GetUserIdFromApiRequestContext(r)
+	if err != nil {
+		core.Warning("Failed to obtain key user id: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = database.DeleteComment(inputs.CommentId, userId)
+	if err != nil {
+		core.Warning("Failed to delete comment: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}

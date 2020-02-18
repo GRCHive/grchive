@@ -281,6 +281,8 @@ export const updateDocRequestUrl : string = "/api/requests/update"
 
 export const newCommentUrl : string = "/api/comments/new"
 export const allCommentUrl : string = "/api/comments/all"
+export const updateCommentUrl : string = "/api/comments/update"
+export const deleteCommentUrl : string = "/api/comments/delete"
 
 export const newDeploymentUrl : string = "/api/deployment/new"
 export const updateDeploymentUrl : string = "/api/deployment/update"

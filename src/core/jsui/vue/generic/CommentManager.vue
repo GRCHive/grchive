@@ -4,6 +4,8 @@
             <v-textarea v-model="commentText"
                         label="Comment"
                         filled
+                        hide-details
+                        class="mb-4"
             ></v-textarea> 
 
             <v-row justify="end">
@@ -16,23 +18,14 @@
 
         <v-list two-line v-if="!loading">
             <template v-for="(item, index) in comments">
-                <v-list-item
+                <single-comment-viewer
+                    :params="params"
                     :key="`content-${item.Id}`"
+                    :comment="item"
+                    @on-delete="deleteComment(item.Id)"
+                    @on-edit="editComment(item.Id, arguments[0])"
                 >
-                    <v-list-item-content>
-                        <v-list-item-title>
-                            {{ userIdToName(item.UserId) }}
-                            <span class="caption">
-                                 {{ item.PostTime.toString() }}
-                            </span>
-                        </v-list-item-title>
-
-                        <v-list-item-subtitle>
-                            <pre>{{ item.Content }}</pre>
-                        </v-list-item-subtitle>
-
-                    </v-list-item-content>
-                </v-list-item>
+                </single-comment-viewer>
                 <v-divider
                     :key="`divider-${item.Id}`"
                     v-if="index != comments.length - 1"
@@ -56,6 +49,8 @@ import { contactUsUrl } from '../../ts/url'
 import MetadataStore from '../../ts/metadata'
 import { PageParamsStore } from '../../ts/pageParams'
 import { createUserString } from '../../ts/users'
+import { standardFormatTime } from '../../ts/time'
+import SingleCommentViewer from './SingleCommentViewer.vue'
 
 const Props = Vue.extend({
     props: {
@@ -63,21 +58,17 @@ const Props = Vue.extend({
     }
 })
 
-@Component
+@Component({
+    components: {
+        SingleCommentViewer
+    }
+})
 export default class CommentManager extends Props {
     loading: boolean = true
     comments : Comment[] = []
 
     formValid: boolean = false
     commentText: string = ""
-
-    get userIdToName() : (a0 : number) => string {
-        if (!MetadataStore.state.usersInitialized) {
-            return (a0: number) => "Loading..."
-        }
-
-        return (userId: number) => createUserString(MetadataStore.getters.getUser(userId))
-    }
 
     onRetrieveSuccess(resp : apiComments.TGetAllCommentsOutput) {
         this.comments = resp.data
@@ -118,6 +109,31 @@ export default class CommentManager extends Props {
             },
             ...this.params
         }).then(this.onCommentSuccess).catch(this.onError)
+    }
+
+    deleteComment(commentId : number) {
+        apiComments.deleteComment({
+            commentId: commentId,
+        }).then(() => {
+            let idx : number = this.comments.findIndex((ele : Comment) => ele.Id == commentId)
+            if (idx == -1) {
+                return
+            }
+            this.comments.splice(idx, 1)
+        }).catch(this.onError)
+    }
+
+    editComment(commentId: number, text : string) {
+        apiComments.updateComment({
+            commentId: commentId,
+            content: text
+        }).then((resp : apiComments.TUpdateCommentOutput) => {
+            let idx : number = this.comments.findIndex((ele : Comment) => ele.Id == resp.data.Id)
+            if (idx == -1) {
+                return
+            }
+            Vue.set(this.comments, idx, resp.data)
+        }).catch(this.onError)
     }
 }
 

@@ -280,6 +280,8 @@ func registerCommentsAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiCommentsPrefix).Subrouter()
 	s.HandleFunc(core.ApiNewEndpoint, newComment).Methods("POST")
 	s.HandleFunc(core.ApiAllEndpoint, allComments).Methods("GET")
+	s.HandleFunc(core.ApiUpdateEndpoint, updateComment).Methods("POST")
+	s.HandleFunc(core.ApiDeleteEndpoint, deleteComment).Methods("POST")
 }
 
 func registerDeploymentAPIPaths(r *mux.Router) {
