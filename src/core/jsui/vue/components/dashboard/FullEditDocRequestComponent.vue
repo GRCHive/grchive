@@ -12,8 +12,34 @@
                     </v-list-item-title>
 
                     <v-list-item-subtitle>
-                        Relevant Document Category:
-                        <a :href="parentCategoryUrl">{{ parentCategory.Name }}</a>
+                        <p class="ma-0">
+                            <span class="font-weight-bold">Relevant Document Category:</span>
+                            <a :href="parentCategoryUrl">{{ parentCategory.Name }}</a>
+                        </p>
+
+                        <p class="ma-0">
+                            <span class="font-weight-bold">Status:</span>
+
+                            <span v-if="!currentRequest.CompletionTime">
+                                Pending
+                                <v-icon
+                                    small
+                                    color="warning"
+                                >
+                                    mdi-help-circle
+                                </v-icon>
+                            </span>
+
+                            <span v-else>
+                                Complete ({{ completionTime }})
+                                <v-icon
+                                    small
+                                    color="success"
+                                >
+                                    mdi-check
+                                </v-icon>
+                            </span>
+                        </p>
                     </v-list-item-subtitle>
 
                 </v-list-item-content>
@@ -73,6 +99,30 @@
                             @do-save="onEdit"
                         ></create-new-request-form>
 
+                        <v-card class="mb-4">
+                            <v-card-title>
+                                Requester Information
+                            </v-card-title>
+                            <v-divider></v-divider>
+
+                            <div class="ma-4">
+                                <user-search-form-component
+                                    label="Requester"
+                                    :user="requestUser"
+                                    readonly
+                                >
+                                </user-search-form-component>
+
+                                <v-text-field
+                                    :value="requestTime"
+                                    label="Request Time"
+                                    prepend-icon="mdi-calendar"
+                                    readonly
+                                >
+                                </v-text-field>
+                            </div>
+                        </v-card>
+
                         <v-card>
                             <v-card-title>
                                 Relevant Files
@@ -117,20 +167,24 @@ import { deleteSingleDocRequest, completeDocRequest } from '../../../ts/api/apiD
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl, createOrgDocRequestsUrl, createSingleDocCatUrl } from '../../../ts/url'
 import { ControlDocumentationCategory, ControlDocumentationFile } from '../../../ts/controls'
+import MetadataStore from '../../../ts/metadata'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import CreateNewRequestForm from './CreateNewRequestForm.vue'
 import DocFileManager from '../../generic/DocFileManager.vue'
 import CommentManager from '../../generic/CommentManager.vue'
+import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
+import { standardFormatTime } from '../../../ts/time'
 
 @Component({
     components: {
         GenericDeleteConfirmationForm,
         CreateNewRequestForm,
         DocFileManager,
-        CommentManager
+        CommentManager,
+        UserSearchFormComponent
     }
 })
-export default class FullEditDatabaseComponent extends Vue {
+export default class FullEditDocRequestComponent extends Vue {
     currentRequest : DocumentRequest | null = null
     relevantFiles: ControlDocumentationFile[] = []
     parentCategory : ControlDocumentationCategory | null = null
@@ -156,6 +210,27 @@ export default class FullEditDatabaseComponent extends Vue {
         return createSingleDocCatUrl(
             PageParamsStore.state.organization!.OktaGroupName,
             this.parentCategory!.Id)
+    }
+
+    get requestUser() : User | null {
+        if (!this.currentRequest) {
+            return null
+        }
+        return MetadataStore.getters.getUser(this.currentRequest.RequestedUserId)
+    }
+
+    get requestTime() : string {
+        if (!this.currentRequest) {
+            return ""
+        }
+        return standardFormatTime(this.currentRequest.RequestTime)
+    }
+
+    get completionTime() : string {
+        if (!this.currentRequest || !this.currentRequest.CompletionTime) {
+            return ""
+        }
+        return standardFormatTime(this.currentRequest.CompletionTime)
     }
 
     @Watch('ready')
