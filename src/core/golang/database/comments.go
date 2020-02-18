@@ -48,7 +48,8 @@ func insertCommentWithTx(comment *core.Comment, tx *sqlx.Tx) error {
 func UpdateCommentWithTx(comment *core.Comment, tx *sqlx.Tx) error {
 	rows, err := tx.NamedQuery(`
 		UPDATE comments
-		SET content = :content
+		SET content = :content,
+			post_time = :post_time
 		WHERE id = :id
 			AND user_id = :user_id
 		RETURNING *

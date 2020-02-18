@@ -161,9 +161,10 @@ func updateComment(w http.ResponseWriter, r *http.Request) {
 	tx := database.CreateTx()
 
 	comment := core.Comment{
-		Id:      inputs.CommentId,
-		UserId:  userId,
-		Content: inputs.Content,
+		Id:       inputs.CommentId,
+		UserId:   userId,
+		PostTime: time.Now().UTC(),
+		Content:  inputs.Content,
 	}
 
 	if err = database.UpdateCommentWithTx(&comment, tx); err != nil {
