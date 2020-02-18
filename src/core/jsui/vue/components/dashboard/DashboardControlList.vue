@@ -100,7 +100,7 @@
                 <v-spacer></v-spacer>
 
                 <v-list-item-content>
-                    {{ createFrequencyDisplayString(item.FrequencyType, item.FrequencyInterval) }}
+                    {{ createFrequencyDisplayString(item.FrequencyType, item.FrequencyInterval, item.FrequencyOther) }}
                 </v-list-item-content>
                 <v-spacer></v-spacer>
 

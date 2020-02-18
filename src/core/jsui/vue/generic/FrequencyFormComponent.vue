@@ -1,34 +1,49 @@
 <template>
     <section id="freq">
-        <v-checkbox
-            label="Run Ad Hoc"
-            :value="isAdHoc"
-            :disabled="disabled"
-            :readonly="readonly"
-            @change="changeAdHoc">
+        <v-select
+            label="Frequency Type"
+            :value="freqType"
+            :items="typeItems"
+            @input="changeType(arguments[0], false)"
+            :value-comparator="compareType"
             hide-details
-        </v-checkbox>
+            filled
+            class="mb-4"
+        >
+        </v-select>
         <v-text-field
             label="Interval"
             prefix="Repeat every"
             outlined
             type="number"
             :rules="[rules.numeric]"
-            v-if="!isAdHoc"
+            v-if="freqType >= 0"
             :value="freqInterval"
             :disabled="disabled"
             :readonly="readonly"
             @change="changeInterval"
+            :key="`interval-${key}`"
         >
             <template v-slot:append-outer v-bind:freqType="freqType">
                 <div id="choices">
                     <v-select :items="frequencyChoices"
                               outlined
                               :value="freqType"
-                              @change="changeType">
+                              @change="changeType(arguments[0], true)">
                     </v-select>
                 </div>
             </template>
+        </v-text-field>
+
+        <v-text-field
+            label="Other Frequency Description"
+            filled
+            v-if="freqType == -2"
+            :disabled="disabled"
+            :readonly="readonly"
+            :value="freqOther"
+            @change="changeOther"
+        >
         </v-text-field>
     </section>
 </template>
@@ -43,6 +58,7 @@ export default Vue.extend({
     props: {
         freqInterval : Number,
         freqType: Number,
+        freqOther: String,
         disabled: {
             type: Boolean,
             default: false
@@ -53,11 +69,25 @@ export default Vue.extend({
         }
     },
     data: () => ({
-        rules
+        rules,
+        key: 0
     }),
     computed: {
-        isAdHoc() : boolean {
-            return (this.freqType == -1)
+        typeItems(): any[] {
+            return [
+                {
+                    text: "Ad-Hoc",
+                    value: -1,
+                },
+                {
+                    text: "Other",
+                    value: -2,
+                },
+                {
+                    text: "Interval",
+                    value: 0,
+                },
+            ]
         },
         frequencyChoices() : Object[] {
             let items = [] as Object[]
@@ -74,17 +104,29 @@ export default Vue.extend({
         }
     },
     methods: {
+        compareType(a : number, b: number) : boolean {
+            if (a == b) {
+                return true
+            }
+
+            // All intervals should look the same to the v-select.
+            if (a >= 0 && b >= 0) {
+                return true
+            }
+
+            return false
+        },
         changeInterval(val : string) {
             this.$emit('update:freqInterval', parseInt(val, 10))
         },
-        changeAdHoc(val: boolean) {
-            if (val) {
-                this.changeType(-1)
-            } else {
-                this.changeType(0)
-            }
+        changeOther(val : string) {
+            this.$emit('update:freqOther', val)
         },
-        changeType(val : number) {
+        changeType(val : number, strict : boolean = true) {
+            if (!strict && val == 0 && this.freqType >= 0) {
+                return
+            }
+            this.key += 1
             this.$emit('update:freqType', val)
         }
     }

@@ -30,6 +30,7 @@ export interface TNewControlInput {
     controlType : number
     frequencyType : number
     frequencyInterval : number
+    frequencyOther: string
     ownerId : number
     nodeId:  number
     riskId : number

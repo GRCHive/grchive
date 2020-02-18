@@ -47,7 +47,7 @@ export default class ControlTable extends ResourceTableProps {
             control: `${inp.Name} ${inp.Descrption}`,
             type: MetadataStore.getters.getControlTypeName(inp.ControlTypeId),
             owner: createUserString(MetadataStore.getters.getUser(inp.OwnerId)),
-            frequency:createFrequencyDisplayString(inp.FrequencyType, inp.FrequencyInterval),
+            frequency:createFrequencyDisplayString(inp.FrequencyType, inp.FrequencyInterval, inp.FrequencyOther),
             value: inp
         }
     }

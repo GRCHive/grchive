@@ -39,12 +39,14 @@
             v-model="isManual"
             :readonly="!canEdit"
             hide-details
+            class="mb-4"
         >
         </v-checkbox>
 
         <frequency-form-component
             v-bind:freqInterval.sync="frequencyData.freqInterval"
             v-bind:freqType.sync="frequencyData.freqType"
+            v-bind:freqOther.sync="frequencyData.freqOther"
             :readonly="!canEdit"
         ></frequency-form-component>
 
@@ -130,7 +132,8 @@ export default Vue.extend({
         formValid: false,
         frequencyData : {
             freqInterval : 0,
-            freqType: 0
+            freqType: 0,
+            freqOther: "",
         },
         isManual: false,
         controlType: Object() as ProcessFlowControlType,
@@ -160,6 +163,7 @@ export default Vue.extend({
                 this.description = control.Description
                 this.frequencyData.freqType = control.FrequencyType
                 this.frequencyData.freqInterval = control.FrequencyInterval
+                this.frequencyData.freqOther = control.FrequencyOther
                 lazyGetUserFromId(control.OwnerId).then((user : User) => {
                     this.controlOwner = user
                 })
@@ -173,6 +177,7 @@ export default Vue.extend({
                 this.description = ""
                 this.frequencyData.freqInterval = 0
                 this.frequencyData.freqType = 0
+                this.frequencyData.freqOther = ""
                 this.controlOwner = Object() as User
                 this.refreshDefaultControlType()
                 this.isManual = false
@@ -240,6 +245,7 @@ export default Vue.extend({
                 controlType: this.controlType.Id,
                 frequencyType : this.frequencyData.freqType,
                 frequencyInterval : this.frequencyData.freqInterval,
+                frequencyOther: this.frequencyData.freqOther,
                 ownerId : !!this.controlOwner ? this.controlOwner.Id : undefined,
                 nodeId: this.nodeId,
                 riskId: this.riskId,
@@ -258,6 +264,7 @@ export default Vue.extend({
                 controlType: this.controlType.Id,
                 frequencyType : this.frequencyData.freqType,
                 frequencyInterval : this.frequencyData.freqInterval,
+                frequencyOther: this.frequencyData.freqOther,
                 ownerId : !!this.controlOwner ? this.controlOwner.Id : undefined,
                 nodeId: this.nodeId,
                 riskId: this.riskId,

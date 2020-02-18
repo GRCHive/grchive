@@ -14,6 +14,7 @@ type NewControlInputs struct {
 	ControlTypeId     int32          `webcore:"controlType"`
 	FrequencyType     int32          `webcore:"frequencyType"`
 	FrequencyInterval int32          `webcore:"frequencyInterval"`
+	FrequencyOther    string         `webcore:"frequencyOther"`
 	OwnerId           core.NullInt64 `webcore:"ownerId,optional"`
 	NodeId            int64          `webcore:"nodeId"`
 	RiskId            int64          `webcore:"riskId"`
@@ -27,6 +28,7 @@ type EditControlInputs struct {
 	ControlTypeId     int32          `webcore:"controlType"`
 	FrequencyType     int32          `webcore:"frequencyType"`
 	FrequencyInterval int32          `webcore:"frequencyInterval"`
+	FrequencyOther    string         `webcore:"frequencyOther"`
 	OwnerId           core.NullInt64 `webcore:"ownerId,optional"`
 	NodeId            int64          `webcore:"nodeId"`
 	RiskId            int64          `webcore:"riskId"`
@@ -99,6 +101,7 @@ func editControl(w http.ResponseWriter, r *http.Request) {
 		OrgId:             org.Id,
 		FrequencyType:     inputs.FrequencyType,
 		FrequencyInterval: inputs.FrequencyInterval,
+		FrequencyOther:    inputs.FrequencyOther,
 		OwnerId:           inputs.OwnerId,
 		Manual:            inputs.Manual,
 	}
@@ -154,6 +157,7 @@ func newControl(w http.ResponseWriter, r *http.Request) {
 		OrgId:             org.Id,
 		FrequencyType:     inputs.FrequencyType,
 		FrequencyInterval: inputs.FrequencyInterval,
+		FrequencyOther:    inputs.FrequencyOther,
 		OwnerId:           inputs.OwnerId,
 		Manual:            inputs.Manual,
 	}

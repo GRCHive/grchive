@@ -30,6 +30,7 @@ interface ProcessFlowControl {
     ControlTypeId: number
     FrequencyType: number
     FrequencyInterval: number 
+    FrequencyOther: string
     OwnerId: number | null
     Manual: boolean
 }

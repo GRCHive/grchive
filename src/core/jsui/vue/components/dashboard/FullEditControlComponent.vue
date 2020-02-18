@@ -236,6 +236,7 @@ export default Vue.extend({
             this.fullControlData!.Control.ControlTypeId = control.ControlTypeId
             this.fullControlData!.Control.FrequencyType = control.FrequencyType
             this.fullControlData!.Control.FrequencyInterval = control.FrequencyInterval
+            this.fullControlData!.Control.FrequencyOther = control.FrequencyOther
             this.fullControlData!.Control.OwnerId = control.OwnerId
             this.fullControlData!.Control.Manual = control.Manual
 
