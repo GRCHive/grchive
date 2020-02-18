@@ -134,3 +134,50 @@ func statusSqlRequest(w http.ResponseWriter, r *http.Request) {
 
 	jsonWriter.Encode(status)
 }
+
+type GetSqlRequestInput struct {
+	RequestId int64 `webcore:"requestId"`
+	OrgId     int32 `webcore:"orgId"`
+}
+
+func getSqlRequest(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := GetSqlRequestInput{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	request, err := database.GetSqlRequest(inputs.RequestId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get SQL request: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	approval, err := database.GetSqlRequestStatus(inputs.RequestId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get SQL request status: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(struct {
+		Request  *core.DbSqlQueryRequest
+		Approval *core.DbSqlQueryRequestApproval
+	}{
+		Request:  request,
+		Approval: approval,
+	})
+}

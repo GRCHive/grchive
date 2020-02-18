@@ -3,6 +3,7 @@ import * as qs from 'query-string'
 import { 
     newSqlRequestUrl,
     allSqlRequestUrl,
+    getSqlRequestUrl,
     statusSqlRequestUrl,
 } from '../url'
 import { getAPIRequestConfig } from './apiUtility'
@@ -48,6 +49,28 @@ export function allSqlRequest(inp : TAllSqlRequestInput) : Promise<TAllSqlReques
     })
 }
 
+export interface TGetSqlRequestInput {
+    requestId : number
+    orgId : number
+}
+
+export interface TGetSqlRequestOutput {
+    data: {
+        Request: DbSqlQueryRequest,
+        Approval: DbSqlQueryRequestApproval | null
+    }
+}
+
+export function getSqlRequest(inp : TGetSqlRequestInput) : Promise<TGetSqlRequestOutput> {
+    return axios.get(getSqlRequestUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetSqlRequestOutput) => {
+        cleanDbSqlRequestFromJson(resp.data.Request)
+        if (!!resp.data.Approval) {
+            cleanDbSqlRequestApprovalFromJson(resp.data.Approval)
+        }
+        return resp
+    })
+}
+
 export interface TStatusSqlRequestInput {
     requestId : number
     orgId : number
@@ -65,3 +88,4 @@ export function statusSqlRequest(inp : TStatusSqlRequestInput) : Promise<TStatus
         return resp
     })
 }
+

@@ -260,6 +260,7 @@ export const runSqlQueryUrl : string = "/api/it/db/sql/query/run"
 
 export const newSqlRequestUrl : string = "/api/it/db/sql/requests/new"
 export const allSqlRequestUrl : string = "/api/it/db/sql/requests/all"
+export const getSqlRequestUrl : string = "/api/it/db/sql/requests/get"
 export const statusSqlRequestUrl : string = "/api/it/db/sql/requests/status"
 
 export const newDbConnUrl : string = "/api/it/db/connection/new"

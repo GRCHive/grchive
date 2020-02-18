@@ -58,9 +58,13 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import {
     TNewSqlRequestOutput, newSqlRequest,
 } from '../../../ts/api/apiSqlRequests'
+import {
+    DbSqlQueryRequest
+} from '../../../ts/sql'
 import * as rules from '../../../ts/formRules'
 import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
@@ -74,7 +78,11 @@ const Props = Vue.extend({
         forceQueryId : {
             type : Number,
             default: -1
-        }
+        },
+        referenceRequest: {
+            type: Object,
+            default: Object() as () => DbSqlQueryRequest | null
+        },
     }
 })
 
@@ -140,11 +148,18 @@ export default class CreateNewSqlRequestForm extends Props {
 
     mounted() {
         this.canEdit = !this.editMode
+        this.clearForm()
     }
 
+    @Watch('referenceRequest')
     clearForm() {
-        this.name = ""
-        this.description = ""
+        if (!!this.referenceRequest) {
+            this.name = this.referenceRequest.Name
+            this.description = this.referenceRequest.Description
+        } else {
+            this.name = ""
+            this.description = ""
+        }
     }
 }
 

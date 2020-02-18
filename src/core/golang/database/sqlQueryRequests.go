@@ -72,6 +72,20 @@ func GetAllSqlRequestsForOrg(orgId int32, role *core.Role) ([]*core.DbSqlQueryRe
 	return data, err
 }
 
+func GetSqlRequest(requestId int64, orgId int32, role *core.Role) (*core.DbSqlQueryRequest, error) {
+	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	req := core.DbSqlQueryRequest{}
+	err := dbConn.Get(&req, `
+		SELECT *
+		FROM database_sql_query_requests
+		WHERE id = $1 AND org_id = $2
+	`, requestId, orgId)
+	return &req, err
+}
+
 func GetSqlRequestStatus(requestId int64, orgId int32, role *core.Role) (*core.DbSqlQueryRequestApproval, error) {
 	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessView) {
 		return nil, core.ErrorUnauthorized
