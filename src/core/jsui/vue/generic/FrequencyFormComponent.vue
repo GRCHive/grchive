@@ -1,11 +1,11 @@
 <template>
     <section id="freq">
         <v-checkbox
-            label="Is Manually Run"
-            :value="isManual"
+            label="Run Ad Hoc"
+            :value="isAdHoc"
             :disabled="disabled"
             :readonly="readonly"
-            @change="changeManual">
+            @change="changeAdHoc">
         </v-checkbox>
         <v-text-field
             label="Interval"
@@ -13,7 +13,7 @@
             outlined
             type="number"
             :rules="[rules.numeric]"
-            v-if="!isManual"
+            v-if="!isAdHoc"
             :value="freqInterval"
             :disabled="disabled"
             :readonly="readonly"
@@ -55,7 +55,7 @@ export default Vue.extend({
         rules
     }),
     computed: {
-        isManual() : boolean {
+        isAdHoc() : boolean {
             return (this.freqType == -1)
         },
         frequencyChoices() : Object[] {
@@ -76,7 +76,7 @@ export default Vue.extend({
         changeInterval(val : string) {
             this.$emit('update:freqInterval', parseInt(val, 10))
         },
-        changeManual(val: boolean) {
+        changeAdHoc(val: boolean) {
             if (val) {
                 this.changeType(-1)
             } else {
