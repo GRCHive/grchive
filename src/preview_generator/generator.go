@@ -6,6 +6,7 @@ import (
 	"gitlab.com/grchive/grchive/core"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -24,7 +25,12 @@ var supportedApplicationMIME []string = []string{
 	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 }
 
-func isFileSupported(filename string) bool {
+type FileSupport struct {
+	Supported bool
+	IsPdf     bool
+}
+
+func isFileSupported(filename string) FileSupport {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 	cmd := exec.Command("dependencies/python/python-3.8.1/bin/bin/python3",
@@ -42,16 +48,16 @@ func isFileSupported(filename string) bool {
 
 	mime := stdout.String()
 	if strings.HasPrefix(mime, "text/") || strings.HasPrefix(mime, "image/") {
-		return true
+		return FileSupport{false, false}
 	}
 
 	for _, m := range supportedApplicationMIME {
 		if strings.TrimSpace(mime) == m {
-			return true
+			return FileSupport{true, m == "application/pdf"}
 		}
 	}
 
-	return false
+	return FileSupport{false, false}
 }
 
 func main() {
@@ -69,18 +75,39 @@ func main() {
 		os.Exit(1)
 	}
 
-	if !isFileSupported(*inputFilename) {
+	support := isFileSupported(*inputFilename)
+	if !support.Supported {
 		core.Error("Unsupported filetype.")
 	}
 
-	cmd := exec.Command("libreoffice",
-		"--headless",
-		"--convert-to", "pdf",
-		"--outdir", *outputDirectory,
-		*inputFilename)
+	var cmd *exec.Cmd
+	if support.IsPdf {
+		outputFilename := *outputDirectory + "/" + filepath.Base(*inputFilename)
+		cmd = exec.Command("gs",
+			"-sDEVICE=pdfwrite",
+			"-dCompatibilityLevel=1.4",
+			"-dPDFSettings=/ebook",
+			"-dNOPAUSE",
+			"-dQUIET",
+			"-dBATCH",
+			"-sOutputFile="+outputFilename,
+			*inputFilename)
+	} else {
+		cmd = exec.Command("libreoffice",
+			"--headless",
+			"--convert-to", "pdf",
+			"--outdir", *outputDirectory,
+			*inputFilename)
+	}
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 
 	err = cmd.Run()
 	if err != nil {
+		core.Warning("STDOUT: " + stdout.String())
+		core.Warning("STDERR: " + stderr.String())
 		core.Error("Failed to run: " + err.Error())
 	}
 }
