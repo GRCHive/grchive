@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
+	"time"
 )
 
 func CreateNewSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.Role, tx *sqlx.Tx) error {
@@ -232,4 +233,23 @@ func FindRunCodeForQueryForUser(queryId int64, orgId int32, userId int64, role *
 			AND code.used_time IS NULL
 	`, queryId, orgId, userId)
 	return &code, err
+}
+
+func MarkRunCodeAsUsed(hashCode string, requestId int64, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+	_, err := tx.Exec(`
+		UPDATE database_sql_query_run_codes
+		SET used_time = $4
+		WHERE hashed_code = $1 AND request_id = $2 AND org_id = $3
+	`, hashCode, requestId, orgId, time.Now().UTC())
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
 }

@@ -419,4 +419,9 @@ func runDatabaseQuery(w http.ResponseWriter, r *http.Request) {
 		jsonWriter.Encode(data)
 	}
 
+	// We should able to ignore this error.	Worst case scenario it'll just expire.
+	err = database.MarkRunCodeAsUsed(code.HashedCode, code.RequestId, code.OrgId, core.ServerRole)
+	if err != nil {
+		core.Warning("Failed to mark used: " + err.Error())
+	}
 }
