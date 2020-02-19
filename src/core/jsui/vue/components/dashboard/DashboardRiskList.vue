@@ -41,26 +41,15 @@
             </v-list-item-action>
         </v-list-item>
         <v-divider></v-divider>
-        <v-card
-            v-for="(item, index) in filteredRisks"
-            :key="index"
-            class="my-2"
+
+        <risk-table
+            :resources="allRisks"
+            :search="filterText"
+            use-crud-delete
+            confirm-delete
+            @delete="deleteSelectedRisk"
         >
-            <v-list-item two-line @click="goToRisk(item.Id)">
-                <v-list-item-content>
-                    <v-list-item-title v-html="highlightText(item.Name)">
-                    </v-list-item-title>
-                    <v-list-item-subtitle v-html="highlightText(item.Description)">
-                    </v-list-item-subtitle>
-                </v-list-item-content>
-                <v-spacer></v-spacer>
-                <v-list-item-action>
-                    <v-btn icon @click.stop="doDeleteRisk(item)" @mousedown.stop @mouseup.stop>
-                        <v-icon>mdi-delete</v-icon>
-                    </v-btn>
-                </v-list-item-action>
-            </v-list-item>
-        </v-card>
+        </risk-table>
     </div>
 </template>
 
@@ -69,56 +58,22 @@
 import Vue from 'vue'
 import { getAllRisks, TAllRiskInput, TAllRiskOutput } from '../../../ts/api/apiRisks'
 import { deleteRisk, TDeleteRiskInput, TDeleteRiskOutput } from '../../../ts/api/apiRisks'
-import { contactUsUrl, createRiskUrl } from '../../../ts/url'
-import { replaceWithMark, sanitizeTextForHTML } from '../../../ts/text'
+import { contactUsUrl } from '../../../ts/url'
 import CreateNewRiskForm from './CreateNewRiskForm.vue'
-import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import { PageParamsStore } from '../../../ts/pageParams'
+import RiskTable from '../../generic/RiskTable.vue'
 
 export default Vue.extend({
     data : () => ({
         allRisks: [] as ProcessFlowRisk[],
         filterText : "",
         showHideCreateNewRisk: false,
-        showHideDeleteRisk: false,
-        currentDeleteRisk : Object() as ProcessFlowRisk
     }),
     components: {
         CreateNewRiskForm,
-        GenericDeleteConfirmationForm
-    },
-    computed: {
-        filter() : (a : ProcessFlowRisk) => boolean {
-            const filterText = this.filterText.trim()
-            return (ele : ProcessFlowRisk) : boolean => {
-                return ele.Name.toLocaleLowerCase().includes(filterText.toLocaleLowerCase()) ||
-                    ele.Description.toLocaleLowerCase().includes(filterText.toLocaleLowerCase())
-            }
-        },
-        filteredRisks() : ProcessFlowRisk[] {
-            return this.allRisks.filter(this.filter)
-        },
-        currentRisksToDelete() : string[] {
-            if (!this.showHideDeleteRisk) {
-                return []
-            }
-            return [this.currentDeleteRisk.Name]
-        }
+        RiskTable
     },
     methods: {
-        highlightText(input : string) : string {
-            const safeInput = sanitizeTextForHTML(input)
-            const useFilter = this.filterText.trim()
-            if (useFilter.length == 0) {
-                return safeInput
-            }
-            return replaceWithMark(
-                safeInput,
-                sanitizeTextForHTML(useFilter))
-        },
-        generateRiskUrl(riskId : number) : string {
-            return createRiskUrl(PageParamsStore.state.organization!.OktaGroupName, riskId)
-        },
         refreshRisks() {
             getAllRisks(<TAllRiskInput>{
                 orgName: PageParamsStore.state.organization!.OktaGroupName
@@ -141,37 +96,16 @@ export default Vue.extend({
         cancelNewRisk() {
             this.showHideCreateNewRisk = false
         },
-        goToRisk(riskId : number) {
-            window.location.assign(this.generateRiskUrl(riskId))
-        },
-        doDeleteRisk(risk : ProcessFlowRisk) {
-            this.currentDeleteRisk = risk
-            this.showHideDeleteRisk = true
-        },
-        deleteSelectedRisks(global : boolean, items : string[]) {
-            // assumption: global is true, items has length 1
-            const idx = this.allRisks.findIndex(
-                (ele) => items.includes(ele.Name))
-            if (idx == -1) {
-                // @ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong. Try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
-                return // ???
-            }
-
-            const risk = this.allRisks[idx]
-
+        deleteSelectedRisk(risk : ProcessFlowRisk, global : boolean) {
             deleteRisk(<TDeleteRiskInput>{
                 nodeId: -1,
                 riskIds: [risk.Id],
-                global: true
+                global: global,
             }).then((resp : TDeleteRiskOutput) => {
-                this.allRisks.splice(idx, 1)
-                this.showHideDeleteRisk = false
+                this.allRisks.splice(
+                    this.allRisks.findIndex((ele : ProcessFlowRisk) =>
+                        ele.Id == risk.Id),
+                    1)
             }).catch((err) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(

@@ -138,12 +138,12 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
                             props: {
                                 itemName: this.resourceName,
                                 itemsToDelete: [this.itemToDelete.name],
-                                useGlobalDeletion: false
+                                useGlobalDeletion: this.useGlobalDeletion
                             },
                             on: {
                                 'do-cancel': () => { this.itemToDelete = null },
-                                'do-delete': () => {
-                                    this.$emit('delete', this.itemToDelete)
+                                'do-delete': (globalDelete : boolean) => {
+                                    this.$emit('delete', this.itemToDelete, globalDelete)
                                     this.itemToDelete = null
                                 }
                             }

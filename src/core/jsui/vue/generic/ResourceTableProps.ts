@@ -27,6 +27,10 @@ const ResourceTableProps = Vue.extend({
             type: Boolean,
             default: false
         },
+        useGlobalDeletion: {
+            type: Boolean,
+            default: false
+        }
     }
 })
 
