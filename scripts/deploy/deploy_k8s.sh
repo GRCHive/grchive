@@ -11,7 +11,7 @@ kubectl apply -f ./cert-manager/letsencrypt-staging.yaml -f ./cert-manager/letse
 
 cd postgresql
 envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
-kubectl apply -f .deployment.prod.yaml -f service.yaml
+kubectl apply -f deployment.prod.yaml -f service.yaml
 cd ../
 
 export VAULT_IMAGE=registry.gitlab.com/grchive/grchive/vault:`git rev-parse HEAD`
