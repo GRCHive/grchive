@@ -1,0 +1,2 @@
+DROP INDEX database_sql_query_requests_query_id_upload_user_id_idx;
+CREATE INDEX ON database_sql_query_requests(query_id, upload_user_id);

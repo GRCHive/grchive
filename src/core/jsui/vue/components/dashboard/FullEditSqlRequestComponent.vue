@@ -39,7 +39,7 @@
 
                 <v-spacer></v-spacer>
 
-                <v-list-item-action>
+                <v-list-item-action v-if="!currentApproval">
                     <v-dialog persistent max-width="40%" v-model="showHideDenyReason">
                         <template v-slot:activator="{on}">
                             <v-btn 
@@ -85,7 +85,7 @@
                     </v-dialog>
                 </v-list-item-action>
 
-                <v-list-item-action>
+                <v-list-item-action v-if="!currentApproval">
                     <v-btn 
                         color="success"
                         @click="approveDeny(true)"

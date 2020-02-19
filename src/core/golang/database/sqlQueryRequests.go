@@ -177,11 +177,6 @@ func UpdateRequestStatusWithTx(approval *core.DbSqlQueryRequestApproval, role *c
 	rows, err := tx.NamedQuery(`
 		INSERT INTO database_sql_query_requests_approvals (request_id, org_id, response_time, responder_user_id, response, reason)
 		VALUES (:request_id, :org_id, :response_time, :responder_user_id, :response, :reason)
-		ON CONFLICT (request_id) DO UPDATE
-			SET response_time = EXCLUDED.response_time,
-				responder_user_id = EXCLUDED.responder_user_id,
-				response = EXCLUDED.response,
-				reason = EXCLUDED.reason
 		RETURNING *
 	`, approval)
 	if err != nil {
