@@ -28,6 +28,7 @@ func FindAllControlsForOrganization(org *core.Organization, role *core.Role) ([]
 		SELECT *
 		FROM process_flow_controls as control
 		WHERE control.org_id = $1
+		ORDER BY name ASC
 	`, org.Id)
 
 	return controls, err
