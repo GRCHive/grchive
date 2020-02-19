@@ -145,6 +145,7 @@ export const getAllProcessFlowIOTypesAPIUrl: string = "/api/flowio/types"
 export const newProcessFlowIOAPIUrl: string = "/api/flowio/new"
 export const deleteProcessFlowIOAPIUrl: string = "/api/flowio/delete"
 export const editProcessFlowIOAPIUrl: string = "/api/flowio/edit"
+export const orderProcessFlowIOAPIUrl: string = "/api/flowio/order"
 export function createGetProcessFlowFullDataUrl(id : number) : string {
     return "/api/flows/" + id.toString() + "/full"
 }

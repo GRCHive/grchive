@@ -96,6 +96,7 @@ func registerProcessFlowIOAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiProcessFlowIONewUrl, createNewProcessFlowIO).Methods("POST")
 	s.HandleFunc(core.ApiProcessFlowIODeleteUrl, deleteProcessFlowIO).Methods("POST")
 	s.HandleFunc(core.ApiProcessFlowIOEditUrl, editProcessFlowIO).Methods("POST")
+	s.HandleFunc(core.ApiProcessFlowIOOrderEndpoint, orderProcessFlowIO).Methods("POST")
 }
 
 func registerProcessFlowEdgesAPIPaths(r *mux.Router) {

@@ -16,6 +16,10 @@ import { getFullProcessFlow, TGetFullProcessFlowInput, TGetFullProcessFlowOutput
 let mutationObservers = []
 const opts = {}
 
+function sortIo(a : ProcessFlowInputOutput, b : ProcessFlowInputOutput) : number {
+    return (a.TypeId - b.TypeId) || (a.IoOrder - b.IoOrder)
+}
+
 const store : StoreOptions<VuexState> = {
     state: {
         primaryNavBarWidth: 256,
@@ -46,6 +50,7 @@ const store : StoreOptions<VuexState> = {
             }
 
             state.currentProcessFlowFullData.Nodes[nodeId].Inputs.push(input)
+            state.currentProcessFlowFullData.Nodes[nodeId].Inputs.sort(sortIo)
             Vue.set(
                 state.currentProcessFlowFullData.Inputs,
                 input.Id,
@@ -56,6 +61,7 @@ const store : StoreOptions<VuexState> = {
                 return
             }
             state.currentProcessFlowFullData.Nodes[nodeId].Outputs.push(output)
+            state.currentProcessFlowFullData.Nodes[nodeId].Outputs.sort(sortIo)
             Vue.set(
                 state.currentProcessFlowFullData.Outputs,
                 output.Id,
@@ -107,6 +113,7 @@ const store : StoreOptions<VuexState> = {
                 })
             if (nodeIdx != -1) {
                 Vue.set(relevantNodeArr, nodeIdx, io)
+                relevantNodeArr.sort(sortIo)
             }
 
             let relevantArr : Record<number, ProcessFlowInputOutput> = 
@@ -339,6 +346,7 @@ const store : StoreOptions<VuexState> = {
                         NodeControlRelationships: Vue.observable(new RelationshipMap<ProcessFlowNode,ProcessFlowControl>()),
                         RiskControlRelationships: Vue.observable(new RelationshipMap<ProcessFlowRisk,ProcessFlowControl>()),
                     }
+        
                     for (let data of resp.data.Graph.Nodes) {
                         newData.Nodes[data.Id] = data
                         newData.NodeKeys.push(data.Id)
@@ -349,6 +357,9 @@ const store : StoreOptions<VuexState> = {
                         for (let inp of data.Outputs) {
                             newData.Outputs[inp.Id] = inp
                         }
+
+                        newData.Nodes[data.Id].Inputs.sort(sortIo)
+                        newData.Nodes[data.Id].Outputs.sort(sortIo)
                     }
                     for (let data of resp.data.Graph.Edges) {
                         newData.Edges[data.Id] = data

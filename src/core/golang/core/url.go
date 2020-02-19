@@ -142,6 +142,7 @@ const ApiProcessFlowIOGetTypesUrl string = "/types"
 const ApiProcessFlowIONewUrl string = "/new"
 const ApiProcessFlowIODeleteUrl string = "/delete"
 const ApiProcessFlowIOEditUrl string = "/edit"
+const ApiProcessFlowIOOrderEndpoint string = "/order"
 
 // API - Users
 var ApiUserPrefix string = fmt.Sprintf("/user/{%s}", DashboardUserQueryId)

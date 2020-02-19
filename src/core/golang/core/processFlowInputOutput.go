@@ -10,4 +10,5 @@ type ProcessFlowInputOutput struct {
 	Name         string `db:"name"`
 	ParentNodeId int64  `db:"parent_node_id"`
 	TypeId       int32  `db:"io_type_id"`
+	IoOrder      int32  `db:"io_order"`
 }

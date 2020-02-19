@@ -194,8 +194,21 @@ function createDefaultNodeLayout(node : ProcessFlowNode, rendererRect : IDOMRect
         ty: LocalSettings.state.simplifiedMode ? 0 : titleHeight
     }
 
+    let ioSort = (a : ProcessFlowInputOutput, b : ProcessFlowInputOutput) : number => {
+        if (a.IoOrder < b.IoOrder) {
+            return -1
+        } else if (a.IoOrder > b.IoOrder) {
+            return 1
+        }
+        return 0
+    }
+
     // Finally, process each group to determine where their input/output elements should lie.
     for (let groupKey of layout.groupKeys) {
+        // Force input/outputs to be in order.
+        layout.groupLayout[groupKey].relevantInputs.sort(ioSort)
+        layout.groupLayout[groupKey].relevantOutputs.sort(ioSort)
+
         if (!LocalSettings.state.simplifiedMode) {
             currentGroupTransform.ty += NodeIOMargins.betweenGroups
         }

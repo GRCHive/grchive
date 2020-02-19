@@ -39,6 +39,7 @@ func readProcessFlowInputOutputArray(data []uint8) ([]core.ProcessFlowInputOutpu
 		retArr[i].Name = mapArr[i]["name"].(string)
 		retArr[i].ParentNodeId = int64(mapArr[i]["parent_node_id"].(float64))
 		retArr[i].TypeId = int32(mapArr[i]["io_type_id"].(float64))
+		retArr[i].IoOrder = int32(mapArr[i]["io_order"].(float64))
 	}
 	return retArr, nil
 }

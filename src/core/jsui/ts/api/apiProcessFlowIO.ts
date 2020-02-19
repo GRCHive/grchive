@@ -3,8 +3,10 @@ import * as qs from 'query-string'
 import { getAllProcessFlowIOTypesAPIUrl, 
          deleteProcessFlowIOAPIUrl,
          editProcessFlowIOAPIUrl,
-         newProcessFlowIOAPIUrl } from '../url'
-import { postFormUrlEncoded } from '../http'
+         newProcessFlowIOAPIUrl,
+         orderProcessFlowIOAPIUrl,
+} from '../url'
+import { postFormUrlEncoded, postFormJson } from '../http'
 import { getAPIRequestConfig } from './apiUtility'
 
 export interface TGetProcessFlowIOTypesInput { 
@@ -60,4 +62,22 @@ export interface TNewProcessFlowIOOutput {
 export function newProcessFlowIO(inp : TNewProcessFlowIOInput) : 
         Promise<TNewProcessFlowIOOutput> {
     return postFormUrlEncoded<TNewProcessFlowIOOutput>(newProcessFlowIOAPIUrl, inp, getAPIRequestConfig())
+}
+
+export interface TOrderProcessFlowIOInput {
+    ioId: number
+    isInput: boolean
+    direction: number // positive or negative
+}
+
+export interface TOrderProcessFlowIOOutput {
+    data: {
+        This: ProcessFlowInputOutput
+        Other: ProcessFlowInputOutput
+    }
+}
+
+export function orderProcessFlowIO(inp : TOrderProcessFlowIOInput) : 
+        Promise<TOrderProcessFlowIOOutput> {
+    return postFormJson<TOrderProcessFlowIOOutput>(orderProcessFlowIOAPIUrl, inp, getAPIRequestConfig())
 }

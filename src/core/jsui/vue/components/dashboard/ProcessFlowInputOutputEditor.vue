@@ -71,6 +71,30 @@
                 </v-btn>
             </v-list-item-action>
 
+            <v-list-item-action class="ma-0" v-if="!canEdit(item.Id)">
+                <v-btn
+                    small
+                    icon
+                    class="ma-0"
+                    :disabled="item.IoOrder == maxIoOrder(item.TypeId)"
+                    @click="raiseLowerIO(item, 1)"
+                >
+                    <v-icon small>mdi-chevron-down</v-icon>
+                </v-btn>
+            </v-list-item-action>
+
+            <v-list-item-action class="ma-0" v-if="!canEdit(item.Id)">
+                <v-btn
+                    small
+                    icon
+                    class="ma-0"
+                    :disabled="item.IoOrder == minIoOrder(item.TypeId)"
+                    @click="raiseLowerIO(item, -1)"
+                >
+                    <v-icon small>mdi-chevron-up</v-icon>
+                </v-btn>
+            </v-list-item-action>
+
         </v-list-item>
     </v-list>
 </template>
@@ -84,6 +108,7 @@ import { contactUsUrl } from '../../../ts/url'
 import { TDeleteProcessFlowIOInput, TDeleteProcessFlowIOOutput, deleteProcessFlowIO } from '../../../ts/api/apiProcessFlowIO'
 import { TEditProcessFlowIOInput, TEditProcessFlowIOOutput, editProcessFlowIO } from '../../../ts/api/apiProcessFlowIO'
 import { TNewProcessFlowIOInput, TNewProcessFlowIOOutput, newProcessFlowIO } from '../../../ts/api/apiProcessFlowIO'
+import { TOrderProcessFlowIOOutput, orderProcessFlowIO } from '../../../ts/api/apiProcessFlowIO'
 
 interface IOEditState {
     canEdit: boolean,
@@ -116,6 +141,18 @@ export default Vue.extend({
         },
         dataTypes(): ProcessFlowIOType[] {
             return MetadataStore.state.ioTypes
+        },
+        minIoOrder() : (a0 : number) => number { 
+            return (typeId: number) : number => {
+                return Math.min(...this.listedIO.filter((ele : ProcessFlowInputOutput) => ele.TypeId == typeId)
+                    .map((ele : ProcessFlowInputOutput) => ele.IoOrder))
+            }
+        },
+        maxIoOrder() : (a0 : number) => number { 
+            return (typeId: number) : number => {
+                return Math.max(...this.listedIO.filter((ele : ProcessFlowInputOutput) => ele.TypeId == typeId)
+                    .map((ele : ProcessFlowInputOutput) => ele.IoOrder))
+            }
         }
     },
     methods: {
@@ -162,6 +199,32 @@ export default Vue.extend({
                 }
             }).catch((err) => {
                 console.log(err)
+                //@ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong, please reload the page and try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
+        raiseLowerIO(io : ProcessFlowInputOutput, dir : number) {
+            orderProcessFlowIO({
+                ioId: io.Id,
+                isInput: this.isInput,
+                direction: dir,
+            }).then((resp : TOrderProcessFlowIOOutput) => {
+                VueSetup.store.commit('updateNodeInputOutput', {
+                    nodeId: this.nodeId,
+                    io: resp.data.This,
+                    isInput: this.isInput
+                })
+                VueSetup.store.commit('updateNodeInputOutput', {
+                    nodeId: this.nodeId,
+                    io: resp.data.Other,
+                    isInput: this.isInput
+                })
+            }).catch((err: any) => {
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
                     "Oops! Something went wrong, please reload the page and try again.",

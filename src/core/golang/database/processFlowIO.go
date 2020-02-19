@@ -33,10 +33,12 @@ func CreateNewProcessFlowIOWithTx(io *core.ProcessFlowInputOutput, isInput bool,
 	var dbName string = getProcessFlowIODbName(isInput)
 
 	rows, err := tx.Queryx(fmt.Sprintf(`
-		INSERT INTO %s (name, parent_node_id, io_type_id)
-		VALUES ($1, $2, $3)
+		INSERT INTO %s (name, parent_node_id, io_type_id, io_order)
+		SELECT $1, $2, $3, COALESCE(MAX(io_order), 0) + 1
+		FROM %s
+		WHERE parent_node_id = $2 AND io_type_id = $3
 		RETURNING *
-	`, dbName), io.Name, io.ParentNodeId, io.TypeId)
+	`, dbName, dbName), io.Name, io.ParentNodeId, io.TypeId)
 	if err != nil {
 		return nil, err
 	}
@@ -108,4 +110,75 @@ func EditProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool, role *core
 
 	err = tx.Commit()
 	return io, nil
+}
+
+func GetProcessFlowIOFromId(ioId int64, isInput bool, role *core.Role) (*core.ProcessFlowInputOutput, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	dbName := getProcessFlowIODbName(isInput)
+	io := core.ProcessFlowInputOutput{}
+	err := dbConn.Get(&io, fmt.Sprintf(`
+		SELECT *
+		FROM %s
+		WHERE id = $1
+	`, dbName), ioId)
+	return &io, err
+}
+
+func GetSwapProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool, dir int32, role *core.Role) (*core.ProcessFlowInputOutput, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	dbName := getProcessFlowIODbName(isInput)
+
+	var orderBy string
+	var where string
+	if dir < 0 {
+		orderBy = "DESC"
+		where = "<"
+	} else {
+		orderBy = "ASC"
+		where = ">"
+	}
+
+	retIo := core.ProcessFlowInputOutput{}
+	err := dbConn.Get(&retIo, fmt.Sprintf(`
+		SELECT *
+		FROM %s
+		WHERE parent_node_id = $1
+			AND io_type_id = $2
+			AND io_order %s $3
+		ORDER BY io_order %s
+		LIMIT 1
+	`, dbName, where, orderBy), io.ParentNodeId, io.TypeId, io.IoOrder)
+	return &retIo, err
+}
+
+func SwapIOOrder(a *core.ProcessFlowInputOutput, b *core.ProcessFlowInputOutput, isInput bool, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := dbConn.MustBegin()
+
+	dbName := getProcessFlowIODbName(isInput)
+
+	_, err := tx.Exec(fmt.Sprintf(`
+		UPDATE %s
+		SET io_order = CASE id
+					   		WHEN $1 THEN (SELECT io_order FROM %s WHERE id = $2)
+					   		WHEN $2 THEN (SELECT io_order FROM %s WHERE id = $1)
+					   END
+		WHERE id in ($1, $2)
+	`, dbName, dbName, dbName), a.Id, b.Id)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }

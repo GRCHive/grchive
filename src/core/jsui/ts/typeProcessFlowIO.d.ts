@@ -8,4 +8,5 @@ interface ProcessFlowInputOutput {
     Name: string
     ParentNodeId: number
     TypeId: number
+    IoOrder: number
 }

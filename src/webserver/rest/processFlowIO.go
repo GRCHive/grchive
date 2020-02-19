@@ -21,6 +21,12 @@ type EditProcessFlowIOInputs struct {
 	Type    int32  `webcore:"type"`
 }
 
+type OrderProcessFlowIOInputs struct {
+	IoId      int64 `json:"ioId"`
+	IsInput   bool  `json:"isInput"`
+	Direction int32 `json:"direction"`
+}
+
 func getAllProcessFlowIOTypes(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -219,4 +225,75 @@ func editProcessFlowIO(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(io)
+}
+
+func orderProcessFlowIO(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := OrderProcessFlowIOInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		jsonWriter.Encode(struct{}{})
+		return
+	}
+
+	var organization *core.Organization
+	if inputs.IsInput {
+		organization, err = database.FindOrganizationFromProcessFlowInputId(inputs.IoId, core.ServerRole)
+		if err != nil {
+			core.Warning("Can't get input org: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	} else {
+		organization, err = database.FindOrganizationFromProcessFlowOutputId(inputs.IoId, core.ServerRole)
+		if err != nil {
+			core.Warning("Can't get output org: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, organization.Id)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	// First find the input/output in question.
+	// Then we need to find the input/output that we want to swap IoOrder with.
+	// Perform a swap.
+	currentIo, err := database.GetProcessFlowIOFromId(inputs.IoId, inputs.IsInput, role)
+	if err != nil {
+		core.Warning("Failed to find current IO: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	swapIo, err := database.GetSwapProcessFlowIO(currentIo, inputs.IsInput, inputs.Direction, role)
+	if err != nil {
+		core.Warning("Failed to find swap IO: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = database.SwapIOOrder(currentIo, swapIo, inputs.IsInput, role)
+	if err != nil {
+		core.Warning("Failed to swap IO: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	currentIo.IoOrder, swapIo.IoOrder = swapIo.IoOrder, currentIo.IoOrder
+
+	jsonWriter.Encode(struct {
+		This  *core.ProcessFlowInputOutput
+		Other *core.ProcessFlowInputOutput
+	}{
+		This:  currentIo,
+		Other: swapIo,
+	})
 }
