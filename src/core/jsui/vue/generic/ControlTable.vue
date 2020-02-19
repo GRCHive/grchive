@@ -1,6 +1,7 @@
 <script lang="ts">
 
 import Vue, {VNode} from 'vue'
+import { VCheckbox } from 'vuetify/lib'
 import Component from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
@@ -19,8 +20,8 @@ export default class ControlTable extends ResourceTableProps {
     get tableHeaders() : any[] {
         return [
             {
-                text: 'Control',
-                value: 'control',
+                text: 'Name',
+                value: 'name',
             },
             {
                 text: 'Type',
@@ -34,6 +35,10 @@ export default class ControlTable extends ResourceTableProps {
                 text: 'Frequency',
                 value: 'frequency'
             },
+            {
+                text: 'Manual',
+                value: 'manual'
+            },
         ]
     }
 
@@ -44,7 +49,7 @@ export default class ControlTable extends ResourceTableProps {
     transformInputResourceToTableItem(inp : any) : any {
         return {
             id: inp.Id,
-            control: `${inp.Name} ${inp.Descrption}`,
+            name: `${inp.Name} ${inp.Descrption}`,
             type: MetadataStore.getters.getControlTypeName(inp.ControlTypeId),
             owner: createUserString(MetadataStore.getters.getUser(inp.OwnerId)),
             frequency:createFrequencyDisplayString(inp.FrequencyType, inp.FrequencyInterval, inp.FrequencyOther),
@@ -59,7 +64,24 @@ export default class ControlTable extends ResourceTableProps {
         ))
     }
 
-    renderControl(props: any) : VNode { 
+    renderIsManual(props : any): VNode {
+        return this.$createElement(
+            VCheckbox,
+            {
+                class: {
+                    'ma-0': true,
+                    'pa-0': true,
+                },
+                props: {
+                    'input-value': props.item.value.Manual,
+                    disabled: true,
+                    'hide-details': true
+                }
+            }
+        )
+    }
+
+    renderName(props: any) : VNode { 
         return this.$createElement(
             'div',
             [
@@ -103,15 +125,17 @@ export default class ControlTable extends ResourceTableProps {
                     ...this.$props,
                     tableHeaders: this.tableHeaders,
                     tableItems: this.tableItems,
-                    resourceName: "controls"
+                    resourceName: "controls",
+                    useGlobalDeletion: true,
                 },
                 on: {
                     input: (items : any[]) => this.$emit('input', items.map((ele : any) => ele.value)),
-                    delete: (item : any) => this.$emit('delete', item.value),
+                    delete: (item : any, g : boolean) => this.$emit('delete', item.value, g),
                     'click:row': this.goToControl
                 },
                 scopedSlots: {
-                    'item.control': this.renderControl,
+                    'item.name': this.renderName,
+                    'item.manual': this.renderIsManual,
                 }
             }
         )

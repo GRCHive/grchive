@@ -1,16 +1,5 @@
 <template>
     <div class="ma-4">
-        <v-dialog v-model="showHideDeleteRisk" persistent max-width="40%">
-            <generic-delete-confirmation-form
-                item-name="risks"
-                :items-to-delete="currentRisksToDelete"
-                v-on:do-cancel="showHideDeleteRisk = false"
-                v-on:do-delete="deleteSelectedRisks"
-                :use-global-deletion="true"
-                :force-global-deletion="true">
-            </generic-delete-confirmation-form>
-        </v-dialog>
-
         <v-list-item class="pa-0">
             <v-list-item-content class="disable-flex mr-4">
                 <v-list-item-title class="title">
