@@ -9,6 +9,8 @@
             hide-details
             filled
             class="mb-4"
+            :disabled="disabled"
+            :readonly="readonly"
         >
         </v-select>
         <v-text-field
