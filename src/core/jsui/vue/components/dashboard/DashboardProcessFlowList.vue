@@ -1,16 +1,5 @@
 <template>
     <div class="ma-4">
-        <v-dialog v-model="showHideDeleteFlow" persistent max-width="40%">
-            <generic-delete-confirmation-form
-                item-name="process flows"
-                :items-to-delete="currentFlowsToDelete"
-                v-on:do-cancel="showHideDeleteFlow = false"
-                v-on:do-delete="deleteFlow"
-                :use-global-deletion="false"
-                :force-global-deletion="true">
-            </generic-delete-confirmation-form>
-        </v-dialog>
-
         <v-list-item class="pa-0">
             <v-list-item-content class="disable-flex mr-4">
                 <v-list-item-title class="title">
@@ -42,62 +31,14 @@
         </v-list-item>
         <v-divider></v-divider>
 
-        <v-list-item class="headerItem">
-            <v-list-item-content class="font-weight-bold pa-0">
-                <v-list-item-title>
-                    Process Flow
-                </v-list-item-title>
-            </v-list-item-content>
-
-            <v-list-item-content class="font-weight-bold pa-0">
-                <v-list-item-title>
-                    Created Date
-                </v-list-item-title>
-            </v-list-item-content>
-
-            <v-list-item-content class="font-weight-bold pa-0">
-                <v-list-item-title>
-                    Last Updated Date
-                </v-list-item-title>
-            </v-list-item-content>
-            <v-spacer></v-spacer>
-
-            <v-list-item-action>
-                <v-btn icon disabled></v-btn>
-            </v-list-item-action>
-        </v-list-item>
-
-        <v-card
-            v-for="(item, index) in filteredFlows"
-            :key="index"
-            class="my-2"
+        <process-flow-table
+            :resources="allFlows"
+            :search="filterText"
+            use-crud-delete
+            confirm-delete
+            @delete="deleteFlow"
         >
-            <v-list-item two-line @click.stop="goToFlow(item.Id)">
-                <v-list-item-content>
-                    <v-list-item-title v-html="highlightText(item.Name)">
-                    </v-list-item-title>
-                    <v-list-item-subtitle v-html="highlightText(item.Description)">
-                    </v-list-item-subtitle>
-                </v-list-item-content>
-                <v-list-item-content>
-                    <v-list-item-title>
-                        {{ item.CreationTime.toDateString() }}
-                    </v-list-item-title>
-                </v-list-item-content>
-                <v-list-item-content>
-                    <v-list-item-title>
-                        {{ item.LastUpdatedTime.toDateString() }}
-                    </v-list-item-title>
-                </v-list-item-content>
-
-                <v-spacer></v-spacer>
-                <v-list-item-action>
-                    <v-btn icon @click.stop="startDeleteFlow(item)" @mousedown.stop @mouseup.stop>
-                        <v-icon>mdi-delete</v-icon>
-                    </v-btn>
-                </v-list-item-action>
-            </v-list-item>
-        </v-card>
+        </process-flow-table>
     </div>
 </template>
 
@@ -107,52 +48,21 @@ import Vue from 'vue'
 import CreateNewProcessFlowForm from './CreateNewProcessFlowForm.vue'
 import { getAllProcessFlow, TGetAllProcessFlowInput, TGetAllProcessFlowOutput } from '../../../ts/api/apiProcessFlow'
 import { deleteProcessFlow, TDeleteProcessFlowInput, TDeleteProcessFlowOutput } from '../../../ts/api/apiProcessFlow'
-import { contactUsUrl, createFlowUrl } from '../../../ts/url'
-import { replaceWithMark, sanitizeTextForHTML } from '../../../ts/text'
-import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
+import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
+import ProcessFlowTable from '../../generic/ProcessFlowTable.vue'
 
 export default Vue.extend({
     data : () => ({
         showHideCreateNewFlow: false,
         allFlows: [] as ProcessFlowBasicData[],
         filterText: "",
-        showHideDeleteFlow: false,
-        flowToDelete: Object() as ProcessFlowBasicData
     }),
     components: {
         CreateNewProcessFlowForm,
-        GenericDeleteConfirmationForm
-    },
-    computed: {
-        filter() : (a : ProcessFlowBasicData) => boolean {
-            const filterText = this.filterText.trim()
-            return (ele : ProcessFlowBasicData) : boolean => {
-                return ele.Name.toLocaleLowerCase().includes(filterText.toLocaleLowerCase()) ||
-                    ele.Description.toLocaleLowerCase().includes(filterText.toLocaleLowerCase())
-            }
-        },
-        filteredFlows() : ProcessFlowBasicData[] {
-            return this.allFlows.filter(this.filter)
-        },
-        currentFlowsToDelete() : string[] {
-            if (!this.showHideDeleteFlow) {
-                return []
-            }
-            return [this.flowToDelete.Name]
-        }
+        ProcessFlowTable
     },
     methods: {
-        highlightText(input : string) : string {
-            const safeInput = sanitizeTextForHTML(input)
-            const useFilter = this.filterText.trim()
-            if (useFilter.length == 0) {
-                return safeInput
-            }
-            return replaceWithMark(
-                safeInput,
-                sanitizeTextForHTML(useFilter))
-        },
         onCreateNewFlow(data : ProcessFlowBasicData) {
             this.showHideCreateNewFlow = false
             this.allFlows.unshift(data)
@@ -173,26 +83,14 @@ export default Vue.extend({
                     true);
             })
         },
-        goToFlow(flowId: number) {
-            window.location.assign(createFlowUrl(
-                PageParamsStore.state.organization!.OktaGroupName,
-                flowId))
-        },
-        startDeleteFlow(flow : ProcessFlowBasicData) {
-            this.showHideDeleteFlow = true
-            this.flowToDelete = flow
-        },
-        deleteFlow() {
-            let processFlow = this.flowToDelete
-
+        deleteFlow(flow : ProcessFlowBasicData) {
             deleteProcessFlow(<TDeleteProcessFlowInput>{
-                flowId: processFlow.Id,
+                flowId: flow.Id,
             }).then((resp : TDeleteProcessFlowOutput) => {
                 this.allFlows.splice(
                     this.allFlows.findIndex((ele : ProcessFlowBasicData) =>
-                        ele.Id == processFlow.Id),
+                        ele.Id == flow.Id),
                     1)
-                this.showHideDeleteFlow = false
             }).catch((err) => {
                 //@ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
