@@ -94,7 +94,8 @@
                             class="mb-4"
                             ref="form"
                             edit-mode
-                            :cat-id="currentRequest.CatId"
+                            load-cats
+                            :reference-cat="parentCategory"
                             :reference-req="currentRequest"
                             @do-save="onEdit"
                         ></create-new-request-form>
@@ -262,8 +263,9 @@ export default class FullEditDocRequestComponent extends Vue {
         })
     }
 
-    onEdit(req : DocumentRequest) {
+    onEdit(req : DocumentRequest, cat : ControlDocumentationCategory) {
         this.currentRequest = req
+        this.parentCategory = cat
     }
 
     onDelete() {

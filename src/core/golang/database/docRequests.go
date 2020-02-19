@@ -63,10 +63,10 @@ func UpdateDocumentRequest(request *core.DocumentRequest, role *core.Role) error
 	rows, err := tx.NamedQuery(`
 		UPDATE document_requests
 		SET name = :name,
-			description = :description
+			description = :description,
+			cat_id = :cat_id
 		WHERE id = :id
 			AND org_id = :org_id
-			AND cat_id = :cat_id
 		RETURNING *
 	`, request)
 

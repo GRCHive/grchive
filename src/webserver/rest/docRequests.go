@@ -98,6 +98,14 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	category, err := database.GetDocumentationCategory(inputs.CatId, inputs.OrgId, role)
+	if err != nil {
+		tx.Rollback()
+		core.Warning("Failed to get cat: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	if err = tx.Commit(); err != nil {
 		tx.Rollback()
 		core.Warning("Failed to commit new doc request: " + err.Error())
@@ -105,7 +113,13 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonWriter.Encode(request)
+	jsonWriter.Encode(struct {
+		Request  *core.DocumentRequest
+		Category *core.ControlDocumentationCategory
+	}{
+		Request:  &request,
+		Category: category,
+	})
 }
 
 func updateDocumentRequest(w http.ResponseWriter, r *http.Request) {
@@ -138,6 +152,13 @@ func updateDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		RequestTime:     time.Now().UTC(),
 	}
 
+	category, err := database.GetDocumentationCategory(inputs.CatId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get cat: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	err = database.UpdateDocumentRequest(&request, role)
 	if err != nil {
 		core.Warning("Failed to update doc request: " + err.Error())
@@ -145,7 +166,13 @@ func updateDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonWriter.Encode(request)
+	jsonWriter.Encode(struct {
+		Request  *core.DocumentRequest
+		Category *core.ControlDocumentationCategory
+	}{
+		Request:  &request,
+		Category: category,
+	})
 }
 
 func getDocumentRequest(w http.ResponseWriter, r *http.Request) {

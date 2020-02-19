@@ -8,7 +8,7 @@ import { newDocRequestUrl,
          deleteDocRequestUrl,
          completeDocRequestUrl,
          updateDocRequestUrl } from '../url'
-import { DocumentRequest } from '../docRequests'
+import { DocumentRequest, cleanJsonDocumentRequest } from '../docRequests'
 import { ControlDocumentationCategory, ControlDocumentationFile, cleanJsonControlDocumentationFile } from '../controls'
 
 export interface TNewDocRequestInput {
@@ -21,15 +21,15 @@ export interface TNewDocRequestInput {
 }
 
 export interface TNewDocRequestOutput {
-    data: DocumentRequest
+    data: {
+        Request: DocumentRequest
+        Category: ControlDocumentationCategory
+    }
 }
 
 export function newDocRequest(inp : TNewDocRequestInput) : Promise<TNewDocRequestOutput> {
     return postFormJson<TNewDocRequestOutput>(newDocRequestUrl, inp, getAPIRequestConfig()).then((resp : TNewDocRequestOutput) => {
-        if (!!resp.data.CompletionTime) {
-            resp.data.CompletionTime = new Date(resp.data.CompletionTime)
-        }
-        resp.data.RequestTime = new Date(resp.data.RequestTime)
+        cleanJsonDocumentRequest(resp.data.Request)
         return resp
     })
 }
@@ -39,15 +39,15 @@ export interface TUpdateDocRequestInput extends TNewDocRequestInput {
 }
 
 export interface TUpdateDocRequestOutput {
-    data: DocumentRequest
+    data: {
+        Request: DocumentRequest
+        Category: ControlDocumentationCategory
+    }
 }
 
 export function updateDocRequest(inp : TUpdateDocRequestInput) : Promise<TUpdateDocRequestOutput> {
     return postFormJson<TUpdateDocRequestOutput>(updateDocRequestUrl, inp, getAPIRequestConfig()).then((resp : TUpdateDocRequestOutput) => {
-        if (!!resp.data.CompletionTime) {
-            resp.data.CompletionTime = new Date(resp.data.CompletionTime)
-        }
-        resp.data.RequestTime = new Date(resp.data.RequestTime)
+        cleanJsonDocumentRequest(resp.data.Request)
         return resp
     })
 }
@@ -90,16 +90,8 @@ export interface TGetSingleDocumentRequestOutput {
 
 export function getSingleDocRequest(inp : TGetSingleDocumentRequestInput) : Promise<TGetSingleDocumentRequestOutput> {
     return axios.get(getDocRequestUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetSingleDocumentRequestOutput) => {
-        if (!!resp.data.Request.CompletionTime) {
-            resp.data.Request.CompletionTime = new Date(resp.data.Request.CompletionTime)
-        }
-        resp.data.Request.RequestTime = new Date(resp.data.Request.RequestTime)
-
-        resp.data.Files = resp.data.Files.map((ele : ControlDocumentationFile) => {
-            cleanJsonControlDocumentationFile(ele)
-            return ele
-        })
-
+        cleanJsonDocumentRequest(resp.data.Request)
+        resp.data.Files.forEach(cleanJsonControlDocumentationFile)
         return resp
     })
 }

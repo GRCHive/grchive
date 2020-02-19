@@ -21,7 +21,6 @@
         ></v-textarea> 
         
         <document-category-search-form-component
-            v-if="catId == -1"
             v-model="realCat"
             :available-cats="availableCats"
             :load-cats="loadCats"
@@ -34,6 +33,7 @@
         <v-btn
             color="error"
             @click="cancel"
+            v-if="canEdit"
         >
             Cancel
         </v-btn>
@@ -96,8 +96,12 @@ const Props = Vue.extend({
             default: false
         },
         referenceReq: {
-            type: Object as () => DocumentRequest | null,
-            default: null
+            type: Object,
+            default: () => null as DocumentRequest | null
+        },
+        referenceCat: {
+            type: Object,
+            default: () => null as ControlDocumentationCategory | null
         }
     },
     components: {
@@ -130,7 +134,7 @@ export default class CreateNewRequestForm extends Props {
     }
 
     onSuccess(resp : TNewDocRequestOutput | TUpdateDocRequestOutput) {
-        this.$emit('do-save', resp.data)
+        this.$emit('do-save', resp.data.Request, resp.data.Category)
         if (this.editMode) {
             this.canEdit = false
         }
@@ -194,6 +198,7 @@ export default class CreateNewRequestForm extends Props {
         if (!!this.referenceReq) {
             this.name = this.referenceReq.Name
             this.description = this.referenceReq.Description
+            this.realCat = this.referenceCat
         } else {
             this.name = ""
             this.description = ""
