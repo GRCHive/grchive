@@ -171,8 +171,8 @@ func FindAllRisksForProcessFlow(flowId int64, role *core.Role) ([]*core.Risk, er
 		INNER JOIN process_flow_nodes AS node
 			ON risknode.node_id = node.id
 		WHERE node.process_flow_id = $1
-		ORDER BY risk.name ASC
 		GROUP BY risk.id
+		ORDER BY risk.name ASC
 	`)
 	if err != nil {
 		return nil, err
@@ -181,17 +181,26 @@ func FindAllRisksForProcessFlow(flowId int64, role *core.Role) ([]*core.Risk, er
 	return findAllRisksFromDbHelper(stmt, flowId)
 }
 
-func FindAllRiskForOrganization(org *core.Organization, role *core.Role) ([]*core.Risk, error) {
+func FindAllRiskForOrganization(org *core.Organization, filter core.RiskFilterData, role *core.Role) ([]*core.Risk, error) {
 	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
-	stmt, err := dbConn.Preparex(`
+
+	sql := fmt.Sprintf(`
 		SELECT 
 			risk.*
 		FROM process_flow_risks as risk
+		LEFT JOIN process_flow_risk_control AS riskcontrol
+			ON riskcontrol.risk_id = risk.id
 		WHERE risk.org_id = $1
+		GROUP BY risk.id
+		HAVING
+			%s
 		ORDER BY risk.name ASC
-	`)
+	`,
+		buildNumericFilter("COUNT(riskcontrol.control_id)", filter.NumControls),
+	)
+	stmt, err := dbConn.Preparex(sql)
 	if err != nil {
 		return nil, err
 	}

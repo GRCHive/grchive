@@ -20,6 +20,7 @@ go_library(
         "encryption.go",
         "error.go",
         "files.go",
+        "filters.go",
         "generalLedger.go",
         "hashIds.go",
         "infrastructure.go",

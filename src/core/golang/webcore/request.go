@@ -157,21 +157,18 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 				return err
 			}
 			dataValue = reflect.ValueOf(boolValue)
-			break
 		case core.Int64ReflectType:
 			intValue, err := strconv.ParseInt(data[0], 10, 64)
 			if err != nil {
 				return err
 			}
 			dataValue = reflect.ValueOf(intValue)
-			break
 		case core.IntReflectType:
 			intValue, err := strconv.ParseInt(data[0], 10, 64)
 			if err != nil {
 				return err
 			}
 			dataValue = reflect.ValueOf(int(intValue))
-			break
 		case core.NullInt64ReflectType:
 			intValue, err := strconv.ParseInt(data[0], 10, 64)
 			if err != nil {
@@ -183,7 +180,6 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 					Valid: true,
 				},
 			})
-			break
 		case core.NullInt32ReflectType:
 			intValue, err := strconv.ParseInt(data[0], 10, 32)
 			if err != nil {
@@ -195,27 +191,22 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 					Valid: true,
 				},
 			})
-			break
 		case core.NullBoolReflectType:
 			boolValue, err := strconv.ParseBool(data[0])
 			if err != nil {
 				return err
 			}
 			dataValue = reflect.ValueOf(core.CreateNullBool(boolValue))
-			break
 		case core.Int32ReflectType:
 			intValue, err := strconv.ParseInt(data[0], 10, 32)
 			if err != nil {
 				return err
 			}
 			dataValue = reflect.ValueOf(int32(intValue))
-			break
 		case core.StringReflectType:
 			dataValue = reflect.ValueOf(data[0])
-			break
 		case core.StringArrayReflectType:
 			dataValue = reflect.ValueOf(data[:])
-			break
 		case core.Int64ArrayReflectType:
 			arr := make([]int64, len(data))
 			for idx, val := range data {
@@ -226,14 +217,19 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 				arr[idx] = int64(intValue)
 			}
 			dataValue = reflect.ValueOf(arr)
-			break
 		case core.TimeReflectType:
 			inputDate, err := time.Parse(time.RFC3339, data[0])
 			if err != nil {
 				return err
 			}
 			dataValue = reflect.ValueOf(inputDate)
-			break
+		case core.RiskFilterDataType:
+			t := core.RiskFilterData{}
+			err := json.Unmarshal([]byte(data[0]), &t)
+			if err != nil {
+				return err
+			}
+			dataValue = reflect.ValueOf(t)
 		default:
 			return errors.New("Unsupported type: " + fieldType.Name)
 		}

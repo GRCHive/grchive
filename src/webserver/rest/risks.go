@@ -33,7 +33,8 @@ type AddRisksToNodeInputs struct {
 }
 
 type GetAllRisksInput struct {
-	OrgName string `webcore:"orgName"`
+	OrgName string              `webcore:"orgName"`
+	Filter  core.RiskFilterData `webcore:"filter"`
 }
 
 func editRisk(w http.ResponseWriter, r *http.Request) {
@@ -251,7 +252,7 @@ func getAllRisks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	risks, err := database.FindAllRiskForOrganization(org, role)
+	risks, err := database.FindAllRiskForOrganization(org, inputs.Filter, role)
 	if err != nil {
 		core.Warning("Could not find risks: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

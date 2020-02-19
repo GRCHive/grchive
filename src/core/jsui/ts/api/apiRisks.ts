@@ -7,7 +7,7 @@ import { newRiskAPIUrl,
          editRiskAPIUrl,
          allRiskAPIUrl,
          createSingleRiskAPIUrl } from '../url'
-import { FullRiskData } from '../risks'
+import { FullRiskData, RiskFilterData } from '../risks'
 import { getAPIRequestConfig } from './apiUtility'
 
 export interface TNewRiskInput {
@@ -67,6 +67,7 @@ export function editRisk(inp : TEditRiskInput) : Promise<TEditRiskOutput> {
 
 export interface TAllRiskInput {
     orgName: string
+    filter: RiskFilterData
 }
 
 export interface TAllRiskOutput {
@@ -74,7 +75,11 @@ export interface TAllRiskOutput {
 }
 
 export function getAllRisks(inp : TAllRiskInput) : Promise<TAllRiskOutput> {
-    return axios.get(allRiskAPIUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+    let passData : any = {
+        orgName: inp.orgName,
+        filter: JSON.stringify(inp.filter),
+    }
+    return axios.get(allRiskAPIUrl + '?' + qs.stringify(passData), getAPIRequestConfig())
 }
 
 export interface TSingleRiskInput {

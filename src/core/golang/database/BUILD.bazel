@@ -17,6 +17,7 @@ go_library(
         "emailVerification.go",
         "generalLedger.go",
         "gettingStartedInterest.go",
+        "filterUtility.go",
         "inviteCodes.go",
         "organizations.go",
         "processFlowEdges.go",

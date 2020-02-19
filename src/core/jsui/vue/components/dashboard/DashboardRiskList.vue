@@ -30,7 +30,9 @@
             </v-list-item-action>
         </v-list-item>
 
-        <advanced-risk-filters>
+        <advanced-risk-filters
+            v-model="riskFilter"
+        >
         </advanced-risk-filters>
 
         <v-divider></v-divider>
@@ -56,12 +58,14 @@ import CreateNewRiskForm from './CreateNewRiskForm.vue'
 import { PageParamsStore } from '../../../ts/pageParams'
 import RiskTable from '../../generic/RiskTable.vue'
 import AdvancedRiskFilters from '../../generic/filters/AdvancedRiskFilters.vue'
+import { RiskFilterData, NullRiskFilterData } from '../../../ts/risks'
 
 export default Vue.extend({
     data : () => ({
         allRisks: [] as ProcessFlowRisk[],
         filterText : "",
         showHideCreateNewRisk: false,
+        riskFilter: NullRiskFilterData,
     }),
     components: {
         CreateNewRiskForm,
@@ -71,7 +75,8 @@ export default Vue.extend({
     methods: {
         refreshRisks() {
             getAllRisks(<TAllRiskInput>{
-                orgName: PageParamsStore.state.organization!.OktaGroupName
+                orgName: PageParamsStore.state.organization!.OktaGroupName,
+                filter: this.riskFilter,
             }).then((resp : TAllRiskOutput) => {
                 this.allRisks = resp.data
             }).catch((err) => {
@@ -110,6 +115,15 @@ export default Vue.extend({
                     contactUsUrl,
                     true);
             })
+        }
+    },
+    watch: {
+        riskFilter : {
+            deep: true,
+
+            handler() {
+                this.refreshRisks()
+            }
         }
     },
     mounted() {

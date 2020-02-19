@@ -1,31 +1,30 @@
 <template>
-    <v-select
-        :value="comparison"
-        label="Operator"
-        :items="comparisonOperatorItems"
-        dense
-        filled hide-details
-        height="44px"
-        @input="changeComparisonOperator"
-    >
-        <template v-slot:prepend>
-            <span class="font-weight-bold numeric-filter-label">{{ label }}</span>
-        </template>
+    <div class="d-flex">
+        <span class="font-weight-bold numeric-label mr-4">{{ label }}</span>
+        <v-select
+            class="mr-4 flex-grow-0"
+            :value="value.Op"
+            label="Operator"
+            :items="comparisonOperatorItems"
+            dense
+            outlined
+            hide-details
+            @input="changeComparisonOperator"
+        >
+        </v-select>
 
-        <template v-slot:append-outer>
-            <v-text-field
-                class="numeric-filter-val"
-                :value="compareTo"
-                @change="changeCompareTo"
-                type="number"
-                filled
-                v-if="!filterDisabled"
-                hide-details
-                dense
-            >
-            </v-text-field>
-        </template>
-    </v-select>
+        <v-text-field
+            class="flex-grow-0"
+            :value="value.Target"
+            @input="changeCompareTo"
+            type="number"
+            outlined
+            v-if="!filterDisabled"
+            hide-details
+            dense
+        >
+        </v-text-field>
+    </div>
 </template>
 
 <script lang="ts">
@@ -33,6 +32,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import * as filters from '../../../../ts/filters'
+import { NumericFilterData } from '../../../../ts/filters'
 
 const Props = Vue.extend({
     props: {
@@ -40,26 +40,29 @@ const Props = Vue.extend({
             type: String,
             default: ""
         },
+        value: {
+            type: Object,
+            default: () => Object() as NumericFilterData
+        },
     }
 })
 
 @Component
 export default class NumericFilter extends Props {
-    comparison : filters.ComparisonOperators = filters.ComparisonOperators.Disabled
-    compareTo : number = 0
-
     comparisonOperatorItems : any[] = filters.comparisonOperatorsSelectItems
 
     get filterDisabled() : boolean {
-        return this.comparison == filters.ComparisonOperators.Disabled
+        return this.value.Op == filters.ComparisonOperators.Disabled
     }
 
     changeComparisonOperator(c : filters.ComparisonOperators) {
-        this.comparison = c
+        this.value.Op = c
+        this.$emit('input', this.value)
     }
 
     changeCompareTo(val : string) {
-        this.compareTo = parseInt(val, 10)
+        this.value.Target = parseInt(val, 10)
+        this.$emit('input', this.value)
     }
 }
 
@@ -67,20 +70,8 @@ export default class NumericFilter extends Props {
 
 <style scoped>
 
-.numeric-filter-label {
-    transform: translateY(-6px);
-}
-
-.numeric-filter-val {
-    transform: translateY(-14px);
-    margin-bottom: -6px;
-}
-
->>>.numeric-filter-val input {
-    padding-top: 0!important;
-    padding-bottom: 0!important;
-    margin-top: 11px !important;
-    margin-bottom: 11px !important;
+.numeric-label { 
+    margin-top: 10px;
 }
 
 </style>

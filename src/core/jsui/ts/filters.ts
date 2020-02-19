@@ -31,10 +31,20 @@ export let comparisonOperatorsSelectItems : any[] = [
     },
     {
         text: "Less Than (<)",
-        value: ComparisonOperators.GreaterEqual,
+        value: ComparisonOperators.Less,
     },
     {
         text: "Less Than or Equal To (<=)",
         value: ComparisonOperators.LessEqual,
     },
 ]
+
+export interface NumericFilterData {
+    Op          : ComparisonOperators
+    Target      : number
+}
+export let NullNumericFilterData : NumericFilterData = {
+    Op: ComparisonOperators.Disabled,
+    Target: 0
+}
+

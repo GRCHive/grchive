@@ -162,3 +162,5 @@ var StringReflectType = reflect.TypeOf((string)(""))
 var Int64ArrayReflectType = reflect.TypeOf([]int64{})
 var StringArrayReflectType = reflect.TypeOf([]string{})
 var TimeReflectType = reflect.TypeOf(time.Time{})
+
+var RiskFilterDataType = reflect.TypeOf(RiskFilterData{})
