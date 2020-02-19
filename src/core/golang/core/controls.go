@@ -18,3 +18,11 @@ type Control struct {
 	OwnerId           NullInt64 `db:"owner_id"`
 	Manual            bool      `db:"is_manual"`
 }
+
+type ControlFilterData struct {
+	NumRisks NumericFilterData
+}
+
+var NullControlFilterData ControlFilterData = ControlFilterData{
+	NumRisks: NullNumericFilterData,
+}

@@ -10,7 +10,7 @@ import { getControlTypesUrl,
          linkCatControlUrl,
          unlinkCatControlUrl } from '../url'
 import { postFormUrlEncoded, postFormJson } from '../http'
-import { FullControlData } from '../controls'
+import { FullControlData, ControlFilterData } from '../controls'
 import { getAPIRequestConfig } from './apiUtility'
 
 export interface TGetControlTypesInput {
@@ -88,6 +88,7 @@ export function editControl(inp: TEditControlInput) : Promise<TEditControlOutput
 
 export interface TAllControlInput {
     orgName: string
+    filter: ControlFilterData
 }
 
 export interface TAllControlOutput {
@@ -95,7 +96,11 @@ export interface TAllControlOutput {
 }
 
 export function getAllControls(inp : TAllControlInput) : Promise<TAllControlOutput> {
-    return axios.get(allControlAPIUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+    let passData : any = {
+        orgName: inp.orgName,
+        filter: JSON.stringify(inp.filter),
+    }
+    return axios.get(allControlAPIUrl + '?' + qs.stringify(passData), getAPIRequestConfig())
 }
 
 export interface TSingleControlInput {

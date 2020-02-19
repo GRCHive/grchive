@@ -30,6 +30,11 @@
                 </v-dialog>
             </v-list-item-action>
         </v-list-item>
+
+        <advanced-control-filters
+            v-model="controlFilter"
+        >
+        </advanced-control-filters>
         <v-divider></v-divider>
 
         <control-table
@@ -52,21 +57,26 @@ import { contactUsUrl } from '../../../ts/url'
 import CreateNewControlForm from './CreateNewControlForm.vue'
 import { PageParamsStore } from '../../../ts/pageParams'
 import ControlTable from '../../generic/ControlTable.vue'
+import AdvancedControlFilters from '../../generic/filters/AdvancedControlFilters.vue'
+import { ControlFilterData, NullControlFilterData } from '../../../ts/controls'
 
 export default Vue.extend({
     data : () => ({
         allControls: [] as ProcessFlowControl[],
         filterText : "",
         showHideCreateNewControl : false,
+        controlFilter: NullControlFilterData,
     }),
     components: {
         CreateNewControlForm,
-        ControlTable
+        ControlTable,
+        AdvancedControlFilters
     },
     methods: {
         refreshControls() {
             getAllControls(<TAllControlInput>{
-                orgName: PageParamsStore.state.organization!.OktaGroupName
+                orgName: PageParamsStore.state.organization!.OktaGroupName,
+                filter: this.controlFilter,
             }).then((resp : TAllControlOutput) => {
                 this.allControls = resp.data
             }).catch((err : any) => {
@@ -108,6 +118,15 @@ export default Vue.extend({
             this.showHideCreateNewControl = false
         },
 
+    },
+    watch: {
+        controlFilter: {
+            deep: true,
+
+            handler() {
+                this.refreshControls()
+            }
+        }
     },
     mounted() {
         this.refreshControls()

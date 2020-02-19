@@ -164,3 +164,4 @@ var StringArrayReflectType = reflect.TypeOf([]string{})
 var TimeReflectType = reflect.TypeOf(time.Time{})
 
 var RiskFilterDataType = reflect.TypeOf(RiskFilterData{})
+var ControlFilterDataType = reflect.TypeOf(ControlFilterData{})

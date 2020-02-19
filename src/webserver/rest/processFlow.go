@@ -254,7 +254,7 @@ func getProcessFlowFullData(w http.ResponseWriter, r *http.Request) {
 		jsonWriter.Encode(struct{}{})
 		return
 	}
-	graph.Controls, err = database.FindAllControlsForOrganization(org, role)
+	graph.Controls, err = database.FindAllControlsForOrganization(org, core.NullControlFilterData, role)
 	if err != nil {
 		core.Warning("Failed to obtain controls: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

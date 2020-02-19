@@ -120,7 +120,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
-import { ControlDocumentationCategory } from '../../../ts/controls'
+import { ControlDocumentationCategory, NullControlFilterData } from '../../../ts/controls'
 import { TGetDocCatOutput, getDocumentCategory } from '../../../ts/api/apiControlDocumentation'
 import { TAllControlOutput, getAllControls} from '../../../ts/api/apiControls'
 import { linkControlToDocumentCategory, unlinkControlFromDocumentCategory } from '../../../ts/api/apiControls'
@@ -197,7 +197,8 @@ export default class FullEditDocumentationCategoryComponent extends Props {
         })
 
         getAllControls({
-            orgName: PageParamsStore.state.organization!.OktaGroupName
+            orgName: PageParamsStore.state.organization!.OktaGroupName,
+            filter: NullControlFilterData,
         }).then((resp : TAllControlOutput) => {
             this.allControls = resp.data
         }).catch((err : any) => {

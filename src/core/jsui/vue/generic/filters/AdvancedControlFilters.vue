@@ -10,9 +10,9 @@
 
         <div class="mb-4" v-if="showHideFilters">
             <numeric-filter
-                label="Number of Linked Controls"
-                :value="value.NumControls"
-                @input="onChangeNumControlsFilter"
+                label="Number of Linked Risks"
+                :value="value.NumRisks"
+                @input="onChangeNumRisksFilter"
             >
             </numeric-filter>
         </div>
@@ -25,13 +25,13 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import NumericFilter from './components/NumericFilter.vue'
 import { NumericFilterData } from '../../../ts/filters'
-import { RiskFilterData } from '../../../ts/risks'
+import { ControlFilterData } from '../../../ts/controls'
 
 const Props = Vue.extend({
     props: {
         value: {
             type: Object,
-            default: () => Object() as RiskFilterData
+            default: () => Object() as ControlFilterData
         }
     }
 })
@@ -41,11 +41,11 @@ const Props = Vue.extend({
         NumericFilter
     }
 })
-export default class AdvancedRiskFilters extends Props {
+export default class AdvancedControlFilters extends Props {
     showHideFilters: boolean = false
 
-    onChangeNumControlsFilter(f : NumericFilterData) {
-        this.value.NumControls = f
+    onChangeNumRisksFilter(f : NumericFilterData) {
+        this.value.NumRisks = f
         this.$emit('input', this.value)
     }
 }

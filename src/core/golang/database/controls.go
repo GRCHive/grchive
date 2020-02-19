@@ -18,18 +18,25 @@ func GetControlTypes(role *core.Role) ([]*core.ControlType, error) {
 	return retArr, err
 }
 
-func FindAllControlsForOrganization(org *core.Organization, role *core.Role) ([]*core.Control, error) {
+func FindAllControlsForOrganization(org *core.Organization, filter core.ControlFilterData, role *core.Role) ([]*core.Control, error) {
 	if !role.Permissions.HasAccess(core.ResourceControls, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
 	controls := make([]*core.Control, 0)
 
-	err := dbConn.Select(&controls, `
-		SELECT *
+	err := dbConn.Select(&controls, fmt.Sprintf(`
+		SELECT control.*
 		FROM process_flow_controls as control
+		LEFT JOIN process_flow_risk_control AS riskcontrol
+			ON riskcontrol.control_id = control.id
 		WHERE control.org_id = $1
+		GROUP BY control.id
+		HAVING
+			%s
 		ORDER BY name ASC
-	`, org.Id)
+	`,
+		buildNumericFilter("COUNT(riskcontrol.risk_id)", filter.NumRisks),
+	), org.Id)
 
 	return controls, err
 }

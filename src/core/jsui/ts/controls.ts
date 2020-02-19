@@ -1,3 +1,5 @@
+import { NumericFilterData, NullNumericFilterData } from './filters'
+
 export interface ControlDocumentationCategory {
     Id: number
     Name: string
@@ -73,4 +75,11 @@ export function cleanJsonControlDocumentationFile(f : ControlDocumentationFile) 
 
 export function cleanJsonFileStorageData(f : FileStorageData) {
     f.UploadTime = new Date(f.UploadTime)
+}
+
+export interface ControlFilterData {
+    NumRisks: NumericFilterData
+}
+export let NullControlFilterData : ControlFilterData = {
+    NumRisks: JSON.parse(JSON.stringify(NullNumericFilterData))
 }

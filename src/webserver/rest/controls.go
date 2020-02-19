@@ -38,7 +38,8 @@ type EditControlInputs struct {
 }
 
 type GetAllControlsInputs struct {
-	OrgName string `webcore:"orgName"`
+	OrgName string                 `webcore:"orgName"`
+	Filter  core.ControlFilterData `webcore:"filter"`
 }
 
 type DeleteControlInputs struct {
@@ -349,7 +350,7 @@ func getAllControls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	controls, err := database.FindAllControlsForOrganization(org, role)
+	controls, err := database.FindAllControlsForOrganization(org, inputs.Filter, role)
 	if err != nil {
 		core.Warning("Could not find controls: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
