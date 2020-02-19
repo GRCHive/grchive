@@ -205,11 +205,13 @@ export default class SqlRequestTable extends ResourceTableProps {
                 {
                     props: {
                         bottom: true,
+                    },
+                    scopedSlots: {
+                        activator: renderIcon
                     }
                 },
                 approval.Reason
             )
-
         }
     }
 
