@@ -171,8 +171,8 @@ func FindAllRisksForProcessFlow(flowId int64, role *core.Role) ([]*core.Risk, er
 		INNER JOIN process_flow_nodes AS node
 			ON risknode.node_id = node.id
 		WHERE node.process_flow_id = $1
-		GROUP BY risk.id
 		ORDER BY risk.name ASC
+		GROUP BY risk.id
 	`)
 	if err != nil {
 		return nil, err
