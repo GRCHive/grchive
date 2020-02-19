@@ -1,3 +1,15 @@
+.deploy-postgresql:
+    stage: predeploy
+    image: $CI_FULL_REGISTRY/ci-image:latest
+    script:
+        - gcloud container clusters get-credentials webserver-gke-cluster
+        - cd devops/k8s/postgresql
+        - envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+        - kubectl apply -f deployment.prod.yaml -f service.yaml
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "${RELEASE_BRANCH}"'
+          when: on_success
+
 .deploy-secrets:
     stage: predeploy
     image: $CI_FULL_REGISTRY/ci-image:latest

@@ -17,26 +17,6 @@ spec:
             containers:
                 - name: database-fetcher-container
                   image: ${FETCHER_IMAGE}
-                - name: cloudsql-proxy
-                  image: gcr.io/cloudsql-docker/gce-proxy:1.16
-                  command: ["/cloud_sql_proxy",
-                             "-instances=${GRCHIVE_PROJECT}:us-central1:${POSTGRES_INSTANCE_NAME}=tcp:5432",
-                             "-credential_file=/secrets/gke/gcloud-service-account.json"]
-                  securityContext:
-                      runAsUser: 2  # non-root user
-                      allowPrivilegeEscalation: false
-                  volumeMounts:
-                      - name: gke-service-account
-                        mountPath: /secrets/gke
-                        readOnly: true
-                  resources:
-                        requests:
-                            cpu: "10m"
-                        limits:
-                            cpu: "100m"
-            volumes:
-                - name: gke-service-account
-                  secret:
-                    secretName: gke-service-account
+
             imagePullSecrets:
                 - name: regcred

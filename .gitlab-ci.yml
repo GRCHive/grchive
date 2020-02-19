@@ -292,6 +292,14 @@ Flyway Webserver (Staging):
     environment:
         name: Staging
 
+Deploy PostgreSQL (Production):
+    extends: .deploy-postgresql
+    <<: *production-before-script
+    variables:
+        RELEASE_BRANCH: "production"
+    environment:
+        name: Production
+
 Deploy Secrets (Production):
     extends: .deploy-secrets
     <<: *production-before-script
@@ -364,6 +372,14 @@ Deploy Webserver (Production):
         RELEASE_BRANCH: "production"
     environment:
         name: Production
+
+Deploy PostgreSQL (Staging):
+    extends: .deploy-postgresql
+    <<: *staging-before-script
+    variables:
+        RELEASE_BRANCH: "staging"
+    environment:
+        name: Staging
 
 Deploy Secrets (Staging):
     extends: .deploy-secrets
