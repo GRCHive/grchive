@@ -17,6 +17,8 @@ spec:
             containers:
                 - name: cloudsql-proxy
                   image: gcr.io/cloudsql-docker/gce-proxy:1.16
+                  ports:
+                    - containerPort: 5432
                   command: ["/cloud_sql_proxy",
                              "-instances=${GRCHIVE_PROJECT}:us-central1:${POSTGRES_INSTANCE_NAME}=tcp:0.0.0.0:5432",
                              "-credential_file=/secrets/gke/gcloud-service-account.json"]
