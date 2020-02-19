@@ -29,6 +29,10 @@
                 </v-dialog>
             </v-list-item-action>
         </v-list-item>
+
+        <advanced-risk-filters>
+        </advanced-risk-filters>
+
         <v-divider></v-divider>
 
         <risk-table
@@ -51,6 +55,7 @@ import { contactUsUrl } from '../../../ts/url'
 import CreateNewRiskForm from './CreateNewRiskForm.vue'
 import { PageParamsStore } from '../../../ts/pageParams'
 import RiskTable from '../../generic/RiskTable.vue'
+import AdvancedRiskFilters from '../../generic/filters/AdvancedRiskFilters.vue'
 
 export default Vue.extend({
     data : () => ({
@@ -60,7 +65,8 @@ export default Vue.extend({
     }),
     components: {
         CreateNewRiskForm,
-        RiskTable
+        RiskTable,
+        AdvancedRiskFilters
     },
     methods: {
         refreshRisks() {
