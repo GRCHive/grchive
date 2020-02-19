@@ -13,6 +13,7 @@
 
                     <v-list-item-subtitle v-if="!!currentMetadata">
                         Relevant Query: {{ currentMetadata.Name }}
+                        <span v-if="!!currentQuery">&nbsp;v{{ currentQuery.Version }}</span>
                     </v-list-item-subtitle>
                 </v-list-item-content>
 
