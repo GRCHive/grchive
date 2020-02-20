@@ -50,7 +50,6 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
     }
 
     changeInput(items: any[]) {
-        console.log("change input", items)
         this.$emit('input', items)
     }
 
