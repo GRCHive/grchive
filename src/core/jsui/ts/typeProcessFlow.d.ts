@@ -11,6 +11,7 @@ interface ProcessFlowNodeType {
     Name : string
     Description : string
     CanLinkToSystem: boolean
+    CanLinkToGL: boolean
 }
 
 interface ProcessFlowRisk {

@@ -5,6 +5,7 @@ type ProcessFlowNodeType struct {
 	Name            string `db:"name"`
 	Description     string `db:"description"`
 	CanLinkToSystem bool   `db:"can_link_to_system"`
+	CanLinkToGL     bool   `db:"can_link_to_gl"`
 }
 
 type ProcessFlowNode struct {

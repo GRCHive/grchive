@@ -28,6 +28,16 @@ export interface GeneralLedgerCategory extends RawGeneralLedgerCategory {
     changed: 1
 }
 
+export function getGLAccountParentString(acc : GeneralLedgerAccount) : string {
+    let cat : GeneralLedgerCategory | null = acc.ParentCategory
+    let name = ""
+    while (cat != null) {
+        name = `${cat.Name} / ${name}`
+        cat = cat.ParentCategory
+    }
+    return name
+}
+
 export class GeneralLedger {
     topLevelCategories: Map<number, GeneralLedgerCategory>
     categories : Map<number, GeneralLedgerCategory>

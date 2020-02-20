@@ -95,6 +95,7 @@ func registerProcessFlowNodesAPIPaths(r *mux.Router) {
 func registerProcessFlowNodeLinksAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiProcessFlowNodeLinksPrefix).Subrouter()
 	registerProcessFlowNodeSystemLinksAPIPaths(s)
+	registerProcessFlowNodeGLLinksAPIPaths(s)
 }
 
 func registerProcessFlowNodeSystemLinksAPIPaths(r *mux.Router) {
@@ -102,6 +103,13 @@ func registerProcessFlowNodeSystemLinksAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiNewEndpoint, newNodeSystemLink).Methods("POST")
 	s.HandleFunc(core.ApiAllEndpoint, allNodeSystemLink).Methods("GET")
 	s.HandleFunc(core.ApiDeleteEndpoint, deleteNodeSystemLink).Methods("POST")
+}
+
+func registerProcessFlowNodeGLLinksAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiGeneralLedgerPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, newNodeGLLink).Methods("POST")
+	s.HandleFunc(core.ApiAllEndpoint, allNodeGLLink).Methods("GET")
+	s.HandleFunc(core.ApiDeleteEndpoint, deleteNodeGLLink).Methods("POST")
 }
 
 func registerProcessFlowIOAPIPaths(r *mux.Router) {

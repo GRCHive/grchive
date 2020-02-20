@@ -1,5 +1,6 @@
 import RelationshipMap from './relationship'
 import { System } from './systems'
+import { GeneralLedger } from './generalLedger'
 
 export interface FullProcessFlowData {
     FlowId: number
@@ -17,6 +18,7 @@ export interface FullProcessFlowData {
     NodeControlRelationships: RelationshipMap<ProcessFlowNode, ProcessFlowControl>
     RiskControlRelationships: RelationshipMap<ProcessFlowRisk, ProcessFlowControl>
     NodeSystemLinks: Record<number, System[] | null>
+    NodeGLLinks: Record<number, GeneralLedger | null>
 }
 
 export function isProcessFullDataEmpty(data : FullProcessFlowData) : boolean {

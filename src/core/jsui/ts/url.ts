@@ -159,6 +159,10 @@ export const newNodeSystemLinkUrl : string = "/api/flownodes/link/systems/new"
 export const deleteNodeSystemLinkUrl : string = "/api/flownodes/link/systems/delete"
 export const allNodeSystemLinkUrl : string = "/api/flownodes/link/systems/all"
 
+export const newNodeGLLinkUrl : string = "/api/flownodes/link/gl/new"
+export const deleteNodeGLLinkUrl : string = "/api/flownodes/link/gl/delete"
+export const allNodeGLLinkUrl : string = "/api/flownodes/link/gl/all"
+
 export function createUpdateProcessFlowApiUrl(id : number) : string {
     return "/api/flows/" + id.toString() + "/update"
 }

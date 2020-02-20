@@ -1,6 +1,7 @@
 <script lang="ts">
 
 import Vue, { VNode } from 'vue'
+import { Watch } from 'vue-property-decorator'
 import { VBtn, VIcon, VDataTable, VDialog } from 'vuetify/lib'
 import Component, { mixins } from 'vue-class-component'
 import ResourceTableProps from './ResourceTableProps'
@@ -30,6 +31,16 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
     selected: any[] = []
     itemToDelete: any | null = null
 
+    @Watch('value')
+    resetSelected() {
+        let valSet : Set<any> = new Set<any>(this.value)
+        this.selected = this.tableItems.filter((ele : any) => valSet.has(ele.value))
+    }
+
+    mounted() {
+        this.resetSelected()
+    }
+
     get showHideDelete() : boolean {
         return !!this.itemToDelete
     }
@@ -39,6 +50,7 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
     }
 
     changeInput(items: any[]) {
+        console.log("change input", items)
         this.$emit('input', items)
     }
 
@@ -66,10 +78,14 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
 
     clickRow(item : any) {
         if (this.selectable) {
-            if (this.selectedSet.has(item)) {
-                this.selected = this.selected.filter((ele : any) => ele != item)
+            if (this.multi) {
+                if (this.selectedSet.has(item)) {
+                    this.selected = this.selected.filter((ele : any) => ele != item)
+                } else {
+                    this.selected = [...this.selected, item]
+                }
             } else {
-                this.selected = [...this.selected, item]
+                this.selected = [item]
             }
 
             this.changeInput(this.selected)

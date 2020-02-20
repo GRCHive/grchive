@@ -11,7 +11,13 @@ import {
     TAllNodeSystemLinkOutput,
     allNodeSystemLink
 } from './api/apiNodeSystemLinks'
+import {
+    TAllNodeGLLinkOutput,
+    allNodeGLLink
+} from './api/apiNodeGLLinks'
+
 import { System } from './systems'
+import { GeneralLedger } from './generalLedger'
 import { PageParamsStore } from './pageParams'
 
 let mutationObservers = []
@@ -333,6 +339,31 @@ const store : StoreOptions<VuexState> = {
 
             arr.splice(idx, 1)
         },
+        addNodeGLLink(state, {nodeId, account}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
+
+            let gl: GeneralLedger | null = state.currentProcessFlowFullData.NodeGLLinks[nodeId]
+            if (gl === null) {
+                return
+            }
+
+            gl.addRawAccount(account)
+        },
+        deleteNodeGLLink(state, {nodeId, accountId}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
+
+            let gl: GeneralLedger | null = state.currentProcessFlowFullData.NodeGLLinks[nodeId]
+            if (gl === null) {
+                return
+            }
+
+            gl.removeAccount(accountId)
+        },
+
     },
     actions: {
         mountPrimaryNavBar(context, nav) {
@@ -376,6 +407,7 @@ const store : StoreOptions<VuexState> = {
                         NodeControlRelationships: Vue.observable(new RelationshipMap<ProcessFlowNode,ProcessFlowControl>()),
                         RiskControlRelationships: Vue.observable(new RelationshipMap<ProcessFlowRisk,ProcessFlowControl>()),
                         NodeSystemLinks: Object(),
+                        NodeGLLinks: Object(),
                     }
         
                     for (let data of resp.data.Graph.Nodes) {
@@ -538,9 +570,35 @@ const store : StoreOptions<VuexState> = {
         }
     },
     getters: {
+        glLinkedToNode(state): (nodeId : number) => GeneralLedger | null {
+            if (!state.currentProcessFlowFullData) {
+                return (_ : number) => null
+            }
+
+            let fullMap : Record<number, GeneralLedger | null> = state.currentProcessFlowFullData.NodeGLLinks
+            return (nodeId : number) : GeneralLedger | null => {
+                let ledger : GeneralLedger | null = null
+                if (nodeId in fullMap) {
+                    ledger = fullMap[nodeId]
+                }
+
+                if (ledger === null) {
+                    allNodeGLLink({
+                        nodeId: nodeId,
+                        orgId: PageParamsStore.state.organization!.Id,
+                    }).then((resp : TAllNodeGLLinkOutput) => {
+                        let gl : GeneralLedger = new GeneralLedger()
+                        gl.rebuildGL(resp.data.Categories!, resp.data.Accounts!)
+                        Vue.set(fullMap, nodeId, gl)
+                    })
+                    return null
+                }
+                return ledger
+            }
+        },
         systemsLinkedToNode(state) : (nodeId : number) => System[] | null {
             if (!state.currentProcessFlowFullData) {
-                return (_ : number) => []
+                return (_ : number) => null
             }
 
             let fullMap : Record<number, System[] | null> = state.currentProcessFlowFullData.NodeSystemLinks
