@@ -45,6 +45,18 @@ func allRiskSystemLinks(w http.ResponseWriter, r *http.Request) {
 		}{
 			Systems: systems,
 		})
+	} else if inputs.SystemId.NullInt64.Valid {
+		risks, err := database.FindRisksLinkedToSystem(inputs.SystemId.NullInt64.Int64, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get linked risks: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		jsonWriter.Encode(struct {
+			Risks []*core.Risk
+		}{
+			Risks: risks,
+		})
 	} else {
 		core.Warning("Invalid combination of inputs.")
 		w.WriteHeader(http.StatusBadRequest)

@@ -71,6 +71,14 @@ func allNodeSystemLink(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		jsonWriter.Encode(systems)
+	} else if inputs.SystemId.NullInt64.Valid {
+		flows, err := database.AllFlowsRelatedToSystem(inputs.SystemId.NullInt64.Int64, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to retrieve flows linked to system: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		jsonWriter.Encode(flows)
 	} else {
 		core.Warning("Invalid combination of inputs.")
 		w.WriteHeader(http.StatusBadRequest)

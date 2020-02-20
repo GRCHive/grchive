@@ -45,6 +45,18 @@ func allControlSystemLinks(w http.ResponseWriter, r *http.Request) {
 		}{
 			Systems: systems,
 		})
+	} else if inputs.SystemId.NullInt64.Valid {
+		controls, err := database.FindControlsLinkedToSystem(inputs.SystemId.NullInt64.Int64, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get linked controls: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		jsonWriter.Encode(struct {
+			Controls []*core.Control
+		}{
+			Controls: controls,
+		})
 	} else {
 		core.Warning("Invalid combination of inputs.")
 		w.WriteHeader(http.StatusBadRequest)

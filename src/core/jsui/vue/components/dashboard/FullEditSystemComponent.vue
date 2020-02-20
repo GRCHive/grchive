@@ -56,48 +56,81 @@
                     <v-col cols="6">
                         <v-card class="mb-4">
                             <v-card-title>
-                                Relevant Databases
-                                <v-spacer></v-spacer>
-                                
-                                <v-dialog persistent
-                                          max-width="40%"
-                                          v-model="showHideLinkDb">
-                                    <template v-slot:activator="{ on }">
-                                        <v-btn color="primary" icon v-on="on">
-                                            <v-icon>mdi-plus</v-icon>
-                                        </v-btn>
-                                    </template>
-
-                                    <v-card>
-                                        <v-card-title>
-                                            Link Databases
-                                        </v-card-title>
-                                        <v-divider></v-divider>
-
-                                        <db-table :resources="allDb"
-                                                  v-model="dbToLink"
-                                                  selectable
-                                                  multi
-                                        ></db-table>
-
-                                        <v-card-actions>
-                                            <v-btn color="error" @click="showHideLinkDb = false">
-                                                Cancel
-                                            </v-btn>
-                                            <v-spacer></v-spacer>
-                                            <v-btn color="success" @click="linkDbs">
-                                                Link
-                                            </v-btn>
-                                        </v-card-actions>
-                                    </v-card>
-                                </v-dialog>
+                                Related Resources
                             </v-card-title>
                             <v-divider></v-divider>
-                            <db-table
-                                :resources="relatedDbs"
-                                use-crud-delete
-                                @delete="onDeleteDbLink"
-                            ></db-table>
+
+                            <v-tabs>
+                                <v-tab>Databases</v-tab>
+                                <v-tab-item>
+                                    <v-list-item>
+                                        <v-spacer></v-spacer>
+                                        
+                                        <v-dialog persistent
+                                                  max-width="40%"
+                                                  v-model="showHideLinkDb">
+                                            <template v-slot:activator="{ on }">
+                                                <v-btn color="primary" icon v-on="on">
+                                                    <v-icon>mdi-plus</v-icon>
+                                                </v-btn>
+                                            </template>
+
+                                            <v-card>
+                                                <v-card-title>
+                                                    Link Databases
+                                                </v-card-title>
+                                                <v-divider></v-divider>
+
+                                                <db-table :resources="allDb"
+                                                          v-model="dbToLink"
+                                                          selectable
+                                                          multi
+                                                ></db-table>
+
+                                                <v-card-actions>
+                                                    <v-btn color="error" @click="showHideLinkDb = false">
+                                                        Cancel
+                                                    </v-btn>
+                                                    <v-spacer></v-spacer>
+                                                    <v-btn color="success" @click="linkDbs">
+                                                        Link
+                                                    </v-btn>
+                                                </v-card-actions>
+                                            </v-card>
+                                        </v-dialog>
+                                    </v-list-item>
+
+                                    <db-table
+                                        :resources="relatedDbs"
+                                        use-crud-delete
+                                        @delete="onDeleteDbLink"
+                                    ></db-table>
+                                </v-tab-item>
+
+                            <v-tab>Process Flows</v-tab>
+                            <v-tab-item>
+                                <process-flow-table
+                                    :resources="relatedFlows"
+                                >
+                                </process-flow-table>
+                            </v-tab-item>
+
+                            <v-tab>Risks</v-tab>
+                            <v-tab-item>
+                                <risk-table
+                                    :resources="relatedRisks"
+                                >
+                                </risk-table>
+                            </v-tab-item>
+
+                            <v-tab>Controls</v-tab>
+                            <v-tab-item>
+                                <control-table
+                                    :resources="relatedControls"
+                                >
+                                </control-table>
+                            </v-tab-item>
+                            </v-tabs>
                         </v-card>
 
                         <v-card>
@@ -153,13 +186,22 @@ import { Database } from '../../../ts/databases'
 import { FullDeployment } from '../../../ts/deployments'
 import DeploymentEditor from '../../generic/DeploymentEditor.vue'
 import { newDeployment, TNewDeploymentOutput } from '../../../ts/api/apiDeployments'
+import { TAllRiskSystemLinkOutput, allRiskSystemLink } from '../../../ts/api/apiRiskSystemLinks'
+import { TAllControlSystemLinkOutput, allControlSystemLink } from '../../../ts/api/apiControlSystemLinks'
+import { TAllNodeSystemLinkOutput, allNodeSystemLink } from '../../../ts/api/apiNodeSystemLinks'
+import RiskTable from '../../generic/RiskTable.vue'
+import ControlTable from '../../generic/ControlTable.vue'
+import ProcessFlowTable from '../../generic/ProcessFlowTable.vue'
 
 @Component({
     components: {
         CreateNewSystemForm,
         GenericDeleteConfirmationForm,
         DbTable,
-        DeploymentEditor
+        DeploymentEditor,
+        RiskTable,
+        ControlTable,
+        ProcessFlowTable
     }
 })
 export default class FullEditSystemComponent extends Vue {
@@ -169,6 +211,10 @@ export default class FullEditSystemComponent extends Vue {
 
     dbToLink: Database[] = []
     deployment: FullDeployment | null = null
+
+    relatedControls : ProcessFlowControl[] = []
+    relatedRisks : ProcessFlowRisk[] = []
+    relatedFlows : ProcessFlowBasicData[] = []
 
     ready : boolean = false
     expandDescription: boolean = false
@@ -197,6 +243,57 @@ export default class FullEditSystemComponent extends Vue {
         })
     }
 
+    refreshRelatedFlows() {
+        allNodeSystemLink({
+            systemId: this.currentSystem.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TAllNodeSystemLinkOutput) => {
+            this.relatedFlows = <ProcessFlowBasicData[]>resp.data
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    refreshRelatedRisks() {
+        allRiskSystemLink({
+            systemId: this.currentSystem.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TAllRiskSystemLinkOutput) => {
+            this.relatedRisks = resp.data.Risks!
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    refreshRelatedControls() {
+        allControlSystemLink({
+            systemId: this.currentSystem.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TAllControlSystemLinkOutput) => {
+            this.relatedControls = resp.data.Controls!
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
     refreshSystemData() {
         let data = window.location.pathname.split('/')
         let systemId = Number(data[data.length - 1])
@@ -212,6 +309,10 @@ export default class FullEditSystemComponent extends Vue {
             let idSet = new Set(resp.data.RelevantDatabaseIds)
             this.relatedDbs = resp.data.AllDatabases.filter((ele : Database) => idSet.has(ele.Id))
             this.deployment = resp.data.Deployment
+
+            this.refreshRelatedFlows()
+            this.refreshRelatedRisks()
+            this.refreshRelatedControls()
 
             Vue.nextTick(() => {
                 this.$refs.editForm.clearForm()

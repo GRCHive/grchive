@@ -26,3 +26,26 @@ func FindSystemsLinkedToControl(controlId int64, orgId int32, role *core.Role) (
 	`, controlId, orgId)
 	return systems, err
 }
+
+func FindControlsLinkedToSystem(systemId int64, orgId int32, role *core.Role) ([]*core.Control, error) {
+	if !role.Permissions.HasAccess(core.ResourceControls, core.AccessView) ||
+		!role.Permissions.HasAccess(core.ResourceSystems, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	controls := make([]*core.Control, 0)
+	err := dbConn.Select(&controls, `
+		SELECT control.*
+		FROM process_flow_controls AS control
+		INNER JOIN process_flow_risk_control AS rc
+			ON rc.control_id = control.id
+		INNER JOIN process_flow_risk_node AS rn
+			ON rn.risk_id = rc.risk_id
+		INNER JOIN node_system_link AS nsl
+			ON nsl.node_id = rn.node_id
+		INNER JOIN systems AS sys
+			ON sys.id = nsl.system_id
+		WHERE sys.id = $1 AND sys.org_id = $2
+	`, systemId, orgId)
+	return controls, err
+}

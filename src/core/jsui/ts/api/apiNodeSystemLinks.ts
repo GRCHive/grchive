@@ -36,7 +36,7 @@ export interface TAllNodeSystemLinkInput {
 }
 
 export interface TAllNodeSystemLinkOutput {
-    data: System[] | ProcessFlowNode[]
+    data: System[] | ProcessFlowBasicData[]
 }
 
 export function allNodeSystemLink(inp : TAllNodeSystemLinkInput) : Promise<TAllNodeSystemLinkOutput> {

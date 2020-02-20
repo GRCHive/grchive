@@ -58,3 +58,33 @@ func AllSystemsLinkedToNode(nodeId int64, orgId int32, role *core.Role) ([]*core
 	`, nodeId, orgId)
 	return systems, err
 }
+
+func AllFlowsRelatedToSystem(systemId int64, orgId int32, role *core.Role) ([]*core.ProcessFlow, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) ||
+		!role.Permissions.HasAccess(core.ResourceSystems, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	flows := make([]*core.ProcessFlow, 0)
+	err := dbConn.Select(&flows, `
+		SELECT
+			flow.id,
+			flow.name,
+			org.id AS "org.id",
+			org.org_group_id AS "org.org_group_id",
+			org.org_group_name AS "org.org_group_name",
+			org.org_name AS "org.org_name",
+			flow.description,
+			flow.created_time,
+			flow.last_updated_time
+		FROM process_flows AS flow
+		INNER JOIN process_flow_nodes AS node
+			ON node.process_flow_id = flow.id
+		INNER JOIN node_system_link AS link
+			ON link.node_id = node.id
+		INNER JOIN organizations AS org
+			ON flow.org_id = org.id
+		WHERE link.system_id = $1 AND org.id = $2
+	`, systemId, orgId)
+	return flows, err
+}

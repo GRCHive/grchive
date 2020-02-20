@@ -376,7 +376,7 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 
 	type FullControlData struct {
 		Control       *core.Control
-		Nodes         []*core.ProcessFlowNode
+		Flows         []*core.ProcessFlow
 		Risks         []*core.Risk
 		InputDocCats  []*core.ControlDocumentationCategory
 		OutputDocCats []*core.ControlDocumentationCategory
@@ -396,7 +396,7 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.Nodes, err = database.FindNodesRelatedToControl(data.Control.Id, role)
+	data.Flows, err = database.FindFlowsRelatedToControl(data.Control.Id, role)
 	if err != nil {
 		core.Warning("Failed to get nodes data: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

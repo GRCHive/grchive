@@ -24,7 +24,7 @@
 
             <v-container fluid>
                 <v-row>
-                    <v-col cols="8">
+                    <v-col cols="5">
                         <create-new-control-form ref="editControl"
                                                  :node-id="-1"
                                                  :risk-id="-1"
@@ -35,7 +35,7 @@
                         </create-new-control-form>
                     </v-col>
 
-                    <v-col cols="4">
+                    <v-col cols="7">
                         <v-card class="mb-4">
                             <v-card-title>
                                 <span class="mr-2">
@@ -112,43 +112,20 @@
                             <v-divider></v-divider>
 
                             <v-tabs>
-                                <v-tab>Nodes</v-tab>
+                                <v-tab>Process Flows</v-tab>
                                 <v-tab-item>
-                                    <v-list two-line>
-                                        <v-list-item v-for="(item, index) in fullControlData.Nodes"
-                                                     :key="index"
-                                        >
-                                            <v-list-item-content>
-                                                <v-list-item-title>
-                                                    {{ item.Name }}
-                                                </v-list-item-title>
-
-                                                <v-list-item-subtitle>
-                                                    {{ item.Description }}
-                                                </v-list-item-subtitle>
-                                            </v-list-item-content>
-                                        </v-list-item>
-                                    </v-list>
+                                    <process-flow-table
+                                        :resources="fullControlData.Flows"
+                                    >
+                                    </process-flow-table>
                                 </v-tab-item>
 
                                 <v-tab>Risks</v-tab>
                                 <v-tab-item>
-                                    <v-list two-line>
-                                        <v-list-item v-for="(item, index) in fullControlData.Risks"
-                                                     :key="index"
-                                                     :href="generateRiskUrl(item.Id)"
-                                        >
-                                            <v-list-item-content>
-                                                <v-list-item-title>
-                                                    {{ item.Name }}
-                                                </v-list-item-title>
-
-                                                <v-list-item-subtitle>
-                                                    {{ item.Description }}
-                                                </v-list-item-subtitle>
-                                            </v-list-item-content>
-                                        </v-list-item>
-                                    </v-list>
+                                    <risk-table
+                                        :resources="fullControlData.Risks"
+                                    >
+                                    </risk-table>
                                 </v-tab-item>
 
                                 <v-tab>Systems</v-tab>
@@ -182,6 +159,8 @@ import { getAllDocumentationCategories, TGetAllDocumentationCategoriesOutput } f
 import AddDocumentCategoryToControlForm from '../../generic/AddDocumentCategoryToControlForm.vue'
 import { System } from '../../../ts/systems'
 import SystemsTable from '../../generic/SystemsTable.vue'
+import RiskTable from '../../generic/RiskTable.vue'
+import ProcessFlowTable from '../../generic/ProcessFlowTable.vue'
 import {
     TAllControlSystemLinkOutput, allControlSystemLink
 } from '../../../ts/api/apiControlSystemLinks'
@@ -350,7 +329,9 @@ export default Vue.extend({
         CreateNewControlForm,
         DocumentationTable,
         AddDocumentCategoryToControlForm,
-        SystemsTable
+        SystemsTable,
+        RiskTable,
+        ProcessFlowTable
     },
     mounted() {
         this.refreshData()

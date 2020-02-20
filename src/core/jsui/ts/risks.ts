@@ -2,7 +2,7 @@ import { NumericFilterData, NullNumericFilterData } from './filters'
 
 export interface FullRiskData {
     Risk: ProcessFlowRisk
-    Nodes: ProcessFlowNode[]
+    Flows: ProcessFlowBasicData[]
     Controls: ProcessFlowControl[]
 }
 

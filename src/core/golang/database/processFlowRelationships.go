@@ -21,6 +21,34 @@ func FindNodeRiskRelationships(flowId int64, role *core.Role) ([]*core.NodeRiskR
 	return relationships, err
 }
 
+func FindFlowsRelatedToRisk(riskId int64, role *core.Role) ([]*core.ProcessFlow, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+	flows := make([]*core.ProcessFlow, 0)
+	err := dbConn.Select(&flows, `
+		SELECT
+			flow.id,
+			flow.name,
+			org.id AS "org.id",
+			org.org_group_id AS "org.org_group_id",
+			org.org_group_name AS "org.org_group_name",
+			org.org_name AS "org.org_name",
+			flow.description,
+			flow.created_time,
+			flow.last_updated_time
+		FROM process_flows AS flow
+		INNER JOIN process_flow_nodes AS node
+			ON node.process_flow_id = flow.id
+		INNER JOIN process_flow_risk_node AS rn
+			ON rn.node_id = node.id
+		INNER JOIN organizations AS org
+			ON flow.org_id = org.id
+		WHERE rn.risk_id = $1
+	`, riskId)
+	return flows, err
+}
+
 func FindNodesRelatedToRisk(riskId int64, role *core.Role) ([]*core.ProcessFlowNode, error) {
 	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
 		return nil, core.ErrorUnauthorized
@@ -34,6 +62,34 @@ func FindNodesRelatedToRisk(riskId int64, role *core.Role) ([]*core.ProcessFlowN
 		WHERE risknode.risk_id = $1
 	`, riskId)
 	return nodes, err
+}
+
+func FindFlowsRelatedToControl(controlId int64, role *core.Role) ([]*core.ProcessFlow, error) {
+	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+	flows := make([]*core.ProcessFlow, 0)
+	err := dbConn.Select(&flows, `
+		SELECT
+			flow.id,
+			flow.name,
+			org.id AS "org.id",
+			org.org_group_id AS "org.org_group_id",
+			org.org_group_name AS "org.org_group_name",
+			org.org_name AS "org.org_name",
+			flow.description,
+			flow.created_time,
+			flow.last_updated_time
+		FROM process_flows AS flow
+		INNER JOIN process_flow_nodes AS node
+			ON node.process_flow_id = flow.id
+		INNER JOIN process_flow_control_node AS cn
+			ON cn.node_id = node.id
+		INNER JOIN organizations AS org
+			ON flow.org_id = org.id
+		WHERE cn.control_id = $1
+	`, controlId)
+	return flows, err
 }
 
 func FindNodesRelatedToControl(controlId int64, role *core.Role) ([]*core.ProcessFlowNode, error) {

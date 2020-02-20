@@ -270,7 +270,7 @@ func getSingleRisk(w http.ResponseWriter, r *http.Request) {
 
 	type FullRiskData struct {
 		Risk     *core.Risk
-		Nodes    []*core.ProcessFlowNode
+		Flows    []*core.ProcessFlow
 		Controls []*core.Control
 	}
 	data := FullRiskData{}
@@ -296,7 +296,7 @@ func getSingleRisk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.Nodes, err = database.FindNodesRelatedToRisk(data.Risk.Id, role)
+	data.Flows, err = database.FindFlowsRelatedToRisk(data.Risk.Id, role)
 	if err != nil {
 		core.Warning("Failed to get nodes data: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

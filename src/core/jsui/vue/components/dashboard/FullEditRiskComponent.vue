@@ -24,7 +24,7 @@
 
             <v-container fluid>
                 <v-row>
-                    <v-col cols="8">
+                    <v-col cols="5">
                         <create-new-risk-form ref="editRisk"
                                               :node-id="-1"
                                               :edit-mode="true"
@@ -36,7 +36,7 @@
                         </create-new-risk-form>
                     </v-col>
 
-                    <v-col cols="4">
+                    <v-col cols="7">
                         <v-card class="mb-4">
                             <v-card-title>
                                 Related Resources
@@ -44,43 +44,20 @@
                             <v-divider></v-divider>
 
                             <v-tabs>
-                                <v-tab>Nodes</v-tab>
+                                <v-tab>Process Flows</v-tab>
                                 <v-tab-item>
-                                    <v-list two-line>
-                                        <v-list-item v-for="(item, index) in fullRiskData.Nodes"
-                                                     :key="index"
-                                        >
-                                            <v-list-item-content>
-                                                <v-list-item-title>
-                                                    {{ item.Name }}
-                                                </v-list-item-title>
-
-                                                <v-list-item-subtitle>
-                                                    {{ item.Description }}
-                                                </v-list-item-subtitle>
-                                            </v-list-item-content>
-                                        </v-list-item>
-                                    </v-list>
+                                    <process-flow-table
+                                        :resources="fullRiskData.Flows"
+                                    >
+                                    </process-flow-table>
                                 </v-tab-item>
 
                                 <v-tab>Controls</v-tab>
                                 <v-tab-item>
-                                    <v-list two-line>
-                                        <v-list-item v-for="(item, index) in fullRiskData.Controls"
-                                                     :key="index"
-                                                     :href="generateControlUrl(item.Id)"
-                                        >
-                                            <v-list-item-content>
-                                                <v-list-item-title>
-                                                    {{ item.Name }}
-                                                </v-list-item-title>
-
-                                                <v-list-item-subtitle>
-                                                    {{ item.Description }}
-                                                </v-list-item-subtitle>
-                                            </v-list-item-content>
-                                        </v-list-item>
-                                    </v-list>
+                                    <control-table
+                                        :resources="fullRiskData.Controls"
+                                    >
+                                    </control-table>
                                 </v-tab-item>
 
                                 <v-tab>Systems</v-tab>
@@ -112,6 +89,8 @@ import { createControlUrl, contactUsUrl } from '../../../ts/url'
 import CreateNewRiskForm from './CreateNewRiskForm.vue'
 import { System } from '../../../ts/systems'
 import SystemsTable from '../../generic/SystemsTable.vue'
+import ControlTable from '../../generic/ControlTable.vue'
+import ProcessFlowTable from '../../generic/ProcessFlowTable.vue'
 import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
@@ -175,7 +154,9 @@ export default Vue.extend({
     },
     components: {
         CreateNewRiskForm,
-        SystemsTable
+        SystemsTable,
+        ControlTable,
+        ProcessFlowTable
     },
     mounted() {
         this.refreshRiskData()
