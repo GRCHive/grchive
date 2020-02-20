@@ -10,6 +10,7 @@ interface ProcessFlowNodeType {
     Id : number
     Name : string
     Description : string
+    CanLinkToSystem: boolean
 }
 
 interface ProcessFlowRisk {

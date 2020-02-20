@@ -52,6 +52,67 @@
         <process-flow-input-output-editor :is-input="false"
                                           :node-id="currentNode.Id">
         </process-flow-input-output-editor>
+
+        <div v-if="canLinkToSystem && linkedSystems != null">
+            <v-divider></v-divider>
+            <v-list dense class="pa-0">
+                <v-list-item class="pa-0">
+                    <v-subheader class="flex-grow-1 pr-0">
+                        LINKED SYSTEMS
+                    </v-subheader>
+
+                    <v-list-item-action class="ma-0">
+                        <v-dialog persistent max-width="40%" v-model="showLinkSystem">
+                            <template v-slot:activator="{ on }">
+                                <v-btn
+                                    icon
+                                    v-on="on"
+                                >
+                                    <v-icon small>
+                                        mdi-plus
+                                    </v-icon>
+                                </v-btn>
+                            </template>
+
+                            <v-card>
+                                <v-card-title>
+                                    Link System
+                                </v-card-title>
+
+                                <system-search-form-component
+                                    v-model="systemsToLink"
+                                >
+                                </system-search-form-component>
+
+                                <v-card-actions>
+                                    <v-btn
+                                        color="error"
+                                        @click="cancelSystemLink"
+                                    >
+                                        Cancel
+                                    </v-btn>
+                                    <v-spacer></v-spacer>
+                                    <v-btn
+                                        color="success"
+                                        @click="saveSystemLink"
+                                        :disabled="systemsToLink.length == 0"
+                                    >
+                                        Link
+                                    </v-btn>
+                                </v-card-actions>
+                            </v-card>
+                        </v-dialog>
+                    </v-list-item-action>
+                </v-list-item>
+
+                <systems-table
+                    :resources="linkedSystems"
+                    use-crud-delete
+                    @delete="deleteLinkedSystem"
+                >
+                </systems-table>
+            </v-list>
+        </div>
     </section>
 </template>
 
@@ -62,13 +123,23 @@ import VueSetup from '../../../ts/vueSetup'
 import * as rules from "../../../ts/formRules"
 import ProcessFlowInputOutputEditor from './ProcessFlowInputOutputEditor.vue'
 import { editProcessFlowNode, TEditProcessFlowNodeInput, TEditProcessFlowNodeOutput } from '../../../ts/api/apiProcessFlowNodes'
+import { 
+    newNodeSystemLink,
+    deleteNodeSystemLink
+} from '../../../ts/api/apiNodeSystemLinks'
 import { contactUsUrl } from '../../../ts/url'
+import { System } from '../../../ts/systems'
+import { PageParamsStore } from '../../../ts/pageParams'
 import MetadataStore from '../../../ts/metadata'
+import SystemSearchFormComponent from '../../generic/SystemSearchFormComponent.vue'
+import SystemsTable from '../../generic/SystemsTable.vue'
 
 export default Vue.extend({
     data : () => ({
         canEditAttr: false,
         cachedData : {} as ProcessFlowNode,
+        systemsToLink: [] as System[],
+        showLinkSystem: false,
         rules,
     }),
     props: {
@@ -76,7 +147,9 @@ export default Vue.extend({
         showHide : Boolean
     },
     components: {
-        ProcessFlowInputOutputEditor
+        ProcessFlowInputOutputEditor,
+        SystemSearchFormComponent,
+        SystemsTable
     },
     methods : {
         startEdit() {
@@ -112,7 +185,60 @@ export default Vue.extend({
                     contactUsUrl,
                     true);
             })
-        }
+        },
+        cancelSystemLink() {
+            this.systemsToLink = []
+            this.showLinkSystem = false
+        },
+        saveSystemLink() {
+            if (this.systemsToLink.length == 0) {
+                return
+            }
+
+            let nodeId : number = this.currentNode.Id
+            let system : System = this.systemsToLink[0]
+            newNodeSystemLink({
+                nodeId: nodeId,
+                systemId: system.Id,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then(() => {
+                VueSetup.store.commit('addNodeSystemLink', {
+                    nodeId: nodeId,
+                    system: system,
+                })
+                this.systemsToLink = []
+                this.showLinkSystem = false
+            }).catch((err : any) => {
+                //@ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong, please reload the page and try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
+        deleteLinkedSystem(system : System) {
+            let id : number = this.currentNode.Id
+            deleteNodeSystemLink({
+                nodeId: id,
+                systemId: system.Id,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then(() => {
+                VueSetup.store.commit('deleteNodeSystemLink', {
+                    nodeId: id,
+                    systemId: system.Id,
+                })
+            }).catch((err : any) => {
+                //@ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong, please reload the page and try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
     },
     computed: {
         clipStyle() : any {
@@ -134,7 +260,13 @@ export default Vue.extend({
                 })
             }
             return retItems
-        }
+        },
+        canLinkToSystem() : boolean {
+            return MetadataStore.state.idToNodeTypes[this.currentNode.NodeTypeId].CanLinkToSystem
+        },
+        linkedSystems() : System[] | null {
+            return VueSetup.store.getters.systemsLinkedToNode(this.currentNode.Id)
+        },
     },
 })
 

@@ -1,9 +1,10 @@
 package core
 
 type ProcessFlowNodeType struct {
-	Id          int32  `db:"id"`
-	Name        string `db:"name"`
-	Description string `db:"description"`
+	Id              int32  `db:"id"`
+	Name            string `db:"name"`
+	Description     string `db:"description"`
+	CanLinkToSystem bool   `db:"can_link_to_system"`
 }
 
 type ProcessFlowNode struct {

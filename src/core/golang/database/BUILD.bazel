@@ -19,6 +19,7 @@ go_library(
         "gettingStartedInterest.go",
         "filterUtility.go",
         "inviteCodes.go",
+        "nodeSystemLinks.go",
         "organizations.go",
         "processFlowEdges.go",
         "processFlowIO.go",

@@ -1,17 +1,18 @@
-import 'core-js/es/promise'
 import Vue from 'vue'
 import Vuex, { StoreOptions } from 'vuex'
 import Vuetify from 'vuetify/lib'
-
-Vue.use(Vuex)
-Vue.use(Vuetify)
-
 import { deleteProcessFlowEdge, TDeleteProcessFlowEdgeInput, TDeleteProcessFlowEdgeOutput } from './api/apiProcessFlowEdges'
 import { deleteProcessFlowNode, TDeleteProcessFlowNodeInput, TDeleteProcessFlowNodeOutput } from './api/apiProcessFlowNodes'
 import RelationshipMap from './relationship'
 import { FullProcessFlowData } from './processFlow'
 import VuexState from './processFlowState'
 import { getFullProcessFlow, TGetFullProcessFlowInput, TGetFullProcessFlowOutput } from './api/apiProcessFlow'
+import {
+    TAllNodeSystemLinkOutput,
+    allNodeSystemLink
+} from './api/apiNodeSystemLinks'
+import { System } from './systems'
+import { PageParamsStore } from './pageParams'
 
 let mutationObservers = []
 const opts = {}
@@ -302,7 +303,36 @@ const store : StoreOptions<VuexState> = {
             state.currentProcessFlowFullData.ControlKeys.splice(
                 state.currentProcessFlowFullData.ControlKeys.findIndex((ele) => ele == controlId),
                 1)
-        }
+        },
+        addNodeSystemLink(state, {nodeId, system}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
+
+            let arr : System[] | null = state.currentProcessFlowFullData.NodeSystemLinks[nodeId]
+            if (arr === null) {
+                return
+            }
+
+            arr.push(system)
+        },
+        deleteNodeSystemLink(state, {nodeId, systemId}) {
+            if (!state.currentProcessFlowFullData) {
+                return
+            }
+
+            let arr : System[] | null = state.currentProcessFlowFullData.NodeSystemLinks[nodeId]
+            if (arr === null) {
+                return
+            }
+
+            let idx : number = arr.findIndex((ele : System) => ele.Id == systemId)
+            if (idx == -1) {
+                return
+            }
+
+            arr.splice(idx, 1)
+        },
     },
     actions: {
         mountPrimaryNavBar(context, nav) {
@@ -345,6 +375,7 @@ const store : StoreOptions<VuexState> = {
                         NodeRiskRelationships: Vue.observable(new RelationshipMap<ProcessFlowNode,ProcessFlowRisk>()),
                         NodeControlRelationships: Vue.observable(new RelationshipMap<ProcessFlowNode,ProcessFlowControl>()),
                         RiskControlRelationships: Vue.observable(new RelationshipMap<ProcessFlowRisk,ProcessFlowControl>()),
+                        NodeSystemLinks: Object(),
                     }
         
                     for (let data of resp.data.Graph.Nodes) {
@@ -507,6 +538,32 @@ const store : StoreOptions<VuexState> = {
         }
     },
     getters: {
+        systemsLinkedToNode(state) : (nodeId : number) => System[] | null {
+            if (!state.currentProcessFlowFullData) {
+                return (_ : number) => []
+            }
+
+            let fullMap : Record<number, System[] | null> = state.currentProcessFlowFullData.NodeSystemLinks
+            return (nodeId : number) : System[] | null => {
+                let systems : System[] | null = null
+                if (nodeId in fullMap) {
+                    systems = fullMap[nodeId]
+                }
+
+                if (systems === null) {
+                    allNodeSystemLink({
+                        nodeId: nodeId,
+                        orgId: PageParamsStore.state.organization!.Id,
+                    }).then((resp : TAllNodeSystemLinkOutput) => {
+                        Vue.set(fullMap, nodeId, <System[]>resp.data)
+                    })
+
+                    return null
+                }
+
+                return systems
+            }
+        },
         isNodeSelected: (state) => {
             return state.selectedNodeId != -1
         },

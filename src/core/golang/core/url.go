@@ -131,6 +131,8 @@ const ApiProcessFlowNodesNewUrl string = "/new"
 const ApiProcessFlowNodesEditUrl string = "/edit"
 const ApiProcessFlowNodesDeleteUrl string = "/delete"
 
+const ApiProcessFlowNodeLinksPrefix = "/link"
+
 // API - Process Flow Edges
 const ApiProcessFlowEdgesUrl string = "/flowedges"
 const ApiProcessFlowEdgesNewUrl string = "/new"

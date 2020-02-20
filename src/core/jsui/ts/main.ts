@@ -1,3 +1,4 @@
+import './vueInit'
 import vueOpts from  './vueSetup'
 import Vue from 'vue'
 import { VApp } from 'vuetify/lib'

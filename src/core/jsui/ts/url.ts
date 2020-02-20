@@ -155,6 +155,10 @@ export const editProcessFlowNodeAPIUrl: string = "/api/flownodes/edit"
 export const deleteProcessFlowNodeAPIUrl: string = "/api/flownodes/delete"
 export const duplicateProcessFlowNodeAPIUrl: string = "/api/flownodes/duplicate"
 
+export const newNodeSystemLinkUrl : string = "/api/flownodes/link/systems/new"
+export const deleteNodeSystemLinkUrl : string = "/api/flownodes/link/systems/delete"
+export const allNodeSystemLinkUrl : string = "/api/flownodes/link/systems/all"
+
 export function createUpdateProcessFlowApiUrl(id : number) : string {
     return "/api/flows/" + id.toString() + "/update"
 }

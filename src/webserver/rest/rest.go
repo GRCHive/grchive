@@ -88,6 +88,20 @@ func registerProcessFlowNodesAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiProcessFlowNodesEditUrl, editProcessFlowNode).Methods("POST")
 	s.HandleFunc(core.ApiProcessFlowNodesDeleteUrl, deleteProcessFlowNode).Methods("POST")
 	s.HandleFunc(core.ApiDuplicateEndpoint, duplicateProcessFlowNode).Methods("POST")
+
+	registerProcessFlowNodeLinksAPIPaths(s)
+}
+
+func registerProcessFlowNodeLinksAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiProcessFlowNodeLinksPrefix).Subrouter()
+	registerProcessFlowNodeSystemLinksAPIPaths(s)
+}
+
+func registerProcessFlowNodeSystemLinksAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiITSystemsPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, newNodeSystemLink).Methods("POST")
+	s.HandleFunc(core.ApiAllEndpoint, allNodeSystemLink).Methods("GET")
+	s.HandleFunc(core.ApiDeleteEndpoint, deleteNodeSystemLink).Methods("POST")
 }
 
 func registerProcessFlowIOAPIPaths(r *mux.Router) {
