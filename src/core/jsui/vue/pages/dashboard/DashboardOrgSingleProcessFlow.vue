@@ -53,6 +53,9 @@ import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
 import LocalSettings from '../../../ts/localSettings'
 import RenderLayout from '../../../ts/render/renderLayout'
+import vueOpts from  '../../../ts/vueSetup'
+import { getCurrentCSRF } from '../../../ts/csrf'
+import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     components : {
@@ -188,8 +191,15 @@ export default Vue.extend({
 
         let data = window.location.pathname.split('/')
         let flowId = Number(data[data.length - 1])
+        RenderLayout.store.dispatch('initialize', {
+            host: PageParamsStore.state.site!.Host,
+            csrf: getCurrentCSRF(),
+            processFlowStore: vueOpts.store
+        })
+
         VueSetup.store.dispatch('refreshCurrentProcessFlowFullData', flowId)
     },
+
     watch: {
         isNodeSelected() {
             this.trackAttributeEditor()

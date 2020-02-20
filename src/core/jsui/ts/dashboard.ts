@@ -5,7 +5,6 @@ import './vueInit'
 
 import vueOpts from  './vueSetup'
 import MetadataStore from './metadata'
-import RenderLayout from './render/renderLayout'
 import Vue from 'vue'
 import { VApp } from 'vuetify/lib'
 const DashboardOrgHome = () => import( /* webpackChunkName: "DashboardOrgHome" */ '../vue/pages/dashboard/DashboardOrgHome.vue')
@@ -90,12 +89,6 @@ function mountApp(inData : PageParamsStoreState) {
             MetadataStore.dispatch('initialize', {
                 csrf: getCurrentCSRF(),
                 orgGroupId: PageParamsStore.state.organization!.OktaGroupName
-            })
-
-            RenderLayout.store.dispatch('initialize', {
-                host: PageParamsStore.state.site!.Host,
-                csrf: getCurrentCSRF(),
-                processFlowStore: vueOpts.store
             })
         }
     })

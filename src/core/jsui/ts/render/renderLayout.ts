@@ -31,7 +31,7 @@ let websocketConnection : WebSocket
 let wsBuffer : any[] = []
 
 function connectWebsocket(context : any, host : string, csrf : string, processFlowStore : any) {
-    if (!!websocketConnection && websocketConnection.readyState == WebSocket.OPEN) {
+    if (!!websocketConnection) {
         websocketConnection.close()
     }
 
