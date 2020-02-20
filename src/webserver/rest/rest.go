@@ -135,6 +135,18 @@ func registerRiskAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiAddRiskToNodeEndpoint, addRisksToNode).Methods("POST")
 	s.HandleFunc(core.ApiGetAllRisksEndpoint, getAllRisks).Methods("GET")
 	s.HandleFunc(core.ApiGetSingleRiskEndpoint, getSingleRisk).Methods("GET")
+
+	registerRiskLinkAPIPaths(s)
+}
+
+func registerRiskLinkAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiProcessFlowNodeLinksPrefix).Subrouter()
+	registerRiskLinkSystemAPIPaths(s)
+}
+
+func registerRiskLinkSystemAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiITSystemsPrefix).Subrouter()
+	s.HandleFunc(core.ApiAllEndpoint, allRiskSystemLinks).Methods("GET")
 }
 
 func registerControlAPIPaths(r *mux.Router) {
@@ -148,6 +160,18 @@ func registerControlAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiEditControlEndpoint, editControl).Methods("POST")
 	s.HandleFunc(core.ApiGetAllControlEndpoint, getAllControls).Methods("GET")
 	s.HandleFunc(core.ApiGetSingleControlEndpoint, getSingleControl).Methods("GET")
+
+	registerControlLinkAPIPaths(s)
+}
+
+func registerControlLinkAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiProcessFlowNodeLinksPrefix).Subrouter()
+	registerControlLinkSystemAPIPaths(s)
+}
+
+func registerControlLinkSystemAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiITSystemsPrefix).Subrouter()
+	s.HandleFunc(core.ApiAllEndpoint, allControlSystemLinks).Methods("GET")
 }
 
 func registerControlDocumentationAPIPaths(r *mux.Router) {

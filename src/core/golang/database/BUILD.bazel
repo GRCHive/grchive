@@ -43,6 +43,8 @@ go_library(
         "utility.go",
         "vendorProducts.go",
         "vendors.go",
+        "controlSystemLinks.go",
+        "riskSystemLinks.go",
     ],
     importpath = "gitlab.com/grchive/grchive/database",
     deps = [

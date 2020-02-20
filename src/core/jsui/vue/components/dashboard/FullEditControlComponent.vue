@@ -107,49 +107,58 @@
 
                         <v-card class="mb-4">
                             <v-card-title>
-                                Related Nodes
+                                Related Resources
                             </v-card-title>
                             <v-divider></v-divider>
 
-                            <v-list two-line>
-                                <v-list-item v-for="(item, index) in fullControlData.Nodes"
-                                             :key="index"
-                                >
-                                    <v-list-item-content>
-                                        <v-list-item-title>
-                                            {{ item.Name }}
-                                        </v-list-item-title>
+                            <v-tabs>
+                                <v-tab>Nodes</v-tab>
+                                <v-tab-item>
+                                    <v-list two-line>
+                                        <v-list-item v-for="(item, index) in fullControlData.Nodes"
+                                                     :key="index"
+                                        >
+                                            <v-list-item-content>
+                                                <v-list-item-title>
+                                                    {{ item.Name }}
+                                                </v-list-item-title>
 
-                                        <v-list-item-subtitle>
-                                            {{ item.Description }}
-                                        </v-list-item-subtitle>
-                                    </v-list-item-content>
-                                </v-list-item>
-                            </v-list>
-                        </v-card>
+                                                <v-list-item-subtitle>
+                                                    {{ item.Description }}
+                                                </v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </v-list>
+                                </v-tab-item>
 
-                        <v-card>
-                            <v-card-title>
-                                Related Risks
-                            </v-card-title>
-                            <v-divider></v-divider>
+                                <v-tab>Risks</v-tab>
+                                <v-tab-item>
+                                    <v-list two-line>
+                                        <v-list-item v-for="(item, index) in fullControlData.Risks"
+                                                     :key="index"
+                                                     :href="generateRiskUrl(item.Id)"
+                                        >
+                                            <v-list-item-content>
+                                                <v-list-item-title>
+                                                    {{ item.Name }}
+                                                </v-list-item-title>
 
-                            <v-list two-line>
-                                <v-list-item v-for="(item, index) in fullControlData.Risks"
-                                             :key="index"
-                                             :href="generateRiskUrl(item.Id)"
-                                >
-                                    <v-list-item-content>
-                                        <v-list-item-title>
-                                            {{ item.Name }}
-                                        </v-list-item-title>
+                                                <v-list-item-subtitle>
+                                                    {{ item.Description }}
+                                                </v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </v-list>
+                                </v-tab-item>
 
-                                        <v-list-item-subtitle>
-                                            {{ item.Description }}
-                                        </v-list-item-subtitle>
-                                    </v-list-item-content>
-                                </v-list-item>
-                            </v-list>
+                                <v-tab>Systems</v-tab>
+                                <v-tab-item>
+                                    <systems-table
+                                        :resources="relevantSystems"
+                                    >
+                                    </systems-table>
+                                </v-tab-item>
+                            </v-tabs>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -171,6 +180,11 @@ import { ControlDocumentationCategory } from '../../../ts/controls'
 import { linkControlToDocumentCategory, unlinkControlFromDocumentCategory } from '../../../ts/api/apiControls'
 import { getAllDocumentationCategories, TGetAllDocumentationCategoriesOutput } from '../../../ts/api/apiControlDocumentation'
 import AddDocumentCategoryToControlForm from '../../generic/AddDocumentCategoryToControlForm.vue'
+import { System } from '../../../ts/systems'
+import SystemsTable from '../../generic/SystemsTable.vue'
+import {
+    TAllControlSystemLinkOutput, allControlSystemLink
+} from '../../../ts/api/apiControlSystemLinks'
 
 export default Vue.extend({
     data: () => ({
@@ -181,7 +195,8 @@ export default Vue.extend({
         showHideDeleteCat : false,
         showHideAddInputDocCat: false,
         showHideAddOutputDocCat: false,
-        availableDocCats: null as ControlDocumentationCategory[] | null
+        availableDocCats: null as ControlDocumentationCategory[] | null,
+        relevantSystems: [] as System[]
     }),
     computed: {
         ready() : boolean {
@@ -197,6 +212,23 @@ export default Vue.extend({
         }
     },
     methods: {
+        refreshSystemLink() {
+            allControlSystemLink({
+                controlId: this.fullControlData!.Control.Id,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TAllControlSystemLinkOutput) => {
+                this.relevantSystems = resp.data.Systems!
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
+
         refreshData() {
             let data = window.location.pathname.split('/')
             let controlId = Number(data[data.length - 1])
@@ -206,6 +238,7 @@ export default Vue.extend({
                 orgId: PageParamsStore.state.organization!.Id,
             }).then((resp : TSingleControlOutput) => {
                 this.fullControlData = resp.data
+                this.refreshSystemLink()
             }).catch((err : any) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
@@ -316,7 +349,8 @@ export default Vue.extend({
     components: {
         CreateNewControlForm,
         DocumentationTable,
-        AddDocumentCategoryToControlForm
+        AddDocumentCategoryToControlForm,
+        SystemsTable
     },
     mounted() {
         this.refreshData()
@@ -324,15 +358,3 @@ export default Vue.extend({
 })
 
 </script>
-
-<style scoped>
-
->>>.v-select__selections input {
-    display: none !important;
-}
-
->>>.v-tabs .v-slide-group {
-    display: none !important;
-}
-
-</style>

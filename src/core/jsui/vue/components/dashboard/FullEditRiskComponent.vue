@@ -39,50 +39,60 @@
                     <v-col cols="4">
                         <v-card class="mb-4">
                             <v-card-title>
-                                Related Nodes
+                                Related Resources
                             </v-card-title>
                             <v-divider></v-divider>
 
-                            <v-list two-line>
-                                <v-list-item v-for="(item, index) in fullRiskData.Nodes"
-                                             :key="index"
-                                >
-                                    <v-list-item-content>
-                                        <v-list-item-title>
-                                            {{ item.Name }}
-                                        </v-list-item-title>
+                            <v-tabs>
+                                <v-tab>Nodes</v-tab>
+                                <v-tab-item>
+                                    <v-list two-line>
+                                        <v-list-item v-for="(item, index) in fullRiskData.Nodes"
+                                                     :key="index"
+                                        >
+                                            <v-list-item-content>
+                                                <v-list-item-title>
+                                                    {{ item.Name }}
+                                                </v-list-item-title>
 
-                                        <v-list-item-subtitle>
-                                            {{ item.Description }}
-                                        </v-list-item-subtitle>
-                                    </v-list-item-content>
-                                </v-list-item>
-                            </v-list>
+                                                <v-list-item-subtitle>
+                                                    {{ item.Description }}
+                                                </v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </v-list>
+                                </v-tab-item>
+
+                                <v-tab>Controls</v-tab>
+                                <v-tab-item>
+                                    <v-list two-line>
+                                        <v-list-item v-for="(item, index) in fullRiskData.Controls"
+                                                     :key="index"
+                                                     :href="generateControlUrl(item.Id)"
+                                        >
+                                            <v-list-item-content>
+                                                <v-list-item-title>
+                                                    {{ item.Name }}
+                                                </v-list-item-title>
+
+                                                <v-list-item-subtitle>
+                                                    {{ item.Description }}
+                                                </v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </v-list>
+                                </v-tab-item>
+
+                                <v-tab>Systems</v-tab>
+                                <v-tab-item>
+                                    <systems-table
+                                        :resources="relevantSystems"
+                                    >
+                                    </systems-table>
+                                </v-tab-item>
+                            </v-tabs>
                         </v-card>
 
-                        <v-card>
-                            <v-card-title>
-                                Related Controls
-                            </v-card-title>
-                            <v-divider></v-divider>
-
-                            <v-list two-line>
-                                <v-list-item v-for="(item, index) in fullRiskData.Controls"
-                                             :key="index"
-                                             :href="generateControlUrl(item.Id)"
-                                >
-                                    <v-list-item-content>
-                                        <v-list-item-title>
-                                            {{ item.Name }}
-                                        </v-list-item-title>
-
-                                        <v-list-item-subtitle>
-                                            {{ item.Description }}
-                                        </v-list-item-subtitle>
-                                    </v-list-item-content>
-                                </v-list-item>
-                            </v-list>
-                        </v-card>
                     </v-col>
                 </v-row>
             </v-container>
@@ -95,15 +105,21 @@
 import Vue from 'vue'
 import { FullRiskData } from '../../../ts/risks'
 import { getSingleRisk, TSingleRiskInput, TSingleRiskOutput} from '../../../ts/api/apiRisks'
-import { createControlUrl } from '../../../ts/url'
+import {
+    TAllRiskSystemLinkOutput, allRiskSystemLink
+} from '../../../ts/api/apiRiskSystemLinks'
+import { createControlUrl, contactUsUrl } from '../../../ts/url'
 import CreateNewRiskForm from './CreateNewRiskForm.vue'
+import { System } from '../../../ts/systems'
+import SystemsTable from '../../generic/SystemsTable.vue'
 import { PageParamsStore } from '../../../ts/pageParams'
 
 export default Vue.extend({
     data: () => ({
         expandDescription: false,
         ready: false,
-        fullRiskData: Object() as FullRiskData
+        fullRiskData: Object() as FullRiskData,
+        relevantSystems: [] as System[]
     }),
     methods: {
         onEditRisk(risk : ProcessFlowRisk) {
@@ -115,6 +131,22 @@ export default Vue.extend({
                 this.$refs.editRisk.clearForm()
             })
         },
+        refreshSystemLink() {
+            allRiskSystemLink({
+                riskId: this.fullRiskData.Risk.Id,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TAllRiskSystemLinkOutput) => {
+                this.relevantSystems = resp.data.Systems!
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
         refreshRiskData() {
             let data = window.location.pathname.split('/')
             let riskId = Number(data[data.length - 1])
@@ -124,6 +156,8 @@ export default Vue.extend({
             }).then((resp : TSingleRiskOutput) => {
                 this.fullRiskData = resp.data
                 this.ready = true
+
+                this.refreshSystemLink()
 
                 Vue.nextTick(() => {
                     //@ts-ignore
@@ -140,7 +174,8 @@ export default Vue.extend({
         }
     },
     components: {
-        CreateNewRiskForm
+        CreateNewRiskForm,
+        SystemsTable
     },
     mounted() {
         this.refreshRiskData()

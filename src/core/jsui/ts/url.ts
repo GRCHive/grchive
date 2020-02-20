@@ -180,6 +180,8 @@ export const editRiskAPIUrl : string = "/api/risk/edit"
 export const addExistingRiskAPIUrl : string = "/api/risk/add"
 export const allRiskAPIUrl : string = "/api/risk/"
 
+export const allRiskSystemLinkUrl : string = "/api/risk/link/systems/all"
+
 export function createSingleRiskAPIUrl(riskId : number) : string {
     return `/api/risk/${riskId}`
 }
@@ -199,6 +201,8 @@ export const allControlAPIUrl : string = "/api/control/"
 export function createSingleControlAPIUrl(controlId : number) : string {
     return `/api/control/${controlId}`
 }
+
+export const allControlSystemLinkUrl : string = "/api/control/link/systems/all"
 
 export const newControlDocCatUrl : string = "/api/documentation/cat/new"
 export const editControlDocCatUrl : string = "/api/documentation/cat/edit"
