@@ -44,7 +44,7 @@
 
             <v-container fluid>
                 <v-row>
-                    <v-col cols="6">
+                    <v-col cols="5">
                         <create-new-system-form
                             ref="editForm"
                             :edit-mode="true"
@@ -53,7 +53,7 @@
                         </create-new-system-form>
                     </v-col>
 
-                    <v-col cols="6">
+                    <v-col cols="7">
                         <v-card class="mb-4">
                             <v-card-title>
                                 Related Resources
@@ -107,29 +107,29 @@
                                     ></db-table>
                                 </v-tab-item>
 
-                            <v-tab>Process Flows</v-tab>
-                            <v-tab-item>
-                                <process-flow-table
-                                    :resources="relatedFlows"
-                                >
-                                </process-flow-table>
-                            </v-tab-item>
+                                <v-tab>Process Flows</v-tab>
+                                <v-tab-item>
+                                    <process-flow-table
+                                        :resources="relatedFlows"
+                                    >
+                                    </process-flow-table>
+                                </v-tab-item>
 
-                            <v-tab>Risks</v-tab>
-                            <v-tab-item>
-                                <risk-table
-                                    :resources="relatedRisks"
-                                >
-                                </risk-table>
-                            </v-tab-item>
+                                <v-tab>Risks</v-tab>
+                                <v-tab-item>
+                                    <risk-table
+                                        :resources="relatedRisks"
+                                    >
+                                    </risk-table>
+                                </v-tab-item>
 
-                            <v-tab>Controls</v-tab>
-                            <v-tab-item>
-                                <control-table
-                                    :resources="relatedControls"
-                                >
-                                </control-table>
-                            </v-tab-item>
+                                <v-tab>Controls</v-tab>
+                                <v-tab-item>
+                                    <control-table
+                                        :resources="relatedControls"
+                                    >
+                                    </control-table>
+                                </v-tab-item>
                             </v-tabs>
                         </v-card>
 

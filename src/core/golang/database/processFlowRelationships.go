@@ -27,7 +27,7 @@ func FindFlowsRelatedToRisk(riskId int64, role *core.Role) ([]*core.ProcessFlow,
 	}
 	flows := make([]*core.ProcessFlow, 0)
 	err := dbConn.Select(&flows, `
-		SELECT
+		SELECT DISTINCT
 			flow.id,
 			flow.name,
 			org.id AS "org.id",
@@ -70,7 +70,7 @@ func FindFlowsRelatedToControl(controlId int64, role *core.Role) ([]*core.Proces
 	}
 	flows := make([]*core.ProcessFlow, 0)
 	err := dbConn.Select(&flows, `
-		SELECT
+		SELECT DISTINCT
 			flow.id,
 			flow.name,
 			org.id AS "org.id",

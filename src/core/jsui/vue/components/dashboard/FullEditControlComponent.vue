@@ -135,6 +135,14 @@
                                     >
                                     </systems-table>
                                 </v-tab-item>
+
+                                <v-tab>Accounts</v-tab>
+                                <v-tab-item>
+                                    <general-ledger-accounts-table
+                                        :resources="relevantAccounts"
+                                    >
+                                    </general-ledger-accounts-table>
+                                </v-tab-item>
                             </v-tabs>
                         </v-card>
                     </v-col>
@@ -164,6 +172,9 @@ import ProcessFlowTable from '../../generic/ProcessFlowTable.vue'
 import {
     TAllControlSystemLinkOutput, allControlSystemLink
 } from '../../../ts/api/apiControlSystemLinks'
+import GeneralLedgerAccountsTable from '../../generic/GeneralLedgerAccountsTable.vue'
+import { allControlGLLink, TAllControlGLLinkOutput } from '../../../ts/api/apiControlGLLinks'
+import { GeneralLedger, GeneralLedgerAccount } from '../../../ts/generalLedger'
 
 export default Vue.extend({
     data: () => ({
@@ -175,11 +186,18 @@ export default Vue.extend({
         showHideAddInputDocCat: false,
         showHideAddOutputDocCat: false,
         availableDocCats: null as ControlDocumentationCategory[] | null,
-        relevantSystems: [] as System[]
+        relevantSystems: [] as System[],
+        relevantGL: null as GeneralLedger | null
     }),
     computed: {
         ready() : boolean {
             return (this.fullControlData != null && this.availableDocCats != null)
+        },
+        relevantAccounts() : GeneralLedgerAccount[] {
+            if (!this.relevantGL) {
+                return []
+            }
+            return this.relevantGL.listAccounts
         }
     },
     watch: {
@@ -207,7 +225,23 @@ export default Vue.extend({
                     true);
             })
         },
-
+        refreshGLLink() {
+            allControlGLLink({
+                controlId: this.fullControlData!.Control.Id,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TAllControlGLLinkOutput) => {
+                this.relevantGL = new GeneralLedger()
+                this.relevantGL.rebuildGL(resp.data.Categories!, resp.data.Accounts!)
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
         refreshData() {
             let data = window.location.pathname.split('/')
             let controlId = Number(data[data.length - 1])
@@ -218,6 +252,7 @@ export default Vue.extend({
             }).then((resp : TSingleControlOutput) => {
                 this.fullControlData = resp.data
                 this.refreshSystemLink()
+                this.refreshGLLink()
             }).catch((err : any) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
@@ -331,7 +366,8 @@ export default Vue.extend({
         AddDocumentCategoryToControlForm,
         SystemsTable,
         RiskTable,
-        ProcessFlowTable
+        ProcessFlowTable,
+        GeneralLedgerAccountsTable
     },
     mounted() {
         this.refreshData()

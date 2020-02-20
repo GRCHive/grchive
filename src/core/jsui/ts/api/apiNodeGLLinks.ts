@@ -39,7 +39,7 @@ export interface TAllNodeGLLinkOutput {
     data: {
         Accounts?: RawGeneralLedgerAccount[]
         Categories?: RawGeneralLedgerCategory[]
-        Nodes?:  ProcessFlowNode[]
+        Nodes?:  ProcessFlowBasicData[]
     }
 }
 

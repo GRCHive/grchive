@@ -85,6 +85,14 @@ func allNodeGLLink(w http.ResponseWriter, r *http.Request) {
 			Accounts:   accounts,
 			Categories: cats,
 		})
+	} else if inputs.AccountId.NullInt64.Valid {
+		flows, err := database.AllFlowsRelatedToGL(inputs.AccountId.NullInt64.Int64, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to retrieve flows linked to GL: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		jsonWriter.Encode(flows)
 	} else {
 		core.Warning("Invalid combination of inputs.")
 		w.WriteHeader(http.StatusBadRequest)

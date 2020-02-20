@@ -67,7 +67,7 @@ func AllFlowsRelatedToSystem(systemId int64, orgId int32, role *core.Role) ([]*c
 
 	flows := make([]*core.ProcessFlow, 0)
 	err := dbConn.Select(&flows, `
-		SELECT
+		SELECT DISTINCT
 			flow.id,
 			flow.name,
 			org.id AS "org.id",

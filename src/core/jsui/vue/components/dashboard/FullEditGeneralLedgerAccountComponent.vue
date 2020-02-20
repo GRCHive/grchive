@@ -48,13 +48,54 @@
             </v-list-item>
             <v-divider></v-divider>
 
-            <create-new-general-ledger-account-form
-                :edit-mode="true"
-                :reference-account="glAccount"
-                :available-gl-cats="availableGLCats"
-                @do-save="finishEdit"
-                ref="editForm">
-            </create-new-general-ledger-account-form>
+            <v-container fluid>
+                <v-row>
+                    <v-col cols="5">
+                        <create-new-general-ledger-account-form
+                            :edit-mode="true"
+                            :reference-account="glAccount"
+                            :available-gl-cats="availableGLCats"
+                            @do-save="finishEdit"
+                            ref="editForm">
+                        </create-new-general-ledger-account-form>
+                    </v-col>
+
+                    <v-col cols="7">
+                        <v-card>
+                            <v-card-title>
+                                Related Resources
+                            </v-card-title>
+                            <v-divider></v-divider>
+
+                            <v-tabs>
+                                <v-tab>Process Flows</v-tab>
+                                <v-tab-item>
+                                    <process-flow-table
+                                        :resources="relatedFlows"
+                                    >
+                                    </process-flow-table>
+                                </v-tab-item>
+
+                                <v-tab>Risks</v-tab>
+                                <v-tab-item>
+                                    <risk-table
+                                        :resources="relatedRisks"
+                                    >
+                                    </risk-table>
+                                </v-tab-item>
+
+                                <v-tab>Controls</v-tab>
+                                <v-tab-item>
+                                    <control-table
+                                        :resources="relatedControls"
+                                    >
+                                    </control-table>
+                                </v-tab-item>
+                            </v-tabs>
+                        </v-card>
+                    </v-col>
+                </v-row>
+            </v-container>
         </div>
     </div>
 </template>
@@ -70,11 +111,20 @@ import { PageParamsStore } from '../../../ts/pageParams'
 import { createOrgGLUrl, contactUsUrl } from '../../../ts/url'
 import CreateNewGeneralLedgerAccountForm from './CreateNewGeneralLedgerAccountForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
+import RiskTable from '../../generic/RiskTable.vue'
+import ControlTable from '../../generic/ControlTable.vue'
+import ProcessFlowTable from '../../generic/ProcessFlowTable.vue'
+import { TAllRiskGLLinkOutput, allRiskGLLink } from '../../../ts/api/apiRiskGLLinks'
+import { TAllControlGLLinkOutput, allControlGLLink } from '../../../ts/api/apiControlGLLinks'
+import { TAllNodeGLLinkOutput, allNodeGLLink } from '../../../ts/api/apiNodeGLLinks'
 
 @Component({
     components: {
         CreateNewGeneralLedgerAccountForm,
-        GenericDeleteConfirmationForm
+        GenericDeleteConfirmationForm,
+        RiskTable,
+        ControlTable,
+        ProcessFlowTable
     }
 })
 export default class FullEditGeneralLedgerAccountComponent extends Vue {
@@ -82,6 +132,10 @@ export default class FullEditGeneralLedgerAccountComponent extends Vue {
     ledger : GeneralLedger = new GeneralLedger()
     expandDescription : boolean = false
     showHideDelete: boolean = false
+
+    relatedControls : ProcessFlowControl[] = []
+    relatedRisks : ProcessFlowRisk[] = []
+    relatedFlows : ProcessFlowBasicData[] = []
 
     $refs!: {
         editForm: CreateNewGeneralLedgerAccountForm
@@ -109,6 +163,57 @@ export default class FullEditGeneralLedgerAccountComponent extends Vue {
             this.ledger.listCategories
     }
 
+    refreshRelatedFlows() {
+        allNodeGLLink({
+            accountId: this.glAccount.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TAllNodeGLLinkOutput) => {
+            this.relatedFlows = <ProcessFlowBasicData[]>resp.data
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    refreshRelatedRisks() {
+        allRiskGLLink({
+            accountId: this.glAccount.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TAllRiskGLLinkOutput) => {
+            this.relatedRisks = resp.data.Risks!
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    refreshRelatedControls() {
+        allControlGLLink({
+            accountId: this.glAccount.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TAllControlGLLinkOutput) => {
+            this.relatedControls = resp.data.Controls!
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
     refreshAccountData() {
         let data = window.location.pathname.split('/')
         let accId = Number(data[data.length - 1])
@@ -119,6 +224,10 @@ export default class FullEditGeneralLedgerAccountComponent extends Vue {
         }).then((resp : TGetGLAccountOutputs) => {
             this.ledger.rebuildGL(resp.data.Parents, [resp.data.Account])
             this.ready = true
+
+            this.refreshRelatedFlows()
+            this.refreshRelatedRisks()
+            this.refreshRelatedControls()
 
             Vue.nextTick(() => {
                 this.$refs.editForm.resetForm()

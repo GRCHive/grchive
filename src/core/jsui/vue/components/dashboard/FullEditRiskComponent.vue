@@ -67,6 +67,15 @@
                                     >
                                     </systems-table>
                                 </v-tab-item>
+
+                                <v-tab>Accounts</v-tab>
+                                <v-tab-item>
+                                    <general-ledger-accounts-table
+                                        :resources="relevantAccounts"
+                                    >
+                                    </general-ledger-accounts-table>
+                                </v-tab-item>
+
                             </v-tabs>
                         </v-card>
 
@@ -91,15 +100,27 @@ import { System } from '../../../ts/systems'
 import SystemsTable from '../../generic/SystemsTable.vue'
 import ControlTable from '../../generic/ControlTable.vue'
 import ProcessFlowTable from '../../generic/ProcessFlowTable.vue'
+import GeneralLedgerAccountsTable from '../../generic/GeneralLedgerAccountsTable.vue'
 import { PageParamsStore } from '../../../ts/pageParams'
+import { allRiskGLLink, TAllRiskGLLinkOutput } from '../../../ts/api/apiRiskGLLinks'
+import { GeneralLedger, GeneralLedgerAccount } from '../../../ts/generalLedger'
 
 export default Vue.extend({
     data: () => ({
         expandDescription: false,
         ready: false,
         fullRiskData: Object() as FullRiskData,
-        relevantSystems: [] as System[]
+        relevantSystems: [] as System[],
+        relevantGL: null as GeneralLedger | null
     }),
+    computed: {
+        relevantAccounts() : GeneralLedgerAccount[] {
+            if (!this.relevantGL) {
+                return []
+            }
+            return this.relevantGL.listAccounts
+        }
+    },
     methods: {
         onEditRisk(risk : ProcessFlowRisk) {
             this.fullRiskData.Risk.Name = risk.Name
@@ -126,6 +147,23 @@ export default Vue.extend({
                     true);
             })
         },
+        refreshGLLink() {
+            allRiskGLLink({
+                riskId: this.fullRiskData.Risk.Id,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TAllRiskGLLinkOutput) => {
+                this.relevantGL = new GeneralLedger()
+                this.relevantGL.rebuildGL(resp.data.Categories!, resp.data.Accounts!)
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        },
         refreshRiskData() {
             let data = window.location.pathname.split('/')
             let riskId = Number(data[data.length - 1])
@@ -137,6 +175,7 @@ export default Vue.extend({
                 this.ready = true
 
                 this.refreshSystemLink()
+                this.refreshGLLink()
 
                 Vue.nextTick(() => {
                     //@ts-ignore
@@ -156,7 +195,8 @@ export default Vue.extend({
         CreateNewRiskForm,
         SystemsTable,
         ControlTable,
-        ProcessFlowTable
+        ProcessFlowTable,
+        GeneralLedgerAccountsTable
     },
     mounted() {
         this.refreshRiskData()
