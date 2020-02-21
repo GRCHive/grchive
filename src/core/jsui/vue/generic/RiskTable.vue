@@ -63,7 +63,6 @@ export default class RiskTable extends ResourceTableProps {
                     tableHeaders: this.tableHeaders,
                     tableItems: this.tableItems,
                     showExpand: true,
-                    useGlobalDeletion: true,
                 },
                 on: {
                     input: (items : any[]) => this.$emit('input', items.map((ele : any) => ele.value)),

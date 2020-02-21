@@ -94,7 +94,7 @@ export default Vue.extend({
                 nodeId: -1,
                 riskIds: [-1],
                 controlIds: [control.Id],
-                global: global
+                global: true
             }).then(() => {
                 this.allControls.splice(
                     this.allControls.findIndex((ele : ProcessFlowControl) =>

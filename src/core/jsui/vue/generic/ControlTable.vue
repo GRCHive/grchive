@@ -16,7 +16,7 @@ const Props = Vue.extend({
         mini: {
             type: Boolean,
             default: false
-        }
+        },
     }
 })
 
@@ -67,7 +67,7 @@ export default class ControlTable extends mixins(ResourceTableProps, Props) {
     transformInputResourceToTableItem(inp : any) : any {
         return {
             id: inp.Id,
-            name: `${inp.Name} ${inp.Descrption}`,
+            name: `${inp.Name} ${inp.Description}`,
             type: MetadataStore.getters.getControlTypeName(inp.ControlTypeId),
             owner: createUserString(MetadataStore.getters.getUser(inp.OwnerId)),
             frequency:createFrequencyDisplayString(inp.FrequencyType, inp.FrequencyInterval, inp.FrequencyOther),
@@ -144,7 +144,6 @@ export default class ControlTable extends mixins(ResourceTableProps, Props) {
                     tableHeaders: this.tableHeaders,
                     tableItems: this.tableItems,
                     resourceName: "controls",
-                    useGlobalDeletion: true,
                 },
                 on: {
                     input: (items : any[]) => this.$emit('input', items.map((ele : any) => ele.value)),

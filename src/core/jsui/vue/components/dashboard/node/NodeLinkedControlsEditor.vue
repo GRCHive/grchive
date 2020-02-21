@@ -146,7 +146,7 @@ export default class NodeLinkedControlsEditor extends Vue {
             nodeId: this.currentNode.Id,
             riskIds: [-1],
             controlIds: [control.Id],
-            global: global,
+            global: false,
         }).then(() => {
             VueSetup.store.dispatch('deleteBatchControls', {
                 nodeId: this.currentNode.Id,

@@ -152,11 +152,28 @@ func DeleteControls(nodeId int64, controlIds []int64, riskIds []int64, global bo
 	// If global, delete the itself control (the relationships will be deleted by cascade).
 	if global {
 		for _, id := range controlIds {
+			// Delete folders first because otherwise
+			// the CASCADE from deleting process_flow_controls
+			// will destroy the connection we have betwen the folder
+			// and control.
 			_, err := tx.Exec(`
+				DELETE FROM file_folders AS folder
+				USING control_folder_link AS link
+				WHERE folder.id = link.folder_id
+					AND link.control_id = $1
+					AND link.org_id = $2
+			`, id, orgId)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+			_, err = tx.Exec(`
 				DELETE FROM process_flow_controls
 				WHERE id = $1
 					AND org_id = $2
 			`, id, orgId)
+
 			if err != nil {
 				tx.Rollback()
 				return err

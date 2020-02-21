@@ -145,7 +145,7 @@ export default class NodeLinkedRisksEditor extends Vue {
         deleteRisk({
             nodeId: this.currentNode.Id,
             riskIds: [risk.Id],
-            global: global,
+            global: false,
         }).then(() => {
             VueSetup.store.dispatch('deleteBatchRisks', {
                 nodeId: this.currentNode.Id,
