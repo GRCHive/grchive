@@ -25,7 +25,7 @@
             :available-cats="availableCats"
             :load-cats="loadCats"
             :rules="[rules.required]"
-            :readonly="!canEdit"
+            :readonly="editMode"
             v-if="catId == -1 || !!referenceCat"
         ></document-category-search-form-component>
     </v-form>
@@ -65,6 +65,7 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import * as rules from '../../../ts/formRules'
 import { newDocRequest, TNewDocRequestOutput } from '../../../ts/api/apiDocRequests'
 import { updateDocRequest, TUpdateDocRequestOutput } from '../../../ts/api/apiDocRequests'
@@ -135,7 +136,7 @@ export default class CreateNewRequestForm extends Props {
     }
 
     onSuccess(resp : TNewDocRequestOutput | TUpdateDocRequestOutput) {
-        this.$emit('do-save', resp.data.Request, resp.data.Category)
+        this.$emit('do-save', resp.data.Request)
         if (this.editMode) {
             this.canEdit = false
         }
@@ -195,6 +196,7 @@ export default class CreateNewRequestForm extends Props {
         this.canEdit = !this.editMode
     }
 
+    @Watch('referenceCat')
     clearForm() {
         if (!!this.referenceReq) {
             this.name = this.referenceReq.Name

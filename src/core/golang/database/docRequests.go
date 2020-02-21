@@ -15,7 +15,6 @@ func CreateNewDocumentRequestWithTx(request *core.DocumentRequest, role *core.Ro
 		INSERT INTO document_requests(
 			name,
 			description,
-			cat_id,
 			org_id,
 			requested_user_id,
 			request_time
@@ -23,7 +22,6 @@ func CreateNewDocumentRequestWithTx(request *core.DocumentRequest, role *core.Ro
 		VALUES (
 			:name,
 			:description,
-			:cat_id,
 			:org_id,
 			:requested_user_id,
 			:request_time
@@ -63,8 +61,7 @@ func UpdateDocumentRequest(request *core.DocumentRequest, role *core.Role) error
 	rows, err := tx.NamedQuery(`
 		UPDATE document_requests
 		SET name = :name,
-			description = :description,
-			cat_id = :cat_id
+			description = :description
 		WHERE id = :id
 			AND org_id = :org_id
 		RETURNING *
@@ -170,20 +167,6 @@ func GetAllDocumentRequestsForOrganization(orgId int32, role *core.Role) ([]*cor
 		FROM document_requests
 		WHERE org_id = $1
 	`, orgId)
-	return requests, err
-}
-
-func GetAllDocumentRequestsForDocCat(catId int64, orgId int32, role *core.Role) ([]*core.DocumentRequest, error) {
-	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessView) {
-		return nil, core.ErrorUnauthorized
-	}
-	requests := make([]*core.DocumentRequest, 0)
-	err := dbConn.Select(&requests, `
-		SELECT *
-		FROM document_requests
-		WHERE cat_id = $1
-			AND org_id = $2
-	`, catId, orgId)
 	return requests, err
 }
 

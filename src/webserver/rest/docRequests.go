@@ -72,7 +72,6 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 	request := core.DocumentRequest{
 		Name:            inputs.Name,
 		Description:     inputs.Description,
-		CatId:           inputs.CatId,
 		OrgId:           inputs.OrgId,
 		RequestedUserId: inputs.RequestedUserId,
 		RequestTime:     time.Now().UTC(),
@@ -98,10 +97,10 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	category, err := database.GetDocumentationCategory(inputs.CatId, inputs.OrgId, role)
+	err = database.AddDocRequestDocCatLinkWithTx(request.Id, inputs.CatId, inputs.OrgId, role, tx)
 	if err != nil {
 		tx.Rollback()
-		core.Warning("Failed to get cat: " + err.Error())
+		core.Warning("Failed to link doc request with doc cat: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -114,11 +113,9 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(struct {
-		Request  *core.DocumentRequest
-		Category *core.ControlDocumentationCategory
+		Request *core.DocumentRequest
 	}{
-		Request:  &request,
-		Category: category,
+		Request: &request,
 	})
 }
 
@@ -146,17 +143,9 @@ func updateDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		Id:              inputs.RequestId,
 		Name:            inputs.Name,
 		Description:     inputs.Description,
-		CatId:           inputs.CatId,
 		OrgId:           inputs.OrgId,
 		RequestedUserId: inputs.RequestedUserId,
 		RequestTime:     time.Now().UTC(),
-	}
-
-	category, err := database.GetDocumentationCategory(inputs.CatId, inputs.OrgId, role)
-	if err != nil {
-		core.Warning("Failed to get cat: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
 	}
 
 	err = database.UpdateDocumentRequest(&request, role)
@@ -167,11 +156,9 @@ func updateDocumentRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(struct {
-		Request  *core.DocumentRequest
-		Category *core.ControlDocumentationCategory
+		Request *core.DocumentRequest
 	}{
-		Request:  &request,
-		Category: category,
+		Request: &request,
 	})
 }
 
@@ -202,13 +189,6 @@ func getDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cat, err := database.GetDocumentationCategory(req.CatId, inputs.OrgId, role)
-	if err != nil {
-		core.Warning("Failed to get doc category: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	fileIds, err := database.GetFulfilledFileIdsForDocRequest(inputs.RequestId, inputs.OrgId, role)
 	if err != nil {
 		core.Warning("Failed to get relevant file IDs for request: " + err.Error())
@@ -227,13 +207,11 @@ func getDocumentRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(struct {
-		Request  *core.DocumentRequest
-		Files    []*core.ControlDocumentationFile
-		Category *core.ControlDocumentationCategory
+		Request *core.DocumentRequest
+		Files   []*core.ControlDocumentationFile
 	}{
-		Request:  req,
-		Files:    files,
-		Category: cat,
+		Request: req,
+		Files:   files,
 	})
 }
 
@@ -261,7 +239,7 @@ func allDocumentRequests(w http.ResponseWriter, r *http.Request) {
 	if inputs.VendorProductId.NullInt64.Valid {
 		reqs, err = database.GetAllDocumentRequestsForVendorProduct(inputs.VendorProductId.NullInt64.Int64, inputs.OrgId, role)
 	} else if inputs.CatId.NullInt64.Valid {
-		reqs, err = database.GetAllDocumentRequestsForDocCat(inputs.CatId.NullInt64.Int64, inputs.OrgId, role)
+		reqs, err = database.FindDocRequestsLinkedToDocCat(inputs.CatId.NullInt64.Int64, inputs.OrgId, role)
 	} else {
 		reqs, err = database.GetAllDocumentRequestsForOrganization(inputs.OrgId, role)
 	}

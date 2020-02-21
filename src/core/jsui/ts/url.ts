@@ -302,6 +302,8 @@ export const deleteDocRequestUrl : string = "/api/requests/delete"
 export const completeDocRequestUrl : string = "/api/requests/complete"
 export const updateDocRequestUrl : string = "/api/requests/update"
 
+export const allDocRequestDocCatLinksUrl : string = "/api/requests/link/cat/all"
+
 export const newCommentUrl : string = "/api/comments/new"
 export const allCommentUrl : string = "/api/comments/all"
 export const updateCommentUrl : string = "/api/comments/update"

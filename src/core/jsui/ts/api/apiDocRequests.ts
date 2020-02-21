@@ -23,7 +23,6 @@ export interface TNewDocRequestInput {
 export interface TNewDocRequestOutput {
     data: {
         Request: DocumentRequest
-        Category: ControlDocumentationCategory
     }
 }
 
@@ -41,7 +40,6 @@ export interface TUpdateDocRequestInput extends TNewDocRequestInput {
 export interface TUpdateDocRequestOutput {
     data: {
         Request: DocumentRequest
-        Category: ControlDocumentationCategory
     }
 }
 
@@ -84,7 +82,6 @@ export interface TGetSingleDocumentRequestOutput {
     data: {
         Request: DocumentRequest
         Files: ControlDocumentationFile[]
-        Category: ControlDocumentationCategory
     }
 }
 

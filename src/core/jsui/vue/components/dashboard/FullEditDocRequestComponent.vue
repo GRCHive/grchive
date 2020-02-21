@@ -12,7 +12,7 @@
                     </v-list-item-title>
 
                     <v-list-item-subtitle>
-                        <p class="ma-0">
+                        <p class="ma-0" v-if="!!parentCategory">
                             <span class="font-weight-bold">Relevant Document Category:</span>
                             <a :href="parentCategoryUrl">{{ parentCategory.Name }}</a>
                         </p>
@@ -131,7 +131,8 @@
                             <v-divider></v-divider>
 
                             <doc-file-manager
-                                :cat-id="currentRequest.CatId"
+                                :cat-id="!!parentCategory ? parentCategory.Id : -1"
+                                :disable-upload="!parentCategory"
                                 :request-id="currentRequest.Id"
                                 v-model="relevantFiles"
                                 disable-sample
@@ -175,6 +176,7 @@ import DocFileManager from '../../generic/DocFileManager.vue'
 import CommentManager from '../../generic/CommentManager.vue'
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 import { standardFormatTime } from '../../../ts/time'
+import { allDocRequestDocCatLink, TAllDocRequestDocCatLinksOutput } from '../../../ts/api/apiDocRequestsDocCatLinks'
 
 @Component({
     components: {
@@ -198,13 +200,12 @@ export default class FullEditDocRequestComponent extends Vue {
     get commentParams() : Object {
         return {
             requestId: this.currentRequest!.Id,
-            catId: this.currentRequest!.CatId,
             orgId: PageParamsStore.state.organization!.Id,
         }
     }
 
     get ready() : boolean {
-        return !!this.currentRequest && !!this.parentCategory
+        return !!this.currentRequest
     }
 
     get parentCategoryUrl() : string {
@@ -241,6 +242,15 @@ export default class FullEditDocRequestComponent extends Vue {
         })
     }
 
+    refreshParentCategory() {
+        allDocRequestDocCatLink({
+            requestId: this.currentRequest!.Id,
+            orgId: PageParamsStore.state.organization!.Id
+        }).then((resp : TAllDocRequestDocCatLinksOutput) => {
+            this.parentCategory = resp.data.Cat!
+        })
+    }
+
     refreshData() {
         let data = window.location.pathname.split('/')
         let resourceId = Number(data[data.length - 1])
@@ -251,7 +261,8 @@ export default class FullEditDocRequestComponent extends Vue {
         }).then((resp : TGetSingleDocumentRequestOutput) => {
             this.currentRequest = resp.data.Request
             this.relevantFiles = resp.data.Files
-            this.parentCategory = resp.data.Category
+
+            this.refreshParentCategory()
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
@@ -263,9 +274,8 @@ export default class FullEditDocRequestComponent extends Vue {
         })
     }
 
-    onEdit(req : DocumentRequest, cat : ControlDocumentationCategory) {
+    onEdit(req : DocumentRequest) {
         this.currentRequest = req
-        this.parentCategory = cat
     }
 
     onDelete() {

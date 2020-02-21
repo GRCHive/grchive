@@ -14,6 +14,7 @@ go_library(
         "database.go",
         "deployments.go",
         "docRequests.go",
+        "docRequestsDocCatLinks.go",
         "emailVerification.go",
         "generalLedger.go",
         "gettingStartedInterest.go",

@@ -17,18 +17,11 @@ import { PageParamsStore } from '../../ts/pageParams'
     }
 })
 export default class DocRequestTable extends ResourceTableProps {
-    catIdToName : Record<number, string> = {}
-    pendingCatRequests : Set<number> = new Set<number>()
-
     get tableHeaders() : any[] {
         return [
             {
                 text: 'Name',
                 value: 'name',
-            },
-            {
-                text: 'Document Category',
-                value: 'docCat',
             },
             {
                 text: 'Requester',
@@ -49,40 +42,6 @@ export default class DocRequestTable extends ResourceTableProps {
         return this.resources.map(this.transformInputResourceToTableItem)
     }
 
-    loadDocumentCategoryName(id : number) {
-        if (id in this.catIdToName) {
-            return
-        }
-
-        if (this.pendingCatRequests.has(id)) {
-            return
-        }
-
-        this.pendingCatRequests.add(id)
-        new Promise<string>((resolve, reject) => {
-            getDocumentCategory({
-                orgId: PageParamsStore.state.organization!.Id,
-                catId: id,
-                lean: true,
-            }).then((resp : TGetDocCatOutput) => {
-                resolve(resp.data.Cat.Name)
-            }).catch((err : any) => {
-                reject()
-            })
-        }).then((val : string) => {
-            Vue.set(this.catIdToName, id, val)
-            this.pendingCatRequests.delete(id)
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
-    }
-
     goToDocRequest(item : any) {
         window.location.assign(createSingleDocRequestUrl(
             PageParamsStore.state.organization!.OktaGroupName,
@@ -91,12 +50,9 @@ export default class DocRequestTable extends ResourceTableProps {
     }
 
     transformInputResourceToTableItem(inp : any) : any {
-        this.loadDocumentCategoryName(inp.CatId)
-
         return {
             id: inp.Id,
             name: inp.Name,
-            docCat: !!this.catIdToName[inp.CatId] ? this.catIdToName[inp.CatId] : "Loading...", 
             requester: createUserString(MetadataStore.getters.getUser(inp.RequestedUserId)),
             requestTime: inp.RequestTime.toString(),
             complete: !!inp.CompletionTime,
