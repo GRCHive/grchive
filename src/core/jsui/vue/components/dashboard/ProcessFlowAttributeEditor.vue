@@ -2,17 +2,17 @@
     <v-navigation-drawer absolute right :style="clipStyle" ref="attrNavDrawer" :value="showHide" :width="400">
         <v-tabs v-model="tab"
                 grow>
-            <v-tab>Node</v-tab>
-            <v-tab>Link</v-tab>
+            <v-tab v-if="nodeSelected">Node</v-tab>
+            <v-tab>Process Flow</v-tab>
         </v-tabs>
-        <section v-if="enabled" class="ma-1" style="max-height: calc(100% - 48px);">
+        <section class="ma-1" style="max-height: calc(100% - 48px);">
             <v-tabs-items v-model="tab">
-                <v-tab-item>
+                <v-tab-item v-if="nodeSelected">
                     <process-flow-node-attribute-editor></process-flow-node-attribute-editor>
                 </v-tab-item>
 
                 <v-tab-item>
-                    <process-flow-risk-control-linkage></process-flow-risk-control-linkage>
+                    <process-flow-flow-attribute-editor></process-flow-flow-attribute-editor>
                 </v-tab-item>
             </v-tabs-items>
         </section>
@@ -24,7 +24,7 @@
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup' 
 import ProcessFlowNodeAttributeEditor from './ProcessFlowNodeAttributeEditor.vue'
-import ProcessFlowRiskControlLinkage from './ProcessFlowRiskControlLinkage.vue'
+import ProcessFlowFlowAttributeEditor from './ProcessFlowFlowAttributeEditor.vue'
 
 export default Vue.extend({
     props: {
@@ -36,7 +36,7 @@ export default Vue.extend({
     }),
     components: {
         ProcessFlowNodeAttributeEditor,
-        ProcessFlowRiskControlLinkage
+        ProcessFlowFlowAttributeEditor
     },
     computed: {
         clipStyle() : any {
@@ -46,7 +46,7 @@ export default Vue.extend({
                 "top" : this.customClipHeight.toString() + "px"
             }
         },
-        enabled() : boolean {
+        nodeSelected() : boolean {
             return VueSetup.store.getters.isNodeSelected
         },
     },

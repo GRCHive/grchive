@@ -655,6 +655,15 @@ const store : StoreOptions<VuexState> = {
                     state.currentProcessFlowFullData.Nodes[nodeId]
                 )
         },
+        controlsForRisk: (state) => (riskId: number) : ProcessFlowControl[] => {
+            if (!state.currentProcessFlowFullData) {
+                return []
+            }
+            return state.currentProcessFlowFullData.RiskControlRelationships.changed && 
+                state.currentProcessFlowFullData.RiskControlRelationships.getB(
+                    state.currentProcessFlowFullData.Risks[riskId]
+                )
+        },
         controlsForRiskNode: (state) => (riskId : number, nodeId : number) : RiskControl[] => {
             if (!state.currentProcessFlowFullData) {
                 return []

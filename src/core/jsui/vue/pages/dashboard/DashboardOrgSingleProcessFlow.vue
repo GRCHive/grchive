@@ -23,7 +23,7 @@
 
                 <process-flow-attribute-editor :custom-clip-height="headerClipHeight" 
                                            ref="attrEditor"
-                                           :show-hide="showHideAttrEditor && isNodeSelected"
+                                           :show-hide="showHideAttrEditor"
                 ></process-flow-attribute-editor>
             </div>
         </v-content>
@@ -34,7 +34,6 @@
                :style="attributePullButtonStyle"
                class="no-transition"
                @click="clickAttributePullTab"
-                v-if="isNodeSelected"
         >
             <v-icon v-if="!showHideAttrEditor">mdi-chevron-up</v-icon>
             <v-icon v-else>mdi-chevron-down</v-icon>
@@ -151,9 +150,6 @@ export default Vue.extend({
         showHideAttrEditor() {
             return LocalSettings.state.showHideAttributeEditor
         },
-        isNodeSelected() : boolean {
-            return VueSetup.store.getters.isNodeSelected
-        },
         attributePullButtonStyle() : any {
             let leftTranslate : string = this.attrEditorLeft.toString()
             let topTranslate : string = ((this.attrEditorTop + this.attrEditorBottom) / 2).toString()
@@ -201,9 +197,6 @@ export default Vue.extend({
     },
 
     watch: {
-        isNodeSelected() {
-            this.trackAttributeEditor()
-        },
         ready() {
             Vue.nextTick(() => {
                 this.recomputeProcessFlowHeaderHeight()

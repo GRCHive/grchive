@@ -65,6 +65,14 @@
             <v-divider></v-divider>
             <v-list dense class="pa-0">
                 <v-list-item class="pa-0">
+                    <v-list-item-action class="ma-0">
+                        <v-btn icon @click="minimizeSystem = !minimizeSystem">
+                            <v-icon small>
+                                {{ !minimizeSystem ? "mdi-window-minimize" : "mdi-arrow-expand-all" }}
+                            </v-icon>
+                        </v-btn>
+                    </v-list-item-action>
+
                     <v-subheader class="flex-grow-1 pr-0">
                         LINKED SYSTEMS
                     </v-subheader>
@@ -117,6 +125,7 @@
                 :resources="linkedSystems"
                 use-crud-delete
                 @delete="deleteLinkedSystem"
+                v-if="!minimizeSystem"
             >
             </systems-table>
         </div>
@@ -126,9 +135,9 @@
             <v-list dense class="pa-0">
                 <v-list-item class="pa-0">
                     <v-list-item-action class="ma-0">
-                        <v-btn icon @click="minimize = !minimize">
+                        <v-btn icon @click="minimizeGL = !minimizeGL">
                             <v-icon small>
-                                {{ !minimize ? "mdi-window-minimize" : "mdi-arrow-expand-all" }}
+                                {{ !minimizeGL ? "mdi-window-minimize" : "mdi-arrow-expand-all" }}
                             </v-icon>
                         </v-btn>
                     </v-list-item-action>
@@ -185,7 +194,7 @@
                 :resources="linkedGL"
                 use-crud-delete
                 @delete="deleteLinkedGL"
-                v-if="!minimize"
+                v-if="!minimizeGL"
             >
             </general-ledger-accounts-table>
         </div>
@@ -228,7 +237,8 @@ export default Vue.extend({
         showLinkSystem: false,
         accountsToLink: [] as GeneralLedgerAccount[],
         showLinkGL: false,
-        minimize: false,
+        minimizeSystem: false,
+        minimizeGL: false,
         rules,
     }),
     props: {
