@@ -97,7 +97,7 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
         if (this.confirmDelete) {
             this.itemToDelete = item
         } else {
-            this.$emit('delete', item)
+            this.$emit('delete', item, false)
         }
         e.stopPropagation()
     }

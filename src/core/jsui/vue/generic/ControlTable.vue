@@ -2,7 +2,7 @@
 
 import Vue, {VNode} from 'vue'
 import { VCheckbox } from 'vuetify/lib'
-import Component from 'vue-class-component'
+import Component, { mixins } from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
 import { PageParamsStore } from '../../ts/pageParams'
@@ -11,35 +11,53 @@ import { createFrequencyDisplayString } from '../../ts/frequency'
 import { createUserString } from '../../ts/users'
 import { createControlUrl } from '../../ts/url'
 
+const Props = Vue.extend({
+    props: {
+        mini: {
+            type: Boolean,
+            default: false
+        }
+    }
+})
+
 @Component({
     components: {
         BaseResourceTable
     }
 })
-export default class ControlTable extends ResourceTableProps {
+export default class ControlTable extends mixins(ResourceTableProps, Props) {
     get tableHeaders() : any[] {
-        return [
+        let headers = [
             {
                 text: 'Name',
                 value: 'name',
             },
-            {
-                text: 'Type',
-                value: 'type',
-            },
-            {
-                text: 'Owner',
-                value: 'owner',
-            },
-            {
-                text: 'Frequency',
-                value: 'frequency'
-            },
-            {
-                text: 'Manual',
-                value: 'manual'
-            },
         ]
+
+        if (!this.mini) {
+            headers.push(...
+                [
+                    {
+                        text: 'Type',
+                        value: 'type',
+                    },
+                    {
+                        text: 'Owner',
+                        value: 'owner',
+                    },
+                    {
+                        text: 'Frequency',
+                        value: 'frequency'
+                    },
+                    {
+                        text: 'Manual',
+                        value: 'manual'
+                    },
+                ]
+            )
+        }
+
+        return headers
     }
 
     get tableItems(): any[] {

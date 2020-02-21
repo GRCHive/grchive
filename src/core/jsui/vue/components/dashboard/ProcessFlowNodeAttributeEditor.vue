@@ -53,6 +53,14 @@
                                           :node-id="currentNode.Id">
         </process-flow-input-output-editor>
 
+        <v-divider></v-divider>
+        <node-linked-risks-editor>
+        </node-linked-risks-editor>
+
+        <v-divider></v-divider>
+        <node-linked-controls-editor>
+        </node-linked-controls-editor>
+
         <div v-if="canLinkToSystem && linkedSystems != null">
             <v-divider></v-divider>
             <v-list dense class="pa-0">
@@ -200,6 +208,8 @@ import SystemSearchFormComponent from '../../generic/SystemSearchFormComponent.v
 import SystemsTable from '../../generic/SystemsTable.vue'
 import GeneralLedgerAccountSearchFormComponent from '../../generic/GeneralLedgerAccountSearchFormComponent.vue'
 import GeneralLedgerAccountsTable from '../../generic/GeneralLedgerAccountsTable.vue'
+import NodeLinkedControlsEditor from './node/NodeLinkedControlsEditor.vue'
+import NodeLinkedRisksEditor from './node/NodeLinkedRisksEditor.vue'
 
 export default Vue.extend({
     data : () => ({
@@ -220,7 +230,9 @@ export default Vue.extend({
         SystemSearchFormComponent,
         SystemsTable,
         GeneralLedgerAccountSearchFormComponent,
-        GeneralLedgerAccountsTable
+        GeneralLedgerAccountsTable,
+        NodeLinkedControlsEditor,
+        NodeLinkedRisksEditor
     },
     methods : {
         startEdit() {

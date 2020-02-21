@@ -47,6 +47,7 @@ export function newControl(inp: TNewControlInput) : Promise<TNewControlOutput> {
 }
 
 export interface TDeleteControlInput {
+    nodeId: number
     riskIds: number[]
     controlIds: number[]
     global: boolean
@@ -68,7 +69,6 @@ export interface TExistingControlInput {
 
 export interface TExistingControlOutput {
 }
-
 
 export function addExistingControls(inp : TExistingControlInput): Promise<TExistingControlOutput> {
     return postFormUrlEncoded<TExistingControlOutput>(addControlUrl, inp, getAPIRequestConfig())

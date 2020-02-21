@@ -646,6 +646,15 @@ const store : StoreOptions<VuexState> = {
                     state.currentProcessFlowFullData.Nodes[nodeId]
                 )
         },
+        controlsForNode: (state) => (nodeId : number) : ProcessFlowControl[] => {
+            if (!state.currentProcessFlowFullData) {
+                return []
+            }
+            return state.currentProcessFlowFullData.NodeControlRelationships.changed &&
+                state.currentProcessFlowFullData.NodeControlRelationships.getB(
+                    state.currentProcessFlowFullData.Nodes[nodeId]
+                )
+        },
         controlsForRiskNode: (state) => (riskId : number, nodeId : number) : RiskControl[] => {
             if (!state.currentProcessFlowFullData) {
                 return []
@@ -665,6 +674,18 @@ const store : StoreOptions<VuexState> = {
                 risk: state.currentProcessFlowFullData!.Risks[riskId],
                 control: ele
             }))
+        },
+        riskList(state) : ProcessFlowRisk[] {
+            if (!state.currentProcessFlowFullData) {
+                return []
+            }
+            return state.currentProcessFlowFullData.RiskKeys.map((ele : number) => state.currentProcessFlowFullData!.Risks[ele])
+        },
+        controlList(state) : ProcessFlowControl[] {
+            if (!state.currentProcessFlowFullData) {
+                return []
+            }
+            return state.currentProcessFlowFullData.ControlKeys.map((ele : number) => state.currentProcessFlowFullData!.Controls[ele])
         }
     }
 }
