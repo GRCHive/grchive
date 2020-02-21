@@ -48,6 +48,14 @@
 
         <v-list dense class="pa-0">
             <v-list-item class="pa-0">
+                <v-list-item-action class="ma-0">
+                    <v-btn icon @click="minimize = !minimize">
+                        <v-icon small>
+                            {{ !minimize ? "mdi-window-minimize" : "mdi-arrow-expand-all" }}
+                        </v-icon>
+                    </v-btn>
+                </v-list-item-action>
+
                 <v-subheader class="flex-grow-1 pr-0">
                     LINKED CONTROLS
                 </v-subheader>
@@ -88,6 +96,7 @@
             use-crud-delete
             mini
             @delete="deleteLinkedControl"
+            v-if="!minimize"
         >
         </control-table>
     </div>
@@ -115,6 +124,7 @@ import { contactUsUrl } from '../../../../ts/url'
 export default class NodeLinkedControlsEditor extends Vue {
     showHideNew : boolean = false
     showHideExisting : boolean = false
+    minimize: boolean = false
 
     selectedControls : ProcessFlowControl[] = []
 

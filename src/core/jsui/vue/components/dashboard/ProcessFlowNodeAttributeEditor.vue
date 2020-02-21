@@ -125,6 +125,14 @@
             <v-divider></v-divider>
             <v-list dense class="pa-0">
                 <v-list-item class="pa-0">
+                    <v-list-item-action class="ma-0">
+                        <v-btn icon @click="minimize = !minimize">
+                            <v-icon small>
+                                {{ !minimize ? "mdi-window-minimize" : "mdi-arrow-expand-all" }}
+                            </v-icon>
+                        </v-btn>
+                    </v-list-item-action>
+
                     <v-subheader class="flex-grow-1 pr-0">
                         LINKED GENERAL LEDGER ACCOUNTS
                     </v-subheader>
@@ -177,6 +185,7 @@
                 :resources="linkedGL"
                 use-crud-delete
                 @delete="deleteLinkedGL"
+                v-if="!minimize"
             >
             </general-ledger-accounts-table>
         </div>
@@ -219,6 +228,7 @@ export default Vue.extend({
         showLinkSystem: false,
         accountsToLink: [] as GeneralLedgerAccount[],
         showLinkGL: false,
+        minimize: false,
         rules,
     }),
     props: {
