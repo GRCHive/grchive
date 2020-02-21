@@ -223,6 +223,8 @@ export const regenPreviewControlDocUrl : string = "/api/documentation/file/previ
 export const allControlDocVersionsUrl : string = "/api/documentation/file/versions/all"
 export const getControlDocVersionsUrl : string = "/api/documentation/file/versions/get"
 
+export const newFolderUrl : string = "/api/documentation/folder/new"
+
 export const allFolderFileLinkUrl : string = "/api/documentation/folder/link/file/all"
 export const newFolderFileLinkUrl : string = "/api/documentation/folder/link/file/new"
 export const deleteFolderFileLinkUrl : string = "/api/documentation/folder/link/file/delete"

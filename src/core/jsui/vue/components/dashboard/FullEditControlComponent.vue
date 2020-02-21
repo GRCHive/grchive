@@ -5,6 +5,13 @@
         </v-overlay>
 
         <v-dialog v-model="showNewFolder" persistent max-width="40%">
+            <create-new-folder-form
+                :control-id="fullControlData.Control.Id"
+                @do-cancel="showNewFolder = false"
+                @do-save="saveFolder"
+                v-if="!!fullControlData"
+            >
+            </create-new-folder-form>
         </v-dialog>
 
         <v-dialog v-model="showNewFile" persistent max-width="40%">
@@ -218,6 +225,7 @@ import { FileFolder } from '../../../ts/folders'
 
 import UploadDocumentationForm from './UploadDocumentationForm.vue'
 import DocSearcherForm from '../../generic/DocSearcherForm.vue'
+import CreateNewFolderForm from './CreateNewFolderForm.vue'
 
 @Component({
     components: {
@@ -228,7 +236,8 @@ import DocSearcherForm from '../../generic/DocSearcherForm.vue'
         GeneralLedgerAccountsTable,
         DocFileTable,
         UploadDocumentationForm,
-        DocSearcherForm
+        DocSearcherForm,
+        CreateNewFolderForm
     }
 })
 export default class FullEditControlComponent extends Vue {
@@ -421,6 +430,14 @@ export default class FullEditControlComponent extends Vue {
                 true);
 
         })
+    }
+
+    saveFolder(folder : FileFolder) {
+        if (!this.relevantFolders) {
+            return
+        }
+        this.relevantFolders!.push(folder)
+        this.showNewFolder = false
     }
 }
 

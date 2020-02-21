@@ -50,6 +50,7 @@ go_library(
         "controlGLLinks.go",
         "riskSystemLinks.go",
         "riskGLLinks.go",
+        "folders.go",
     ],
     importpath = "gitlab.com/grchive/grchive/database",
     deps = [

@@ -19,6 +19,7 @@ go_library(
         "generalLedger.go",
         "gettingStarted.go",
         "folderFileLinks.go",
+        "folders.go",
         "login.go",
         "organization.go",
         "nodeGLLinks.go",
