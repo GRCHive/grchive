@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
 )
@@ -112,54 +111,4 @@ func GetDocumentationCategory(catId int64, orgId int32, role *core.Role) (*core.
 			AND org_id = $2
 	`, catId, orgId)
 	return cat, err
-}
-
-func getIoDocCatsForControl(table string, controlId int64, orgId int32, role *core.Role) ([]*core.ControlDocumentationCategory, error) {
-	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
-		return nil, core.ErrorUnauthorized
-	}
-
-	cats := make([]*core.ControlDocumentationCategory, 0)
-	err := dbConn.Select(&cats, fmt.Sprintf(`
-		SELECT cat.*
-		FROM %s AS cid
-		INNER JOIN process_flow_control_documentation_categories AS cat
-			ON cid.category_id = cat.id
-		WHERE cid.control_id = $1
-			AND cid.org_id = $2
-	`, table), controlId, orgId)
-	return cats, err
-}
-
-func GetInputDocumentationCategoriesForControl(controlId int64, orgId int32, role *core.Role) ([]*core.ControlDocumentationCategory, error) {
-	return getIoDocCatsForControl("controls_input_documentation", controlId, orgId, role)
-}
-
-func GetOutputDocumentationCategoriesForControl(controlId int64, orgId int32, role *core.Role) ([]*core.ControlDocumentationCategory, error) {
-	return getIoDocCatsForControl("controls_output_documentation", controlId, orgId, role)
-}
-
-func getControlsWithIoDocCat(table string, catId int64, orgId int32, role *core.Role) ([]*core.Control, error) {
-	if !role.Permissions.HasAccess(core.ResourceControls, core.AccessView) {
-		return nil, core.ErrorUnauthorized
-	}
-
-	controls := make([]*core.Control, 0)
-	err := dbConn.Select(&controls, fmt.Sprintf(`
-		SELECT ctrl.*
-		FROM %s AS cid
-		INNER JOIN process_flow_controls AS ctrl
-			ON cid.control_id = ctrl.id
-		WHERE cid.category_id = $1
-			AND cid.org_id = $2
-	`, table), catId, orgId)
-	return controls, err
-}
-
-func GetControlsWithInputDocumentationCategory(catId int64, orgId int32, role *core.Role) ([]*core.Control, error) {
-	return getControlsWithIoDocCat("controls_input_documentation", catId, orgId, role)
-}
-
-func GetControlsWithOutputDocumentationCategory(catId int64, orgId int32, role *core.Role) ([]*core.Control, error) {
-	return getControlsWithIoDocCat("controls_output_documentation", catId, orgId, role)
 }

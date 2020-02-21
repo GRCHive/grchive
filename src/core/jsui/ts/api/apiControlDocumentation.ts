@@ -78,6 +78,7 @@ export interface TUploadControlDocInput {
     uploadUserId: number
     fulfilledRequestId?: number | null
     fileId? : number | null
+    folderId? : number | null
 }
 
 export interface TUploadControlDocOutput {
@@ -102,6 +103,10 @@ export function uploadControlDoc(inp : TUploadControlDocInput): Promise<TUploadC
 
     if (!!inp.fileId) {
         data.set('fileId', inp.fileId!.toString())
+    }
+
+    if (!!inp.folderId) {
+        data.set('folderId', inp.folderId!.toString())
     }
 
     return postFormMultipart<TUploadControlDocOutput>(uploadControlDocUrl, data, getAPIRequestConfig()).then((resp : TUploadControlDocOutput) => {
@@ -247,8 +252,6 @@ export interface TGetDocCatInput {
 export interface TGetDocCatOutput {
     data: {
         Cat: ControlDocumentationCategory
-        InputFor: ProcessFlowControl[]
-        OutputFor: ProcessFlowControl[]
     }
 }
 

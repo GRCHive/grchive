@@ -44,8 +44,6 @@ export interface FullControlData {
     Control: ProcessFlowControl
     Nodes: ProcessFlowNode[]
     Risks: ProcessFlowRisk[]
-    InputDocCats: ControlDocumentationCategory[]
-    OutputDocCats: ControlDocumentationCategory[]
 }
 
 export function compareDocumentationCategories(a : ControlDocumentationCategory | null, b : ControlDocumentationCategory | null) : boolean {

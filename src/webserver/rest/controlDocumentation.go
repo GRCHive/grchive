@@ -40,6 +40,7 @@ type UploadControlDocInputs struct {
 	UploadUserId       int64          `webcore:"uploadUserId"`
 	FulfilledRequestId core.NullInt64 `webcore:"fulfilledRequestId,optional"`
 	FileId             core.NullInt64 `webcore:"fileId,optional"`
+	FolderId           core.NullInt64 `webcore:"folderId,optional"`
 }
 
 type AllControlDocInputs struct {
@@ -71,7 +72,6 @@ type AllControlDocCatInputs struct {
 type GetControlDocCatInputs struct {
 	OrgId int32 `webcore:"orgId"`
 	CatId int64 `webcore:"catId"`
-	Lean  bool  `webcore:"lean"`
 }
 
 type EditControlDocInputs struct {
@@ -328,6 +328,22 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		core.Warning("Failed to upload new file: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+
+	if inputs.FolderId.NullInt64.Valid {
+		err = database.AddFileToFolderWithTx(
+			internalFile.Id,
+			inputs.FolderId.NullInt64.Int64,
+			inputs.OrgId,
+			role,
+			tx,
+		)
+		if err != nil {
+			tx.Rollback()
+			core.Warning("Failed to add file to folder: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	core.Debug("\tPost to RabbitMQ")
@@ -609,33 +625,10 @@ func getControlDocumentationCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var inputControls []*core.Control
-	var outputControls []*core.Control
-
-	if !inputs.Lean {
-		inputControls, err = database.GetControlsWithInputDocumentationCategory(inputs.CatId, inputs.OrgId, role)
-		if err != nil {
-			core.Warning("Failed to get all input controls: " + core.ErrorString(err))
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		outputControls, err = database.GetControlsWithOutputDocumentationCategory(inputs.CatId, inputs.OrgId, role)
-		if err != nil {
-			core.Warning("Failed to get all output controls: " + core.ErrorString(err))
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}
-
 	jsonWriter.Encode(struct {
-		Cat       *core.ControlDocumentationCategory
-		InputFor  []*core.Control
-		OutputFor []*core.Control
+		Cat *core.ControlDocumentationCategory
 	}{
-		Cat:       cat,
-		InputFor:  inputControls,
-		OutputFor: outputControls,
+		Cat: cat,
 	})
 }
 

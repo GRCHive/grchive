@@ -59,13 +59,6 @@ type GetSingleControlInputs struct {
 	OrgId int32 `webcore:"orgId"`
 }
 
-type LinkControlToDocCatInputs struct {
-	ControlId int64 `json:"controlId"`
-	OrgId     int32 `json:"orgId"`
-	CatId     int64 `json:"catId"`
-	IsInput   bool  `json:"isInput"`
-}
-
 func editControl(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -410,67 +403,8 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.InputDocCats, err = database.GetInputDocumentationCategoriesForControl(data.Control.Id, inputs.OrgId, role)
-	if err != nil {
-		core.Warning("Failed to get input doc cats: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	data.OutputDocCats, err = database.GetOutputDocumentationCategoriesForControl(data.Control.Id, inputs.OrgId, role)
-	if err != nil {
-		core.Warning("Failed to get output doc cats: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	data.InputDocCats = make([]*core.ControlDocumentationCategory, 0)
+	data.OutputDocCats = make([]*core.ControlDocumentationCategory, 0)
 
 	jsonWriter.Encode(data)
-}
-
-func linkControlToDocumentCategory(w http.ResponseWriter, r *http.Request) {
-	inputs := LinkControlToDocCatInputs{}
-	err := webcore.UnmarshalRequestForm(r, &inputs)
-	if err != nil {
-		core.Warning("Can't parse inputs: " + err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
-	if err != nil {
-		core.Warning("Bad access: " + err.Error())
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	err = database.AddControlDocCatToControl(inputs.ControlId, inputs.CatId, inputs.OrgId, inputs.IsInput, role)
-	if err != nil {
-		core.Warning("Failed to add doc cat/control relationship: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-func unlinkControlToDocumentCategory(w http.ResponseWriter, r *http.Request) {
-	inputs := LinkControlToDocCatInputs{}
-	err := webcore.UnmarshalRequestForm(r, &inputs)
-	if err != nil {
-		core.Warning("Can't parse inputs: " + err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
-	if err != nil {
-		core.Warning("Bad access: " + err.Error())
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	err = database.RemoveControlDocCatFromControl(inputs.ControlId, inputs.CatId, inputs.OrgId, inputs.IsInput, role)
-	if err != nil {
-		core.Warning("Failed to remove doc cat/control relationship: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 }

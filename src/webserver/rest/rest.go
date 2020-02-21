@@ -161,8 +161,6 @@ func registerControlAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiGetControlTypesEndpoint, getControlTypes).Methods("GET")
 	s.HandleFunc(core.ApiDeleteControlEndpoint, deleteControls).Methods("POST")
 	s.HandleFunc(core.ApiAddControlEndpoint, addControls).Methods("POST")
-	s.HandleFunc(core.ApiLinkDocCatControlEndpoint, linkControlToDocumentCategory).Methods("POST")
-	s.HandleFunc(core.ApiUnlinkDocCatControlEndpoint, unlinkControlToDocumentCategory).Methods("POST")
 	s.HandleFunc(core.ApiEditControlEndpoint, editControl).Methods("POST")
 	s.HandleFunc(core.ApiGetAllControlEndpoint, getAllControls).Methods("GET")
 	s.HandleFunc(core.ApiGetSingleControlEndpoint, getSingleControl).Methods("GET")
@@ -174,6 +172,7 @@ func registerControlLinkAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiProcessFlowNodeLinksPrefix).Subrouter()
 	registerControlLinkSystemAPIPaths(s)
 	registerControlLinkGLAPIPaths(s)
+	registerControlLinkDocAPIPaths(s)
 }
 
 func registerControlLinkSystemAPIPaths(r *mux.Router) {
@@ -184,6 +183,22 @@ func registerControlLinkSystemAPIPaths(r *mux.Router) {
 func registerControlLinkGLAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiGeneralLedgerPrefix).Subrouter()
 	s.HandleFunc(core.ApiAllEndpoint, allControlGeneralLedgerAccountLinks).Methods("GET")
+}
+
+func registerControlLinkDocAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiControlDocumentationPrefix).Subrouter()
+	registerControlLinkDocCatAPIPaths(s)
+	registerControlLinkFolderAPIPaths(s)
+}
+
+func registerControlLinkDocCatAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiDocCatPrefix).Subrouter()
+	s.HandleFunc(core.ApiAllEndpoint, allControlDocCatLinks).Methods("GET")
+}
+
+func registerControlLinkFolderAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiFolderPrefix).Subrouter()
+	s.HandleFunc(core.ApiAllEndpoint, allControlFolderLinks).Methods("GET")
 }
 
 func registerControlDocumentationAPIPaths(r *mux.Router) {
@@ -203,12 +218,30 @@ func registerControlDocumentationAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiRegenPreviewControlDocumentationEndpoint, regeneratePreview).Methods("POST")
 
 	registerControlDocVersionsAPIPaths(s)
+	registerFileFolderAPIPaths(s)
 }
 
 func registerControlDocVersionsAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiFileVersionPrefix).Subrouter()
 	s.HandleFunc(core.ApiAllEndpoint, allFileVersions).Methods("GET")
 	s.HandleFunc(core.ApiGetEndpoint, getFileVersion).Methods("GET")
+}
+
+func registerFileFolderAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiFolderPrefix).Subrouter()
+	registerFileFolderLinksAPIPaths(s)
+}
+
+func registerFileFolderLinksAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiLinkPrefix).Subrouter()
+	registerFileFolderFileLinksAPIPaths(s)
+}
+
+func registerFileFolderFileLinksAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiDocFilePrefix).Subrouter()
+	s.HandleFunc(core.ApiAllEndpoint, allFolderFileLinks).Methods("GET")
+	s.HandleFunc(core.ApiNewEndpoint, newFolderFileLinks).Methods("POST")
+	s.HandleFunc(core.ApiDeleteEndpoint, deleteFolderFileLink).Methods("POST")
 }
 
 func registerRoleAPIPaths(r *mux.Router) {

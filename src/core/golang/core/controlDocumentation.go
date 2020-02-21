@@ -53,3 +53,9 @@ func (file ControlDocumentationFile) UniqueKey() string {
 func (file ControlDocumentationFile) StorageFilename(org *Organization, version int32) string {
 	return fmt.Sprintf("org-%d-%s/%s-v%d", org.Id, org.Name, file.UniqueKey(), version)
 }
+
+type FileFolder struct {
+	Id    int64  `db:"id"`
+	OrgId int32  `db:"org_id"`
+	Name  string `db:"name"`
+}

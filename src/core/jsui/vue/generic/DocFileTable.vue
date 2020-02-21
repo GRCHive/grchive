@@ -245,7 +245,8 @@ export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
                     tableHeaders: this.tableHeaders,
                     tableItems: this.tableItems,
                     resourceName: "files",
-                    showExpand: true
+                    showExpand: true,
+                    value: this.value.map((ele : any) => ele.File),
                 },
                 on: {
                     input: (items : any[]) => this.$emit('input', items.map((ele : any) => ({
@@ -265,5 +266,3 @@ export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
 }
 
 </script>
-
-

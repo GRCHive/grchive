@@ -93,6 +93,10 @@ export default Vue.extend({
         fileId:{
             type: Number,
             default: -1
+        },
+        folderId: {
+            type: Number,
+            default: -1
         }
     },
     components: {
@@ -149,7 +153,8 @@ export default Vue.extend({
                 description: this.description,
                 uploadUserId: this.uploadUser.Id,
                 fulfilledRequestId: (this.requestId != -1) ? this.requestId : null,
-                fileId: this.isVersionUpload ? this.fileId : null
+                fileId: this.isVersionUpload ? this.fileId : null,
+                folderId: (this.folderId != -1) ? this.folderId : null,
             }).then((resp : TUploadControlDocOutput) => {
                 this.progressOverlay = false
                 this.$emit('do-save', resp.data.File, resp.data.Version)

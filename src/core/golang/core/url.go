@@ -182,6 +182,10 @@ var ApiGetSingleControlEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgContro
 
 // API - Control Documentation
 const ApiControlDocumentationPrefix string = "/documentation"
+const ApiDocCatPrefix = "/cat"
+const ApiFolderPrefix = "/folder"
+const ApiDocFilePrefix = "/file"
+
 const ApiNewControlDocumentationCategoryEndpoint string = "/cat/new"
 const ApiEditControlDocumentationCategoryEndpoint string = "/cat/edit"
 const ApiDeleteControlDocumentationCategoryEndpoint string = "/cat/delete"

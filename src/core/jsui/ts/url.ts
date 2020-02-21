@@ -196,8 +196,6 @@ export const newControlUrl : string = "/api/control/new"
 export const deleteControlUrl : string = "/api/control/delete"
 export const addControlUrl : string = "/api/control/add"
 export const editControlUrl : string = "/api/control/edit"
-export const linkCatControlUrl : string = "/api/control/linkCat"
-export const unlinkCatControlUrl : string = "/api/control/unlinkCat"
 export const allControlAPIUrl : string = "/api/control/"
 export function createSingleControlAPIUrl(controlId : number) : string {
     return `/api/control/${controlId}`
@@ -205,6 +203,8 @@ export function createSingleControlAPIUrl(controlId : number) : string {
 
 export const allControlSystemLinkUrl : string = "/api/control/link/systems/all"
 export const allControlGLLinkUrl : string = "/api/control/link/gl/all"
+export const allControlDocCatLinkUrl : string = "/api/control/link/documentation/cat/all"
+export const allControlFolderLinkUrl : string = "/api/control/link/documentation/folder/all"
 
 export const newControlDocCatUrl : string = "/api/documentation/cat/new"
 export const editControlDocCatUrl : string = "/api/documentation/cat/edit"
@@ -222,6 +222,10 @@ export const regenPreviewControlDocUrl : string = "/api/documentation/file/previ
 
 export const allControlDocVersionsUrl : string = "/api/documentation/file/versions/all"
 export const getControlDocVersionsUrl : string = "/api/documentation/file/versions/get"
+
+export const allFolderFileLinkUrl : string = "/api/documentation/folder/link/file/all"
+export const newFolderFileLinkUrl : string = "/api/documentation/folder/link/file/new"
+export const deleteFolderFileLinkUrl : string = "/api/documentation/folder/link/file/delete"
 
 export const requestVerificationEmailUrl : string = "/api/verification/resend"
 export const inviteUsersToOrgUrl: string = "/api/invite/send"

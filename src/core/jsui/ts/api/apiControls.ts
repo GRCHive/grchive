@@ -7,8 +7,7 @@ import { getControlTypesUrl,
          deleteControlUrl,
          allControlAPIUrl,
          createSingleControlAPIUrl,
-         linkCatControlUrl,
-         unlinkCatControlUrl } from '../url'
+} from '../url'
 import { postFormUrlEncoded, postFormJson } from '../http'
 import { FullControlData, ControlFilterData } from '../controls'
 import { getAPIRequestConfig } from './apiUtility'
@@ -114,26 +113,4 @@ export interface TSingleControlOutput {
 
 export function getSingleControl(inp : TSingleControlInput) : Promise<TSingleControlOutput> {
     return axios.get(createSingleControlAPIUrl(inp.controlId) + '?' + qs.stringify(inp), getAPIRequestConfig())
-}
-
-export interface TLinkToDocCatInput {
-    controlId: number
-    orgId: number
-    catId: number
-    isInput: boolean
-}
-
-export function linkControlToDocumentCategory(inp : TLinkToDocCatInput) : Promise<void> {
-    return postFormJson<void>(linkCatControlUrl, inp, getAPIRequestConfig())
-}
-
-export interface TUnlinkFromDocCatInput {
-    controlId: number
-    orgId: number
-    catId: number
-    isInput: boolean
-}
-
-export function unlinkControlFromDocumentCategory(inp : TUnlinkFromDocCatInput) : Promise<void> {
-    return postFormJson<void>(unlinkCatControlUrl, inp, getAPIRequestConfig())
 }

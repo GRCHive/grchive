@@ -4,6 +4,30 @@
             <v-progress-circular indeterminate size="64"></v-progress-circular>
         </v-overlay>
 
+        <v-dialog v-model="showNewFolder" persistent max-width="40%">
+        </v-dialog>
+
+        <v-dialog v-model="showNewFile" persistent max-width="40%">
+            <upload-documentation-form
+                :cat-id="-1"
+                :folder-id="currentFolder.Id"
+                @do-cancel="showNewFile = false"
+                @do-save="saveFile"
+                v-if="!!currentFolder"
+            >
+            </upload-documentation-form>
+        </v-dialog>
+
+        <v-dialog v-model="showAddExistingFile" persistent max-width="40%">
+            <doc-searcher-form
+                :exclude-files="filesForFolder(currentFolder.Id)"
+                @do-cancel="showAddExistingFile = false"
+                @do-select="addFilesToFolder"
+                v-if="!!currentFolder"
+            >
+            </doc-searcher-form>
+        </v-dialog>
+
         <div v-if="ready">
             <v-list-item two-line class="pa-0">
                 <v-list-item-content>
@@ -36,73 +60,84 @@
                     </v-col>
 
                     <v-col cols="7">
-                        <v-card class="mb-4">
+                        <v-card class="mb-4" v-if="!!relevantFolders">
                             <v-card-title>
                                 <span class="mr-2">
-                                    Input Documentation
+                                    Documentation
                                 </span>
                                 <v-spacer></v-spacer>
 
-                                <v-dialog persistent
-                                          max-width="40%"
-                                          v-model="showHideAddInputDocCat">
-                                    <template v-slot:activator="{ on }">
-                                        <v-btn color="primary" icon v-on="on">
+                                <v-menu bottom left offset-y>
+                                    <template v-slot:activator="{on}">
+                                        <v-btn
+                                            icon
+                                            color="primary"
+                                            v-on="on"
+                                        >
                                             <v-icon>mdi-plus</v-icon>
                                         </v-btn>
                                     </template>
-                                    
-                                    <add-document-category-to-control-form
-                                        :is-input="true"
-                                        @do-cancel="showHideAddInputDocCat = false"
-                                        @do-save="addInputCat"
-                                        :fixed-control="fullControlData.Control"
-                                        :cat-choices="availableDocCats"
-                                    ></add-document-category-to-control-form>
-                                </v-dialog>
+                                    <v-list dense>
+                                        <v-list-item @click="showNewFolder = true">
+                                            <v-list-item-title>
+                                                New Folder
+                                            </v-list-item-title>
+                                        </v-list-item>
+                                        <v-divider></v-divider>
+
+                                        <v-list-item @click="showNewFile = true" :disabled="relevantFolders.length == 0">
+                                            <v-list-item-title>
+                                                Upload File
+                                            </v-list-item-title>
+                                        </v-list-item>
+
+                                        <v-list-item @click="showAddExistingFile = true" :disabled="relevantFolders.length == 0">
+                                            <v-list-item-title>
+                                                Add Existing File
+                                            </v-list-item-title>
+                                        </v-list-item>
+                                    </v-list>
+                                </v-menu>
                             </v-card-title>
                             <v-divider></v-divider>
+                            <v-tabs v-model="currentFolderIdx">
+                                <template v-for="folder in relevantFolders">
+                                    <v-tab :key="`tab-${folder.Id}`">
+                                        {{ folder.Name }}
+                                        <v-spacer></v-spacer>
+                                        <v-menu bottom left offset-y>
+                                            <template v-slot:activator="{on}">
+                                                <v-btn icon v-on="on" @mousedown.stop @click.stop>
+                                                    <v-icon small>
+                                                        mdi-dots-vertical
+                                                    </v-icon>
+                                                </v-btn>
+                                           </template>
+                                           <v-list dense>
+                                                <v-list-item>
+                                                    <v-list-item-title>
+                                                        Edit
+                                                    </v-list-item-title>
+                                                </v-list-item>
 
-                            <documentation-table
-                                :resources="fullControlData.InputDocCats"
-                                use-crud-delete
-                                @delete="deleteInputCat"
-                            ></documentation-table>
-                        </v-card>
-
-                        <v-card class="mb-4">
-                            <v-card-title>
-                                <span class="mr-2">
-                                    Output Documentation
-                                </span>
-                                <v-spacer></v-spacer>
-
-                                <v-dialog persistent
-                                          max-width="40%"
-                                          v-model="showHideAddOutputDocCat">
-                                    <template v-slot:activator="{ on }">
-                                        <v-btn color="primary" icon v-on="on">
-                                            <v-icon>mdi-plus</v-icon>
-                                        </v-btn>
-                                    </template>
-                                    
-                                    <add-document-category-to-control-form
-                                        :is-input="true"
-                                        @do-cancel="showHideAddOutputDocCat = false"
-                                        @do-save="addOutputCat"
-                                        :fixed-control="fullControlData.Control"
-                                        :cat-choices="availableDocCats"
-                                    ></add-document-category-to-control-form>
-                                </v-dialog>
-
-                            </v-card-title>
-                            <v-divider></v-divider>
-
-                            <documentation-table
-                                :resources="fullControlData.OutputDocCats"
-                                use-crud-delete
-                                @delete="deleteOutputCat"
-                            ></documentation-table>
+                                                <v-list-item>
+                                                    <v-list-item-title>
+                                                        Delete
+                                                    </v-list-item-title>
+                                                </v-list-item>
+                                            </v-list>
+                                        </v-menu>
+                                    </v-tab>
+                                    <v-tab-item :key="`item-${folder.Id}`">
+                                        <doc-file-table
+                                            :resources="filesForFolder(folder.Id)"
+                                            use-crud-delete
+                                            @delete="deleteLink"
+                                        >
+                                        </doc-file-table>
+                                    </v-tab-item>
+                                </template>
+                            </v-tabs>
                         </v-card>
 
                         <v-card class="mb-4">
@@ -128,16 +163,16 @@
                                     </risk-table>
                                 </v-tab-item>
 
-                                <v-tab>Systems</v-tab>
-                                <v-tab-item>
+                                <v-tab v-if="!!relevantSystems">Systems</v-tab>
+                                <v-tab-item v-if="!!relevantSystems">
                                     <systems-table
                                         :resources="relevantSystems"
                                     >
                                     </systems-table>
                                 </v-tab-item>
 
-                                <v-tab>Accounts</v-tab>
-                                <v-tab-item>
+                                <v-tab v-if="!!relevantAccounts">Accounts</v-tab>
+                                <v-tab-item v-if="!!relevantAccounts">
                                     <general-ledger-accounts-table
                                         :resources="relevantAccounts"
                                     >
@@ -155,223 +190,238 @@
 <script lang="ts">
 
 import Vue from 'vue'
+import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import CreateNewControlForm from './CreateNewControlForm.vue'
-import { FullControlData } from '../../../ts/controls'
+import { FullControlData, ControlDocumentationFile } from '../../../ts/controls'
 import { getSingleControl, TSingleControlInput, TSingleControlOutput } from '../../../ts/api/apiControls'
 import { createRiskUrl, contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
-import DocumentationTable from '../../generic/DocumentationTable.vue'
-import { ControlDocumentationCategory } from '../../../ts/controls'
-import { linkControlToDocumentCategory, unlinkControlFromDocumentCategory } from '../../../ts/api/apiControls'
-import { getAllDocumentationCategories, TGetAllDocumentationCategoriesOutput } from '../../../ts/api/apiControlDocumentation'
-import AddDocumentCategoryToControlForm from '../../generic/AddDocumentCategoryToControlForm.vue'
 import { System } from '../../../ts/systems'
 import SystemsTable from '../../generic/SystemsTable.vue'
 import RiskTable from '../../generic/RiskTable.vue'
 import ProcessFlowTable from '../../generic/ProcessFlowTable.vue'
+import DocFileTable from '../../generic/DocFileTable.vue'
 import {
     TAllControlSystemLinkOutput, allControlSystemLink
 } from '../../../ts/api/apiControlSystemLinks'
 import GeneralLedgerAccountsTable from '../../generic/GeneralLedgerAccountsTable.vue'
 import { allControlGLLink, TAllControlGLLinkOutput } from '../../../ts/api/apiControlGLLinks'
 import { GeneralLedger, GeneralLedgerAccount } from '../../../ts/generalLedger'
+import { allControlFolderLink, TAllControlFolderLinkOutput } from '../../../ts/api/apiControlFolderLinks'
+import {
+    allFolderFileLink, TAllFolderFileLinkOutput ,
+    newFolderFileLink,
+    deleteFolderFileLink
+} from '../../../ts/api/apiFolderFileLinks'
+import { FileFolder } from '../../../ts/folders'
 
-export default Vue.extend({
-    data: () => ({
-        expandDescription: false,
-        fullControlData: null as FullControlData | null,
-        showHideNewCat: false,
-        showHideEditCat : false,
-        showHideDeleteCat : false,
-        showHideAddInputDocCat: false,
-        showHideAddOutputDocCat: false,
-        availableDocCats: null as ControlDocumentationCategory[] | null,
-        relevantSystems: [] as System[],
-        relevantGL: null as GeneralLedger | null
-    }),
-    computed: {
-        ready() : boolean {
-            return (this.fullControlData != null && this.availableDocCats != null)
-        },
-        relevantAccounts() : GeneralLedgerAccount[] {
-            if (!this.relevantGL) {
-                return []
-            }
-            return this.relevantGL.listAccounts
-        }
-    },
-    watch: {
-        ready() {
-            Vue.nextTick(() => {
-                //@ts-ignore
-                this.$refs.editControl.clearForm()
-            })
-        }
-    },
-    methods: {
-        refreshSystemLink() {
-            allControlSystemLink({
-                controlId: this.fullControlData!.Control.Id,
-                orgId: PageParamsStore.state.organization!.Id,
-            }).then((resp : TAllControlSystemLinkOutput) => {
-                this.relevantSystems = resp.data.Systems!
-            }).catch((err : any) => {
-                // @ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong. Try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
-            })
-        },
-        refreshGLLink() {
-            allControlGLLink({
-                controlId: this.fullControlData!.Control.Id,
-                orgId: PageParamsStore.state.organization!.Id,
-            }).then((resp : TAllControlGLLinkOutput) => {
-                this.relevantGL = new GeneralLedger()
-                this.relevantGL.rebuildGL(resp.data.Categories!, resp.data.Accounts!)
-            }).catch((err : any) => {
-                // @ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong. Try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
-            })
-        },
-        refreshData() {
-            let data = window.location.pathname.split('/')
-            let controlId = Number(data[data.length - 1])
+import UploadDocumentationForm from './UploadDocumentationForm.vue'
+import DocSearcherForm from '../../generic/DocSearcherForm.vue'
 
-            getSingleControl(<TSingleControlInput>{
-                controlId: controlId,
-                orgId: PageParamsStore.state.organization!.Id,
-            }).then((resp : TSingleControlOutput) => {
-                this.fullControlData = resp.data
-                this.refreshSystemLink()
-                this.refreshGLLink()
-            }).catch((err : any) => {
-                // @ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong. Try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
-            })
-
-            getAllDocumentationCategories({
-                orgId: PageParamsStore.state.organization!.Id,
-            }).then((resp : TGetAllDocumentationCategoriesOutput) => {
-                this.availableDocCats = resp.data
-            }).catch((err : any) => {
-                // @ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong. Try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
-            })
-        },
-        onEditControl(control : ProcessFlowControl) {
-            this.fullControlData!.Control.Name = control.Name
-            this.fullControlData!.Control.Description = control.Description
-            this.fullControlData!.Control.ControlTypeId = control.ControlTypeId
-            this.fullControlData!.Control.FrequencyType = control.FrequencyType
-            this.fullControlData!.Control.FrequencyInterval = control.FrequencyInterval
-            this.fullControlData!.Control.FrequencyOther = control.FrequencyOther
-            this.fullControlData!.Control.OwnerId = control.OwnerId
-            this.fullControlData!.Control.Manual = control.Manual
-
-            Vue.nextTick(() => {
-                //@ts-ignore
-                this.$refs.editControl.clearForm()
-            })
-        },
-        generateRiskUrl(riskId : number) : string {
-            return createRiskUrl(
-                PageParamsStore.state.organization!.OktaGroupName,
-                riskId)
-        },
-
-        addIoCat(cat : ControlDocumentationCategory, control : ProcessFlowControl, isInput: boolean) {
-            linkControlToDocumentCategory({
-                controlId: control.Id,
-                orgId: PageParamsStore.state.organization!.Id,
-                catId: cat.Id,
-                isInput: isInput
-            }).then(() => {
-                this.showHideAddInputDocCat = false
-                this.showHideAddOutputDocCat = false
-                if (isInput) {
-                    this.fullControlData!.InputDocCats.push(cat)
-                } else {
-                    this.fullControlData!.OutputDocCats.push(cat)
-                }
-            }).catch((err: any) => {
-                // @ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong. Try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
-            })
-        },
-        addInputCat(cat : ControlDocumentationCategory, control : ProcessFlowControl) {
-            this.addIoCat(cat, control, true)
-        },
-        addOutputCat(cat : ControlDocumentationCategory, control : ProcessFlowControl) {
-            this.addIoCat(cat, control, false)
-        },
-
-        deleteIoCat(cat : ControlDocumentationCategory, control : ProcessFlowControl, isInput: boolean) {
-            unlinkControlFromDocumentCategory({
-                controlId: control.Id,
-                orgId: PageParamsStore.state.organization!.Id,
-                catId: cat.Id,
-                isInput: isInput
-            }).then(() => {
-                if (isInput) {
-                    this.fullControlData!.InputDocCats = this.fullControlData!.InputDocCats.filter((ele : ControlDocumentationCategory) =>
-                        ele.Id != cat.Id)
-                } else {
-                    this.fullControlData!.OutputDocCats = this.fullControlData!.OutputDocCats.filter((ele : ControlDocumentationCategory) =>
-                        ele.Id != cat.Id)
-                }
-            }).catch((err : any) => {
-                // @ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong. Try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
-            })
-        },
-        deleteInputCat(cat : ControlDocumentationCategory) {
-            this.deleteIoCat(cat, this.fullControlData!.Control, true)
-        },
-        deleteOutputCat(cat : ControlDocumentationCategory) {
-            this.deleteIoCat(cat, this.fullControlData!.Control, false)
-        },
-    },
+@Component({
     components: {
         CreateNewControlForm,
-        DocumentationTable,
-        AddDocumentCategoryToControlForm,
         SystemsTable,
         RiskTable,
         ProcessFlowTable,
-        GeneralLedgerAccountsTable
-    },
+        GeneralLedgerAccountsTable,
+        DocFileTable,
+        UploadDocumentationForm,
+        DocSearcherForm
+    }
+})
+export default class FullEditControlComponent extends Vue {
+    expandDescription: boolean = false
+    fullControlData: FullControlData | null = null
+    relevantSystems: System[] | null = null
+    relevantGL: GeneralLedger | null =  null
+    relevantFolders: FileFolder[] | null =  null
+    folderToFiles: Record<number, ControlDocumentationFile[]> = Object()
+    currentFolderIdx: number = 0
+
+    showNewFolder: boolean = false
+    showNewFile : boolean = false
+    showAddExistingFile: boolean = false
+
+    $refs!: {
+        editControl: any
+    }
+
+    get ready() : boolean {
+        return this.fullControlData != null
+    }
+
+    get relevantAccounts() : GeneralLedgerAccount[] | null {
+        if (!this.relevantGL) {
+            return null
+        }
+        return this.relevantGL.listAccounts
+    }
+
+    get currentFolder() : FileFolder | null {
+        if (!this.relevantFolders || this.relevantFolders.length == 0) {
+            return null
+        }
+        return this.relevantFolders[this.currentFolderIdx]
+    }
+
+    get filesForFolder() : (id : number) => ControlDocumentationFile[] {
+        return (id: number) : ControlDocumentationFile[] => {
+            if (!(id in this.folderToFiles)) {
+                allFolderFileLink({
+                    folderId: id,
+                    orgId: PageParamsStore.state.organization!.Id,
+                }).then((resp : TAllFolderFileLinkOutput) => {
+                    Vue.set(this.folderToFiles, id, resp.data.Files!)
+                }).catch((err : any) => {
+                    // @ts-ignore
+                    this.$root.$refs.snackbar.showSnackBar(
+                        "Oops! Something went wrong. Try again.",
+                        true,
+                        "Contact Us",
+                        contactUsUrl,
+                        true);
+                })
+                return []
+            }
+            return this.folderToFiles[id]
+        }
+    }
+
+    @Watch('ready')
+    refreshReady() {
+        Vue.nextTick(() => {
+            //@ts-ignore
+            this.$refs.editControl.clearForm()
+        })
+    }
+
+    refreshSystemLink() {
+        allControlSystemLink({
+            controlId: this.fullControlData!.Control.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TAllControlSystemLinkOutput) => {
+            this.relevantSystems = resp.data.Systems!
+        })
+    }
+
+    refreshGLLink() {
+        allControlGLLink({
+            controlId: this.fullControlData!.Control.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TAllControlGLLinkOutput) => {
+            this.relevantGL = new GeneralLedger()
+            this.relevantGL.rebuildGL(resp.data.Categories!, resp.data.Accounts!)
+        })
+    }
+
+    refreshFileFolders() {
+        allControlFolderLink({
+            controlId: this.fullControlData!.Control.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TAllControlFolderLinkOutput) => {
+            this.relevantFolders = resp.data.Folders!
+        })
+    }
+
+    refreshData() {
+        let data = window.location.pathname.split('/')
+        let controlId = Number(data[data.length - 1])
+
+        getSingleControl(<TSingleControlInput>{
+            controlId: controlId,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TSingleControlOutput) => {
+            this.fullControlData = resp.data
+            this.refreshSystemLink()
+            this.refreshGLLink()
+            this.refreshFileFolders()
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    onEditControl(control : ProcessFlowControl) {
+        Vue.set(this.fullControlData!, 'Control', control)
+        Vue.nextTick(() => {
+            //@ts-ignore
+            this.$refs.editControl.clearForm()
+        })
+    }
+
+    generateRiskUrl(riskId : number) : string {
+        return createRiskUrl(
+            PageParamsStore.state.organization!.OktaGroupName,
+            riskId)
+    }
+
     mounted() {
         this.refreshData()
     }
-})
+
+    saveFile(file : ControlDocumentationFile) {
+        this.folderToFiles[this.currentFolder!.Id].push(file)
+        this.showNewFile = false
+    }
+
+    addFilesToFolder(files : ControlDocumentationFile[]) {
+        newFolderFileLink({
+            folderId: this.currentFolder!.Id,
+            fileIds: files.map((ele : ControlDocumentationFile) => ele.Id),
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then(() => {
+            this.folderToFiles[this.currentFolder!.Id].push(...files)
+            this.showAddExistingFile = false
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    deleteLink(file : ControlDocumentationFile) {
+        if (!this.currentFolder) {
+            return
+        }
+        let folder : FileFolder = this.currentFolder!
+        deleteFolderFileLink({
+            folderId: folder.Id,
+            fileId: file.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then(() => {
+            if (!(folder.Id in this.folderToFiles)) {
+                return
+            }
+            let idx : number = this.folderToFiles[folder.Id].findIndex(
+                (ele : ControlDocumentationFile) => ele.Id == file.Id)
+
+            if (idx == -1) {
+                return
+            }
+
+            this.folderToFiles[folder.Id].splice(idx, 1)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+
+        })
+    }
+}
 
 </script>
