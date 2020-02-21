@@ -26,6 +26,7 @@
             :load-cats="loadCats"
             :rules="[rules.required]"
             :readonly="!canEdit"
+            v-if="catId == -1 || !!referenceCat"
         ></document-category-search-form-component>
     </v-form>
 
@@ -202,7 +203,9 @@ export default class CreateNewRequestForm extends Props {
         } else {
             this.name = ""
             this.description = ""
-            this.realCat = null
+            if (this.catId == -1) {
+                this.realCat = null
+            }
         }
     }
 }
