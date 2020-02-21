@@ -283,15 +283,20 @@ const store : StoreOptions<VuexState> = {
             if (!state.currentProcessFlowFullData) {
                 return
             }
-            state.currentProcessFlowFullData.NodeControlRelationships.delete(
-                state.currentProcessFlowFullData.Nodes[nodeId],
-                state.currentProcessFlowFullData.Controls[controlId]
-            )
 
-            state.currentProcessFlowFullData.RiskControlRelationships.delete(
-                state.currentProcessFlowFullData.Risks[riskId],
-                state.currentProcessFlowFullData.Controls[controlId]
-            )
+            if (nodeId != -1) {
+                state.currentProcessFlowFullData.NodeControlRelationships.delete(
+                    state.currentProcessFlowFullData.Nodes[nodeId],
+                    state.currentProcessFlowFullData.Controls[controlId]
+                )
+            }
+
+            if (riskId != -1) {
+                state.currentProcessFlowFullData.RiskControlRelationships.delete(
+                    state.currentProcessFlowFullData.Risks[riskId],
+                    state.currentProcessFlowFullData.Controls[controlId]
+                )
+            }
         },
         deleteControlGlobal(state, {controlId}) {
             if (!state.currentProcessFlowFullData) {
@@ -560,7 +565,7 @@ const store : StoreOptions<VuexState> = {
                 context.commit('deleteControlFromRiskNode', {
                     controlId: controlIds[i],
                     nodeId: nodeId,
-                    riskIds: riskIds[i]
+                    riskId: riskIds[i]
                 })
 
                 if (global) {
@@ -664,6 +669,16 @@ const store : StoreOptions<VuexState> = {
                     state.currentProcessFlowFullData.Risks[riskId]
                 )
         },
+        risksForControl: (state) => (controlId: number) : ProcessFlowRisk[] => {
+            if (!state.currentProcessFlowFullData) {
+                return []
+            }
+            return state.currentProcessFlowFullData.RiskControlRelationships.changed && 
+                state.currentProcessFlowFullData.RiskControlRelationships.getA(
+                    state.currentProcessFlowFullData.Controls[controlId]
+                )
+        },
+
         controlsForRiskNode: (state) => (riskId : number, nodeId : number) : RiskControl[] => {
             if (!state.currentProcessFlowFullData) {
                 return []

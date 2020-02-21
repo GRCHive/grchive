@@ -1,7 +1,7 @@
 <template>
     <div>
         <div>
-            <p class="text-center font-weight-bold outline">
+            <p class="text-center font-weight-bold outline mb-2">
                 Risk & Control Linkage
             </p>
             <v-divider></v-divider>

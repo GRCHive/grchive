@@ -26,7 +26,7 @@
             >CONTROLS</text> 
 
             <g ref="riskText">
-                <a v-for="(item, index) in risks"
+                <a v-for="(item, index) in combinedRisks"
                    :key="index"
                    :href="generateRiskUrl(item)"
                    target="_blank"
@@ -37,16 +37,17 @@
                           :transform="`translate(
                             ${getRiskLayout(item.Id).tx},
                             ${getRiskLayout(item.Id).ty})`"
-                    >{{ item.Name }}</text> 
+                          :font-style="extraRiskIdSet.has(item.Id) ? `italic` : `normal`"
+                    >{{ item.Name }}</text>
                 </a>
             </g>
 
             <g ref="controlText">
-                <g v-for="risk in risks"
-                   :key="risk.Id"
+                <g v-for="risk in combinedRisks"
+                   :key="`risk-${risk.Id}`"
                 >
                     <a v-for="(control, cindex) in controls[risk.Id]"
-                       :key="cindex"
+                       :key="`control-${cindex}`"
                        :href="generateControlUrl(control.control)"
                        target="_blank"
                     >
@@ -55,8 +56,8 @@
                               text-rendering="optimizeLegibility"
                               text-anchor="end"
                               :transform="`translate(
-                                ${currentWidth - getControlLayout(control.control.Id).tx},
-                                ${getControlLayout(control.control.Id).ty})`"
+                                ${currentWidth - getControlLayout(risk.Id, control.control.Id).tx},
+                                ${getControlLayout(risk.Id, control.control.Id).ty})`"
                         >{{ control.control.Name }}</text> 
                     </a>
                 </g>
@@ -107,22 +108,59 @@ export default Vue.extend({
         riskTransformLayout: new Map<number, TransformData>(),
         riskTextWidth: 200,
         controlTextWidth: 200,
-        controlTransformLayout: new Map<number, TransformData>()
+        controlTransformLayout: new Map<number, Map<number, TransformData>>()
     }),
     computed: {
         hasRiskControl() : boolean {
-            return this.risks.length > 0
+            return this.combinedRisks.length > 0
         },
         risks() : ProcessFlowRisk[] {
             return VueSetup.store.getters.risksForNode(this.node.Id)
         },
+        extraRisks() : ProcessFlowRisk[] {
+            // Extra risks are risks that are linked to a control that is
+            // attached to the node but the risk itself isn't linked with the node.
+            let controls : ProcessFlowControl[] = VueSetup.store.getters.controlsForNode(this.node.Id)
+            let extraRisks: ProcessFlowRisk[] = []
+            // Risk Set are all the nodes already processed
+            let riskSet : Set<number> = new Set<number>(this.risks.map((ele : ProcessFlowRisk) => ele.Id))
+            for (let c of controls) {
+                let risks : ProcessFlowRisk[] = VueSetup.store.getters.risksForControl(c.Id)
+                for (let r of risks) {
+                    if (riskSet.has(r.Id)) {
+                        continue
+                    }
+
+                    riskSet.add(r.Id)
+                    extraRisks.push(r)
+                }
+            }
+
+            return extraRisks
+        },
+        extraRiskIdSet() : Set<number> {
+            return new Set<number>(this.extraRisks.map((ele : ProcessFlowRisk) => ele.Id))
+        },
+        combinedRisks() : ProcessFlowRisk[] {
+            return [...this.risks, ...this.extraRisks]
+        },
         controls() : Record<number, RiskControl[]> {
             let groupedControls = Object() as Record<number, RiskControl[]>
-            for (let risk of this.risks) {
-                groupedControls[risk.Id] = VueSetup.store.getters.controlsForRiskNode(
-                    risk.Id,
-                    this.node.Id)
+
+            let controls : ProcessFlowControl[] = VueSetup.store.getters.controlsForNode(this.node.Id)
+            for (let c of controls) {
+                let risks : ProcessFlowRisk[] = VueSetup.store.getters.risksForControl(c.Id)
+                for (let r of risks) {
+                    if (!(r.Id in groupedControls)) {
+                        groupedControls[r.Id] = []
+                    }
+                    groupedControls[r.Id].push({
+                        risk: r,
+                        control: c
+                    })
+                }
             }
+
             return groupedControls
         },
         expandedHeight() : number {
@@ -149,16 +187,20 @@ export default Vue.extend({
             let currentY = riskTitle.getBBox().y + riskTitle.getBBox().height
 
             this.riskTransformLayout = new Map<number, TransformData>()
-            for (let r of this.risks) {
+            this.controlTransformLayout = new Map<number, Map<number, TransformData>>()
+
+            for (let r of this.combinedRisks) {
                 currentY += itemSpacingMargin
                 this.riskTransformLayout.set(r.Id, <TransformData>{
                     tx: itemSpacingMargin,
                     ty: currentY
                 })
 
+                let rcLayout : Map<number, TransformData> = new Map<number, TransformData>()
+
                 if (r.Id in this.controls && this.controls[r.Id].length > 0) {
                     for (let c of this.controls[r.Id]) {
-                        this.controlTransformLayout.set(c.control.Id, <TransformData>{
+                        rcLayout.set(c.control.Id, <TransformData>{
                             tx: itemSpacingMargin,
                             ty: currentY
                         })
@@ -167,6 +209,8 @@ export default Vue.extend({
                     }
                     currentY -= riskTitle.getBBox().height
                 }
+
+                this.controlTransformLayout.set(r.Id, rcLayout)
                 // This is OK since we don't actually change the font
                 currentY += riskTitle.getBBox().height
             }
@@ -200,14 +244,22 @@ export default Vue.extend({
                 return this.riskTransformLayout.get(riskId)!
             }
         },
-        getControlLayout(controlId: number) : TransformData {
-            if (!this.controlTransformLayout.has(controlId)) {
+        getControlLayout(riskId: number, controlId: number) : TransformData {
+            if (!this.controlTransformLayout.has(riskId)) {
                 return <TransformData>{
                     tx: 0,
                     ty: 0
                 }
             } else {
-                return this.controlTransformLayout.get(controlId)!
+                let rcLayout : Map<number, TransformData> = this.controlTransformLayout.get(riskId)!
+                if (!rcLayout.has(controlId)) {
+                    return <TransformData>{
+                        tx: 0,
+                        ty: 0
+                    }
+                }
+
+                return rcLayout.get(controlId)!
             }
         },
         generateRiskUrl(risk : ProcessFlowRisk) {
