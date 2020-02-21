@@ -230,6 +230,8 @@ func registerControlDocVersionsAPIPaths(r *mux.Router) {
 func registerFileFolderAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiFolderPrefix).Subrouter()
 	s.HandleFunc(core.ApiNewEndpoint, newFolder).Methods("POST")
+	s.HandleFunc(core.ApiUpdateEndpoint, updateFolder).Methods("POST")
+	s.HandleFunc(core.ApiDeleteEndpoint, deleteFolder).Methods("POST")
 
 	registerFileFolderLinksAPIPaths(s)
 }

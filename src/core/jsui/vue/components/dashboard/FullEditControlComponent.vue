@@ -14,6 +14,31 @@
             </create-new-folder-form>
         </v-dialog>
 
+        <v-dialog v-model="showEditFolder" persistent max-width="40%">
+            <create-new-folder-form
+                edit-mode
+                dialog-mode
+                :control-id="fullControlData.Control.Id"
+                :reference-folder="editFolder"
+                @do-cancel="showEditFolder = false"
+                @do-save="onEditFolder"
+                v-if="!!fullControlData && !!editFolder"
+            >
+            </create-new-folder-form>
+        </v-dialog>
+
+        <v-dialog v-model="showDeleteFolder" persistent max-width="40%">
+            <generic-delete-confirmation-form
+                item-name="folders"
+                :items-to-delete="[deleteFolder.Name]"
+                :use-global-deletion="false"
+                @do-cancel="showDeleteFolder = false"
+                @do-delete="onDeleteFolder"
+                v-if="!!deleteFolder"
+            >
+            </generic-delete-confirmation-form>
+        </v-dialog>
+
         <v-dialog v-model="showNewFile" persistent max-width="40%">
             <upload-documentation-form
                 :cat-id="-1"
@@ -121,13 +146,13 @@
                                                 </v-btn>
                                            </template>
                                            <v-list dense>
-                                                <v-list-item>
+                                                <v-list-item @click="startEditFolder(folder)">
                                                     <v-list-item-title>
                                                         Edit
                                                     </v-list-item-title>
                                                 </v-list-item>
 
-                                                <v-list-item>
+                                                <v-list-item @click="startDeleteFolder(folder)">
                                                     <v-list-item-title>
                                                         Delete
                                                     </v-list-item-title>
@@ -221,11 +246,13 @@ import {
     newFolderFileLink,
     deleteFolderFileLink
 } from '../../../ts/api/apiFolderFileLinks'
+import { deleteFolder } from '../../../ts/api/apiFolders'
 import { FileFolder } from '../../../ts/folders'
 
 import UploadDocumentationForm from './UploadDocumentationForm.vue'
 import DocSearcherForm from '../../generic/DocSearcherForm.vue'
 import CreateNewFolderForm from './CreateNewFolderForm.vue'
+import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 
 @Component({
     components: {
@@ -237,7 +264,8 @@ import CreateNewFolderForm from './CreateNewFolderForm.vue'
         DocFileTable,
         UploadDocumentationForm,
         DocSearcherForm,
-        CreateNewFolderForm
+        CreateNewFolderForm,
+        GenericDeleteConfirmationForm
     }
 })
 export default class FullEditControlComponent extends Vue {
@@ -252,6 +280,11 @@ export default class FullEditControlComponent extends Vue {
     showNewFolder: boolean = false
     showNewFile : boolean = false
     showAddExistingFile: boolean = false
+    showEditFolder: boolean = false
+    showDeleteFolder: boolean = false
+
+    editFolder : FileFolder | null = null
+    deleteFolder : FileFolder | null = null
 
     $refs!: {
         editControl: any
@@ -428,7 +461,6 @@ export default class FullEditControlComponent extends Vue {
                 "Contact Us",
                 contactUsUrl,
                 true);
-
         })
     }
 
@@ -438,6 +470,63 @@ export default class FullEditControlComponent extends Vue {
         }
         this.relevantFolders!.push(folder)
         this.showNewFolder = false
+    }
+
+    onEditFolder(folder : FileFolder) {
+        if (!this.relevantFolders) {
+            return
+        }
+
+        let idx : number = this.relevantFolders.findIndex(
+            (ele : FileFolder) => ele.Id == folder.Id)
+
+        if (idx == -1) {
+            return
+        }
+
+        Vue.set(this.relevantFolders, idx, folder)
+        this.showEditFolder = false
+    }
+
+    onDeleteFolder() {
+        if (!this.deleteFolder) {
+            return
+        }
+
+        let folder : FileFolder = this.deleteFolder
+
+        deleteFolder({
+            orgId: PageParamsStore.state.organization!.Id,
+            folderId: folder.Id,
+        }).then(() => {
+            let idx : number = this.relevantFolders!.findIndex(
+                (ele : FileFolder) => ele.Id == folder.Id)
+
+            if (idx == -1) {
+                return
+            }
+
+            this.relevantFolders!.splice(idx, 1)
+            this.showDeleteFolder = false
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    startDeleteFolder(folder : FileFolder) {
+        this.deleteFolder = folder
+        this.showDeleteFolder = true
+    }
+
+    startEditFolder(folder : FileFolder) {
+        this.editFolder = folder
+        this.showEditFolder = true
     }
 }
 

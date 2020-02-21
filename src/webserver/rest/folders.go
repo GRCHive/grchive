@@ -64,3 +64,73 @@ func newFolder(w http.ResponseWriter, r *http.Request) {
 
 	jsonWriter.Encode(folder)
 }
+
+type UpdateFolderInputs struct {
+	Name     string `json:"name"`
+	OrgId    int32  `json:"orgId"`
+	FolderId int64  `json:"folderId"`
+}
+
+func updateFolder(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := UpdateFolderInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	folder := core.FileFolder{
+		Id:    inputs.FolderId,
+		OrgId: inputs.OrgId,
+		Name:  inputs.Name,
+	}
+
+	err = database.UpdateFolder(&folder, role)
+	if err != nil {
+		core.Warning("Failed to update folder: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(folder)
+}
+
+type DeleteFolderInputs struct {
+	OrgId    int32 `json:"orgId"`
+	FolderId int64 `json:"folderId"`
+}
+
+func deleteFolder(w http.ResponseWriter, r *http.Request) {
+	inputs := DeleteFolderInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = database.DeleteFolder(inputs.FolderId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to delete folder: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}

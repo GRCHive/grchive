@@ -50,10 +50,13 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import * as rules from "../../../ts/formRules"
 import { contactUsUrl } from "../../../ts/url"
 import { PageParamsStore } from '../../../ts/pageParams'
 import { newFolder, TNewFolderOutput } from '../../../ts/api/apiFolders'
+import { updateFolder, TUpdateFolderOutput } from '../../../ts/api/apiFolders'
+import { FileFolder } from '../../../ts/folders'
 
 const Props = Vue.extend({
     props: {
@@ -61,6 +64,14 @@ const Props = Vue.extend({
         editMode: {
             type: Boolean,
             default: false
+        },
+        dialogMode: {
+            type: Boolean,
+            default: false
+        },
+        referenceFolder: {
+            type : Object,
+            default: () => null as FileFolder | null
         }
     }
 })
@@ -73,7 +84,7 @@ export default class CreateNewFolderForm extends Props {
     rules: any = rules
 
     cancel() {
-        if (this.editMode) {
+        if (this.editMode && !this.dialogMode) {
             this.canEdit = false
         }
         this.clearForm()
@@ -100,6 +111,22 @@ export default class CreateNewFolderForm extends Props {
     }
 
     doEdit() {
+        updateFolder({
+            name: this.name,
+            orgId: PageParamsStore.state.organization!.Id,
+            controlId: this.controlId,
+            folderId: this.referenceFolder!.Id
+        }).then((resp : TUpdateFolderOutput) => {
+            this.$emit('do-save', resp.data)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops. Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 
     save() {
@@ -111,12 +138,17 @@ export default class CreateNewFolderForm extends Props {
     }
 
     mounted() {
-        this.canEdit = !this.editMode
+        this.canEdit = !this.editMode || this.dialogMode
         this.clearForm()
     }
 
+    @Watch('referenceFolder')
     clearForm() {
-        this.name = ""
+        if (!!this.referenceFolder) {
+            this.name = this.referenceFolder.Name
+        } else {
+            this.name = ""
+        }
     }
 }
 

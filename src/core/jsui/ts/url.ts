@@ -224,6 +224,8 @@ export const allControlDocVersionsUrl : string = "/api/documentation/file/versio
 export const getControlDocVersionsUrl : string = "/api/documentation/file/versions/get"
 
 export const newFolderUrl : string = "/api/documentation/folder/new"
+export const updateFolderUrl : string = "/api/documentation/folder/update"
+export const deleteFolderUrl : string = "/api/documentation/folder/delete"
 
 export const allFolderFileLinkUrl : string = "/api/documentation/folder/link/file/all"
 export const newFolderFileLinkUrl : string = "/api/documentation/folder/link/file/new"
