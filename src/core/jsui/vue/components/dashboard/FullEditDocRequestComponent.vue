@@ -102,6 +102,7 @@
                             load-cats
                             :reference-cat="parentCategory"
                             :reference-req="currentRequest"
+                            :reference-control="parentControl"
                             @do-save="onEdit"
                         ></create-new-request-form>
 
