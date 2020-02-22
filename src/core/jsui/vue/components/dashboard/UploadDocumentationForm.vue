@@ -16,6 +16,23 @@
             >
             </document-category-search-form-component>
 
+            <div v-if="requestId != -1 && requestLinkedToControl">
+                <control-search-form-component
+                    v-model="chosenControl"
+                    :rules="[rules.required]"
+                    :readonly="!!requestControl"
+                >
+                </control-search-form-component>
+
+                <control-folder-search-form-component
+                    :control-id="chosenControl.Id"
+                    v-model="chosenFolder"
+                    :rules="[rules.required]"
+                    v-if="!!chosenControl"
+                >
+                </control-folder-search-form-component>
+            </div>
+
             <v-menu
                 offset-y
                 v-model="dateMenu"
@@ -80,7 +97,10 @@ import { createLocalDateFromDateString } from '../../../ts/time'
 import { ControlDocumentationCategory } from '../../../ts/controls'
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 import DocumentCategorySearchFormComponent from '../../generic/DocumentCategorySearchFormComponent.vue'
+import ControlSearchFormComponent from '../../generic/ControlSearchFormComponent.vue'
+import ControlFolderSearchFormComponent from '../../generic/ControlFolderSearchFormComponent.vue'
 import { standardFormatDate } from '../../../ts/time'
+import { FileFolder } from '../../../ts/folders'
 
 export default Vue.extend({
     props : {
@@ -88,6 +108,18 @@ export default Vue.extend({
         requestId: {
             type: Number,
             default: -1
+        },
+        // If requestId and requestLinkedToControl is set, then that should mean
+        // that we are uploading a file to fulfill a request that is linked to
+        // a control. If requestControl is set, then that means we know which
+        // control to link to and that it shouldn't be changed.
+        requestLinkedToControl: {
+            type: Boolean,
+            default: false,
+        },
+        requestControl: {
+            type: Object,
+            default: () => null as ProcessFlowControl | null
         },
         // If fileId is set, it means we're uploading a new version of the file.
         fileId:{
@@ -101,7 +133,9 @@ export default Vue.extend({
     },
     components: {
         UserSearchFormComponent,
-        DocumentCategorySearchFormComponent
+        DocumentCategorySearchFormComponent,
+        ControlSearchFormComponent,
+        ControlFolderSearchFormComponent,
     },
     data : () => ({
         dateMenu: false,
@@ -114,6 +148,8 @@ export default Vue.extend({
         description: "",
         uploadUser: {} as User,
         chosenCat: {} as ControlDocumentationCategory,
+        chosenControl: null as ProcessFlowControl | null,
+        chosenFolder: null as FileFolder | null,
     }),
     computed : {
         canSubmit() : boolean {
@@ -129,6 +165,18 @@ export default Vue.extend({
 
         isVersionUpload() : boolean {
             return this.fileId >= 0
+        },
+
+        getRelevantFolderId() : number | null{
+            if (this.folderId != -1) {
+                return this.folderId
+            }
+
+            if (!!this.chosenFolder) {
+                return this.chosenFolder.Id
+            }
+
+            return null
         }
     },
     methods: {
@@ -154,7 +202,7 @@ export default Vue.extend({
                 uploadUserId: this.uploadUser.Id,
                 fulfilledRequestId: (this.requestId != -1) ? this.requestId : null,
                 fileId: this.isVersionUpload ? this.fileId : null,
-                folderId: (this.folderId != -1) ? this.folderId : null,
+                folderId: this.getRelevantFolderId,
             }).then((resp : TUploadControlDocOutput) => {
                 this.progressOverlay = false
                 this.$emit('do-save', resp.data.File, resp.data.Version)
@@ -179,6 +227,7 @@ export default Vue.extend({
     },
     mounted() {
         this.uploadUser = PageParamsStore.state.user!
+        this.chosenControl = this.requestControl
     }
 })
 

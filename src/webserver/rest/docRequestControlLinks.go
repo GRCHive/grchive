@@ -8,17 +8,17 @@ import (
 	"net/http"
 )
 
-type AllDocRequestDocCatLinkInputs struct {
+type AllDocRequestControlLinkInputs struct {
 	RequestId core.NullInt64 `webcore:"requestId,optional"`
-	CatId     core.NullInt64 `webcore:"catId,optional"`
+	ControlId core.NullInt64 `webcore:"controlId,optional"`
 	OrgId     int32          `webcore:"orgId"`
 }
 
-func allDocRequestDocCatLinks(w http.ResponseWriter, r *http.Request) {
+func allDocRequestControlLinks(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	inputs := AllDocRequestDocCatLinkInputs{}
+	inputs := AllDocRequestControlLinkInputs{}
 	err := webcore.UnmarshalRequestForm(r, &inputs)
 	if err != nil {
 		core.Warning("Can't parse inputs: " + err.Error())
@@ -34,16 +34,16 @@ func allDocRequestDocCatLinks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if inputs.RequestId.NullInt64.Valid {
-		cat, err := database.FindDocCatLinkedToDocRequest(inputs.RequestId.NullInt64.Int64, inputs.OrgId, role)
+		control, err := database.FindControlLinkedToDocRequest(inputs.RequestId.NullInt64.Int64, inputs.OrgId, role)
 		if err != nil {
-			core.Warning("Failed to get linked cat: " + err.Error())
+			core.Warning("Failed to get linked control: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		jsonWriter.Encode(struct {
-			Cat *core.ControlDocumentationCategory
+			Control *core.Control
 		}{
-			Cat: cat,
+			Control: control,
 		})
 	} else {
 		core.Warning("Invalid combination of inputs.")

@@ -17,6 +17,7 @@ go_library(
         "deployment.go",
         "docRequests.go",
         "docRequestDocCatLinks.go",
+        "docRequestControlLinks.go",
         "generalLedger.go",
         "gettingStarted.go",
         "folderFileLinks.go",

@@ -19,15 +19,36 @@
                     filled
                     :readonly="!canEdit"
         ></v-textarea> 
-        
-        <document-category-search-form-component
-            v-model="realCat"
-            :available-cats="availableCats"
-            :load-cats="loadCats"
-            :rules="[rules.required]"
-            :readonly="editMode"
-            v-if="catId == -1 || !!referenceCat"
-        ></document-category-search-form-component>
+
+        <v-select
+            v-model="currentLinkage"
+            :items="requestLinkageItems"
+            label="Link To"
+            :rules="[rules.nonZero]"
+            :readonly="!canEdit || !!referenceCat"
+            filled
+        >
+        </v-select>
+
+        <div v-if="currentLinkage == 1">
+            <document-category-search-form-component
+                v-model="realCat"
+                :available-cats="availableCats"
+                :load-cats="loadCats"
+                :rules="[rules.required]"
+                :readonly="editMode"
+                v-if="catId == -1 || !!referenceCat"
+            ></document-category-search-form-component>
+        </div>
+
+        <div v-if="currentLinkage == 2">
+            <control-search-form-component
+                v-model="linkControl"
+                :rules="[rules.required]"
+                :readonly="editMode"
+            >
+            </control-search-form-component>
+        </div>
     </v-form>
 
     <v-card-actions>
@@ -67,13 +88,14 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 import * as rules from '../../../ts/formRules'
-import { newDocRequest, TNewDocRequestOutput } from '../../../ts/api/apiDocRequests'
-import { updateDocRequest, TUpdateDocRequestOutput } from '../../../ts/api/apiDocRequests'
+import { newDocRequest, TNewDocRequestOutput, TNewDocRequestInput } from '../../../ts/api/apiDocRequests'
+import { updateDocRequest, TUpdateDocRequestOutput, TUpdateDocRequestInput } from '../../../ts/api/apiDocRequests'
 import { ControlDocumentationCategory } from '../../../ts/controls'
 import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
-import { DocumentRequest } from '../../../ts/docRequests'
+import { DocumentRequest, RequestLinkageMode, requestLinkageItems } from '../../../ts/docRequests'
 import DocumentCategorySearchFormComponent from '../../generic/DocumentCategorySearchFormComponent.vue'
+import ControlSearchFormComponent from '../../generic/ControlSearchFormComponent.vue'
 
 const Props = Vue.extend({
     props: {
@@ -104,10 +126,15 @@ const Props = Vue.extend({
         referenceCat: {
             type: Object,
             default: () => null as ControlDocumentationCategory | null
+        },
+        linkage: {
+            type : Number,
+            default: RequestLinkageMode.None
         }
     },
     components: {
-        DocumentCategorySearchFormComponent
+        DocumentCategorySearchFormComponent,
+        ControlSearchFormComponent
     }
 })
 
@@ -118,7 +145,11 @@ export default class CreateNewRequestForm extends Props {
     name: string = ""
     description: string = ""
     realCat: ControlDocumentationCategory | null = null
+    linkControl : ProcessFlowControl | null = null
     canEdit: boolean = false
+
+    currentLinkage : RequestLinkageMode = RequestLinkageMode.None
+    requestLinkageItems: any[] = requestLinkageItems
 
     get realCatId() : number {
         if (this.catId == -1) {
@@ -146,21 +177,30 @@ export default class CreateNewRequestForm extends Props {
         // @ts-ignore
         this.$root.$refs.snackbar.showSnackBar(
             "Oops. Something went wrong. Try again.",
-            false,
-            "",
+            true,
+            "Contact Us",
             contactUsUrl,
             true);
     }
 
     doSave() {
-        newDocRequest({
+        let params : TNewDocRequestInput = {
             name: this.name,
             description: this.description,
-            catId: this.realCatId,
             orgId: PageParamsStore.state.organization!.Id,
             requestedUserId: PageParamsStore.state.user!.Id,
             vendorProductId: this.vendorProductId
-        }).then((resp : TNewDocRequestOutput) => {
+        }
+
+        if (this.currentLinkage == RequestLinkageMode.DocCat) {
+            params.catId = this.realCatId
+        } else if (this.currentLinkage == RequestLinkageMode.Controls) {
+            params.controlId = this.linkControl!.Id
+        }
+
+        newDocRequest(
+            params
+        ).then((resp : TNewDocRequestOutput) => {
             this.onSuccess(resp)
             this.clearForm()
         }).catch((err : any) => {
@@ -169,15 +209,21 @@ export default class CreateNewRequestForm extends Props {
     }
 
     doEdit() {
-        updateDocRequest({
+        let params : TUpdateDocRequestInput = {
             requestId: this.referenceReq!.Id,
             name: this.name,
             description: this.description,
-            catId: this.realCatId!,
             orgId: PageParamsStore.state.organization!.Id,
             requestedUserId: PageParamsStore.state.user!.Id,
             vendorProductId: this.vendorProductId
-        }).then((resp : TNewDocRequestOutput) => {
+        }
+
+        // Don't let people update cat or controls. NO need 
+        // to put these parameters here.
+
+        updateDocRequest(
+            params
+        ).then((resp : TNewDocRequestOutput) => {
             this.onSuccess(resp)
         }).catch((err : any) => {
             this.onError()
@@ -194,6 +240,8 @@ export default class CreateNewRequestForm extends Props {
 
     mounted() {
         this.canEdit = !this.editMode
+        this.currentLinkage = this.linkage
+        this.clearForm()
     }
 
     @Watch('referenceCat')
@@ -208,6 +256,10 @@ export default class CreateNewRequestForm extends Props {
             if (this.catId == -1) {
                 this.realCat = null
             }
+        }
+
+        if (!!this.referenceCat) {
+            this.currentLinkage = RequestLinkageMode.DocCat
         }
     }
 }

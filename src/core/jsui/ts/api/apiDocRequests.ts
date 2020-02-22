@@ -14,7 +14,8 @@ import { ControlDocumentationCategory, ControlDocumentationFile, cleanJsonContro
 export interface TNewDocRequestInput {
     name: string
     description: string
-    catId: number
+    catId?: number
+    controlId? : number
     orgId: number
     requestedUserId: number
     vendorProductId: number

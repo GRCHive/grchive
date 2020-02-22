@@ -2,6 +2,7 @@ package rest
 
 import (
 	"encoding/json"
+	"errors"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/webcore"
@@ -10,12 +11,13 @@ import (
 )
 
 type NewDocumentRequestInputs struct {
-	Name            string `json:"name"`
-	Description     string `json:"description"`
-	CatId           int64  `json:"catId"`
-	OrgId           int32  `json:"orgId"`
-	RequestedUserId int64  `json:"requestedUserId"`
-	VendorProductId int64  `json:"vendorProductId"`
+	Name            string         `json:"name"`
+	Description     string         `json:"description"`
+	CatId           core.NullInt64 `json:"catId"`
+	ControlId       core.NullInt64 `json:"controlId"`
+	OrgId           int32          `json:"orgId"`
+	RequestedUserId int64          `json:"requestedUserId"`
+	VendorProductId int64          `json:"vendorProductId"`
 }
 
 type UpdateDocumentRequestInputs struct {
@@ -97,10 +99,17 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = database.AddDocRequestDocCatLinkWithTx(request.Id, inputs.CatId, inputs.OrgId, role, tx)
+	if inputs.CatId.NullInt64.Valid {
+		err = database.AddDocRequestDocCatLinkWithTx(request.Id, inputs.CatId.NullInt64.Int64, inputs.OrgId, role, tx)
+	} else if inputs.ControlId.NullInt64.Valid {
+		err = database.AddDocRequestControlLinkWithTx(request.Id, inputs.ControlId.NullInt64.Int64, inputs.OrgId, role, tx)
+	} else {
+		err = errors.New("Invalid combination")
+	}
+
 	if err != nil {
 		tx.Rollback()
-		core.Warning("Failed to link doc request with doc cat: " + err.Error())
+		core.Warning("Failed to link doc request: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

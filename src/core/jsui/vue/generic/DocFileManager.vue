@@ -77,8 +77,11 @@
                             Upload
                         </v-btn>
                     </template>
-                    <upload-documentation-form :cat-id="catId"
+                    <upload-documentation-form
+                        :cat-id="catId"
                         :request-id="requestId"
+                        :request-linked-to-control="requestLinkedToControl"
+                        :request-control="requestControl"
                         @do-cancel="showHideUpload = false"
                         @do-save="finishUpload">
                     </upload-documentation-form>
@@ -113,6 +116,14 @@ const Props = Vue.extend({
         requestId: {
             type: Number,
             default: -1
+        },
+        requestLinkedToControl: {
+            type: Boolean,
+            default: false,
+        },
+        requestControl: {
+            type: Object,
+            default: () => null as ProcessFlowControl | null
         },
         value: {
             type: Array,

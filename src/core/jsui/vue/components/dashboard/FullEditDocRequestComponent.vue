@@ -17,6 +17,11 @@
                             <a :href="parentCategoryUrl">{{ parentCategory.Name }}</a>
                         </p>
 
+                        <p class="ma-0" v-if="!!parentControl">
+                            <span class="font-weight-bold">Relevant Control:</span>
+                            <a :href="parentControlUrl">{{ parentControl.Name }}</a>
+                        </p>
+
                         <p class="ma-0">
                             <span class="font-weight-bold">Status:</span>
 
@@ -132,8 +137,9 @@
 
                             <doc-file-manager
                                 :cat-id="!!parentCategory ? parentCategory.Id : -1"
-                                :disable-upload="!parentCategory"
                                 :request-id="currentRequest.Id"
+                                :request-linked-to-control="!!parentControl"
+                                :request-control="parentControl"
                                 v-model="relevantFiles"
                                 disable-sample
                             ></doc-file-manager>
@@ -167,7 +173,7 @@ import { DocumentRequest } from '../../../ts/docRequests'
 import { TGetSingleDocumentRequestOutput, getSingleDocRequest } from '../../../ts/api/apiDocRequests'
 import { deleteSingleDocRequest, completeDocRequest } from '../../../ts/api/apiDocRequests'
 import { PageParamsStore } from '../../../ts/pageParams'
-import { contactUsUrl, createOrgDocRequestsUrl, createSingleDocCatUrl } from '../../../ts/url'
+import { contactUsUrl, createOrgDocRequestsUrl, createSingleDocCatUrl, createControlUrl } from '../../../ts/url'
 import { ControlDocumentationCategory, ControlDocumentationFile } from '../../../ts/controls'
 import MetadataStore from '../../../ts/metadata'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
@@ -177,6 +183,7 @@ import CommentManager from '../../generic/CommentManager.vue'
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 import { standardFormatTime } from '../../../ts/time'
 import { allDocRequestDocCatLink, TAllDocRequestDocCatLinksOutput } from '../../../ts/api/apiDocRequestsDocCatLinks'
+import { allDocRequestControlLink, TAllDocRequestControlLinksOutput } from '../../../ts/api/apiDocRequestControlLinks'
 
 @Component({
     components: {
@@ -190,7 +197,10 @@ import { allDocRequestDocCatLink, TAllDocRequestDocCatLinksOutput } from '../../
 export default class FullEditDocRequestComponent extends Vue {
     currentRequest : DocumentRequest | null = null
     relevantFiles: ControlDocumentationFile[] = []
+
     parentCategory : ControlDocumentationCategory | null = null
+    parentControl : ProcessFlowControl | null = null
+
     showHideDelete: boolean = false
 
     $refs!: {
@@ -208,7 +218,19 @@ export default class FullEditDocRequestComponent extends Vue {
         return !!this.currentRequest
     }
 
+    get parentControlUrl() : string {
+        if (!this.parentControl) {
+            return ""
+        }
+        return createControlUrl(
+            PageParamsStore.state.organization!.OktaGroupName,
+            this.parentControl!.Id)
+    }
+
     get parentCategoryUrl() : string {
+        if (!this.parentCategory) {
+            return ""
+        }
         return createSingleDocCatUrl(
             PageParamsStore.state.organization!.OktaGroupName,
             this.parentCategory!.Id)
@@ -242,6 +264,15 @@ export default class FullEditDocRequestComponent extends Vue {
         })
     }
 
+    refreshParentControl() {
+        allDocRequestControlLink({
+            requestId: this.currentRequest!.Id,
+            orgId: PageParamsStore.state.organization!.Id
+        }).then((resp : TAllDocRequestControlLinksOutput) => {
+            this.parentControl = resp.data.Control!
+        })
+    }
+
     refreshParentCategory() {
         allDocRequestDocCatLink({
             requestId: this.currentRequest!.Id,
@@ -263,6 +294,7 @@ export default class FullEditDocRequestComponent extends Vue {
             this.relevantFiles = resp.data.Files
 
             this.refreshParentCategory()
+            this.refreshParentControl()
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

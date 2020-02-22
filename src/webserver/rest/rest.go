@@ -378,6 +378,12 @@ func registerDocRequestsAPIPaths(r *mux.Router) {
 func registerDocRequestLinksAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiLinkPrefix).Subrouter()
 	registerDocRequestDocCatLinksAPIPaths(s)
+	registerDocRequestControlLinksAPIPaths(s)
+}
+
+func registerDocRequestControlLinksAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiControlPrefix).Subrouter()
+	s.HandleFunc(core.ApiAllEndpoint, allDocRequestControlLinks).Methods("GET")
 }
 
 func registerDocRequestDocCatLinksAPIPaths(r *mux.Router) {
