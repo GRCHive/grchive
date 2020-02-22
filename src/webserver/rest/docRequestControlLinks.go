@@ -45,6 +45,18 @@ func allDocRequestControlLinks(w http.ResponseWriter, r *http.Request) {
 		}{
 			Control: control,
 		})
+	} else if inputs.ControlId.NullInt64.Valid {
+		requests, err := database.FindDocRequestsLinkedToControl(inputs.ControlId.NullInt64.Int64, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get linked requests: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		jsonWriter.Encode(struct {
+			Requests []*core.DocumentRequest
+		}{
+			Requests: requests,
+		})
 	} else {
 		core.Warning("Invalid combination of inputs.")
 		w.WriteHeader(http.StatusBadRequest)

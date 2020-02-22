@@ -172,6 +172,34 @@
                             </v-tabs>
                         </v-card>
 
+                        <v-card v-if="!!relevantRequests" class="mb-4">
+                            <v-card-title>
+                                <span class="mr-2">
+                                    Requests
+                                </span>
+                                <v-spacer></v-spacer>
+
+                                <v-dialog v-model="showHideRequest" persistent max-width="40%">
+                                    <template v-slot:activator="{ on }">
+                                        <v-btn color="warning" icon v-on="on">
+                                            <v-icon>mdi-plus</v-icon>
+                                        </v-btn>
+                                    </template>
+
+                                    <create-new-request-form
+                                        :reference-control="fullControlData.Control"
+                                        @do-cancel="showHideRequest = false"
+                                        @do-save="newRequest"
+                                    >
+                                    </create-new-request-form>
+                                </v-dialog>
+                            </v-card-title>
+                            <v-divider></v-divider>
+
+                            <doc-request-table :resources="relevantRequests">
+                            </doc-request-table>
+                        </v-card>
+
                         <v-card class="mb-4">
                             <v-card-title>
                                 Related Resources
@@ -234,6 +262,7 @@ import SystemsTable from '../../generic/SystemsTable.vue'
 import RiskTable from '../../generic/RiskTable.vue'
 import ProcessFlowTable from '../../generic/ProcessFlowTable.vue'
 import DocFileTable from '../../generic/DocFileTable.vue'
+import DocRequestTable from '../../generic/DocRequestTable.vue'
 import {
     TAllControlSystemLinkOutput, allControlSystemLink
 } from '../../../ts/api/apiControlSystemLinks'
@@ -246,12 +275,17 @@ import {
     newFolderFileLink,
     deleteFolderFileLink
 } from '../../../ts/api/apiFolderFileLinks'
+import {
+    allDocRequestControlLink, TAllDocRequestControlLinksOutput
+} from '../../../ts/api/apiDocRequestControlLinks'
 import { deleteFolder } from '../../../ts/api/apiFolders'
 import { FileFolder } from '../../../ts/folders'
+import { DocumentRequest } from '../../../ts/docRequests'
 
 import UploadDocumentationForm from './UploadDocumentationForm.vue'
 import DocSearcherForm from '../../generic/DocSearcherForm.vue'
 import CreateNewFolderForm from './CreateNewFolderForm.vue'
+import CreateNewRequestForm from './CreateNewRequestForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 
 @Component({
@@ -262,9 +296,11 @@ import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
         ProcessFlowTable,
         GeneralLedgerAccountsTable,
         DocFileTable,
+        DocRequestTable,
         UploadDocumentationForm,
         DocSearcherForm,
         CreateNewFolderForm,
+        CreateNewRequestForm,
         GenericDeleteConfirmationForm
     }
 })
@@ -274,6 +310,7 @@ export default class FullEditControlComponent extends Vue {
     relevantSystems: System[] | null = null
     relevantGL: GeneralLedger | null =  null
     relevantFolders: FileFolder[] | null =  null
+    relevantRequests: DocumentRequest[] | null = null
     folderToFiles: Record<number, ControlDocumentationFile[]> = Object()
     currentFolderIdx: number = 0
 
@@ -282,6 +319,7 @@ export default class FullEditControlComponent extends Vue {
     showAddExistingFile: boolean = false
     showEditFolder: boolean = false
     showDeleteFolder: boolean = false
+    showHideRequest: boolean = false
 
     editFolder : FileFolder | null = null
     deleteFolder : FileFolder | null = null
@@ -367,6 +405,15 @@ export default class FullEditControlComponent extends Vue {
         })
     }
 
+    refreshRequests() {
+        allDocRequestControlLink({
+            controlId: this.fullControlData!.Control.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then((resp : TAllDocRequestControlLinksOutput) => {
+            this.relevantRequests = resp.data.Requests!
+        })
+    }
+
     refreshData() {
         let data = window.location.pathname.split('/')
         let controlId = Number(data[data.length - 1])
@@ -379,6 +426,7 @@ export default class FullEditControlComponent extends Vue {
             this.refreshSystemLink()
             this.refreshGLLink()
             this.refreshFileFolders()
+            this.refreshRequests()
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
@@ -527,6 +575,11 @@ export default class FullEditControlComponent extends Vue {
     startEditFolder(folder : FileFolder) {
         this.editFolder = folder
         this.showEditFolder = true
+    }
+
+    newRequest(req : DocumentRequest) {
+        this.relevantRequests!.unshift(req)
+        this.showHideRequest = false
     }
 }
 

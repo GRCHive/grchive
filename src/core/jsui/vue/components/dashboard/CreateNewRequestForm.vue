@@ -25,7 +25,7 @@
             :items="requestLinkageItems"
             label="Link To"
             :rules="[rules.nonZero]"
-            :readonly="!canEdit || !!referenceCat"
+            :readonly="!canEdit || !!referenceCat || !!referenceControl || catId != -1"
             filled
         >
         </v-select>
@@ -45,7 +45,7 @@
             <control-search-form-component
                 v-model="linkControl"
                 :rules="[rules.required]"
-                :readonly="editMode"
+                :readonly="editMode || !!referenceControl"
             >
             </control-search-form-component>
         </div>
@@ -127,10 +127,10 @@ const Props = Vue.extend({
             type: Object,
             default: () => null as ControlDocumentationCategory | null
         },
-        linkage: {
-            type : Number,
-            default: RequestLinkageMode.None
-        }
+        referenceControl: {
+            type: Object,
+            default: () => null as ProcessFlowControl | null
+        },
     },
     components: {
         DocumentCategorySearchFormComponent,
@@ -240,10 +240,10 @@ export default class CreateNewRequestForm extends Props {
 
     mounted() {
         this.canEdit = !this.editMode
-        this.currentLinkage = this.linkage
         this.clearForm()
     }
 
+    @Watch('referenceControl')
     @Watch('referenceCat')
     clearForm() {
         if (!!this.referenceReq) {
@@ -256,10 +256,14 @@ export default class CreateNewRequestForm extends Props {
             if (this.catId == -1) {
                 this.realCat = null
             }
+            this.linkControl = null
         }
 
-        if (!!this.referenceCat) {
+        if (!!this.referenceCat || this.catId != -1) {
             this.currentLinkage = RequestLinkageMode.DocCat
+        } else if (!!this.referenceControl) {
+            this.currentLinkage = RequestLinkageMode.Controls
+            this.linkControl = this.referenceControl
         }
     }
 }

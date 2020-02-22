@@ -45,3 +45,20 @@ func FindControlLinkedToDocRequest(requestId int64, orgId int32, role *core.Role
 	return &control, err
 
 }
+
+func FindDocRequestsLinkedToControl(controlId int64, orgId int32, role *core.Role) ([]*core.DocumentRequest, error) {
+	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessView) ||
+		!role.Permissions.HasAccess(core.ResourceControls, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	requests := make([]*core.DocumentRequest, 0)
+	err := dbConn.Select(&requests, `
+		SELECT req.*
+		FROM document_requests AS req
+		INNER JOIN request_control_link AS link
+			ON link.request_id = req.id
+		WHERE link.control_id = $1 AND link.org_id = $2
+	`, controlId, orgId)
+	return requests, err
+}
