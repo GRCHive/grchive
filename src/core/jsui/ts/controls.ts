@@ -42,7 +42,7 @@ export interface ControlDocumentationFileHandle {
 
 export interface FullControlData {
     Control: ProcessFlowControl
-    Nodes: ProcessFlowNode[]
+    Flows: ProcessFlowBasicData[]
     Risks: ProcessFlowRisk[]
 }
 

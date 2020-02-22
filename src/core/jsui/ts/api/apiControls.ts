@@ -11,6 +11,7 @@ import { getControlTypesUrl,
 import { postFormUrlEncoded, postFormJson } from '../http'
 import { FullControlData, ControlFilterData } from '../controls'
 import { getAPIRequestConfig } from './apiUtility'
+import { cleanProcessFlowFromJson } from '../processFlow'
 
 export interface TGetControlTypesInput {
 }
@@ -112,5 +113,8 @@ export interface TSingleControlOutput {
 }
 
 export function getSingleControl(inp : TSingleControlInput) : Promise<TSingleControlOutput> {
-    return axios.get(createSingleControlAPIUrl(inp.controlId) + '?' + qs.stringify(inp), getAPIRequestConfig())
+    return axios.get(createSingleControlAPIUrl(inp.controlId) + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TSingleControlOutput) => {
+        resp.data.Flows.forEach(cleanProcessFlowFromJson)
+        return resp
+    })
 }

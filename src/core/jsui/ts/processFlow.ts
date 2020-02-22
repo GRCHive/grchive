@@ -32,3 +32,8 @@ export function isProcessFullDataEmpty(data : FullProcessFlowData) : boolean {
 
     return false
 }
+
+export function cleanProcessFlowFromJson(data : ProcessFlowBasicData) {
+    data.CreationTime = new Date(data.CreationTime)
+    data.LastUpdatedTime = new Date(data.LastUpdatedTime)
+}

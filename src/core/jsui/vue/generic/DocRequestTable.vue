@@ -10,6 +10,7 @@ import { createUserString } from '../../ts/users'
 import { createSingleDocRequestUrl, contactUsUrl } from '../../ts/url'
 import { TGetDocCatOutput, getDocumentCategory } from '../../ts/api/apiControlDocumentation'
 import { PageParamsStore } from '../../ts/pageParams'
+import { standardFormatTime } from '../../ts/time'
 
 @Component({
     components: {
@@ -54,7 +55,7 @@ export default class DocRequestTable extends ResourceTableProps {
             id: inp.Id,
             name: inp.Name,
             requester: createUserString(MetadataStore.getters.getUser(inp.RequestedUserId)),
-            requestTime: inp.RequestTime.toString(),
+            requestTime: standardFormatTime(inp.RequestTime),
             complete: !!inp.CompletionTime,
             value: inp
         }

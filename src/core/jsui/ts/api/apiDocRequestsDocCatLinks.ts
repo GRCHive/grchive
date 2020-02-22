@@ -5,7 +5,7 @@ import {
 } from '../url'
 import { getAPIRequestConfig } from './apiUtility'
 import { ControlDocumentationCategory } from '../controls'
-import { DocumentRequest } from '../docRequests'
+import { DocumentRequest, cleanJsonDocumentRequest } from '../docRequests'
 
 export interface TAllDocRequestDocCatLinksInput {
     requestId?: number
@@ -21,5 +21,11 @@ export interface TAllDocRequestDocCatLinksOutput {
 }
 
 export function allDocRequestDocCatLink(inp : TAllDocRequestDocCatLinksInput) : Promise<TAllDocRequestDocCatLinksOutput> {
-    return axios.get(allDocRequestDocCatLinksUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+    return axios.get(allDocRequestDocCatLinksUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TAllDocRequestDocCatLinksOutput) => {
+        if (!!resp.data.Requests) {
+            resp.data.Requests.forEach(cleanJsonDocumentRequest)
+        }
+        return resp
+    })
+
 }

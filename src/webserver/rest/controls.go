@@ -368,11 +368,9 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type FullControlData struct {
-		Control       *core.Control
-		Flows         []*core.ProcessFlow
-		Risks         []*core.Risk
-		InputDocCats  []*core.ControlDocumentationCategory
-		OutputDocCats []*core.ControlDocumentationCategory
+		Control *core.Control
+		Flows   []*core.ProcessFlow
+		Risks   []*core.Risk
 	}
 	data := FullControlData{}
 	data.Control, err = webcore.GetControlFromRequestUrl(r, core.ServerRole)
@@ -402,9 +400,6 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	data.InputDocCats = make([]*core.ControlDocumentationCategory, 0)
-	data.OutputDocCats = make([]*core.ControlDocumentationCategory, 0)
 
 	jsonWriter.Encode(data)
 }

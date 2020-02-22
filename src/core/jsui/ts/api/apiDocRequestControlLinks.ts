@@ -4,7 +4,7 @@ import {
     allDocRequestControlLinksUrl 
 } from '../url'
 import { getAPIRequestConfig } from './apiUtility'
-import { DocumentRequest } from '../docRequests'
+import { DocumentRequest, cleanJsonDocumentRequest } from '../docRequests'
 
 export interface TAllDocRequestControlLinksInput {
     requestId?: number
@@ -20,5 +20,10 @@ export interface TAllDocRequestControlLinksOutput {
 }
 
 export function allDocRequestControlLink(inp : TAllDocRequestControlLinksInput) : Promise<TAllDocRequestControlLinksOutput> {
-    return axios.get(allDocRequestControlLinksUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+    return axios.get(allDocRequestControlLinksUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TAllDocRequestControlLinksOutput) => {
+        if (!!resp.data.Requests) {
+            resp.data.Requests.forEach(cleanJsonDocumentRequest)
+        }
+        return resp
+    })
 }

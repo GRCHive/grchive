@@ -9,6 +9,7 @@ import { newRiskAPIUrl,
          createSingleRiskAPIUrl } from '../url'
 import { FullRiskData, RiskFilterData } from '../risks'
 import { getAPIRequestConfig } from './apiUtility'
+import { cleanProcessFlowFromJson } from '../processFlow'
 
 export interface TNewRiskInput {
     name: string
@@ -91,5 +92,8 @@ export interface TSingleRiskOutput {
 }
 
 export function getSingleRisk(inp : TSingleRiskInput) : Promise<TSingleRiskOutput> {
-    return axios.get(createSingleRiskAPIUrl(inp.riskId) + '?' + qs.stringify(inp), getAPIRequestConfig())
+    return axios.get(createSingleRiskAPIUrl(inp.riskId) + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TSingleRiskOutput) => {
+        resp.data.Flows.forEach(cleanProcessFlowFromJson)
+        return resp
+    })
 }
