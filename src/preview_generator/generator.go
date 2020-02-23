@@ -47,8 +47,9 @@ func isFileSupported(filename string) FileSupport {
 	}
 
 	mime := stdout.String()
+	core.Info(mime)
 	if strings.HasPrefix(mime, "text/") || strings.HasPrefix(mime, "image/") {
-		return FileSupport{false, false}
+		return FileSupport{true, false}
 	}
 
 	for _, m := range supportedApplicationMIME {
