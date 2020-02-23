@@ -61,10 +61,12 @@ type HashIdConfigData struct {
 }
 
 type RabbitMQConfig struct {
-	Username string
-	Password string
-	Host     string
-	Port     int32
+	Username      string
+	Password      string
+	Host          string
+	Port          int32
+	UseTLS        bool
+	TLSRootCaCert string
 }
 
 type GrpcEndpoints struct {
@@ -176,6 +178,8 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.RabbitMQ.Password = tomlConfig.Get("rabbitmq.password").(string)
 	envConfig.RabbitMQ.Host = tomlConfig.Get("rabbitmq.host").(string)
 	envConfig.RabbitMQ.Port = int32(tomlConfig.Get("rabbitmq.port").(int64))
+	envConfig.RabbitMQ.UseTLS = bool(tomlConfig.Get("rabbitmq.use_tls").(bool))
+	envConfig.RabbitMQ.TLSRootCaCert = tomlConfig.Get("rabbitmq.tls.root_ca").(string)
 
 	envConfig.Grpc = new(GrpcEndpoints)
 	envConfig.Grpc.QueryRunnerHost = tomlConfig.Get("grpc.query_runner.host").(string)

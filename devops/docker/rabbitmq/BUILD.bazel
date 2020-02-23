@@ -11,23 +11,24 @@ genrule(
     outs = [
         "run_rabbitmq.sh"
     ],
-    cmd = ". $(location //build:bash) && envsubst '$${RABBITMQ_USER} $${RABBITMQ_PASSWORD}' < $< > $@",
+    cmd = ". $(location //build:bash_env) && envsubst '$${RABBITMQ_USER} $${RABBITMQ_PASSWORD}' < $< > $@",
     tools = [
-        "//build:bash"
+        "//build:bash_env"
     ]
 )
 
 genrule(
-    name = "rabbitmq",
-    srcs = [
-        "rabbitmq.conf.tmpl"
-    ],
+    name = "rabbitmq-conf",
+    srcs = select({
+        "//build:kube-env": ["rabbitmq.prod.conf.tmpl"],
+        "//conditions:default": ["rabbitmq.dev.conf.tmpl"],
+    }),
     outs = [
         "etc/rabbitmq/rabbitmq.conf"
     ],
-    cmd = ". $(location //build:bash) && envsubst '$${RABBITMQ_PORT}' < $< > $@",
+    cmd = ". $(location //build:bash_env) && envsubst '$${RABBITMQ_PORT}' < $< > $@",
     tools = [
-        "//build:bash"
+        "//build:bash_env"
     ]
 )
 
@@ -36,7 +37,7 @@ container_image(
     base = "@rabbitmq//image",
     files = [
         ":run_rabbitmq",
-        ":rabbitmq"
+        ":rabbitmq-conf"
     ],
     data_path = ".",
     cmd = "./run_rabbitmq.sh",

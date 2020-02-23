@@ -1,6 +1,5 @@
 #!/bin/bash
 
-gcloud container clusters get-credentials webserver-gke-cluster
 kubectl create secret generic gke-service-account --from-file=gcloud-service-account.json=devops/gcloud/gcloud-kubernetes-account.json -o yaml --dry-run --save-config | kubectl apply -f -
 kubectl create secret docker-registry regcred --docker-server=registry.gitlab.com --docker-username=${GKE_REGISTRY_USER} --docker-password=${GKE_REGISTRY_PASSWORD} -o yaml --dry-run --save-config | kubectl apply -f -
 

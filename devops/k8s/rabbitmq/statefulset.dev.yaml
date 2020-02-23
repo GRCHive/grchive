@@ -20,10 +20,25 @@ spec:
               image: bazel/devops/docker/rabbitmq:rabbitmq
               imagePullPolicy: Never
               ports:
-              - containerPort: 5672
+              - containerPort: 5671
               volumeMounts:
               - mountPath: /var/lib/rabbitmq
                 name: rabbitmq
+              - mountPath: /opt/certs/rabbitmq
+                name: rabbitmq-service-certificate
+                readOnly: true
+              - mountPath: /opt/certs/rootca
+                name: rootca
+                readOnly: true
+            volumes:
+                - name: rabbitmq-service-certificate
+                  secret:
+                    secretName: rabbitmq-service-certificate
+                    defaultMode: 256
+                - name: rootca
+                  secret:
+                    secretName: rootca
+                    defaultMode: 256
     volumeClaimTemplates:
       - metadata:
             name: rabbitmq

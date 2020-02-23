@@ -18,3 +18,12 @@ spec:
                 - name: database-fetcher-container
                   image: bazel/devops/docker/database_fetcher:docker_database_fetcher
                   imagePullPolicy: Never
+                  volumeMounts:
+                  - mountPath: /opt/certs/rootca
+                    name: rootca
+                    readOnly: true
+            volumes:
+                - name: rootca
+                  secret:
+                    secretName: rootca
+                    defaultMode: 256

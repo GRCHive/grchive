@@ -1,10 +1,13 @@
 package webcore
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"github.com/streadway/amqp"
 	"gitlab.com/grchive/grchive/core"
+	"io/ioutil"
 )
 
 const DEFAULT_EXCHANGE string = ""
@@ -115,10 +118,30 @@ func (r *RabbitMQConnection) publishWorker(idx int) {
 	}
 }
 
-func CreateRabbitMQConnection(url string, numChannels int) *RabbitMQConnection {
-	connection, err := amqp.Dial(url)
-	if err != nil {
-		core.Error("Failed to dial RabbitMQ: " + err.Error())
+func CreateRabbitMQConnection(cfg core.RabbitMQConfig, numChannels int) *RabbitMQConnection {
+	var connection *amqp.Connection
+	var err error
+	url := generateUrlFromConfig(cfg)
+
+	if cfg.UseTLS {
+		tlsCfg := new(tls.Config)
+		tlsCfg.RootCAs = x509.NewCertPool()
+
+		ca, err := ioutil.ReadFile(cfg.TLSRootCaCert)
+		if err != nil {
+			core.Error("Failed to read CA cert: " + err.Error())
+		}
+		tlsCfg.RootCAs.AppendCertsFromPEM(ca)
+
+		connection, err = amqp.DialTLS(url, tlsCfg)
+		if err != nil {
+			core.Error("Failed to dial RabbitMQ (TLS): " + err.Error())
+		}
+	} else {
+		connection, err = amqp.Dial(url)
+		if err != nil {
+			core.Error("Failed to dial RabbitMQ (non-TLS): " + err.Error())
+		}
 	}
 
 	c := RabbitMQConnection{
@@ -190,13 +213,18 @@ type RealRabbitMQInterface struct {
 }
 
 func generateUrlFromConfig(cfg core.RabbitMQConfig) string {
-	return fmt.Sprintf("amqp://%s:%s@%s:%d/", cfg.Username, cfg.Password, cfg.Host, cfg.Port)
+	var prefix string
+	if cfg.UseTLS {
+		prefix = "amqps://"
+	} else {
+		prefix = "amqp://"
+	}
+	return fmt.Sprintf("%s%s:%s@%s:%d/", prefix, cfg.Username, cfg.Password, cfg.Host, cfg.Port)
 }
 
 func (r *RealRabbitMQInterface) Connect(cfg core.RabbitMQConfig) {
-	url := generateUrlFromConfig(cfg)
-	r.publish = CreateRabbitMQConnection(url, 4)
-	r.consume = CreateRabbitMQConnection(url, 1)
+	r.publish = CreateRabbitMQConnection(cfg, 4)
+	r.consume = CreateRabbitMQConnection(cfg, 1)
 }
 
 func (r *RealRabbitMQInterface) SendMessage(msg PublishMessage) {

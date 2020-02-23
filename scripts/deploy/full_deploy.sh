@@ -68,6 +68,9 @@ ${DIR}/terraform.sh
 gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
 gcloud config set project ${GRCHIVE_PROJECT}
 gcloud config set compute/zone us-central1-c
+gcloud container clusters get-credentials webserver-gke-cluster
+
+${DIR}/deploy_self_signed_certificates.sh
 ${DIR}/deploy_k8s.sh
 
 kill -9 $PROXY_PID

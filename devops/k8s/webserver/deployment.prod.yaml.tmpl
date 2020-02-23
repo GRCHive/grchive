@@ -31,6 +31,10 @@ spec:
                         port: 8080
                     initialDelaySeconds: 15
                     periodSeconds: 20
+                  volumeMounts:
+                  - mountPath: /opt/certs/rootca
+                    name: rootca
+                    readOnly: true
                 - name: nginx-container
                   image: ${NGINX_IMAGE}
                   ports:
@@ -79,5 +83,9 @@ spec:
                 - name: ssl-certificate
                   secret:
                     secretName: grchive-cert-prod
+                - name: rootca
+                  secret:
+                    secretName: rootca
+                    defaultMode: 256
             imagePullSecrets:
                 - name: regcred

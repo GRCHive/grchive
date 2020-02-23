@@ -27,7 +27,9 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `RABBITMQ_USER`: The username to use to connect to the RabbitMQ server in the Docker container.
 - `RABBITMQ_PASSWORD`: The password to use to connect to the RabbitMQ server in the Docker container.
 - `RABBITMQ_HOST`: The hostname/IP address of the RabbitMQ server to connect to.
-- `RABBITMQ_PORT`: The port the RabbitMQ server is listening on.
+- `RABBITMQ_PORT`: The port the RabbitMQ server is listening on. For non-TLS connections, this should be 5672 and for TLS connections this should be 5671.
+- `RABBITMQ_TLS`: Whether to use TLS to connect to the RabbitMQ server.
+- `RABBITMQ_ROOT_CA_CRT`: Path to the root certificate used for the RabbitMQ server.
 
 ### PostgreSQL
 
@@ -248,10 +250,33 @@ After ensuring all these things, you may need to
 Finally, run `eval $(minikube docker-env)` to ensure docker containers are available to minikube.
 At this point you will need to rebuild all Docker containers.
 
+### Additional Build Parameters
+
+You will now need to rebuild most targets with the additional command line of
+
+```
+--platforms=//build:k8s
+```
+
+e.g.
+
+```
+bazel build --platforms=//build:k8s //src/webserver:webserver
+```
+
 ### Storage
 
 - `cd $SRC/devops/k8s/storage/dev`
 - `kubectl apply -f .`
+
+### Self-Signed Certificates
+
+We use self-signed certificates to communicate with backend services.
+To generate and deploy them onto your Minikube cluster run
+
+```
+$SRC/scripts/deploy/deploy_self_signed_certificate.sh
+```
 
 ### PostgreSQL
 
