@@ -209,6 +209,7 @@ export default Vue.extend({
             })
         },
         handleHotkeys(e : KeyboardEvent) {
+            console.log("handle hot key: " , e)
             if (e.code == "Delete") {
                 VueSetup.store.dispatch('requestDeletionOfSelection')
                 e.stopPropagation()

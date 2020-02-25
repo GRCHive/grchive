@@ -203,11 +203,26 @@ export default Vue.extend({
 
 
                 if (this.ready) {
+                    //@ts-ignore
+                    let ele : HTMLElement = this.$refs.rendererVue.$el
                     // Add events here to let toolbar handle input events.
+                    document.addEventListener('keydown', (e : KeyboardEvent) => {
+                        if (!document.activeElement) {
+                            return
+                        }
+                        
+                        // This needs to be here so that the delete doesn't
+                        // accidentally trigger a hotkey when a dialog is
+                        // in focus.
+                        if (!document.activeElement!.contains(ele)) {
+                            return
+                        }
+
+                        //@ts-ignore
+                        this.$refs.toolbar.handleHotkeys(e)
+                    })
                     //@ts-ignore
-                    this.$refs.rendererVue.$el.addEventListener('keydown', this.$refs.toolbar.handleHotKeys)
-                    //@ts-ignore
-                    this.$refs.rendererVue.$el.addEventListener('wheel', this.$refs.toolbar.handleScroll)
+                    ele.addEventListener('wheel', this.$refs.toolbar.handleScroll)
                 }
             })
         }
