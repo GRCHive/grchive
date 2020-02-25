@@ -223,18 +223,20 @@
                                     </risk-table>
                                 </v-tab-item>
 
-                                <v-tab v-if="!!relevantSystems">Systems</v-tab>
-                                <v-tab-item v-if="!!relevantSystems">
+                                <v-tab :disabled="!relevantSystems">Systems</v-tab>
+                                <v-tab-item>
                                     <systems-table
                                         :resources="relevantSystems"
+                                        v-if="!!relevantSystems"
                                     >
                                     </systems-table>
                                 </v-tab-item>
 
-                                <v-tab v-if="!!relevantAccounts">Accounts</v-tab>
-                                <v-tab-item v-if="!!relevantAccounts">
+                                <v-tab :disabled="!relevantAccounts">Accounts</v-tab>
+                                <v-tab-item>
                                     <general-ledger-accounts-table
                                         :resources="relevantAccounts"
+                                        v-if="!!relevantAccounts"
                                     >
                                     </general-ledger-accounts-table>
                                 </v-tab-item>
