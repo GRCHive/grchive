@@ -139,6 +139,8 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"RabbitMQ.Password", "rabbitmq.password", "asdfasdf", nil},
 					{"RabbitMQ.Host", "rabbitmq.host", "hostname", nil},
 					{"RabbitMQ.Port", "rabbitmq.port", int64(64), int32(64)},
+					{"RabbitMQ.UseTLS", "rabbitmq.use_tls", true, nil},
+					{"RabbitMQ.TLSRootCaCert", "rabbitmq.tls.root_ca", "root_ca", nil},
 					{"Grpc.QueryRunnerHost", "grpc.query_runner.host", "hostname", nil},
 					{"Grpc.QueryRunnerPort", "grpc.query_runner.port", int64(128), int32(128)},
 				},

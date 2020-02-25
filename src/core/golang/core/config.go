@@ -178,7 +178,7 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.RabbitMQ.Password = tomlConfig.Get("rabbitmq.password").(string)
 	envConfig.RabbitMQ.Host = tomlConfig.Get("rabbitmq.host").(string)
 	envConfig.RabbitMQ.Port = int32(tomlConfig.Get("rabbitmq.port").(int64))
-	envConfig.RabbitMQ.UseTLS = bool(tomlConfig.Get("rabbitmq.use_tls").(bool))
+	envConfig.RabbitMQ.UseTLS = tomlConfig.Get("rabbitmq.use_tls").(bool)
 	envConfig.RabbitMQ.TLSRootCaCert = tomlConfig.Get("rabbitmq.tls.root_ca").(string)
 
 	envConfig.Grpc = new(GrpcEndpoints)
