@@ -110,7 +110,7 @@ export default class ProcessFlowRiskControlLinkage extends Vue {
     }
 
     get currentFlowRisks() : ProcessFlowRisk[] {
-        return VueSetup.store.getters.riskList
+        return VueSetup.store.getters.linkedRiskList
     }
 
     @Watch('currentFlowRisks')
