@@ -15,10 +15,9 @@ seal "gcpckms" {
 
 listener "tcp" {
     address     = "0.0.0.0:${VAULT_PORT}"
-    tls_disable = 1
-//    tls_disable = 0
-//    tls_cert_file = "/etc/letsencrypt/live/grchive.com/fullchain.pem"
-//    tls_key_file = "/etc/letsencrypt/live/grchive.com/privkey.pem"
+    tls_disable = 0
+    tls_cert_file = "/opt/certs/vault/internal-vault-service.crt"
+    tls_key_file = "/opt/certs/vault/internal-vault-service.key"
 }
 
 disable_mlock = true

@@ -31,7 +31,6 @@ spec:
                 readOnly: true
             imagePullSecrets:
                 - name: regcred
-                - name: ssl-certificate
             volumes:
                 - name: rabbitmq-service-certificate
                   secret:
