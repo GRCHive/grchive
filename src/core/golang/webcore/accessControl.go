@@ -130,12 +130,7 @@ func GrantAPIKeyDefaultRole(key *core.ApiKey, orgId int32) (*core.Role, error) {
 	return retRole, nil
 }
 
-func GetCurrentRequestRole(r *http.Request, orgId int32) (*core.Role, error) {
-	key, err := FindApiKeyInContext(r.Context())
-	if err != nil {
-		return nil, err
-	}
-
+func GetRoleFromKey(key *core.ApiKey, orgId int32) (*core.Role, error) {
 	role, err := ObtainAPIKeyRole(key, orgId)
 	if err != nil {
 		return nil, err
@@ -151,4 +146,12 @@ func GetCurrentRequestRole(r *http.Request, orgId int32) (*core.Role, error) {
 	}
 
 	return role, nil
+}
+
+func GetCurrentRequestRole(r *http.Request, orgId int32) (*core.Role, error) {
+	key, err := FindApiKeyInContext(r.Context())
+	if err != nil {
+		return nil, err
+	}
+	return GetRoleFromKey(key, orgId)
 }

@@ -17,34 +17,10 @@ type ProcessFlowNodeDisplaySettingsPayload struct {
 	Settings map[string]interface{}
 }
 
-func processProcessFlowNodeDisplaySettings(conn *websocket.Conn, r *http.Request) {
+func processProcessFlowNodeDisplaySettings(conn *websocket.Conn, r *http.Request, role *core.Role) {
 	flowId, err := webcore.GetProcessFlowIdFromRequest(r)
 	if err != nil {
 		core.Warning("Failed to get flow id: " + err.Error())
-		return
-	}
-
-	organization, err := database.FindOrganizationFromProcessFlowId(flowId, core.ServerRole)
-	if err != nil {
-		core.Warning("Failed to get organization: " + err.Error())
-		return
-	}
-
-	userParsedData, err := webcore.FindSessionParsedDataInContext(r.Context())
-	if err != nil {
-		core.Warning("Failed to get session parsed data: " + err.Error())
-		return
-	}
-
-	key, err := database.FindApiKeyForUser(userParsedData.CurrentUser.Id)
-	if err != nil {
-		core.Warning("Failed to get user: " + err.Error())
-		return
-	}
-
-	role, err := webcore.ObtainAPIKeyRole(key, organization.Id)
-	if err != nil {
-		core.Warning("Failed to get role: " + err.Error())
 		return
 	}
 

@@ -35,33 +35,37 @@ function connectWebsocket(context : any, host : string, csrf : string, processFl
         websocketConnection.close()
     }
 
-    websocketConnection = connectProcessFlowNodeDisplaySettingsWebsocket(host, csrf, processFlowStore.state.currentProcessFlowFullData.FlowId)
-    websocketConnection.onopen = () => {
-        if (wsBuffer.length > 0) {
-            for (let b of wsBuffer) {
-                websocketConnection.send(b)
+    connectProcessFlowNodeDisplaySettingsWebsocket(host, csrf, processFlowStore.state.currentProcessFlowFullData.FlowId).then(
+        (ws : WebSocket) => {
+            websocketConnection = ws
+
+            if (wsBuffer.length > 0) {
+                for (let b of wsBuffer) {
+                    websocketConnection.send(b)
+                }
+                wsBuffer = []
             }
-            wsBuffer = []
+            context.commit('setReady')
+
+            websocketConnection.onclose = (e : CloseEvent) => {
+                if (e.code != 1001) {
+                    // Automatically try to reconnect?
+                    connectWebsocket(context, host, csrf, processFlowStore)
+                }
+            }
+            websocketConnection.onmessage = (e : MessageEvent) => {
+                // For now only grab the node's transform since everything else
+                // can just be computed.
+                let data : { NodeId: number, Settings: NodeLayout }= JSON.parse(e.data)
+                context.commit('setNodeDisplayTranslation', {
+                    nodeId: data.NodeId,
+                    tx: data.Settings.transform.tx,
+                    ty: data.Settings.transform.ty,
+                    sendUpdate: false  
+                })
+            }
         }
-        context.commit('setReady')
-    }
-    websocketConnection.onclose = (e : CloseEvent) => {
-        if (e.code != 1001) {
-            // Automatically try to reconnect?
-            connectWebsocket(context, host, csrf, processFlowStore)
-        }
-    }
-    websocketConnection.onmessage = (e : MessageEvent) => {
-        // For now only grab the node's transform since everything else
-        // can just be computed.
-        let data : { NodeId: number, Settings: NodeLayout }= JSON.parse(e.data)
-        context.commit('setNodeDisplayTranslation', {
-            nodeId: data.NodeId,
-            tx: data.Settings.transform.tx,
-            ty: data.Settings.transform.ty,
-            sendUpdate: false  
-        })
-    }
+    )
 }
 
 function processIOGroupLayout(layout : IOGroupLayout, initialTransform: TransformData) {
