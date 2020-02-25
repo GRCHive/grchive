@@ -12,7 +12,7 @@ func FindSystemsLinkedToControl(controlId int64, orgId int32, role *core.Role) (
 
 	systems := make([]*core.System, 0)
 	err := dbConn.Select(&systems, `
-		SELECT sys.*
+		SELECT DISTINCT sys.*
 		FROM systems AS sys
 		INNER JOIN node_system_link AS nsl
 			ON nsl.system_id = sys.id
@@ -35,7 +35,7 @@ func FindControlsLinkedToSystem(systemId int64, orgId int32, role *core.Role) ([
 
 	controls := make([]*core.Control, 0)
 	err := dbConn.Select(&controls, `
-		SELECT control.*
+		SELECT DISTINCT control.*
 		FROM process_flow_controls AS control
 		INNER JOIN process_flow_risk_control AS rc
 			ON rc.control_id = control.id

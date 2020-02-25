@@ -12,7 +12,7 @@ func FindGeneralLedgerAccountsLinkedToRisk(riskId int64, orgId int32, role *core
 
 	accounts := make([]*core.GeneralLedgerAccount, 0)
 	err := dbConn.Select(&accounts, `
-		SELECT acc.*
+		SELECT DISTINCT acc.*
 		FROM general_ledger_accounts AS acc
 		INNER JOIN node_gl_link AS ngl
 			ON ngl.gl_account_id = acc.id
@@ -33,7 +33,7 @@ func FindRisksLinkedToGeneralLedgerAccount(accountId int64, orgId int32, role *c
 
 	risks := make([]*core.Risk, 0)
 	err := dbConn.Select(&risks, `
-		SELECT 
+		SELECT DISTINCT
 			risk.id,
 			risk.name,
 			risk.description,

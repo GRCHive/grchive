@@ -12,7 +12,7 @@ func FindGeneralLedgerAccountsLinkedToControl(controlId int64, orgId int32, role
 
 	accounts := make([]*core.GeneralLedgerAccount, 0)
 	err := dbConn.Select(&accounts, `
-		SELECT acc.*
+		SELECT DISTINCT acc.*
 		FROM general_ledger_accounts AS acc
 		INNER JOIN node_gl_link AS ngl
 			ON ngl.gl_account_id = acc.id
@@ -33,7 +33,7 @@ func FindControlsLinkedToGeneralLedgerAccount(accountId int64, orgId int32, role
 
 	controls := make([]*core.Control, 0)
 	err := dbConn.Select(&controls, `
-		SELECT control.*
+		SELECT DISTINCT control.*
 		FROM process_flow_controls AS control
 		INNER JOIN process_flow_control_node AS cn
 			ON cn.control_id = control.id
