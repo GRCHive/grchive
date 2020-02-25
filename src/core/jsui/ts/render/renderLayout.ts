@@ -30,12 +30,12 @@ const plugHeight: number = 20
 let websocketConnection : WebSocket
 let wsBuffer : any[] = []
 
-function connectWebsocket(context : any, host : string, csrf : string, processFlowStore : any) {
+function connectWebsocket(context : any, host : string, processFlowStore : any) {
     if (!!websocketConnection) {
         websocketConnection.close()
     }
 
-    connectProcessFlowNodeDisplaySettingsWebsocket(host, csrf, processFlowStore.state.currentProcessFlowFullData.FlowId).then(
+    connectProcessFlowNodeDisplaySettingsWebsocket(host, processFlowStore.state.currentProcessFlowFullData.FlowId).then(
         (ws : WebSocket) => {
             websocketConnection = ws
 
@@ -50,7 +50,7 @@ function connectWebsocket(context : any, host : string, csrf : string, processFl
             websocketConnection.onclose = (e : CloseEvent) => {
                 if (e.code != 1001) {
                     // Automatically try to reconnect?
-                    connectWebsocket(context, host, csrf, processFlowStore)
+                    connectWebsocket(context, host, processFlowStore)
                 }
             }
             websocketConnection.onmessage = (e : MessageEvent) => {
@@ -359,7 +359,7 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
     actions: {
         // initialize should be called as late as possible to ensure that the
         // metadata datastore has already been fully initialized.
-        initialize(context, {host, csrf, processFlowStore}) {
+        initialize(context, {host, processFlowStore}) {
             processFlowStore.watch((state : VuexState) => {
                 return state.currentProcessFlowFullData
             }, (newFlowData : FullProcessFlowData | null, oldFlowData: FullProcessFlowData | null) => {
@@ -376,7 +376,7 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
                         processFlowStore.state.currentProcessFlowFullData)
 
                     if (newFlow) {
-                        connectWebsocket(context, host, csrf, processFlowStore)
+                        connectWebsocket(context, host, processFlowStore)
                     }
 
             }, {
