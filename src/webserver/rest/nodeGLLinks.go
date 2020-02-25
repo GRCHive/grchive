@@ -92,7 +92,11 @@ func allNodeGLLink(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		jsonWriter.Encode(flows)
+		jsonWriter.Encode(struct {
+			Flows []*core.ProcessFlow
+		}{
+			Flows: flows,
+		})
 	} else {
 		core.Warning("Invalid combination of inputs.")
 		w.WriteHeader(http.StatusBadRequest)

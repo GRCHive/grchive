@@ -168,7 +168,7 @@ export default class FullEditGeneralLedgerAccountComponent extends Vue {
             accountId: this.glAccount.Id,
             orgId: PageParamsStore.state.organization!.Id,
         }).then((resp : TAllNodeGLLinkOutput) => {
-            this.relatedFlows = <ProcessFlowBasicData[]>resp.data
+            this.relatedFlows = resp.data.Flows!
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

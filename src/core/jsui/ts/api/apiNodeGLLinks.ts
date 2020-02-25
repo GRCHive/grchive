@@ -8,6 +8,7 @@ import {
 import { postFormJson } from '../http'
 import { getAPIRequestConfig } from './apiUtility'
 import { RawGeneralLedgerAccount, RawGeneralLedgerCategory } from '../generalLedger'
+import { cleanProcessFlowFromJson } from '../processFlow'
 
 export interface TNewNodeGLLinkInput {
     nodeId: number
@@ -39,10 +40,15 @@ export interface TAllNodeGLLinkOutput {
     data: {
         Accounts?: RawGeneralLedgerAccount[]
         Categories?: RawGeneralLedgerCategory[]
-        Nodes?:  ProcessFlowBasicData[]
+        Flows?:  ProcessFlowBasicData[]
     }
 }
 
 export function allNodeGLLink(inp : TAllNodeGLLinkInput) : Promise<TAllNodeGLLinkOutput> {
-    return axios.get(allNodeGLLinkUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+    return axios.get(allNodeGLLinkUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TAllNodeGLLinkOutput) => {
+        if (!!resp.data.Flows) {
+            resp.data.Flows!.forEach(cleanProcessFlowFromJson)
+        }
+        return resp
+    })
 }
