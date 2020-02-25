@@ -33,7 +33,7 @@
             <v-col cols="6" v-if="metadataReady" class="py-0">
                 <div class="mt-2 mr-3">
                     <v-list-item two-line class="pa-0">
-                        <v-list-item-content>
+                        <v-list-item-content class="file-title-content">
                             <v-list-item-title class="title">
                                 File: {{ metadata.AltName }}
                             </v-list-item-title>
@@ -41,10 +41,9 @@
                             <v-list-item-subtitle>
                                 Parent Category: <a :href="parentCatUrl">{{ parentCat.Name }}</a>
                             </v-list-item-subtitle>
-
                         </v-list-item-content>
 
-                        <v-list-item-content>
+                        <v-list-item-content class="file-version-content">
                             <v-select
                                 v-model="selectedVersion"
                                 :items="versionItems"
@@ -675,3 +674,16 @@ export default class FullEditDocumentationComponent extends Vue {
 }
 
 </script>
+
+<style scoped>
+
+.file-title-content {
+    flex: 6 1 !important;
+}
+
+.file-version-content {
+    flex: 0 1 !important;
+    min-width: 100px;
+}
+
+</style>
