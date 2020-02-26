@@ -36,6 +36,12 @@ resource "google_container_cluster" "webserver-gke" {
         }
     }
 
+    private cluster_config {
+        enable_private_nodes = true
+        enable_private_endpoint = true
+        master_ipv4_cidr_block = "172.16.0.0/28"
+    }
+
     ip_allocation_policy {
         cluster_ipv4_cidr_block = ""
         services_ipv4_cidr_block = ""
@@ -70,5 +76,37 @@ resource "google_storage_bucket" "webserver-control-doc-store" {
 
     versioning {
         enabled = true
+    }
+}
+
+resource "google_compute_address" "gke-outbound-network-us-central1-nat-ip" {
+    count   = 1
+    name    = "gke-outbound-network-us-central1-nat-ip-${count.index}"
+    region  = google_compute_subnetwork.gke-outbound-network-us-central1.region
+}
+
+resource "google_compute_router" "gke-outbound-network-us-central1-router" {
+    name        = "gke-outbound-network-us-central1-router"
+    region      = google_compute_subnetwork.gke-outbound-network-us-central1.region
+    network     = google_compute_network.gke-outbound-network.self_link
+}
+
+resource "google_compute_router_nat" "gke-outbound-network-us-central1-nat" {
+    name    = "gke-outbound-network-us-central1-nat"
+    router  = google_compute_router.gke-outbound-network-us-central1-router.name
+    region  = google_compute_router.gke-outbound-network-us-central1-router.region
+
+    nat_ip_allocate_option = "MANUAL_ONLY"
+    nat_ips                = google_compute_address.gke-outbound-network-us-central1-nat-ip.*.self_link
+
+    source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+    subnetwork {
+        name                    = google_compute_subnetwork.gke-outbound-network-us-central1.self_link
+        source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+    }
+
+    log_config {
+        enable = true
+        filter = "ALL"
     }
 }
