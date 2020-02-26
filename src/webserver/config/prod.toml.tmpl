@@ -77,3 +77,8 @@ root_ca = "${ROOT_CA_CRT}"
 [grpc.query_runner]
 host = "${GRPC_QUERY_RUNNER_HOST}"
 port = ${GRPC_QUERY_RUNNER_PORT}
+
+[grpc.query_runner.tls]
+enable = ${GRPC_QUERY_RUNNER_TLS}
+cert = "/opt/certs/query_runner/query-runner-service.crt"
+key = "/opt/certs/query_runner/query-runner-service.key"

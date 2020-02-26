@@ -351,11 +351,7 @@ func runDatabaseQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", core.EnvConfig.Grpc.QueryRunnerHost, core.EnvConfig.Grpc.QueryRunnerPort),
-		grpc.WithInsecure(),
-		grpc.WithBlock(),
-		grpc.WithTimeout(time.Second*30))
-
+	conn, err := webcore.CreateGRPCClientConnection(core.EnvConfig.Grpc.QueryRunner, core.EnvConfig.Tls, grpc.WithTimeout(time.Second*30))
 	if err != nil {
 		core.Warning("Failed to connect to GRPC: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

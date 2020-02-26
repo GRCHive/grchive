@@ -18,5 +18,6 @@ kubectl create secret generic rootca \
 
 $DIR/deploy_single_signed_cert.sh rabbitmq-service $ROOT_CERT_DIR/rootca
 $DIR/deploy_single_signed_cert.sh internal-vault-service $ROOT_CERT_DIR/rootca
+$DIR/deploy_single_signed_cert.sh query-runner-service $ROOT_CERT_DIR/rootca
 
 rm -rf $ROOT_CERT_DIR

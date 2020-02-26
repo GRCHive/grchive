@@ -68,6 +68,7 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `GRCHIVE_DOC_BUCKET`: The Google Cloud Storage bucket in which to store the documentation files.
 - `GRPC_QUERY_RUNNER_HOST`: The hostname of the database_query_runner worker.
 - `GRPC_QUERY_RUNNER_PORT`: The port the database_query_runner worker is listening on.
+- `GRPC_QUERY_RUNNER_TLS`: Whether or not the query runner should use TLS for communication.
 - `ROOT_CA_CRT`: Path to the root certificate used for the self-signed certificates.
 
 ## Setup Dependencies
