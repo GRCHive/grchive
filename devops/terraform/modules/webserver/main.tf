@@ -36,12 +36,6 @@ resource "google_container_cluster" "webserver-gke" {
         }
     }
 
-    private_cluster_config {
-        enable_private_nodes = true
-        enable_private_endpoint = true
-        master_ipv4_cidr_block = "172.16.0.0/28"
-    }
-
     ip_allocation_policy {
         cluster_ipv4_cidr_block = ""
         services_ipv4_cidr_block = ""
