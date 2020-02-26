@@ -12,10 +12,7 @@ done
 
 set -xe
 
-DO_TERRAFORM=0
-USE_ENV_VARIABLES=0
 EXTRA_BUILD_OPTIONS=""
-DEPLOY_GCLOUD=0
 
 case "$ENV" in
     prod)
@@ -60,21 +57,18 @@ case "$ENV" in
         ;;
 
     minikube)
-        USE_ENV_VARIABLES=0
-        DO_TERRAFORM=0
-        DEPLOY_GCLOUD=0
-
         HOST_STATUS=$(minikube status | grep host)
-        if [[ "$HOST_STATUS" == *"Stopped"* ]];
+        if [[ "$HOST_STATUS" == *"Stopped"* ]]; then
             echo "Minikube is not running."
-            return 1
+            exit 1
         fi
 
         EXTRA_BUILD_OPTIONS="-m"
+        eval $(minikube docker-env)
         ;;
 esac
 
-if [[ ! -z $USE_ENV_VARIABLES ]]; then
+if [[ ! -z "$USE_ENV_VARIABLES" ]]; then
     envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
 fi
 
@@ -86,7 +80,7 @@ ${DIR}/build_webserver_container.sh ${EXTRA_BUILD_OPTIONS}
 ${DIR}/build_database_refresh_worker.sh ${EXTRA_BUILD_OPTIONS}
 ${DIR}/build_database_runner_worker.sh ${EXTRA_BUILD_OPTIONS}
 
-if [[ ! -z $DO_TERRAFORM ]]; then
+if [[ ! -z "$DO_TERRAFORM" ]]; then
     gcloud auth activate-service-account --key-file devops/gcloud/gcloud-terraform-account.json
     gcloud config set project ${GRCHIVE_PROJECT}
     gcloud config set compute/zone us-central1-c
@@ -99,7 +93,7 @@ if [[ ! -z $DO_TERRAFORM ]]; then
     kill -9 $PROXY_PID
 fi
 
-if [[ ! -z $DEPLOY_GCLOUD ]]; then
+if [[ ! -z "$DEPLOY_GCLOUD" ]]; then
     gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
     gcloud config set project ${GRCHIVE_PROJECT}
     gcloud config set compute/zone us-central1-c
@@ -107,4 +101,4 @@ if [[ ! -z $DEPLOY_GCLOUD ]]; then
 fi
 
 ${DIR}/deploy_self_signed_certificates.sh
-${DIR}/deploy_k8s.sh
+${DIR}/deploy_k8s.sh ${EXTRA_BUILD_OPTIONS}

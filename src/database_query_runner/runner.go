@@ -74,7 +74,7 @@ func main() {
 		Url:      core.EnvConfig.Vault.Url,
 		Username: core.EnvConfig.Vault.Username,
 		Password: core.EnvConfig.Vault.Password,
-	})
+	}, core.EnvConfig.Tls.Config())
 
 	queryId := flag.Int64("queryId", -1, "Refresh ID to retrieve data for. Will not read from gRPC if specified.")
 	orgId := flag.Int64("orgId", -1, "Org ID to retrieve data for. Will not read from gRPC if specified.")

@@ -44,6 +44,7 @@ go_library(
         "templates.go",
         "time.go",
         "timer.go",
+        "tls.go",
         "types.go",
         "url.go",
         "user.go",

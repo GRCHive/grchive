@@ -1,13 +1,15 @@
 #!/bin/bash
+BUILD_OPT="-c opt"
 while getopts 'm' OPTION; do
     case "$OPTION" in
         m)
             MINIKUBE=1
+            BUILD_OPT=""
             ;;
     esac
 done
 
-bazel build -c opt --platforms=//build:k8s //devops/docker/preview_generator:docker_preview_generator.tar
+bazel build ${BUILD_OPT} --platforms=//build:k8s //devops/docker/preview_generator:docker_preview_generator.tar
 docker load -i bazel-bin/devops/docker/preview_generator/docker_preview_generator.tar
 
 if [[ -z $MINIKUBE ]]; then
