@@ -4,7 +4,7 @@ env = {
     "RABBITMQ_HOST": "rabbitmq-service",
     "RABBITMQ_PORT": 5671,
     "RABBITMQ_TLS": "true",
-    "RABBITMQ_ROOT_CA_CRT": "/opt/certs/rootca/rootca.crt",
+    "ROOT_CA_CRT": "/opt/certs/rootca/rootca.crt",
 
     "POSTGRES_USER": "${POSTGRES_USER}",
     "POSTGRES_PASSWORD": "${POSTGRES_PASSWORD}",
@@ -13,7 +13,7 @@ env = {
 
     "VAULT_USER": "${VAULT_USER}",
     "VAULT_PASSWORD": "${VAULT_PASSWORD}",
-    "VAULT_HOST": "http://internal-vault-service",
+    "VAULT_HOST": "https://internal-vault-service",
     "VAULT_PORT": 8200,
 
     "OKTA_URL": "https://dev-798696.okta.com",
@@ -33,4 +33,5 @@ env = {
 
     "GRPC_QUERY_RUNNER_HOST": "query-runner-service",
     "GRPC_QUERY_RUNNER_PORT": 6000,
+    "GRPC_QUERY_RUNNER_TLS": "true",
 }

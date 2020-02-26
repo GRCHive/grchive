@@ -2,6 +2,7 @@ package vault
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,13 +14,23 @@ type VaultConfig struct {
 	Url      string
 	Username string
 	Password string
-	token    string
+
+	token  string
+	client *http.Client
 }
 
 var GlobalConfig VaultConfig = VaultConfig{}
 
-func Initialize(config VaultConfig) {
+func Initialize(config VaultConfig, tlsConfig *tls.Config) {
 	GlobalConfig = config
+
+	GlobalConfig.client = &http.Client{}
+	if tlsConfig != nil {
+		GlobalConfig.client.Transport = &http.Transport{
+			TLSClientConfig: tlsConfig,
+		}
+	}
+
 	if err := userPassAuth(config.Username, config.Password); err != nil {
 		panic("Failed to auth with Vault: " + err.Error())
 	}
@@ -43,7 +54,7 @@ func sendVaultRequest(method string, endpoint string, data interface{}) (map[str
 	}
 
 	req.Header.Set("X-Vault-Token", GlobalConfig.token)
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := GlobalConfig.client.Do(req)
 	if err != nil {
 		return nil, err
 	}

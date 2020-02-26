@@ -10,8 +10,6 @@ import (
 	"gitlab.com/grchive/grchive/proto/sqlQuery"
 	"gitlab.com/grchive/grchive/vault_api"
 	"gitlab.com/grchive/grchive/webcore"
-	"google.golang.org/grpc"
-	"net"
 	"time"
 )
 
@@ -74,7 +72,7 @@ func main() {
 		Url:      core.EnvConfig.Vault.Url,
 		Username: core.EnvConfig.Vault.Username,
 		Password: core.EnvConfig.Vault.Password,
-	})
+	}, core.EnvConfig.Tls.Config())
 
 	queryId := flag.Int64("queryId", -1, "Refresh ID to retrieve data for. Will not read from gRPC if specified.")
 	orgId := flag.Int64("orgId", -1, "Org ID to retrieve data for. Will not read from gRPC if specified.")
@@ -83,12 +81,7 @@ func main() {
 
 	if *queryId >= 0 && *orgId >= 0 {
 		if *rpcClient {
-			url := fmt.Sprintf("%s:%d", core.EnvConfig.Grpc.QueryRunnerHost, core.EnvConfig.Grpc.QueryRunnerPort)
-			core.Info(url)
-			conn, err := grpc.Dial(url,
-				grpc.WithInsecure(),
-				grpc.WithBlock())
-
+			conn, err := webcore.CreateGRPCClientConnection(core.EnvConfig.Grpc.QueryRunner, core.EnvConfig.Tls)
 			if err != nil {
 				core.Error("Failed to connect to GRPC: " + err.Error())
 			}
@@ -128,14 +121,11 @@ func main() {
 			core.Info(result.CsvText)
 		}
 	} else {
-		url := fmt.Sprintf(":%d", core.EnvConfig.Grpc.QueryRunnerPort)
-		core.Info(url)
-		lis, err := net.Listen("tcp", url)
+		lis, s, err := webcore.CreateGRPCServer(core.EnvConfig.Grpc.QueryRunner)
 		if err != nil {
-			core.Error("Failed to listen: " + err.Error())
+			core.Error("Failed to create GRPC server: " + err.Error())
 		}
 
-		s := grpc.NewServer()
 		sqlQuery.RegisterQueryRunnerServer(s, &server{})
 		if err := s.Serve(lis); err != nil {
 			core.Error("Failed to serve: " + err.Error())

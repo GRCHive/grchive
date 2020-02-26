@@ -127,10 +127,10 @@ func main() {
 		Url:      core.EnvConfig.Vault.Url,
 		Username: core.EnvConfig.Vault.Username,
 		Password: core.EnvConfig.Vault.Password,
-	})
+	}, core.EnvConfig.Tls.Config())
 	gcloud.DefaultGCloudApi.InitFromJson(core.EnvConfig.Gcloud.AuthFilename)
 
-	webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ)
+	webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ, core.EnvConfig.Tls)
 	defer webcore.DefaultRabbitMQ.Cleanup()
 
 	forever := make(chan bool)

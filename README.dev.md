@@ -29,7 +29,6 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `RABBITMQ_HOST`: The hostname/IP address of the RabbitMQ server to connect to.
 - `RABBITMQ_PORT`: The port the RabbitMQ server is listening on. For non-TLS connections, this should be 5672 and for TLS connections this should be 5671.
 - `RABBITMQ_TLS`: Whether to use TLS to connect to the RabbitMQ server.
-- `RABBITMQ_ROOT_CA_CRT`: Path to the root certificate used for the RabbitMQ server.
 
 ### PostgreSQL
 
@@ -40,7 +39,7 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 
 ### Vault
 
-- `VAULT_HOST` : The hostname/IP address of the Vault server to connect to.
+- `VAULT_HOST` : The hostname/IP address of the Vault server to connect to. This should include the protocol (http/https).
 - `VAULT_PORT` : The port the Vault server is listening on.
 - `VAULT_USER` : The username to authenticate with the Vault server.
 - `VAULT_PASSWORD` : The passowrd to authenticate with the Vault server.
@@ -69,6 +68,8 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `GRCHIVE_DOC_BUCKET`: The Google Cloud Storage bucket in which to store the documentation files.
 - `GRPC_QUERY_RUNNER_HOST`: The hostname of the database_query_runner worker.
 - `GRPC_QUERY_RUNNER_PORT`: The port the database_query_runner worker is listening on.
+- `GRPC_QUERY_RUNNER_TLS`: Whether or not the query runner should use TLS for communication.
+- `ROOT_CA_CRT`: Path to the root certificate used for the self-signed certificates.
 
 ## Setup Dependencies
 
@@ -305,7 +306,7 @@ $SRC/scripts/deploy/deploy_self_signed_certificate.sh
 - `kubectl apply -f ./deployment.dev.yaml`
 - `kubectl apply -f ./service-internal.yaml`
 - `kubectl apply -f ./service-external.dev.yaml`
-- Set the `VAULT_HOST` build variable to be `http://internal-vault-service` (this will require you to rebuild some Docker containers).
+- Set the `VAULT_HOST` build variable to be `https://internal-vault-service` (this will require you to rebuild some Docker containers).
 - Run `kubectl get services -l app=vault` and get the external port of the service. For example
 
     ```

@@ -1,7 +1,6 @@
 #!/bin/bash
 
 DIR=`dirname $0`
-. ${DIR}/pull_env_variables.sh
 
 while getopts 'e:' OPTION; do
     case "$OPTION" in
@@ -13,8 +12,11 @@ done
 
 set -xe
 
+EXTRA_BUILD_OPTIONS=""
+
 case "$ENV" in
     prod)
+        . ${DIR}/pull_env_variables.sh
         echo $GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
         echo $GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
         echo $GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
@@ -27,9 +29,14 @@ case "$ENV" in
         export GRCHIVE_DOC_BUCKET="grchive-prod"
         export TERRAFORM_FOLDER="prod"
         export INGRESS_ENV="prod"
+
+        USE_ENV_VARIABLES=1
+        DO_TERRAFORM=1
+        DEPLOY_GCLOUD=1
         ;;
 
     staging)
+        . ${DIR}/pull_env_variables.sh
         echo $STAGING_GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
         echo $STAGING_GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
         echo $STAGING_GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
@@ -43,34 +50,55 @@ case "$ENV" in
         export GRCHIVE_DOC_BUCKET="grchive-staging"
         export TERRAFORM_FOLDER="staging"
         export INGRESS_ENV="staging"
+
+        USE_ENV_VARIABLES=1
+        DO_TERRAFORM=1
+        DEPLOY_GCLOUD=1
+        ;;
+
+    minikube)
+        HOST_STATUS=$(minikube status | grep host)
+        if [[ "$HOST_STATUS" == *"Stopped"* ]]; then
+            echo "Minikube is not running."
+            exit 1
+        fi
+
+        EXTRA_BUILD_OPTIONS="-m"
+        eval $(minikube docker-env)
         ;;
 esac
 
-envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
+if [[ ! -z "$USE_ENV_VARIABLES" ]]; then
+    envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
+fi
 
-${DIR}/build_nginx_container.sh
-${DIR}/build_rabbitmq_container.sh
-${DIR}/build_vault_container.sh
-${DIR}/build_preview_generator_container.sh
-${DIR}/build_webserver_container.sh
-${DIR}/build_database_refresh_worker.sh
-${DIR}/build_database_runner_worker.sh
+${DIR}/build_nginx_container.sh ${EXTRA_BUILD_OPTIONS}
+${DIR}/build_rabbitmq_container.sh ${EXTRA_BUILD_OPTIONS}
+${DIR}/build_vault_container.sh ${EXTRA_BUILD_OPTIONS}
+${DIR}/build_preview_generator_container.sh ${EXTRA_BUILD_OPTIONS}
+${DIR}/build_webserver_container.sh ${EXTRA_BUILD_OPTIONS}
+${DIR}/build_database_refresh_worker.sh ${EXTRA_BUILD_OPTIONS}
+${DIR}/build_database_runner_worker.sh ${EXTRA_BUILD_OPTIONS}
 
-gcloud auth activate-service-account --key-file devops/gcloud/gcloud-terraform-account.json
-gcloud config set project ${GRCHIVE_PROJECT}
-gcloud config set compute/zone us-central1-c
+if [[ ! -z "$DO_TERRAFORM" ]]; then
+    gcloud auth activate-service-account --key-file devops/gcloud/gcloud-terraform-account.json
+    gcloud config set project ${GRCHIVE_PROJECT}
+    gcloud config set compute/zone us-central1-c
 
-cloud_sql_proxy -instances=${GRCHIVE_PROJECT}:us-central1:${POSTGRES_INSTANCE_NAME}=tcp:5555 &
-PROXY_PID=$!
+    cloud_sql_proxy -instances=${GRCHIVE_PROJECT}:us-central1:${POSTGRES_INSTANCE_NAME}=tcp:5555 &
+    PROXY_PID=$!
 
-${DIR}/terraform.sh
+    ${DIR}/terraform.sh
 
-gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
-gcloud config set project ${GRCHIVE_PROJECT}
-gcloud config set compute/zone us-central1-c
-gcloud container clusters get-credentials webserver-gke-cluster
+    kill -9 $PROXY_PID
+fi
+
+if [[ ! -z "$DEPLOY_GCLOUD" ]]; then
+    gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
+    gcloud config set project ${GRCHIVE_PROJECT}
+    gcloud config set compute/zone us-central1-c
+    gcloud container clusters get-credentials webserver-gke-cluster
+fi
 
 ${DIR}/deploy_self_signed_certificates.sh
-${DIR}/deploy_k8s.sh
-
-kill -9 $PROXY_PID
+${DIR}/deploy_k8s.sh ${EXTRA_BUILD_OPTIONS}

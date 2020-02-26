@@ -61,17 +61,27 @@ type HashIdConfigData struct {
 }
 
 type RabbitMQConfig struct {
-	Username      string
-	Password      string
-	Host          string
-	Port          int32
-	UseTLS        bool
-	TLSRootCaCert string
+	Username string
+	Password string
+	Host     string
+	Port     int32
+	UseTLS   bool
+}
+
+type GrpcConfig struct {
+	Host    string
+	Port    int32
+	TLS     bool
+	TLSCert string
+	TLSKey  string
 }
 
 type GrpcEndpoints struct {
-	QueryRunnerHost string
-	QueryRunnerPort int32
+	QueryRunner GrpcConfig
+}
+
+type TLSConfig struct {
+	TLSRootCaCert string
 }
 
 type EnvConfigData struct {
@@ -89,6 +99,7 @@ type EnvConfigData struct {
 	HashId             *HashIdConfigData
 	RabbitMQ           *RabbitMQConfig
 	Grpc               *GrpcEndpoints
+	Tls                *TLSConfig
 }
 
 var EnvConfig *EnvConfigData
@@ -179,11 +190,16 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.RabbitMQ.Host = tomlConfig.Get("rabbitmq.host").(string)
 	envConfig.RabbitMQ.Port = int32(tomlConfig.Get("rabbitmq.port").(int64))
 	envConfig.RabbitMQ.UseTLS = tomlConfig.Get("rabbitmq.use_tls").(bool)
-	envConfig.RabbitMQ.TLSRootCaCert = tomlConfig.Get("rabbitmq.tls.root_ca").(string)
 
 	envConfig.Grpc = new(GrpcEndpoints)
-	envConfig.Grpc.QueryRunnerHost = tomlConfig.Get("grpc.query_runner.host").(string)
-	envConfig.Grpc.QueryRunnerPort = int32(tomlConfig.Get("grpc.query_runner.port").(int64))
+	envConfig.Grpc.QueryRunner.Host = tomlConfig.Get("grpc.query_runner.host").(string)
+	envConfig.Grpc.QueryRunner.Port = int32(tomlConfig.Get("grpc.query_runner.port").(int64))
+	envConfig.Grpc.QueryRunner.TLS = tomlConfig.Get("grpc.query_runner.tls.enable").(bool)
+	envConfig.Grpc.QueryRunner.TLSCert = tomlConfig.Get("grpc.query_runner.tls.cert").(string)
+	envConfig.Grpc.QueryRunner.TLSKey = tomlConfig.Get("grpc.query_runner.tls.key").(string)
+
+	envConfig.Tls = new(TLSConfig)
+	envConfig.Tls.TLSRootCaCert = tomlConfig.Get("tls.root_ca").(string)
 
 	return envConfig
 }

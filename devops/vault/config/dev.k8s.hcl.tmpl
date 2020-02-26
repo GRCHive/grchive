@@ -5,14 +5,6 @@ storage "postgresql" {
     max_parallel = "10"
 }
 
-seal "gcpckms" {
-    credentials = "/secrets/gke/gcloud-service-account.json"
-    project     = "${GRCHIVE_PROJECT}"
-    region      = "us-central1"
-    key_ring    = "vault-keyring"
-    crypto_key  = "vault-key"
-}
-
 listener "tcp" {
     address     = "0.0.0.0:${VAULT_PORT}"
     tls_disable = 0
