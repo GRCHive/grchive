@@ -60,6 +60,7 @@ func generateTestToml(config GenerateTomlConfig) (*toml.Tree, *core.EnvConfigDat
 		HashId:   new(core.HashIdConfigData),
 		RabbitMQ: new(core.RabbitMQConfig),
 		Grpc:     new(core.GrpcEndpoints),
+		Tls:      new(core.TLSConfig),
 	}
 
 	newDataVal := reflect.ValueOf(&newData).Elem()
@@ -140,9 +141,12 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"RabbitMQ.Host", "rabbitmq.host", "hostname", nil},
 					{"RabbitMQ.Port", "rabbitmq.port", int64(64), int32(64)},
 					{"RabbitMQ.UseTLS", "rabbitmq.use_tls", true, nil},
-					{"RabbitMQ.TLSRootCaCert", "rabbitmq.tls.root_ca", "root_ca", nil},
-					{"Grpc.QueryRunnerHost", "grpc.query_runner.host", "hostname", nil},
-					{"Grpc.QueryRunnerPort", "grpc.query_runner.port", int64(128), int32(128)},
+					{"Grpc.QueryRunner.Host", "grpc.query_runner.host", "hostname", nil},
+					{"Grpc.QueryRunner.Port", "grpc.query_runner.port", int64(128), int32(128)},
+					{"Grpc.QueryRunner.TLS", "grpc.query_runner.tls.enable", true, nil},
+					{"Grpc.QueryRunner.TLSCert", "grpc.query_runner.tls.cert", "certfile", nil},
+					{"Grpc.QueryRunner.TLSKey", "grpc.query_runner.tls.key", "keyfile", nil},
+					{"Tls.TLSRootCaCert", "tls.root_ca", "root_ca", nil},
 				},
 			},
 			parseError: false,
