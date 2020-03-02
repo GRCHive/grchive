@@ -16,6 +16,17 @@ resource "google_compute_subnetwork" "gke-outbound-network-us-central1" {
     ip_cidr_range           = "192.168.1.0/24"
 }
 
+resource "google_compute_firewall" "gke-outbound-network-firewall-wireguard-ingress" {
+    name                    = "gke-outbound-network-firewall-wireguard-ingress"
+    network                 = google_compute_network.gke-outbound-network.name
+    direction               = "INGRESS"
+
+    allow {
+        protocol = "udp"
+        ports = ["51820"] 
+    }
+}
+
 resource "google_container_cluster" "webserver-gke" {
     name     = "webserver-gke-cluster"
     location = "us-central1-c"
@@ -110,3 +121,39 @@ resource "google_compute_router_nat" "gke-outbound-network-us-central1-nat" {
         filter = "ALL"
     }
 }
+
+resource "google_compute_address" "wireguard-static-ip" {
+    name    = "wireguard-static-ip"
+    region  = google_compute_subnetwork.gke-outbound-network-us-central1.region
+}
+
+data "google_compute_image" "wireguard-image" {
+    family  = "cos-stable"
+    project = "gce-uefi-images"
+}
+
+resource "google_compute_instance" "wireguard" {
+    name            = "grchive-wireguard-central1-c"
+    machine_type    = "f1-micro"
+    zone            = "us-central1-c"
+
+    boot_disk {
+        initialize_params {
+            size    = 10
+            type    = "pd-standard"
+            image   = data.google_compute_image.wireguard-image.self_link
+        }
+    }
+
+    network_interface {
+        network    = google_compute_network.gke-outbound-network.self_link
+        subnetwork = google_compute_subnetwork.gke-outbound-network-us-central1.self_link
+
+        access_config {
+            nat_ip = google_compute_address.wireguard-static-ip.address
+        }
+    }
+    
+    can_ip_forward = true
+}
+

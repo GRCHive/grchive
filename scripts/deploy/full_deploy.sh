@@ -2,10 +2,16 @@
 
 DIR=`dirname $0`
 
-while getopts 'e:' OPTION; do
+while getopts 'e:db' OPTION; do
     case "$OPTION" in
         e)
             ENV=$OPTARG
+            ;;
+        d)
+            NODEPLOY=1
+            ;;
+        b)
+            NOBUILD=1
             ;;
     esac
 done
@@ -72,13 +78,15 @@ if [[ ! -z "$USE_ENV_VARIABLES" ]]; then
     envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
 fi
 
-${DIR}/build_nginx_container.sh ${EXTRA_BUILD_OPTIONS}
-${DIR}/build_rabbitmq_container.sh ${EXTRA_BUILD_OPTIONS}
-${DIR}/build_vault_container.sh ${EXTRA_BUILD_OPTIONS}
-${DIR}/build_preview_generator_container.sh ${EXTRA_BUILD_OPTIONS}
-${DIR}/build_webserver_container.sh ${EXTRA_BUILD_OPTIONS}
-${DIR}/build_database_refresh_worker.sh ${EXTRA_BUILD_OPTIONS}
-${DIR}/build_database_runner_worker.sh ${EXTRA_BUILD_OPTIONS}
+if [[ -z "$NOBUILD" ]]; then
+    ${DIR}/build_nginx_container.sh ${EXTRA_BUILD_OPTIONS}
+    ${DIR}/build_rabbitmq_container.sh ${EXTRA_BUILD_OPTIONS}
+    ${DIR}/build_vault_container.sh ${EXTRA_BUILD_OPTIONS}
+    ${DIR}/build_preview_generator_container.sh ${EXTRA_BUILD_OPTIONS}
+    ${DIR}/build_webserver_container.sh ${EXTRA_BUILD_OPTIONS}
+    ${DIR}/build_database_refresh_worker.sh ${EXTRA_BUILD_OPTIONS}
+    ${DIR}/build_database_runner_worker.sh ${EXTRA_BUILD_OPTIONS}
+fi
 
 if [[ ! -z "$DO_TERRAFORM" ]]; then
     gcloud auth activate-service-account --key-file devops/gcloud/gcloud-terraform-account.json
@@ -93,12 +101,14 @@ if [[ ! -z "$DO_TERRAFORM" ]]; then
     kill -9 $PROXY_PID
 fi
 
-if [[ ! -z "$DEPLOY_GCLOUD" ]]; then
-    gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
-    gcloud config set project ${GRCHIVE_PROJECT}
-    gcloud config set compute/zone us-central1-c
-    gcloud container clusters get-credentials webserver-gke-cluster
-fi
+if [[ -z "$NODEPLOY" ]]; then
+    if [[ ! -z "$DEPLOY_GCLOUD" ]]; then
+        gcloud auth activate-service-account --key-file devops/gcloud/gcloud-kubernetes-account.json
+        gcloud config set project ${GRCHIVE_PROJECT}
+        gcloud config set compute/zone us-central1-c
+        gcloud container clusters get-credentials webserver-gke-cluster
+    fi
 
-${DIR}/deploy_self_signed_certificates.sh
-${DIR}/deploy_k8s.sh ${EXTRA_BUILD_OPTIONS}
+    ${DIR}/deploy_self_signed_certificates.sh
+    ${DIR}/deploy_k8s.sh ${EXTRA_BUILD_OPTIONS}
+fi

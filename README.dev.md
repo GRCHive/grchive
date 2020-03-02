@@ -349,3 +349,32 @@ $SRC/scripts/deploy/deploy_self_signed_certificate.sh
 - `kubectl apply -f ./deployment.dev.yaml`
 - `kubectl apply -f ./loadbalancer.yaml`
 - Run `minikube service external-webserver-service --url` to obtain the URL to put into your web browser to access the webserver.
+
+## Wireguard Setup
+
+To perform deployments you will need to use Wireguard to access the VPN deployed on the GKE VPC network.
+First, generate a private and public key to use with wireguard and store these files somewhere (e.g. `~/.config/wg`).
+
+```
+wg genkey | tee privatekey | wg pubkey > publickey
+```
+
+Now also create a client configuration file (e.g. `wg0-client.conf`), that has the contents:
+
+```
+[Interface]
+Address = YOUR_PRIVATE_IP_ADDRESS
+PrivateKey = YOUR_PRIVATE_KEY
+
+[Peer]
+PublicKey = SERVER_PUBLIC_KEY
+Endpoint = SERVER_IP_ADDRESS
+AllowedIPs = 0.0.0.0/0
+```
+
+- `YOUR_PRIVATE_IP_ADDRESS`: This should be of the form `10.200.200.XXX/32`. Ensure that your IP address has not been chosen by checking the `$SRC/devops/docker/wireguard/wg0.conf.tmpl` peer list.
+- `YOUR_PRIVATE_KEY`: This should contain the contents of the `privatekey` file you generated in the previous step.
+- `SERVER_PUBLIC_KEY`: This should be the server's public key that can be found in the file found at `$SRC/devops/docker/wireguard/publickey`.
+- `SERVER_IP_ADDRESS`: This is the server's public IP address. Find the appropriate IP address for the appropriate project in the Google Cloud console.
+
+Finally, modify `$SRC/devops/docker/wireguard/wg0.conf.tmpl` and add your own PublicKey and Address as a peer.
