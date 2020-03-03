@@ -105,6 +105,10 @@ if [[ ! -z "$DO_TERRAFORM" ]]; then
 
     ${DIR}/terraform.sh
 
+    # Do this twice - sometimes if the kubernetes is cluster is destroyed, recreating it won't
+    # also re-create the node pool.
+    ${DIR}/terraform.sh
+
     kill -9 $PROXY_PID
 fi
 
@@ -118,11 +122,16 @@ if [[ -z "$NODEPLOY" ]]; then
 
     if [[ -z "$NOWIREGUARD" ]]; then
         ${DIR}/deploy_wireguard.sh
+        sleep 5
     fi
 
 
     if [[ -z "$NOK8S" ]]; then
+        sudo wg-quick up wg0-client
+
         ${DIR}/deploy_self_signed_certificates.sh
         ${DIR}/deploy_k8s.sh ${EXTRA_BUILD_OPTIONS}
+
+        sudo wg-quick down wg0-client
     fi
 fi

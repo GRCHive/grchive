@@ -36,6 +36,41 @@ resource "google_compute_firewall" "gke-outbound-network-firewall-wireguard-ingr
     }
 }
 
+resource "google_compute_address" "wireguard-static-ip" {
+    name    = "wireguard-static-ip"
+    region  = google_compute_subnetwork.gke-outbound-network-us-central1.region
+}
+
+data "google_compute_image" "wireguard-image" {
+    family  = "debian-10"
+    project = "debian-cloud"
+}
+
+resource "google_compute_instance" "wireguard" {
+    name            = "grchive-wireguard-central1-c"
+    machine_type    = "f1-micro"
+    zone            = "us-central1-c"
+
+    boot_disk {
+        initialize_params {
+            size    = 10
+            type    = "pd-standard"
+            image   = data.google_compute_image.wireguard-image.self_link
+        }
+    }
+
+    network_interface {
+        network    = google_compute_network.gke-outbound-network.self_link
+        subnetwork = google_compute_subnetwork.gke-outbound-network-us-central1.self_link
+
+        access_config {
+            nat_ip = google_compute_address.wireguard-static-ip.address
+        }
+    }
+    
+    can_ip_forward = true
+}
+
 resource "google_container_cluster" "webserver-gke" {
     name     = "webserver-gke-cluster"
     location = "us-central1-c"
@@ -58,8 +93,14 @@ resource "google_container_cluster" "webserver-gke" {
 
     private_cluster_config {
         enable_private_nodes = true
-        enable_private_endpoint = false
+        enable_private_endpoint = true
         master_ipv4_cidr_block = "172.16.0.0/28"
+    }
+
+    master_authorized_networks_config {
+        cidr_blocks {
+            cidr_block = "${google_compute_instance.wireguard.network_interface.0.network_ip}/32"
+        }
     }
 
     ip_allocation_policy {
@@ -130,39 +171,3 @@ resource "google_compute_router_nat" "gke-outbound-network-us-central1-nat" {
         filter = "ALL"
     }
 }
-
-resource "google_compute_address" "wireguard-static-ip" {
-    name    = "wireguard-static-ip"
-    region  = google_compute_subnetwork.gke-outbound-network-us-central1.region
-}
-
-data "google_compute_image" "wireguard-image" {
-    family  = "debian-10"
-    project = "debian-cloud"
-}
-
-resource "google_compute_instance" "wireguard" {
-    name            = "grchive-wireguard-central1-c"
-    machine_type    = "f1-micro"
-    zone            = "us-central1-c"
-
-    boot_disk {
-        initialize_params {
-            size    = 10
-            type    = "pd-standard"
-            image   = data.google_compute_image.wireguard-image.self_link
-        }
-    }
-
-    network_interface {
-        network    = google_compute_network.gke-outbound-network.self_link
-        subnetwork = google_compute_subnetwork.gke-outbound-network-us-central1.self_link
-
-        access_config {
-            nat_ip = google_compute_address.wireguard-static-ip.address
-        }
-    }
-    
-    can_ip_forward = true
-}
-
