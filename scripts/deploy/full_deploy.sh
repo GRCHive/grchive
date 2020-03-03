@@ -2,7 +2,7 @@
 
 DIR=`dirname $0`
 
-while getopts 'e:db' OPTION; do
+while getopts 'e:dbwk' OPTION; do
     case "$OPTION" in
         e)
             ENV=$OPTARG
@@ -12,6 +12,12 @@ while getopts 'e:db' OPTION; do
             ;;
         b)
             NOBUILD=1
+            ;;
+        w)
+            NOWIREGUARD=1
+            ;;
+        k)
+            NOK8S=1
             ;;
     esac
 done
@@ -68,6 +74,7 @@ case "$ENV" in
             echo "Minikube is not running."
             exit 1
         fi
+        NOWIREGUARD=1
 
         EXTRA_BUILD_OPTIONS="-m"
         eval $(minikube docker-env)
@@ -109,6 +116,13 @@ if [[ -z "$NODEPLOY" ]]; then
         gcloud container clusters get-credentials webserver-gke-cluster
     fi
 
-    ${DIR}/deploy_self_signed_certificates.sh
-    ${DIR}/deploy_k8s.sh ${EXTRA_BUILD_OPTIONS}
+    if [[ -z "$NOWIREGUARD" ]]; then
+        ${DIR}/deploy_wireguard.sh
+    fi
+
+
+    if [[ -z "$NOK8S" ]]; then
+        ${DIR}/deploy_self_signed_certificates.sh
+        ${DIR}/deploy_k8s.sh ${EXTRA_BUILD_OPTIONS}
+    fi
 fi

@@ -3,3 +3,4 @@ bazel-*
 .vim
 
 .gitlab-env-variables
+wg0.conf

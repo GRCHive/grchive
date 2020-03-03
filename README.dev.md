@@ -368,13 +368,17 @@ PrivateKey = YOUR_PRIVATE_KEY
 
 [Peer]
 PublicKey = SERVER_PUBLIC_KEY
-Endpoint = SERVER_IP_ADDRESS
+Endpoint = SERVER_IP_ADDRESS:51280
 AllowedIPs = 0.0.0.0/0
 ```
 
-- `YOUR_PRIVATE_IP_ADDRESS`: This should be of the form `10.200.200.XXX/32`. Ensure that your IP address has not been chosen by checking the `$SRC/devops/docker/wireguard/wg0.conf.tmpl` peer list.
+- `YOUR_PRIVATE_IP_ADDRESS`: This should be of the form `10.200.200.XXX/32`. Ensure that your IP address has not been chosen by checking the `$SRC/devops/wireguard/wg0.conf.tmpl` peer list.
 - `YOUR_PRIVATE_KEY`: This should contain the contents of the `privatekey` file you generated in the previous step.
-- `SERVER_PUBLIC_KEY`: This should be the server's public key that can be found in the file found at `$SRC/devops/docker/wireguard/publickey`.
+- `SERVER_PUBLIC_KEY`: This should be the server's public key that can be found in the file found at `$SRC/devops/wireguard/publickey`.
 - `SERVER_IP_ADDRESS`: This is the server's public IP address. Find the appropriate IP address for the appropriate project in the Google Cloud console.
 
-Finally, modify `$SRC/devops/docker/wireguard/wg0.conf.tmpl` and add your own PublicKey and Address as a peer.
+Next, modify `$SRC/devops/wireguard/wg0.conf.tmpl` and add your own PublicKey and Address as a peer.
+Move the `wg0-client.conf` file to `/etc/wireguard/wg0-client.conf`.
+Now, bring up the Wireguard VPN by running `sudo wg-quick up wg0-client`.
+Ensure you are connected by running `sudo wg show`.
+If you wish to stop using the VPN, run `sudo wg-quick down wg0-client`.

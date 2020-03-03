@@ -22,8 +22,17 @@ resource "google_compute_firewall" "gke-outbound-network-firewall-wireguard-ingr
     direction               = "INGRESS"
 
     allow {
+        protocol = "icmp"
+    }
+
+    allow {
         protocol = "udp"
         ports = ["51820"] 
+    }
+
+    allow {
+        protocol = "tcp"
+        ports = ["22"]
     }
 }
 
@@ -128,8 +137,8 @@ resource "google_compute_address" "wireguard-static-ip" {
 }
 
 data "google_compute_image" "wireguard-image" {
-    family  = "cos-stable"
-    project = "gce-uefi-images"
+    family  = "debian-10"
+    project = "debian-cloud"
 }
 
 resource "google_compute_instance" "wireguard" {
