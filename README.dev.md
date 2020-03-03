@@ -365,11 +365,13 @@ Now also create a client configuration file (e.g. `wg0-client.conf`), that has t
 [Interface]
 Address = YOUR_PRIVATE_IP_ADDRESS
 PrivateKey = YOUR_PRIVATE_KEY
+MTU = 1380
 
 [Peer]
 PublicKey = SERVER_PUBLIC_KEY
-Endpoint = SERVER_IP_ADDRESS:51280
+Endpoint = SERVER_IP_ADDRESS:51820
 AllowedIPs = 0.0.0.0/0
+PersistentKeepalive = 25
 ```
 
 - `YOUR_PRIVATE_IP_ADDRESS`: This should be of the form `10.200.200.XXX/32`. Ensure that your IP address has not been chosen by checking the `$SRC/devops/wireguard/wg0.conf.tmpl` peer list.
