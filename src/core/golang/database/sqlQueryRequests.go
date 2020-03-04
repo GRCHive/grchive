@@ -30,8 +30,12 @@ func CreateNewSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.
 }
 
 func CreateNewSqlQueryRequest(request *core.DbSqlQueryRequest, role *core.Role) error {
-	tx := dbConn.MustBegin()
-	err := CreateNewSqlQueryRequestWithTx(request, role, tx)
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	err = CreateNewSqlQueryRequestWithTx(request, role, tx)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -66,8 +70,12 @@ func UpdateSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.Rol
 }
 
 func UpdateSqlQueryRequest(request *core.DbSqlQueryRequest, role *core.Role) error {
-	tx := dbConn.MustBegin()
-	err := UpdateSqlQueryRequestWithTx(request, role, tx)
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	err = UpdateSqlQueryRequestWithTx(request, role, tx)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -80,8 +88,12 @@ func DeleteSqlQueryRequest(requestId int64, orgId int32, role *core.Role) error 
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
-	_, err := tx.Exec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`
 		DELETE FROM database_sql_query_requests
 		WHERE id = $1 AND org_id = $2
 	`, requestId, orgId)

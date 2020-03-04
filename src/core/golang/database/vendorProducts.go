@@ -9,7 +9,10 @@ func NewVendorProduct(product *core.VendorProduct, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
 
 	rows, err := tx.NamedQuery(`
 		INSERT INTO vendor_products(product_name, description, url, org_id, vendor_id)
@@ -66,9 +69,12 @@ func UpdateVendorProduct(product *core.VendorProduct, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
 
-	_, err := tx.NamedExec(`
+	_, err = tx.NamedExec(`
 		UPDATE vendor_products
 		SET product_name = :product_name,
 			description = :description,
@@ -88,9 +94,12 @@ func DeleteVendorProduct(productId int64, vendorId int64, orgId int32, role *cor
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
 
-	_, err := tx.Exec(`
+	_, err = tx.Exec(`
 		DELETE FROM vendor_products
 		WHERE id = $1 AND vendor_id = $2 AND org_id = $3
 	`, productId, vendorId, orgId)

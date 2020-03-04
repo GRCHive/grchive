@@ -43,8 +43,12 @@ func CreateNewDocumentRequestWithTx(request *core.DocumentRequest, role *core.Ro
 }
 
 func CreateNewDocumentRequest(request *core.DocumentRequest, role *core.Role) error {
-	tx := dbConn.MustBegin()
-	err := CreateNewDocumentRequestWithTx(request, role, tx)
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	err = CreateNewDocumentRequestWithTx(request, role, tx)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -57,7 +61,10 @@ func UpdateDocumentRequest(request *core.DocumentRequest, role *core.Role) error
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
 	rows, err := tx.NamedQuery(`
 		UPDATE document_requests
 		SET name = :name,
@@ -103,8 +110,11 @@ func DeleteDocumentRequest(requestId int64, orgId int32, role *core.Role) error 
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
-	_, err := tx.Exec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec(`
 		DELETE FROM document_requests
 		WHERE id = $1
 			AND org_id = $2
@@ -126,8 +136,11 @@ func CompleteDocumentRequest(requestId int64, orgId int32, complete bool, role *
 		newTime = core.CreateNullTime(time.Now().UTC())
 	}
 
-	tx := dbConn.MustBegin()
-	_, err := tx.Exec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec(`
 		UPDATE document_requests
 		SET completion_time = $3
 		WHERE id = $1

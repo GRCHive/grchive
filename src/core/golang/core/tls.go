@@ -12,7 +12,8 @@ func (t TLSConfig) Config() *tls.Config {
 
 	ca, err := ioutil.ReadFile(t.TLSRootCaCert)
 	if err != nil {
-		Error("Failed to read CA cert: " + err.Error())
+		Warning("Failed to read CA cert: " + err.Error())
+		return nil
 	}
 	tlsCfg.RootCAs.AppendCertsFromPEM(ca)
 	return tlsCfg

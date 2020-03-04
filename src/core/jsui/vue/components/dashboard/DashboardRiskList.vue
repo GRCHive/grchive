@@ -100,7 +100,7 @@ export default Vue.extend({
             deleteRisk(<TDeleteRiskInput>{
                 nodeId: -1,
                 riskIds: [risk.Id],
-                global: global,
+                global: true,
             }).then((resp : TDeleteRiskOutput) => {
                 this.allRisks.splice(
                     this.allRisks.findIndex((ele : ProcessFlowRisk) =>

@@ -79,7 +79,12 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		RequestTime:     time.Now().UTC(),
 	}
 
-	tx := database.CreateTx()
+	tx, err := database.CreateAuditTrailTx(role)
+	if err != nil {
+		core.Warning("Failed to create audit trail TX: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	err = database.CreateNewDocumentRequestWithTx(&request, role, tx)
 	if err != nil {

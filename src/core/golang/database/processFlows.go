@@ -50,8 +50,12 @@ func UpdateProcessFlow(flow *core.ProcessFlow, role *core.Role) error {
 	}
 
 	flow.LastUpdatedTime = time.Now().UTC()
-	tx := dbConn.MustBegin()
-	_, err := tx.NamedExec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.NamedExec(`
 		UPDATE process_flows
 		SET name = :name, description = :description
 		WHERE id = :id
@@ -71,7 +75,11 @@ func InsertNewProcessFlow(flow *core.ProcessFlow, role *core.Role) error {
 
 	var err error
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
 	rows, err := tx.NamedQuery(`
 		INSERT INTO process_flows (name, org_id, description, created_time, last_updated_time)
 		VALUES (:name, :org.id, :description, :created_time, :last_updated_time)
@@ -147,8 +155,12 @@ func DeleteProcessFlow(flowId int64, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
-	_, err := tx.Exec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`
 		DELETE FROM process_flows
 		WHERE id = $1
 	`, flowId)

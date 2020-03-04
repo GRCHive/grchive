@@ -24,7 +24,11 @@ func InsertNewDatabase(db *core.Database, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
 	rows, err := tx.NamedQuery(`
 		INSERT INTO database_resources(name, org_id, type_id, other_type, version)
 		VALUES (:name, :org_id, :type_id, :other_type, :version)
@@ -120,8 +124,12 @@ func EditDb(db *core.Database, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceDatabases, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
-	tx := dbConn.MustBegin()
-	_, err := tx.NamedExec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.NamedExec(`
 		UPDATE database_resources
 		SET name = :name,
 			type_id = :type_id,
@@ -141,8 +149,12 @@ func DeleteDb(dbId int64, orgId int32, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceDatabases, core.AccessManage) {
 		return core.ErrorUnauthorized
 	}
-	tx := dbConn.MustBegin()
-	_, err := tx.Exec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`
 		DELETE FROM database_resources
 		WHERE id = $1
 			AND org_id = $2
@@ -164,7 +176,11 @@ func InsertNewDatabaseConnection(conn *core.DatabaseConnection, role *core.Role)
 		return err
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
 	rows, err := tx.Queryx(`
 		INSERT INTO database_connection_info (
 			db_id,
@@ -267,8 +283,12 @@ func DeleteDatabaseConnection(connId int64, dbId int64, orgId int32, role *core.
 	if !role.Permissions.HasAccess(core.ResourceDbConnections, core.AccessManage) {
 		return core.ErrorUnauthorized
 	}
-	tx := dbConn.MustBegin()
-	_, err := tx.Exec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`
 		DELETE FROM database_connection_info
 		WHERE id = $1
 			AND db_id = $2

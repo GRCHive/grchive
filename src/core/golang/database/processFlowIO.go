@@ -32,6 +32,11 @@ func CreateNewProcessFlowIOWithTx(io *core.ProcessFlowInputOutput, isInput bool,
 	var err error
 	var dbName string = getProcessFlowIODbName(isInput)
 
+	err = UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return nil, err
+	}
+
 	rows, err := tx.Queryx(fmt.Sprintf(`
 		INSERT INTO %s (name, parent_node_id, io_type_id, io_order)
 		SELECT $1, $2, $3, COALESCE(MAX(io_order), 0) + 1
@@ -54,7 +59,10 @@ func CreateNewProcessFlowIOWithTx(io *core.ProcessFlowInputOutput, isInput bool,
 }
 
 func CreateNewProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool, role *core.Role) (*core.ProcessFlowInputOutput, error) {
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
 	outIo, err := CreateNewProcessFlowIOWithTx(io, isInput, tx, role)
 	if err != nil {
 		tx.Rollback()
@@ -68,8 +76,13 @@ func DeleteProcessFlowIO(ioId int64, isInput bool, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 	var dbName string = getProcessFlowIODbName(isInput)
-	tx := dbConn.MustBegin()
-	_, err := tx.Exec(fmt.Sprintf(`
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(fmt.Sprintf(`
 		DELETE FROM %s
 		WHERE id = $1
 	`, dbName), ioId)
@@ -86,7 +99,12 @@ func EditProcessFlowIO(io *core.ProcessFlowInputOutput, isInput bool, role *core
 		return nil, core.ErrorUnauthorized
 	}
 	var dbName string = getProcessFlowIODbName(isInput)
-	tx := dbConn.MustBegin()
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
 	rows, err := tx.NamedQuery(fmt.Sprintf(`
 		UPDATE %s
 		SET name = :name, io_type_id = :io_type_id
@@ -162,11 +180,14 @@ func SwapIOOrder(a *core.ProcessFlowInputOutput, b *core.ProcessFlowInputOutput,
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
 
 	dbName := getProcessFlowIODbName(isInput)
 
-	_, err := tx.Exec(fmt.Sprintf(`
+	_, err = tx.Exec(fmt.Sprintf(`
 		UPDATE %s
 		SET io_order = CASE id
 					   		WHEN $1 THEN (SELECT io_order FROM %s WHERE id = $2)

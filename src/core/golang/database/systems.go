@@ -9,7 +9,11 @@ func CreateNewSystem(system *core.System, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
 	rows, err := tx.NamedQuery(`
 		INSERT INTO systems(org_id, name, purpose, description)
 		VALUES (:org_id, :name, :purpose, :description)
@@ -86,8 +90,11 @@ func EditSystem(sys *core.System, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceSystems, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
-	tx := dbConn.MustBegin()
-	_, err := tx.NamedExec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+	_, err = tx.NamedExec(`
 		UPDATE systems
 		SET name = :name,
 			purpose = :purpose,
@@ -107,8 +114,11 @@ func DeleteSystem(sysId int64, orgId int32, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
-	_, err := tx.Exec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec(`
 		DELETE FROM systems
 		WHERE id = $1
 			AND org_id = $2
@@ -124,6 +134,7 @@ func FindSystemIdsForDatabase(dbId int64, orgId int32, role *core.Role) ([]int64
 	if !role.Permissions.HasAccess(core.ResourceSystems, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
+
 	ids := make([]int64, 0)
 	err := dbConn.Select(&ids, `
 		SELECT system_id

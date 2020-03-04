@@ -11,8 +11,12 @@ func EditRisk(risk *core.Risk, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
-	tx := dbConn.MustBegin()
-	_, err := tx.NamedExec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.NamedExec(`
 		UPDATE process_flow_risks
 		SET name = :name, description = :description
 		WHERE id = :id
@@ -33,7 +37,11 @@ func DeleteRisks(nodeId int64, riskIds []int64, global bool, orgId int32, role *
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
 	if nodeId != -1 {
 		riskIdQuery := make([]string, 0)
 		riskIdParams := append(make([]interface{}, 0), nodeId)
@@ -42,7 +50,7 @@ func DeleteRisks(nodeId int64, riskIds []int64, global bool, orgId int32, role *
 			riskIdQuery = append(riskIdQuery, fmt.Sprintf("$%d", idx+2))
 		}
 
-		_, err := tx.Exec(fmt.Sprintf(`
+		_, err = tx.Exec(fmt.Sprintf(`
 			DELETE FROM process_flow_risk_node
 			WHERE node_id = $1
 				AND risk_id IN (%s)
@@ -55,7 +63,7 @@ func DeleteRisks(nodeId int64, riskIds []int64, global bool, orgId int32, role *
 
 	if global {
 		for _, id := range riskIds {
-			_, err := tx.Exec(`
+			_, err = tx.Exec(`
 				DELETE FROM process_flow_risks
 				WHERE id = $1
 					AND org_id = $2
@@ -104,7 +112,11 @@ func InsertNewRisk(risk *core.Risk, role *core.Role) error {
 
 	var err error
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
 	rows, err := tx.NamedQuery(`
 		INSERT INTO process_flow_risks (name, description, org_id)
 		VALUES (:name, :description, :org.id)

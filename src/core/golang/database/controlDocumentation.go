@@ -10,6 +10,11 @@ func CreateFileStorageWithTx(storage *core.FileStorageData, tx *sqlx.Tx, role *c
 		return core.ErrorUnauthorized
 	}
 
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
+	}
+
 	rows, err := tx.NamedQuery(`
 		INSERT INTO file_storage (
 			metadata_id,
@@ -49,7 +54,12 @@ func UpdateFileStorageStorageIdWithTx(id int64, orgId int32, storageId string, t
 		return core.ErrorUnauthorized
 	}
 
-	_, err := tx.Exec(`
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`
 		UPDATE file_storage
 		SET storage_id = $1
 		WHERE id = $2 AND org_id = $3	
@@ -60,6 +70,11 @@ func UpdateFileStorageStorageIdWithTx(id int64, orgId int32, storageId string, t
 func CreateControlDocumentationFileWithTx(file *core.ControlDocumentationFile, tx *sqlx.Tx, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessManage) {
 		return core.ErrorUnauthorized
+	}
+
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
 	}
 
 	rows, err := tx.NamedQuery(`
@@ -97,7 +112,12 @@ func UpdateControlDocumentationWithTx(file *core.ControlDocumentationFile, tx *s
 		return core.ErrorUnauthorized
 	}
 
-	_, err := tx.NamedExec(`
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.NamedExec(`
 		UPDATE file_metadata
 		SET alt_name = :alt_name,
 			description = :description,
@@ -110,8 +130,11 @@ func UpdateControlDocumentationWithTx(file *core.ControlDocumentationFile, tx *s
 }
 
 func UpdateControlDocumentation(file *core.ControlDocumentationFile, role *core.Role) error {
-	tx := dbConn.MustBegin()
-	err := UpdateControlDocumentationWithTx(file, tx, role)
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+	err = UpdateControlDocumentationWithTx(file, tx, role)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -124,9 +147,13 @@ func DeleteBatchControlDocumentation(fileIds []int64, orgId int32, role *core.Ro
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
 	for _, id := range fileIds {
-		_, err := tx.Exec(`
+		_, err = tx.Exec(`
 			DELETE FROM file_metadata AS file
 			WHERE file.id = $1
 				AND file.org_id = $2

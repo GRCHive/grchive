@@ -10,6 +10,11 @@ func NewControlDocumentationCategoryWithTx(cat *core.ControlDocumentationCategor
 		return core.ErrorUnauthorized
 	}
 
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
+	}
+
 	rows, err := tx.NamedQuery(`
 		INSERT INTO process_flow_control_documentation_categories (name, description, org_id)
 		VALUES (:name, :description, :org_id)
@@ -29,8 +34,12 @@ func NewControlDocumentationCategoryWithTx(cat *core.ControlDocumentationCategor
 }
 
 func NewControlDocumentationCategory(cat *core.ControlDocumentationCategory, role *core.Role) error {
-	tx := dbConn.MustBegin()
-	err := NewControlDocumentationCategoryWithTx(cat, role, tx)
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	err = NewControlDocumentationCategoryWithTx(cat, role, tx)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -44,8 +53,12 @@ func EditControlDocumentationCategory(cat *core.ControlDocumentationCategory, ro
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
-	_, err := tx.NamedExec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.NamedExec(`
 		UPDATE process_flow_control_documentation_categories
 		SET name = :name, 
 			description = :description
@@ -63,7 +76,13 @@ func DeleteControlDocumentationCategoryWithTx(catId int64, orgId int32, role *co
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessManage) {
 		return core.ErrorUnauthorized
 	}
-	_, err := tx.Exec(`
+
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`
 		DELETE FROM process_flow_control_documentation_categories
 		WHERE id = $1
 			AND org_id = $2
@@ -75,8 +94,12 @@ func DeleteControlDocumentationCategoryWithTx(catId int64, orgId int32, role *co
 }
 
 func DeleteControlDocumentationCategory(catId int64, orgId int32, role *core.Role) error {
-	tx := dbConn.MustBegin()
-	err := DeleteControlDocumentationCategoryWithTx(catId, orgId, role, tx)
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	err = DeleteControlDocumentationCategoryWithTx(catId, orgId, role, tx)
 	if err != nil {
 		tx.Rollback()
 		return err

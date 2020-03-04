@@ -39,7 +39,11 @@ func CreateNewGLCategory(cat *core.GeneralLedgerCategory, role *core.Role) error
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
 	rows, err := tx.NamedQuery(`
 		INSERT INTO general_ledger_categories(org_id, parent_category_id, name, description)
 		VALUES (:org_id, :parent_category_id, :name, :description)
@@ -68,8 +72,12 @@ func UpdateGLCategory(cat *core.GeneralLedgerCategory, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
-	_, err := tx.NamedExec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.NamedExec(`
 		UPDATE general_ledger_categories
 		SET parent_category_id = :parent_category_id,
 			name = :name,
@@ -90,7 +98,11 @@ func CreateNewGLAccount(acc *core.GeneralLedgerAccount, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
 	rows, err := tx.NamedQuery(`
 		INSERT INTO general_ledger_accounts(org_id, parent_category_id, account_identifier, account_name, account_description, financially_relevant)
 		VALUES (:org_id, :parent_category_id, :account_identifier, :account_name, :account_description, :financially_relevant)
@@ -119,8 +131,12 @@ func DeleteGLCategory(catId int64, orgId int32, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
-	_, err := tx.Exec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`
 		DELETE FROM general_ledger_categories
 		WHERE id = $1
 			AND org_id = $2
@@ -178,8 +194,12 @@ func UpdateGLAccount(acc *core.GeneralLedgerAccount, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
-	_, err := tx.NamedExec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.NamedExec(`
 		UPDATE general_ledger_accounts
 		SET 
 			parent_category_id = :parent_category_id,
@@ -203,8 +223,12 @@ func DeleteGLAccount(accId int64, orgId int32, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
-	_, err := tx.Exec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`
 		DELETE FROM general_ledger_accounts
 		WHERE id = $1
 			AND org_id = $2

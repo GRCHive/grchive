@@ -145,6 +145,7 @@ func GetRoleFromKey(key *core.ApiKey, orgId int32) (*core.Role, error) {
 		role.SetMax(core.AccessView)
 	}
 
+	role.UserId = key.UserId
 	return role, nil
 }
 

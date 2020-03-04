@@ -11,8 +11,12 @@ func DeleteProcessFlowNodeFromId(nodeId int64, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
-	tx := dbConn.MustBegin()
-	_, err := tx.Exec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`
 		DELETE FROM process_flow_nodes
 		WHERE id = $1
 	`, nodeId)
@@ -42,6 +46,11 @@ func CreateNewProcessFlowNodeWithTypeIdWithTx(typeId int32, flowId int64, tx *sq
 	}
 	var err error
 
+	err = UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return nil, err
+	}
+
 	rows, err := tx.Queryx(`
 		INSERT INTO process_flow_nodes (process_flow_id, node_type, name, description)
 		VALUES ($1, $2, 'Temporary Name', '')
@@ -62,7 +71,11 @@ func CreateNewProcessFlowNodeWithTypeIdWithTx(typeId int32, flowId int64, tx *sq
 }
 
 func CreateNewProcessFlowNodeWithTypeId(typeId int32, flowId int64, role *core.Role) (*core.ProcessFlowNode, error) {
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
 	node, err := CreateNewProcessFlowNodeWithTypeIdWithTx(typeId, flowId, tx, role)
 	if err != nil {
 		tx.Rollback()
@@ -168,6 +181,12 @@ func EditProcessFlowNodeWithTx(node *core.ProcessFlowNode, tx *sqlx.Tx, role *co
 	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessEdit) {
 		return nil, core.ErrorUnauthorized
 	}
+
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return nil, err
+	}
+
 	rows, err := tx.NamedQuery(`
 		UPDATE process_flow_nodes
 		SET name = :name, description = :description, node_type = :node_type
@@ -190,8 +209,12 @@ func EditProcessFlowNodeWithTx(node *core.ProcessFlowNode, tx *sqlx.Tx, role *co
 }
 
 func EditProcessFlowNode(node *core.ProcessFlowNode, role *core.Role) (*core.ProcessFlowNode, error) {
-	tx := dbConn.MustBegin()
-	_, err := EditProcessFlowNodeWithTx(node, tx, role)
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = EditProcessFlowNodeWithTx(node, tx, role)
 	if err != nil {
 		tx.Rollback()
 		return nil, err

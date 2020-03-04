@@ -19,3 +19,23 @@ func Init() {
 func CreateTx() *sqlx.Tx {
 	return dbConn.MustBegin()
 }
+
+func UpgradeTxToAudit(tx *sqlx.Tx, role *core.Role) error {
+	_, err := tx.Exec(`
+		SELECT set_current_role_for_user_id($1)
+	`, role.UserId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateAuditTrailTx(role *core.Role) (*sqlx.Tx, error) {
+	tx := CreateTx()
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	return tx, nil
+}

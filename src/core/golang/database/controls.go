@@ -45,8 +45,12 @@ func EditControl(control *core.Control, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceControls, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
-	tx := dbConn.MustBegin()
-	_, err := tx.NamedExec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.NamedExec(`
 		UPDATE process_flow_controls
 		SET name = :name, 
 			description = :description,
@@ -73,7 +77,11 @@ func InsertNewControl(control *core.Control, role *core.Role) error {
 	var err error
 	var rows *sqlx.Rows
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
 	if control.OwnerId.Valid {
 		rows, err = tx.NamedQuery(`
 			INSERT INTO process_flow_controls (name, description, control_type, org_id, freq_type, freq_interval, owner_id, is_manual, freq_other)
@@ -110,7 +118,11 @@ func DeleteControls(nodeId int64, controlIds []int64, riskIds []int64, global bo
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
 	// Always delete the control relationship between the node and the control
 	// as well as the control and the specified risk.
 	for idx, id := range controlIds {

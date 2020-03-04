@@ -10,6 +10,11 @@ func NewVendorWithTx(vendor *core.Vendor, role *core.Role, tx *sqlx.Tx) error {
 		return core.ErrorUnauthorized
 	}
 
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
+	}
+
 	rows, err := tx.NamedQuery(`
 		INSERT INTO vendors(name, description, url, org_id)
 		VALUES (:name, :description, :url, :org_id)
@@ -71,7 +76,10 @@ func DeleteVendor(vendorId int64, orgId int32, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
 
 	// First delete the relevant documentation category and then
 	// delete the vendor itself. Everything else should propgate through
@@ -107,9 +115,12 @@ func UpdateVendor(vendor *core.Vendor, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
 
-	_, err := tx.NamedExec(`
+	_, err = tx.NamedExec(`
 		UPDATE vendors
 		SET name = :name,
 			description = :description,
