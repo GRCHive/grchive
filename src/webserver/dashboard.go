@@ -41,6 +41,7 @@ func createOrganizationSubrouter(r *mux.Router) {
 	s.HandleFunc(core.DashboardOrgAllVendorsEndpoint, render.RenderVendors)
 	s.HandleFunc(core.DashboardOrgSingleVendorEndpoint, render.RenderSingleVendor)
 	s.HandleFunc(core.DashboardOrgSingleDocFileEndpoint, render.RenderSingleDocFile)
+	s.HandleFunc(core.ApiAuditTrailPrefix, render.RenderAuditTrail)
 
 	createOrganizationSettingsSubrouter(s)
 	createOrganizationGLSubrouter(s)

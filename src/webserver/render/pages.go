@@ -277,6 +277,10 @@ func RenderSingleDocFile(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardSingleDocFileTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
+func RenderAuditTrail(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardOrgAuditTrailTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
+}
+
 func RenderRedirectPage(w http.ResponseWriter, r *http.Request, url string) {
 	RenderTemplate(w, RedirectTemplateKey, "base",
 		BuildPageTemplateParametersFull(r),

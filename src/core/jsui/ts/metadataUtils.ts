@@ -1,12 +1,12 @@
 import Metadata from './metadata'
 
-export function lazyGetUserFromId(userId : number | null) : Promise<User> {
-    return new Promise<User>((resolve) => {
+export function lazyGetUserFromId(userId : number | null) : Promise<User | null> {
+    return new Promise<User | null>((resolve) => {
         let getUser = () => {
             if (!!userId && userId in Metadata.state.idToUsers) {
                 resolve(Metadata.state.idToUsers[userId])
             } else {
-                resolve(Object() as User)
+                resolve(null)
             }
         }
 

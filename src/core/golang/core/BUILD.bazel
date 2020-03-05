@@ -5,6 +5,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "webserver_core_library",
     srcs = [
+        "auditTrail.go",
         "apiKey.go",
         "clock.go",
         "comments.go",

@@ -165,8 +165,8 @@ export default Vue.extend({
                     promises.push(lazyGetUserFromId(userId))
                 }
 
-                Promise.all(promises).then((vals) => {
-                    this.users = vals
+                Promise.all(promises).then((vals : (User | null)[]) => {
+                    this.users = <User[]>(vals.filter((ele : User | null) => !!ele))
                 })
 
                 this.ready = true

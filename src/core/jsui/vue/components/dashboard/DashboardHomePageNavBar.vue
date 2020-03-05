@@ -83,6 +83,12 @@ export default Vue.extend({
                             url: PageParamsStore.state.organization!.Url + 'requests',
                             disabled : false
                         },
+                        {
+                            title: 'Audit Trail',
+                            icon: 'mdi-shoe-print',
+                            url: PageParamsStore.state.organization!.Url + 'auditlog',
+                            disabled : false
+                        },
                     ],
                 },
                 {

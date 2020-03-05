@@ -35,6 +35,7 @@ const DashboardOrgSingleServer = () => import( /* webpackChunkName: "DashboardOr
 const DashboardOrgVendors = () => import( /* webpackChunkName: "DashboardOrgVendors" */ '../vue/pages/dashboard/DashboardOrgVendors.vue')
 const DashboardOrgSingleVendor = () => import( /* webpackChunkName: "DashboardOrgSingleVendor" */ '../vue/pages/dashboard/DashboardOrgSingleVendor.vue')
 const DashboardOrgSingleDocFile = () => import( /* webpackChunkName: "DashboardOrgSingleDocFile" */ '../vue/pages/dashboard/DashboardOrgSingleDocFile.vue')
+const DashboardOrgAuditTrail = () => import (/* webpackChunkName: "DashboardOrgAuditTrail" */ '../vue/pages/dashboard/DashboardOrgAuditTrail.vue')
 const SnackBar = () => import( /* webpackChunkName: "SnackBar" */ '../vue/components/SnackBar.vue')
 import { getCurrentCSRF } from './csrf'
 import { PageParamsStore, PageParamsStoreState  } from '../ts/pageParams'
@@ -82,6 +83,7 @@ function mountApp(inData : PageParamsStoreState) {
             DashboardOrgSingleVendor,
             DashboardOrgSingleDocFile,
             DashboardOrgSingleSqlRequest,
+            DashboardOrgAuditTrail,
             SnackBar,
         },
         vuetify: vueOpts.vuetify,

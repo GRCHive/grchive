@@ -337,3 +337,5 @@ export const deleteVendorProductUrl : string = "/api/vendor/product/delete"
 
 export const newVendorProductSocLinkUrl : string = "/api/vendor/product/soc/new"
 export const deleteVendorProductSocLinkUrl : string = "/api/vendor/product/soc/delete"
+
+export const allAuditTrailLinkUrl : string = "/api/auditlog/all"

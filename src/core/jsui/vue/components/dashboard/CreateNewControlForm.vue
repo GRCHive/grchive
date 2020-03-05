@@ -164,8 +164,8 @@ export default Vue.extend({
                 this.frequencyData.freqType = control.FrequencyType
                 this.frequencyData.freqInterval = control.FrequencyInterval
                 this.frequencyData.freqOther = control.FrequencyOther
-                lazyGetUserFromId(control.OwnerId).then((user : User) => {
-                    this.controlOwner = user
+                lazyGetUserFromId(control.OwnerId).then((user : User | null) => {
+                    this.controlOwner = user!
                 })
 
                 lazyGetControlTypeFromId(control.ControlTypeId).then((typ : ProcessFlowControlType) => {

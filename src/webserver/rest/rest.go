@@ -30,6 +30,7 @@ func registerAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiUrl).Subrouter()
 	s.Use(webcore.ObtainAPIKeyRoleInContextMiddleware)
 
+	registerAuditTrailAPIPaths(s)
 	registerInviteAPIPaths(s)
 	registerVerificationAPIPaths(s)
 	registerUserAPIPaths(s)
@@ -48,6 +49,11 @@ func registerAPIPaths(r *mux.Router) {
 	registerCommentsAPIPaths(s)
 	registerDeploymentAPIPaths(s)
 	registerVendorAPIPaths(s)
+}
+
+func registerAuditTrailAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiAuditTrailPrefix).Subrouter()
+	s.HandleFunc(core.ApiAllEndpoint, allAuditTrailEvents).Methods("GET")
 }
 
 func registerInviteAPIPaths(r *mux.Router) {

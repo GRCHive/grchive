@@ -51,6 +51,7 @@ const (
 	DashboardVendorsTemplateKey
 	DashboardSingleVendorTemplateKey
 	DashboardSingleDocFileTemplateKey
+	DashboardOrgAuditTrailTemplateKey
 	// Error Keys
 	Error403TemplateKey
 	Error404TemplateKey
@@ -158,6 +159,10 @@ func RegisterTemplates() {
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardUserOrgs.tmpl")
 	allTemplates[DashboardUserProfileTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardUserProfile.tmpl")
+
+	// Audit Trail
+	allTemplates[DashboardOrgAuditTrailTemplateKey] =
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardAuditTrail.tmpl")
 
 	// Error templates
 	allTemplates[Error403TemplateKey] =
