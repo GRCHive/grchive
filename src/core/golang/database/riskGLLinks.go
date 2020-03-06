@@ -33,14 +33,7 @@ func FindRisksLinkedToGeneralLedgerAccount(accountId int64, orgId int32, role *c
 
 	risks := make([]*core.Risk, 0)
 	err := dbConn.Select(&risks, `
-		SELECT DISTINCT
-			risk.id,
-			risk.name,
-			risk.description,
-			org.id AS "org.id",
-			org.org_group_id AS "org.org_group_id",
-			org.org_group_name AS "org.org_group_name",
-			org.org_name AS "org.org_name"
+		SELECT DISTINCT risk.*
 		FROM process_flow_risks AS risk
 		INNER JOIN process_flow_risk_node AS rn
 			ON rn.risk_id = risk.id
@@ -48,8 +41,6 @@ func FindRisksLinkedToGeneralLedgerAccount(accountId int64, orgId int32, role *c
 			ON ngl.node_id = rn.node_id
 		INNER JOIN general_ledger_accounts AS acc
 			ON acc.id = ngl.gl_account_id
-		INNER JOIN organizations AS org
-			ON risk.org_id = org.id
 		WHERE acc.id = $1
 			AND acc.org_id = $2
 			AND risk.org_id = $2

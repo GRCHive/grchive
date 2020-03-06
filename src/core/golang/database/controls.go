@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func GetControlTypes(role *core.Role) ([]*core.ControlType, error) {
@@ -38,7 +39,20 @@ func FindAllControlsForOrganization(org *core.Organization, filter core.ControlF
 		buildNumericFilter("COUNT(riskcontrol.risk_id)", filter.NumRisks),
 	), org.Id)
 
-	return controls, err
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, c := range controls {
+		err = LogAuditSelectWithTx(c.OrgId, core.ResourceControl, strconv.FormatInt(c.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return controls, tx.Commit()
 }
 
 func EditControl(control *core.Control, role *core.Role) error {
@@ -256,7 +270,10 @@ func FindControl(controlId int64, role *core.Role) (*core.Control, error) {
 		FROM process_flow_controls AS ctrl
 		WHERE id = $1
 	`, controlId)
-	return &control, err
+	if err != nil {
+		return nil, err
+	}
+	return &control, LogAuditSelect(control.OrgId, core.ResourceControl, strconv.FormatInt(control.Id, 10), role)
 }
 
 func getTableNameForControlDocCatIO(isInput bool) string {

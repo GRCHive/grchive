@@ -153,6 +153,7 @@ var ServerRole = &Role{
 		Description: "All access Server role",
 	},
 	Permissions: CreateAllAccessPermission(),
+	UserId:      -1,
 }
 
 func CreateDefaultRoleMetadata(orgId int32) RoleMetadata {

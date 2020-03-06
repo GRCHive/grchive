@@ -85,6 +85,7 @@ export function getAllRisks(inp : TAllRiskInput) : Promise<TAllRiskOutput> {
 
 export interface TSingleRiskInput {
     riskId: number
+    orgId: number
 }
 
 export interface TSingleRiskOutput {

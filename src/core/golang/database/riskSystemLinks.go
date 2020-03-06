@@ -33,14 +33,7 @@ func FindRisksLinkedToSystem(systemId int64, orgId int32, role *core.Role) ([]*c
 
 	risks := make([]*core.Risk, 0)
 	err := dbConn.Select(&risks, `
-		SELECT DISTINCT
-			risk.id,
-			risk.name,
-			risk.description,
-			org.id AS "org.id",
-			org.org_group_id AS "org.org_group_id",
-			org.org_group_name AS "org.org_group_name",
-			org.org_name AS "org.org_name"
+		SELECT DISTINCT risk.*
 		FROM process_flow_risks AS risk
 		INNER JOIN process_flow_risk_node AS rn
 			ON rn.risk_id = risk.id
@@ -48,8 +41,6 @@ func FindRisksLinkedToSystem(systemId int64, orgId int32, role *core.Role) ([]*c
 			ON nsl.node_id = rn.node_id
 		INNER JOIN systems AS sys
 			ON sys.id = nsl.system_id
-		INNER JOIN organizations AS org
-			ON sys.org_id = org.id
 		WHERE sys.id = $1
 			AND sys.org_id = $2
 			AND risk.org_id = $2

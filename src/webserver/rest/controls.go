@@ -56,7 +56,8 @@ type AddControlInputs struct {
 }
 
 type GetSingleControlInputs struct {
-	OrgId int32 `webcore:"orgId"`
+	OrgId     int32 `webcore:"orgId"`
+	ControlId int64 `webcore:"controlId"`
 }
 
 func editControl(w http.ResponseWriter, r *http.Request) {
@@ -367,23 +368,23 @@ func getSingleControl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	type FullControlData struct {
 		Control *core.Control
 		Flows   []*core.ProcessFlow
 		Risks   []*core.Risk
 	}
 	data := FullControlData{}
-	data.Control, err = webcore.GetControlFromRequestUrl(r, core.ServerRole)
+	data.Control, err = database.FindControl(inputs.ControlId, role)
 	if err != nil {
 		core.Warning("No control data: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
-	if err != nil {
-		core.Warning("Bad access: " + err.Error())
-		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 

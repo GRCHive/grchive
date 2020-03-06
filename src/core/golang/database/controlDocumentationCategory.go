@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func NewControlDocumentationCategoryWithTx(cat *core.ControlDocumentationCategory, role *core.Role, tx *sqlx.Tx) error {
@@ -118,7 +119,25 @@ func GetAllDocumentationCategoriesForOrg(orgId int32, role *core.Role) ([]*core.
 		FROM process_flow_control_documentation_categories
 		WHERE org_id = $1
 	`, orgId)
-	return cats, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, c := range cats {
+		err = LogAuditSelectWithTx(orgId, core.ResourceDocCat, strconv.FormatInt(c.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return cats, tx.Commit()
 }
 
 func GetDocumentationCategory(catId int64, orgId int32, role *core.Role) (*core.ControlDocumentationCategory, error) {
@@ -133,5 +152,8 @@ func GetDocumentationCategory(catId int64, orgId int32, role *core.Role) (*core.
 		WHERE id = $1
 			AND org_id = $2
 	`, catId, orgId)
-	return cat, err
+	if err != nil {
+		return nil, err
+	}
+	return cat, LogAuditSelect(orgId, core.ResourceDocCat, strconv.FormatInt(cat.Id, 10), role)
 }

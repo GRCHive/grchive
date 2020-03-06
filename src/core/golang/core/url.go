@@ -164,8 +164,7 @@ const ApiDeleteRiskEndpoint string = "/delete"
 const ApiEditRiskEndpoint string = "/edit"
 const ApiAddRiskToNodeEndpoint string = "/add"
 const ApiGetAllRisksEndpoint string = "/"
-
-var ApiGetSingleRiskEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgRiskQueryId)
+const ApiGetSingleRiskEndpoint string = "/get"
 
 // API - Controls
 const ApiControlPrefix string = "/control"
@@ -177,8 +176,7 @@ const ApiAddControlEndpoint string = "/add"
 const ApiLinkDocCatControlEndpoint string = "/linkCat"
 const ApiUnlinkDocCatControlEndpoint string = "/unlinkCat"
 const ApiGetAllControlEndpoint string = "/"
-
-var ApiGetSingleControlEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgControlQueryId)
+const ApiGetSingleControlEndpoint string = "/get"
 
 // API - Control Documentation
 const ApiControlDocumentationPrefix string = "/documentation"

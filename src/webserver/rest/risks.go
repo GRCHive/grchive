@@ -37,6 +37,11 @@ type GetAllRisksInput struct {
 	Filter  core.RiskFilterData `webcore:"filter"`
 }
 
+type GetRiskInput struct {
+	OrgId  int32 `webcore:"orgId"`
+	RiskId int64 `webcore:"riskId"`
+}
+
 func editRisk(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
@@ -115,7 +120,7 @@ func createNewRisk(w http.ResponseWriter, r *http.Request) {
 	newRisk := core.Risk{
 		Name:        inputs.Name,
 		Description: inputs.Description,
-		Org:         org,
+		OrgId:       org.Id,
 	}
 
 	err = database.InsertNewRisk(&newRisk, role)
@@ -264,7 +269,6 @@ func getAllRisks(w http.ResponseWriter, r *http.Request) {
 }
 
 func getSingleRisk(w http.ResponseWriter, r *http.Request) {
-	var err error
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -273,26 +277,28 @@ func getSingleRisk(w http.ResponseWriter, r *http.Request) {
 		Flows    []*core.ProcessFlow
 		Controls []*core.Control
 	}
+
+	inputs := GetRiskInput{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	data := FullRiskData{}
-	data.Risk, err = webcore.GetRiskFromRequestUrl(r, core.ServerRole)
+	data.Risk, err = database.FindRisk(inputs.RiskId, role)
 	if err != nil {
 		core.Warning("No risk data: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		jsonWriter.Encode(struct{}{})
-		return
-	}
-
-	org, err := database.FindOrganizationFromRiskId(data.Risk.Id, core.ServerRole)
-	if err != nil {
-		core.Warning("No organization: " + err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	role, err := webcore.GetCurrentRequestRole(r, org.Id)
-	if err != nil {
-		core.Warning("Bad access: " + err.Error())
-		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 

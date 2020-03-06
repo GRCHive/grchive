@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func CreateFileStorageWithTx(storage *core.FileStorageData, tx *sqlx.Tx, role *core.Role) error {
@@ -183,8 +184,24 @@ func GetSocDocumentationForVendorProduct(productId int64, orgId int32, role *cor
 		ORDER BY relevant_time DESC
 	`, productId, orgId)
 
-	return retArr, err
+	if err != nil {
+		return nil, err
+	}
 
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range retArr {
+		err = LogAuditSelectWithTx(orgId, core.ResourceDocMetadata, strconv.FormatInt(r.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return retArr, tx.Commit()
 }
 
 func GetControlDocumentation(fileId int64, orgId int32, role *core.Role) (*core.ControlDocumentationFile, error) {
@@ -203,7 +220,11 @@ func GetControlDocumentation(fileId int64, orgId int32, role *core.Role) (*core.
 			AND file.org_id = $2
 	`, fileId, orgId)
 
-	return &retFile, err
+	if err != nil {
+		return nil, err
+	}
+
+	return &retFile, LogAuditSelect(orgId, core.ResourceDocMetadata, strconv.FormatInt(retFile.Id, 10), role)
 }
 
 func GetControlDocumentationStorage(fileId int64, orgId int32, role *core.Role) (*core.FileStorageData, error) {
@@ -232,7 +253,7 @@ func GetControlDocumentationStorage(fileId int64, orgId int32, role *core.Role) 
 		return nil, err
 	}
 
-	return &retFile, err
+	return &retFile, LogAuditSelect(orgId, core.ResourceFileStorage, strconv.FormatInt(retFile.Id, 10), role)
 }
 
 func GetControlDocumentationForCategory(catId int64, orgId int32, role *core.Role) ([]*core.ControlDocumentationFile, error) {
@@ -252,7 +273,20 @@ func GetControlDocumentationForCategory(catId int64, orgId int32, role *core.Rol
 		ORDER BY file.relevant_time DESC
 	`, catId, orgId)
 
-	return retArr, err
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range retArr {
+		err = LogAuditSelectWithTx(orgId, core.ResourceDocMetadata, strconv.FormatInt(r.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return retArr, tx.Commit()
 }
 
 func LinkFileWithPreviewWithTx(

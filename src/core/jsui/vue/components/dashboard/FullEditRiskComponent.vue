@@ -170,6 +170,7 @@ export default Vue.extend({
 
             getSingleRisk(<TSingleRiskInput>{
                 riskId: riskId,
+                orgId: PageParamsStore.state.organization!.Id,
             }).then((resp : TSingleRiskOutput) => {
                 this.fullRiskData = resp.data
                 this.ready = true

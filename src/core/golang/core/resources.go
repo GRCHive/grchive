@@ -19,4 +19,7 @@ const (
 	ResourceServer           string = "infrastructure_servers"
 	ResourceSystem           string = "systems"
 	ResourceDocRequest       string = "document_requests"
+	ResourceDocCat           string = "process_flow_control_documentation_categories"
+	ResourceRisk             string = "process_flow_risks"
+	ResourceControl          string = "process_flow_controls"
 )

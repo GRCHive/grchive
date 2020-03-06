@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func AddFileVersionWithTx(file *core.ControlDocumentationFile, storage *core.FileStorageData, tx *sqlx.Tx, role *core.Role) (*core.FileVersion, error) {
@@ -86,7 +87,25 @@ func GetAllVersionsFileStorage(fileId int64, orgId int32, role *core.Role) ([]*c
 		WHERE fvh.file_id = $1
 			AND fvh.org_id = $2
 	`, fileId, orgId)
-	return retData, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range retData {
+		err = LogAuditSelectWithTx(orgId, core.ResourceFileStorage, strconv.FormatInt(r.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return retData, tx.Commit()
 }
 
 func GetFileVersionStorageData(fileId int64, orgId int32, version int32, role *core.Role) (*core.FileStorageData, error) {
@@ -104,7 +123,12 @@ func GetFileVersionStorageData(fileId int64, orgId int32, version int32, role *c
 			AND fvh.org_id = $2
 			AND fvh.version_number = $3
 	`, fileId, orgId, version)
-	return &data, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &data, LogAuditSelect(orgId, core.ResourceFileStorage, strconv.FormatInt(data.Id, 10), role)
 }
 
 func GetPreviewFileVersionStorageDataFromStorageData(storage *core.FileStorageData, role *core.Role) (*core.FileStorageData, error) {
@@ -135,7 +159,7 @@ func GetPreviewFileVersionStorageDataFromStorageData(storage *core.FileStorageDa
 	if err != nil {
 		return nil, err
 	}
-	return &data, err
+	return &data, LogAuditSelect(storage.OrgId, core.ResourceFileStorage, strconv.FormatInt(data.Id, 10), role)
 }
 
 func GetPreviewFileVersionStorageData(fileId int64, orgId int32, version int32, role *core.Role) (*core.FileStorageData, error) {
@@ -170,5 +194,5 @@ func GetPreviewFileVersionStorageData(fileId int64, orgId int32, version int32, 
 	if err != nil {
 		return nil, err
 	}
-	return &data, err
+	return &data, LogAuditSelect(orgId, core.ResourceFileStorage, strconv.FormatInt(data.Id, 10), role)
 }

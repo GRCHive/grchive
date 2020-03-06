@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 	"strings"
 )
 
@@ -140,7 +141,7 @@ func InsertNewRisk(risk *core.Risk, role *core.Role) error {
 	return err
 }
 
-func findAllRisksFromDbHelper(stmt *sqlx.Stmt, args ...interface{}) ([]*core.Risk, error) {
+func findAllRisksFromDbHelper(role *core.Role, stmt *sqlx.Stmt, args ...interface{}) ([]*core.Risk, error) {
 	risks := []*core.Risk{}
 	rows, err := stmt.Queryx(args...)
 	if err != nil {
@@ -149,25 +150,28 @@ func findAllRisksFromDbHelper(stmt *sqlx.Stmt, args ...interface{}) ([]*core.Ris
 	defer rows.Close()
 
 	for rows.Next() {
-		dataMap := make(map[string]interface{})
-		err = rows.MapScan(dataMap)
+		r := core.Risk{}
+		err = rows.StructScan(&r)
 		if err != nil {
 			return nil, err
 		}
-
-		// Manual unmarshaling so we can support the JSON inputs/outputs.
-		newRisk := core.Risk{}
-		newRisk.Id = dataMap["id"].(int64)
-		newRisk.Name = dataMap["name"].(string)
-		newRisk.Description = dataMap["description"].(string)
-		if err != nil {
-			return nil, err
-		}
-
-		risks = append(risks, &newRisk)
+		risks = append(risks, &r)
 	}
 
-	return risks, nil
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range risks {
+		err = LogAuditSelectWithTx(r.OrgId, core.ResourceRisk, strconv.FormatInt(r.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return risks, tx.Commit()
 }
 
 func FindAllRisksForProcessFlow(flowId int64, role *core.Role) ([]*core.Risk, error) {
@@ -190,7 +194,7 @@ func FindAllRisksForProcessFlow(flowId int64, role *core.Role) ([]*core.Risk, er
 		return nil, err
 	}
 
-	return findAllRisksFromDbHelper(stmt, flowId)
+	return findAllRisksFromDbHelper(role, stmt, flowId)
 }
 
 func FindAllRiskForOrganization(org *core.Organization, filter core.RiskFilterData, role *core.Role) ([]*core.Risk, error) {
@@ -217,7 +221,7 @@ func FindAllRiskForOrganization(org *core.Organization, filter core.RiskFilterDa
 		return nil, err
 	}
 
-	return findAllRisksFromDbHelper(stmt, org.Id)
+	return findAllRisksFromDbHelper(role, stmt, org.Id)
 }
 
 func FindRisk(riskId int64, role *core.Role) (*core.Risk, error) {
@@ -226,9 +230,14 @@ func FindRisk(riskId int64, role *core.Role) (*core.Risk, error) {
 	}
 	risk := core.Risk{}
 	err := dbConn.Get(&risk, `
-		SELECT risk.id, risk.name, risk.description
+		SELECT *
 		FROM process_flow_risks AS risk
 		WHERE id = $1
 	`, riskId)
-	return &risk, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &risk, LogAuditSelect(risk.OrgId, core.ResourceRisk, strconv.FormatInt(risk.Id, 10), role)
 }

@@ -183,8 +183,8 @@ export const allRiskAPIUrl : string = "/api/risk/"
 export const allRiskSystemLinkUrl : string = "/api/risk/link/systems/all"
 export const allRiskGLLinkUrl : string = "/api/risk/link/gl/all"
 
-export function createSingleRiskAPIUrl(riskId : number) : string {
-    return `/api/risk/${riskId}`
+export function createSingleRiskAPIUrl(_ : number) : string {
+    return `/api/risk/get`
 }
 
 export function createGetAllOrgUsersAPIUrl(org : string) : string {
@@ -197,8 +197,8 @@ export const deleteControlUrl : string = "/api/control/delete"
 export const addControlUrl : string = "/api/control/add"
 export const editControlUrl : string = "/api/control/edit"
 export const allControlAPIUrl : string = "/api/control/"
-export function createSingleControlAPIUrl(controlId : number) : string {
-    return `/api/control/${controlId}`
+export function createSingleControlAPIUrl(_ : number) : string {
+    return `/api/control/get`
 }
 
 export const allControlSystemLinkUrl : string = "/api/control/link/systems/all"
