@@ -1,10 +1,12 @@
 package database
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func commonAuditEventRetrievalQuery(role *core.Role, cond string, limit string, args ...interface{}) ([]*core.AuditEvent, error) {
@@ -153,4 +155,230 @@ func GetLatestAuditModificationHistoryData(resourceType string, resourceId strin
 	}
 
 	return getAuditModificationFromStmt(stmt, resourceType, resourceId)
+}
+
+func retrieveResourceExtraData(resourceType string, resourceId string) (map[string]interface{}, error) {
+	data := map[string]interface{}{}
+
+	var rows *sqlx.Rows
+	var err error
+
+	switch resourceType {
+	case core.ResourceFileStorage:
+		storageId, err := strconv.ParseInt(resourceId, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		rows, err = dbConn.Queryx(`
+			SELECT f.category_id AS "cat_id", s.metadata_id AS "file_id"
+			FROM file_storage AS s
+			INNER JOIN file_metadata AS f
+				ON f.id = s.metadata_id
+			WHERE s.id = $1
+		`, storageId)
+	case core.ResourceDocMetadata:
+		fileId, err := strconv.ParseInt(resourceId, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		rows, err = dbConn.Queryx(`
+			SELECT r.category_id AS "cat_id"
+			FROM file_metadata AS r
+			WHERE r.id = $1
+		`, fileId)
+	case core.ResourceVendorProduct:
+		productId, err := strconv.ParseInt(resourceId, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		rows, err = dbConn.Queryx(`
+			SELECT p.vendor_id AS "vendor_id"
+			FROM vendor_products AS p
+			WHERE p.id = $1
+		`, productId)
+	case core.ResourceGLCat:
+		catId, err := strconv.ParseInt(resourceId, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		rows, err = dbConn.Queryx(`
+			SELECT c.parent_category_id AS "gl_parent_cat_id"
+			FROM general_ledger_categories AS c
+			WHERE c.id = $1
+		`, catId)
+	case core.ResourceGLAcc:
+		accId, err := strconv.ParseInt(resourceId, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		rows, err = dbConn.Queryx(`
+			SELECT a.parent_category_id AS "gl_parent_cat_id"
+			FROM general_ledger_accounts AS a
+			WHERE a.id = $1
+		`, accId)
+	case core.ResourceFlowNode:
+		nodeId, err := strconv.ParseInt(resourceId, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		rows, err = dbConn.Queryx(`
+			SELECT n.process_flow_id AS "process_flow_id"
+			FROM process_flow_nodes AS n
+			WHERE n.id = $1
+		`, nodeId)
+	case core.ResourceFlowNodeInput:
+		ioId, err := strconv.ParseInt(resourceId, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		rows, err = dbConn.Queryx(`
+			SELECT n.process_flow_id AS "process_flow_id", io.parent_node_id AS "node_id"
+			FROM process_flow_node_inputs AS io
+			INNER JOIN process_flow_nodes AS n
+				ON n.id = io.parent_node_id
+			WHERE id = $1
+		`, ioId)
+	case core.ResourceFlowNodeOutput:
+		ioId, err := strconv.ParseInt(resourceId, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		rows, err = dbConn.Queryx(`
+			SELECT n.process_flow_id AS "process_flow_id", io.parent_node_id AS "node_id"
+			FROM process_flow_node_outputs AS io
+			INNER JOIN process_flow_nodes AS n
+				ON n.id = io.parent_node_id
+			WHERE id = $1
+		`, ioId)
+	case core.ResourceSqlQueryMetadata:
+		queryId, err := strconv.ParseInt(resourceId, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		rows, err = dbConn.Queryx(`
+			SELECT r.db_id AS "db_id"
+			FROM database_sql_metadata AS r
+			WHERE r.id = $1
+		`, queryId)
+	case core.ResourceSqlQuery:
+		queryId, err := strconv.ParseInt(resourceId, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		rows, err = dbConn.Queryx(`
+			SELECT r.metadata_id AS "sql_metadata_id", m.db_id AS "db_id"
+			FROM database_sql_metadata AS r
+			INNER JOIN database_sql_metadata AS m
+				ON m.id = r.metadata_id
+			WHERE r.id = $1
+		`, queryId)
+	case core.ResourceDatabaseConn:
+		connId, err := strconv.ParseInt(resourceId, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		rows, err = dbConn.Queryx(`
+			SELECT r.db_id AS "db_id"
+			FROM database_connection_info AS r
+			WHERE r.id = $1
+		`, connId)
+	case core.ResourceSqlQueryRequest:
+		reqId, err := strconv.ParseInt(resourceId, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		rows, err = dbConn.Queryx(`
+			SELECT r.query_id AS "query_id", q.metadata_id AS "metadata_id"
+			FROM database_sql_query_requests AS r
+			INNER JOIN database_sql_queries AS q
+				ON q.id = r.query_id
+			WHERE r.id = $1
+		`, reqId)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if rows != nil {
+		defer rows.Close()
+		rows.Next()
+
+		err = rows.MapScan(data)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return data, nil
+}
+
+func LogAuditSelectWithTx(orgId int32, resourceType string, resourceId string, role *core.Role, tx *sqlx.Tx) error {
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
+	}
+
+	extraData, err := retrieveResourceExtraData(resourceType, resourceId)
+	if err != nil {
+		return err
+	}
+
+	rawExtraData, err := json.Marshal(extraData)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`
+		INSERT INTO global_audit_event_history(
+			org_id,
+			resource_type,
+			resource_id,
+			resource_extra_data,
+			action,
+			performed_at,
+			pgrole_id
+		)
+		SELECT 
+			$1,
+			$2,
+			$3,
+			$4,
+			'SELECT',
+			NOW(),
+			pg.oid
+		FROM pg_roles AS pg
+		WHERE pg.rolname = current_user
+	`, orgId, resourceType, resourceId, string(rawExtraData))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func LogAuditSelect(orgId int32, resourceType string, resourceId string, role *core.Role) error {
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	err = LogAuditSelectWithTx(orgId, resourceType, resourceId, role, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
 }

@@ -2,6 +2,7 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func NewServer(server *core.Server, role *core.Role) error {
@@ -96,7 +97,25 @@ func AllServersForOrganization(orgId int32, role *core.Role) ([]*core.Server, er
 		FROM infrastructure_servers
 		WHERE org_id = $1
 	`, orgId)
-	return servers, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, s := range servers {
+		err = LogAuditSelectWithTx(orgId, core.ResourceServer, strconv.FormatInt(s.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return servers, tx.Commit()
 }
 
 func GetServer(serverId int64, orgId int32, role *core.Role) (*core.Server, error) {
@@ -110,7 +129,11 @@ func GetServer(serverId int64, orgId int32, role *core.Role) (*core.Server, erro
 		FROM infrastructure_servers
 		WHERE id = $1 AND org_id = $2
 	`, serverId, orgId)
-	return &server, err
+	if err != nil {
+		return nil, err
+	}
+
+	return &server, LogAuditSelect(orgId, core.ResourceServer, strconv.FormatInt(server.Id, 10), role)
 }
 
 func AllServersForDeployment(deployId int64, orgId int32, role *core.Role) ([]*core.Server, error) {
@@ -127,7 +150,24 @@ func AllServersForDeployment(deployId int64, orgId int32, role *core.Role) ([]*c
 		WHERE srv.org_id = $1
 			AND link.deployment_id = $2
 	`, orgId, deployId)
-	return servers, err
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, s := range servers {
+		err = LogAuditSelectWithTx(orgId, core.ResourceServer, strconv.FormatInt(s.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return servers, tx.Commit()
 }
 
 func GetSystemsLinkedToServer(serverId int64, orgId int32, role *core.Role) ([]*core.System, error) {
@@ -150,7 +190,25 @@ func GetSystemsLinkedToServer(serverId int64, orgId int32, role *core.Role) ([]*
 			AND sys.org_id = $2
 			AND deploy.deployment_type = $3
 	`, serverId, orgId, core.KSelfDeployment)
-	return systems, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range systems {
+		err = LogAuditSelectWithTx(orgId, core.ResourceSystem, strconv.FormatInt(r.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return systems, tx.Commit()
 }
 
 func GetDatabasesLinkedToServer(serverId int64, orgId int32, role *core.Role) ([]*core.Database, error) {
@@ -173,5 +231,23 @@ func GetDatabasesLinkedToServer(serverId int64, orgId int32, role *core.Role) ([
 			AND db.org_id = $2
 			AND deploy.deployment_type = $3
 	`, serverId, orgId, core.KSelfDeployment)
-	return dbs, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range dbs {
+		err = LogAuditSelectWithTx(orgId, core.ResourceDatabase, strconv.FormatInt(r.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return dbs, tx.Commit()
 }
