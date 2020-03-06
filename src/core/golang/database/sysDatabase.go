@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/jmoiron/sqlx/types"
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func GetAllSupportedDatabaseTypes(role *core.Role) ([]*core.DatabaseType, error) {
@@ -64,7 +65,24 @@ func GetAllDatabasesForOrg(orgId int32, role *core.Role) ([]*core.Database, erro
 		WHERE org_id = $1
 	`, orgId)
 
-	return dbs, err
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, d := range dbs {
+		err = LogAuditSelectWithTx(orgId, core.ResourceDatabase, strconv.FormatInt(d.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return dbs, tx.Commit()
 }
 
 func GetAllDatabasesForOrgWithDeployment(orgId int32, deploymentType int32, role *core.Role) ([]*core.Database, error) {
@@ -83,8 +101,24 @@ func GetAllDatabasesForOrgWithDeployment(orgId int32, deploymentType int32, role
 		WHERE db.org_id = $1
 			AND dp.deployment_type = $2
 	`, orgId, deploymentType)
+	if err != nil {
+		return nil, err
+	}
 
-	return dbs, err
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, d := range dbs {
+		err = LogAuditSelectWithTx(orgId, core.ResourceDatabase, strconv.FormatInt(d.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return dbs, tx.Commit()
 }
 
 func GetDb(dbId int64, orgId int32, role *core.Role) (*core.Database, error) {
@@ -99,8 +133,11 @@ func GetDb(dbId int64, orgId int32, role *core.Role) (*core.Database, error) {
 		WHERE id = $1
 			AND org_id = $2
 	`, dbId, orgId)
+	if err != nil {
+		return nil, err
+	}
 
-	return &db, err
+	return &db, LogAuditSelect(orgId, core.ResourceDatabase, strconv.FormatInt(db.Id, 10), role)
 }
 
 func GetDbType(dbId int64, orgId int32, role *core.Role) (*core.DatabaseType, error) {
@@ -276,7 +313,7 @@ func FindDatabaseConnectionForDatabase(dbId int64, orgId int32, role *core.Role)
 		return nil, err
 	}
 
-	return &conn, nil
+	return &conn, LogAuditSelect(orgId, core.ResourceDatabaseConn, strconv.FormatInt(conn.Id, 10), role)
 }
 
 func DeleteDatabaseConnection(connId int64, dbId int64, orgId int32, role *core.Role) error {

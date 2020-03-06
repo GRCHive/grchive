@@ -2,6 +2,7 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func CreateNewSystem(system *core.System, role *core.Role) error {
@@ -48,7 +49,25 @@ func GetAllSystemsForOrg(orgId int32, role *core.Role) ([]*core.System, error) {
 		FROM systems
 		WHERE org_id = $1
 	`, orgId)
-	return systems, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, s := range systems {
+		err = LogAuditSelectWithTx(orgId, core.ResourceSystem, strconv.FormatInt(s.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return systems, tx.Commit()
 }
 
 func GetAllSystemsForOrgWithDeployment(orgId int32, deploymentType int32, role *core.Role) ([]*core.System, error) {
@@ -67,7 +86,25 @@ func GetAllSystemsForOrgWithDeployment(orgId int32, deploymentType int32, role *
 		WHERE sys.org_id = $1
 			AND dp.deployment_type = $2
 	`, orgId, deploymentType)
-	return systems, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, s := range systems {
+		err = LogAuditSelectWithTx(orgId, core.ResourceSystem, strconv.FormatInt(s.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return systems, tx.Commit()
 }
 
 func GetSystem(sysId int64, orgId int32, role *core.Role) (*core.System, error) {
@@ -83,7 +120,11 @@ func GetSystem(sysId int64, orgId int32, role *core.Role) (*core.System, error) 
 			AND org_id = $2
 	`, sysId, orgId)
 
-	return &sys, err
+	if err != nil {
+		return nil, err
+	}
+
+	return &sys, LogAuditSelect(orgId, core.ResourceSystem, strconv.FormatInt(sys.Id, 10), role)
 }
 
 func EditSystem(sys *core.System, role *core.Role) error {
