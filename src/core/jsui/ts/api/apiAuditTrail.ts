@@ -1,8 +1,12 @@
 import axios from 'axios'
 import * as qs from 'query-string'
-import { allAuditTrailLinkUrl } from '../url'
+import { 
+    allAuditTrailLinkUrl,
+    getAuditTrailLinkUrl
+} from '../url'
 import { getAPIRequestConfig } from './apiUtility'
 import { AuditEventEntry, cleanAuditEventEntryFromJson } from '../auditTrail'
+import { ResourceHandle } from '../resourceUtils'
 
 export interface TAllAuditTrailInput {
     orgId: number
@@ -17,4 +21,20 @@ export function allAuditTrail(inp : TAllAuditTrailInput) : Promise<TAllAuditTrai
         resp.data.forEach(cleanAuditEventEntryFromJson)
         return resp
     })
+}
+
+export interface TGetAuditTrailInput {
+    orgId: number
+    resourceHandleOnly: boolean
+    entryId? : number
+}
+
+export interface TGetAuditTrailOutput {
+    data: {
+        Handle?: ResourceHandle
+    }
+}
+
+export function getAuditTrail(inp : TGetAuditTrailInput) : Promise<TGetAuditTrailOutput> {
+    return axios.get(getAuditTrailLinkUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
 }

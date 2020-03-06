@@ -30,6 +30,10 @@ func (v *NullString) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+func CreateNullString(v string) NullString {
+	return NullString{sql.NullString{v, true}}
+}
+
 type NullTime struct {
 	sql.NullTime
 }

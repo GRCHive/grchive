@@ -54,6 +54,7 @@ func registerAPIPaths(r *mux.Router) {
 func registerAuditTrailAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiAuditTrailPrefix).Subrouter()
 	s.HandleFunc(core.ApiAllEndpoint, allAuditTrailEvents).Methods("GET")
+	s.HandleFunc(core.ApiGetEndpoint, getAuditTrailEntry).Methods("GET")
 }
 
 func registerInviteAPIPaths(r *mux.Router) {

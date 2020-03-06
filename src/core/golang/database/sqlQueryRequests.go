@@ -11,6 +11,11 @@ func CreateNewSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.
 		return core.ErrorUnauthorized
 	}
 
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
+	}
+
 	rows, err := tx.NamedQuery(`
 		INSERT INTO database_sql_query_requests (query_id, upload_time, upload_user_id, org_id, name, description)
 		VALUES (:query_id, :upload_time, :upload_user_id, :org_id, :name, :description)
@@ -46,6 +51,11 @@ func CreateNewSqlQueryRequest(request *core.DbSqlQueryRequest, role *core.Role) 
 func UpdateSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.Role, tx *sqlx.Tx) error {
 	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessEdit) {
 		return core.ErrorUnauthorized
+	}
+
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
 	}
 
 	rows, err := tx.NamedQuery(`

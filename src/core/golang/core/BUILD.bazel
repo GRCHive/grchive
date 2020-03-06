@@ -36,6 +36,7 @@ go_library(
         "processFlowNodes.go",
         "processFlows.go",
         "random.go",
+        "resources.go",
         "risks.go",
         "roles.go",
         "search.go",

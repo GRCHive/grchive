@@ -39,6 +39,11 @@ type FileVersion struct {
 	VersionNumber int32 `db:"version_number"`
 }
 
+type FileStorageAuxData struct {
+	IsPreview     bool  `db:"is_preview"`
+	VersionNumber int32 `db:"version_number"`
+}
+
 type ControlDocumentationFileHandle struct {
 	Id         int64
 	CategoryId int64

@@ -2,12 +2,14 @@
 
 import Vue, { VNode } from 'vue'
 import Component from 'vue-class-component'
+import { VTooltip, VIcon } from 'vuetify/lib'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
 import { PageParamsStore } from '../../ts/pageParams'
 import { standardFormatTime } from '../../ts/time'
 import { createUserString } from '../../ts/users'
-import { getResourceHandle, ResourceHandle, standardizeResourceType } from '../../ts/resourceUtils'
+import { ResourceHandle, standardizeResourceType } from '../../ts/resourceUtils'
+import { TGetAuditTrailOutput, getAuditTrail } from '../../ts/api/apiAuditTrail'
 import { contactUsUrl } from '../../ts/url'
 import MetadataStore from '../../ts/metadata'
 
@@ -18,6 +20,7 @@ import MetadataStore from '../../ts/metadata'
 })
 export default class AuditEntryTable extends ResourceTableProps {
     eventIdToResourceHandle : Record<number, ResourceHandle | null> = Object()
+    eventIdProcessed : Set<number> = new Set<number>()
 
     get tableHeaders() : any[] {
         return [
@@ -49,19 +52,54 @@ export default class AuditEntryTable extends ResourceTableProps {
     }
 
     renderResource(props: any) : VNode { 
-        console.log("RENDER RESOURCE:" , props.item, props.item.Id)
         if (props.item.id in this.eventIdToResourceHandle) {
             let res : ResourceHandle | null = this.eventIdToResourceHandle[props.item.id]
             if (!!res) {
-                return this.$createElement(
-                    'a',
-                    {
-                        attrs: {
-                            href: res.resourceUri ? res.resourceUri : '#'
-                        }
-                    },
-                    res.displayText,
-                )
+                if (!!res.resourceUri) {
+                    return this.$createElement(
+                        'a',
+                        {
+                            attrs: {
+                                href: res.resourceUri
+                            }
+                        },
+                        res.displayText,
+                    )
+                } else {
+                    return this.$createElement(
+                        'span',
+                        [
+                            this.$createElement(
+                                's',
+                                res.displayText,
+                            ),
+                            this.$createElement(
+                                VTooltip,
+                                {
+                                    props: {
+                                        bottom: true,
+                                        left: true,
+                                    },
+                                    scopedSlots: {
+                                        activator: (props : any) : VNode => {
+                                            return this.$createElement(
+                                                VIcon,
+                                                {
+                                                    props: {
+                                                        small: true
+                                                    },
+                                                    on: props.on
+                                                },
+                                                "mdi-help-circle"
+                                            )
+                                        }
+                                    }
+                                },
+                                "This resource can not be found. It may have been deleted."
+                            ),
+                        ]
+                    )
+                }
 
             } else {
                 return this.$createElement('span', 'Unknown')
@@ -72,10 +110,14 @@ export default class AuditEntryTable extends ResourceTableProps {
     }
 
     transformInputResourceToTableItem(inp : any) : any {
-        if (!(inp.Id in this.eventIdToResourceHandle)) {
-            getResourceHandle(inp.Action, inp.ResourceType, inp.ResourceId, inp.ResourceExtraData).then((resp : ResourceHandle | null) => {
-                console.log("RESOLVE: ", inp.Id)
-                Vue.set(this.eventIdToResourceHandle, inp.Id, resp)
+        if (!(inp.Id in this.eventIdToResourceHandle) && !this.eventIdProcessed.has(inp.Id)) {
+            this.eventIdProcessed.add(inp.Id)
+            getAuditTrail({
+                orgId: PageParamsStore.state.organization!.Id,
+                resourceHandleOnly: true,
+                entryId: inp.Id,
+            }).then((resp : TGetAuditTrailOutput) => {
+                Vue.set(this.eventIdToResourceHandle, inp.Id, resp.data.Handle!)
             }).catch((err : any) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(

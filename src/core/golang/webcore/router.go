@@ -26,6 +26,18 @@ const (
 	DashboardOrgHomeRouteName      = "DashboardOrgHome"
 	DashboardUserHomeRouteName     = "DashboardUserHome"
 	OrgSettingsUsersRouteName      = "OrgSettingsUsers"
+	SingleDatabaseRouteName        = "SingleDatabase"
+	SingleSystemRouteName          = "SingleSystem"
+	SingleVendorRouteName          = "SingleVendor"
+	SingleRiskRouteName            = "SingleRisk"
+	SingleControlRouteName         = "SingleControl"
+	SingleFlowRouteName            = "SingleFlow"
+	SingleDocCatRouteName          = "SingleDocCat"
+	SingleServerRouteName          = "SingleServer"
+	SingleGLAccountRouteName       = "SingleGLAccount"
+	FullGLAccountRouteName         = "FullGL"
+	SingleDocRequestRouteName      = "SingleDocRequest"
+	SingleDocumentationRouteName   = "SingleDocumentation"
 )
 
 var globalRouter *mux.Router

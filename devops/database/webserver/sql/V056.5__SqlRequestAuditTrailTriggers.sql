@@ -3,11 +3,18 @@ CREATE OR REPLACE FUNCTION audit_database_sql_query_requests_change(r database_s
 $$
     DECLARE
         event_id BIGINT;
+        metadata_id BIGINT;
     BEGIN
+        SELECT q.metadata_id INTO metadata_id
+        FROM database_sql_queries AS q
+        WHERE q.id = r.query_id;
+
         SELECT generic_audit_event(r.org_id,
             'database_sql_query_requests',
             r.id,
-            jsonb_build_object('query_id', r.query_id),
+            jsonb_build_object(
+                'query_id', r.query_id,
+                'sql_metadata_id', metadata_id),
             action
         ) INTO event_id;
         INSERT INTO audit_resource_modifications(event_id, data)

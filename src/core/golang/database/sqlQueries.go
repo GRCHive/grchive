@@ -70,6 +70,11 @@ func CreateSqlQueryMetadataWithTx(metadata *core.DbSqlQueryMetadata, role *core.
 		return core.ErrorUnauthorized
 	}
 
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
+	}
+
 	rows, err := tx.NamedQuery(`
 		INSERT INTO database_sql_metadata (db_id, org_id, name, description)
 		VALUES (:db_id, :org_id, :name, :description)
@@ -91,6 +96,11 @@ func CreateSqlQueryMetadataWithTx(metadata *core.DbSqlQueryMetadata, role *core.
 func UpdateSqlQueryMetadataWithTx(metadata *core.DbSqlQueryMetadata, role *core.Role, tx *sqlx.Tx) error {
 	if !role.Permissions.HasAccess(core.ResourceDbSqlQuery, core.AccessManage) {
 		return core.ErrorUnauthorized
+	}
+
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
 	}
 
 	rows, err := tx.NamedQuery(`
@@ -119,6 +129,11 @@ func CreateSqlQueryWithTx(query *core.DbSqlQuery, role *core.Role, tx *sqlx.Tx) 
 		return core.ErrorUnauthorized
 	}
 
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
+	}
+
 	rows, err := tx.NamedQuery(`
 		INSERT INTO database_sql_queries (metadata_id, version_number, upload_time, upload_user_id, org_id, query)
 		SELECT :metadata_id, COALESCE(MAX(version_number), 0) + 1, :upload_time, :upload_user_id, :org_id, :query
@@ -145,8 +160,12 @@ func DeleteSqlQuery(metadataId int64, orgId int32, role *core.Role) error {
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
-	_, err := tx.Exec(`
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`
 		DELETE FROM database_sql_metadata 
 		WHERE id = $1
 			AND org_id = $2

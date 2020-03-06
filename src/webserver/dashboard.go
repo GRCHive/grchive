@@ -28,19 +28,19 @@ func createOrganizationSubrouter(r *mux.Router) {
 	}))
 	s.HandleFunc(core.DashboardOrgHomeUrl, render.RenderDashboardOrgHomePage).Name(webcore.DashboardOrgHomeRouteName)
 	s.HandleFunc(core.DashboardOrgAllFlowsEndpoint, render.RenderDashboardProcessFlowsPage).Name(webcore.DashboardProcessFlowsRouteName)
-	s.HandleFunc(core.DashboardOrgFlowEndpoint, render.RenderDashboardSingleFlowPage)
-	s.HandleFunc(core.DashboardOrgRiskEndpoint, render.RenderDashboardSingleRiskPage)
+	s.HandleFunc(core.DashboardOrgFlowEndpoint, render.RenderDashboardSingleFlowPage).Name(webcore.SingleFlowRouteName)
+	s.HandleFunc(core.DashboardOrgRiskEndpoint, render.RenderDashboardSingleRiskPage).Name(webcore.SingleRiskRouteName)
 	s.HandleFunc(core.DashboardOrgAllRiskEndpoint, render.RenderDashboardRisksPage)
 	s.HandleFunc(core.DashboardOrgAllControlsEndpoint, render.RenderDashboardControlsPage)
-	s.HandleFunc(core.DashboardOrgControlEndpoint, render.RenderDashboardSingleControlPage)
+	s.HandleFunc(core.DashboardOrgControlEndpoint, render.RenderDashboardSingleControlPage).Name(webcore.SingleControlRouteName)
 	s.HandleFunc(core.DashboardOrgAllDocumentationEndpoint, render.RenderDocumentation)
-	s.HandleFunc(core.DashboardOrgSingleDocCatEndpoint, render.RenderSingleDocCat)
+	s.HandleFunc(core.DashboardOrgSingleDocCatEndpoint, render.RenderSingleDocCat).Name(webcore.SingleDocCatRouteName)
 	s.HandleFunc(core.DashboardOrgAllDocRequestsEndpoint, render.RenderDocRequest)
-	s.HandleFunc(core.DashboardOrgSingleDocRequestEndpoint, render.RenderSingleDocRequest)
+	s.HandleFunc(core.DashboardOrgSingleDocRequestEndpoint, render.RenderSingleDocRequest).Name(webcore.SingleDocRequestRouteName)
 	s.HandleFunc(core.DashboardOrgSingleSqlRequestEndpoint, render.RenderSingleSqlRequest)
 	s.HandleFunc(core.DashboardOrgAllVendorsEndpoint, render.RenderVendors)
-	s.HandleFunc(core.DashboardOrgSingleVendorEndpoint, render.RenderSingleVendor)
-	s.HandleFunc(core.DashboardOrgSingleDocFileEndpoint, render.RenderSingleDocFile)
+	s.HandleFunc(core.DashboardOrgSingleVendorEndpoint, render.RenderSingleVendor).Name(webcore.SingleVendorRouteName)
+	s.HandleFunc(core.DashboardOrgSingleDocFileEndpoint, render.RenderSingleDocFile).Name(webcore.SingleDocumentationRouteName)
 	s.HandleFunc(core.ApiAuditTrailPrefix, render.RenderAuditTrail)
 
 	createOrganizationSettingsSubrouter(s)
@@ -50,20 +50,20 @@ func createOrganizationSubrouter(r *mux.Router) {
 
 func createOrganizationGLSubrouter(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardGeneralLedgerPrefix).Subrouter()
-	s.HandleFunc(core.DashboardGeneralLedgerViewEndpoint, render.RenderDashboardGeneralLedger)
-	s.HandleFunc(core.DashboardOrgGLAccountEndpoint, render.RenderDashboardGLAccount)
+	s.HandleFunc(core.DashboardGeneralLedgerViewEndpoint, render.RenderDashboardGeneralLedger).Name(webcore.FullGLAccountRouteName)
+	s.HandleFunc(core.DashboardOrgGLAccountEndpoint, render.RenderDashboardGLAccount).Name(webcore.SingleGLAccountRouteName)
 }
 
 func createOrganizationSystemSubrouter(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardSystemsPrefix).Subrouter()
 	s.HandleFunc(core.DashboardSystemHomeEndpoint, render.RenderSystemHome)
-	s.HandleFunc(core.DashboardSingleSystemEndpoint, render.RenderSingleSystem)
+	s.HandleFunc(core.DashboardSingleSystemEndpoint, render.RenderSingleSystem).Name(webcore.SingleSystemRouteName)
 
 	s.HandleFunc(core.DashboardDbSystemsEndpoint, render.RenderDbSystems)
-	s.HandleFunc(core.DashboardSingleDbEndpoint, render.RenderSingleDb)
+	s.HandleFunc(core.DashboardSingleDbEndpoint, render.RenderSingleDb).Name(webcore.SingleDatabaseRouteName)
 
 	s.HandleFunc(core.DashboardServersEndpoint, render.RenderServers)
-	s.HandleFunc(core.DashboardSingleServerEndpoint, render.RenderSingleServer)
+	s.HandleFunc(core.DashboardSingleServerEndpoint, render.RenderSingleServer).Name(webcore.SingleServerRouteName)
 }
 
 func createOrganizationSettingsSubrouter(r *mux.Router) {

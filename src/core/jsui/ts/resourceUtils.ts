@@ -1,10 +1,6 @@
-import { PageParamsStore } from './pageParams'
-import {
-    createSingleDbUrl
-} from './url'
-
 export interface ResourceHandle {
     displayText: string
+    // resourceUri will be null only if the resource has been deleted.
     resourceUri: string | null
 }
 
@@ -16,13 +12,17 @@ export function standardizeResourceType(typ : string) : string {
             return 'Database'
         case 'database_sql_query_requests':
             return 'SQL Query Request'
+	    case 'database_sql_metadata':
+            return 'SQL Query Metadata'
+	    case 'database_sql_queries':
+            return 'SQL Query Version'
         case 'document_requests':
             return 'Document Request'
         case 'file_metadata':
             return 'Documentation Metadata'
         case 'file_storage':
             return 'Documentation'
-        case 'general_legder_accounts':
+        case 'general_ledger_accounts':
             return 'GL Account'
         case 'general_ledger_categories':
             return 'GL Category'
@@ -51,54 +51,4 @@ export function standardizeResourceType(typ : string) : string {
     }
 
     return 'UNKNOWN'
-}
-
-export function getResourceHandle(action : string, typ : string, id : number, extra : any) : Promise<ResourceHandle | null> {
-    // We can't use the standard retrieval functions because ideally these should still work in the face
-    // of deletion.
-    return new Promise<ResourceHandle | null>((resolve, reject) => {
-        switch (typ) {
-            case 'database_connection_info':
-                break
-            case 'database_resources':
-                break
-            case 'database_sql_query_requests':
-                break
-            case 'document_requests':
-                break
-            case 'file_metadata':
-                break
-            case 'file_storage':
-                break
-            case 'general_legder_accounts':
-                break
-            case 'general_ledger_categories':
-                break
-            case 'infrastructure_servers':
-                break
-            case 'process_flows':
-                break
-            case 'process_flow_controls':
-                break
-            case 'process_flow_control_documentation_categories':
-                break
-            case 'process_flow_nodes':
-                break
-            case 'process_flow_node_inputs':
-                break
-            case 'process_flow_node_outputs':
-                break
-            case 'process_flow_risks':
-                break
-            case 'systems':
-                break
-            case 'vendors':
-                break
-            case 'vendor_products':
-                break
-            default:
-                resolve(null)
-                break
-        }
-    }
 }
