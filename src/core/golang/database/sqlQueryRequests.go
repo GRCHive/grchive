@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 	"time"
 )
 
@@ -131,7 +132,25 @@ func GetAllSqlRequestsForDb(dbId int64, orgId int32, role *core.Role) ([]*core.D
 		WHERE meta.db_id = $1 AND meta.org_id = $2
 		ORDER BY req.upload_time DESC
 	`, dbId, orgId)
-	return data, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, d := range data {
+		err = LogAuditSelectWithTx(orgId, core.ResourceSqlQueryRequest, strconv.FormatInt(d.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return data, tx.Commit()
 }
 
 func GetAllSqlRequestsForOrg(orgId int32, role *core.Role) ([]*core.DbSqlQueryRequest, error) {
@@ -146,7 +165,25 @@ func GetAllSqlRequestsForOrg(orgId int32, role *core.Role) ([]*core.DbSqlQueryRe
 		WHERE req.org_id = $1
 		ORDER BY req.upload_time DESC
 	`, orgId)
-	return data, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, d := range data {
+		err = LogAuditSelectWithTx(orgId, core.ResourceSqlQueryRequest, strconv.FormatInt(d.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return data, tx.Commit()
 }
 
 func GetSqlRequest(requestId int64, orgId int32, role *core.Role) (*core.DbSqlQueryRequest, error) {
@@ -160,7 +197,12 @@ func GetSqlRequest(requestId int64, orgId int32, role *core.Role) (*core.DbSqlQu
 		FROM database_sql_query_requests
 		WHERE id = $1 AND org_id = $2
 	`, requestId, orgId)
-	return &req, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &req, LogAuditSelect(orgId, core.ResourceSqlQueryRequest, strconv.FormatInt(req.Id, 10), role)
 }
 
 func GetSqlRequestStatus(requestId int64, orgId int32, role *core.Role) (*core.DbSqlQueryRequestApproval, error) {

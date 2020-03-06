@@ -300,7 +300,7 @@ func retrieveResourceExtraData(resourceType string, resourceId string) (map[stri
 		}
 
 		rows, err = dbConn.Queryx(`
-			SELECT r.query_id AS "query_id", q.metadata_id AS "metadata_id"
+			SELECT r.query_id AS "query_id", q.metadata_id AS "sql_metadata_id"
 			FROM database_sql_query_requests AS r
 			INNER JOIN database_sql_queries AS q
 				ON q.id = r.query_id

@@ -18,4 +18,5 @@ const (
 	ResourceGLAcc            string = "general_ledger_accounts"
 	ResourceServer           string = "infrastructure_servers"
 	ResourceSystem           string = "systems"
+	ResourceDocRequest       string = "document_requests"
 )

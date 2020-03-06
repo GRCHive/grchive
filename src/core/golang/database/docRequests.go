@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 	"time"
 )
 
@@ -102,7 +103,11 @@ func GetDocumentRequest(requestId int64, orgId int32, role *core.Role) (*core.Do
 		WHERE id = $1
 			AND org_id = $2
 	`, requestId, orgId)
-	return &req, err
+	if err != nil {
+		return nil, err
+	}
+
+	return &req, LogAuditSelect(orgId, core.ResourceDocRequest, strconv.FormatInt(req.Id, 10), role)
 }
 
 func DeleteDocumentRequest(requestId int64, orgId int32, role *core.Role) error {
@@ -166,7 +171,25 @@ func GetAllDocumentRequestsForVendorProduct(productId int64, orgId int32, role *
 			ON req.id = link.request_id
 		WHERE req.org_id = $1 AND link.vendor_product_id = $2
 	`, orgId, productId)
-	return requests, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range requests {
+		err = LogAuditSelectWithTx(orgId, core.ResourceDocRequest, strconv.FormatInt(r.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return requests, tx.Commit()
 }
 
 func GetAllDocumentRequestsForOrganization(orgId int32, role *core.Role) ([]*core.DocumentRequest, error) {
@@ -180,7 +203,25 @@ func GetAllDocumentRequestsForOrganization(orgId int32, role *core.Role) ([]*cor
 		FROM document_requests
 		WHERE org_id = $1
 	`, orgId)
-	return requests, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range requests {
+		err = LogAuditSelectWithTx(orgId, core.ResourceDocRequest, strconv.FormatInt(r.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return requests, tx.Commit()
 }
 
 func FulfillDocumentRequestWithTx(requestId int64, fileId int64, orgId int32, role *core.Role, tx *sqlx.Tx) error {
@@ -195,7 +236,7 @@ func FulfillDocumentRequestWithTx(requestId int64, fileId int64, orgId int32, ro
 			request_id
 		)
 		VALUES (
-			$1,
+			$1
 			$2,
 			$3
 		)
