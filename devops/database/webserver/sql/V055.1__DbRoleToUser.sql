@@ -26,10 +26,8 @@ $$
         -- It's probably not super great to create SUPERUSER
         -- roles...but we're already logging in using a SUPERUSER
         -- role and this user can't login anyway.
-        EXECUTE 'CREATE ROLE ' || nm || ' WITH
-            SUPERUSER
-            NOLOGIN
-            PASSWORD NULL';
+        EXECUTE 'CREATE ROLE ' || nm || ' WITH INHERIT NOLOGIN PASSWORD NULL';
+        EXECUTE 'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ' || nm;
 
         INSERT INTO postgres_oid_to_users(pg_oid, user_id)
         SELECT rl.oid, u.id
