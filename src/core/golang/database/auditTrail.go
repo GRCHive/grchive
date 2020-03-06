@@ -82,7 +82,7 @@ func GetAuditEvent(eventId int64, role *core.Role) (*core.AuditEvent, error) {
 	return events[0], nil
 }
 
-func GetLatestAuditEvent(resourceType string, resourceId int64, role *core.Role) (*core.AuditEvent, error) {
+func GetLatestAuditEvent(resourceType string, resourceId string, role *core.Role) (*core.AuditEvent, error) {
 	events, err := commonAuditEventRetrievalQuery(role, `
 		WHERE hist.resource_type = $1 AND hist.resource_id = $2
  	`, "1", resourceType, resourceId)
@@ -136,7 +136,7 @@ func GetAuditModificationHistoryData(eventId int64, role *core.Role) (map[string
 	return getAuditModificationFromStmt(stmt, eventId)
 }
 
-func GetLatestAuditModificationHistoryData(resourceType string, resourceId int64, role *core.Role) (map[string]interface{}, error) {
+func GetLatestAuditModificationHistoryData(resourceType string, resourceId string, role *core.Role) (map[string]interface{}, error) {
 	stmt, err := dbConn.Preparex(`
 		SELECT mod.data
 		FROM audit_resource_modifications AS mod
