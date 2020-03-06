@@ -2,6 +2,7 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func NewNodeSystemLink(nodeId int64, systemId int64, orgId int32, role *core.Role) error {
@@ -56,7 +57,25 @@ func AllSystemsLinkedToNode(nodeId int64, orgId int32, role *core.Role) ([]*core
 			ON link.system_id = sys.id
 		WHERE link.node_id = $1 AND link.org_id = $2
 	`, nodeId, orgId)
-	return systems, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, s := range systems {
+		err = LogAuditSelectWithTx(orgId, core.ResourceSystem, strconv.FormatInt(s.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return systems, tx.Commit()
 }
 
 func AllFlowsRelatedToSystem(systemId int64, orgId int32, role *core.Role) ([]*core.ProcessFlow, error) {
@@ -86,5 +105,23 @@ func AllFlowsRelatedToSystem(systemId int64, orgId int32, role *core.Role) ([]*c
 			ON flow.org_id = org.id
 		WHERE link.system_id = $1 AND org.id = $2
 	`, systemId, orgId)
-	return flows, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, f := range flows {
+		err = LogAuditSelectWithTx(orgId, core.ResourceProcessFlow, strconv.FormatInt(f.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return flows, tx.Commit()
 }

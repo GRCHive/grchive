@@ -2,6 +2,7 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func FindSystemsLinkedToControl(controlId int64, orgId int32, role *core.Role) ([]*core.System, error) {
@@ -24,7 +25,25 @@ func FindSystemsLinkedToControl(controlId int64, orgId int32, role *core.Role) (
 			ON control.id = rc.control_id
 		WHERE control.id = $1 AND control.org_id = $2
 	`, controlId, orgId)
-	return systems, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, s := range systems {
+		err = LogAuditSelectWithTx(orgId, core.ResourceSystem, strconv.FormatInt(s.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return systems, tx.Commit()
 }
 
 func FindControlsLinkedToSystem(systemId int64, orgId int32, role *core.Role) ([]*core.Control, error) {
@@ -47,5 +66,19 @@ func FindControlsLinkedToSystem(systemId int64, orgId int32, role *core.Role) ([
 			ON sys.id = nsl.system_id
 		WHERE sys.id = $1 AND sys.org_id = $2
 	`, systemId, orgId)
-	return controls, err
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, c := range controls {
+		err = LogAuditSelectWithTx(orgId, core.ResourceControl, strconv.FormatInt(c.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return controls, tx.Commit()
 }

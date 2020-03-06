@@ -22,7 +22,25 @@ func FindSystemsLinkedToRisk(riskId int64, orgId int32, role *core.Role) ([]*cor
 			ON risk.id = rn.risk_id
 		WHERE risk.id = $1 AND risk.org_id = $2
 	`, riskId, orgId)
-	return systems, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, s := range systems {
+		err = LogAuditSelectWithTx(orgId, core.ResourceSystem, strconv.FormatInt(s.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return systems, tx.Commit()
 }
 
 func FindRisksLinkedToSystem(systemId int64, orgId int32, role *core.Role) ([]*core.Risk, error) {
@@ -45,5 +63,23 @@ func FindRisksLinkedToSystem(systemId int64, orgId int32, role *core.Role) ([]*c
 			AND sys.org_id = $2
 			AND risk.org_id = $2
 	`, systemId, orgId)
-	return risks, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range risks {
+		err = LogAuditSelectWithTx(orgId, core.ResourceRisk, strconv.FormatInt(r.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return risks, tx.Commit()
 }

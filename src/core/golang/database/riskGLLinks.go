@@ -22,7 +22,25 @@ func FindGeneralLedgerAccountsLinkedToRisk(riskId int64, orgId int32, role *core
 			ON risk.id = rn.risk_id
 		WHERE risk.id = $1 AND risk.org_id = $2
 	`, riskId, orgId)
-	return accounts, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, a := range accounts {
+		err = LogAuditSelectWithTx(orgId, core.ResourceGLAcc, strconv.FormatInt(a.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return accounts, tx.Commit()
 }
 
 func FindRisksLinkedToGeneralLedgerAccount(accountId int64, orgId int32, role *core.Role) ([]*core.Risk, error) {
@@ -45,5 +63,23 @@ func FindRisksLinkedToGeneralLedgerAccount(accountId int64, orgId int32, role *c
 			AND acc.org_id = $2
 			AND risk.org_id = $2
 	`, accountId, orgId)
-	return risks, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range risks {
+		err = LogAuditSelectWithTx(orgId, core.ResourceRisk, strconv.FormatInt(r.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return risks, tx.Commit()
 }

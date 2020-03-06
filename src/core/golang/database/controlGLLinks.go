@@ -2,6 +2,7 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func FindGeneralLedgerAccountsLinkedToControl(controlId int64, orgId int32, role *core.Role) ([]*core.GeneralLedgerAccount, error) {
@@ -22,7 +23,25 @@ func FindGeneralLedgerAccountsLinkedToControl(controlId int64, orgId int32, role
 			ON control.id = cn.control_id
 		WHERE control.id = $1 AND control.org_id = $2
 	`, controlId, orgId)
-	return accounts, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, a := range accounts {
+		err = LogAuditSelectWithTx(orgId, core.ResourceGLAcc, strconv.FormatInt(a.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return accounts, tx.Commit()
 }
 
 func FindControlsLinkedToGeneralLedgerAccount(accountId int64, orgId int32, role *core.Role) ([]*core.Control, error) {
@@ -45,5 +64,23 @@ func FindControlsLinkedToGeneralLedgerAccount(accountId int64, orgId int32, role
 			AND acc.org_id = $2
 			AND control.org_id = $2
 	`, accountId, orgId)
-	return controls, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, c := range controls {
+		err = LogAuditSelectWithTx(orgId, core.ResourceControl, strconv.FormatInt(c.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return controls, tx.Commit()
 }

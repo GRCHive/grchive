@@ -2,6 +2,7 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func FindNodeRiskRelationships(flowId int64, role *core.Role) ([]*core.NodeRiskRelationship, error) {
@@ -46,22 +47,25 @@ func FindFlowsRelatedToRisk(riskId int64, role *core.Role) ([]*core.ProcessFlow,
 			ON flow.org_id = org.id
 		WHERE rn.risk_id = $1
 	`, riskId)
-	return flows, err
-}
 
-func FindNodesRelatedToRisk(riskId int64, role *core.Role) ([]*core.ProcessFlowNode, error) {
-	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
-		return nil, core.ErrorUnauthorized
+	if err != nil {
+		return nil, err
 	}
-	nodes := make([]*core.ProcessFlowNode, 0)
-	err := dbConn.Select(&nodes, `
-		SELECT DISTINCT node.*
-		FROM process_flow_risk_node AS risknode
-		INNER JOIN process_flow_nodes AS node
-			ON node.id = risknode.node_id
-		WHERE risknode.risk_id = $1
-	`, riskId)
-	return nodes, err
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, f := range flows {
+		err = LogAuditSelectWithTx(f.Org.Id, core.ResourceProcessFlow, strconv.FormatInt(f.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return flows, tx.Commit()
 }
 
 func FindFlowsRelatedToControl(controlId int64, role *core.Role) ([]*core.ProcessFlow, error) {
@@ -89,22 +93,25 @@ func FindFlowsRelatedToControl(controlId int64, role *core.Role) ([]*core.Proces
 			ON flow.org_id = org.id
 		WHERE cn.control_id = $1
 	`, controlId)
-	return flows, err
-}
 
-func FindNodesRelatedToControl(controlId int64, role *core.Role) ([]*core.ProcessFlowNode, error) {
-	if !role.Permissions.HasAccess(core.ResourceProcessFlows, core.AccessView) {
-		return nil, core.ErrorUnauthorized
+	if err != nil {
+		return nil, err
 	}
-	nodes := make([]*core.ProcessFlowNode, 0)
-	err := dbConn.Select(&nodes, `
-		SELECT DISTINCT node.*
-		FROM process_flow_control_node AS nodecontrol
-		INNER JOIN process_flow_nodes AS node
-			ON node.id = nodecontrol.node_id
-		WHERE nodecontrol.control_id = $1
-	`, controlId)
-	return nodes, err
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, f := range flows {
+		err = LogAuditSelectWithTx(f.Org.Id, core.ResourceProcessFlow, strconv.FormatInt(f.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return flows, tx.Commit()
 }
 
 func FindNodeControlRelationships(flowId int64, role *core.Role) ([]*core.NodeControlRelationship, error) {
@@ -154,7 +161,25 @@ func FindControlsRelatedToRisk(riskId int64, role *core.Role) ([]*core.Control, 
 			ON control.id = riskcontrol.control_id
 		WHERE riskcontrol.risk_id = $1
 	`, riskId)
-	return controls, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, c := range controls {
+		err = LogAuditSelectWithTx(c.OrgId, core.ResourceControl, strconv.FormatInt(c.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return controls, tx.Commit()
 }
 
 func FindRisksRelatedToControl(controlId int64, role *core.Role) ([]*core.Risk, error) {
@@ -169,5 +194,23 @@ func FindRisksRelatedToControl(controlId int64, role *core.Role) ([]*core.Risk, 
 			ON risk.id = riskcontrol.risk_id
 		WHERE riskcontrol.control_id = $1
 	`, controlId)
-	return risks, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range risks {
+		err = LogAuditSelectWithTx(r.OrgId, core.ResourceRisk, strconv.FormatInt(r.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return risks, tx.Commit()
 }

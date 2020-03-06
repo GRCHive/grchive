@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func AddDocRequestDocCatLinkWithTx(requestId int64, catId int64, orgId int32, role *core.Role, tx *sqlx.Tx) error {
@@ -42,7 +43,10 @@ func FindDocCatLinkedToDocRequest(requestId int64, orgId int32, role *core.Role)
 	}
 
 	err = rows.StructScan(&cat)
-	return &cat, err
+	if err != nil {
+		return nil, err
+	}
+	return &cat, LogAuditSelect(orgId, core.ResourceDocCat, strconv.FormatInt(cat.Id, 10), role)
 }
 
 func FindDocRequestsLinkedToDocCat(catId int64, orgId int32, role *core.Role) ([]*core.DocumentRequest, error) {
@@ -59,5 +63,23 @@ func FindDocRequestsLinkedToDocCat(catId int64, orgId int32, role *core.Role) ([
 			ON link.request_id = req.id
 		WHERE link.cat_id = $1 AND link.org_id = $2
 	`, catId, orgId)
-	return requests, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range requests {
+		err = LogAuditSelectWithTx(orgId, core.ResourceDocRequest, strconv.FormatInt(r.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return requests, tx.Commit()
 }

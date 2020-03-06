@@ -2,6 +2,7 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func NewNodeGLLink(nodeId int64, accountId int64, orgId int32, role *core.Role) error {
@@ -56,7 +57,25 @@ func AllGLLinkedToNode(nodeId int64, orgId int32, role *core.Role) ([]*core.Gene
 			ON link.gl_account_id = acc.id
 		WHERE link.node_id = $1 AND link.org_id = $2
 	`, nodeId, orgId)
-	return accounts, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, a := range accounts {
+		err = LogAuditSelectWithTx(orgId, core.ResourceGLAcc, strconv.FormatInt(a.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return accounts, tx.Commit()
 }
 
 func AllFlowsRelatedToGL(accountId int64, orgId int32, role *core.Role) ([]*core.ProcessFlow, error) {
@@ -86,5 +105,23 @@ func AllFlowsRelatedToGL(accountId int64, orgId int32, role *core.Role) ([]*core
 			ON flow.org_id = org.id
 		WHERE link.gl_account_id = $1 AND org.id = $2
 	`, accountId, orgId)
-	return flows, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, f := range flows {
+		err = LogAuditSelectWithTx(orgId, core.ResourceProcessFlow, strconv.FormatInt(f.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return flows, tx.Commit()
 }
