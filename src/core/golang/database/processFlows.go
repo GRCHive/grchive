@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 	"time"
 )
 
@@ -41,7 +42,7 @@ func FindProcessFlowWithId(id int64, role *core.Role) (*core.ProcessFlow, error)
 		return nil, err
 	}
 
-	return flow, nil
+	return flow, LogAuditSelect(flow.Org.Id, core.ResourceProcessFlow, strconv.FormatInt(flow.Id, 10), role)
 }
 
 func UpdateProcessFlow(flow *core.ProcessFlow, role *core.Role) error {
@@ -121,7 +122,21 @@ func FindOrganizationProcessFlows(org *core.Organization, role *core.Role) ([]*c
 	for i := 0; i < len(result); i++ {
 		result[i].Org = org
 	}
-	return result, nil
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, p := range result {
+		err = LogAuditSelectWithTx(org.Id, core.ResourceProcessFlow, strconv.FormatInt(p.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return result, tx.Commit()
 }
 
 // Finds all process flows and finds the result index of the specified process flow

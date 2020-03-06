@@ -2,6 +2,7 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func NewVendorProduct(product *core.VendorProduct, role *core.Role) error {
@@ -47,7 +48,20 @@ func AllVendorProductsForVendor(vendorId int64, orgId int32, role *core.Role) ([
 		FROM vendor_products
 		WHERE org_id = $1 and vendor_id = $2
 	`, orgId, vendorId)
-	return products, err
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, p := range products {
+		err = LogAuditSelectWithTx(orgId, core.ResourceVendorProduct, strconv.FormatInt(p.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+	return products, tx.Commit()
 }
 
 func GetVendorProduct(productId int64, vendorId int64, orgId int32, role *core.Role) (*core.VendorProduct, error) {
@@ -61,7 +75,10 @@ func GetVendorProduct(productId int64, vendorId int64, orgId int32, role *core.R
 		FROM vendor_products
 		WHERE id = $1 AND vendor_id = $2 AND org_id = $3
 	`, productId, vendorId, orgId)
-	return &product, err
+	if err != nil {
+		return nil, err
+	}
+	return &product, LogAuditSelect(orgId, core.ResourceVendorProduct, strconv.FormatInt(product.Id, 10), role)
 }
 
 func UpdateVendorProduct(product *core.VendorProduct, role *core.Role) error {

@@ -2,6 +2,7 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func GetOrgGLCategories(orgId int32, role *core.Role) ([]*core.GeneralLedgerCategory, error) {
@@ -16,7 +17,20 @@ func GetOrgGLCategories(orgId int32, role *core.Role) ([]*core.GeneralLedgerCate
 		WHERE org_id = $1
 	`, orgId)
 
-	return cats, err
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, c := range cats {
+		err = LogAuditSelectWithTx(orgId, core.ResourceGLCat, strconv.FormatInt(c.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return cats, tx.Commit()
 }
 
 func GetOrgGLAccounts(orgId int32, role *core.Role) ([]*core.GeneralLedgerAccount, error) {
@@ -31,7 +45,20 @@ func GetOrgGLAccounts(orgId int32, role *core.Role) ([]*core.GeneralLedgerAccoun
 		WHERE org_id = $1
 	`, orgId)
 
-	return accs, err
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, a := range accs {
+		err = LogAuditSelectWithTx(orgId, core.ResourceGLAcc, strconv.FormatInt(a.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return accs, tx.Commit()
 }
 
 func CreateNewGLCategory(cat *core.GeneralLedgerCategory, role *core.Role) error {
@@ -163,7 +190,11 @@ func GetGLAccountFromDbId(accId int64, orgId int32, role *core.Role) (*core.Gene
 			AND org_id = $2
 	`, accId, orgId)
 
-	return &acc, err
+	if err != nil {
+		return nil, err
+	}
+
+	return &acc, LogAuditSelect(orgId, core.ResourceGLAcc, strconv.FormatInt(acc.Id, 10), role)
 }
 
 func FindGLAccountParentCategories(acc *core.GeneralLedgerAccount, role *core.Role) ([]*core.GeneralLedgerCategory, error) {
@@ -186,7 +217,25 @@ func FindGLAccountParentCategories(acc *core.GeneralLedgerAccount, role *core.Ro
 		)
 		SELECT * FROM parents
 	`, acc.ParentCategoryId, acc.OrgId)
-	return parents, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, c := range parents {
+		err = LogAuditSelectWithTx(acc.OrgId, core.ResourceGLCat, strconv.FormatInt(c.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return parents, tx.Commit()
 }
 
 func UpdateGLAccount(acc *core.GeneralLedgerAccount, role *core.Role) error {

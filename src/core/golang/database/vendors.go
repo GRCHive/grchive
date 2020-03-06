@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func NewVendorWithTx(vendor *core.Vendor, role *core.Role, tx *sqlx.Tx) error {
@@ -52,7 +53,21 @@ func AllVendorsForOrganization(orgId int32, role *core.Role) ([]*core.Vendor, er
 			ON vnd.id = link.vendor_id
 		WHERE vnd.org_id = $1
 	`, orgId)
-	return vendors, err
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range vendors {
+		err = LogAuditSelectWithTx(orgId, core.ResourceVendor, strconv.FormatInt(v.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	return vendors, tx.Commit()
 }
 
 func GetVendorFromId(vendorId int64, orgId int32, role *core.Role) (*core.Vendor, error) {
@@ -68,7 +83,12 @@ func GetVendorFromId(vendorId int64, orgId int32, role *core.Role) (*core.Vendor
 			ON vnd.id = link.vendor_id
 		WHERE vnd.id = $1 AND vnd.org_id = $2
 	`, vendorId, orgId)
-	return &vendor, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &vendor, LogAuditSelect(orgId, core.ResourceVendor, strconv.FormatInt(vendor.Id, 10), role)
 }
 
 func DeleteVendor(vendorId int64, orgId int32, role *core.Role) error {

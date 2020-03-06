@@ -21,11 +21,13 @@ func CreateTx() *sqlx.Tx {
 }
 
 func UpgradeTxToAudit(tx *sqlx.Tx, role *core.Role) error {
-	_, err := tx.Exec(`
-		SELECT set_current_role_for_user_id($1)
-	`, role.UserId)
-	if err != nil {
-		return err
+	if role.UserId != -1 {
+		_, err := tx.Exec(`
+			SELECT set_current_role_for_user_id($1)
+		`, role.UserId)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

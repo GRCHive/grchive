@@ -142,6 +142,7 @@ func GetProcessFlowIOFromId(ioId int64, isInput bool, role *core.Role) (*core.Pr
 		FROM %s
 		WHERE id = $1
 	`, dbName), ioId)
+
 	return &io, err
 }
 

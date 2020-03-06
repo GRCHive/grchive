@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func DeleteProcessFlowNodeFromId(nodeId int64, role *core.Role) error {
@@ -84,7 +85,7 @@ func CreateNewProcessFlowNodeWithTypeId(typeId int32, flowId int64, role *core.R
 	return node, tx.Commit()
 }
 
-func findNodesHelper(condition string, args ...interface{}) ([]*core.ProcessFlowNode, error) {
+func findNodesHelper(role *core.Role, condition string, args ...interface{}) ([]*core.ProcessFlowNode, error) {
 	nodes := []*core.ProcessFlowNode{}
 	rows, err := dbConn.Queryx(fmt.Sprintf(`
 		SELECT 
@@ -92,7 +93,8 @@ func findNodesHelper(condition string, args ...interface{}) ([]*core.ProcessFlow
 			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(DISTINCT inp.*), null)) AS inputs,
 			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(DISTINCT out.*), null)) AS outputs,
 			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(DISTINCT risk.id), null)) AS risks,
-			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(DISTINCT control.id), null)) AS controls
+			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(DISTINCT control.id), null)) AS controls,
+			(ARRAY_AGG(DISTINCT flow.org_id))[1] AS "org_id"
 		FROM process_flow_nodes AS node
 		LEFT JOIN process_flow_node_inputs AS inp
 			ON inp.parent_node_id = node.id
@@ -106,6 +108,8 @@ func findNodesHelper(condition string, args ...interface{}) ([]*core.ProcessFlow
 			ON controlnode.node_id = node.id
 		LEFT JOIN process_flow_controls AS control
 			ON controlnode.control_id = control.id
+		LEFT JOIN process_flows AS flow
+			ON flow.id = node.process_flow_id
 		%s
 		GROUP BY node.id
 	`, condition), args...)
@@ -114,10 +118,16 @@ func findNodesHelper(condition string, args ...interface{}) ([]*core.ProcessFlow
 	}
 	defer rows.Close()
 
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
 	for rows.Next() {
 		dataMap := make(map[string]interface{})
 		err = rows.MapScan(dataMap)
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 
@@ -130,26 +140,37 @@ func findNodesHelper(condition string, args ...interface{}) ([]*core.ProcessFlow
 		newNode.NodeTypeId = int32(dataMap["node_type"].(int64))
 		newNode.Inputs, err = readProcessFlowInputOutputArray(dataMap["inputs"].([]uint8))
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 		newNode.Outputs, err = readProcessFlowInputOutputArray(dataMap["outputs"].([]uint8))
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 
 		// THESE ARE CONVERTING BYTE ARRAYS. THE uint8 IS CORRECT.
 		newNode.RiskIds, err = readInt64Array(dataMap["risks"].([]uint8))
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 		newNode.ControlIds, err = readInt64Array(dataMap["controls"].([]uint8))
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 		nodes = append(nodes, &newNode)
+
+		orgId := int32(dataMap["org_id"].(int64))
+		err = LogAuditSelectWithTx(orgId, core.ResourceFlowNode, strconv.FormatInt(newNode.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
 	}
 
-	return nodes, nil
+	return nodes, tx.Commit()
 }
 
 func FindNodeFromId(nodeId int64, role *core.Role) (*core.ProcessFlowNode, error) {
@@ -157,7 +178,7 @@ func FindNodeFromId(nodeId int64, role *core.Role) (*core.ProcessFlowNode, error
 		return nil, core.ErrorUnauthorized
 	}
 
-	nodes, err := findNodesHelper("WHERE node.id = $1", nodeId)
+	nodes, err := findNodesHelper(role, "WHERE node.id = $1", nodeId)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +195,7 @@ func FindAllNodesForProcessFlow(flowId int64, role *core.Role) ([]*core.ProcessF
 		return nil, core.ErrorUnauthorized
 	}
 
-	return findNodesHelper("WHERE node.process_flow_id = $1", flowId)
+	return findNodesHelper(role, "WHERE node.process_flow_id = $1", flowId)
 }
 
 func EditProcessFlowNodeWithTx(node *core.ProcessFlowNode, tx *sqlx.Tx, role *core.Role) (*core.ProcessFlowNode, error) {
