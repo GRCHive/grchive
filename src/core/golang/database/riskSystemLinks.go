@@ -2,6 +2,7 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func FindSystemsLinkedToRisk(riskId int64, orgId int32, role *core.Role) ([]*core.System, error) {
