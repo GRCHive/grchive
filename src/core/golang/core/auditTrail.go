@@ -26,3 +26,12 @@ type AuditTrailSortParams struct {
 	Limit         NullInt32
 	Page          NullInt32
 }
+
+type AuditTrailFilterData struct {
+	ResourceTypeFilter StringFilterData
+	ActionFilter       StringFilterData
+	UserFilter         StringFilterData
+	TimeRangeFilter    TimeRangeFilterData
+}
+
+var NullAuditTrailFilterData AuditTrailFilterData = AuditTrailFilterData{}

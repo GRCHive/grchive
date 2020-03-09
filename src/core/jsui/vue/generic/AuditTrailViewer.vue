@@ -7,8 +7,15 @@
                 </v-list-item-title>
             </v-list-item-content>
         </v-list-item>
+        <advanced-audit-trail-filters
+            v-model="filter"
+            class="px-4"
+        >
+        </advanced-audit-trail-filters>
         <v-divider></v-divider>
-        <audit-entry-table></audit-entry-table>
+        <audit-entry-table
+            :retrieval-params="auditParams"
+        ></audit-entry-table>
     </div>
 </template>
 
@@ -16,18 +23,27 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { AuditEventEntry } from '../../ts/auditTrail'
+import { AuditEventEntry, AuditTrailFilterData, NullAuditTrailFilterData } from '../../ts/auditTrail'
 import { PageParamsStore } from '../../ts/pageParams'
 import { contactUsUrl } from '../../ts/url'
 import { TAllAuditTrailOutput, allAuditTrail} from '../../ts/api/apiAuditTrail'
 import AuditEntryTable from './AuditEntryTable.vue'
+import AdvancedAuditTrailFilters from './filters/AdvancedAuditTrailFilters.vue'
 
 @Component({
     components: {
-        AuditEntryTable
+        AuditEntryTable,
+        AdvancedAuditTrailFilters
     }
 })
 export default class AuditTrailViewer extends Vue {
+    filter : AuditTrailFilterData = NullAuditTrailFilterData
+
+    get auditParams() : any {
+        return {
+            filter: this.filter,
+        }
+    }
 }
 
 </script>

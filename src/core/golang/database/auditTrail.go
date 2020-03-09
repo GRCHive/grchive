@@ -14,7 +14,8 @@ import (
 func commonAuditEventRetrievalQuery(
 	role *core.Role,
 	retrieve core.AuditTrailRetrievalParams,
-	sort core.AuditTrailSortParams) ([]*core.AuditEvent, error) {
+	sort core.AuditTrailSortParams,
+	filter core.AuditTrailFilterData) ([]*core.AuditEvent, error) {
 
 	selectParams := strings.Builder{}
 	args := make([]interface{}, 0)
@@ -31,6 +32,11 @@ func commonAuditEventRetrievalQuery(
 	} else {
 		return nil, errors.New("Invalid retrieval parameters.")
 	}
+
+	selectParams.WriteString(fmt.Sprintf("AND %s\n", buildStringFilter("audit_resource_type_to_human_name(hist.resource_type)", filter.ResourceTypeFilter)))
+	selectParams.WriteString(fmt.Sprintf("AND %s\n", buildStringFilter("hist.action", filter.ActionFilter)))
+	selectParams.WriteString(fmt.Sprintf("AND %s\n", buildStringFilter("user_to_human_name(u.*::users)", filter.UserFilter)))
+	selectParams.WriteString(fmt.Sprintf("AND %s\n", buildTimeRangeFilter("hist.performed_at", filter.TimeRangeFilter)))
 
 	if len(sort.SortColumns) > 0 && sort.SortDirection.NullString.Valid {
 		selectParams.WriteString("ORDER BY\n")
@@ -109,21 +115,36 @@ func commonAuditEventRetrievalQuery(
 	return events, err
 }
 
-func AllFilteredAuditEvents(orgId int32, sort core.AuditTrailSortParams, role *core.Role) ([]*core.AuditEvent, error) {
+func AllFilteredAuditEvents(orgId int32, sort core.AuditTrailSortParams, filter core.AuditTrailFilterData, role *core.Role) ([]*core.AuditEvent, error) {
 	return commonAuditEventRetrievalQuery(
 		role,
 		core.AuditTrailRetrievalParams{
 			OrgId: core.CreateNullInt32(orgId),
 		},
-		sort)
+		sort,
+		filter)
 }
 
-func CountFilteredAuditEvents(orgId int32, role *core.Role) (int, error) {
-	rows, err := dbConn.Queryx(`
-		SELECT COUNT(*)
-		FROM global_audit_event_history
+func CountFilteredAuditEvents(orgId int32, filter core.AuditTrailFilterData, role *core.Role) (int, error) {
+	// How to prevent duplicate code here with the above function?
+	rows, err := dbConn.Queryx(fmt.Sprintf(`
+		SELECT COUNT(hist.*)
+		FROM global_audit_event_history AS hist
+		LEFT JOIN postgres_oid_to_users AS lnk
+			ON lnk.pg_oid = hist.pgrole_id
+		LEFT JOIN users AS u
+			ON u.id = lnk.user_id
 		WHERE org_id = $1
-	`, orgId)
+			AND %s
+			AND %s
+			AND %s
+			AND %s
+	`,
+		buildStringFilter("audit_resource_type_to_human_name(hist.resource_type)", filter.ResourceTypeFilter),
+		buildStringFilter("hist.action", filter.ActionFilter),
+		buildStringFilter("user_to_human_name(u.*::users)", filter.UserFilter),
+		buildTimeRangeFilter("hist.performed_at", filter.TimeRangeFilter)),
+		orgId)
 
 	if err != nil {
 		return -1, err
@@ -147,7 +168,8 @@ func GetAuditEvent(eventId int64, role *core.Role) (*core.AuditEvent, error) {
 		},
 		core.AuditTrailSortParams{
 			Limit: core.CreateNullInt32(1),
-		})
+		},
+		core.NullAuditTrailFilterData)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +190,8 @@ func GetLatestAuditEvent(resourceType string, resourceId string, role *core.Role
 		},
 		core.AuditTrailSortParams{
 			Limit: core.CreateNullInt32(1),
-		})
+		},
+		core.NullAuditTrailFilterData)
 	if err != nil {
 		return nil, err
 	}

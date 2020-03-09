@@ -27,7 +27,7 @@ export function standardizeResourceType(typ : string) : string {
         case 'general_ledger_categories':
             return 'GL Category'
         case 'infrastructure_servers':
-            return 'GL Servers'
+            return 'Servers'
         case 'process_flows':
             return 'Process Flow'
         case 'process_flow_controls':

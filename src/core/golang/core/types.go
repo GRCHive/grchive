@@ -169,3 +169,4 @@ var TimeReflectType = reflect.TypeOf(time.Time{})
 
 var RiskFilterDataType = reflect.TypeOf(RiskFilterData{})
 var ControlFilterDataType = reflect.TypeOf(ControlFilterData{})
+var AuditTrailFilterDataType = reflect.TypeOf(AuditTrailFilterData{})

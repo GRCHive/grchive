@@ -5,7 +5,7 @@ import {
     getAuditTrailLinkUrl
 } from '../url'
 import { getAPIRequestConfig } from './apiUtility'
-import { AuditEventEntry, cleanAuditEventEntryFromJson } from '../auditTrail'
+import { AuditEventEntry, cleanAuditEventEntryFromJson, AuditTrailFilterData } from '../auditTrail'
 import { ResourceHandle } from '../resourceUtils'
 
 export interface TAllAuditTrailInput {
@@ -14,6 +14,7 @@ export interface TAllAuditTrailInput {
     numItems: number
     sortHeaders: string
     sortDesc: boolean
+    filter: AuditTrailFilterData
 }
 
 export interface TAllAuditTrailOutput {
@@ -24,7 +25,12 @@ export interface TAllAuditTrailOutput {
 }
 
 export function allAuditTrail(inp : TAllAuditTrailInput) : Promise<TAllAuditTrailOutput> {
-    return axios.get(allAuditTrailLinkUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TAllAuditTrailOutput) => {
+    let passData : any = {
+        ...inp
+    }
+    passData.filter = JSON.stringify(passData.filter)
+        
+    return axios.get(allAuditTrailLinkUrl + '?' + qs.stringify(passData), getAPIRequestConfig()).then((resp : TAllAuditTrailOutput) => {
         resp.data.Entries.forEach(cleanAuditEventEntryFromJson)
         return resp
     })

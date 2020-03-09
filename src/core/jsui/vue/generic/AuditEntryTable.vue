@@ -49,6 +49,7 @@ export default class AuditEntryTable extends mixins(ResourceTableProps, Props) {
     @Watch('sortHeaders')
     @Watch('itemsPerPage')
     @Watch('currentPage')
+    @Watch('retrievalParams', { deep: true })
     refreshData() {
         this.isLoading = true
 

@@ -13,11 +13,12 @@ import (
 )
 
 type AllAuditTrailInputs struct {
-	OrgId      int32           `webcore:"orgId"`
-	Page       int32           `webcore:"page"`
-	NumItems   int32           `webcore:"numItems"`
-	SortHeader core.NullString `webcore:"sortHeaders,optional"`
-	SortDesc   core.NullBool   `webcore:"sortDesc,optional"`
+	OrgId      int32                     `webcore:"orgId"`
+	Page       int32                     `webcore:"page"`
+	NumItems   int32                     `webcore:"numItems"`
+	SortHeader core.NullString           `webcore:"sortHeaders,optional"`
+	SortDesc   core.NullBool             `webcore:"sortDesc,optional"`
+	Filter     core.AuditTrailFilterData `webcore:"filter"`
 }
 
 func allAuditTrailEvents(w http.ResponseWriter, r *http.Request) {
@@ -63,14 +64,14 @@ func allAuditTrailEvents(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	events, err := database.AllFilteredAuditEvents(inputs.OrgId, sortParams, role)
+	events, err := database.AllFilteredAuditEvents(inputs.OrgId, sortParams, inputs.Filter, role)
 	if err != nil {
 		core.Warning("Failed to get audit trail events: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	total, err := database.CountFilteredAuditEvents(inputs.OrgId, role)
+	total, err := database.CountFilteredAuditEvents(inputs.OrgId, inputs.Filter, role)
 	if err != nil {
 		core.Warning("Failed to get total audit events: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
