@@ -13,7 +13,11 @@ import (
 )
 
 type AllAuditTrailInputs struct {
-	OrgId int32 `webcore:"orgId"`
+	OrgId      int32           `webcore:"orgId"`
+	Page       int32           `webcore:"page"`
+	NumItems   int32           `webcore:"numItems"`
+	SortHeader core.NullString `webcore:"sortHeaders,optional"`
+	SortDesc   core.NullBool   `webcore:"sortDesc,optional"`
 }
 
 func allAuditTrailEvents(w http.ResponseWriter, r *http.Request) {
@@ -35,14 +39,51 @@ func allAuditTrailEvents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	events, err := database.AllFilteredAuditEvents(inputs.OrgId, role)
+	sortParams := core.AuditTrailSortParams{
+		Limit: core.CreateNullInt32(inputs.NumItems),
+		Page:  core.CreateNullInt32(inputs.Page),
+	}
+
+	if inputs.SortHeader.NullString.Valid {
+		dir := "ASC"
+		if inputs.SortDesc.NullBool.Valid && inputs.SortDesc.NullBool.Bool {
+			dir = "DESC"
+		}
+		sortParams.SortDirection = core.CreateNullString(dir)
+
+		switch h := inputs.SortHeader.NullString.String; h {
+		case "time":
+			sortParams.SortColumns = []string{"hist.performed_at"}
+		case "user":
+			sortParams.SortColumns = []string{"u.FirstName, u.LastName, u.Email"}
+		case "gaction":
+			sortParams.SortColumns = []string{"hist.action"}
+		case "type":
+			sortParams.SortColumns = []string{"hist.resource_type"}
+		}
+	}
+
+	events, err := database.AllFilteredAuditEvents(inputs.OrgId, sortParams, role)
 	if err != nil {
 		core.Warning("Failed to get audit trail events: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	jsonWriter.Encode(events)
+	total, err := database.CountFilteredAuditEvents(inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get total audit events: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(struct {
+		Entries []*core.AuditEvent
+		Total   int
+	}{
+		Entries: events,
+		Total:   total,
+	})
 }
 
 type GetAuditTrailInputs struct {

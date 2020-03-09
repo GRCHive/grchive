@@ -8,15 +8,7 @@
             </v-list-item-content>
         </v-list-item>
         <v-divider></v-divider>
-
-        <div v-if="!!auditTrail">
-            <audit-entry-table :resources="auditTrail">
-            </audit-entry-table>
-        </div>
-
-        <v-row justify="center" align="center" v-else>
-            <v-progress-circular indeterminate size="64"></v-progress-circular>
-        </v-row>
+        <audit-entry-table></audit-entry-table>
     </div>
 </template>
 
@@ -36,27 +28,6 @@ import AuditEntryTable from './AuditEntryTable.vue'
     }
 })
 export default class AuditTrailViewer extends Vue {
-    auditTrail : AuditEventEntry[] | null = null
-
-    refreshData() {
-        allAuditTrail({
-            orgId: PageParamsStore.state.organization!.Id,
-        }).then((resp : TAllAuditTrailOutput) => {
-            this.auditTrail = resp.data
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
-    }
-
-    mounted() {
-        this.refreshData()
-    }
 }
 
 </script>

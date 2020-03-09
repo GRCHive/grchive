@@ -2,14 +2,58 @@ package database
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
 	"gitlab.com/grchive/grchive/core"
 	"strconv"
+	"strings"
 )
 
-func commonAuditEventRetrievalQuery(role *core.Role, cond string, limit string, args ...interface{}) ([]*core.AuditEvent, error) {
+func commonAuditEventRetrievalQuery(
+	role *core.Role,
+	retrieve core.AuditTrailRetrievalParams,
+	sort core.AuditTrailSortParams) ([]*core.AuditEvent, error) {
+
+	selectParams := strings.Builder{}
+	args := make([]interface{}, 0)
+
+	if retrieve.OrgId.NullInt32.Valid {
+		selectParams.WriteString("WHERE hist.org_id = $1\n")
+		args = []interface{}{retrieve.OrgId.NullInt32.Int32}
+	} else if retrieve.EventId.NullInt64.Valid {
+		selectParams.WriteString("WHERE hist.id = $1\n")
+		args = []interface{}{retrieve.EventId.NullInt64.Int64}
+	} else if retrieve.ResourceType.NullString.Valid && retrieve.ResourceId.NullString.Valid {
+		selectParams.WriteString("WHERE hist.resource_type = $1 AND hist.resource_id = $2\n")
+		args = []interface{}{retrieve.ResourceType.NullString.String, retrieve.ResourceId.NullString.String}
+	} else {
+		return nil, errors.New("Invalid retrieval parameters.")
+	}
+
+	if len(sort.SortColumns) > 0 && sort.SortDirection.NullString.Valid {
+		selectParams.WriteString("ORDER BY\n")
+		for idx, c := range sort.SortColumns {
+			selectParams.WriteString(fmt.Sprintf("%s %s", c, sort.SortDirection.NullString.String))
+			if idx != len(sort.SortColumns)-1 {
+				selectParams.WriteString(",")
+			}
+			selectParams.WriteString("\n")
+		}
+	} else {
+		selectParams.WriteString("ORDER BY hist.id DESC\n")
+	}
+
+	if sort.Limit.NullInt32.Valid {
+		selectParams.WriteString(fmt.Sprintf("LIMIT %d\n", sort.Limit.NullInt32.Int32))
+
+		if sort.Page.NullInt32.Valid {
+			selectParams.WriteString(fmt.Sprintf("OFFSET %d\n",
+				int64(sort.Limit.NullInt32.Int32)*int64(sort.Page.NullInt32.Int32)))
+		}
+	}
+
 	rows, err := dbConn.Queryx(fmt.Sprintf(`
 		SELECT
 			hist.id,
@@ -26,9 +70,7 @@ func commonAuditEventRetrievalQuery(role *core.Role, cond string, limit string, 
 		LEFT JOIN users AS u
 			ON u.id = lnk.user_id
 		%s
-		ORDER BY hist.id DESC
-		LIMIT %s
-	`, cond, limit), args...)
+	`, selectParams.String()), args...)
 
 	if err != nil {
 		return nil, err
@@ -67,12 +109,45 @@ func commonAuditEventRetrievalQuery(role *core.Role, cond string, limit string, 
 	return events, err
 }
 
-func AllFilteredAuditEvents(orgId int32, role *core.Role) ([]*core.AuditEvent, error) {
-	return commonAuditEventRetrievalQuery(role, "WHERE hist.org_id = $1", "ALL", orgId)
+func AllFilteredAuditEvents(orgId int32, sort core.AuditTrailSortParams, role *core.Role) ([]*core.AuditEvent, error) {
+	return commonAuditEventRetrievalQuery(
+		role,
+		core.AuditTrailRetrievalParams{
+			OrgId: core.CreateNullInt32(orgId),
+		},
+		sort)
+}
+
+func CountFilteredAuditEvents(orgId int32, role *core.Role) (int, error) {
+	rows, err := dbConn.Queryx(`
+		SELECT COUNT(*)
+		FROM global_audit_event_history
+		WHERE org_id = $1
+	`, orgId)
+
+	if err != nil {
+		return -1, err
+	}
+	defer rows.Close()
+
+	val := int(0)
+	rows.Next()
+	err = rows.Scan(&val)
+	if err != nil {
+		return -1, err
+	}
+	return val, nil
 }
 
 func GetAuditEvent(eventId int64, role *core.Role) (*core.AuditEvent, error) {
-	events, err := commonAuditEventRetrievalQuery(role, "WHERE hist.id = $1", "1", eventId)
+	events, err := commonAuditEventRetrievalQuery(
+		role,
+		core.AuditTrailRetrievalParams{
+			EventId: core.CreateNullInt64(eventId),
+		},
+		core.AuditTrailSortParams{
+			Limit: core.CreateNullInt32(1),
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -85,9 +160,15 @@ func GetAuditEvent(eventId int64, role *core.Role) (*core.AuditEvent, error) {
 }
 
 func GetLatestAuditEvent(resourceType string, resourceId string, role *core.Role) (*core.AuditEvent, error) {
-	events, err := commonAuditEventRetrievalQuery(role, `
-		WHERE hist.resource_type = $1 AND hist.resource_id = $2
- 	`, "1", resourceType, resourceId)
+	events, err := commonAuditEventRetrievalQuery(
+		role,
+		core.AuditTrailRetrievalParams{
+			ResourceType: core.CreateNullString(resourceType),
+			ResourceId:   core.CreateNullString(resourceId),
+		},
+		core.AuditTrailSortParams{
+			Limit: core.CreateNullInt32(1),
+		})
 	if err != nil {
 		return nil, err
 	}

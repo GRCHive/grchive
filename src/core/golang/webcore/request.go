@@ -197,6 +197,8 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 				return err
 			}
 			dataValue = reflect.ValueOf(core.CreateNullBool(boolValue))
+		case core.NullStringReflectType:
+			dataValue = reflect.ValueOf(core.CreateNullString(data[0]))
 		case core.Int32ReflectType:
 			intValue, err := strconv.ParseInt(data[0], 10, 32)
 			if err != nil {

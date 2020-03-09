@@ -10,15 +10,22 @@ import { ResourceHandle } from '../resourceUtils'
 
 export interface TAllAuditTrailInput {
     orgId: number
+    page: number
+    numItems: number
+    sortHeaders: string
+    sortDesc: boolean
 }
 
 export interface TAllAuditTrailOutput {
-    data: AuditEventEntry[]
+    data: {
+        Entries: AuditEventEntry[]
+        Total: number
+    }
 }
 
 export function allAuditTrail(inp : TAllAuditTrailInput) : Promise<TAllAuditTrailOutput> {
     return axios.get(allAuditTrailLinkUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TAllAuditTrailOutput) => {
-        resp.data.forEach(cleanAuditEventEntryFromJson)
+        resp.data.Entries.forEach(cleanAuditEventEntryFromJson)
         return resp
     })
 }

@@ -1,7 +1,8 @@
 <script lang="ts">
 
 import Vue, { VNode } from 'vue'
-import Component from 'vue-class-component'
+import Component, { mixins } from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import { VTooltip, VIcon } from 'vuetify/lib'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
@@ -9,18 +10,80 @@ import { PageParamsStore } from '../../ts/pageParams'
 import { standardFormatTime } from '../../ts/time'
 import { createUserString } from '../../ts/users'
 import { ResourceHandle, standardizeResourceType } from '../../ts/resourceUtils'
-import { TGetAuditTrailOutput, getAuditTrail } from '../../ts/api/apiAuditTrail'
+import { 
+    TGetAuditTrailOutput, getAuditTrail,
+    TAllAuditTrailOutput, allAuditTrail,
+} from '../../ts/api/apiAuditTrail'
 import { contactUsUrl } from '../../ts/url'
+import { AuditEventEntry } from '../../ts/auditTrail'
 import MetadataStore from '../../ts/metadata'
+
+const Props = Vue.extend({
+    props: {
+        retrievalParams : {
+            type: Object,
+            default: () => Object(),
+        }
+    }
+})
 
 @Component({
     components: {
         BaseResourceTable
     }
 })
-export default class AuditEntryTable extends ResourceTableProps {
+export default class AuditEntryTable extends mixins(ResourceTableProps, Props) {
     eventIdToResourceHandle : Record<number, ResourceHandle | null> = Object()
     eventIdProcessed : Set<number> = new Set<number>()
+
+    loadedData : AuditEventEntry[] = []
+    totalEntries: number = 0
+    currentPage: number = 1
+    itemsPerPage: number = 10
+    sortHeaders: string[] = []
+    sortDesc: boolean[] = []
+
+    isLoading : boolean = false
+
+    @Watch('sortDesc')
+    @Watch('sortHeaders')
+    @Watch('itemsPerPage')
+    @Watch('currentPage')
+    refreshData() {
+        this.isLoading = true
+
+        let params = {
+            orgId: PageParamsStore.state.organization!.Id,
+            ...this.retrievalParams,
+            page: this.currentPage - 1,
+            numItems: this.itemsPerPage,
+        }
+
+        if (this.sortHeaders.length == 1) {
+            params.sortHeaders = this.sortHeaders[0]
+            if (this.sortDesc.length == 1 && this.sortDesc[0]) {
+                params.sortDesc = true
+            } else {
+                params.sortDesc = false
+            }
+        }
+
+        allAuditTrail(
+            params
+        ).then((resp : TAllAuditTrailOutput) => {
+            this.loadedData = resp.data.Entries
+            this.totalEntries = resp.data.Total
+            this.isLoading = false
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
 
     get tableHeaders() : any[] {
         return [
@@ -43,12 +106,13 @@ export default class AuditEntryTable extends ResourceTableProps {
             {
                 text: 'Resource',
                 value: 'resource',
+                sortable: false,
             },
         ]
     }
 
     get tableItems(): any[] {
-        return this.resources.map(this.transformInputResourceToTableItem)
+        return this.loadedData.map(this.transformInputResourceToTableItem)
     }
 
     renderResource(props: any) : VNode { 
@@ -154,17 +218,27 @@ export default class AuditEntryTable extends ResourceTableProps {
                     tableHeaders: this.tableHeaders,
                     tableItems: this.tableItems,
                     resourceName: "audit trail entry",
-                    showExpand: false
+                    showExpand: false,
+                    loading: this.isLoading,
+                    serverItemsLength: this.totalEntries,
                 },
                 on: {
                     input: (items : any[]) => this.$emit('input', items.map((ele : any) => ele.value)),
                     delete: (item : any) => this.$emit('delete', item.value),
+                    'update:page': (n : number) => { this.currentPage = n  },
+                    'update:sort-by': (s : string[]) => { this.sortHeaders = s },
+                    'update:sort-desc': (d : boolean[]) => { this.sortDesc = d },
+                    'update:items-per-page': (n : number) => { this.itemsPerPage = n },
                 },
                 scopedSlots: {
                     'item.resource': this.renderResource,
                 }
             }
         )
+    }
+
+    mounted() {
+        this.refreshData()
     }
 }
 

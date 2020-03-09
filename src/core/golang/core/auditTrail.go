@@ -12,3 +12,17 @@ type AuditEvent struct {
 	PerformedAt       time.Time              `db:"performed_at"`
 	UserId            NullInt64              `db:"user_id"`
 }
+
+type AuditTrailRetrievalParams struct {
+	OrgId        NullInt32
+	EventId      NullInt64
+	ResourceType NullString
+	ResourceId   NullString
+}
+
+type AuditTrailSortParams struct {
+	SortColumns   []string
+	SortDirection NullString
+	Limit         NullInt32
+	Page          NullInt32
+}

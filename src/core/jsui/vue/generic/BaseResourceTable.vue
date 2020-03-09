@@ -19,6 +19,10 @@ const TableProps = Vue.extend({
             type: Boolean,
             default: false,
         },
+        serverItemsLength: {
+            type: Number,
+            default: -1,
+        },
     }
 })
 
@@ -179,8 +183,11 @@ export default class BaseResourceTable extends mixins(ResourceTableProps, TableP
                     singleSelect: !this.multi,
                     search: this.search,
                     showExpand: this.showExpand,
+                    loading: this.loading, 
+                    serverItemsLength: this.serverItemsLength,
                 },
                 on: {
+                    ...this.$listeners,
                     input: this.changeInput,
                     'click:row': this.clickRow
                 },
