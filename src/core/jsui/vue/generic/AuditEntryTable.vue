@@ -52,6 +52,8 @@ export default class AuditEntryTable extends ResourceTableProps {
     }
 
     renderResource(props: any) : VNode { 
+        this.retrieveAuditTrailDetails(props.item.value)
+
         if (props.item.id in this.eventIdToResourceHandle) {
             let res : ResourceHandle | null = this.eventIdToResourceHandle[props.item.id]
             if (!!res) {
@@ -109,7 +111,7 @@ export default class AuditEntryTable extends ResourceTableProps {
         }
     }
 
-    transformInputResourceToTableItem(inp : any) : any {
+    retrieveAuditTrailDetails(inp : any) {
         if (!(inp.Id in this.eventIdToResourceHandle) && !this.eventIdProcessed.has(inp.Id)) {
             this.eventIdProcessed.add(inp.Id)
             getAuditTrail({
@@ -129,7 +131,9 @@ export default class AuditEntryTable extends ResourceTableProps {
                 this.eventIdToResourceHandle[inp.Id] = null
             })
         }
+    }
 
+    transformInputResourceToTableItem(inp : any) : any {
         return {
             id: inp.Id,
             gaction: inp.Action,
