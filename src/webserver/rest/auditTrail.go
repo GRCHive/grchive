@@ -13,12 +13,14 @@ import (
 )
 
 type AllAuditTrailInputs struct {
-	OrgId      int32                     `webcore:"orgId"`
-	Page       int32                     `webcore:"page"`
-	NumItems   int32                     `webcore:"numItems"`
-	SortHeader core.NullString           `webcore:"sortHeaders,optional"`
-	SortDesc   core.NullBool             `webcore:"sortDesc,optional"`
-	Filter     core.AuditTrailFilterData `webcore:"filter"`
+	OrgId        int32                     `webcore:"orgId"`
+	Page         int32                     `webcore:"page"`
+	NumItems     int32                     `webcore:"numItems"`
+	SortHeader   core.NullString           `webcore:"sortHeaders,optional"`
+	SortDesc     core.NullBool             `webcore:"sortDesc,optional"`
+	Filter       core.AuditTrailFilterData `webcore:"filter"`
+	ResourceType core.NullString           `webcore:"resourceType,optional"`
+	ResourceId   core.NullString           `webcore:"resourceId,optional"`
 }
 
 func allAuditTrailEvents(w http.ResponseWriter, r *http.Request) {
@@ -64,14 +66,36 @@ func allAuditTrailEvents(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	events, err := database.AllFilteredAuditEvents(inputs.OrgId, sortParams, inputs.Filter, role)
+	var events []*core.AuditEvent
+
+	if inputs.ResourceType.NullString.Valid && inputs.ResourceId.NullString.Valid {
+		events, err = database.AllFilteredAuditEventsForResource(
+			inputs.ResourceType.NullString.String,
+			inputs.ResourceId.NullString.String,
+			sortParams,
+			inputs.Filter,
+			role)
+	} else {
+		events, err = database.AllFilteredAuditEvents(inputs.OrgId, sortParams, inputs.Filter, role)
+	}
 	if err != nil {
 		core.Warning("Failed to get audit trail events: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	total, err := database.CountFilteredAuditEvents(inputs.OrgId, inputs.Filter, role)
+	var total int
+
+	if inputs.ResourceType.NullString.Valid && inputs.ResourceId.NullString.Valid {
+		total, err = database.CountFilteredAuditEventsForResource(
+			inputs.ResourceType.NullString.String,
+			inputs.ResourceId.NullString.String,
+			inputs.Filter,
+			role)
+	} else {
+		total, err = database.CountFilteredAuditEvents(inputs.OrgId, inputs.Filter, role)
+	}
+
 	if err != nil {
 		core.Warning("Failed to get total audit events: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

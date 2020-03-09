@@ -208,6 +208,16 @@
                         >
                         </dashboard-sql-request-list>
                     </v-tab-item>
+
+                    <v-tab>Audit Trail</v-tab>
+                    <v-tab-item>
+                        <audit-trail-viewer
+                            resource-type="database_resources"
+                            :resource-id="`${currentDb.Id}`"
+                            no-header
+                        >
+                        </audit-trail-viewer>
+                    </v-tab-item>
                 </v-tabs>
 
             </v-container>
@@ -240,6 +250,7 @@ import DeploymentEditor from '../../generic/DeploymentEditor.vue'
 import DatabaseSqlEditor from '../../generic/DatabaseSqlEditor.vue'
 import DashboardSqlRequestList from './DashboardSqlRequestList.vue'
 import { newDeployment, TNewDeploymentOutput } from '../../../ts/api/apiDeployments'
+import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 @Component({
     components: {
@@ -250,7 +261,8 @@ import { newDeployment, TNewDeploymentOutput } from '../../../ts/api/apiDeployme
         SystemsTable,
         DeploymentEditor,
         DatabaseSqlEditor,
-        DashboardSqlRequestList
+        DashboardSqlRequestList,
+        AuditTrailViewer
     }
 })
 export default class FullEditDatabaseComponent extends Vue {

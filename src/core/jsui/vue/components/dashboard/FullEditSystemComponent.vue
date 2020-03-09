@@ -43,127 +43,142 @@
             <v-divider></v-divider>
 
             <v-container fluid>
-                <v-row>
-                    <v-col cols="5">
-                        <create-new-system-form
-                            ref="editForm"
-                            :edit-mode="true"
-                            :reference-system="currentSystem"
-                            @do-save="onEdit">
-                        </create-new-system-form>
-                    </v-col>
+                <v-tabs>
+                    <v-tab>Overview</v-tab>
+                    <v-tab-item>
+                        <v-row>
+                            <v-col cols="5">
+                                <create-new-system-form
+                                    ref="editForm"
+                                    :edit-mode="true"
+                                    :reference-system="currentSystem"
+                                    @do-save="onEdit">
+                                </create-new-system-form>
+                            </v-col>
 
-                    <v-col cols="7">
-                        <v-card class="mb-4">
-                            <v-card-title>
-                                Related Resources
-                            </v-card-title>
-                            <v-divider></v-divider>
+                            <v-col cols="7">
+                                <v-card class="mb-4">
+                                    <v-card-title>
+                                        Related Resources
+                                    </v-card-title>
+                                    <v-divider></v-divider>
 
-                            <v-tabs>
-                                <v-tab>Databases</v-tab>
-                                <v-tab-item>
-                                    <v-list-item>
-                                        <v-spacer></v-spacer>
-                                        
-                                        <v-dialog persistent
-                                                  max-width="40%"
-                                                  v-model="showHideLinkDb">
-                                            <template v-slot:activator="{ on }">
-                                                <v-btn color="primary" icon v-on="on">
-                                                    <v-icon>mdi-plus</v-icon>
-                                                </v-btn>
-                                            </template>
+                                    <v-tabs>
+                                        <v-tab>Databases</v-tab>
+                                        <v-tab-item>
+                                            <v-list-item>
+                                                <v-spacer></v-spacer>
+                                                
+                                                <v-dialog persistent
+                                                          max-width="40%"
+                                                          v-model="showHideLinkDb">
+                                                    <template v-slot:activator="{ on }">
+                                                        <v-btn color="primary" icon v-on="on">
+                                                            <v-icon>mdi-plus</v-icon>
+                                                        </v-btn>
+                                                    </template>
 
-                                            <v-card>
-                                                <v-card-title>
-                                                    Link Databases
-                                                </v-card-title>
-                                                <v-divider></v-divider>
+                                                    <v-card>
+                                                        <v-card-title>
+                                                            Link Databases
+                                                        </v-card-title>
+                                                        <v-divider></v-divider>
 
-                                                <db-table :resources="allDb"
-                                                          v-model="dbToLink"
-                                                          selectable
-                                                          multi
-                                                ></db-table>
+                                                        <db-table :resources="allDb"
+                                                                  v-model="dbToLink"
+                                                                  selectable
+                                                                  multi
+                                                        ></db-table>
 
-                                                <v-card-actions>
-                                                    <v-btn color="error" @click="showHideLinkDb = false">
-                                                        Cancel
-                                                    </v-btn>
-                                                    <v-spacer></v-spacer>
-                                                    <v-btn color="success" @click="linkDbs">
-                                                        Link
-                                                    </v-btn>
-                                                </v-card-actions>
-                                            </v-card>
-                                        </v-dialog>
-                                    </v-list-item>
+                                                        <v-card-actions>
+                                                            <v-btn color="error" @click="showHideLinkDb = false">
+                                                                Cancel
+                                                            </v-btn>
+                                                            <v-spacer></v-spacer>
+                                                            <v-btn color="success" @click="linkDbs">
+                                                                Link
+                                                            </v-btn>
+                                                        </v-card-actions>
+                                                    </v-card>
+                                                </v-dialog>
+                                            </v-list-item>
 
-                                    <db-table
-                                        :resources="relatedDbs"
-                                        use-crud-delete
-                                        @delete="onDeleteDbLink"
-                                    ></db-table>
-                                </v-tab-item>
+                                            <db-table
+                                                :resources="relatedDbs"
+                                                use-crud-delete
+                                                @delete="onDeleteDbLink"
+                                            ></db-table>
+                                        </v-tab-item>
 
-                                <v-tab>Process Flows</v-tab>
-                                <v-tab-item>
-                                    <process-flow-table
-                                        :resources="relatedFlows"
-                                    >
-                                    </process-flow-table>
-                                </v-tab-item>
+                                        <v-tab>Process Flows</v-tab>
+                                        <v-tab-item>
+                                            <process-flow-table
+                                                :resources="relatedFlows"
+                                            >
+                                            </process-flow-table>
+                                        </v-tab-item>
 
-                                <v-tab>Risks</v-tab>
-                                <v-tab-item>
-                                    <risk-table
-                                        :resources="relatedRisks"
-                                    >
-                                    </risk-table>
-                                </v-tab-item>
+                                        <v-tab>Risks</v-tab>
+                                        <v-tab-item>
+                                            <risk-table
+                                                :resources="relatedRisks"
+                                            >
+                                            </risk-table>
+                                        </v-tab-item>
 
-                                <v-tab>Controls</v-tab>
-                                <v-tab-item>
-                                    <control-table
-                                        :resources="relatedControls"
-                                    >
-                                    </control-table>
-                                </v-tab-item>
-                            </v-tabs>
-                        </v-card>
+                                        <v-tab>Controls</v-tab>
+                                        <v-tab-item>
+                                            <control-table
+                                                :resources="relatedControls"
+                                            >
+                                            </control-table>
+                                        </v-tab-item>
+                                    </v-tabs>
+                                </v-card>
 
-                        <v-card>
-                            <v-card-title>
-                                Deployment
-                            </v-card-title>
-                            <v-divider></v-divider>
+                                <v-card>
+                                    <v-card-title>
+                                        Deployment
+                                    </v-card-title>
+                                    <v-divider></v-divider>
 
-                            <div v-if="!deployment">
-                                <v-row align="center" justify="center">
-                                    <v-btn color="primary"
-                                           fab
-                                           outlined
-                                           x-large
-                                           class="my-6"
-                                           @click="addDeployment">
-                                        <v-icon>mdi-plus</v-icon>
-                                    </v-btn>
-                                </v-row>
-                            </div>
+                                    <div v-if="!deployment">
+                                        <v-row align="center" justify="center">
+                                            <v-btn color="primary"
+                                                   fab
+                                                   outlined
+                                                   x-large
+                                                   class="my-6"
+                                                   @click="addDeployment">
+                                                <v-icon>mdi-plus</v-icon>
+                                            </v-btn>
+                                        </v-row>
+                                    </div>
 
-                            <div v-else>
-                                <deployment-editor
-                                    class="pa-4"
-                                    v-model="deployment"
-                                    :system-id="currentSystem.Id"
-                                >
-                                </deployment-editor>
-                            </div>
+                                    <div v-else>
+                                        <deployment-editor
+                                            class="pa-4"
+                                            v-model="deployment"
+                                            :system-id="currentSystem.Id"
+                                        >
+                                        </deployment-editor>
+                                    </div>
 
-                        </v-card>
-                    </v-col>
-                </v-row>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                    </v-tab-item>
+
+                    <v-tab>Audit Trail</v-tab>
+                    <v-tab-item>
+                        <audit-trail-viewer
+                            resource-type="systems"
+                            :resource-id="`${currentSystem.Id}`"
+                            no-header
+                        >
+                        </audit-trail-viewer>
+                    </v-tab-item>
+                </v-tabs>
             </v-container>
         </div>
     </div>
@@ -192,6 +207,7 @@ import { TAllNodeSystemLinkOutput, allNodeSystemLink } from '../../../ts/api/api
 import RiskTable from '../../generic/RiskTable.vue'
 import ControlTable from '../../generic/ControlTable.vue'
 import ProcessFlowTable from '../../generic/ProcessFlowTable.vue'
+import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 @Component({
     components: {
@@ -201,7 +217,8 @@ import ProcessFlowTable from '../../generic/ProcessFlowTable.vue'
         DeploymentEditor,
         RiskTable,
         ControlTable,
-        ProcessFlowTable
+        ProcessFlowTable,
+        AuditTrailViewer
     }
 })
 export default class FullEditSystemComponent extends Vue {

@@ -125,6 +125,17 @@ func AllFilteredAuditEvents(orgId int32, sort core.AuditTrailSortParams, filter 
 		filter)
 }
 
+func AllFilteredAuditEventsForResource(resourceType string, resourceId string, sort core.AuditTrailSortParams, filter core.AuditTrailFilterData, role *core.Role) ([]*core.AuditEvent, error) {
+	return commonAuditEventRetrievalQuery(
+		role,
+		core.AuditTrailRetrievalParams{
+			ResourceType: core.CreateNullString(resourceType),
+			ResourceId:   core.CreateNullString(resourceId),
+		},
+		sort,
+		filter)
+}
+
 func CountFilteredAuditEvents(orgId int32, filter core.AuditTrailFilterData, role *core.Role) (int, error) {
 	// How to prevent duplicate code here with the above function?
 	rows, err := dbConn.Queryx(fmt.Sprintf(`
@@ -145,6 +156,41 @@ func CountFilteredAuditEvents(orgId int32, filter core.AuditTrailFilterData, rol
 		buildStringFilter("user_to_human_name(u.*::users)", filter.UserFilter),
 		buildTimeRangeFilter("hist.performed_at", filter.TimeRangeFilter)),
 		orgId)
+
+	if err != nil {
+		return -1, err
+	}
+	defer rows.Close()
+
+	val := int(0)
+	rows.Next()
+	err = rows.Scan(&val)
+	if err != nil {
+		return -1, err
+	}
+	return val, nil
+}
+
+func CountFilteredAuditEventsForResource(resourceType string, resourceId string, filter core.AuditTrailFilterData, role *core.Role) (int, error) {
+	// How to prevent duplicate code here with the above function?
+	rows, err := dbConn.Queryx(fmt.Sprintf(`
+		SELECT COUNT(hist.*)
+		FROM global_audit_event_history AS hist
+		LEFT JOIN postgres_oid_to_users AS lnk
+			ON lnk.pg_oid = hist.pgrole_id
+		LEFT JOIN users AS u
+			ON u.id = lnk.user_id
+		WHERE hist.resource_type = $1 AND hist.resource_id = $2
+			AND %s
+			AND %s
+			AND %s
+			AND %s
+	`,
+		buildStringFilter("audit_resource_type_to_human_name(hist.resource_type)", filter.ResourceTypeFilter),
+		buildStringFilter("hist.action", filter.ActionFilter),
+		buildStringFilter("user_to_human_name(u.*::users)", filter.UserFilter),
+		buildTimeRangeFilter("hist.performed_at", filter.TimeRangeFilter)),
+		resourceType, resourceId)
 
 	if err != nil {
 		return -1, err

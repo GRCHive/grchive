@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-list-item>
+        <v-list-item v-if="!noHeader">
             <v-list-item-content>
                 <v-list-item-title class="title">
                     Audit Trail
@@ -30,19 +30,46 @@ import { TAllAuditTrailOutput, allAuditTrail} from '../../ts/api/apiAuditTrail'
 import AuditEntryTable from './AuditEntryTable.vue'
 import AdvancedAuditTrailFilters from './filters/AdvancedAuditTrailFilters.vue'
 
+const Props = Vue.extend({
+    props: {
+        resourceType: {
+            type: String,
+            default: "",
+        },
+        resourceId: {
+            type: String,
+            default: "",
+        },
+        noHeader: {
+            type: Boolean,
+            default: false,
+        },
+    }
+})
+
 @Component({
     components: {
         AuditEntryTable,
         AdvancedAuditTrailFilters
     }
 })
-export default class AuditTrailViewer extends Vue {
+export default class AuditTrailViewer extends Props {
     filter : AuditTrailFilterData = NullAuditTrailFilterData
 
     get auditParams() : any {
-        return {
+        let params : any = {
             filter: this.filter,
         }
+
+        if (this.resourceType != "") {
+            params.resourceType = this.resourceType
+        }
+
+        if (this.resourceId != "") {
+            params.resourceId = this.resourceId
+        }
+
+        return params
     }
 }
 

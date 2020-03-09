@@ -100,76 +100,91 @@
             </v-list-item>
             <v-divider></v-divider>
 
-            <v-container fluid>
-                <v-row>
-                    <v-col cols="8">
-                        <create-new-server-form
-                            edit-mode
-                            :reference-server="currentServer"
-                            ref="editForm"
-                            @do-save="onEdit"
-                        >
-                        </create-new-server-form>
-                    </v-col>
+            <v-tabs>
+                <v-tab>Overview</v-tab>
+                <v-tab-item>
+                    <v-container fluid>
+                        <v-row>
+                            <v-col cols="8">
+                                <create-new-server-form
+                                    edit-mode
+                                    :reference-server="currentServer"
+                                    ref="editForm"
+                                    @do-save="onEdit"
+                                >
+                                </create-new-server-form>
+                            </v-col>
 
-                    <v-col cols="4">
-                        <v-card>
-                            <v-card-title>
-                                Linked Deployments
+                            <v-col cols="4">
+                                <v-card>
+                                    <v-card-title>
+                                        Linked Deployments
 
-                                <v-spacer></v-spacer>
+                                        <v-spacer></v-spacer>
 
-                                <v-menu offset-y>
-                                    <template v-slot:activator="{ on }">
-                                        <v-btn color="primary" icon v-on="on">
-                                            <v-icon>mdi-plus</v-icon>
-                                        </v-btn>
-                                    </template>
+                                        <v-menu offset-y>
+                                            <template v-slot:activator="{ on }">
+                                                <v-btn color="primary" icon v-on="on">
+                                                    <v-icon>mdi-plus</v-icon>
+                                                </v-btn>
+                                            </template>
 
-                                    <v-list dense>
-                                        <v-list-item @click="startLinkSystems">
-                                            <v-list-item-title>Add Systems</v-list-item-title>
-                                        </v-list-item>
-                                        <v-list-item @click="startLinkDatabases">
-                                            <v-list-item-title>Add Databases</v-list-item-title>
-                                        </v-list-item>
-                                    </v-list>
-                                </v-menu>
+                                            <v-list dense>
+                                                <v-list-item @click="startLinkSystems">
+                                                    <v-list-item-title>Add Systems</v-list-item-title>
+                                                </v-list-item>
+                                                <v-list-item @click="startLinkDatabases">
+                                                    <v-list-item-title>Add Databases</v-list-item-title>
+                                                </v-list-item>
+                                            </v-list>
+                                        </v-menu>
 
-                            </v-card-title>
+                                    </v-card-title>
 
-                            <v-tabs
-                                v-model="relevantTab"
-                            >
-                                <v-tab>Systems</v-tab>
-                                <v-tab>Databases</v-tab>
-                            </v-tabs>
-
-                            <v-tabs-items
-                                v-model="relevantTab"
-                            >
-                                <v-tab-item>
-                                    <systems-table
-                                        :resources="relevantSystems"
-                                        use-crud-delete
-                                        @delete="deleteSystemLink"
+                                    <v-tabs
+                                        v-model="relevantTab"
                                     >
-                                    </systems-table>
-                                </v-tab-item>
+                                        <v-tab>Systems</v-tab>
+                                        <v-tab>Databases</v-tab>
+                                    </v-tabs>
 
-                                <v-tab-item>
-                                    <db-table
-                                        :resources="relevantDbs"
-                                        use-crud-delete
-                                        @delete="deleteDbLink"
+                                    <v-tabs-items
+                                        v-model="relevantTab"
                                     >
-                                    </db-table>
-                                </v-tab-item>
-                            </v-tabs-items>
-                        </v-card>
-                    </v-col>
-                </v-row>
-            </v-container>
+                                        <v-tab-item>
+                                            <systems-table
+                                                :resources="relevantSystems"
+                                                use-crud-delete
+                                                @delete="deleteSystemLink"
+                                            >
+                                            </systems-table>
+                                        </v-tab-item>
+
+                                        <v-tab-item>
+                                            <db-table
+                                                :resources="relevantDbs"
+                                                use-crud-delete
+                                                @delete="deleteDbLink"
+                                            >
+                                            </db-table>
+                                        </v-tab-item>
+                                    </v-tabs-items>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                </v-tab-item>
+
+                <v-tab>Audit Trail</v-tab>
+                <v-tab-item>
+                    <audit-trail-viewer
+                        resource-type="infrastructure_servers"
+                        :resource-id="`${currentServer.Id}`"
+                        no-header
+                    >
+                    </audit-trail-viewer>
+                </v-tab-item>
+            </v-tabs>
         </div>
     </div>
 </template>
@@ -193,13 +208,15 @@ import { System } from '../../../ts/systems'
 import { Database } from '../../../ts/databases'
 import SystemsTable from '../../generic/SystemsTable.vue'
 import DbTable from '../../generic/DbTable.vue'
+import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 @Component({
     components: {
         GenericDeleteConfirmationForm,
         CreateNewServerForm,
         SystemsTable,
-        DbTable
+        DbTable,
+        AuditTrailViewer
     }
 })
 export default class FullEditServerComponent extends Vue {
