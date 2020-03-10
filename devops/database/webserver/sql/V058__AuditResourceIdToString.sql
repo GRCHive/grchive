@@ -1,9 +1,8 @@
 ALTER TABLE global_audit_event_history
 ADD COLUMN resource_id_str VARCHAR(128);
 
-INSERT INTO global_audit_event_history (resource_id_str)
-SELECT CAST(resource_id AS VARCHAR(128))
-FROM global_audit_event_history;
+UPDATE global_audit_event_history AS hist
+    SET resource_id_str = CAST(hist.resource_id AS VARCHAR(128));
 
 ALTER TABLE global_audit_event_history
 ALTER COLUMN resource_id_str SET NOT NULL;
