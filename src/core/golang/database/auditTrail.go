@@ -18,17 +18,45 @@ func buildHistResourceFilter(types []string, ids []string) string {
 	for i, typ := range types {
 		idStr := ""
 		if ids[i] == "*" {
-			idStr = "hist.resource_id LIKE '%'"
+			idStr = "IS NOT NULL"
 		} else {
-			idStr = fmt.Sprintf("hist.resource_id = '%s'", ids[i])
+			idStr = fmt.Sprintf("= '%s'", ids[i])
 		}
 
 		filter.WriteString(fmt.Sprintf(`
-			(hist.resource_type = '%s' AND %s)
+			(hist.resource_type = '%s' AND hist.resource_id %s)
 		`,
 			typ,
 			idStr,
 		))
+
+		subTyp := ""
+		switch typ {
+		case core.ResourceDocMetadata:
+			subTyp = "file_id"
+		case core.ResourceDocCat:
+			subTyp = "cat_id"
+		case core.ResourceVendor:
+			subTyp = "vendor_id"
+		case core.ResourceGLCat:
+			subTyp = "gl_parent_cat_id"
+		case core.ResourceProcessFlow:
+			subTyp = "process_flow_id"
+		case core.ResourceFlowNode:
+			subTyp = "node_id"
+		case core.ResourceDatabase:
+			subTyp = "db_id"
+		case core.ResourceSqlQueryMetadata:
+			subTyp = "sql_metadata_id"
+		case core.ResourceSqlQuery:
+			subTyp = "query_id"
+		}
+
+		if len(subTyp) > 0 {
+			filter.WriteString(fmt.Sprintf(`
+				OR (hist.resource_extra_data ->> '%s' %s)
+			`, subTyp, idStr))
+		}
 
 		if i == len(types)-1 {
 			filter.WriteString("\n")
@@ -90,7 +118,7 @@ func commonAuditEventRetrievalQuery(
 	}
 
 	rows, err := dbConn.Queryx(fmt.Sprintf(`
-		SELECT
+		SELECT DISTINCT
 			hist.id,
 			hist.org_id,
 			hist.resource_type,
@@ -203,7 +231,7 @@ func CountFilteredAuditEvents(orgId int32, filter core.AuditTrailFilterData, rol
 func CountFilteredAuditEventsForResource(resourceType []string, resourceId []string, filter core.AuditTrailFilterData, role *core.Role) (int, error) {
 	// How to prevent duplicate code here with the above function?
 	rows, err := dbConn.Queryx(fmt.Sprintf(`
-		SELECT COUNT(hist.*)
+		SELECT COUNT(DISTINCT hist.*)
 		FROM global_audit_event_history AS hist
 		LEFT JOIN postgres_oid_to_users AS lnk
 			ON lnk.pg_oid = hist.pgrole_id
