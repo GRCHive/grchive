@@ -103,8 +103,8 @@
                     <v-tab>Audit Trail</v-tab>
                     <v-tab-item>
                         <audit-trail-viewer
-                            resource-type="general_ledger_accounts"
-                            :resource-id="`${glAccount.Id}`"
+                            :resource-type="['general_ledger_accounts']"
+                            :resource-id="[`${glAccount.Id}`]"
                             no-header
                         >
                         </audit-trail-viewer>

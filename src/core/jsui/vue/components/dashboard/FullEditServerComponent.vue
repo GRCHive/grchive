@@ -177,8 +177,8 @@
                 <v-tab>Audit Trail</v-tab>
                 <v-tab-item>
                     <audit-trail-viewer
-                        resource-type="infrastructure_servers"
-                        :resource-id="`${currentServer.Id}`"
+                        :resource-type="['infrastructure_servers']"
+                        :resource-id="[`${currentServer.Id}`]"
                         no-header
                     >
                     </audit-trail-viewer>

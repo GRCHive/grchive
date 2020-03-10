@@ -11,6 +11,36 @@ import (
 	"strings"
 )
 
+func buildHistResourceFilter(types []string, ids []string) string {
+	filter := strings.Builder{}
+	filter.WriteString("(")
+
+	for i, typ := range types {
+		idStr := ""
+		if ids[i] == "*" {
+			idStr = "hist.resource_id LIKE '%'"
+		} else {
+			idStr = fmt.Sprintf("hist.resource_id = '%s'", ids[i])
+		}
+
+		filter.WriteString(fmt.Sprintf(`
+			(hist.resource_type = '%s' AND %s)
+		`,
+			typ,
+			idStr,
+		))
+
+		if i == len(types)-1 {
+			filter.WriteString("\n")
+		} else {
+			filter.WriteString("OR\n")
+		}
+	}
+
+	filter.WriteString(")")
+	return filter.String()
+}
+
 func commonAuditEventRetrievalQuery(
 	role *core.Role,
 	retrieve core.AuditTrailRetrievalParams,
@@ -26,9 +56,8 @@ func commonAuditEventRetrievalQuery(
 	} else if retrieve.EventId.NullInt64.Valid {
 		selectParams.WriteString("WHERE hist.id = $1\n")
 		args = []interface{}{retrieve.EventId.NullInt64.Int64}
-	} else if retrieve.ResourceType.NullString.Valid && retrieve.ResourceId.NullString.Valid {
-		selectParams.WriteString("WHERE hist.resource_type = $1 AND hist.resource_id = $2\n")
-		args = []interface{}{retrieve.ResourceType.NullString.String, retrieve.ResourceId.NullString.String}
+	} else if len(retrieve.ResourceType) > 0 && len(retrieve.ResourceId) > 0 {
+		selectParams.WriteString(fmt.Sprintf("WHERE %s\n", buildHistResourceFilter(retrieve.ResourceType, retrieve.ResourceId)))
 	} else {
 		return nil, errors.New("Invalid retrieval parameters.")
 	}
@@ -125,12 +154,12 @@ func AllFilteredAuditEvents(orgId int32, sort core.AuditTrailSortParams, filter 
 		filter)
 }
 
-func AllFilteredAuditEventsForResource(resourceType string, resourceId string, sort core.AuditTrailSortParams, filter core.AuditTrailFilterData, role *core.Role) ([]*core.AuditEvent, error) {
+func AllFilteredAuditEventsForResource(resourceType []string, resourceId []string, sort core.AuditTrailSortParams, filter core.AuditTrailFilterData, role *core.Role) ([]*core.AuditEvent, error) {
 	return commonAuditEventRetrievalQuery(
 		role,
 		core.AuditTrailRetrievalParams{
-			ResourceType: core.CreateNullString(resourceType),
-			ResourceId:   core.CreateNullString(resourceId),
+			ResourceType: resourceType,
+			ResourceId:   resourceId,
 		},
 		sort,
 		filter)
@@ -171,7 +200,7 @@ func CountFilteredAuditEvents(orgId int32, filter core.AuditTrailFilterData, rol
 	return val, nil
 }
 
-func CountFilteredAuditEventsForResource(resourceType string, resourceId string, filter core.AuditTrailFilterData, role *core.Role) (int, error) {
+func CountFilteredAuditEventsForResource(resourceType []string, resourceId []string, filter core.AuditTrailFilterData, role *core.Role) (int, error) {
 	// How to prevent duplicate code here with the above function?
 	rows, err := dbConn.Queryx(fmt.Sprintf(`
 		SELECT COUNT(hist.*)
@@ -180,17 +209,17 @@ func CountFilteredAuditEventsForResource(resourceType string, resourceId string,
 			ON lnk.pg_oid = hist.pgrole_id
 		LEFT JOIN users AS u
 			ON u.id = lnk.user_id
-		WHERE hist.resource_type = $1 AND hist.resource_id = $2
+		WHERE %s
 			AND %s
 			AND %s
 			AND %s
 			AND %s
 	`,
+		buildHistResourceFilter(resourceType, resourceId),
 		buildStringFilter("audit_resource_type_to_human_name(hist.resource_type)", filter.ResourceTypeFilter),
 		buildStringFilter("hist.action", filter.ActionFilter),
 		buildStringFilter("user_to_human_name(u.*::users)", filter.UserFilter),
-		buildTimeRangeFilter("hist.performed_at", filter.TimeRangeFilter)),
-		resourceType, resourceId)
+		buildTimeRangeFilter("hist.performed_at", filter.TimeRangeFilter)))
 
 	if err != nil {
 		return -1, err
@@ -231,8 +260,8 @@ func GetLatestAuditEvent(resourceType string, resourceId string, role *core.Role
 	events, err := commonAuditEventRetrievalQuery(
 		role,
 		core.AuditTrailRetrievalParams{
-			ResourceType: core.CreateNullString(resourceType),
-			ResourceId:   core.CreateNullString(resourceId),
+			ResourceType: []string{resourceType},
+			ResourceId:   []string{resourceId},
 		},
 		core.AuditTrailSortParams{
 			Limit: core.CreateNullInt32(1),

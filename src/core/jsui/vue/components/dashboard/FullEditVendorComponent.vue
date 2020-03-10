@@ -240,8 +240,8 @@
 
                 <v-tab-item>
                     <audit-trail-viewer
-                        resource-type="vendors"
-                        :resource-id="`${currentVendor.Id}`"
+                        :resource-type="['vendors']"
+                        :resource-id="[`${currentVendor.Id}`]"
                         no-header
                     >
                     </audit-trail-viewer>

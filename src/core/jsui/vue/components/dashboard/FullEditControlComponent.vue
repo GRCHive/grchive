@@ -252,8 +252,8 @@
                     <v-tab>Audit Trail</v-tab>
                     <v-tab-item>
                         <audit-trail-viewer
-                            resource-type="process_flow_controls"
-                            :resource-id="`${fullControlData.Control.Id}`"
+                            :resource-type="['process_flow_controls']"
+                            :resource-id="[`${fullControlData.Control.Id}`]"
                             no-header
                         >
                         </audit-trail-viewer>

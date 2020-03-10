@@ -33,12 +33,10 @@ import AdvancedAuditTrailFilters from './filters/AdvancedAuditTrailFilters.vue'
 const Props = Vue.extend({
     props: {
         resourceType: {
-            type: String,
-            default: "",
+            type: Array,
         },
         resourceId: {
-            type: String,
-            default: "",
+            type: Array,
         },
         noHeader: {
             type: Boolean,
@@ -60,15 +58,8 @@ export default class AuditTrailViewer extends Props {
         let params : any = {
             filter: this.filter,
         }
-
-        if (this.resourceType != "") {
-            params.resourceType = this.resourceType
-        }
-
-        if (this.resourceId != "") {
-            params.resourceId = this.resourceId
-        }
-
+        params.resourceType = this.resourceType
+        params.resourceId = this.resourceId
         return params
     }
 }

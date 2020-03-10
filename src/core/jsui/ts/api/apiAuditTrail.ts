@@ -15,8 +15,8 @@ export interface TAllAuditTrailInput {
     sortHeaders: string
     sortDesc: boolean
     filter: AuditTrailFilterData
-    resourceType?: string
-    resourceId? : string
+    resourceType?: string[]
+    resourceId? : string[]
 }
 
 export interface TAllAuditTrailOutput {

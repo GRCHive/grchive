@@ -247,8 +247,8 @@
 
                         <v-tab-item :style="tabItemStyle">
                             <audit-trail-viewer
-                                resource-type="file_metadata"
-                                :resource-id="`${metadata.Id}`"
+                                :resource-type="['file_metadata']"
+                                :resource-id="[`${metadata.Id}`]"
                                 no-header
                             >
                             </audit-trail-viewer>

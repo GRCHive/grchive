@@ -19,8 +19,8 @@ type AllAuditTrailInputs struct {
 	SortHeader   core.NullString           `webcore:"sortHeaders,optional"`
 	SortDesc     core.NullBool             `webcore:"sortDesc,optional"`
 	Filter       core.AuditTrailFilterData `webcore:"filter"`
-	ResourceType core.NullString           `webcore:"resourceType,optional"`
-	ResourceId   core.NullString           `webcore:"resourceId,optional"`
+	ResourceType []string                  `webcore:"resourceType,optional"`
+	ResourceId   []string                  `webcore:"resourceId,optional"`
 }
 
 func allAuditTrailEvents(w http.ResponseWriter, r *http.Request) {
@@ -68,10 +68,10 @@ func allAuditTrailEvents(w http.ResponseWriter, r *http.Request) {
 
 	var events []*core.AuditEvent
 
-	if inputs.ResourceType.NullString.Valid && inputs.ResourceId.NullString.Valid {
+	if len(inputs.ResourceType) > 0 && len(inputs.ResourceId) > 0 {
 		events, err = database.AllFilteredAuditEventsForResource(
-			inputs.ResourceType.NullString.String,
-			inputs.ResourceId.NullString.String,
+			inputs.ResourceType,
+			inputs.ResourceId,
 			sortParams,
 			inputs.Filter,
 			role)
@@ -86,10 +86,10 @@ func allAuditTrailEvents(w http.ResponseWriter, r *http.Request) {
 
 	var total int
 
-	if inputs.ResourceType.NullString.Valid && inputs.ResourceId.NullString.Valid {
+	if len(inputs.ResourceType) > 0 && len(inputs.ResourceId) > 0 {
 		total, err = database.CountFilteredAuditEventsForResource(
-			inputs.ResourceType.NullString.String,
-			inputs.ResourceId.NullString.String,
+			inputs.ResourceType,
+			inputs.ResourceId,
 			inputs.Filter,
 			role)
 	} else {

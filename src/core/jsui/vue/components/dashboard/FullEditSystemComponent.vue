@@ -171,8 +171,8 @@
                     <v-tab>Audit Trail</v-tab>
                     <v-tab-item>
                         <audit-trail-viewer
-                            resource-type="systems"
-                            :resource-id="`${currentSystem.Id}`"
+                            resource-type="['systems']"
+                            :resource-id="[`${currentSystem.Id}`]"
                             no-header
                         >
                         </audit-trail-viewer>

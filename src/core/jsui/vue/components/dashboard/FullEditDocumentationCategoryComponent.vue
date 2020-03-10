@@ -68,8 +68,8 @@
                     <v-tab>Audit Trail</v-tab>
                     <v-tab-item>
                         <audit-trail-viewer
-                            resource-type="process_flow_control_documentation_categories"
-                            :resource-id="`${currentCat.Id}`"
+                            :resource-type="['process_flow_control_documentation_categories']"
+                            :resource-id="[`${currentCat.Id}`]"
                             no-header
                         >
                         </audit-trail-viewer>

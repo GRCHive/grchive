@@ -212,8 +212,8 @@
                     <v-tab>Audit Trail</v-tab>
                     <v-tab-item>
                         <audit-trail-viewer
-                            resource-type="database_resources"
-                            :resource-id="`${currentDb.Id}`"
+                            :resource-type="['database_resources']"
+                            :resource-id="[`${currentDb.Id}`]"
                             no-header
                         >
                         </audit-trail-viewer>

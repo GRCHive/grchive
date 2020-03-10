@@ -16,8 +16,8 @@ type AuditEvent struct {
 type AuditTrailRetrievalParams struct {
 	OrgId        NullInt32
 	EventId      NullInt64
-	ResourceType NullString
-	ResourceId   NullString
+	ResourceType []string
+	ResourceId   []string
 }
 
 type AuditTrailSortParams struct {

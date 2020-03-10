@@ -89,8 +89,8 @@
                     <v-tab>Audit Trail</v-tab>
                     <v-tab-item>
                         <audit-trail-viewer
-                            resource-type="process_flow_risks"
-                            :resource-id="`${fullRiskData.Risk.Id}`"
+                            :resource-type="['process_flow_risks']"
+                            :resource-id="[`${fullRiskData.Risk.Id}`]"
                             no-header
                         >
                         </audit-trail-viewer>
