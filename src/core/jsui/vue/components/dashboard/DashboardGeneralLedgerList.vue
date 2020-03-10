@@ -74,10 +74,20 @@
             </v-list-item-action>
         </v-list-item>
         <v-divider></v-divider>
-        <general-ledger-display
-            :org-id="orgId"
-            ref="ledger"
-        ></general-ledger-display>
+
+        <v-tabs>
+            <v-tab>Ledger</v-tab>
+            <v-tab-item>
+                <general-ledger-display
+                    :org-id="orgId"
+                    ref="ledger"
+                ></general-ledger-display>
+            </v-tab-item>
+
+            <v-tab>Audit Trail</v-tab>
+            <v-tab-item>
+            </v-tab-item>
+        </v-tabs>
     </div>
 </template>
 
@@ -90,12 +100,14 @@ import { PageParamsStore } from '../../../ts/pageParams'
 import { GeneralLedgerCategory, RawGeneralLedgerCategory, RawGeneralLedgerAccount } from '../../../ts/generalLedger'
 import CreateNewGeneralLedgerCategoryForm from './CreateNewGeneralLedgerCategoryForm.vue'
 import CreateNewGeneralLedgerAccountForm from './CreateNewGeneralLedgerAccountForm.vue'
+import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 @Component({
     components: {
         GeneralLedgerDisplay,
         CreateNewGeneralLedgerAccountForm,
-        CreateNewGeneralLedgerCategoryForm
+        CreateNewGeneralLedgerCategoryForm,
+        AuditTrailViewer
     }
 })
 export default class DashboardGeneralLedgerList extends Vue {

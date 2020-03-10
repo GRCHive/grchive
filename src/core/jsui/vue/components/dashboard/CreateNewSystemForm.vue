@@ -63,6 +63,7 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import * as rules from '../../../ts/formRules'
 import { TNewSystemOutputs, newSystem} from '../../../ts/api/apiSystems'
 import { TEditSystemOutputs, editSystem} from '../../../ts/api/apiSystems'
@@ -159,8 +160,10 @@ export default class CreateNewSystemForm extends VueComponent {
 
     mounted() {
         this.canEdit = !this.editMode
+        this.clearForm()
     }
 
+    @Watch('referenceSystem')
     clearForm() {
         if (!!this.referenceSystem) {
             this.name = this.referenceSystem.Name

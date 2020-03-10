@@ -12,19 +12,36 @@
         <v-content class="max-height" ref="sectionDiv">
             <div :style="contentContainerStyle" v-if="ready">
                 <process-flow-editor @on-change="recomputeProcessFlowHeaderHeight"></process-flow-editor>
-                <v-divider></v-divider>
-                <process-flow-toolbar ref="toolbar"></process-flow-toolbar>
-                <v-divider ref="headerDivider"></v-divider>
-                <process-flow-renderer :content-max-height-clip="headerClipHeight"
-                                   :content-max-width-clip="attrEditorClipWidth"
-                                   :display-rect="rendererClientRect"
-                                   ref="rendererVue"
-                ></process-flow-renderer>
+                <v-divider ref="editDivider"></v-divider>
 
-                <process-flow-attribute-editor :custom-clip-height="headerClipHeight" 
-                                           ref="attrEditor"
-                                           :show-hide="showHideAttrEditor"
-                ></process-flow-attribute-editor>
+                <v-tabs v-model="activeTab" :style="tabContainerStyle">
+                    <v-tab>Graph</v-tab>
+                    <v-tab-item :style="tabContentContainerStyle">
+                        <v-divider></v-divider>
+                        <process-flow-toolbar ref="toolbar"></process-flow-toolbar>
+                        <v-divider ref="headerDivider"></v-divider>
+                        <process-flow-renderer :content-max-height-clip="headerClipHeight"
+                                           :content-max-width-clip="attrEditorClipWidth"
+                                           :display-rect="rendererClientRect"
+                                           ref="rendererVue"
+                        ></process-flow-renderer>
+
+                        <process-flow-attribute-editor :custom-clip-height="headerClipHeight" 
+                                                   ref="attrEditor"
+                                                   :show-hide="showHideAttrEditor"
+                        ></process-flow-attribute-editor>
+                    </v-tab-item>
+
+                    <v-tab>Audit Trail</v-tab>
+                    <v-tab-item>
+                        <audit-trail-viewer
+                            resource-type="process_flows"
+                            :resource-id="`${flowId}`"
+                            no-header
+                        >
+                        </audit-trail-viewer>
+                    </v-tab-item>
+                </v-tabs>
             </div>
         </v-content>
 
@@ -34,6 +51,7 @@
                :style="attributePullButtonStyle"
                class="no-transition"
                @click="clickAttributePullTab"
+               v-if="activeTab == 0"
         >
             <v-icon v-if="!showHideAttrEditor">mdi-chevron-up</v-icon>
             <v-icon v-else>mdi-chevron-down</v-icon>
@@ -55,6 +73,7 @@ import RenderLayout from '../../../ts/render/renderLayout'
 import vueOpts from  '../../../ts/vueSetup'
 import { getCurrentCSRF } from '../../../ts/csrf'
 import { PageParamsStore } from '../../../ts/pageParams'
+import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 export default Vue.extend({
     components : {
@@ -64,18 +83,21 @@ export default Vue.extend({
         ProcessFlowRenderer,
         ProcessFlowToolbar,
         ProcessFlowAttributeEditor,
+        AuditTrailViewer,
     },
     data : () => ({
         appBarClipHeight: 0,
         headerClipHeight : 0,
+        tabClipHeight: 0,
         attrEditorTop: 0,
         attrEditorBottom: 0,
         attrEditorLeft: 0,
         attrEditorClipWidth: 256,
+        activeTab: 0,
     }),
     methods: {
         updateClientRect() {
-            if (!this.ready) {
+            if (!this.ready || this.activeTab != 0) {
                 return
             }
             //@ts-ignore
@@ -98,22 +120,30 @@ export default Vue.extend({
             Vue.nextTick(() => {
                 //@ts-ignore
                 this.appBarClipHeight = this.$refs.dashboardAppBar.$el.offsetHeight
+
                 //@ts-ignore
                 const contentDiv = this.$refs.sectionDiv.$el.firstElementChild
                 const sectionTop = contentDiv.getBoundingClientRect().top
-                //@ts-ignore
-                const dividerBottom = this.$refs.headerDivider.$el.getBoundingClientRect().bottom
-                this.headerClipHeight = dividerBottom - sectionTop
 
-                Vue.nextTick(() => {
+                if (this.activeTab == 0) {
                     //@ts-ignore
-                    const attrEditorEl = this.$refs.attrEditor.$el
-                    const attrEditorRect = attrEditorEl.getBoundingClientRect()
-                    this.attrEditorTop = attrEditorRect.top
-                    this.attrEditorBottom = attrEditorRect.bottom
-                    this.attrEditorLeft = attrEditorRect.left
-                    this.attrEditorClipWidth = this.$root.$el.clientWidth - this.attrEditorLeft
-                })
+                    const dividerBottom = this.$refs.headerDivider.$el.getBoundingClientRect().bottom
+                    this.headerClipHeight = 32 // I think we only need toa ccount for toolbar height + 2 dividers
+
+                    Vue.nextTick(() => {
+                        //@ts-ignore
+                        const attrEditorEl = this.$refs.attrEditor.$el
+                        const attrEditorRect = attrEditorEl.getBoundingClientRect()
+                        this.attrEditorTop = attrEditorRect.top
+                        this.attrEditorBottom = attrEditorRect.bottom
+                        this.attrEditorLeft = attrEditorRect.left
+                        this.attrEditorClipWidth = this.$root.$el.clientWidth - this.attrEditorLeft
+                    })
+                }
+
+                //@ts-ignore
+                const editDividerBottom = this.$refs.editDivider.$el.getBoundingClientRect().bottom
+                this.tabClipHeight = editDividerBottom - sectionTop
             })
 
             // Spend the next second or so making sure we keep track of the total size
@@ -173,6 +203,21 @@ export default Vue.extend({
                 "height": "100vh",
                 "maxHeight": `calc(100vh - ${this.appBarClipHeight}px)`
             }
+        },
+        tabContainerStyle() : any {
+            return {
+                "height": "100vh",
+                "maxHeight": `calc(100vh - ${this.appBarClipHeight}px - ${this.tabClipHeight}px)`
+            }
+        },
+        tabContentContainerStyle() : any {
+            return {
+                "height": "100vh",
+                "maxHeight": `calc(100vh - ${this.appBarClipHeight}px - ${this.tabClipHeight}px - 48px)`
+            }
+        },
+        flowId() : number {
+            return VueSetup.store.state.currentProcessFlowBasicData!.Id
         },
         ready() : boolean {
             return !!VueSetup.store.state.currentProcessFlowBasicData && !!VueSetup.store.state.currentProcessFlowFullData

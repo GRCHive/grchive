@@ -74,6 +74,7 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import * as rules from '../../../ts/formRules'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
@@ -179,8 +180,10 @@ export default class CreateNewServerForm extends VueComponent {
 
     mounted() {
         this.canEdit = !this.editMode
+        this.clearForm()
     }
 
+    @Watch('referenceServer')
     clearForm() {
         if (!!this.referenceServer) {
             this.name = this.referenceServer!.Name

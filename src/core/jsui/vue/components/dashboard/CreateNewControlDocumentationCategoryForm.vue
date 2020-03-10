@@ -58,6 +58,7 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import * as rules from "../../../ts/formRules"
 import { contactUsUrl } from "../../../ts/url"
 import { newControlDocCat, TNewControlDocCatInput, TNewControlDocCatOutput } from '../../../ts/api/apiControlDocumentation'
@@ -98,6 +99,8 @@ export default class CreateNewControlDocumentationCategoryForm extends FormProps
         return this.$data.formValid && this.$data.name.length > 0;
     }
 
+    @Watch('defaultName')
+    @Watch('defaultDescription')
     clearForm() {
         this.name = this.defaultName
         this.description = this.defaultDescription

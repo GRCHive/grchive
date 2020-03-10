@@ -109,7 +109,6 @@
                                 <create-new-server-form
                                     edit-mode
                                     :reference-server="currentServer"
-                                    ref="editForm"
                                     @do-save="onEdit"
                                 >
                                 </create-new-server-form>
@@ -238,10 +237,6 @@ export default class FullEditServerComponent extends Vue {
     allDatabases : Database[] | null = null
     databasesToLink : Database[] = []
 
-    $refs! : {
-        editForm : CreateNewServerForm
-    }
-
     get linkableDatabases() : Database[] {
         if (!this.allDatabases) {
             return []
@@ -270,10 +265,6 @@ export default class FullEditServerComponent extends Vue {
             this.relevantSystems = resp.data.RelevantSystems
             this.relevantDbs = resp.data.RelevantDbs
             this.ready = true
-
-            Vue.nextTick(() => {
-                this.$refs.editForm.clearForm()
-            })
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

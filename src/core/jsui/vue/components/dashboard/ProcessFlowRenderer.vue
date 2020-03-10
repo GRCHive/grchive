@@ -1,13 +1,13 @@
 <template>
-    <section id="flowRenderer" class="ma-0" :style="contentStyle" ref="renderer">
-        <section class="max-height" v-if="hasProcessFlowToRender">
+    <div id="flowRenderer" class="ma-0" :style="contentStyle" ref="renderer">
+        <div class="max-height" v-if="hasProcessFlowToRender">
             <process-flow-svg-renderer
                 :svg-width="svgWidth"
                 :svg-height="svgHeight"
                 v-if="renderReady"
             ></process-flow-svg-renderer>
 
-            <section class="max-height" v-else>
+            <div class="max-height" v-else>
                 <v-row class="max-height ma-0" align="center" width="100%">
                     <v-col class="pa-0">
                         <v-row justify="center" class="ma-0">
@@ -16,10 +16,10 @@
                         </v-row>
                     </v-col>
                 </v-row>
-            </section>
-        </section>
+            </div>
+        </div>
 
-        <section class="max-height" v-else>
+        <div class="max-height" v-else>
             <v-row class="max-height ma-0" align="center" width="100%">
                 <v-col class="pa-0">
                     <v-row justify="center" class="ma-0">
@@ -38,8 +38,8 @@
                     </v-row>
                 </v-col>
             </v-row>
-        </section>
-    </section>
+        </div>
+    </div>
 </template>
 
 <script lang="ts">

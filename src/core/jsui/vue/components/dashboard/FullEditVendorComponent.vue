@@ -61,6 +61,7 @@
                 <v-tab>Overview</v-tab>
                 <v-tab>Products</v-tab>
                 <v-tab>Documentation</v-tab>
+                <v-tab>Audit Trail</v-tab>
             </v-tabs>
 
             <v-tabs-items v-model="tab">
@@ -236,6 +237,15 @@
                     >
                     </full-edit-documentation-category-component>
                 </v-tab-item>
+
+                <v-tab-item>
+                    <audit-trail-viewer
+                        resource-type="vendors"
+                        :resource-id="`${currentVendor.Id}`"
+                        no-header
+                    >
+                    </audit-trail-viewer>
+                </v-tab-item>
             </v-tabs-items>
         </div>
     </div>
@@ -270,6 +280,7 @@ import DocFileManager from '../../generic/DocFileManager.vue'
 import DocRequestTable from '../../generic/DocRequestTable.vue'
 import DocSearcherForm from '../../generic/DocSearcherForm.vue'
 import CreateNewRequestForm from './CreateNewRequestForm.vue'
+import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 @Component({
     components: {
@@ -280,7 +291,8 @@ import CreateNewRequestForm from './CreateNewRequestForm.vue'
         DocFileManager,
         DocRequestTable,
         DocSearcherForm,
-        CreateNewRequestForm
+        CreateNewRequestForm,
+        AuditTrailViewer
     }
 })
 export default class FullEditVendorComponent extends Vue {

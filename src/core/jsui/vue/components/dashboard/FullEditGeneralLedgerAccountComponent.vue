@@ -49,52 +49,67 @@
             <v-divider></v-divider>
 
             <v-container fluid>
-                <v-row>
-                    <v-col cols="5">
-                        <create-new-general-ledger-account-form
-                            :edit-mode="true"
-                            :reference-account="glAccount"
-                            :available-gl-cats="availableGLCats"
-                            @do-save="finishEdit"
-                            ref="editForm">
-                        </create-new-general-ledger-account-form>
-                    </v-col>
+                <v-tabs>
+                    <v-tab>Overview</v-tab>
+                    <v-tab-item>
+                        <v-row>
+                            <v-col cols="5">
+                                <create-new-general-ledger-account-form
+                                    :edit-mode="true"
+                                    :reference-account="glAccount"
+                                    :available-gl-cats="availableGLCats"
+                                    @do-save="finishEdit"
+                                    ref="editForm">
+                                </create-new-general-ledger-account-form>
+                            </v-col>
 
-                    <v-col cols="7">
-                        <v-card>
-                            <v-card-title>
-                                Related Resources
-                            </v-card-title>
-                            <v-divider></v-divider>
+                            <v-col cols="7">
+                                <v-card>
+                                    <v-card-title>
+                                        Related Resources
+                                    </v-card-title>
+                                    <v-divider></v-divider>
 
-                            <v-tabs>
-                                <v-tab>Process Flows</v-tab>
-                                <v-tab-item>
-                                    <process-flow-table
-                                        :resources="relatedFlows"
-                                    >
-                                    </process-flow-table>
-                                </v-tab-item>
+                                    <v-tabs>
+                                        <v-tab>Process Flows</v-tab>
+                                        <v-tab-item>
+                                            <process-flow-table
+                                                :resources="relatedFlows"
+                                            >
+                                            </process-flow-table>
+                                        </v-tab-item>
 
-                                <v-tab>Risks</v-tab>
-                                <v-tab-item>
-                                    <risk-table
-                                        :resources="relatedRisks"
-                                    >
-                                    </risk-table>
-                                </v-tab-item>
+                                        <v-tab>Risks</v-tab>
+                                        <v-tab-item>
+                                            <risk-table
+                                                :resources="relatedRisks"
+                                            >
+                                            </risk-table>
+                                        </v-tab-item>
 
-                                <v-tab>Controls</v-tab>
-                                <v-tab-item>
-                                    <control-table
-                                        :resources="relatedControls"
-                                    >
-                                    </control-table>
-                                </v-tab-item>
-                            </v-tabs>
-                        </v-card>
-                    </v-col>
-                </v-row>
+                                        <v-tab>Controls</v-tab>
+                                        <v-tab-item>
+                                            <control-table
+                                                :resources="relatedControls"
+                                            >
+                                            </control-table>
+                                        </v-tab-item>
+                                    </v-tabs>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                    </v-tab-item>
+
+                    <v-tab>Audit Trail</v-tab>
+                    <v-tab-item>
+                        <audit-trail-viewer
+                            resource-type="general_ledger_accounts"
+                            :resource-id="`${glAccount.Id}`"
+                            no-header
+                        >
+                        </audit-trail-viewer>
+                    </v-tab-item>
+                </v-tabs>
             </v-container>
         </div>
     </div>
@@ -117,6 +132,7 @@ import ProcessFlowTable from '../../generic/ProcessFlowTable.vue'
 import { TAllRiskGLLinkOutput, allRiskGLLink } from '../../../ts/api/apiRiskGLLinks'
 import { TAllControlGLLinkOutput, allControlGLLink } from '../../../ts/api/apiControlGLLinks'
 import { TAllNodeGLLinkOutput, allNodeGLLink } from '../../../ts/api/apiNodeGLLinks'
+import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 @Component({
     components: {
@@ -124,7 +140,8 @@ import { TAllNodeGLLinkOutput, allNodeGLLink } from '../../../ts/api/apiNodeGLLi
         GenericDeleteConfirmationForm,
         RiskTable,
         ControlTable,
-        ProcessFlowTable
+        ProcessFlowTable,
+        AuditTrailViewer
     }
 })
 export default class FullEditGeneralLedgerAccountComponent extends Vue {

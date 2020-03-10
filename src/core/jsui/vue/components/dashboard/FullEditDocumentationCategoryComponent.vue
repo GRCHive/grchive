@@ -24,43 +24,57 @@
             <v-divider v-if="!contentOnly"></v-divider>
 
             <v-container fluid :class="contentOnly ? 'pa-0' : ''">
-                <v-row>
-                    <v-col cols="4">
-                        <create-new-control-documentation-category-form
-                            edit-mode
-                            :default-name="currentCat.Name"
-                            :default-description="currentCat.Description"
-                            :cat-id="currentCat.Id"
-                            ref="editForm"
-                            class="mb-4"
-                        ></create-new-control-documentation-category-form>
+                <v-tabs>
+                    <v-tab>Overview</v-tab>
+                    <v-tab-item>
+                        <v-row>
+                            <v-col cols="4">
+                                <create-new-control-documentation-category-form
+                                    edit-mode
+                                    :default-name="currentCat.Name"
+                                    :default-description="currentCat.Description"
+                                    :cat-id="currentCat.Id"
+                                    class="mb-4"
+                                ></create-new-control-documentation-category-form>
 
-                        <v-card class="mb-4">
-                            <v-card-title>
-                                <span class="mr-2">
-                                    Related Resources
-                                </span>
-                                <v-spacer></v-spacer>
-                            </v-card-title>
-                            <v-divider></v-divider>
+                                <v-card class="mb-4">
+                                    <v-card-title>
+                                        <span class="mr-2">
+                                            Related Resources
+                                        </span>
+                                        <v-spacer></v-spacer>
+                                    </v-card-title>
+                                    <v-divider></v-divider>
 
-                            <v-tabs>
-                                <v-tab v-if="!!relevantControls">Controls</v-tab>
-                                <v-tab-item v-if="!!relevantControls">
-                                    <control-table
-                                        :resources="relevantControls"
-                                    ></control-table>
-                                </v-tab-item>
-                            </v-tabs>
+                                    <v-tabs>
+                                        <v-tab v-if="!!relevantControls">Controls</v-tab>
+                                        <v-tab-item v-if="!!relevantControls">
+                                            <control-table
+                                                :resources="relevantControls"
+                                            ></control-table>
+                                        </v-tab-item>
+                                    </v-tabs>
 
-                        </v-card>
-                    </v-col>
+                                </v-card>
+                            </v-col>
 
-                    <v-col cols="8">
-                        <documentation-category-viewer :cat-id="currentCat.Id">
-                        </documentation-category-viewer>
-                    </v-col>
-                </v-row>
+                            <v-col cols="8">
+                                <documentation-category-viewer :cat-id="currentCat.Id">
+                                </documentation-category-viewer>
+                            </v-col>
+                        </v-row>
+                    </v-tab-item>
+
+                    <v-tab>Audit Trail</v-tab>
+                    <v-tab-item>
+                        <audit-trail-viewer
+                            resource-type="process_flow_control_documentation_categories"
+                            :resource-id="`${currentCat.Id}`"
+                            no-header
+                        >
+                        </audit-trail-viewer>
+                    </v-tab-item>
+                </v-tabs>
             </v-container>
         </div>
     </div>
@@ -70,7 +84,6 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { Watch } from 'vue-property-decorator'
 import { ControlDocumentationCategory, NullControlFilterData } from '../../../ts/controls'
 import { TGetDocCatOutput, getDocumentCategory } from '../../../ts/api/apiControlDocumentation'
 import { allControlDocCatLink, TAllControlDocCatLinkOutput } from '../../../ts/api/apiControlDocCatLinks'
@@ -79,6 +92,7 @@ import { PageParamsStore } from '../../../ts/pageParams'
 import ControlTable from '../../generic/ControlTable.vue'
 import DocumentationCategoryViewer from './DocumentationCategoryViewer.vue'
 import CreateNewControlDocumentationCategoryForm from './CreateNewControlDocumentationCategoryForm.vue'
+import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 const Props = Vue.extend({
     props: {
@@ -98,6 +112,7 @@ const Props = Vue.extend({
         DocumentationCategoryViewer,
         CreateNewControlDocumentationCategoryForm,
         ControlTable,
+        AuditTrailViewer
     }
 })
 export default class FullEditDocumentationCategoryComponent extends Props {
@@ -110,10 +125,6 @@ export default class FullEditDocumentationCategoryComponent extends Props {
 
     get ready() : boolean {
         return !!this.currentCat
-    }
-
-    $refs!: {
-        editForm : CreateNewControlDocumentationCategoryForm
     }
 
     refreshRelevantControls() {
@@ -149,13 +160,6 @@ export default class FullEditDocumentationCategoryComponent extends Props {
                 "Contact Us",
                 contactUsUrl,
                 true);
-        })
-    }
-
-    @Watch('ready')
-    onReady() {
-        Vue.nextTick(() => {
-            this.$refs.editForm.clearForm()
         })
     }
 }

@@ -23,64 +23,79 @@
             <v-divider></v-divider>
 
             <v-container fluid>
-                <v-row>
-                    <v-col cols="5">
-                        <create-new-risk-form ref="editRisk"
-                                              :node-id="-1"
-                                              :edit-mode="true"
-                                              :default-name="fullRiskData.Risk.Name"
-                                              :default-description="fullRiskData.Risk.Description"
-                                              :risk-id="fullRiskData.Risk.Id"
-                                              :staged-edits="true"
-                                              @do-save="onEditRisk">
-                        </create-new-risk-form>
-                    </v-col>
+                <v-tabs>
+                    <v-tab>Overview</v-tab>
+                    <v-tab-item>
+                        <v-row>
+                            <v-col cols="5">
+                                <create-new-risk-form ref="editRisk"
+                                                      :node-id="-1"
+                                                      :edit-mode="true"
+                                                      :default-name="fullRiskData.Risk.Name"
+                                                      :default-description="fullRiskData.Risk.Description"
+                                                      :risk-id="fullRiskData.Risk.Id"
+                                                      :staged-edits="true"
+                                                      @do-save="onEditRisk">
+                                </create-new-risk-form>
+                            </v-col>
 
-                    <v-col cols="7">
-                        <v-card class="mb-4">
-                            <v-card-title>
-                                Related Resources
-                            </v-card-title>
-                            <v-divider></v-divider>
+                            <v-col cols="7">
+                                <v-card class="mb-4">
+                                    <v-card-title>
+                                        Related Resources
+                                    </v-card-title>
+                                    <v-divider></v-divider>
 
-                            <v-tabs>
-                                <v-tab>Process Flows</v-tab>
-                                <v-tab-item>
-                                    <process-flow-table
-                                        :resources="fullRiskData.Flows"
-                                    >
-                                    </process-flow-table>
-                                </v-tab-item>
+                                    <v-tabs>
+                                        <v-tab>Process Flows</v-tab>
+                                        <v-tab-item>
+                                            <process-flow-table
+                                                :resources="fullRiskData.Flows"
+                                            >
+                                            </process-flow-table>
+                                        </v-tab-item>
 
-                                <v-tab>Controls</v-tab>
-                                <v-tab-item>
-                                    <control-table
-                                        :resources="fullRiskData.Controls"
-                                    >
-                                    </control-table>
-                                </v-tab-item>
+                                        <v-tab>Controls</v-tab>
+                                        <v-tab-item>
+                                            <control-table
+                                                :resources="fullRiskData.Controls"
+                                            >
+                                            </control-table>
+                                        </v-tab-item>
 
-                                <v-tab>Systems</v-tab>
-                                <v-tab-item>
-                                    <systems-table
-                                        :resources="relevantSystems"
-                                    >
-                                    </systems-table>
-                                </v-tab-item>
+                                        <v-tab>Systems</v-tab>
+                                        <v-tab-item>
+                                            <systems-table
+                                                :resources="relevantSystems"
+                                            >
+                                            </systems-table>
+                                        </v-tab-item>
 
-                                <v-tab>Accounts</v-tab>
-                                <v-tab-item>
-                                    <general-ledger-accounts-table
-                                        :resources="relevantAccounts"
-                                    >
-                                    </general-ledger-accounts-table>
-                                </v-tab-item>
+                                        <v-tab>Accounts</v-tab>
+                                        <v-tab-item>
+                                            <general-ledger-accounts-table
+                                                :resources="relevantAccounts"
+                                            >
+                                            </general-ledger-accounts-table>
+                                        </v-tab-item>
 
-                            </v-tabs>
-                        </v-card>
+                                    </v-tabs>
+                                </v-card>
 
-                    </v-col>
-                </v-row>
+                            </v-col>
+                        </v-row>
+                    </v-tab-item>
+
+                    <v-tab>Audit Trail</v-tab>
+                    <v-tab-item>
+                        <audit-trail-viewer
+                            resource-type="process_flow_risks"
+                            :resource-id="`${fullRiskData.Risk.Id}`"
+                            no-header
+                        >
+                        </audit-trail-viewer>
+                    </v-tab-item>
+                </v-tabs>
             </v-container>
         </div>
     </div>
@@ -104,6 +119,7 @@ import GeneralLedgerAccountsTable from '../../generic/GeneralLedgerAccountsTable
 import { PageParamsStore } from '../../../ts/pageParams'
 import { allRiskGLLink, TAllRiskGLLinkOutput } from '../../../ts/api/apiRiskGLLinks'
 import { GeneralLedger, GeneralLedgerAccount } from '../../../ts/generalLedger'
+import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 export default Vue.extend({
     data: () => ({
@@ -197,7 +213,8 @@ export default Vue.extend({
         SystemsTable,
         ControlTable,
         ProcessFlowTable,
-        GeneralLedgerAccountsTable
+        GeneralLedgerAccountsTable,
+        AuditTrailViewer,
     },
     mounted() {
         this.refreshRiskData()

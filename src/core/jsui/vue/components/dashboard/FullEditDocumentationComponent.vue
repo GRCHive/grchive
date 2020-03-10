@@ -124,6 +124,7 @@
                     <v-tabs v-model="currentTab">
                         <v-tab>Overview</v-tab>
                         <v-tab>Comments</v-tab>
+                        <v-tab>Audit Trail</v-tab>
                     </v-tabs>
 
                     <v-tabs-items v-model="currentTab" ref="tabItems">
@@ -243,6 +244,15 @@
                                 :params="commentParams"
                             ></comment-manager>
                         </v-tab-item>
+
+                        <v-tab-item :style="tabItemStyle">
+                            <audit-trail-viewer
+                                resource-type="file_metadata"
+                                :resource-id="`${metadata.Id}`"
+                                no-header
+                            >
+                            </audit-trail-viewer>
+                        </v-tab-item>
                     </v-tabs-items>
                 </div>
             </v-col>
@@ -297,6 +307,7 @@ import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import CommentManager from '../../generic/CommentManager.vue'
 import MetadataStore from '../../../ts/metadata'
 import UploadDocumentationForm from './UploadDocumentationForm.vue'
+import AuditTrailViewer  from '../../generic/AuditTrailViewer.vue'
 import { saveAs } from 'file-saver'
 
 @Component({
@@ -306,7 +317,8 @@ import { saveAs } from 'file-saver'
         UserSearchFormComponent,
         GenericDeleteConfirmationForm,
         CommentManager,
-        UploadDocumentationForm
+        UploadDocumentationForm,
+        AuditTrailViewer,
     }
 })
 export default class FullEditDocumentationComponent extends Vue {

@@ -49,7 +49,6 @@
                         <v-row>
                             <v-col cols="5">
                                 <create-new-system-form
-                                    ref="editForm"
                                     :edit-mode="true"
                                     :reference-system="currentSystem"
                                     @do-save="onEdit">
@@ -238,10 +237,6 @@ export default class FullEditSystemComponent extends Vue {
     showHideDelete: boolean = false
     showHideLinkDb: boolean = false
 
-    $refs!: {
-        editForm: CreateNewSystemForm
-    }
-
     addDeployment() {
         newDeployment({
             orgId: PageParamsStore.state.organization!.Id,
@@ -330,10 +325,6 @@ export default class FullEditSystemComponent extends Vue {
             this.refreshRelatedFlows()
             this.refreshRelatedRisks()
             this.refreshRelatedControls()
-
-            Vue.nextTick(() => {
-                this.$refs.editForm.clearForm()
-            })
         }).catch((err : any) => {
             window.location.replace('/404')
         })

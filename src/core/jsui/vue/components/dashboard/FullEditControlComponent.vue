@@ -79,171 +79,186 @@
             <v-divider></v-divider>
 
             <v-container fluid>
-                <v-row>
-                    <v-col cols="5">
-                        <create-new-control-form ref="editControl"
-                                                 :node-id="-1"
-                                                 :risk-id="-1"
-                                                 :edit-mode="true"
-                                                 :control="fullControlData.Control"
-                                                 :staged-edits="true"
-                                                 @do-save="onEditControl">
-                        </create-new-control-form>
-                    </v-col>
+                <v-tabs>
+                    <v-tab>Overview</v-tab>
+                    <v-tab-item>
+                        <v-row>
+                            <v-col cols="5">
+                                <create-new-control-form ref="editControl"
+                                                         :node-id="-1"
+                                                         :risk-id="-1"
+                                                         :edit-mode="true"
+                                                         :control="fullControlData.Control"
+                                                         :staged-edits="true"
+                                                         @do-save="onEditControl">
+                                </create-new-control-form>
+                            </v-col>
 
-                    <v-col cols="7">
-                        <v-card class="mb-4" v-if="!!relevantFolders">
-                            <v-card-title>
-                                <span class="mr-2">
-                                    Documentation
-                                </span>
-                                <v-spacer></v-spacer>
-
-                                <v-menu bottom left offset-y>
-                                    <template v-slot:activator="{on}">
-                                        <v-btn
-                                            icon
-                                            color="primary"
-                                            v-on="on"
-                                        >
-                                            <v-icon>mdi-plus</v-icon>
-                                        </v-btn>
-                                    </template>
-                                    <v-list dense>
-                                        <v-list-item @click="showNewFolder = true">
-                                            <v-list-item-title>
-                                                New Folder
-                                            </v-list-item-title>
-                                        </v-list-item>
-                                        <v-divider></v-divider>
-
-                                        <v-list-item @click="showNewFile = true" :disabled="relevantFolders.length == 0">
-                                            <v-list-item-title>
-                                                Upload File
-                                            </v-list-item-title>
-                                        </v-list-item>
-
-                                        <v-list-item @click="showAddExistingFile = true" :disabled="relevantFolders.length == 0">
-                                            <v-list-item-title>
-                                                Add Existing File
-                                            </v-list-item-title>
-                                        </v-list-item>
-                                    </v-list>
-                                </v-menu>
-                            </v-card-title>
-                            <v-divider></v-divider>
-                            <v-tabs v-model="currentFolderIdx">
-                                <template v-for="folder in relevantFolders">
-                                    <v-tab :key="`tab-${folder.Id}`">
-                                        {{ folder.Name }}
+                            <v-col cols="7">
+                                <v-card class="mb-4" v-if="!!relevantFolders">
+                                    <v-card-title>
+                                        <span class="mr-2">
+                                            Documentation
+                                        </span>
                                         <v-spacer></v-spacer>
+
                                         <v-menu bottom left offset-y>
                                             <template v-slot:activator="{on}">
-                                                <v-btn icon v-on="on" @mousedown.stop @click.stop>
-                                                    <v-icon small>
-                                                        mdi-dots-vertical
-                                                    </v-icon>
+                                                <v-btn
+                                                    icon
+                                                    color="primary"
+                                                    v-on="on"
+                                                >
+                                                    <v-icon>mdi-plus</v-icon>
                                                 </v-btn>
-                                           </template>
-                                           <v-list dense>
-                                                <v-list-item @click="startEditFolder(folder)">
+                                            </template>
+                                            <v-list dense>
+                                                <v-list-item @click="showNewFolder = true">
                                                     <v-list-item-title>
-                                                        Edit
+                                                        New Folder
+                                                    </v-list-item-title>
+                                                </v-list-item>
+                                                <v-divider></v-divider>
+
+                                                <v-list-item @click="showNewFile = true" :disabled="relevantFolders.length == 0">
+                                                    <v-list-item-title>
+                                                        Upload File
                                                     </v-list-item-title>
                                                 </v-list-item>
 
-                                                <v-list-item @click="startDeleteFolder(folder)">
+                                                <v-list-item @click="showAddExistingFile = true" :disabled="relevantFolders.length == 0">
                                                     <v-list-item-title>
-                                                        Delete
+                                                        Add Existing File
                                                     </v-list-item-title>
                                                 </v-list-item>
                                             </v-list>
                                         </v-menu>
-                                    </v-tab>
-                                    <v-tab-item :key="`item-${folder.Id}`">
-                                        <doc-file-table
-                                            :resources="filesForFolder(folder.Id)"
-                                            use-crud-delete
-                                            @delete="deleteLink"
-                                        >
-                                        </doc-file-table>
-                                    </v-tab-item>
-                                </template>
-                            </v-tabs>
-                        </v-card>
+                                    </v-card-title>
+                                    <v-divider></v-divider>
+                                    <v-tabs v-model="currentFolderIdx">
+                                        <template v-for="folder in relevantFolders">
+                                            <v-tab :key="`tab-${folder.Id}`">
+                                                {{ folder.Name }}
+                                                <v-spacer></v-spacer>
+                                                <v-menu bottom left offset-y>
+                                                    <template v-slot:activator="{on}">
+                                                        <v-btn icon v-on="on" @mousedown.stop @click.stop>
+                                                            <v-icon small>
+                                                                mdi-dots-vertical
+                                                            </v-icon>
+                                                        </v-btn>
+                                                   </template>
+                                                   <v-list dense>
+                                                        <v-list-item @click="startEditFolder(folder)">
+                                                            <v-list-item-title>
+                                                                Edit
+                                                            </v-list-item-title>
+                                                        </v-list-item>
 
-                        <v-card v-if="!!relevantRequests" class="mb-4">
-                            <v-card-title>
-                                <span class="mr-2">
-                                    Requests
-                                </span>
-                                <v-spacer></v-spacer>
+                                                        <v-list-item @click="startDeleteFolder(folder)">
+                                                            <v-list-item-title>
+                                                                Delete
+                                                            </v-list-item-title>
+                                                        </v-list-item>
+                                                    </v-list>
+                                                </v-menu>
+                                            </v-tab>
+                                            <v-tab-item :key="`item-${folder.Id}`">
+                                                <doc-file-table
+                                                    :resources="filesForFolder(folder.Id)"
+                                                    use-crud-delete
+                                                    @delete="deleteLink"
+                                                >
+                                                </doc-file-table>
+                                            </v-tab-item>
+                                        </template>
+                                    </v-tabs>
+                                </v-card>
 
-                                <v-dialog v-model="showHideRequest" persistent max-width="40%">
-                                    <template v-slot:activator="{ on }">
-                                        <v-btn color="warning" icon v-on="on">
-                                            <v-icon>mdi-plus</v-icon>
-                                        </v-btn>
-                                    </template>
+                                <v-card v-if="!!relevantRequests" class="mb-4">
+                                    <v-card-title>
+                                        <span class="mr-2">
+                                            Requests
+                                        </span>
+                                        <v-spacer></v-spacer>
 
-                                    <create-new-request-form
-                                        :reference-control="fullControlData.Control"
-                                        @do-cancel="showHideRequest = false"
-                                        @do-save="newRequest"
-                                    >
-                                    </create-new-request-form>
-                                </v-dialog>
-                            </v-card-title>
-                            <v-divider></v-divider>
+                                        <v-dialog v-model="showHideRequest" persistent max-width="40%">
+                                            <template v-slot:activator="{ on }">
+                                                <v-btn color="warning" icon v-on="on">
+                                                    <v-icon>mdi-plus</v-icon>
+                                                </v-btn>
+                                            </template>
 
-                            <doc-request-table :resources="relevantRequests">
-                            </doc-request-table>
-                        </v-card>
+                                            <create-new-request-form
+                                                :reference-control="fullControlData.Control"
+                                                @do-cancel="showHideRequest = false"
+                                                @do-save="newRequest"
+                                            >
+                                            </create-new-request-form>
+                                        </v-dialog>
+                                    </v-card-title>
+                                    <v-divider></v-divider>
 
-                        <v-card class="mb-4">
-                            <v-card-title>
-                                Related Resources
-                            </v-card-title>
-                            <v-divider></v-divider>
+                                    <doc-request-table :resources="relevantRequests">
+                                    </doc-request-table>
+                                </v-card>
 
-                            <v-tabs>
-                                <v-tab>Process Flows</v-tab>
-                                <v-tab-item>
-                                    <process-flow-table
-                                        :resources="fullControlData.Flows"
-                                    >
-                                    </process-flow-table>
-                                </v-tab-item>
+                                <v-card class="mb-4">
+                                    <v-card-title>
+                                        Related Resources
+                                    </v-card-title>
+                                    <v-divider></v-divider>
 
-                                <v-tab>Risks</v-tab>
-                                <v-tab-item>
-                                    <risk-table
-                                        :resources="fullControlData.Risks"
-                                    >
-                                    </risk-table>
-                                </v-tab-item>
+                                    <v-tabs>
+                                        <v-tab>Process Flows</v-tab>
+                                        <v-tab-item>
+                                            <process-flow-table
+                                                :resources="fullControlData.Flows"
+                                            >
+                                            </process-flow-table>
+                                        </v-tab-item>
 
-                                <v-tab :disabled="!relevantSystems">Systems</v-tab>
-                                <v-tab-item>
-                                    <systems-table
-                                        :resources="relevantSystems"
-                                        v-if="!!relevantSystems"
-                                    >
-                                    </systems-table>
-                                </v-tab-item>
+                                        <v-tab>Risks</v-tab>
+                                        <v-tab-item>
+                                            <risk-table
+                                                :resources="fullControlData.Risks"
+                                            >
+                                            </risk-table>
+                                        </v-tab-item>
 
-                                <v-tab :disabled="!relevantAccounts">Accounts</v-tab>
-                                <v-tab-item>
-                                    <general-ledger-accounts-table
-                                        :resources="relevantAccounts"
-                                        v-if="!!relevantAccounts"
-                                    >
-                                    </general-ledger-accounts-table>
-                                </v-tab-item>
-                            </v-tabs>
-                        </v-card>
-                    </v-col>
-                </v-row>
+                                        <v-tab :disabled="!relevantSystems">Systems</v-tab>
+                                        <v-tab-item>
+                                            <systems-table
+                                                :resources="relevantSystems"
+                                                v-if="!!relevantSystems"
+                                            >
+                                            </systems-table>
+                                        </v-tab-item>
+
+                                        <v-tab :disabled="!relevantAccounts">Accounts</v-tab>
+                                        <v-tab-item>
+                                            <general-ledger-accounts-table
+                                                :resources="relevantAccounts"
+                                                v-if="!!relevantAccounts"
+                                            >
+                                            </general-ledger-accounts-table>
+                                        </v-tab-item>
+                                    </v-tabs>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                    </v-tab-item>
+
+                    <v-tab>Audit Trail</v-tab>
+                    <v-tab-item>
+                        <audit-trail-viewer
+                            resource-type="process_flow_controls"
+                            :resource-id="`${fullControlData.Control.Id}`"
+                            no-header
+                        >
+                        </audit-trail-viewer>
+                    </v-tab-item>
+                </v-tabs>
             </v-container>
         </div>
     </div>
@@ -289,6 +304,7 @@ import DocSearcherForm from '../../generic/DocSearcherForm.vue'
 import CreateNewFolderForm from './CreateNewFolderForm.vue'
 import CreateNewRequestForm from './CreateNewRequestForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
+import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 @Component({
     components: {
@@ -303,7 +319,8 @@ import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
         DocSearcherForm,
         CreateNewFolderForm,
         CreateNewRequestForm,
-        GenericDeleteConfirmationForm
+        GenericDeleteConfirmationForm,
+        AuditTrailViewer,
     }
 })
 export default class FullEditControlComponent extends Vue {
