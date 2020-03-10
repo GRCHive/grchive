@@ -665,7 +665,6 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			handle.DisplayText = "Unknown"
-			handle.ResourceUri = "#"
 		}
 
 		handle.ResourceUri.NullString.Valid = resourceStillExists
