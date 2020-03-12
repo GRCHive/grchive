@@ -94,9 +94,12 @@ func main() {
 	webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ, core.EnvConfig.Tls)
 	defer webcore.DefaultRabbitMQ.Cleanup()
 
-	r := mux.NewRouter().StrictSlash(true)
-	r.HandleFunc("/healthz", healthCheck)
-	r.Use(webcore.HTTPRedirectStatusCodes)
+	baser := mux.NewRouter().StrictSlash(true)
+	baser.HandleFunc("/healthz", healthCheck)
+	baser.Use(webcore.HTTPRedirectStatusCodes)
+
+	r := baser.NewRoute().Subrouter()
+	r.Use(webcore.LoggedRequestMiddleware)
 
 	staticRouter := r.PathPrefix("/static").Subrouter()
 
@@ -146,7 +149,7 @@ func main() {
 
 	// TODO: Configurable port?
 	srv := &http.Server{
-		Handler:      webcore.LoggedRequestMiddleware(r),
+		Handler:      baser,
 		Addr:         ":8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
