@@ -91,7 +91,11 @@ import { PageParamsStore } from '../../ts/pageParams'
 
 const VueComponent = Vue.extend({
     props: {
-        orgId: Number 
+        orgId: Number,
+        generalLedger: {
+            type: Object,
+            default: () => new GeneralLedger()
+        }
     },
     components: {
         CreateNewGeneralLedgerCategoryForm,
@@ -101,7 +105,6 @@ const VueComponent = Vue.extend({
 
 @Component
 export default class GeneralLedgerDisplay extends VueComponent {
-    generalLedger: GeneralLedger = new GeneralLedger()
     showHideEditCat: boolean = false
     showHideDeleteCat: boolean = false
     currentEditDeleteCat : GeneralLedgerCategory | null = null
@@ -123,6 +126,7 @@ export default class GeneralLedgerDisplay extends VueComponent {
             Vue.nextTick(() => {
                 this.$refs.view.updateAll(true)
             })
+            this.$emit('update:generalLedger', this.generalLedger)
         }).catch((err : any) => {
             //@ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
@@ -132,14 +136,6 @@ export default class GeneralLedgerDisplay extends VueComponent {
                 contactUsUrl,
                 true);
         })
-    }
-
-    addCategory(cat : RawGeneralLedgerCategory) {
-        this.generalLedger.addRawCategory(cat)
-    }
-
-    addAccount(acc : RawGeneralLedgerAccount) {
-        this.generalLedger.addRawAccount(acc)
     }
 
     mounted() {
@@ -210,6 +206,7 @@ export default class GeneralLedgerDisplay extends VueComponent {
             this.generalLedger.removeCategory(this.currentEditDeleteCat!.Id)
             this.currentEditDeleteCat = null
             this.showHideDeleteCat = false
+            this.$emit('update:generalLedger', this.generalLedger)
         }).catch((err: any) => {
             //@ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
@@ -228,6 +225,7 @@ export default class GeneralLedgerDisplay extends VueComponent {
     finishCatEdit(cat : RawGeneralLedgerCategory) {
         this.showHideEditCat = false
         this.generalLedger.replaceRawCategory(cat)
+        this.$emit('update:generalLedger', this.generalLedger)
     }
 
     goToAcc(inp : Array<string>) {

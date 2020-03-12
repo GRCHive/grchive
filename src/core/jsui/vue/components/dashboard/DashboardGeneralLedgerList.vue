@@ -80,7 +80,7 @@
             <v-tab-item>
                 <general-ledger-display
                     :org-id="orgId"
-                    ref="ledger"
+                    :generalLedger.sync="ledger"
                 ></general-ledger-display>
             </v-tab-item>
 
@@ -103,7 +103,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import GeneralLedgerDisplay from '../../generic/GeneralLedgerDisplay.vue'
 import { PageParamsStore } from '../../../ts/pageParams'
-import { GeneralLedgerCategory, RawGeneralLedgerCategory, RawGeneralLedgerAccount } from '../../../ts/generalLedger'
+import { GeneralLedgerCategory, RawGeneralLedgerCategory, RawGeneralLedgerAccount, GeneralLedger } from '../../../ts/generalLedger'
 import CreateNewGeneralLedgerCategoryForm from './CreateNewGeneralLedgerCategoryForm.vue'
 import CreateNewGeneralLedgerAccountForm from './CreateNewGeneralLedgerAccountForm.vue'
 import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
@@ -121,10 +121,7 @@ export default class DashboardGeneralLedgerList extends Vue {
     showHideNewSubledger : boolean = false
     showHideNewAccount : boolean = false
     isMounted: boolean = false
-
-    $refs!: {
-        ledger: GeneralLedgerDisplay
-    }
+    ledger: GeneralLedger = new GeneralLedger()
 
     get orgId() : number {
         return PageParamsStore.state.organization!.Id
@@ -135,8 +132,7 @@ export default class DashboardGeneralLedgerList extends Vue {
             return []
         }
 
-        return this.$refs.ledger.generalLedger.changed && 
-            this.$refs.ledger.generalLedger.listCategories
+        return this.ledger.changed && this.ledger.listCategories
     }
 
     onCancelNewCategory() {
@@ -144,7 +140,7 @@ export default class DashboardGeneralLedgerList extends Vue {
     }
 
     onCreateNewCategory(cat : RawGeneralLedgerCategory) {
-        this.$refs.ledger.addCategory(cat)
+        this.ledger.addRawCategory(cat)
         this.showHideNewCategory = false
     }
 
@@ -153,7 +149,7 @@ export default class DashboardGeneralLedgerList extends Vue {
     }
 
     onCreateNewSubledger(cat : RawGeneralLedgerCategory) {
-        this.$refs.ledger.addCategory(cat)
+        this.ledger.addRawCategory(cat)
         this.showHideNewSubledger = false
     }
 
@@ -162,7 +158,7 @@ export default class DashboardGeneralLedgerList extends Vue {
     }
 
     onCreateNewAccount(acc : RawGeneralLedgerAccount) {
-        this.$refs.ledger.addAccount(acc)
+        this.ledger.addRawAccount(acc)
         this.showHideNewAccount = false
     }
 
