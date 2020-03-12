@@ -59,7 +59,7 @@
                                     :reference-account="glAccount"
                                     :available-gl-cats="availableGLCats"
                                     @do-save="finishEdit"
-                                    ref="editForm">
+                                >
                                 </create-new-general-ledger-account-form>
                             </v-col>
 
@@ -154,10 +154,6 @@ export default class FullEditGeneralLedgerAccountComponent extends Vue {
     relatedRisks : ProcessFlowRisk[] = []
     relatedFlows : ProcessFlowBasicData[] = []
 
-    $refs!: {
-        editForm: CreateNewGeneralLedgerAccountForm
-    }
-
     get parentBreadcrumbs() : any[] {
         let parentCrumbs = []
         let currentParent : GeneralLedgerCategory | null = this.glAccount.ParentCategory
@@ -245,10 +241,6 @@ export default class FullEditGeneralLedgerAccountComponent extends Vue {
             this.refreshRelatedFlows()
             this.refreshRelatedRisks()
             this.refreshRelatedControls()
-
-            Vue.nextTick(() => {
-                this.$refs.editForm.resetForm()
-            })
         }).catch((err : any) => {
             window.location.replace('/404')
         })

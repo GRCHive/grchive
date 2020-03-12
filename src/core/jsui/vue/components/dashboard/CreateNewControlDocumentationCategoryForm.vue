@@ -183,6 +183,7 @@ export default class CreateNewControlDocumentationCategoryForm extends FormProps
 
     mounted() {
         this.canEdit = !this.editMode
+        this.clearForm()
     }
 }
 

@@ -84,13 +84,14 @@
                     <v-tab-item>
                         <v-row>
                             <v-col cols="5">
-                                <create-new-control-form ref="editControl"
-                                                         :node-id="-1"
-                                                         :risk-id="-1"
-                                                         :edit-mode="true"
-                                                         :control="fullControlData.Control"
-                                                         :staged-edits="true"
-                                                         @do-save="onEditControl">
+                                <create-new-control-form 
+                                     :node-id="-1"
+                                     :risk-id="-1"
+                                     :edit-mode="true"
+                                     :control="fullControlData.Control"
+                                     :staged-edits="true"
+                                     @do-save="onEditControl"
+                                >
                                 </create-new-control-form>
                             </v-col>
 
@@ -343,10 +344,6 @@ export default class FullEditControlComponent extends Vue {
     editFolder : FileFolder | null = null
     deleteFolder : FileFolder | null = null
 
-    $refs!: {
-        editControl: any
-    }
-
     get ready() : boolean {
         return this.fullControlData != null
     }
@@ -386,14 +383,6 @@ export default class FullEditControlComponent extends Vue {
             }
             return this.folderToFiles[id]
         }
-    }
-
-    @Watch('ready')
-    refreshReady() {
-        Vue.nextTick(() => {
-            //@ts-ignore
-            this.$refs.editControl.clearForm()
-        })
     }
 
     refreshSystemLink() {
@@ -459,10 +448,6 @@ export default class FullEditControlComponent extends Vue {
 
     onEditControl(control : ProcessFlowControl) {
         Vue.set(this.fullControlData!, 'Control', control)
-        Vue.nextTick(() => {
-            //@ts-ignore
-            this.$refs.editControl.clearForm()
-        })
     }
 
     generateRiskUrl(riskId : number) : string {

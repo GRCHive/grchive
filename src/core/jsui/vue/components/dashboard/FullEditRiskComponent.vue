@@ -28,14 +28,15 @@
                     <v-tab-item>
                         <v-row>
                             <v-col cols="5">
-                                <create-new-risk-form ref="editRisk"
-                                                      :node-id="-1"
-                                                      :edit-mode="true"
-                                                      :default-name="fullRiskData.Risk.Name"
-                                                      :default-description="fullRiskData.Risk.Description"
-                                                      :risk-id="fullRiskData.Risk.Id"
-                                                      :staged-edits="true"
-                                                      @do-save="onEditRisk">
+                                <create-new-risk-form 
+                                  :node-id="-1"
+                                  :edit-mode="true"
+                                  :default-name="fullRiskData.Risk.Name"
+                                  :default-description="fullRiskData.Risk.Description"
+                                  :risk-id="fullRiskData.Risk.Id"
+                                  :staged-edits="true"
+                                  @do-save="onEditRisk"
+                                >
                                 </create-new-risk-form>
                             </v-col>
 
@@ -141,11 +142,6 @@ export default Vue.extend({
         onEditRisk(risk : ProcessFlowRisk) {
             this.fullRiskData.Risk.Name = risk.Name
             this.fullRiskData.Risk.Description = risk.Description
-
-            Vue.nextTick(() => {
-                //@ts-ignore
-                this.$refs.editRisk.clearForm()
-            })
         },
         refreshSystemLink() {
             allRiskSystemLink({
@@ -193,11 +189,6 @@ export default Vue.extend({
 
                 this.refreshSystemLink()
                 this.refreshGLLink()
-
-                Vue.nextTick(() => {
-                    //@ts-ignore
-                    this.$refs.editRisk.clearForm()
-                })
             }).catch((err : any) => {
                 window.location.replace('/404')
             })

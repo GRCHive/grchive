@@ -191,6 +191,7 @@ export default class CreateNewGeneralLedgerAccountForm extends VueComponent {
 
     mounted() {
         this.canEdit = !this.editMode
+        this.resetForm()
     }
 
     get canSubmit() : boolean {
@@ -205,6 +206,7 @@ export default class CreateNewGeneralLedgerAccountForm extends VueComponent {
         this.name = newId
     }
 
+    @Watch('referenceAccount')
     resetForm() {
         if (!!this.referenceAccount) {
             this.parentCategoryId = this.referenceAccount.ParentCategoryId

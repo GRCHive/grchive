@@ -185,6 +185,7 @@ export default Vue.extend({
     },
     mounted() {
         this.canEdit = (!this.stagedEdits || !this.editMode)
+        this.clearForm()
     }
 })
 
