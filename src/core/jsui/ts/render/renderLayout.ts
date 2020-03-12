@@ -45,7 +45,6 @@ function connectWebsocket(context : any, host : string, processFlowStore : any) 
                 }
                 wsBuffer = []
             }
-            context.commit('setReady')
 
             websocketConnection.onclose = (e : CloseEvent) => {
                 if (e.code != 1001) {
@@ -56,13 +55,26 @@ function connectWebsocket(context : any, host : string, processFlowStore : any) 
             websocketConnection.onmessage = (e : MessageEvent) => {
                 // For now only grab the node's transform since everything else
                 // can just be computed.
-                let data : { NodeId: number, Settings: NodeLayout }= JSON.parse(e.data)
-                context.commit('setNodeDisplayTranslation', {
-                    nodeId: data.NodeId,
-                    tx: data.Settings.transform.tx,
-                    ty: data.Settings.transform.ty,
-                    sendUpdate: false  
-                })
+                let data : { 
+                    NodeId: number
+                    Settings: NodeLayout | null
+                    IsInit?: boolean
+                    InitNum?: number
+                    InitTotal?: number
+                } = JSON.parse(e.data)
+
+                if (!!data.Settings) {
+                    context.commit('setNodeDisplayTranslation', {
+                        nodeId: data.NodeId,
+                        tx: data.Settings.transform.tx,
+                        ty: data.Settings.transform.ty,
+                        sendUpdate: false  
+                    })
+                }
+
+                if (!!data.IsInit && data.InitNum! == data.InitTotal) {
+                    context.commit('setReady')
+                }
             }
         }
     )

@@ -258,6 +258,15 @@ export default Vue.extend({
             LocalSettings.commit('setViewBoxZoom', Math.min(zoomX, zoomY))
         }
     },
+    mounted() {
+        this.$watch(() => {
+            return RenderLayout.store.state.ready
+        }, () => {
+            if (RenderLayout.store.state.ready) {
+                this.fitToGraph()
+            }
+        })
+    }
 })
 
 </script>

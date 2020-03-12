@@ -13,8 +13,11 @@ import (
 )
 
 type ProcessFlowNodeDisplaySettingsPayload struct {
-	NodeId   int64
-	Settings map[string]interface{}
+	NodeId    int64
+	Settings  map[string]interface{}
+	IsInit    bool
+	InitNum   int
+	InitTotal int
 }
 
 func processProcessFlowNodeDisplaySettings(conn *websocket.Conn, r *http.Request, role *core.Role) {
@@ -79,15 +82,36 @@ func processProcessFlowNodeDisplaySettings(conn *websocket.Conn, r *http.Request
 	go func() {
 		defer waitGroup.Done()
 
+		count := 0
 		for nodeId, settings := range nodeSettings {
 			jsonMessage, err := json.Marshal(ProcessFlowNodeDisplaySettingsPayload{
-				NodeId:   nodeId,
-				Settings: settings,
+				NodeId:    nodeId,
+				Settings:  settings,
+				IsInit:    true,
+				InitNum:   count + 1,
+				InitTotal: len(nodeSettings),
 			})
 			err = conn.WriteMessage(websocket.TextMessage, jsonMessage)
 			if err != nil {
 				core.Warning("Failed to write message to websocket: " + err.Error())
 				break
+			}
+
+			count += 1
+		}
+
+		// Need to send a "done initializing" message to the user.
+		if count == 0 {
+			jsonMessage, err := json.Marshal(ProcessFlowNodeDisplaySettingsPayload{
+				NodeId:    -1,
+				Settings:  nil,
+				IsInit:    true,
+				InitNum:   0,
+				InitTotal: 0,
+			})
+			err = conn.WriteMessage(websocket.TextMessage, jsonMessage)
+			if err != nil {
+				core.Warning("Failed to write message to websocket: " + err.Error())
 			}
 		}
 
