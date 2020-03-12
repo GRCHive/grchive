@@ -329,7 +329,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				if dbData != nil {
+				if dbData != nil && metadata != nil {
 					handle.DisplayText = fmt.Sprintf(
 						"%s v%d #%s for DB %s #%d",
 						metadata["name"].(string),
@@ -393,28 +393,26 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 				}
 
 				auxData, err := database.GetFileStorageAuxData(storageId, inputs.OrgId, core.ServerRole)
-				if err != nil {
-					core.Warning("Failed to get aux file storage data: " + err.Error())
-					w.WriteHeader(http.StatusInternalServerError)
-					return
+				if fileData != nil && err == nil {
+					handle.DisplayText = fmt.Sprintf(
+						"%s v%d #%d",
+						fileData["alt_name"].(string),
+						auxData.VersionNumber,
+						fileId,
+					)
+
+					if auxData.IsPreview {
+						handle.DisplayText = handle.DisplayText + " (PREVIEW)"
+					}
+
+					handle.ResourceUri = core.CreateNullString(fmt.Sprintf("%s?version=%d", webcore.MustGetRouteUrlAbsolute(
+						webcore.SingleDocumentationRouteName,
+						core.DashboardOrgOrgQueryId, org.OktaGroupName,
+						core.DashboardOrgDocFileQueryId, event.ResourceId,
+					), auxData.VersionNumber))
+				} else {
+					handle.DisplayText = "UNKNOWN"
 				}
-
-				handle.DisplayText = fmt.Sprintf(
-					"%s v%d #%d",
-					fileData["alt_name"].(string),
-					auxData.VersionNumber,
-					fileId,
-				)
-
-				if auxData.IsPreview {
-					handle.DisplayText = handle.DisplayText + " (PREVIEW)"
-				}
-
-				handle.ResourceUri = core.CreateNullString(fmt.Sprintf("%s?version=%d", webcore.MustGetRouteUrlAbsolute(
-					webcore.SingleDocumentationRouteName,
-					core.DashboardOrgOrgQueryId, org.OktaGroupName,
-					core.DashboardOrgDocFileQueryId, event.ResourceId,
-				), auxData.VersionNumber))
 			case "general_ledger_accounts":
 				handle.DisplayText = fmt.Sprintf(
 					"%s (%s) #%s",
@@ -501,19 +499,23 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				handle.DisplayText = fmt.Sprintf(
-					"%s #%s (%s #%d)",
-					latestData["name"].(string),
-					event.ResourceId,
-					flowData["name"].(string),
-					flowId,
-				)
+				if flowData != nil {
+					handle.DisplayText = fmt.Sprintf(
+						"%s #%s (%s #%d)",
+						latestData["name"].(string),
+						event.ResourceId,
+						flowData["name"].(string),
+						flowId,
+					)
 
-				handle.ResourceUri = core.CreateNullString(webcore.MustGetRouteUrlAbsolute(
-					webcore.SingleFlowRouteName,
-					core.DashboardOrgOrgQueryId, org.OktaGroupName,
-					core.DashboardOrgFlowQueryId, strconv.FormatInt(flowId, 10),
-				))
+					handle.ResourceUri = core.CreateNullString(webcore.MustGetRouteUrlAbsolute(
+						webcore.SingleFlowRouteName,
+						core.DashboardOrgOrgQueryId, org.OktaGroupName,
+						core.DashboardOrgFlowQueryId, strconv.FormatInt(flowId, 10),
+					))
+				} else {
+					handle.DisplayText = "UNKNOWN"
+				}
 			case "process_flow_node_inputs":
 				flowId := int64(math.Round(event.ResourceExtraData["process_flow_id"].(float64)))
 				flowData, err := database.GetLatestAuditModificationHistoryData(
@@ -541,21 +543,25 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				handle.DisplayText = fmt.Sprintf(
-					"%s #%s [%s #%d (%s #%d)]",
-					latestData["name"].(string),
-					event.ResourceId,
-					nodeData["name"].(string),
-					nodeId,
-					flowData["name"].(string),
-					flowId,
-				)
+				if flowData != nil && nodeData != nil {
+					handle.DisplayText = fmt.Sprintf(
+						"%s #%s [%s #%d (%s #%d)]",
+						latestData["name"].(string),
+						event.ResourceId,
+						nodeData["name"].(string),
+						nodeId,
+						flowData["name"].(string),
+						flowId,
+					)
 
-				handle.ResourceUri = core.CreateNullString(webcore.MustGetRouteUrlAbsolute(
-					webcore.SingleFlowRouteName,
-					core.DashboardOrgOrgQueryId, org.OktaGroupName,
-					core.DashboardOrgFlowQueryId, strconv.FormatInt(flowId, 10),
-				))
+					handle.ResourceUri = core.CreateNullString(webcore.MustGetRouteUrlAbsolute(
+						webcore.SingleFlowRouteName,
+						core.DashboardOrgOrgQueryId, org.OktaGroupName,
+						core.DashboardOrgFlowQueryId, strconv.FormatInt(flowId, 10),
+					))
+				} else {
+					handle.DisplayText = "UNKNOWN"
+				}
 			case "process_flow_node_outputs":
 				flowId := int64(math.Round(event.ResourceExtraData["process_flow_id"].(float64)))
 				flowData, err := database.GetLatestAuditModificationHistoryData(
@@ -583,21 +589,25 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				handle.DisplayText = fmt.Sprintf(
-					"%s #%s [%s #%d (%s #%d)]",
-					latestData["name"].(string),
-					event.ResourceId,
-					nodeData["name"].(string),
-					nodeId,
-					flowData["name"].(string),
-					flowId,
-				)
+				if flowData != nil && nodeData != nil {
+					handle.DisplayText = fmt.Sprintf(
+						"%s #%s [%s #%d (%s #%d)]",
+						latestData["name"].(string),
+						event.ResourceId,
+						nodeData["name"].(string),
+						nodeId,
+						flowData["name"].(string),
+						flowId,
+					)
 
-				handle.ResourceUri = core.CreateNullString(webcore.MustGetRouteUrlAbsolute(
-					webcore.SingleFlowRouteName,
-					core.DashboardOrgOrgQueryId, org.OktaGroupName,
-					core.DashboardOrgFlowQueryId, strconv.FormatInt(flowId, 10),
-				))
+					handle.ResourceUri = core.CreateNullString(webcore.MustGetRouteUrlAbsolute(
+						webcore.SingleFlowRouteName,
+						core.DashboardOrgOrgQueryId, org.OktaGroupName,
+						core.DashboardOrgFlowQueryId, strconv.FormatInt(flowId, 10),
+					))
+				} else {
+					handle.DisplayText = "UNKNOWN"
+				}
 			case "process_flow_risks":
 				handle.DisplayText = fmt.Sprintf(
 					"%s #%s",
@@ -648,23 +658,27 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				handle.DisplayText = fmt.Sprintf(
-					"%s #%s (%s #%d)",
-					latestData["product_name"].(string),
-					event.ResourceId,
-					vendorData["name"].(string),
-					vendorId,
-				)
+				if vendorData != nil {
+					handle.DisplayText = fmt.Sprintf(
+						"%s #%s (%s #%d)",
+						latestData["product_name"].(string),
+						event.ResourceId,
+						vendorData["name"].(string),
+						vendorId,
+					)
 
-				handle.ResourceUri = core.CreateNullString(webcore.MustGetRouteUrlAbsolute(
-					webcore.SingleVendorRouteName,
-					core.DashboardOrgOrgQueryId, org.OktaGroupName,
-					core.DashboardOrgVendorQueryId, strconv.FormatInt(vendorId, 10),
-				))
+					handle.ResourceUri = core.CreateNullString(webcore.MustGetRouteUrlAbsolute(
+						webcore.SingleVendorRouteName,
+						core.DashboardOrgOrgQueryId, org.OktaGroupName,
+						core.DashboardOrgVendorQueryId, strconv.FormatInt(vendorId, 10),
+					))
+				} else {
+					handle.DisplayText = "UNKNOWN"
+				}
 
 			}
 		} else {
-			handle.DisplayText = "Unknown"
+			handle.DisplayText = "UNKNOWN"
 		}
 
 		handle.ResourceUri.NullString.Valid = resourceStillExists
