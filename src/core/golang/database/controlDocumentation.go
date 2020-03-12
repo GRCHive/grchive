@@ -382,12 +382,16 @@ func GetFileStorageAuxData(storageId int64, orgId int32, role *core.Role) (*core
 	err := dbConn.Get(&aux, `
 		SELECT 
 			fp.file_id IS NOT NULL AS "is_preview",
-			fvh.version_number AS "version_number"
+			COALESCE(fvhp.version_number, fvhs.version_number, 0) AS "version_number"
 		FROM file_storage AS s
 		LEFT JOIN file_previews AS fp
 			ON fp.preview_storage_id = s.id
-		INNER JOIN file_version_history AS fvh
-			ON fvh.file_storage_id = s.id
+		LEFT JOIN file_previews AS fs
+			ON fs.original_storage_id = s.id
+		LEFT JOIN file_version_history AS fvhp
+			ON fvhp.file_storage_id = fp.original_storage_id
+		LEFT JOIN file_version_history AS fvhs
+			ON fvhs.file_storage_id = fs.original_storage_id
 		WHERE s.id = $1 AND s.org_id = $2
 	`, storageId, orgId)
 	return &aux, err
