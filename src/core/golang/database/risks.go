@@ -120,7 +120,7 @@ func InsertNewRisk(risk *core.Risk, role *core.Role) error {
 
 	rows, err := tx.NamedQuery(`
 		INSERT INTO process_flow_risks (name, description, org_id)
-		VALUES (:name, :description, :org.id)
+		VALUES (:name, :description, :org_id)
 		RETURNING id
 	`, risk)
 	if err != nil {
