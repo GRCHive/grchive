@@ -121,13 +121,8 @@
 
                     <v-divider></v-divider>
 
-                    <v-tabs v-model="currentTab">
+                    <v-tabs id="docTabs">
                         <v-tab>Overview</v-tab>
-                        <v-tab>Comments</v-tab>
-                        <v-tab>Audit Trail</v-tab>
-                    </v-tabs>
-
-                    <v-tabs-items v-model="currentTab" ref="tabItems">
                         <v-tab-item :style="tabItemStyle">
                             <v-form @submit.prevent v-model="formValid" class="ma-4">
 
@@ -239,12 +234,14 @@
                             ></v-progress-circular>
                         </v-tab-item>
 
+                        <v-tab>Comments</v-tab>
                         <v-tab-item :style="tabItemStyle">
                             <comment-manager
                                 :params="commentParams"
                             ></comment-manager>
                         </v-tab-item>
 
+                        <v-tab>Audit Trail</v-tab>
                         <v-tab-item :style="tabItemStyle">
                             <audit-trail-viewer
                                 :resource-type="['file_metadata']"
@@ -253,7 +250,8 @@
                             >
                             </audit-trail-viewer>
                         </v-tab-item>
-                    </v-tabs-items>
+
+                    </v-tabs>
                 </div>
             </v-col>
 
@@ -343,8 +341,6 @@ export default class FullEditDocumentationComponent extends Vue {
     viewerMaxHeight: number = 100
     metadataMaxHeight:  number = 100
 
-    currentTab : number | null = null
-
     formValid: boolean = false
     showHideDateMenu: boolean = false
     editData: EditData | null = null
@@ -357,7 +353,6 @@ export default class FullEditDocumentationComponent extends Vue {
 
     $refs!: {
         pdfViewer: PdfJsViewer
-        tabItems: any
     }
 
     get versionItems() : any[] {
@@ -551,7 +546,8 @@ export default class FullEditDocumentationComponent extends Vue {
             if (!this.metadataReady) {
                 return
             }
-            let metadataRect = this.$refs.tabItems.$el.getBoundingClientRect()
+            let metadataEl : HTMLElement | null = document.querySelector('#docTabs .v-tabs-items')
+            let metadataRect = <DOMRect>(metadataEl!.getBoundingClientRect())
             let windowHeight = window.innerHeight
             this.metadataMaxHeight = windowHeight - metadataRect.y
         })
