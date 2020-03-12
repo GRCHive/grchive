@@ -92,7 +92,7 @@ func commonAuditEventRetrievalQuery(
 
 	selectParams.WriteString(fmt.Sprintf("AND %s\n", buildStringFilter("audit_resource_type_to_human_name(hist.resource_type)", filter.ResourceTypeFilter)))
 	selectParams.WriteString(fmt.Sprintf("AND %s\n", buildStringFilter("hist.action", filter.ActionFilter)))
-	selectParams.WriteString(fmt.Sprintf("AND %s\n", buildStringFilter("user_to_human_name(u.*::users)", filter.UserFilter)))
+	selectParams.WriteString(fmt.Sprintf("AND %s\n", buildStringFilter("COALESCE(user_to_human_name(u.*::users), 'No User')", filter.UserFilter)))
 	selectParams.WriteString(fmt.Sprintf("AND %s\n", buildTimeRangeFilter("hist.performed_at", filter.TimeRangeFilter)))
 
 	if len(sort.SortColumns) > 0 && sort.SortDirection.NullString.Valid {
