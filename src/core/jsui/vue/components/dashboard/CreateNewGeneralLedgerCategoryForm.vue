@@ -21,7 +21,7 @@
         </v-textarea> 
 
         <v-autocomplete
-            v-if="isSubledger || editMode"
+            v-if="isSubledger"
             v-model="parentCategoryId"
             label="Parent Category"
             deletable-chips
@@ -34,7 +34,7 @@
             item-text="Name"
             item-value="Id"
             :items="finalAvailableCats"
-            :rules="(!editMode && isSubledger) ? [rules.required] : []"
+            :rules="isSubledger ? [rules.required] : []"
         ></v-autocomplete>
     </v-form>
 
@@ -122,7 +122,7 @@ export default class CreateNewGeneralLedgerCategoryForm extends VueComponent {
     cancel() {
         this.$emit('do-cancel')
 
-        if (this.editMode) {
+        if (this.editMode && !this.dialogMode) {
             this.canEdit = false
         }
     }
@@ -180,7 +180,7 @@ export default class CreateNewGeneralLedgerCategoryForm extends VueComponent {
     }
 
     mounted() {
-        this.canEdit = !this.editMode
+        this.canEdit = !this.editMode || this.dialogMode
     }
 
     resetForm() {
