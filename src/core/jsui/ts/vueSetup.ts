@@ -642,14 +642,16 @@ const store : StoreOptions<VuexState> = {
             }
             return getters.nodeInfo(state.selectedNodeId)
         },
-        risksForNode: (state) => (nodeId : number) : ProcessFlowRisk[] => {
+        risksForNode: (state, getters) => (nodeId : number) : ProcessFlowRisk[] => {
             if (!state.currentProcessFlowFullData) {
                 return []
             }
+
+            let flowRiskIdSet : Set<number> = new Set<number>(getters.linkedRiskList.map((ele : ProcessFlowRisk) => ele.Id))
             return state.currentProcessFlowFullData.NodeRiskRelationships.changed &&
                 state.currentProcessFlowFullData.NodeRiskRelationships.getB(
                     state.currentProcessFlowFullData.Nodes[nodeId]
-                )
+                ).filter((ele : ProcessFlowRisk) => flowRiskIdSet.has(ele.Id))
         },
         controlsForNode: (state) => (nodeId : number) : ProcessFlowControl[] => {
             if (!state.currentProcessFlowFullData) {
@@ -669,14 +671,15 @@ const store : StoreOptions<VuexState> = {
                     state.currentProcessFlowFullData.Risks[riskId]
                 )
         },
-        risksForControl: (state) => (controlId: number) : ProcessFlowRisk[] => {
+        risksForControl: (state, getters) => (controlId: number) : ProcessFlowRisk[] => {
             if (!state.currentProcessFlowFullData) {
                 return []
             }
+            let flowRiskIdSet : Set<number> = new Set<number>(getters.linkedRiskList.map((ele : ProcessFlowRisk) => ele.Id))
             return state.currentProcessFlowFullData.RiskControlRelationships.changed && 
                 state.currentProcessFlowFullData.RiskControlRelationships.getA(
                     state.currentProcessFlowFullData.Controls[controlId]
-                )
+                ).filter((ele : ProcessFlowRisk) => flowRiskIdSet.has(ele.Id))
         },
 
         controlsForRiskNode: (state) => (riskId : number, nodeId : number) : RiskControl[] => {
