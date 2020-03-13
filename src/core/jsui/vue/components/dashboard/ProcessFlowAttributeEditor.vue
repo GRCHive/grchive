@@ -1,5 +1,14 @@
 <template>
-    <v-navigation-drawer absolute right :style="clipStyle" ref="attrNavDrawer" :value="showHide" :width="400">
+    <v-navigation-drawer
+        absolute
+        right
+        :style="clipStyle"
+        ref="attrNavDrawer"
+        :value="showHide"
+        :width="400"
+        disable-resize-watcher
+        mobile-break-point="-1"
+    >
         <v-tabs v-model="tab"
                 grow>
             <v-tab v-if="nodeSelected">Node</v-tab>

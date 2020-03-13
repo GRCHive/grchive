@@ -229,6 +229,7 @@ export default Vue.extend({
         this.appBarClipHeight = this.$refs.dashboardAppBar.$el.offsetHeight
 
         window.addEventListener('resize', this.updateClientRect)
+        window.addEventListener('resize', this.recomputeProcessFlowHeaderHeight)
 
         let data = window.location.pathname.split('/')
         let flowId = Number(data[data.length - 1])
