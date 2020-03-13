@@ -19,6 +19,29 @@
                         {{ currentCat.Description }}
                     </v-list-item-subtitle>
                 </v-list-item-content>
+
+                <v-spacer></v-spacer>
+                <v-list-item-action>
+                    <v-dialog v-model="showHideDelete"
+                              persistent
+                              max-width="40%"
+                    >
+                        <template v-slot:activator="{ on }">
+                            <v-btn color="error" v-on="on">
+                                Delete
+                            </v-btn>
+                        </template>
+
+                        <generic-delete-confirmation-form
+                            item-name="document category"
+                            :items-to-delete="[currentCat.Name]"
+                            :use-global-deletion="false"
+                            @do-cancel="showHideDelete = false"
+                            @do-delete="onDelete">
+                        </generic-delete-confirmation-form>
+                    </v-dialog>
+                </v-list-item-action>
+
             </v-list-item>
 
             <v-divider v-if="!contentOnly"></v-divider>
@@ -87,12 +110,14 @@ import Component from 'vue-class-component'
 import { ControlDocumentationCategory, NullControlFilterData } from '../../../ts/controls'
 import { TGetDocCatOutput, getDocumentCategory } from '../../../ts/api/apiControlDocumentation'
 import { allControlDocCatLink, TAllControlDocCatLinkOutput } from '../../../ts/api/apiControlDocCatLinks'
-import { contactUsUrl } from '../../../ts/url'
+import { contactUsUrl, createOrgDocCatUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
+import { deleteControlDocCat } from '../../../ts/api/apiControlDocumentation'
 import ControlTable from '../../generic/ControlTable.vue'
 import DocumentationCategoryViewer from './DocumentationCategoryViewer.vue'
 import CreateNewControlDocumentationCategoryForm from './CreateNewControlDocumentationCategoryForm.vue'
 import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
+import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 
 const Props = Vue.extend({
     props: {
@@ -112,7 +137,8 @@ const Props = Vue.extend({
         DocumentationCategoryViewer,
         CreateNewControlDocumentationCategoryForm,
         ControlTable,
-        AuditTrailViewer
+        AuditTrailViewer,
+        GenericDeleteConfirmationForm
     }
 })
 export default class FullEditDocumentationCategoryComponent extends Props {
@@ -120,6 +146,7 @@ export default class FullEditDocumentationCategoryComponent extends Props {
     currentCat : ControlDocumentationCategory | null = null
     showHideAddInput: boolean = false
     showHideAddOutput: boolean = false
+    showHideDelete: boolean = false
 
     relevantControls : ProcessFlowControl[] | null = null
 
@@ -158,6 +185,23 @@ export default class FullEditDocumentationCategoryComponent extends Props {
                 "Oops! Something went wrong. Try again.",
                 true,
                 "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    onDelete() {
+        deleteControlDocCat({
+            catId: this.currentCat!.Id,
+            orgId: PageParamsStore.state.organization!.Id
+        }).then(() => {
+            window.location.replace(createOrgDocCatUrl(PageParamsStore.state.organization!.OktaGroupName))
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops. Something went wrong. Try again.",
+                false,
+                "",
                 contactUsUrl,
                 true);
         })

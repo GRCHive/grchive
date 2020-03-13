@@ -92,7 +92,7 @@
                         </template>
 
                         <generic-delete-confirmation-form
-                            item-name="risk"
+                            item-name="control"
                             :items-to-delete="[`${fullControlData.Control.Name} (${fullControlData.Control.Identifier})`]"
                             :use-global-deletion="false"
                             @do-cancel="showHideDelete = false"
@@ -367,6 +367,7 @@ export default class FullEditControlComponent extends Vue {
     showEditFolder: boolean = false
     showDeleteFolder: boolean = false
     showHideRequest: boolean = false
+    showHideDelete: boolean = false
 
     editFolder : FileFolder | null = null
     deleteFolder : FileFolder | null = null

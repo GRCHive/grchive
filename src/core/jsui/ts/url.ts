@@ -109,6 +109,10 @@ export function createOrgRoleUrl(org : string, role : number) : string {
     return `/dashboard/org/${org}/settings/roles/${role}`
 }
 
+export function createOrgDocCatUrl(org : string) : string {
+    return `/dashboard/org/${org}/documentation`
+}
+
 export function createSingleDocCatUrl(org : string, id: number) : string {
     return `/dashboard/org/${org}/documentation/cat/${id}`
 }
