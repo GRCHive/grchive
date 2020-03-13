@@ -262,7 +262,11 @@ export default Vue.extend({
             return RenderLayout.store.state.ready
         }, () => {
             if (RenderLayout.store.state.ready) {
-                this.fitToGraph()
+                if (VueSetup.store.state.currentProcessFlowFullData!.NodeKeys.length > 0) {
+                    this.fitToGraph()
+                } else {
+                    this.resetView()
+                }
             }
         })
     }
