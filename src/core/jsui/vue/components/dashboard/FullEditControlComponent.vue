@@ -65,6 +65,9 @@
                 <v-list-item-content>
                     <v-list-item-title class="title">
                         Control: {{ fullControlData.Control.Name }}
+                        <span class="subtitle-1" v-if="fullControlData.Control.Name != fullControlData.Control.Identifier">
+                            ({{ fullControlData.Control.Identifier }})
+                        </span>
                         <v-btn icon @click="expandDescription = !expandDescription">
                             <v-icon small v-if="!expandDescription" >mdi-chevron-down</v-icon>
                             <v-icon small v-else>mdi-chevron-up</v-icon>

@@ -26,6 +26,7 @@ export function getControlTypes(inp : TGetControlTypesInput) : Promise<TGetContr
 
 export interface TNewControlInput {
     name : string 
+    identifier: string
     description: string
     controlType : number
     frequencyType : number

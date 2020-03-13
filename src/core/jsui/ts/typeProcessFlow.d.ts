@@ -28,6 +28,7 @@ interface ProcessFlowControlType {
 interface ProcessFlowControl {
     Id : number
     Name : string
+    Identifier : string
     Description : string
     ControlTypeId: number
     FrequencyType: number

@@ -9,6 +9,7 @@ type ControlType struct {
 type Control struct {
 	Id                int64     `db:"id"`
 	Name              string    `db:"name"`
+	Identifier        string    `db:"identifier"`
 	Description       string    `db:"description"`
 	ControlTypeId     int32     `db:"control_type"`
 	OrgId             int32     `db:"org_id"`

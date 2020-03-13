@@ -11,6 +11,7 @@ import (
 type NewControlInputs struct {
 	Name              string         `webcore:"name"`
 	Description       string         `webcore:"description"`
+	Identifier        string         `webcore:"identifier"`
 	ControlTypeId     int32          `webcore:"controlType"`
 	FrequencyType     int32          `webcore:"frequencyType"`
 	FrequencyInterval int32          `webcore:"frequencyInterval"`
@@ -25,6 +26,7 @@ type NewControlInputs struct {
 type EditControlInputs struct {
 	Name              string         `webcore:"name"`
 	Description       string         `webcore:"description"`
+	Identifier        string         `webcore:"identifier"`
 	ControlTypeId     int32          `webcore:"controlType"`
 	FrequencyType     int32          `webcore:"frequencyType"`
 	FrequencyInterval int32          `webcore:"frequencyInterval"`
@@ -91,6 +93,7 @@ func editControl(w http.ResponseWriter, r *http.Request) {
 	control := core.Control{
 		Id:                inputs.ControlId,
 		Name:              inputs.Name,
+		Identifier:        inputs.Identifier,
 		Description:       inputs.Description,
 		ControlTypeId:     inputs.ControlTypeId,
 		OrgId:             org.Id,
@@ -148,6 +151,7 @@ func newControl(w http.ResponseWriter, r *http.Request) {
 	control := core.Control{
 		Name:              inputs.Name,
 		Description:       inputs.Description,
+		Identifier:        inputs.Identifier,
 		ControlTypeId:     inputs.ControlTypeId,
 		OrgId:             org.Id,
 		FrequencyType:     inputs.FrequencyType,

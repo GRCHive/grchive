@@ -67,7 +67,7 @@ export default class ControlTable extends mixins(ResourceTableProps, Props) {
     transformInputResourceToTableItem(inp : any) : any {
         return {
             id: inp.Id,
-            name: `${inp.Name} ${inp.Description}`,
+            name: `${inp.Name} ${inp.Description} ${inp.Identifier}`,
             type: MetadataStore.getters.getControlTypeName(inp.ControlTypeId),
             owner: createUserString(MetadataStore.getters.getUser(inp.OwnerId)),
             frequency:createFrequencyDisplayString(inp.FrequencyType, inp.FrequencyInterval, inp.FrequencyOther),
@@ -113,7 +113,7 @@ export default class ControlTable extends mixins(ResourceTableProps, Props) {
                             'font-weight-bold': true
                         },
                         domProps: {
-                            innerHTML: props.item.value.Name
+                            innerHTML: props.item.value.Identifier
                         }
                     },
                 ),
@@ -127,7 +127,7 @@ export default class ControlTable extends mixins(ResourceTableProps, Props) {
                             'font-weight-light': true
                         },
                         domProps: {
-                            innerHTML: props.item.value.Description
+                            innerHTML: props.item.value.Name
                         }
                     }
                 ),

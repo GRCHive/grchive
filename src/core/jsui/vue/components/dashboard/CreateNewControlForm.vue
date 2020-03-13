@@ -15,6 +15,13 @@
                       :readonly="!canEdit">
         </v-text-field>
 
+        <v-text-field v-model="identifier"
+                      label="Identifier"
+                      filled
+                      :rules="[rules.required, rules.createMaxLength(256)]"
+                      :readonly="!canEdit">
+        </v-text-field>
+
         <v-textarea v-model="description" label="Description" filled
                     :readonly="!canEdit">
         </v-textarea> 
@@ -127,6 +134,7 @@ export default Vue.extend({
     },
     data: () => ({
         name: "",
+        identifier: "",
         description: "",
         rules,
         formValid: false,
@@ -160,6 +168,7 @@ export default Vue.extend({
             if (this.editMode) {
                 let control : ProcessFlowControl = this.control
                 this.name = control.Name
+                this.identifier = control.Identifier
                 this.description = control.Description
                 this.frequencyData.freqType = control.FrequencyType
                 this.frequencyData.freqInterval = control.FrequencyInterval
@@ -174,6 +183,7 @@ export default Vue.extend({
                 this.isManual = control.Manual
             } else {
                 this.name = ""
+                this.identifier = ""
                 this.description = ""
                 this.frequencyData.freqInterval = 0
                 this.frequencyData.freqType = 0
@@ -242,6 +252,7 @@ export default Vue.extend({
             newControl(<TNewControlInput>{
                 name: this.name,
                 description: this.description,
+                identifier: this.identifier,
                 controlType: this.controlType.Id,
                 frequencyType : this.frequencyData.freqType,
                 frequencyInterval : this.frequencyData.freqInterval,
@@ -261,6 +272,7 @@ export default Vue.extend({
             editControl(<TEditControlInput>{
                 name: this.name,
                 description: this.description,
+                identifier: this.identifier,
                 controlType: this.controlType.Id,
                 frequencyType : this.frequencyData.freqType,
                 frequencyInterval : this.frequencyData.freqInterval,
