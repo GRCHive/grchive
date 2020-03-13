@@ -97,6 +97,8 @@ export default class PdfPageRenderer extends Props {
             "width": `${this.viewport.width}px`,
             "height": `${this.viewport.height}px`,
             "position": "relative",
+            "margin-left": "auto",
+            "margin-right": "auto",
         }
     }
 
