@@ -22,6 +22,29 @@
                         {{ fullRiskData.Risk.Description }}
                     </v-list-item-subtitle>
                 </v-list-item-content>
+
+                <v-spacer></v-spacer>
+                <v-list-item-action>
+                    <v-dialog v-model="showHideDelete"
+                              persistent
+                              max-width="40%"
+                    >
+                        <template v-slot:activator="{ on }">
+                            <v-btn color="error" v-on="on">
+                                Delete
+                            </v-btn>
+                        </template>
+
+                        <generic-delete-confirmation-form
+                            item-name="risk"
+                            :items-to-delete="[`${fullRiskData.Risk.Name} (${fullRiskData.Risk.Identifier})`]"
+                            :use-global-deletion="false"
+                            @do-cancel="showHideDelete = false"
+                            @do-delete="onDelete">
+                        </generic-delete-confirmation-form>
+                    </v-dialog>
+                </v-list-item-action>
+
             </v-list-item>
             <v-divider></v-divider>
 
@@ -114,7 +137,7 @@ import { getSingleRisk, TSingleRiskInput, TSingleRiskOutput} from '../../../ts/a
 import {
     TAllRiskSystemLinkOutput, allRiskSystemLink
 } from '../../../ts/api/apiRiskSystemLinks'
-import { createControlUrl, contactUsUrl } from '../../../ts/url'
+import { createOrgRisksUrl, contactUsUrl } from '../../../ts/url'
 import CreateNewRiskForm from './CreateNewRiskForm.vue'
 import { System } from '../../../ts/systems'
 import SystemsTable from '../../generic/SystemsTable.vue'
@@ -125,11 +148,14 @@ import { PageParamsStore } from '../../../ts/pageParams'
 import { allRiskGLLink, TAllRiskGLLinkOutput } from '../../../ts/api/apiRiskGLLinks'
 import { GeneralLedger, GeneralLedgerAccount } from '../../../ts/generalLedger'
 import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
+import { deleteRisk, TDeleteRiskOutput } from '../../../ts/api/apiRisks'
+import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 
 export default Vue.extend({
     data: () => ({
         expandDescription: false,
         ready: false,
+        showHideDelete: false,
         fullRiskData: Object() as FullRiskData,
         relevantSystems: [] as System[],
         relevantGL: null as GeneralLedger | null
@@ -198,11 +224,24 @@ export default Vue.extend({
                 window.location.replace('/404')
             })
         },
-        generateControlUrl(controlId : number) : string {
-            return createControlUrl(
-                PageParamsStore.state.organization!.OktaGroupName,
-                controlId)
+        onDelete() {
+            deleteRisk({
+                nodeId: -1,
+                riskIds: [this.fullRiskData.Risk.Id],
+                global: true,
+            }).then((resp : TDeleteRiskOutput) => {
+                window.location.replace(createOrgRisksUrl(PageParamsStore.state.organization!.OktaGroupName))
+            }).catch((err) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
         }
+
     },
     components: {
         CreateNewRiskForm,
@@ -211,6 +250,7 @@ export default Vue.extend({
         ProcessFlowTable,
         GeneralLedgerAccountsTable,
         AuditTrailViewer,
+        GenericDeleteConfirmationForm,
     },
     mounted() {
         this.refreshRiskData()

@@ -85,6 +85,10 @@ export function createFlowUrl(org : string, flow : number) : string {
     return `/dashboard/org/${org}/flows/${flow}`
 }
 
+export function createOrgRisksUrl(org : string) : string {
+    return `/dashboard/org/${org}/risks`
+}
+
 export function createRiskUrl(org : string, risk : number) : string {
     return `/dashboard/org/${org}/risks/${risk}`
 }
