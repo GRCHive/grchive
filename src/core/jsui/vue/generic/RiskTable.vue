@@ -37,9 +37,45 @@ export default class RiskTable extends ResourceTableProps {
     transformInputResourceToTableItem(inp : any) : any {
         return {
             id: inp.Id,
-            name: inp.Name,
+            name: `${inp.Name} ${inp.Identifier} ${inp.Description}`,
             value: inp
         }
+    }
+
+    renderName(props: any) : VNode { 
+        return this.$createElement(
+            'div',
+            [
+                this.$createElement(
+                    'p',
+                    {
+                        class: {
+                            'ma-0': true,
+                            'pa-0': true,
+                            'body-1': true,
+                            'font-weight-bold': true
+                        },
+                        domProps: {
+                            innerHTML: props.item.value.Identifier
+                        }
+                    },
+                ),
+                this.$createElement(
+                    'p',
+                    {
+                        class: {
+                            'ma-0': true,
+                            'pa-0': true,
+                            'caption': true,
+                            'font-weight-light': true
+                        },
+                        domProps: {
+                            innerHTML: props.item.value.Name
+                        }
+                    }
+                ),
+            ]
+        )
     }
 
     renderExpansion(props : any) : VNode {
@@ -70,6 +106,7 @@ export default class RiskTable extends ResourceTableProps {
                     'click:row': this.goToRisk
                 },
                 scopedSlots: {
+                    'item.name': this.renderName,
                     'expanded-item': this.renderExpansion,
                 }
             }

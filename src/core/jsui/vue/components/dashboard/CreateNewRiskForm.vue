@@ -15,6 +15,13 @@
                       :readonly="!canEdit">
         </v-text-field>
 
+        <v-text-field v-model="identifier"
+                      label="Identifier"
+                      filled
+                      :rules="[rules.required, rules.createMaxLength(256)]"
+                      :readonly="!canEdit">
+        </v-text-field>
+
         <v-textarea v-model="description"
                     label="Description"
                     filled
@@ -73,6 +80,10 @@ export default Vue.extend({
             type: String,
             default: ""
         },
+        defaultIdentifier: {
+            type: String,
+            default: ""
+        },
         defaultDescription: {
             type: String,
             default: ""
@@ -92,6 +103,7 @@ export default Vue.extend({
     },
     data: () => ({
         name: "",
+        identifier: "",
         description: "",
         rules,
         formValid: false,
@@ -105,6 +117,7 @@ export default Vue.extend({
     methods: {
         clearForm() {
             this.name = this.defaultName
+            this.identifier = this.defaultIdentifier
             this.description = this.defaultDescription
         },
         edit() {
@@ -162,6 +175,7 @@ export default Vue.extend({
             newRisk(<TNewRiskInput>{
                 name : this.name,
                 description: this.description,
+                identifier: this.identifier,
                 nodeId: this.nodeId,
                 orgName: PageParamsStore.state.organization!.OktaGroupName
             }).then((resp : TNewRiskOutput) => {
@@ -174,6 +188,7 @@ export default Vue.extend({
             editRisk(<TEditRiskInput>{
                 name : this.name,
                 description: this.description,
+                identifier: this.identifier,
                 riskId: this.riskId,
                 orgName: PageParamsStore.state.organization!.OktaGroupName
             }).then((resp : TEditRiskOutput) => {

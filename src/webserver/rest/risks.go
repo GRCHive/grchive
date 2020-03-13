@@ -11,6 +11,7 @@ import (
 type NewRiskInputs struct {
 	Name        string `webcore:"name"`
 	Description string `webcore:"description"`
+	Identifier  string `webcore:"identifier"`
 	NodeId      int64  `webcore:"nodeId"`
 	OrgName     string `webcore:"orgName"`
 }
@@ -18,6 +19,7 @@ type NewRiskInputs struct {
 type EditRiskInputs struct {
 	Name        string `webcore:"name"`
 	Description string `webcore:"description"`
+	Identifier  string `webcore:"identifier"`
 	RiskId      int64  `webcore:"riskId"`
 }
 
@@ -72,6 +74,7 @@ func editRisk(w http.ResponseWriter, r *http.Request) {
 	risk := core.Risk{
 		Id:          inputs.RiskId,
 		Name:        inputs.Name,
+		Identifier:  inputs.Identifier,
 		Description: inputs.Description,
 	}
 	err = database.EditRisk(&risk, role)
@@ -119,6 +122,7 @@ func createNewRisk(w http.ResponseWriter, r *http.Request) {
 
 	newRisk := core.Risk{
 		Name:        inputs.Name,
+		Identifier:  inputs.Identifier,
 		Description: inputs.Description,
 		OrgId:       org.Id,
 	}

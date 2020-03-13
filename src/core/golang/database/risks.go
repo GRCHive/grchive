@@ -19,7 +19,7 @@ func EditRisk(risk *core.Risk, role *core.Role) error {
 
 	_, err = tx.NamedExec(`
 		UPDATE process_flow_risks
-		SET name = :name, description = :description
+		SET name = :name, description = :description, identifier = :identifier
 		WHERE id = :id
 	`, risk)
 	if err != nil {
@@ -119,8 +119,8 @@ func InsertNewRisk(risk *core.Risk, role *core.Role) error {
 	}
 
 	rows, err := tx.NamedQuery(`
-		INSERT INTO process_flow_risks (name, description, org_id)
-		VALUES (:name, :description, :org_id)
+		INSERT INTO process_flow_risks (name, identifier, description, org_id)
+		VALUES (:name, :identifier, :description, :org_id)
 		RETURNING id
 	`, risk)
 	if err != nil {

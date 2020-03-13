@@ -9,6 +9,9 @@
                 <v-list-item-content>
                     <v-list-item-title class="title">
                         Risk: {{ fullRiskData.Risk.Name }}
+                        <span class="subtitle-1" v-if="fullRiskData.Risk.Name != fullRiskData.Risk.Identifier">
+                            ({{ fullRiskData.Risk.Identifier }})
+                        </span>
                         <v-btn icon @click="expandDescription = !expandDescription">
                             <v-icon small v-if="!expandDescription" >mdi-chevron-down</v-icon>
                             <v-icon small v-else>mdi-chevron-up</v-icon>
@@ -32,6 +35,7 @@
                                   :node-id="-1"
                                   :edit-mode="true"
                                   :default-name="fullRiskData.Risk.Name"
+                                  :default-identifier="fullRiskData.Risk.Identifier"
                                   :default-description="fullRiskData.Risk.Description"
                                   :risk-id="fullRiskData.Risk.Id"
                                   :staged-edits="true"
@@ -142,6 +146,7 @@ export default Vue.extend({
         onEditRisk(risk : ProcessFlowRisk) {
             this.fullRiskData.Risk.Name = risk.Name
             this.fullRiskData.Risk.Description = risk.Description
+            this.fullRiskData.Risk.Identifier = risk.Identifier
         },
         refreshSystemLink() {
             allRiskSystemLink({

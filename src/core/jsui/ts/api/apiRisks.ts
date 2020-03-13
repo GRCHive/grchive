@@ -14,6 +14,7 @@ import { cleanProcessFlowFromJson } from '../processFlow'
 export interface TNewRiskInput {
     name: string
     description : string
+    identifier: string
     nodeId: number
     orgName: string
 }

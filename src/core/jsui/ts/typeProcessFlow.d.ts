@@ -17,6 +17,7 @@ interface ProcessFlowNodeType {
 interface ProcessFlowRisk {
     Id : number
     Name : string
+    Identifier : string
     Description: string
 }
 
