@@ -78,6 +78,29 @@
                         {{ fullControlData.Control.Description }}
                     </v-list-item-subtitle>
                 </v-list-item-content>
+
+                <v-spacer></v-spacer>
+                <v-list-item-action>
+                    <v-dialog v-model="showHideDelete"
+                              persistent
+                              max-width="40%"
+                    >
+                        <template v-slot:activator="{ on }">
+                            <v-btn color="error" v-on="on">
+                                Delete
+                            </v-btn>
+                        </template>
+
+                        <generic-delete-confirmation-form
+                            item-name="risk"
+                            :items-to-delete="[`${fullControlData.Control.Name} (${fullControlData.Control.Identifier})`]"
+                            :use-global-deletion="false"
+                            @do-cancel="showHideDelete = false"
+                            @do-delete="onDelete">
+                        </generic-delete-confirmation-form>
+                    </v-dialog>
+                </v-list-item-action>
+
             </v-list-item>
             <v-divider></v-divider>
 
@@ -276,7 +299,7 @@ import { Watch } from 'vue-property-decorator'
 import CreateNewControlForm from './CreateNewControlForm.vue'
 import { FullControlData, ControlDocumentationFile } from '../../../ts/controls'
 import { getSingleControl, TSingleControlInput, TSingleControlOutput } from '../../../ts/api/apiControls'
-import { createRiskUrl, contactUsUrl } from '../../../ts/url'
+import { createRiskUrl, contactUsUrl, createOrgControlsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { System } from '../../../ts/systems'
 import SystemsTable from '../../generic/SystemsTable.vue'
@@ -309,6 +332,7 @@ import CreateNewFolderForm from './CreateNewFolderForm.vue'
 import CreateNewRequestForm from './CreateNewRequestForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
+import { deleteControls, TDeleteControlOutput} from '../../../ts/api/apiControls'
 
 @Component({
     components: {
@@ -587,6 +611,25 @@ export default class FullEditControlComponent extends Vue {
     newRequest(req : DocumentRequest) {
         this.relevantRequests!.unshift(req)
         this.showHideRequest = false
+    }
+
+    onDelete() {
+        deleteControls({
+            nodeId: -1,
+            riskIds: [-1],
+            controlIds: [this.fullControlData!.Control.Id],
+            global: true
+        }).then(() => {
+            window.location.replace(createOrgControlsUrl(PageParamsStore.state.organization!.OktaGroupName))
+        }).catch((err) => {
+            //@ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 }
 

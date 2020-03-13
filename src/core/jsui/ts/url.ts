@@ -93,6 +93,10 @@ export function createRiskUrl(org : string, risk : number) : string {
     return `/dashboard/org/${org}/risks/${risk}`
 }
 
+export function createOrgControlsUrl(org : string) : string {
+    return `/dashboard/org/${org}/controls`
+}
+
 export function createControlUrl(org : string, control : number) : string {
     return `/dashboard/org/${org}/controls/${control}`
 }
