@@ -16,13 +16,15 @@
                 </v-card-title>
                 <v-divider></v-divider>
 
-                <risk-table
+                <risk-table-with-controls
+                    class="ma-4"
                     v-model="selectedRisks"
-                    :resources="unlinkedRisks"
-                    selectable
-                    multi
+                    :exclude="nodeRisks"
+                    disable-new
+                    disable-delete
+                    enable-select
                 >
-                </risk-table>
+                </risk-table-with-controls>
 
                 <v-card-actions>
                     <v-btn
@@ -108,6 +110,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import VueSetup from '../../../../ts/vueSetup'
 import RiskTable from '../../../generic/RiskTable.vue'
+import RiskTableWithControls from '../../../generic/resources/RiskTableWithControls.vue'
 import CreateNewRiskForm from '../CreateNewRiskForm.vue'
 import {
     addExistingRisk,
@@ -118,6 +121,7 @@ import { contactUsUrl } from '../../../../ts/url'
 @Component({
     components: {
         RiskTable,
+        RiskTableWithControls,
         CreateNewRiskForm
     }
 })
@@ -134,11 +138,6 @@ export default class NodeLinkedRisksEditor extends Vue {
 
     get nodeRisks() : ProcessFlowRisk[] {
         return VueSetup.store.getters.risksForNode(this.currentNode.Id)
-    }
-
-    get unlinkedRisks() : ProcessFlowRisk[] {
-        let usedSet : Set<number> = new Set(this.nodeRisks.map((ele : ProcessFlowRisk) => ele.Id))
-        return VueSetup.store.getters.riskList.filter((ele : ProcessFlowRisk) => !usedSet.has(ele.Id))
     }
 
     deleteLinkedRisk(risk : ProcessFlowRisk, global : boolean) {
