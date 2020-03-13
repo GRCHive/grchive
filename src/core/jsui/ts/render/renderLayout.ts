@@ -72,7 +72,7 @@ function connectWebsocket(context : any, host : string, processFlowStore : any) 
                     })
                 }
 
-                if (!!data.IsInit && data.InitNum! == data.InitTotal) {
+                if (!!data.IsInit && data.InitNum! == data.InitTotal!) {
                     context.commit('setReady')
                 }
             }
