@@ -57,7 +57,7 @@
         <v-spacer></v-spacer>
 
         <v-list-item-action>
-            <v-menu offset-y :disabled="comment.UserId != currentUserId">
+            <v-menu offset-y v-if="comment.UserId == currentUserId">
                 <template v-slot:activator="{on}">
                     <v-btn icon v-on="on">
                         <v-icon>
