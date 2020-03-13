@@ -327,16 +327,25 @@ func runDatabaseQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	code, err := database.FindRunCodeForQueryForUser(inputs.QueryId, inputs.OrgId, userId, role)
+	codes, err := database.FindRunCodesForQueryForUser(inputs.QueryId, inputs.OrgId, userId, role)
 	if err != nil {
-		core.Warning("Failed to existing code: " + err.Error())
+		core.Warning("Failed to find existing codes: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if code.HashedCode != webcore.HashRunCode(inputs.RunCode, code.Salt) ||
-		core.IsPastTime(time.Now().UTC(), code.ExpirationTime, 10) {
-		core.Warning("Run code mismatch or expiration.")
+	var code *core.DbSqlQueryRunCode
+
+	for _, c := range codes {
+		if c.HashedCode == webcore.HashRunCode(inputs.RunCode, c.Salt) &&
+			!core.IsPastTime(time.Now().UTC(), c.ExpirationTime, 10) {
+			code = c
+			break
+		}
+	}
+
+	if code == nil {
+		core.Warning("Failed to find a matching, unexpired code.")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}

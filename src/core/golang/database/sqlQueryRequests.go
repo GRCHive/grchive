@@ -275,13 +275,13 @@ func CreateNewRunCodeWithTx(runCode *core.DbSqlQueryRunCode, role *core.Role, tx
 	return err
 }
 
-func FindRunCodeForQueryForUser(queryId int64, orgId int32, userId int64, role *core.Role) (*core.DbSqlQueryRunCode, error) {
+func FindRunCodesForQueryForUser(queryId int64, orgId int32, userId int64, role *core.Role) ([]*core.DbSqlQueryRunCode, error) {
 	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
 
-	code := core.DbSqlQueryRunCode{}
-	err := dbConn.Get(&code, `
+	codes := make([]*core.DbSqlQueryRunCode, 0)
+	err := dbConn.Select(&codes, `
 		SELECT code.*
 		FROM database_sql_query_run_codes AS code
 		INNER JOIN database_sql_query_requests AS req
@@ -291,7 +291,7 @@ func FindRunCodeForQueryForUser(queryId int64, orgId int32, userId int64, role *
 			AND req.upload_user_id = $3
 			AND code.used_time IS NULL
 	`, queryId, orgId, userId)
-	return &code, err
+	return codes, err
 }
 
 func MarkRunCodeAsUsed(hashCode string, requestId int64, orgId int32, role *core.Role) error {
