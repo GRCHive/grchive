@@ -162,8 +162,7 @@ func UnlinkVendorProductFromSocFiles(productId int64, orgId int32, files []*core
 			WHERE product_id = $1
 				AND org_id = $2
 				AND file_id = $3
-				AND cat_id = $4
-		`, productId, orgId, file.Id, file.CategoryId)
+		`, productId, orgId, file.Id)
 
 		if err != nil {
 			tx.Rollback()

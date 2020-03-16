@@ -152,75 +152,41 @@
                                         </v-col>
 
                                         <v-col cols="8">
-                                            <v-list-item class="title">
-                                                SOC Reports
-                                            </v-list-item>
+                                            <v-card>
+                                                <doc-file-manager
+                                                    :cat-id="currentVendor.DocCatId"
+                                                    :vendor-product-id="selectedProduct.Id"
+                                                    :vendor-id="currentVendor.Id"
+                                                    custom-header="SOC Reports"
+                                                    @new-doc="onAddNewSocFile"
+                                                >
+                                                </doc-file-manager>
+                                            </v-card>
 
-                                            <doc-file-manager
-                                                v-model="productSocFiles"
-                                                :cat-id="currentVendor.DocCatId"
-                                                @new-doc="onAddNewSocFile"
-                                            >
-                                                <template v-slot:multiActions="{ hasSelected, selectedFiles }">
-                                                    <v-btn 
-                                                        color="warning"
-                                                        :disabled="!hasSelected"
-                                                        @click="unlinkSocFiles(selectedFiles)"
-                                                        class="ml-2"
-                                                    >
-                                                        Unlink
-                                                    </v-btn>
-                                                </template>
+                                            <v-card class="mt-4">
+                                                <v-card-title>
+                                                    SOC Report Requests
+                                                    <v-spacer></v-spacer>
 
-                                                <template v-slot:singleActions>
-                                                    <v-dialog
-                                                        v-model="showAddSoc"
-                                                        persistent
-                                                        max-width="40%"
-                                                    >
+                                                    <v-dialog v-model="showRequestSoc" persistent max-width="40%">
                                                         <template v-slot:activator="{ on }">
-                                                            <v-btn color="info" v-on="on">
-                                                                Add Existing
+                                                            <v-btn color="warning" icon v-on="on">
+                                                                <v-icon>mdi-plus</v-icon>
                                                             </v-btn>
                                                         </template>
 
-                                                        <doc-searcher-form
-                                                            :force-cat-id="currentVendor.DocCatId"
-                                                            :exclude-files="productSocFiles"
-                                                            @do-select="onSelectSOC"
-                                                            @do-cancel="showAddSoc = false">
-                                                        </doc-searcher-form>
+                                                        <create-new-request-form
+                                                            :cat-id="currentVendor.DocCatId"
+                                                            :vendor-product-id="selectedProduct.Id"
+                                                            @do-cancel="showRequestSoc = false"
+                                                            @do-save="onRequestSOC">
+                                                        </create-new-request-form>
                                                     </v-dialog>
-
-                                                </template>
-                                            </doc-file-manager>
-
-                                            <v-divider class="my-3"></v-divider>
-
-                                            <v-list-item class="title">
-                                                SOC Report Requests
-
-                                                <v-spacer></v-spacer>
-
-                                                <v-dialog v-model="showRequestSoc" persistent max-width="40%">
-                                                    <template v-slot:activator="{ on }">
-                                                        <v-btn color="warning" icon v-on="on">
-                                                            <v-icon>mdi-plus</v-icon>
-                                                        </v-btn>
-                                                    </template>
-
-                                                    <create-new-request-form
-                                                        :cat-id="currentVendor.DocCatId"
-                                                        :vendor-product-id="selectedProduct.Id"
-                                                        @do-cancel="showRequestSoc = false"
-                                                        @do-save="onRequestSOC">
-                                                    </create-new-request-form>
-                                                </v-dialog>
-                                            </v-list-item>
-
-                                            <doc-request-table :resources="productSocRequests">
-                                            </doc-request-table>
-
+                                                </v-card-title>
+                                                <v-divider></v-divider>
+                                                <doc-request-table :resources="productSocRequests">
+                                                </doc-request-table>
+                                            </v-card>
                                         </v-col>
                                     </v-row>
                                 </div>
@@ -307,7 +273,6 @@ export default class FullEditVendorComponent extends Vue {
     showHideNewProduct: boolean = false
 
     productFullyLoaded : boolean = false
-    productSocFiles : ControlDocumentationFile[] = []
     productSocRequests : DocumentRequest[] = []
 
     showAddSoc: boolean = false
@@ -420,27 +385,10 @@ export default class FullEditVendorComponent extends Vue {
 
     @Watch('selectedProduct')
     onChangeProduct() {
-        this.productFullyLoaded = false
         if (!this.selectedProduct) {
             return
         }
-
-        getVendorProduct({
-            productId: this.selectedProduct!.Id,
-            vendorId: this.currentVendor!.Id,
-            orgId: PageParamsStore.state.organization!.Id,
-        }).then((resp : TGetVendorProductOutput) => {
-            this.productSocFiles = resp.data.SocFiles
-            this.productFullyLoaded = true
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
+        this.productFullyLoaded = true
 
         getAllDocRequests({
             orgId: PageParamsStore.state.organization!.Id,
@@ -460,41 +408,18 @@ export default class FullEditVendorComponent extends Vue {
     }
 
     onAddNewSocFile(f : ControlDocumentationFile) {
-        this.onSelectSOC([f], false)
+        this.onSelectSOC([f])
         this.refreshDocCat += 1
     }
 
-    onSelectSOC(f : ControlDocumentationFile[], needAddToModel : boolean = true) {
+    onSelectSOC(f : ControlDocumentationFile[]) {
         linkVendorProductSocFiles({
             productId: this.selectedProduct!.Id,
             vendorId: this.currentVendor!.Id,
             orgId: PageParamsStore.state.organization!.Id,
             socFiles: f.map(extractControlDocumentationFileHandle)
         }).then(() => {
-            if (needAddToModel) {
-                this.productSocFiles.unshift(...f)
-            }
             this.showAddSoc = false
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
-    }
-
-    unlinkSocFiles(files : VersionedMetadata[]) {
-        unlinkVendorProductSocFiles({
-            productId: this.selectedProduct!.Id,
-            vendorId: this.currentVendor!.Id,
-            orgId: PageParamsStore.state.organization!.Id,
-            socFiles: files.map((ele : VersionedMetadata) => extractControlDocumentationFileHandle(ele.File))
-        }).then(() => {
-            let idSet = new Set<number>(files.map((ele : VersionedMetadata) => ele.File.Id))
-            this.productSocFiles = this.productSocFiles.filter((ele : ControlDocumentationFile) => !idSet.has(ele.Id))
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

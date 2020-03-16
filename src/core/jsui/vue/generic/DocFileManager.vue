@@ -3,7 +3,7 @@
         <v-list-item>
             <v-list-item-content class="disable-flex mr-4">
                 <v-list-item-title class="title">
-                    Files
+                    {{ customHeader != "" ? customHeader : "Files" }}
                 </v-list-item-title>
             </v-list-item-content>
             <v-list-item-action>
@@ -97,6 +97,7 @@
 
                     <doc-searcher-form
                         :exclude-files="allFiles"
+                        :force-cat-id="catId"
                         @do-cancel="showHideAddExisting = false"
                         @do-select="doLinkFiles"
                     >
@@ -152,6 +153,11 @@ import {
     newFolderFileLink,
     deleteFolderFileLink
 } from '../../ts/api/apiFolderFileLinks'
+import { 
+    getVendorProduct, TGetVendorProductOutput,
+    linkVendorProductSocFiles, unlinkVendorProductSocFiles,
+} from '../../ts/api/apiVendorProduct'
+import { extractControlDocumentationFileHandle } from '../../ts/controls'
 
 import { saveAs } from 'file-saver'
 
@@ -162,6 +168,18 @@ const Props = Vue.extend({
             default: -1,
         },
         folderId: {
+            type: Number,
+            default: -1,
+        },
+        customHeader: {
+            type: String,
+            default: "",
+        },
+        vendorProductId: {
+            type: Number,
+            default: -1,
+        },
+        vendorId: {
             type: Number,
             default: -1,
         },
@@ -233,8 +251,16 @@ export default class DocFileManager extends Props {
         return this.forceEnableSelect || !this.disableDownload || !this.disableDelete
     }
 
+    get isFolderMode() : boolean {
+        return this.folderId != -1
+    }
+
+    get isVendorProductSocMode() : boolean {
+        return this.vendorId != -1 && this.vendorProductId != -1
+    }
+
     get canLinkFiles() : boolean {
-        return !this.disableUpload && this.folderId != -1
+        return !this.disableUpload && (this.isFolderMode || this.isVendorProductSocMode)
     }
 
     get hasSelected() : boolean {
@@ -280,13 +306,31 @@ export default class DocFileManager extends Props {
 
     @Watch('catId')
     @Watch('folderId')
+    @Watch('vendorId')
+    @Watch('vendorProductId')
     refreshData() {
-        if (this.folderId != -1) {
+        if (this.isFolderMode) {
             allFolderFileLink({
                 folderId: this.folderId,
                 orgId: PageParamsStore.state.organization!.Id,
             }).then((resp : TAllFolderFileLinkOutput) => {
                 this.allFiles = resp.data.Files!
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        } else if (this.isVendorProductSocMode) {
+            getVendorProduct({
+                productId: this.vendorProductId,
+                vendorId: this.vendorId,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TGetVendorProductOutput) => {
+                this.allFiles = resp.data.SocFiles
             }).catch((err : any) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
@@ -333,7 +377,7 @@ export default class DocFileManager extends Props {
             this.deleteInProgress = false
         }
 
-        if (this.folderId != -1) {
+        if (this.isFolderMode) {
             for (let id of ids) {
                 deleteFolderFileLink({
                     folderId: this.folderId,
@@ -351,6 +395,26 @@ export default class DocFileManager extends Props {
                         true);
                 })
             }
+        } else if (this.isVendorProductSocMode) {
+            unlinkVendorProductSocFiles({
+                productId: this.vendorProductId,
+                vendorId: this.vendorId,
+                orgId: PageParamsStore.state.organization!.Id,
+                socFiles: ids.map((ele : number) => ({
+                    Id: ele,
+                    CategoryId: this.catId,
+                }))
+            }).then(() => {
+                onSuccess(ids)
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
         } else {
             deleteControlDocuments({
                 orgId: PageParamsStore.state.organization!.Id,
@@ -387,25 +451,42 @@ export default class DocFileManager extends Props {
     }
 
     doLinkFiles(files : ControlDocumentationFile[]) {
-        newFolderFileLink({
-            folderId: this.folderId,
-            fileIds: files.map((ele : ControlDocumentationFile) => ele.Id),
-            orgId: PageParamsStore.state.organization!.Id,
-        }).then(() => {
-            this.allFiles.unshift(...files)
-            for (let f of files) {
-                this.$emit('new-doc', f)
-            }
-            this.showHideAddExisting = false
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
+        if (this.isFolderMode) {
+            newFolderFileLink({
+                folderId: this.folderId,
+                fileIds: files.map((ele : ControlDocumentationFile) => ele.Id),
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then(() => {
+                this.allFiles.unshift(...files)
+                this.showHideAddExisting = false
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        } else if (this.isVendorProductSocMode) {
+            linkVendorProductSocFiles({
+                productId: this.vendorProductId,
+                vendorId: this.vendorId,
+                orgId: PageParamsStore.state.organization!.Id,
+                socFiles: files.map(extractControlDocumentationFileHandle)
+            }).then(() => {
+                this.allFiles.unshift(...files)
+                this.showHideAddExisting = false
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        }
     }
 }
 
