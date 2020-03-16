@@ -85,11 +85,15 @@
                                                 </v-card-title>
                                                 <v-divider></v-divider>
 
-                                                <systems-table :resources="allSystems"
-                                                               selectable
-                                                               multi
-                                                               v-model="systemsToLink"
-                                                ></systems-table>
+                                                <system-table-with-controls
+                                                    class="ma-4"
+                                                    v-model="systemsToLink"
+                                                    :exclude="relatedSystems"
+                                                    enable-select
+                                                    disable-new
+                                                    disable-delete
+                                                >
+                                                </system-table-with-controls>
 
                                                 <v-card-actions>
                                                     <v-btn color="error" @click="showHideLinkSystem = false">
@@ -244,6 +248,7 @@ import CreateNewDbConnectionForm from './CreateNewDbConnectionForm.vue'
 import { Watch } from 'vue-property-decorator'
 import DatabaseConnectionReadOnlyComponent from '../../generic/DatabaseConnectionReadOnlyComponent.vue'
 import SystemsTable from '../../generic/SystemsTable.vue'
+import SystemTableWithControls from '../../generic/resources/SystemTableWithControls.vue'
 import { System } from '../../../ts/systems'
 import { FullDeployment } from '../../../ts/deployments'
 import DeploymentEditor from '../../generic/DeploymentEditor.vue'
@@ -259,6 +264,7 @@ import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
         CreateNewDbConnectionForm,
         DatabaseConnectionReadOnlyComponent,
         SystemsTable,
+        SystemTableWithControls,
         DeploymentEditor,
         DatabaseSqlEditor,
         DashboardSqlRequestList,
