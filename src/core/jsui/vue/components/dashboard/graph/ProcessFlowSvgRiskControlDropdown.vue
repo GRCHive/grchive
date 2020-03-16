@@ -38,7 +38,7 @@
                             ${getRiskLayout(item.Id).tx},
                             ${getRiskLayout(item.Id).ty})`"
                           :font-style="extraRiskIdSet.has(item.Id) ? `italic` : `normal`"
-                    >{{ item.Name }}</text>
+                    >{{ item.Identifier }}</text>
                 </a>
             </g>
 
@@ -58,7 +58,7 @@
                               :transform="`translate(
                                 ${currentWidth - getControlLayout(risk.Id, control.control.Id).tx},
                                 ${getControlLayout(risk.Id, control.control.Id).ty})`"
-                        >{{ control.control.Name }}</text> 
+                        >{{ control.control.Identifier }}</text> 
                     </a>
                 </g>
             </g>
