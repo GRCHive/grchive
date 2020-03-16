@@ -46,11 +46,14 @@
                         </v-card-title>
                         <v-divider></v-divider>
 
-                        <server-table :resources="linkableServers"
-                                       selectable
-                                       multi
-                                       v-model="serversToLink"
-                        ></server-table>
+                        <server-table-with-controls
+                            class="ma-4"
+                            v-model="serversToLink"
+                            :exclude="editableDeployment.SelfDeployment.Servers"
+                            disable-new
+                            disable-delete
+                            enable-select
+                        ></server-table-with-controls>
 
                         <v-card-actions>
                             <v-btn color="error" @click="showHideLinkServer = false">
@@ -154,6 +157,7 @@ import { contactUsUrl } from '../../ts/url'
 import { PageParamsStore } from '../../ts/pageParams'
 import DocRequestTable from './DocRequestTable.vue'
 import ServerTable from './ServerTable.vue'
+import ServerTableWithControls from './resources/ServerTableWithControls.vue'
 import { Server } from '../../ts/infrastructure'
 import { allServers, TAllServerOutput } from '../../ts/api/apiServers'
 import VendorProductSearchFormComponent from './VendorProductSearchFormComponent.vue'
@@ -173,6 +177,7 @@ const VueProps = Vue.extend({
         CreateNewRequestForm,
         DocRequestTable,
         ServerTable,
+        ServerTableWithControls,
         VendorProductSearchFormComponent
     }
 })
@@ -195,16 +200,6 @@ export default class DeploymentEditor extends VueProps {
             return -1
         }
         return this.editableDeployment.VendorDeployment.Product.VendorId
-    }
-
-    get linkableServers() : Server[] {
-        let usedServerIds = new Set<number>()
-        if (this.editableDeployment.SelfDeployment) {
-            for (let s of this.editableDeployment.SelfDeployment.Servers) {
-                usedServerIds.add(s.Id)
-            }
-        }
-        return this.allAvailableServers.filter((ele : Server) => !usedServerIds.has(ele.Id))
     }
 
     get deploymentType() : number {
