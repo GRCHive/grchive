@@ -41,6 +41,7 @@
             open-all
             @update:active="goToAcc"
             activatable
+            :search="filterText"
         >
             <template v-slot:prepend="{ item, open }">
                 <v-icon v-if="!!item.cat">
@@ -95,7 +96,11 @@ const VueComponent = Vue.extend({
         generalLedger: {
             type: Object,
             default: () => new GeneralLedger()
-        }
+        },
+        filterText: {
+            type : String,
+            default: ""
+        },
     },
     components: {
         CreateNewGeneralLedgerCategoryForm,

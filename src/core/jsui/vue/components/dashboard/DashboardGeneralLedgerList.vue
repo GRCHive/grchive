@@ -43,6 +43,13 @@
                     General Ledger
                 </v-list-item-title>
             </v-list-item-content>
+            <v-list-item-action>
+                <v-text-field outlined
+                              v-model="filterText"
+                              prepend-inner-icon="mdi-magnify"
+                              hide-details
+                ></v-text-field>
+            </v-list-item-action>
 
             <v-spacer></v-spacer>
             <v-list-item-action>
@@ -81,6 +88,7 @@
                 <general-ledger-display
                     :org-id="orgId"
                     :generalLedger.sync="ledger"
+                    :filterText="filterText"
                 ></general-ledger-display>
             </v-tab-item>
 
@@ -122,6 +130,7 @@ export default class DashboardGeneralLedgerList extends Vue {
     showHideNewAccount : boolean = false
     isMounted: boolean = false
     ledger: GeneralLedger = new GeneralLedger()
+    filterText: string = ""
 
     get orgId() : number {
         return PageParamsStore.state.organization!.Id
