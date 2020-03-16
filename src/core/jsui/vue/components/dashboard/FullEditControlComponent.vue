@@ -39,27 +39,6 @@
             </generic-delete-confirmation-form>
         </v-dialog>
 
-        <v-dialog v-model="showNewFile" persistent max-width="40%">
-            <upload-documentation-form
-                :cat-id="-1"
-                :folder-id="currentFolder.Id"
-                @do-cancel="showNewFile = false"
-                @do-save="saveFile"
-                v-if="!!currentFolder"
-            >
-            </upload-documentation-form>
-        </v-dialog>
-
-        <v-dialog v-model="showAddExistingFile" persistent max-width="40%">
-            <doc-searcher-form
-                :exclude-files="filesForFolder(currentFolder.Id)"
-                @do-cancel="showAddExistingFile = false"
-                @do-select="addFilesToFolder"
-                v-if="!!currentFolder"
-            >
-            </doc-searcher-form>
-        </v-dialog>
-
         <div v-if="ready">
             <v-list-item two-line class="pa-0">
                 <v-list-item-content>
@@ -145,19 +124,6 @@
                                                         New Folder
                                                     </v-list-item-title>
                                                 </v-list-item>
-                                                <v-divider></v-divider>
-
-                                                <v-list-item @click="showNewFile = true" :disabled="relevantFolders.length == 0">
-                                                    <v-list-item-title>
-                                                        Upload File
-                                                    </v-list-item-title>
-                                                </v-list-item>
-
-                                                <v-list-item @click="showAddExistingFile = true" :disabled="relevantFolders.length == 0">
-                                                    <v-list-item-title>
-                                                        Add Existing File
-                                                    </v-list-item-title>
-                                                </v-list-item>
                                             </v-list>
                                         </v-menu>
                                     </v-card-title>
@@ -191,12 +157,11 @@
                                                 </v-menu>
                                             </v-tab>
                                             <v-tab-item :key="`item-${folder.Id}`">
-                                                <doc-file-table
-                                                    :resources="filesForFolder(folder.Id)"
-                                                    use-crud-delete
-                                                    @delete="deleteLink"
+                                                <doc-file-manager
+                                                    :folder-id="folder.Id"
+                                                    disable-sample
                                                 >
-                                                </doc-file-table>
+                                                </doc-file-manager>
                                             </v-tab-item>
                                         </template>
                                     </v-tabs>
@@ -305,7 +270,7 @@ import { System } from '../../../ts/systems'
 import SystemsTable from '../../generic/SystemsTable.vue'
 import RiskTable from '../../generic/RiskTable.vue'
 import ProcessFlowTable from '../../generic/ProcessFlowTable.vue'
-import DocFileTable from '../../generic/DocFileTable.vue'
+import DocFileManager from '../../generic/DocFileManager.vue'
 import DocRequestTable from '../../generic/DocRequestTable.vue'
 import {
     TAllControlSystemLinkOutput, allControlSystemLink
@@ -326,8 +291,6 @@ import { deleteFolder } from '../../../ts/api/apiFolders'
 import { FileFolder } from '../../../ts/folders'
 import { DocumentRequest } from '../../../ts/docRequests'
 
-import UploadDocumentationForm from './UploadDocumentationForm.vue'
-import DocSearcherForm from '../../generic/DocSearcherForm.vue'
 import CreateNewFolderForm from './CreateNewFolderForm.vue'
 import CreateNewRequestForm from './CreateNewRequestForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
@@ -341,10 +304,8 @@ import { deleteControls, TDeleteControlOutput} from '../../../ts/api/apiControls
         RiskTable,
         ProcessFlowTable,
         GeneralLedgerAccountsTable,
-        DocFileTable,
+        DocFileManager,
         DocRequestTable,
-        UploadDocumentationForm,
-        DocSearcherForm,
         CreateNewFolderForm,
         CreateNewRequestForm,
         GenericDeleteConfirmationForm,
@@ -362,8 +323,6 @@ export default class FullEditControlComponent extends Vue {
     currentFolderIdx: number = 0
 
     showNewFolder: boolean = false
-    showNewFile : boolean = false
-    showAddExistingFile: boolean = false
     showEditFolder: boolean = false
     showDeleteFolder: boolean = false
     showHideRequest: boolean = false
@@ -381,36 +340,6 @@ export default class FullEditControlComponent extends Vue {
             return null
         }
         return this.relevantGL.listAccounts
-    }
-
-    get currentFolder() : FileFolder | null {
-        if (!this.relevantFolders || this.relevantFolders.length == 0) {
-            return null
-        }
-        return this.relevantFolders[this.currentFolderIdx]
-    }
-
-    get filesForFolder() : (id : number) => ControlDocumentationFile[] {
-        return (id: number) : ControlDocumentationFile[] => {
-            if (!(id in this.folderToFiles)) {
-                allFolderFileLink({
-                    folderId: id,
-                    orgId: PageParamsStore.state.organization!.Id,
-                }).then((resp : TAllFolderFileLinkOutput) => {
-                    Vue.set(this.folderToFiles, id, resp.data.Files!)
-                }).catch((err : any) => {
-                    // @ts-ignore
-                    this.$root.$refs.snackbar.showSnackBar(
-                        "Oops! Something went wrong. Try again.",
-                        true,
-                        "Contact Us",
-                        contactUsUrl,
-                        true);
-                })
-                return []
-            }
-            return this.folderToFiles[id]
-        }
     }
 
     refreshSystemLink() {
@@ -486,62 +415,6 @@ export default class FullEditControlComponent extends Vue {
 
     mounted() {
         this.refreshData()
-    }
-
-    saveFile(file : ControlDocumentationFile) {
-        this.folderToFiles[this.currentFolder!.Id].push(file)
-        this.showNewFile = false
-    }
-
-    addFilesToFolder(files : ControlDocumentationFile[]) {
-        newFolderFileLink({
-            folderId: this.currentFolder!.Id,
-            fileIds: files.map((ele : ControlDocumentationFile) => ele.Id),
-            orgId: PageParamsStore.state.organization!.Id,
-        }).then(() => {
-            this.folderToFiles[this.currentFolder!.Id].push(...files)
-            this.showAddExistingFile = false
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
-    }
-
-    deleteLink(file : ControlDocumentationFile) {
-        if (!this.currentFolder) {
-            return
-        }
-        let folder : FileFolder = this.currentFolder!
-        deleteFolderFileLink({
-            folderId: folder.Id,
-            fileId: file.Id,
-            orgId: PageParamsStore.state.organization!.Id,
-        }).then(() => {
-            if (!(folder.Id in this.folderToFiles)) {
-                return
-            }
-            let idx : number = this.folderToFiles[folder.Id].findIndex(
-                (ele : ControlDocumentationFile) => ele.Id == file.Id)
-
-            if (idx == -1) {
-                return
-            }
-
-            this.folderToFiles[folder.Id].splice(idx, 1)
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
     }
 
     saveFolder(folder : FileFolder) {

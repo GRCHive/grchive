@@ -1,5 +1,21 @@
 <template>
     <div>
+        <v-list-item>
+            <v-list-item-content class="disable-flex mr-4">
+                <v-list-item-title class="title">
+                    Files
+                </v-list-item-title>
+            </v-list-item-content>
+            <v-list-item-action>
+                <v-text-field outlined
+                              v-model="filterText"
+                              prepend-inner-icon="mdi-magnify"
+                              hide-details
+                ></v-text-field>
+            </v-list-item-action>
+        </v-list-item>
+        <v-divider></v-divider>
+
         <v-dialog v-model="showHideDeleteFiles" persistent max-width="40%">
             <generic-delete-confirmation-form
                 item-name="documents"
@@ -12,63 +28,82 @@
         </v-dialog>
 
         <doc-file-table
-            :resources="value"
+            v-model="selectedFiles"
+            :resources="allFiles"
+            :search="filterText"
+            :selectable="selectMode"
+            :multi="selectMode"
+            :use-crud-delete="!disableDelete"
+            :confirm-delete="!disableDelete"
+            :value="value"
+            @delete="deleteSingleFile"
+            @input="modifySelected"
         ></doc-file-table>
 
         <v-divider></v-divider>
         <v-list-item>
-            <v-dialog v-model="showHideSelectFiles" persistent max-width="60%">
-                <template v-slot:activator="{on}">
-                    <v-btn color="warning" v-on="on">
-                        Select
-                    </v-btn>
-                </template>
+            <v-list-item-action class="mr-2">
+                <v-btn
+                    color="warning"
+                    @click="selectMode = true"
+                    v-if="!selectMode"
+                >
+                    Select
+                </v-btn>
 
-                <v-card>
-                    <v-card-title>
-                        Select Files
-                    </v-card-title>
-                    <v-divider></v-divider>
+                <v-btn
+                    color="error"
+                    @click="selectMode = false"
+                    v-if="selectMode"
+                >
+                    Cancel
+                </v-btn>
+            </v-list-item-action>
 
-                    <doc-file-table
-                        :resources="value"
-                        selectable
-                        multi
-                        v-model="selectedFiles"
-                    ></doc-file-table>
+            <v-list-item-action class="mr-2">
+                <v-btn color="error" @click="startDeleteFlow" :disabled="!hasSelected" :loading="deleteInProgress">
+                    <span v-if="!deleteInProgress">Delete</span>
+                    <v-progress-circular indeterminate size="16" v-else></v-progress-circular>
+                </v-btn>
+            </v-list-item-action>
 
-                    <v-card-actions>
-                        <v-btn color="error" @click="showHideSelectFiles = false">
-                            Cancel
-                        </v-btn>
+            <slot
+                name="multiActions" 
+                v-bind:hasSelected="hasSelected"
+                v-bind:selectedFiles="selectedFiles"
+                v-bind:allFiles="allFiles"
+            >
+            </slot>
 
-                        <v-spacer></v-spacer>
-
-                        <v-btn color="error" @click="startDeleteFlow" :disabled="!hasSelected || deleteInProgress">
-                            <span v-if="!deleteInProgress">Delete</span>
-                            <v-progress-circular indeterminate size="16" v-else></v-progress-circular>
-                        </v-btn>
-
-                        <slot
-                            name="multiActions" 
-                            v-bind:hasSelected="hasSelected"
-                            v-bind:selectedFiles="selectedFiles"
-                        >
-                        </slot>
-
-                        <v-btn color="success" @click="downloadSelectedFiles" :disabled="!hasSelected || downloadInProgress">
-                            <span v-if="!downloadInProgress">Download</span>
-                            <v-progress-circular indeterminate size="16" v-else></v-progress-circular>
-                        </v-btn>
-                    </v-card-actions>
-                </v-card>
-
-            </v-dialog>
+            <v-list-item-action class="mr-2">
+                <v-btn color="success" @click="downloadSelectedFiles" :disabled="!hasSelected" :loading="downloadInProgress">
+                    <span v-if="!downloadInProgress">Download</span>
+                    <v-progress-circular indeterminate size="16" v-else></v-progress-circular>
+                </v-btn>
+            </v-list-item-action>
 
             <v-spacer></v-spacer>
 
             <slot name="singleActions">
             </slot>
+
+            <v-list-item-action v-if="canLinkFiles">
+                <v-dialog v-model="showHideAddExisting" persistent max-width="40%">
+                    <template v-slot:activator="{on}">
+                        <v-btn color="secondary" v-on="on">
+                            Add Existing
+                        </v-btn>
+                    </template>
+
+                    <doc-searcher-form
+                        :exclude-files="allFiles"
+                        @do-cancel="showHideAddExisting = false"
+                        @do-select="doLinkFiles"
+                    >
+                    </doc-searcher-form>
+                </v-dialog>
+
+            </v-list-item-action>
 
             <v-list-item-action v-if="!disableUpload">
                 <v-dialog v-model="showHideUpload" persistent max-width="40%">
@@ -79,6 +114,7 @@
                     </template>
                     <upload-documentation-form
                         :cat-id="catId"
+                        :folder-id="folderId"
                         :request-id="requestId"
                         :request-linked-to-control="requestLinkedToControl"
                         :request-control="requestControl"
@@ -88,7 +124,6 @@
                 </v-dialog>
             </v-list-item-action>
         </v-list-item>
-
     </div>
 </template>
 
@@ -97,6 +132,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import DocFileTable from './DocFileTable.vue'
+import DocSearcherForm from './DocSearcherForm.vue'
 import GenericDeleteConfirmationForm from '../components/dashboard/GenericDeleteConfirmationForm.vue'
 import UploadDocumentationForm from '../components/dashboard/UploadDocumentationForm.vue'
 import { ControlDocumentationFile, VersionedMetadata } from '../../ts/controls'
@@ -107,12 +143,24 @@ import { TDownloadControlDocumentsOutput, downloadControlDocuments } from '../..
 import {
     cleanJsonControlDocumentationFile
 } from '../../ts/controls'
+import {
+    allFolderFileLink, TAllFolderFileLinkOutput ,
+    newFolderFileLink,
+    deleteFolderFileLink
+} from '../../ts/api/apiFolderFileLinks'
 
 import { saveAs } from 'file-saver'
 
 const Props = Vue.extend({
     props: {
-        catId: Number,
+        catId: {
+            type: Number,
+            default: -1,
+        },
+        folderId: {
+            type: Number,
+            default: -1,
+        },
         requestId: {
             type: Number,
             default: -1
@@ -124,10 +172,6 @@ const Props = Vue.extend({
         requestControl: {
             type: Object,
             default: () => null as ProcessFlowControl | null
-        },
-        value: {
-            type: Array,
-            default: () => [] as ControlDocumentationFile[]
         },
         disableUpload: {
             type: Boolean,
@@ -149,11 +193,17 @@ const Props = Vue.extend({
             type: Boolean,
             default: true,
         },
+        value: {
+            type: Array,
+            default: () => [],
+        },
+
     },
     components: {
         DocFileTable,
         GenericDeleteConfirmationForm,
-        UploadDocumentationForm
+        UploadDocumentationForm,
+        DocSearcherForm
     }
 })
 
@@ -162,11 +212,15 @@ const Props = Vue.extend({
 // upload/delete/sampling).
 @Component
 export default class DocFileManager extends Props {
+    allFiles : ControlDocumentationFile[] = []
+    filterText: string = ""
+
     selectedFiles: VersionedMetadata[] = []
-    showHideSelectFiles: boolean = false
+    selectMode: boolean = false
 
     showHideDeleteFiles: boolean = false
     showHideUpload: boolean = false
+    showHideAddExisting : boolean = false
 
     deleteInProgress : boolean = false
     downloadInProgress : boolean = false
@@ -175,45 +229,16 @@ export default class DocFileManager extends Props {
         return this.forceEnableSelect || !this.disableDownload || !this.disableDelete
     }
 
+    get canLinkFiles() : boolean {
+        return !this.disableUpload && this.folderId != -1
+    }
+
     get hasSelected() : boolean {
         return this.selectedFiles.length > 0
     }
 
     get selectedFileNames() : string[] {
         return this.selectedFiles.map((ele) => ele.File.AltName)
-    }
-
-    deleteSelectedFiles() {
-        this.showHideSelectFiles = true
-        this.showHideDeleteFiles = false
-        this.deleteInProgress = true
-
-        let selectedFileIds = this.selectedFiles.map((ele :VersionedMetadata) => ele.File.Id)
-        deleteControlDocuments({
-            orgId: PageParamsStore.state.organization!.Id,
-            fileIds: selectedFileIds,
-        }).then(() => {
-            let selectedFileSet = new Set<number>(selectedFileIds)
-            for (let i = this.value.length - 1; i >= 0; --i) {
-                if (selectedFileSet.has((this.value[i] as ControlDocumentationFile).Id)) {
-                    this.value.splice(i, 1)
-                    this.$emit('input', this.value)
-                }
-            }
-            this.selectedFiles = []
-            this.showHideDeleteFiles = false
-            this.deleteInProgress = false
-            this.showHideSelectFiles = false
-        }).catch((err : any) => {
-            this.deleteInProgress = false
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
     }
 
     downloadSelectedFiles() {
@@ -225,7 +250,6 @@ export default class DocFileManager extends Props {
             orgId: PageParamsStore.state.organization!.Id,
         }).then((resp : TDownloadControlDocumentsOutput) => {
             this.downloadInProgress = false
-            this.showHideSelectFiles = false
             saveAs(resp.data, "download.zip")
         }).catch((err : any) => {
             this.downloadInProgress = false
@@ -242,14 +266,126 @@ export default class DocFileManager extends Props {
     finishUpload(newDoc : ControlDocumentationFile) {
         this.showHideUpload = false
         cleanJsonControlDocumentationFile(newDoc)
-        this.value.unshift(newDoc)
+        this.allFiles.unshift(newDoc)
         this.$emit('new-doc', newDoc)
-        this.$emit('input', this.value)
     }
 
     startDeleteFlow() {
-        this.showHideSelectFiles = false
         this.showHideDeleteFiles = true
+    }
+
+    refreshData() {
+        if (this.folderId != -1) {
+            allFolderFileLink({
+                folderId: this.folderId,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TAllFolderFileLinkOutput) => {
+                this.allFiles = resp.data.Files!
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        } else {
+        }
+    }
+
+    mounted() {
+        this.refreshData()
+    }
+
+    genericDeleteFiles(ids : number[], clearSelect:  boolean) {
+        let onSuccess = (sids : number[]) => {
+            let selectedFileSet = new Set<number>(sids)
+            for (let i = this.allFiles.length - 1; i >= 0; --i) {
+                if (selectedFileSet.has((this.allFiles[i] as ControlDocumentationFile).Id)) {
+                    this.allFiles.splice(i, 1)
+                }
+            }
+            if (clearSelect) {
+                this.selectedFiles = []
+            }
+            this.showHideDeleteFiles = false
+            this.deleteInProgress = false
+        }
+
+        if (this.folderId != -1) {
+            for (let id of ids) {
+                deleteFolderFileLink({
+                    folderId: this.folderId,
+                    fileId: id,
+                    orgId: PageParamsStore.state.organization!.Id,
+                }).then(() => {
+                    onSuccess([id])
+                }).catch((err : any) => {
+                    // @ts-ignore
+                    this.$root.$refs.snackbar.showSnackBar(
+                        "Oops! Something went wrong. Try again.",
+                        true,
+                        "Contact Us",
+                        contactUsUrl,
+                        true);
+                })
+            }
+        } else {
+            deleteControlDocuments({
+                orgId: PageParamsStore.state.organization!.Id,
+                fileIds: ids,
+            }).then(() => {
+                onSuccess(ids)
+            }).catch((err : any) => {
+                this.deleteInProgress = false
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        }
+    }
+
+    deleteSelectedFiles() {
+        this.showHideDeleteFiles = false
+        this.deleteInProgress = true
+
+        let selectedFileIds = this.selectedFiles.map((ele :VersionedMetadata) => ele.File.Id)
+        this.genericDeleteFiles(selectedFileIds, true)
+    }
+
+    deleteSingleFile(file : ControlDocumentationFile) {
+        this.genericDeleteFiles([file.Id], false)
+    }
+
+    modifySelected(vals : VersionedMetadata[]) {
+        this.$emit('input', vals)
+    }
+
+    doLinkFiles(files : ControlDocumentationFile[]) {
+        newFolderFileLink({
+            folderId: this.folderId,
+            fileIds: files.map((ele : ControlDocumentationFile) => ele.Id),
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then(() => {
+            this.allFiles.unshift(...files)
+            for (let f of files) {
+                this.$emit('new-doc', f)
+            }
+            this.showHideAddExisting = false
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 }
 
