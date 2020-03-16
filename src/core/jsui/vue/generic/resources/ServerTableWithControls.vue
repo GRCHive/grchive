@@ -41,6 +41,9 @@
         <server-table
             :resources="filteredServers"
             :search="filterText"
+            :use-crud-delete="!disableDelete"
+            :confirm-delete="!disableDelete"
+            @delete="deleteServer"
             @input="modifySelected"
             :selectable="enableSelect"
             :multi="enableSelect"
@@ -59,6 +62,7 @@ import { allServers, TAllServerOutput } from '../../../ts/api/apiServers'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
 import CreateNewServerForm from '../../components/dashboard/CreateNewServerForm.vue'
+import { deleteServer } from '../../../ts/api/apiServers'
 
 const Props = Vue.extend({
     props: {
@@ -127,6 +131,26 @@ export default class ServerTableWithControls extends Props {
 
     modifySelected(vals : Server[]) {
         this.$emit('input', vals)
+    }
+
+    deleteServer(server : Server) {
+        deleteServer({
+            serverId: server.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }).then(() => {
+            this.servers.splice(
+                this.servers.findIndex((ele : Server) =>
+                    ele.Id == server.Id),
+                1)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 }
 

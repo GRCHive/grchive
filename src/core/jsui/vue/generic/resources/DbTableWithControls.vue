@@ -37,6 +37,9 @@
         <db-table
             :resources="filteredDbs"
             :search="filterText"
+            :use-crud-delete="!disableDelete"
+            :confirm-delete="!disableDelete"
+            @delete="deleteDb"
             @input="modifySelected"
             :selectable="enableSelect"
             :multi="enableSelect"
@@ -54,6 +57,7 @@ import { TAllDatabaseOutputs, allDatabase } from '../../../ts/api/apiDatabases'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
 import CreateNewDatabaseForm from '../../components/dashboard/CreateNewDatabaseForm.vue'
+import { deleteDatabase } from '../../../ts/api/apiDatabases'
 
 const Props = Vue.extend({
     props: {
@@ -69,7 +73,10 @@ const Props = Vue.extend({
             type: Boolean,
             default: false,
         },
-
+        disableDelete: {
+            type: Boolean,
+            default: false,
+        },
         enableSelect: {
             type: Boolean,
             default: false,
@@ -123,6 +130,26 @@ export default class DbTableWithControls extends Props {
 
     modifySelected(vals : Database[]) {
         this.$emit('input', vals)
+    }
+
+    deleteDb(db : Database) {
+        deleteDatabase({
+            dbId: db.Id,
+            orgId: PageParamsStore.state.organization!.Id
+        }).then(() => {
+            this.allDbs.splice(
+                this.allDbs.findIndex((ele : Database) =>
+                    ele.Id == db.Id),
+                1)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 }
 

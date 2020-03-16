@@ -88,6 +88,7 @@
                                                             v-model="dbToLink"
                                                             :exclude="relatedDbs"
                                                             disable-new
+                                                            disable-delete
                                                             enable-select
                                                         >
                                                         </db-table-with-controls>

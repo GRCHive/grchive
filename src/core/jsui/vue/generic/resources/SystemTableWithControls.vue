@@ -16,7 +16,7 @@
 
             <v-spacer></v-spacer>
 
-            <v-list-item-action>
+            <v-list-item-action v-if="!disableNew">
                 <v-dialog v-model="showHideNew"
                           persistent
                           max-width="40%"
