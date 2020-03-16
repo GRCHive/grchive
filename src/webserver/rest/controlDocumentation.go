@@ -346,17 +346,6 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	core.Debug("\tPost to RabbitMQ")
-	// At this point we know we can put in a request to generate a preview.
-	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
-		Exchange: webcore.DEFAULT_EXCHANGE,
-		Queue:    webcore.FILE_PREVIEW_QUEUE,
-		Body: webcore.FilePreviewMessage{
-			File:    *internalFile,
-			Storage: *storageData,
-		},
-	})
-
 	if inputs.FulfilledRequestId.NullInt64.Valid {
 		err = database.FulfillDocumentRequestWithTx(
 			inputs.FulfilledRequestId.NullInt64.Int64,
@@ -373,6 +362,17 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	core.Debug("\tPost to RabbitMQ")
+	// At this point we know we can put in a request to generate a preview.
+	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
+		Exchange: webcore.DEFAULT_EXCHANGE,
+		Queue:    webcore.FILE_PREVIEW_QUEUE,
+		Body: webcore.FilePreviewMessage{
+			File:    *internalFile,
+			Storage: *storageData,
+		},
+	})
 
 	core.Debug("\tCommit")
 	err = tx.Commit()

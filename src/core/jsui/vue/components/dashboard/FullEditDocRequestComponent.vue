@@ -141,8 +141,8 @@
                                 :request-id="currentRequest.Id"
                                 :request-linked-to-control="!!parentControl"
                                 :request-control="parentControl"
-                                v-model="relevantFiles"
                                 disable-sample
+                                disable-delete
                             ></doc-file-manager>
                         </v-card>
                     </v-col>

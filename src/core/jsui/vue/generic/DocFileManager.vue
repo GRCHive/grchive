@@ -60,7 +60,7 @@
                 </v-btn>
             </v-list-item-action>
 
-            <v-list-item-action class="mr-2">
+            <v-list-item-action class="mr-2" v-if="!disableDelete">
                 <v-btn color="error" @click="startDeleteFlow" :disabled="!hasSelected" :loading="deleteInProgress">
                     <span v-if="!deleteInProgress">Delete</span>
                     <v-progress-circular indeterminate size="16" v-else></v-progress-circular>
@@ -75,7 +75,7 @@
             >
             </slot>
 
-            <v-list-item-action class="mr-2">
+            <v-list-item-action class="mr-2" v-if="!disableDownload">
                 <v-btn color="success" @click="downloadSelectedFiles" :disabled="!hasSelected" :loading="downloadInProgress">
                     <span v-if="!downloadInProgress">Download</span>
                     <v-progress-circular indeterminate size="16" v-else></v-progress-circular>
@@ -157,6 +157,7 @@ import {
     getVendorProduct, TGetVendorProductOutput,
     linkVendorProductSocFiles, unlinkVendorProductSocFiles,
 } from '../../ts/api/apiVendorProduct'
+import { TGetSingleDocumentRequestOutput, getSingleDocRequest } from '../../ts/api/apiDocRequests'
 import { extractControlDocumentationFileHandle } from '../../ts/controls'
 
 import { saveAs } from 'file-saver'
@@ -259,6 +260,10 @@ export default class DocFileManager extends Props {
         return this.vendorId != -1 && this.vendorProductId != -1
     }
 
+    get isDocRequestMode() : boolean {
+        return this.requestId != -1
+    }
+
     get canLinkFiles() : boolean {
         return !this.disableUpload && (this.isFolderMode || this.isVendorProductSocMode)
     }
@@ -308,6 +313,7 @@ export default class DocFileManager extends Props {
     @Watch('folderId')
     @Watch('vendorId')
     @Watch('vendorProductId')
+    @Watch('requestId')
     refreshData() {
         if (this.isFolderMode) {
             allFolderFileLink({
@@ -331,6 +337,21 @@ export default class DocFileManager extends Props {
                 orgId: PageParamsStore.state.organization!.Id,
             }).then((resp : TGetVendorProductOutput) => {
                 this.allFiles = resp.data.SocFiles
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        } else if (this.isDocRequestMode) {
+            getSingleDocRequest({
+                requestId: this.requestId,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TGetSingleDocumentRequestOutput) => {
+                this.allFiles = resp.data.Files
             }).catch((err : any) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(

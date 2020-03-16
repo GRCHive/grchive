@@ -236,7 +236,7 @@ func FulfillDocumentRequestWithTx(requestId int64, fileId int64, orgId int32, ro
 			request_id
 		)
 		VALUES (
-			$1
+			$1,
 			$2,
 			$3
 		)
