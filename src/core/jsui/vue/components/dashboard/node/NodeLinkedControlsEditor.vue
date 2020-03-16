@@ -140,11 +140,6 @@ export default class NodeLinkedControlsEditor extends Vue {
         return VueSetup.store.getters.controlsForNode(this.currentNode.Id)
     }
 
-    get unlinkedControls() : ProcessFlowControl[] {
-        let usedSet : Set<number> = new Set(this.nodeControls.map((ele : ProcessFlowControl) => ele.Id))
-        return VueSetup.store.getters.controlList.filter((ele : ProcessFlowControl) => !usedSet.has(ele.Id))
-    }
-
     deleteLinkedControl(control : ProcessFlowControl, global : boolean) {
         deleteControls({
             nodeId: this.currentNode.Id,

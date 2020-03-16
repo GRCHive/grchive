@@ -63,142 +63,15 @@
 
         <div v-if="canLinkToSystem && linkedSystems != null">
             <v-divider></v-divider>
-            <v-list dense class="pa-0">
-                <v-list-item class="pa-0">
-                    <v-list-item-action class="ma-0">
-                        <v-btn icon @click="minimizeSystem = !minimizeSystem">
-                            <v-icon small>
-                                {{ !minimizeSystem ? "mdi-chevron-up" : "mdi-chevron-down" }}
-                            </v-icon>
-                        </v-btn>
-                    </v-list-item-action>
-
-                    <v-subheader class="flex-grow-1 pr-0">
-                        LINKED SYSTEMS
-                    </v-subheader>
-
-                    <v-list-item-action class="ma-0">
-                        <v-dialog persistent max-width="40%" v-model="showLinkSystem">
-                            <template v-slot:activator="{ on }">
-                                <v-btn
-                                    icon
-                                    v-on="on"
-                                >
-                                    <v-icon small>
-                                        mdi-plus
-                                    </v-icon>
-                                </v-btn>
-                            </template>
-
-                            <v-card>
-                                <v-card-title>
-                                    Link System
-                                </v-card-title>
-
-                                <system-search-form-component
-                                    v-model="systemsToLink"
-                                >
-                                </system-search-form-component>
-
-                                <v-card-actions>
-                                    <v-btn
-                                        color="error"
-                                        @click="cancelSystemLink"
-                                    >
-                                        Cancel
-                                    </v-btn>
-                                    <v-spacer></v-spacer>
-                                    <v-btn
-                                        color="success"
-                                        @click="saveSystemLink"
-                                        :disabled="systemsToLink.length == 0"
-                                    >
-                                        Link
-                                    </v-btn>
-                                </v-card-actions>
-                            </v-card>
-                        </v-dialog>
-                    </v-list-item-action>
-                </v-list-item>
-            </v-list>
-            <systems-table
-                :resources="linkedSystems"
-                use-crud-delete
-                @delete="deleteLinkedSystem"
-                v-if="!minimizeSystem"
-            >
-            </systems-table>
+            <node-linked-systems-editor>
+            </node-linked-systems-editor>
         </div>
 
         <div v-if="canLinkToGL && linkedGL != null">
             <v-divider></v-divider>
-            <v-list dense class="pa-0">
-                <v-list-item class="pa-0">
-                    <v-list-item-action class="ma-0">
-                        <v-btn icon @click="minimizeGL = !minimizeGL">
-                            <v-icon small>
-                                {{ !minimizeGL ? "mdi-chevron-up" : "mdi-chevron-down" }}
-                            </v-icon>
-                        </v-btn>
-                    </v-list-item-action>
-
-                    <v-subheader class="flex-grow-1 pr-0">
-                        LINKED GENERAL LEDGER ACCOUNTS
-                    </v-subheader>
-
-                    <v-list-item-action class="ma-0">
-                        <v-dialog persistent max-width="40%" v-model="showLinkGL">
-                            <template v-slot:activator="{ on }">
-                                <v-btn
-                                    icon
-                                    v-on="on"
-                                >
-                                    <v-icon small>
-                                        mdi-plus
-                                    </v-icon>
-                                </v-btn>
-                            </template>
-
-                            <v-card>
-                                <v-card-title>
-                                    Link General Ledger Accounts
-                                </v-card-title>
-
-                                <general-ledger-account-search-form-component
-                                    v-model="accountsToLink"
-                                >
-                                </general-ledger-account-search-form-component>
-
-                                <v-card-actions>
-                                    <v-btn
-                                        color="error"
-                                        @click="cancelGLLink"
-                                    >
-                                        Cancel
-                                    </v-btn>
-                                    <v-spacer></v-spacer>
-                                    <v-btn
-                                        color="success"
-                                        @click="saveGLLink"
-                                        :disabled="accountsToLink.length == 0"
-                                    >
-                                        Link
-                                    </v-btn>
-                                </v-card-actions>
-                            </v-card>
-                        </v-dialog>
-                    </v-list-item-action>
-                </v-list-item>
-            </v-list>
-            <general-ledger-accounts-table
-                :resources="linkedGL"
-                use-crud-delete
-                @delete="deleteLinkedGL"
-                v-if="!minimizeGL"
-            >
-            </general-ledger-accounts-table>
+            <node-linked-gl-editor>
+            </node-linked-gl-editor>
         </div>
-
     </section>
 </template>
 
@@ -209,36 +82,20 @@ import VueSetup from '../../../ts/vueSetup'
 import * as rules from "../../../ts/formRules"
 import ProcessFlowInputOutputEditor from './ProcessFlowInputOutputEditor.vue'
 import { editProcessFlowNode, TEditProcessFlowNodeInput, TEditProcessFlowNodeOutput } from '../../../ts/api/apiProcessFlowNodes'
-import { 
-    newNodeSystemLink,
-    deleteNodeSystemLink
-} from '../../../ts/api/apiNodeSystemLinks'
-import { 
-    newNodeGLLink,
-    deleteNodeGLLink
-} from '../../../ts/api/apiNodeGLLinks'
 import { contactUsUrl } from '../../../ts/url'
 import { System } from '../../../ts/systems'
 import { GeneralLedgerAccount, GeneralLedger } from '../../../ts/generalLedger'
 import { PageParamsStore } from '../../../ts/pageParams'
 import MetadataStore from '../../../ts/metadata'
-import SystemSearchFormComponent from '../../generic/SystemSearchFormComponent.vue'
-import SystemsTable from '../../generic/SystemsTable.vue'
-import GeneralLedgerAccountSearchFormComponent from '../../generic/GeneralLedgerAccountSearchFormComponent.vue'
-import GeneralLedgerAccountsTable from '../../generic/GeneralLedgerAccountsTable.vue'
 import NodeLinkedControlsEditor from './node/NodeLinkedControlsEditor.vue'
 import NodeLinkedRisksEditor from './node/NodeLinkedRisksEditor.vue'
+import NodeLinkedSystemsEditor from './node/NodeLinkedSystemsEditor.vue'
+import NodeLinkedGlEditor from './node/NodeLinkedGlEditor.vue'
 
 export default Vue.extend({
     data : () => ({
         canEditAttr: false,
         cachedData : {} as ProcessFlowNode,
-        systemsToLink: [] as System[],
-        showLinkSystem: false,
-        accountsToLink: [] as GeneralLedgerAccount[],
-        showLinkGL: false,
-        minimizeSystem: false,
-        minimizeGL: false,
         rules,
     }),
     props: {
@@ -247,12 +104,10 @@ export default Vue.extend({
     },
     components: {
         ProcessFlowInputOutputEditor,
-        SystemSearchFormComponent,
-        SystemsTable,
-        GeneralLedgerAccountSearchFormComponent,
-        GeneralLedgerAccountsTable,
         NodeLinkedControlsEditor,
-        NodeLinkedRisksEditor
+        NodeLinkedRisksEditor,
+        NodeLinkedSystemsEditor,
+        NodeLinkedGlEditor
     },
     methods : {
         startEdit() {
@@ -288,113 +143,6 @@ export default Vue.extend({
                     contactUsUrl,
                     true);
             })
-        },
-        cancelSystemLink() {
-            this.systemsToLink = []
-            this.showLinkSystem = false
-        },
-        saveSystemLink() {
-            if (this.systemsToLink.length == 0) {
-                return
-            }
-
-            let nodeId : number = this.currentNode.Id
-            let system : System = this.systemsToLink[0]
-            newNodeSystemLink({
-                nodeId: nodeId,
-                systemId: system.Id,
-                orgId: PageParamsStore.state.organization!.Id,
-            }).then(() => {
-                VueSetup.store.commit('addNodeSystemLink', {
-                    nodeId: nodeId,
-                    system: system,
-                })
-                this.systemsToLink = []
-                this.showLinkSystem = false
-            }).catch((err : any) => {
-                //@ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong, please reload the page and try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
-            })
-        },
-        deleteLinkedSystem(system : System) {
-            let id : number = this.currentNode.Id
-            deleteNodeSystemLink({
-                nodeId: id,
-                systemId: system.Id,
-                orgId: PageParamsStore.state.organization!.Id,
-            }).then(() => {
-                VueSetup.store.commit('deleteNodeSystemLink', {
-                    nodeId: id,
-                    systemId: system.Id,
-                })
-            }).catch((err : any) => {
-                //@ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong, please reload the page and try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
-            })
-        },
-        cancelGLLink() {
-            this.accountsToLink = []
-            this.showLinkGL = false
-        },
-        saveGLLink() {
-            if (this.accountsToLink.length == 0) {
-                return
-            }
-
-            let nodeId : number = this.currentNode.Id
-            let account : GeneralLedgerAccount = this.accountsToLink[0]
-            newNodeGLLink({
-                nodeId: nodeId,
-                accountId: account.Id,
-                orgId: PageParamsStore.state.organization!.Id,
-            }).then(() => {
-                VueSetup.store.commit('addNodeGLLink', {
-                    nodeId: nodeId,
-                    account: account,
-                })
-                this.accountsToLink = []
-                this.showLinkGL = false
-            }).catch((err : any) => {
-                //@ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong, please reload the page and try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
-            })
-        },
-        deleteLinkedGL(account : GeneralLedgerAccount) {
-            let id : number = this.currentNode.Id
-            deleteNodeGLLink({
-                nodeId: id,
-                accountId: account.Id,
-                orgId: PageParamsStore.state.organization!.Id,
-            }).then(() => {
-                VueSetup.store.commit('deleteNodeGLLink', {
-                    nodeId: id,
-                    accountId: account.Id,
-                })
-            }).catch((err : any) => {
-                //@ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong, please reload the page and try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
-            })
-
         },
     },
     computed: {
