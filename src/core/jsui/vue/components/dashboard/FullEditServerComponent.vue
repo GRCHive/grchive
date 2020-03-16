@@ -14,13 +14,15 @@
                         Link Systems
                     </v-card-title>
 
-                    <systems-table
+                    <system-table-with-controls
+                        class="ma-4"
                         v-model="systemsToLink"
-                        selectable
-                        multi
-                        :resources="linkableSystems"
+                        disable-new
+                        disable-delete
+                        enable-select
+                        :exclude="relevantSystems"
                     >
-                    </systems-table>
+                    </system-table-with-controls>
 
                     <v-card-actions>
                         <v-btn color="error" @click="showHideLinkSystems = false">
@@ -43,13 +45,15 @@
                         Link Databases
                     </v-card-title>
 
-                    <db-table
+                    <db-table-with-controls
+                        class="ma-4"
                         v-model="databasesToLink"
-                        selectable
-                        multi
-                        :resources="linkableDatabases"
+                        disable-new
+                        disable-delete
+                        enable-select
+                        :exclude="relevantDbs"
                     >
-                    </db-table>
+                    </db-table-with-controls>
 
                     <v-card-actions>
                         <v-btn color="error" @click="showHideLinkDatabases = false">
@@ -206,7 +210,9 @@ import { contactUsUrl, createOrgServersUrl } from '../../../ts/url'
 import { System } from '../../../ts/systems'
 import { Database } from '../../../ts/databases'
 import SystemsTable from '../../generic/SystemsTable.vue'
+import SystemTableWithControls from '../../generic/resources/SystemTableWithControls.vue'
 import DbTable from '../../generic/DbTable.vue'
+import DbTableWithControls from '../../generic/resources/DbTableWithControls.vue'
 import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 @Component({
@@ -214,7 +220,9 @@ import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
         GenericDeleteConfirmationForm,
         CreateNewServerForm,
         SystemsTable,
+        SystemTableWithControls,
         DbTable,
+        DbTableWithControls,
         AuditTrailViewer
     }
 })
