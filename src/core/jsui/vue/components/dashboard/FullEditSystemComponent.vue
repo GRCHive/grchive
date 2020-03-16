@@ -83,11 +83,14 @@
                                                         </v-card-title>
                                                         <v-divider></v-divider>
 
-                                                        <db-table :resources="allDb"
-                                                                  v-model="dbToLink"
-                                                                  selectable
-                                                                  multi
-                                                        ></db-table>
+                                                        <db-table-with-controls
+                                                            class="ma-4"
+                                                            v-model="dbToLink"
+                                                            :exclude="relatedDbs"
+                                                            disable-new
+                                                            enable-select
+                                                        >
+                                                        </db-table-with-controls>
 
                                                         <v-card-actions>
                                                             <v-btn color="error" @click="showHideLinkDb = false">
@@ -196,6 +199,7 @@ import CreateNewSystemForm from './CreateNewSystemForm.vue'
 import { contactUsUrl, createOrgSystemUrl } from '../../../ts/url'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import DbTable from '../../generic/DbTable.vue'
+import DbTableWithControls from '../../generic/resources/DbTableWithControls.vue'
 import { Database } from '../../../ts/databases'
 import { FullDeployment } from '../../../ts/deployments'
 import DeploymentEditor from '../../generic/DeploymentEditor.vue'
@@ -213,6 +217,7 @@ import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
         CreateNewSystemForm,
         GenericDeleteConfirmationForm,
         DbTable,
+        DbTableWithControls,
         DeploymentEditor,
         RiskTable,
         ControlTable,
