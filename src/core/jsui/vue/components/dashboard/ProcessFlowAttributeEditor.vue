@@ -14,7 +14,7 @@
             <v-tab v-if="nodeSelected">Node</v-tab>
             <v-tab>Process Flow</v-tab>
         </v-tabs>
-        <section class="ma-1" style="max-height: calc(100% - 48px);">
+        <div class="ma-1" style="max-height: calc(100% - 48px);">
             <v-tabs-items v-model="tab">
                 <v-tab-item v-if="nodeSelected">
                     <process-flow-node-attribute-editor></process-flow-node-attribute-editor>
@@ -24,7 +24,7 @@
                     <process-flow-flow-attribute-editor></process-flow-flow-attribute-editor>
                 </v-tab-item>
             </v-tabs-items>
-        </section>
+        </div>
     </v-navigation-drawer>
 </template>
 

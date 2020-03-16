@@ -68,7 +68,7 @@
                     <v-list-item-action class="ma-0">
                         <v-btn icon @click="minimizeSystem = !minimizeSystem">
                             <v-icon small>
-                                {{ !minimizeSystem ? "mdi-window-minimize" : "mdi-arrow-expand-all" }}
+                                {{ !minimizeSystem ? "mdi-chevron-up" : "mdi-chevron-down" }}
                             </v-icon>
                         </v-btn>
                     </v-list-item-action>
@@ -137,7 +137,7 @@
                     <v-list-item-action class="ma-0">
                         <v-btn icon @click="minimizeGL = !minimizeGL">
                             <v-icon small>
-                                {{ !minimizeGL ? "mdi-window-minimize" : "mdi-arrow-expand-all" }}
+                                {{ !minimizeGL ? "mdi-chevron-up" : "mdi-chevron-down" }}
                             </v-icon>
                         </v-btn>
                     </v-list-item-action>

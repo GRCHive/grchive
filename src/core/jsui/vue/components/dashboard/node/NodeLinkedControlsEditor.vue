@@ -53,7 +53,7 @@
                 <v-list-item-action class="ma-0">
                     <v-btn icon @click="minimize = !minimize">
                         <v-icon small>
-                            {{ !minimize ? "mdi-window-minimize" : "mdi-arrow-expand-all" }}
+                            {{ !minimize ? "mdi-chevron-up" : "mdi-chevron-down" }}
                         </v-icon>
                     </v-btn>
                 </v-list-item-action>
