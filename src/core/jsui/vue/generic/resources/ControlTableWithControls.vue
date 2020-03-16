@@ -3,7 +3,7 @@
         <v-list-item class="pa-0">
             <v-list-item-content class="disable-flex mr-4">
                 <v-list-item-title class="title">
-                    Risks
+                    Controls
                 </v-list-item-title>
             </v-list-item-content>
             <v-list-item-action>
@@ -15,40 +15,40 @@
             </v-list-item-action>
             <v-spacer></v-spacer>
             <v-list-item-action v-if="!disableNew">
-                <v-dialog v-model="showHideCreateNewRisk" persistent max-width="40%">
+                <v-dialog v-model="showHideCreateNewControl" persistent max-width="40%">
                     <template v-slot:activator="{ on }">
                         <v-btn class="primary" v-on="on">
                             New
                         </v-btn>
                     </template>
-                    <create-new-risk-form
+                    <create-new-control-form
                         :node-id="-1"
-                        @do-save="saveNewRisk"
-                        @do-cancel="cancelNewRisk">
-                    </create-new-risk-form>
+                        @do-save="saveNewControl"
+                        @do-cancel="cancelNewControl">
+                    </create-new-control-form>
                 </v-dialog>
             </v-list-item-action>
         </v-list-item>
 
-        <advanced-risk-filters
-            v-model="riskFilter"
+        <advanced-control-filters
+            v-model="controlFilter"
         >
-        </advanced-risk-filters>
+        </advanced-control-filters>
 
         <v-divider></v-divider>
 
-        <risk-table
+        <control-table
             :value="value"
-            :resources="filteredRisks"
+            :resources="filteredControls"
             :search="filterText"
             :use-crud-delete="!disableDelete"
             :confirm-delete="!disableDelete"
-            @delete="deleteSelectedRisk"
+            @delete="deleteSelectedControl"
             @input="modifySelected"
             :selectable="enableSelect"
             :multi="enableSelect"
         >
-        </risk-table>
+        </control-table>
     </div>
 </template>
 
@@ -57,14 +57,14 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
-import { getAllRisks, TAllRiskOutput } from '../../../ts/api/apiRisks'
-import { deleteRisk, TDeleteRiskOutput } from '../../../ts/api/apiRisks'
+import { getAllControls, TAllControlOutput } from '../../../ts/api/apiControls'
+import { deleteControls, TDeleteControlOutput } from '../../../ts/api/apiControls'
 import { contactUsUrl } from '../../../ts/url'
-import CreateNewRiskForm from '../../components/dashboard/CreateNewRiskForm.vue'
+import CreateNewControlForm from '../../components/dashboard/CreateNewControlForm.vue'
 import { PageParamsStore } from '../../../ts/pageParams'
-import RiskTable from '../RiskTable.vue'
-import AdvancedRiskFilters from '../filters/AdvancedRiskFilters.vue'
-import { RiskFilterData, NullRiskFilterData } from '../../../ts/risks'
+import ControlTable from '../ControlTable.vue'
+import AdvancedControlFilters from '../filters/AdvancedControlFilters.vue'
+import { ControlFilterData, NullControlFilterData } from '../../../ts/controls'
 
 const Props = Vue.extend({
     props: {
@@ -93,32 +93,32 @@ const Props = Vue.extend({
 
 @Component({
     components: {
-        CreateNewRiskForm,
-        RiskTable,
-        AdvancedRiskFilters
+        CreateNewControlForm,
+        ControlTable,
+        AdvancedControlFilters
     }
 })
-export default class RiskTableWithControls extends Props {
-    allRisks: ProcessFlowRisk[] = []
+export default class ControlTableWithControls extends Props {
+    allControls: ProcessFlowControl[] = []
     filterText : string = ""
-    showHideCreateNewRisk: boolean = false
-    riskFilter: RiskFilterData = JSON.parse(JSON.stringify(NullRiskFilterData))
+    showHideCreateNewControl: boolean = false
+    controlFilter: ControlFilterData = JSON.parse(JSON.stringify(NullControlFilterData))
 
     get excludeSet() : Set<number> {
         return new Set<number>(this.exclude.map((ele : any) => ele.Id))
     }
 
-    get filteredRisks() : ProcessFlowRisk[] {
-        return this.allRisks.filter((ele : ProcessFlowRisk) => !this.excludeSet.has(ele.Id))
+    get filteredControls() : ProcessFlowControl[] {
+        return this.allControls.filter((ele : ProcessFlowControl) => !this.excludeSet.has(ele.Id))
     }
 
-    @Watch('riskFilter', {deep:true})
-    refreshRisks() {
-        getAllRisks({
+    @Watch('controlFilter', {deep:true})
+    refreshControls() {
+        getAllControls({
             orgName: PageParamsStore.state.organization!.OktaGroupName,
-            filter: this.riskFilter,
-        }).then((resp : TAllRiskOutput) => {
-            this.allRisks = resp.data
+            filter: this.controlFilter,
+        }).then((resp : TAllControlOutput) => {
+            this.allControls = resp.data
         }).catch((err) => {
             //@ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
@@ -130,24 +130,25 @@ export default class RiskTableWithControls extends Props {
         })
     }
 
-    saveNewRisk(risk : ProcessFlowRisk) {
-        this.allRisks.unshift(risk)
-        this.showHideCreateNewRisk = false
+    saveNewControl(control : ProcessFlowControl) {
+        this.allControls.unshift(control)
+        this.showHideCreateNewControl = false
     }
 
-    cancelNewRisk() {
-        this.showHideCreateNewRisk = false
+    cancelNewControl() {
+        this.showHideCreateNewControl = false
     }
 
-    deleteSelectedRisk(risk : ProcessFlowRisk, global : boolean) {
-        deleteRisk({
+    deleteSelectedControl(control : ProcessFlowControl, global : boolean) {
+        deleteControls({
             nodeId: -1,
-            riskIds: [risk.Id],
+            riskIds: [-1],
+            controlIds: [control.Id],
             global: true,
-        }).then((resp : TDeleteRiskOutput) => {
-            this.allRisks.splice(
-                this.allRisks.findIndex((ele : ProcessFlowRisk) =>
-                    ele.Id == risk.Id),
+        }).then((resp : TDeleteControlOutput) => {
+            this.allControls.splice(
+                this.allControls.findIndex((ele : ProcessFlowControl) =>
+                    ele.Id == control.Id),
                 1)
         }).catch((err) => {
             // @ts-ignore
@@ -160,12 +161,12 @@ export default class RiskTableWithControls extends Props {
         })
     }
 
-    modifySelected(vals : ProcessFlowRisk[]) {
+    modifySelected(vals : ProcessFlowControl[]) {
         this.$emit('input', vals)
     }
 
     mounted() {
-        this.refreshRisks()
+        this.refreshControls()
     }
 }
 

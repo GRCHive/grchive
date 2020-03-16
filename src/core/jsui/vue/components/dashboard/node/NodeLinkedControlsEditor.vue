@@ -17,13 +17,15 @@
                 </v-card-title>
                 <v-divider></v-divider>
 
-                <control-table
+                <control-table-with-controls
+                    class="ma-4"
                     v-model="selectedControls"
-                    :resources="unlinkedControls"
-                    selectable
-                    multi
+                    :exclude="nodeControls"
+                    disable-new
+                    disable-delete
+                    enable-select
                 >
-                </control-table>
+                </control-table-with-controls>
 
                 <v-card-actions>
                     <v-btn
@@ -108,6 +110,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import VueSetup from '../../../../ts/vueSetup'
 import ControlTable from '../../../generic/ControlTable.vue'
+import ControlTableWithControls from '../../../generic/resources/ControlTableWithControls.vue'
 import CreateNewControlForm from '../CreateNewControlForm.vue'
 import {
     addExistingControls,
@@ -118,7 +121,8 @@ import { contactUsUrl } from '../../../../ts/url'
 @Component({
     components: {
         ControlTable,
-        CreateNewControlForm
+        CreateNewControlForm,
+        ControlTableWithControls
     }
 })
 export default class NodeLinkedControlsEditor extends Vue {
