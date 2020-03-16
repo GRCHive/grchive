@@ -31,34 +31,45 @@
 <script lang="ts">
 
 import Vue from 'vue'
+import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import VueSetup from '../../../ts/vueSetup' 
 import ProcessFlowNodeAttributeEditor from './ProcessFlowNodeAttributeEditor.vue'
 import ProcessFlowFlowAttributeEditor from './ProcessFlowFlowAttributeEditor.vue'
 
-export default Vue.extend({
+const Props = Vue.extend({
     props: {
         customClipHeight : Number,
         showHide : Boolean
     },
-    data : () => ({
-        tab : 0
-    }),
+})
+
+@Component({
     components: {
         ProcessFlowNodeAttributeEditor,
         ProcessFlowFlowAttributeEditor
     },
-    computed: {
-        clipStyle() : any {
-            return {
-                "height":  "100vh !important",
-                "max-height": "calc(100% - " + this.customClipHeight.toString()  + "px) !important",
-                "top" : this.customClipHeight.toString() + "px"
-            }
-        },
-        nodeSelected() : boolean {
-            return VueSetup.store.getters.isNodeSelected
-        },
-    },
 })
+export default class ProcessFlowAttributeEditor extends Props {
+    tab : number =  0
+    get clipStyle() : any {
+        return {
+            "height":  "100vh !important",
+            "max-height": "calc(100% - " + this.customClipHeight.toString()  + "px) !important",
+            "top" : this.customClipHeight.toString() + "px"
+        }
+    }
+
+    get nodeSelected() : boolean {
+        return VueSetup.store.getters.isNodeSelected
+    } 
+
+    @Watch('nodeSelected')
+    resetTabs() {
+        Vue.nextTick(() => {
+            this.tab = 1
+        })
+    }
+}
 
 </script>
