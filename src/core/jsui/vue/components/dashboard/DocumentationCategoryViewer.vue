@@ -3,7 +3,6 @@
         <doc-file-manager
             class="mb-4"
             :cat-id="catId"
-            v-model="allFiles"
         >
         </doc-file-manager>
         <v-card>
@@ -65,44 +64,10 @@ const Props = Vue.extend({
     }
 })
 export default class DocumentationCategoryViewer extends Props {
-    allFiles : ControlDocumentationFile[] = []
     requests : DocumentRequest[] = []
     showHideRequest : boolean = false
     
-    @Watch('catId')
-    reloadFiles() {
-        allControlDocuments({
-            catId: this.catId,
-            orgId: PageParamsStore.state.organization!.Id,
-        }).then((resp : TAllControlDocumentsOutput) => {
-            this.allFiles = resp.data.Files
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
-    }
-
     refreshData() {
-        allControlDocuments({
-            catId: this.catId,
-            orgId: PageParamsStore.state.organization!.Id,
-        }).then((resp : TAllControlDocumentsOutput) => {
-            this.allFiles = resp.data.Files
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
-
         getAllDocRequests({
             orgId: PageParamsStore.state.organization!.Id,
             catId: this.catId,

@@ -131,6 +131,7 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import DocFileTable from './DocFileTable.vue'
 import DocSearcherForm from './DocSearcherForm.vue'
 import GenericDeleteConfirmationForm from '../components/dashboard/GenericDeleteConfirmationForm.vue'
@@ -139,7 +140,10 @@ import { ControlDocumentationFile, VersionedMetadata } from '../../ts/controls'
 import { deleteControlDocuments } from '../../ts/api/apiControlDocumentation'
 import { PageParamsStore } from '../../ts/pageParams'
 import { contactUsUrl } from '../../ts/url'
-import { TDownloadControlDocumentsOutput, downloadControlDocuments } from '../../ts/api/apiControlDocumentation'
+import { 
+    TDownloadControlDocumentsOutput, downloadControlDocuments,
+    allControlDocuments, TAllControlDocumentsOutput,
+} from '../../ts/api/apiControlDocumentation'
 import {
     cleanJsonControlDocumentationFile
 } from '../../ts/controls'
@@ -274,6 +278,8 @@ export default class DocFileManager extends Props {
         this.showHideDeleteFiles = true
     }
 
+    @Watch('catId')
+    @Watch('folderId')
     refreshData() {
         if (this.folderId != -1) {
             allFolderFileLink({
@@ -290,7 +296,21 @@ export default class DocFileManager extends Props {
                     contactUsUrl,
                     true);
             })
-        } else {
+        } else if (this.catId != -1) {
+            allControlDocuments({
+                catId: this.catId,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TAllControlDocumentsOutput) => {
+                this.allFiles = resp.data.Files
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
         }
     }
 
