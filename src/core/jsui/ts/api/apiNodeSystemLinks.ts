@@ -8,6 +8,7 @@ import {
 import { postFormJson } from '../http'
 import { getAPIRequestConfig } from './apiUtility'
 import { System } from '../systems'
+import { cleanProcessFlowFromJson } from '../processFlow'
 
 export interface TNewNodeSystemLinkInput {
     nodeId: number
@@ -40,5 +41,10 @@ export interface TAllNodeSystemLinkOutput {
 }
 
 export function allNodeSystemLink(inp : TAllNodeSystemLinkInput) : Promise<TAllNodeSystemLinkOutput> {
-    return axios.get(allNodeSystemLinkUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+    return axios.get(allNodeSystemLinkUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TAllNodeSystemLinkOutput) => {
+        if (resp.data.length > 0 && (resp.data[0] as ProcessFlowBasicData).CreationTime !== undefined) {
+            (resp.data as ProcessFlowBasicData[]).forEach(cleanProcessFlowFromJson)
+        }
+        return resp
+    })
 }
