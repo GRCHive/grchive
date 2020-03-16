@@ -31,11 +31,15 @@
                             <v-card-title>
                                 Link General Ledger Accounts
                             </v-card-title>
+                            <v-divider></v-divider>
 
-                            <general-ledger-account-search-form-component
+                            <general-ledger-account-table-with-controls
+                                class="ma-4"
                                 v-model="accountsToLink"
+                                :exclude="linkedGL"
+                                enable-select
                             >
-                            </general-ledger-account-search-form-component>
+                            </general-ledger-account-table-with-controls>
 
                             <v-card-actions>
                                 <v-btn
@@ -73,8 +77,8 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import VueSetup from '../../../../ts/vueSetup' 
-import GeneralLedgerAccountSearchFormComponent from '../../../generic/GeneralLedgerAccountSearchFormComponent.vue'
 import GeneralLedgerAccountsTable from '../../../generic/GeneralLedgerAccountsTable.vue'
+import GeneralLedgerAccountTableWithControls from '../../../generic/resources/GeneralLedgerAccountTableWithControls.vue'
 import { PageParamsStore } from '../../../../ts/pageParams'
 import { contactUsUrl } from '../../../../ts/url'
 import { GeneralLedgerAccount, GeneralLedger } from '../../../../ts/generalLedger'
@@ -86,7 +90,7 @@ import {
 @Component({
     components: {
         GeneralLedgerAccountsTable,
-        GeneralLedgerAccountSearchFormComponent
+        GeneralLedgerAccountTableWithControls
     }
 })
 export default class NodeLinkedGLEditor extends Vue {
