@@ -31,11 +31,17 @@
                             <v-card-title>
                                 Link System
                             </v-card-title>
+                            <v-divider></v-divider>
 
-                            <system-search-form-component
+                            <system-table-with-controls
+                                class="ma-4"
                                 v-model="systemsToLink"
+                                :exclude="linkedSystems"
+                                disable-new
+                                disable-delete
+                                enable-select
                             >
-                            </system-search-form-component>
+                            </system-table-with-controls>
 
                             <v-card-actions>
                                 <v-btn
@@ -74,7 +80,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import VueSetup from '../../../../ts/vueSetup' 
 import SystemsTable from '../../../generic/SystemsTable.vue'
-import SystemSearchFormComponent from '../../../generic/SystemSearchFormComponent.vue'
+import SystemTableWithControls from '../../../generic/resources/SystemTableWithControls.vue'
 import { PageParamsStore } from '../../../../ts/pageParams'
 import { System } from '../../../../ts/systems'
 import { contactUsUrl } from '../../../../ts/url'
@@ -86,7 +92,7 @@ import {
 @Component({
     components: {
         SystemsTable,
-        SystemSearchFormComponent
+        SystemTableWithControls,
     }
 })
 export default class NodeLinkedSystemsEditor extends Vue {
