@@ -56,7 +56,10 @@ export default Vue.extend({
         changeUser(val : User) {
             this.$emit('update:user', val)
         },
-        compare(a : User, b : User) : boolean {
+        compare(a : User | null, b : User | null) : boolean {
+            if (a == null || b == null) {
+                return false
+            }
             return a.Id == b.Id
         }
     },
