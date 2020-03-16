@@ -7,13 +7,16 @@
                 </v-card-title>
                 <v-divider></v-divider>
 
-                <control-table
+                <control-table-with-controls
+                    v-if="showHideExisting"
+                    class="ma-4"
                     v-model="selectedControls"
-                    :resources="unlinkedControls"
-                    selectable
-                    multi
+                    :exclude="controlsForRisk(existingControlRiskId)"
+                    disable-new
+                    disable-delete
+                    enable-select
                 >
-                </control-table>
+                </control-table-with-controls>
 
                 <v-card-actions>
                     <v-btn
@@ -47,8 +50,8 @@
                 </v-list-item-action>
 
                 <v-list-item-content>
-                    <v-list-item-title>{{ risk.Name }}</v-list-item-title>
-                    <v-list-item-subtitle>{{ risk.Description }}</v-list-item-subtitle>
+                    <v-list-item-title>{{ risk.Identifier }}</v-list-item-title>
+                    <v-list-item-subtitle>{{ risk.Name }}</v-list-item-subtitle>
                 </v-list-item-content>
 
                 <v-spacer></v-spacer>
@@ -80,12 +83,14 @@ import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 import VueSetup from '../../../ts/vueSetup'
 import ControlTable from '../../generic/ControlTable.vue'
+import ControlTableWithControls from '../../generic/resources/ControlTableWithControls.vue'
 import { addExistingControls, deleteControls } from '../../../ts/api/apiControls'
 import { contactUsUrl } from '../../../ts/url'
 
 @Component({
     components: {
-        ControlTable
+        ControlTable,
+        ControlTableWithControls
     }
 })
 export default class ProcessFlowRiskControlLinkage extends Vue {
@@ -97,16 +102,6 @@ export default class ProcessFlowRiskControlLinkage extends Vue {
 
     clickRiskBar(riskId : number) {
         Vue.set(this.riskExpansion, riskId, !this.riskExpansion[riskId])
-    }
-
-    get unlinkedControls() : ProcessFlowControl[] {
-        if (this.existingControlRiskId == -1) {
-            return []
-        }
-
-        let controlsForRisk : ProcessFlowControl[] = VueSetup.store.getters.controlsForRisk(this.existingControlRiskId)
-        let usedSet : Set<number> = new Set(controlsForRisk.map((ele : ProcessFlowControl) => ele.Id))
-        return VueSetup.store.getters.controlList.filter((ele : ProcessFlowControl) => !usedSet.has(ele.Id))
     }
 
     get currentFlowRisks() : ProcessFlowRisk[] {
