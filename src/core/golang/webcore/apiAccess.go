@@ -1,6 +1,8 @@
 package webcore
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"github.com/google/uuid"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
@@ -33,9 +35,32 @@ func RefreshGrantAPIKey(userId int64, w http.ResponseWriter, r *http.Request) er
 	// This situation happens if they share the browser and login as a different user.
 	forceNeedNewKey := false
 	cookie, err := r.Cookie("client-api-key")
-	if err == nil && key != nil {
-		clientKey := core.RawApiKey(cookie.Value)
-		forceNeedNewKey = clientKey.Hash() != key.HashedKey
+	if err != nil {
+		forceNeedNewKey = true
+	}
+
+	if !forceNeedNewKey {
+		var clientApiKey core.RawApiKey = ""
+
+		// Check if cookie is well formed.
+		// We expect the cookie to be base64 encoded JSON.
+		// If it isn't, then re-grant the cookie (older API keys don't have this form).
+		rawJsonCookie, err := base64.StdEncoding.DecodeString(cookie.Value)
+		if err == nil {
+			jsonData := map[string]string{}
+			err := json.Unmarshal([]byte(rawJsonCookie), &jsonData)
+			if err == nil {
+				clientApiKey = core.RawApiKey(jsonData["Key"])
+			} else {
+				forceNeedNewKey = true
+			}
+		} else {
+			forceNeedNewKey = true
+		}
+
+		if key != nil && !forceNeedNewKey {
+			forceNeedNewKey = clientApiKey.Hash() != key.HashedKey
+		}
 	}
 
 	if err != nil || key == nil || forceNeedNewKey || key.IsExpired(core.DefaultClock) {
@@ -51,7 +76,19 @@ func RefreshGrantAPIKey(userId int64, w http.ResponseWriter, r *http.Request) er
 		if err != nil {
 			return err
 		}
-		http.SetCookie(w, CreateCookie("client-api-key", string(rawKey), key.SecondsToExpiration(core.DefaultClock), false))
+
+		data, err := json.Marshal(struct {
+			Key        string
+			Expiration time.Time
+		}{
+			Key:        string(rawKey),
+			Expiration: key.ExpirationDate,
+		})
+
+		if err != nil {
+			return err
+		}
+		http.SetCookie(w, CreateCookie("client-api-key", base64.StdEncoding.EncodeToString(data), key.SecondsToExpiration(core.DefaultClock), false))
 	}
 
 	return nil

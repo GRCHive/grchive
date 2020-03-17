@@ -39,6 +39,7 @@ const DashboardOrgAuditTrail = () => import (/* webpackChunkName: "DashboardOrgA
 const SnackBar = () => import( /* webpackChunkName: "SnackBar" */ '../vue/components/SnackBar.vue')
 import { getCurrentCSRF } from './csrf'
 import { PageParamsStore, PageParamsStoreState  } from '../ts/pageParams'
+import { startTemporaryApiKeyRefresh } from '../ts/api/apiUtility'
 
 import '../sass/main.scss'
 
@@ -50,6 +51,8 @@ function mountApp(inData : PageParamsStoreState) {
     } else {
         document.title = `${PageParamsStore.state.user!.FirstName}  ${PageParamsStore.state.user!.LastName} :: ${PageParamsStore.state.site!.CompanyName}`
     }
+
+    startTemporaryApiKeyRefresh()
 
     new Vue({
         el: '#app',
