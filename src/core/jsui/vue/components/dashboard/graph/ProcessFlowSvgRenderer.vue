@@ -334,6 +334,9 @@ export default Vue.extend({
             VueSetup.store.commit('setSelectedProcessFlowEdge', edgeId)
             VueSetup.store.commit('setSelectedProcessFlowNode', -1)
             e.stopPropagation()
+        },
+        syncViewBox() {
+            RenderLayout.store.commit('setViewBox', this.viewBox)
         }
     },
     mounted() {
@@ -341,6 +344,11 @@ export default Vue.extend({
         Vue.nextTick(() => {
             this.forceUpdate += 1
         })
+
+        this.$watch(() => {
+            return this.viewBox
+        }, this.syncViewBox, { deep : true})
+        this.syncViewBox()
     }
 })
 

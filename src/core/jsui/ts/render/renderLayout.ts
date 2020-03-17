@@ -168,7 +168,7 @@ function addIOToGroupLayout(layout: NodeLayout, io : ProcessFlowInputOutput, isI
     }
 }
 
-function createDefaultNodeLayout(node : ProcessFlowNode, rendererRect : IDOMRect) : NodeLayout {
+function createDefaultNodeLayout(node : ProcessFlowNode, rendererRect : IDOMRect, viewBox : BoundingBox) : NodeLayout {
     let layout = <NodeLayout>{
         transform: {...LocalSettings.state.viewBoxTransform},
         titleTransform: <TransformData>{
@@ -184,8 +184,8 @@ function createDefaultNodeLayout(node : ProcessFlowNode, rendererRect : IDOMRect
         boxHeight: 200
     }
 
-    layout.transform.tx += rendererRect.width / 2
-    layout.transform.ty += rendererRect.height / 2
+    layout.transform.tx = viewBox.x + viewBox.width / 2
+    layout.transform.ty = viewBox.y + viewBox.height / 2
     
     // Group the input and outputs by their type first.
     for (let input of node.Inputs) {
@@ -234,8 +234,8 @@ function createDefaultNodeLayout(node : ProcessFlowNode, rendererRect : IDOMRect
     return layout
 }
 
-function mergeNodeLayout(node : ProcessFlowNode, existingLayout: NodeLayout, rendererRect : IDOMRect) : NodeLayout {
-    let defaultLayout : NodeLayout = createDefaultNodeLayout(node, rendererRect)
+function mergeNodeLayout(node : ProcessFlowNode, existingLayout: NodeLayout, rendererRect : IDOMRect, viewBox : BoundingBox) : NodeLayout {
+    let defaultLayout : NodeLayout = createDefaultNodeLayout(node, rendererRect, viewBox)
     if (!existingLayout) {
         return defaultLayout
     }
@@ -248,6 +248,7 @@ interface ProcessFlowRenderLayoutStoreState {
     ready: boolean
     fullGraph: Object
     rendererRect: IDOMRect
+    viewBox: BoundingBox
 }
 
 function onUpdateAssociatedNode(layout : NodeLayout) {
@@ -321,10 +322,19 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
             width: 0,
             height: 0
         },
+        viewBox: {
+            x: 0,
+            y: 0,
+            width: 0,
+            height: 0
+        }
     },
     mutations: {
         setRendererRect(state, val) {
             state.rendererRect = val
+        },
+        setViewBox(state, val) {
+            state.viewBox = val
         },
         resetNodeLayout(state) {
             state.ready = false
@@ -414,7 +424,7 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
             for (let nodeKey of processFlow.NodeKeys) {
                 context.commit('setNodeLayout', {
                     nodeId: nodeKey,
-                    layout: createDefaultNodeLayout(processFlow.Nodes[nodeKey], context.state.rendererRect),
+                    layout: createDefaultNodeLayout(processFlow.Nodes[nodeKey], context.state.rendererRect, context.state.viewBox),
                     isDefault: true
                 })
             }
@@ -428,7 +438,8 @@ const renderLayoutStore: StoreOptions<ProcessFlowRenderLayoutStoreState> = {
                     layout: mergeNodeLayout(
                                 processFlow.Nodes[nodeKey],
                                 context.state.nodeLayouts[nodeKey],
-                                context.state.rendererRect),
+                                context.state.rendererRect,
+                                context.state.viewBox),
                     isDefault: false
                 })
             }
