@@ -40,6 +40,13 @@ export default class DocRequestTable extends ResourceTableProps {
                 value: 'assignee',
             },
             {
+                text: 'Due Date',
+                value: 'dueDate',
+                sort: (a : Date, b : Date) => {
+                    return a.getTime() - b.getTime()
+                }
+            },
+            {
                 text: 'Complete',
                 value: 'complete',
             },
@@ -65,6 +72,7 @@ export default class DocRequestTable extends ResourceTableProps {
             requestTime: inp.RequestTime,
             complete: !!inp.CompletionTime,
             assignee: createUserString(MetadataStore.getters.getUser(inp.AssigneeUserId)),
+            dueDate: inp.DueDate,
             value: inp
         }
     }
@@ -101,6 +109,13 @@ export default class DocRequestTable extends ResourceTableProps {
         )
     }
 
+    renderDueDate(props : any) : VNode {
+        return this.$createElement(
+            'span',
+            standardFormatTime(props.item.dueDate)
+        )
+    }
+
     render() : VNode {
         return this.$createElement(
             BaseResourceTable,
@@ -120,6 +135,7 @@ export default class DocRequestTable extends ResourceTableProps {
                     'expanded-item': this.renderExpansion,
                     'item.complete': this.renderFulfilled,
                     'item.requestTime': this.renderRequestTime,
+                    'item.dueDate': this.renderDueDate,
                 }
             }
         )

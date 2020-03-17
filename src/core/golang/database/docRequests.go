@@ -19,7 +19,8 @@ func CreateNewDocumentRequestWithTx(request *core.DocumentRequest, role *core.Ro
 			org_id,
 			requested_user_id,
 			request_time,
-			assignee
+			assignee,
+			due_date
 		)
 		VALUES (
 			:name,
@@ -27,7 +28,8 @@ func CreateNewDocumentRequestWithTx(request *core.DocumentRequest, role *core.Ro
 			:org_id,
 			:requested_user_id,
 			:request_time,
-			:assignee
+			:assignee,
+			:due_date
 		)
 		RETURNING id
 	`, request)
@@ -72,7 +74,8 @@ func UpdateDocumentRequest(request *core.DocumentRequest, role *core.Role) error
 		UPDATE document_requests
 		SET name = :name,
 			description = :description,
-			assignee = :assignee
+			assignee = :assignee,
+			due_date = :due_date
 		WHERE id = :id
 			AND org_id = :org_id
 		RETURNING *

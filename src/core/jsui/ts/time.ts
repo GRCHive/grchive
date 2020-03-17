@@ -1,4 +1,7 @@
-export function standardFormatTime(dt : Date) : string {
+export function standardFormatTime(dt : Date | null) : string {
+    if (!dt) {
+        return "None"
+    }
     return dt.toLocaleString(undefined, {
         //@ts-ignore
         dateStyle: "short",
@@ -7,7 +10,10 @@ export function standardFormatTime(dt : Date) : string {
     })
 }
 
-export function standardFormatDate(dt : Date) : string {
+export function standardFormatDate(dt : Date | null) : string {
+    if (!dt) {
+        return "None"
+    }
     return `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, "0")}-${dt.getDate().toString().padStart(2, "0")}`
 }
 

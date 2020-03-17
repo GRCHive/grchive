@@ -93,6 +93,7 @@ export interface DbSqlQueryRequest {
     UploadTime      : Date
     UploadUserId    : number
     AssigneeUserId  : number | null
+    DueDate         : Date | null
     OrgId           : number
     Name            : string
     Description     : string
@@ -104,6 +105,10 @@ export function cleanDbSqlQueryFromJson(q : DbSqlQuery) {
 
 export function cleanDbSqlRequestFromJson(q : DbSqlQueryRequest) {
     q.UploadTime = new Date(q.UploadTime)
+
+    if (!!q.DueDate) {
+        q.DueDate = new Date(q.DueDate)
+    }
 }
 
 export interface DbSqlQueryRequestApproval {

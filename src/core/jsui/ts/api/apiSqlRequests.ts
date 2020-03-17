@@ -23,6 +23,7 @@ export interface TNewSqlRequestInput {
     name: string
     description: string
     assigneeUserId: number | null
+    dueDate: Date | null
 }
 
 export interface TNewSqlRequestOutput {
@@ -98,6 +99,7 @@ export interface TUpdateSqlRequestInput {
     name: string
     description: string
     assigneeUserId: number | null
+    dueDate: Date | null
 }
 
 export interface TUpdateSqlRequestOutput {

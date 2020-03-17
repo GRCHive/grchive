@@ -61,6 +61,13 @@ export default class SqlRequestTable extends ResourceTableProps {
                 value: 'assignee',
             },
             {
+                text: 'Due Date',
+                value: 'dueDate',
+                sort: (a : Date, b : Date) => {
+                    return a.getTime() - b.getTime()
+                }
+            },
+            {
                 text: 'Approval',
                 value: 'approval',
             },
@@ -164,6 +171,7 @@ export default class SqlRequestTable extends ResourceTableProps {
             requestTime: inp.UploadTime,
             approval: this.idToApproval[inp.Id],
             assignee: createUserString(MetadataStore.getters.getUser(inp.AssigneeUserId)),
+            dueDate: inp.DueDate,
             value: inp
         }
     }
@@ -289,6 +297,13 @@ export default class SqlRequestTable extends ResourceTableProps {
         )
     }
 
+    renderDueDate(props : any) : VNode {
+        return this.$createElement(
+            'span',
+            standardFormatTime(props.item.dueDate)
+        )
+    }
+
     render() : VNode {
         return this.$createElement(
             BaseResourceTable,
@@ -308,6 +323,7 @@ export default class SqlRequestTable extends ResourceTableProps {
                     'expanded-item': this.renderExpansion,
                     'item.approval': this.renderApproval,
                     'item.requestTime': this.renderRequestTime,
+                    'item.dueDate': this.renderDueDate,
                 }
             }
         )

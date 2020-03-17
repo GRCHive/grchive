@@ -24,8 +24,17 @@
             class="mt-4"
             label="Assignee"
             :user.sync="assignee"
+            :readonly="!canEdit"
         >
         </user-search-form-component>
+
+        <date-time-picker-form-component
+            v-model="dueDate"
+            label="Due Date"
+            :readonly="!canEdit"
+            clearable
+        >
+        </date-time-picker-form-component>
 
         <v-select
             v-model="currentLinkage"
@@ -105,6 +114,7 @@ import MetadataStore from '../../../ts/metadata'
 import DocumentCategorySearchFormComponent from '../../generic/DocumentCategorySearchFormComponent.vue'
 import ControlSearchFormComponent from '../../generic/ControlSearchFormComponent.vue'
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
+import DateTimePickerFormComponent from '../../generic/DateTimePickerFormComponent.vue'
 
 const Props = Vue.extend({
     props: {
@@ -144,7 +154,8 @@ const Props = Vue.extend({
     components: {
         DocumentCategorySearchFormComponent,
         ControlSearchFormComponent,
-        UserSearchFormComponent
+        UserSearchFormComponent,
+        DateTimePickerFormComponent
     }
 })
 
@@ -158,6 +169,7 @@ export default class CreateNewRequestForm extends Props {
     linkControl : ProcessFlowControl | null = null
     canEdit: boolean = false
     assignee : User | null = null
+    dueDate : Date | null = null
 
     currentLinkage : RequestLinkageMode = RequestLinkageMode.None
     requestLinkageItems: any[] = requestLinkageItems
@@ -201,7 +213,8 @@ export default class CreateNewRequestForm extends Props {
             orgId: PageParamsStore.state.organization!.Id,
             requestedUserId: PageParamsStore.state.user!.Id,
             vendorProductId: this.vendorProductId,
-            assigneeUserId: !!this.assignee ? this.assignee.Id : null
+            assigneeUserId: !!this.assignee ? this.assignee.Id : null,
+            dueDate: this.dueDate,
         }
 
         if (this.currentLinkage == RequestLinkageMode.DocCat) {
@@ -228,7 +241,8 @@ export default class CreateNewRequestForm extends Props {
             orgId: PageParamsStore.state.organization!.Id,
             requestedUserId: PageParamsStore.state.user!.Id,
             vendorProductId: this.vendorProductId,
-            assigneeUserId: !!this.assignee ? this.assignee.Id : null
+            assigneeUserId: !!this.assignee ? this.assignee.Id : null,
+            dueDate: this.dueDate,
         }
 
         // Don't let people update cat or controls. NO need 
@@ -264,6 +278,7 @@ export default class CreateNewRequestForm extends Props {
             this.description = this.referenceReq.Description
             this.realCat = this.referenceCat
             this.assignee = MetadataStore.getters.getUser(this.referenceReq.AssigneeUserId)
+            this.dueDate = this.referenceReq.DueDate
         } else {
             this.name = ""
             this.description = ""
@@ -272,6 +287,7 @@ export default class CreateNewRequestForm extends Props {
             }
             this.linkControl = null
             this.assignee = null
+            this.dueDate = null
         }
 
         if (!!this.referenceCat || this.catId != -1) {

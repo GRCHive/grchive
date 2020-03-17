@@ -15,6 +15,7 @@ type NewSqlRequestInput struct {
 	Name           string         `json:"name"`
 	Description    string         `json:"description"`
 	AssigneeUserId core.NullInt64 `json:"assigneeUserId"`
+	DueDate        core.NullTime  `json:"dueDate"`
 }
 
 func newSqlRequest(w http.ResponseWriter, r *http.Request) {
@@ -48,6 +49,7 @@ func newSqlRequest(w http.ResponseWriter, r *http.Request) {
 		UploadTime:     time.Now().UTC(),
 		UploadUserId:   userId,
 		AssigneeUserId: inputs.AssigneeUserId,
+		DueDate:        inputs.DueDate,
 		OrgId:          inputs.OrgId,
 		Name:           inputs.Name,
 		Description:    inputs.Description,
@@ -190,6 +192,7 @@ type UpdateSqlRequestInput struct {
 	Name           string         `json:"name"`
 	Description    string         `json:"description"`
 	AssigneeUserId core.NullInt64 `json:"assigneeUserId"`
+	DueDate        core.NullTime  `json:"dueDate"`
 }
 
 func updateSqlRequest(w http.ResponseWriter, r *http.Request) {
@@ -217,6 +220,7 @@ func updateSqlRequest(w http.ResponseWriter, r *http.Request) {
 		Name:           inputs.Name,
 		Description:    inputs.Description,
 		AssigneeUserId: inputs.AssigneeUserId,
+		DueDate:        inputs.DueDate,
 	}
 
 	err = database.UpdateSqlQueryRequest(&request, role)

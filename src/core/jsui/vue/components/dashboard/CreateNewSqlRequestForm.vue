@@ -35,8 +35,17 @@
             class="mt-4"
             label="Assignee"
             :user.sync="assignee"
+            :readonly="!canEdit"
         >
         </user-search-form-component>
+
+        <date-time-picker-form-component
+            v-model="dueDate"
+            label="Due Date"
+            :readonly="!canEdit"
+            clearable
+        >
+        </date-time-picker-form-component>
 
         <v-text-field
             :value="requestTime"
@@ -98,6 +107,7 @@ import { PageParamsStore } from '../../../ts/pageParams'
 import MetadataStore from '../../../ts/metadata'
 import { standardFormatTime } from '../../../ts/time'
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
+import DateTimePickerFormComponent from '../../generic/DateTimePickerFormComponent.vue'
 
 const Props = Vue.extend({
     props: {
@@ -119,6 +129,7 @@ const Props = Vue.extend({
 @Component({
     components: {
         UserSearchFormComponent,
+        DateTimePickerFormComponent
     }
 })
 export default class CreateNewSqlRequestForm extends Props {
@@ -129,6 +140,7 @@ export default class CreateNewSqlRequestForm extends Props {
     description: string = ""
     rules: any = rules
     assignee : User | null = null
+    dueDate : Date | null = null
 
     get queryId() : number {
         if (this.forceQueryId != -1) {
@@ -178,7 +190,8 @@ export default class CreateNewSqlRequestForm extends Props {
             orgId: PageParamsStore.state.organization!.Id,
             name: this.name,
             description: this.description,
-            assigneeUserId: !!this.assignee ? this.assignee.Id : null
+            assigneeUserId: !!this.assignee ? this.assignee.Id : null,
+            dueDate: this.dueDate,
         }).then((resp : TUpdateSqlRequestOutput) => {
             this.$emit('do-save', resp.data)
             this.canEdit = false
@@ -199,7 +212,8 @@ export default class CreateNewSqlRequestForm extends Props {
             orgId: PageParamsStore.state.organization!.Id,
             name: this.name,
             description: this.description,
-            assigneeUserId: !!this.assignee ? this.assignee.Id : null
+            assigneeUserId: !!this.assignee ? this.assignee.Id : null,
+            dueDate: this.dueDate,
         }).then((resp : TNewSqlRequestOutput) => {
             this.$emit('do-save', resp.data)
             this.clearForm()
@@ -225,10 +239,12 @@ export default class CreateNewSqlRequestForm extends Props {
             this.name = this.referenceRequest.Name
             this.description = this.referenceRequest.Description
             this.assignee = MetadataStore.getters.getUser(this.referenceRequest.AssigneeUserId)
+            this.dueDate = this.referenceRequest.DueDate
         } else {
             this.name = ""
             this.description = ""
             this.assignee = null
+            this.dueDate = null
         }
     }
 }

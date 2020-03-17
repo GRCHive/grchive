@@ -19,6 +19,7 @@ export interface TNewDocRequestInput {
     orgId: number
     requestedUserId: number
     assigneeUserId: number | null
+    dueDate: Date | null
     vendorProductId: number
 }
 
@@ -64,13 +65,7 @@ export interface TGetAllDocumentRequestOutput {
 
 export function getAllDocRequests(inp : TGetAllDocumentRequestInput) : Promise<TGetAllDocumentRequestOutput> {
     return axios.get(allDocRequestUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetAllDocumentRequestOutput) => {
-        resp.data = resp.data.map((ele : DocumentRequest) => {
-            if (!!ele.CompletionTime) {
-                ele.CompletionTime = new Date(ele.CompletionTime)
-            }
-            ele.RequestTime = new Date(ele.RequestTime)
-            return ele
-        })
+        resp.data.forEach(cleanJsonDocumentRequest)
         return resp
     })
 }

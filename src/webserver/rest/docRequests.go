@@ -19,6 +19,7 @@ type NewDocumentRequestInputs struct {
 	RequestedUserId int64          `json:"requestedUserId"`
 	VendorProductId int64          `json:"vendorProductId"`
 	AssigneeUserId  core.NullInt64 `json:"assigneeUserId"`
+	DueDate         core.NullTime  `json:"dueDate"`
 }
 
 type UpdateDocumentRequestInputs struct {
@@ -29,6 +30,7 @@ type UpdateDocumentRequestInputs struct {
 	OrgId           int32          `json:"orgId"`
 	RequestedUserId int64          `json:"requestedUserId"`
 	AssigneeUserId  core.NullInt64 `json:"assigneeUserId"`
+	DueDate         core.NullTime  `json:"dueDate"`
 }
 
 type GetDocumentRequestInputs struct {
@@ -80,6 +82,7 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		RequestedUserId: inputs.RequestedUserId,
 		RequestTime:     time.Now().UTC(),
 		AssigneeUserId:  inputs.AssigneeUserId,
+		DueDate:         inputs.DueDate,
 	}
 
 	tx, err := database.CreateAuditTrailTx(role)
@@ -164,7 +167,10 @@ func updateDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		RequestedUserId: inputs.RequestedUserId,
 		RequestTime:     time.Now().UTC(),
 		AssigneeUserId:  inputs.AssigneeUserId,
+		DueDate:         inputs.DueDate,
 	}
+
+	core.Info(request.DueDate)
 
 	err = database.UpdateDocumentRequest(&request, role)
 	if err != nil {

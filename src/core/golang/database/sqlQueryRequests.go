@@ -25,7 +25,8 @@ func CreateNewSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.
 			org_id,
 			name,
 			description,
-			assignee
+			assignee,
+			due_date
 		)
 		VALUES (
 			:query_id,
@@ -34,7 +35,8 @@ func CreateNewSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.
 			:org_id,
 			:name,
 			:description,
-			:assignee
+			:assignee,
+			:due_date
 		)
 		RETURNING id
 	`, request)
@@ -79,7 +81,8 @@ func UpdateSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.Rol
 		UPDATE database_sql_query_requests
 		SET name = :name,
 			description = :description,
-			assignee = :assignee
+			assignee = :assignee,
+			due_date = :due_date
 		WHERE id = :id
 			AND org_id = :org_id
 		RETURNING *

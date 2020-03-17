@@ -5,6 +5,7 @@ export interface DocumentRequest {
     OrgId:           number
     RequestedUserId: number
     AssigneeUserId:  number | null
+    DueDate         : Date | null
     CompletionTime:  Date | null
     RequestTime:     Date
 }
@@ -33,6 +34,10 @@ export let requestLinkageItems : any[] = [
 export function cleanJsonDocumentRequest(f : DocumentRequest) {
     if (!!f.CompletionTime) {
         f.CompletionTime = new Date(f.CompletionTime)
+    }
+
+    if (!!f.DueDate) {
+        f.DueDate = new Date(f.DueDate)
     }
     f.RequestTime = new Date(f.RequestTime)
 }

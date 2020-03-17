@@ -11,6 +11,7 @@ type DocumentRequest struct {
 	OrgId           int32     `db:"org_id"`
 	RequestedUserId int64     `db:"requested_user_id"`
 	AssigneeUserId  NullInt64 `db:"assignee"`
+	DueDate         NullTime  `db:"due_date"`
 	CompletionTime  NullTime  `db:"completion_time"`
 	RequestTime     time.Time `db:"request_time"`
 }
