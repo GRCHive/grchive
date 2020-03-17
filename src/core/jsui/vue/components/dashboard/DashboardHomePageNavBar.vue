@@ -114,6 +114,23 @@ export default Vue.extend({
                     ]
                 },
                 {
+                    title: 'Automation',
+                    icon: 'mdi-cogs',
+                    disabled: false,
+                    children: [
+                        {
+                            title: 'Data',
+                            icon: 'mdi-table',
+                            url: '#',
+                        },
+                        {
+                            title: 'Scripts',
+                            icon: 'mdi-code-tags',
+                            url: '#',
+                        },
+                    ],
+                },
+                {
                     title: 'Settings',
                     icon: 'mdi-settings',
                     url: PageParamsStore.state.organization!.Url + 'settings',

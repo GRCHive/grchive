@@ -4,7 +4,7 @@
   "devDependencies": {
     "@babel/core": "^7.6.2",
     "@babel/preset-env": "^7.6.2",
-    "@mdi/font": "^4.4.95",
+    "@mdi/font": "^4.9.95",
     "@mdi/js": "^4.5.95",
     "@okta/okta-signin-widget": "^3.4.1",
     "@types/file-saver": "^2.0.1",
