@@ -60,8 +60,8 @@ $$
 
         IF previous_event IS NOT NULL THEN
             RETURN jsonb_diff(
-                (SELECT data FROM audit_resource_modifications AS m WHERE m.event_id = current_event.id),
-                (SELECT data FROM audit_resource_modifications AS m WHERE m.event_id = previous_event.id)
+                (SELECT data FROM audit_resource_modifications AS m WHERE m.event_id = previous_event.id),
+                (SELECT data FROM audit_resource_modifications AS m WHERE m.event_id = current_event.id)
             );
         END IF;
 

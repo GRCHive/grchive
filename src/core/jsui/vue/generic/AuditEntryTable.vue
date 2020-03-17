@@ -3,7 +3,7 @@
 import Vue, { VNode } from 'vue'
 import Component, { mixins } from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
-import { VTooltip, VIcon } from 'vuetify/lib'
+import { VTooltip, VIcon, VChip } from 'vuetify/lib'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
 import { PageParamsStore } from '../../ts/pageParams'
@@ -34,6 +34,7 @@ const Props = Vue.extend({
 })
 export default class AuditEntryTable extends mixins(ResourceTableProps, Props) {
     eventIdToResourceHandle : Record<number, ResourceHandle | null> = Object()
+    eventIdToDiff : Record<number, Record<string, any> | null> = Object()
     eventIdProcessed : Set<number> = new Set<number>()
 
     loadedData : AuditEventEntry[] = []
@@ -184,10 +185,10 @@ export default class AuditEntryTable extends mixins(ResourceTableProps, Props) {
             this.eventIdProcessed.add(inp.Id)
             getAuditTrail({
                 orgId: PageParamsStore.state.organization!.Id,
-                resourceHandleOnly: true,
                 entryId: inp.Id,
             }).then((resp : TGetAuditTrailOutput) => {
-                Vue.set(this.eventIdToResourceHandle, inp.Id, resp.data.Handle!)
+                Vue.set(this.eventIdToResourceHandle, inp.Id, resp.data.Handle)
+                Vue.set(this.eventIdToDiff, inp.Id, resp.data.Diff)
             }).catch((err : any) => {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
@@ -216,8 +217,81 @@ export default class AuditEntryTable extends mixins(ResourceTableProps, Props) {
             type: standardizeResourceType(inp.ResourceType),
             user: createUserString(MetadataStore.getters.getUser(inp.UserId)),
             resource: this.eventIdToResourceHandle[inp.Id],
+            diff: this.eventIdToDiff[inp.Id],
             value: inp
         }
+    }
+
+    renderDiff(diff : Record<string, any> | null) : VNode[] {
+        if (!diff) {
+            return [this.$createElement(
+                'span',
+                'No diff available.'
+            )]
+        }
+
+        let keys = Object.keys(diff)
+        return keys.map((ele : string) => {
+            return this.$createElement(
+                'span',
+                [
+                    this.$createElement(
+                        VChip,
+                        {
+                            props: {
+                                color: "primary"
+                            }
+                        },
+                        ele
+                    ),
+                    ' changed from ',
+                    this.$createElement(
+                        VChip,
+                        {
+                            props: {
+                                color: "error"
+                            }
+                        },
+                        diff[ele]['old']
+                    ),
+                    ' to ',
+                    this.$createElement(
+                        VChip,
+                        {
+                            props: {
+                                color: "success"
+                            }
+                        },
+                        diff[ele]['new']
+                    ),
+                ]
+            )
+        })
+    }
+
+    renderExpansion(props : any) : VNode {
+        if (!(props.item.id in this.eventIdToDiff)) {
+            return this.$createElement(
+                'td',
+                {
+                    attrs: {
+                        colspan: props.headers.length
+                    },
+                },
+                'Loading...'
+            )
+        }
+
+        let diff = this.eventIdToDiff[props.item.id]
+        return this.$createElement(
+            'td',
+            {
+                attrs: {
+                    colspan: props.headers.length
+                },
+            },
+            this.renderDiff(diff)
+        )
     }
 
     render() : VNode {
@@ -229,7 +303,7 @@ export default class AuditEntryTable extends mixins(ResourceTableProps, Props) {
                     tableHeaders: this.tableHeaders,
                     tableItems: this.tableItems,
                     resourceName: "audit trail entry",
-                    showExpand: false,
+                    showExpand: true,
                     loading: this.isLoading,
                     serverItemsLength: this.totalEntries,
                 },
@@ -244,6 +318,7 @@ export default class AuditEntryTable extends mixins(ResourceTableProps, Props) {
                 scopedSlots: {
                     'item.resource': this.renderResource,
                     'item.time': this.renderTime,
+                    'expanded-item': this.renderExpansion,
                 }
             }
         )

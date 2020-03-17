@@ -40,13 +40,13 @@ export function allAuditTrail(inp : TAllAuditTrailInput) : Promise<TAllAuditTrai
 
 export interface TGetAuditTrailInput {
     orgId: number
-    resourceHandleOnly: boolean
     entryId? : number
 }
 
 export interface TGetAuditTrailOutput {
     data: {
-        Handle?: ResourceHandle
+        Handle: ResourceHandle
+        Diff: Record<string, any>
     }
 }
 

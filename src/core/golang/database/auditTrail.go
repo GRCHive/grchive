@@ -365,6 +365,35 @@ func GetLatestAuditModificationHistoryData(resourceType string, resourceId strin
 	return getAuditModificationFromStmt(stmt, resourceType, resourceId)
 }
 
+func GetModificationDiffFromEventId(eventId int64, role *core.Role) (map[string]interface{}, error) {
+	rows, err := dbConn.Queryx(`
+		SELECT diff
+		FROM audit_resource_modification_diffs
+		WHERE event_id = $1
+	`, eventId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	rows.Next()
+
+	diffData := types.JSONText{}
+	err = rows.Scan(&diffData)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := map[string]interface{}{}
+	err = diffData.Unmarshal(&ret)
+	if err != nil {
+		return nil, err
+	}
+
+	return ret, nil
+}
+
 func retrieveResourceExtraData(resourceType string, resourceId string) (map[string]interface{}, error) {
 	data := map[string]interface{}{}
 
