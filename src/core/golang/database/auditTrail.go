@@ -117,7 +117,7 @@ func commonAuditEventRetrievalQuery(
 		}
 	}
 
-	rows, err := dbConn.Queryx(fmt.Sprintf(`
+	queryString := fmt.Sprintf(`
 		SELECT DISTINCT
 			hist.id,
 			hist.org_id,
@@ -133,7 +133,8 @@ func commonAuditEventRetrievalQuery(
 		LEFT JOIN users AS u
 			ON u.id = lnk.user_id
 		%s
-	`, selectParams.String()), args...)
+	`, selectParams.String())
+	rows, err := dbConn.Queryx(queryString, args...)
 
 	if err != nil {
 		return nil, err
