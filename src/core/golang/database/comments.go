@@ -11,26 +11,30 @@ func getComments(condition string, args ...interface{}) ([]*core.Comment, error)
 	err := dbConn.Select(&comments, fmt.Sprintf(`
 		SELECT comments.*
 		FROM comments
+		INNER JOIN comment_threads AS t
+			ON t.id = comments.thread_id 
 		%s
 		ORDER BY id DESC
 	`, condition), args...)
 	return comments, err
 }
 
-func insertCommentWithTx(comment *core.Comment, tx *sqlx.Tx) error {
-	rows, err := tx.NamedQuery(`
+func insertCommentWithTx(comment *core.Comment, threadId int64, tx *sqlx.Tx) error {
+	rows, err := tx.Queryx(`
 		INSERT INTO comments (
 			user_id,
 			post_time,
-			content
+			content,
+			thread_id
 		)
 		VALUES (
-			:user_id,
-			:post_time,
-			:content
+			$1,
+			$2,
+			$3,
+			$4
 		)
 		RETURNING id
-	`, comment)
+	`, comment.UserId, comment.PostTime, comment.Content, threadId)
 
 	if err != nil {
 		return err

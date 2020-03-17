@@ -339,8 +339,8 @@ func GetSqlRequestComments(requestId int64, orgId int32, role *core.Role) ([]*co
 	}
 
 	return getComments(`
-		INNER JOIN sql_request_comments AS src
-			ON src.comment_id = comments.id
+		INNER JOIN sql_request_comment_threads AS src
+			ON src.thread_id = t.id
 		WHERE src.sql_request_id = $1
 			AND src.org_id = $2
 	`, requestId, orgId)
@@ -351,26 +351,18 @@ func InsertSqlRequestComment(requestId int64, orgId int32, comment *core.Comment
 		return core.ErrorUnauthorized
 	}
 
-	tx := dbConn.MustBegin()
-
-	err := insertCommentWithTx(comment, tx)
+	threadId := int64(0)
+	err := dbConn.Get(&threadId, `
+		SELECT thread_id
+		FROM sql_request_comment_threads
+		WHERE sql_request_id = $1 AND org_id = $2
+	`, requestId, orgId)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
-	_, err = tx.Exec(`
-		INSERT INTO sql_request_comments (
-			sql_request_id,
-			org_id,
-			comment_id
-		)
-		VALUES (
-			$1,
-			$2,
-			$3
-		)
-	`, requestId, orgId, comment.Id)
+	tx := dbConn.MustBegin()
+	err = insertCommentWithTx(comment, threadId, tx)
 	if err != nil {
 		tx.Rollback()
 		return err

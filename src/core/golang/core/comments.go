@@ -9,4 +9,5 @@ type Comment struct {
 	UserId   int64     `db:"user_id"`
 	PostTime time.Time `db:"post_time"`
 	Content  string    `db:"content"`
+	ThreadId int64     `db:"thread_id"`
 }
