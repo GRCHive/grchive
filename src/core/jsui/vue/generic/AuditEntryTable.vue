@@ -91,6 +91,9 @@ export default class AuditEntryTable extends mixins(ResourceTableProps, Props) {
             {
                 text: 'Time',
                 value: 'time',
+                sort: (a : Date, b : Date) => {
+                    return a.getTime() - b.getTime()
+                }
             },
             {
                 text: 'User',
@@ -198,11 +201,18 @@ export default class AuditEntryTable extends mixins(ResourceTableProps, Props) {
         }
     }
 
+    renderTime(props : any) : VNode {
+        return this.$createElement(
+            'span',
+            standardFormatTime(props.item.time)
+        )
+    }
+
     transformInputResourceToTableItem(inp : any) : any {
         return {
             id: inp.Id,
             gaction: inp.Action,
-            time: standardFormatTime(inp.PerformedAt),
+            time: inp.PerformedAt,
             type: standardizeResourceType(inp.ResourceType),
             user: createUserString(MetadataStore.getters.getUser(inp.UserId)),
             resource: this.eventIdToResourceHandle[inp.Id],
@@ -233,6 +243,7 @@ export default class AuditEntryTable extends mixins(ResourceTableProps, Props) {
                 },
                 scopedSlots: {
                     'item.resource': this.renderResource,
+                    'item.time': this.renderTime,
                 }
             }
         )

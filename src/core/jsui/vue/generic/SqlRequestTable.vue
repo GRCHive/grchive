@@ -52,6 +52,9 @@ export default class SqlRequestTable extends ResourceTableProps {
             {
                 text: 'Request Time',
                 value: 'requestTime',
+                sort: (a : Date, b : Date) => {
+                    return a.getTime() - b.getTime()
+                }
             },
             {
                 text: 'Approval',
@@ -154,10 +157,17 @@ export default class SqlRequestTable extends ResourceTableProps {
             name: inp.Name,
             query: queryName,
             requester: createUserString(MetadataStore.getters.getUser(inp.UploadUserId)),
-            requestTime: standardFormatTime(inp.UploadTime),
+            requestTime: inp.UploadTime,
             approval: this.idToApproval[inp.Id],
             value: inp
         }
+    }
+
+    renderRequestTime(props : any) : VNode {
+        return this.$createElement(
+            'span',
+            standardFormatTime(props.item.requestTime)
+        )
     }
 
     renderApproval(props : any) : VNode {
@@ -292,6 +302,7 @@ export default class SqlRequestTable extends ResourceTableProps {
                 scopedSlots: {
                     'expanded-item': this.renderExpansion,
                     'item.approval': this.renderApproval,
+                    'item.requestTime': this.renderRequestTime,
                 }
             }
         )

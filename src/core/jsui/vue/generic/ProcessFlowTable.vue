@@ -23,10 +23,16 @@ export default class ProcessFlowTable extends ResourceTableProps {
             {
                 text: 'Created',
                 value: 'createdTime',
+                sort: (a : Date, b : Date) => {
+                    return a.getTime() - b.getTime()
+                }
             },
             {
                 text: 'Last Updated',
                 value: 'lastUpdatedTime',
+                sort: (a : Date, b : Date) => {
+                    return a.getTime() - b.getTime()
+                }
             },
         ]
     }
@@ -47,8 +53,8 @@ export default class ProcessFlowTable extends ResourceTableProps {
             id: inp.Id,
             name: inp.Name,
             description: inp.Description,
-            createdTime: standardFormatTime(inp.CreationTime),
-            lastUpdatedTime: standardFormatTime(inp.LastUpdatedTime),
+            createdTime: inp.CreationTime,
+            lastUpdatedTime: inp.LastUpdatedTime,
             value: inp
         }
     }
@@ -62,6 +68,20 @@ export default class ProcessFlowTable extends ResourceTableProps {
                 },
             },
             props.item.description
+        )
+    }
+
+    renderCreatedTime(props : any) : VNode {
+        return this.$createElement(
+            'span',
+            standardFormatTime(props.item.createdTime)
+        )
+    }
+
+    renderUpdatedTime(props : any) : VNode {
+        return this.$createElement(
+            'span',
+            standardFormatTime(props.item.lastUpdatedTime)
         )
     }
 
@@ -82,6 +102,8 @@ export default class ProcessFlowTable extends ResourceTableProps {
                 },
                 scopedSlots: {
                     'expanded-item': this.renderExpansion,
+                    'item.createdTime': this.renderCreatedTime,
+                    'item.lastUpdatedTime': this.renderUpdatedTime,
                 }
             }
         )

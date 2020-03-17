@@ -43,7 +43,10 @@ export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
             },
             {
                 text: 'Relevant Time',
-                value: 'relevantTime'
+                value: 'relevantTime',
+                sort: (a : Date, b : Date) => {
+                    return a.getTime() - b.getTime()
+                }
             },
             {
                 text: 'Version',
@@ -55,7 +58,13 @@ export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
             },
             {
                 text: 'Upload Time',
-                value: 'uploadTime'
+                value: 'uploadTime',
+                sort: (a : Date | null, b : Date | null) => {
+                    if (a == null || b == null) {
+                        return 0
+                    }
+                    return a.getTime() - b.getTime()
+                }
             },
             {
                 text: 'User',
@@ -112,7 +121,7 @@ export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
             orgId: PageParamsStore.state.organization!.Id,
             version: v.VersionNumber
         }).then((resp : TGetVersionStorageDataOutput) => {
-            obj.uploadTime = standardFormatDate(resp.data.Storage.UploadTime)
+            obj.uploadTime = resp.data.Storage.UploadTime
             obj.user = createUserString(MetadataStore.getters.getUser(resp.data.Storage.UploadUserId))
             obj.filename = resp.data.Storage.StorageName
         }).catch((err : any) => {
@@ -131,10 +140,10 @@ export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
             id: inp.Id,
             name: inp.AltName,
             filename: "Loading...",
-            relevantTime: standardFormatDate(inp.RelevantTime),
+            relevantTime: inp.RelevantTime,
             availableVersions: null,
             version: null,
-            uploadTime: "Loading...",
+            uploadTime: null,
             user: "Loading...",
             value: inp
         }
@@ -236,6 +245,20 @@ export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
         )
     }
 
+    renderRelevantTime(props : any) : VNode {
+        return this.$createElement(
+            'span',
+            standardFormatDate(props.item.relevantTime)
+        )
+    }
+
+    renderUploadTime(props : any) : VNode {
+        return this.$createElement(
+            'span',
+            !!props.item.uploadTime ? standardFormatDate(props.item.uploadTime) : "Loading..."
+        )
+    }
+
     render() : VNode {
         return this.$createElement(
             BaseResourceTable,
@@ -259,6 +282,8 @@ export default class DocFileTable extends mixins(ResourceTableProps, DocProps) {
                 scopedSlots: {
                     'expanded-item': this.renderExpansion,
                     'item.version': this.renderVersion,
+                    'item.relevantTime': this.renderRelevantTime,
+                    'item.uploadTime': this.renderUploadTime,
                 }
             }
         )

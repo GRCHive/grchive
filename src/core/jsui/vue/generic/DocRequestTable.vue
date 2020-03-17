@@ -31,6 +31,9 @@ export default class DocRequestTable extends ResourceTableProps {
             {
                 text: 'Request Time',
                 value: 'requestTime',
+                sort: (a : Date, b : Date) => {
+                    return a.getTime() - b.getTime()
+                }
             },
             {
                 text: 'Complete',
@@ -55,7 +58,7 @@ export default class DocRequestTable extends ResourceTableProps {
             id: inp.Id,
             name: inp.Name,
             requester: createUserString(MetadataStore.getters.getUser(inp.RequestedUserId)),
-            requestTime: standardFormatTime(inp.RequestTime),
+            requestTime: inp.RequestTime,
             complete: !!inp.CompletionTime,
             value: inp
         }
@@ -86,6 +89,13 @@ export default class DocRequestTable extends ResourceTableProps {
         )
     }
 
+    renderRequestTime(props : any) : VNode {
+        return this.$createElement(
+            'span',
+            standardFormatTime(props.item.requestTime)
+        )
+    }
+
     render() : VNode {
         return this.$createElement(
             BaseResourceTable,
@@ -104,6 +114,7 @@ export default class DocRequestTable extends ResourceTableProps {
                 scopedSlots: {
                     'expanded-item': this.renderExpansion,
                     'item.complete': this.renderFulfilled,
+                    'item.requestTime': this.renderRequestTime,
                 }
             }
         )
