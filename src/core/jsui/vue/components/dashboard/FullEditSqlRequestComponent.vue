@@ -99,120 +99,135 @@
             <v-divider></v-divider>
 
             <v-container fluid>
-                <v-row>
-                    <v-col cols="6">
-                        <create-new-sql-request-form
-                            :reference-request="currentRequest"
-                            :force-query-id="currentRequest.QueryId"
-                            edit-mode
-                            @do-save="onEditRequest"
-                            class="mb-4"
-                        >
-                        </create-new-sql-request-form>
+                <v-tabs>
+                    <v-tab>Overview</v-tab>
+                    <v-tab-item>
+                        <v-row>
+                            <v-col cols="6">
+                                <create-new-sql-request-form
+                                    :reference-request="currentRequest"
+                                    :force-query-id="currentRequest.QueryId"
+                                    edit-mode
+                                    @do-save="onEditRequest"
+                                    class="mb-4"
+                                >
+                                </create-new-sql-request-form>
 
-                        <v-card>
-                            <v-card-title>
-                                Query
-                            </v-card-title>
-                            <v-divider></v-divider>
+                                <v-card>
+                                    <v-card-title>
+                                        Query
+                                    </v-card-title>
+                                    <v-divider></v-divider>
 
-                            <v-row v-if="!currentQuery" align="center" justify="center">
-                                <v-progress-circular indeterminate size="64"></v-progress-circular>
-                            </v-row>
+                                    <v-row v-if="!currentQuery" align="center" justify="center">
+                                        <v-progress-circular indeterminate size="64"></v-progress-circular>
+                                    </v-row>
 
-                            <sql-text-area
-                                :value="currentQuery.Query"
-                                readonly
-                                v-else
-                            >
-                            </sql-text-area>
-                        </v-card>
-
-                    </v-col>
-
-                    <v-col cols="6">
-                        <v-card class="mb-4">
-                            <v-card-title>
-                                Approval Status
-                            </v-card-title>
-                            <v-divider></v-divider>
-
-                            <div class="px-4">
-                                <p class="ma-0 py-4">
-                                    <span class="font-weight-bold">
-                                        Status:
-                                    </span>
-
-                                    <span v-if="!currentApproval">
-                                        Pending
-
-                                        <v-icon
-                                            small
-                                            color="warning"
-                                        >
-                                            mdi-help-circle
-                                        </v-icon>
-                                    </span>
-
-                                    <span v-else-if="currentApproval.Response">
-                                        Approved
-
-                                        <v-icon
-                                            small
-                                            color="success"
-                                        >
-                                            mdi-check
-                                        </v-icon>
-                                    </span>
-
-                                    <span v-else>
-                                        Denied
-
-                                        <v-icon
-                                            small
-                                            color="error"
-                                        >
-                                            mdi-cancel
-                                        </v-icon>
-                                    </span>
-                                </p>
-
-                                <div v-if="!!currentApproval">
-                                    <user-search-form-component
-                                        label="Responder"
-                                        v-bind:user="responderUser"
+                                    <sql-text-area
+                                        :value="currentQuery.Query"
                                         readonly
-                                    ></user-search-form-component>
+                                        v-else
+                                    >
+                                    </sql-text-area>
+                                </v-card>
 
-                                    <p>
-                                        <span class="font-weight-bold">
-                                            Responded At:
-                                        </span>
-                                        {{ responseTime }}
-                                    </p>
+                            </v-col>
 
-                                    <p v-if="!currentApproval.Response">
-                                        <span class="font-weight-bold">
-                                            Reason:
-                                        </span>
-                                        <pre class="pb-4">{{ currentApproval.Reason }}</pre>
-                                    </p>
-                                </div>
-                            </div>
-                        </v-card>
+                            <v-col cols="6">
+                                <v-card class="mb-4">
+                                    <v-card-title>
+                                        Approval Status
+                                    </v-card-title>
+                                    <v-divider></v-divider>
 
-                        <v-card>
-                            <v-card-title>
-                                Comments
-                            </v-card-title>
-                            <v-divider></v-divider>
+                                    <div class="px-4">
+                                        <p class="ma-0 py-4">
+                                            <span class="font-weight-bold">
+                                                Status:
+                                            </span>
 
-                            <comment-manager
-                                :params="commentParams"
-                            ></comment-manager>
-                        </v-card>
-                    </v-col>
-                </v-row>
+                                            <span v-if="!currentApproval">
+                                                Pending
+
+                                                <v-icon
+                                                    small
+                                                    color="warning"
+                                                >
+                                                    mdi-help-circle
+                                                </v-icon>
+                                            </span>
+
+                                            <span v-else-if="currentApproval.Response">
+                                                Approved
+
+                                                <v-icon
+                                                    small
+                                                    color="success"
+                                                >
+                                                    mdi-check
+                                                </v-icon>
+                                            </span>
+
+                                            <span v-else>
+                                                Denied
+
+                                                <v-icon
+                                                    small
+                                                    color="error"
+                                                >
+                                                    mdi-cancel
+                                                </v-icon>
+                                            </span>
+                                        </p>
+
+                                        <div v-if="!!currentApproval">
+                                            <user-search-form-component
+                                                label="Responder"
+                                                v-bind:user="responderUser"
+                                                readonly
+                                            ></user-search-form-component>
+
+                                            <p>
+                                                <span class="font-weight-bold">
+                                                    Responded At:
+                                                </span>
+                                                {{ responseTime }}
+                                            </p>
+
+                                            <p v-if="!currentApproval.Response">
+                                                <span class="font-weight-bold">
+                                                    Reason:
+                                                </span>
+                                                <pre class="pb-4">{{ currentApproval.Reason }}</pre>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </v-card>
+
+                                <v-card>
+                                    <v-card-title>
+                                        Comments
+                                    </v-card-title>
+                                    <v-divider></v-divider>
+
+                                    <comment-manager
+                                        :params="commentParams"
+                                    ></comment-manager>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                    </v-tab-item>
+
+                    <v-tab>Audit Trail</v-tab>
+                    <v-tab-item>
+                        <audit-trail-viewer
+                            :resource-type="['database_sql_query_requests']"
+                            :resource-id="[`${currentRequest.Id}`]"
+                            no-header
+                        >
+                        </audit-trail-viewer>
+                    </v-tab-item>
+                </v-tabs>
             </v-container>
         </div>
     </div>
@@ -239,6 +254,7 @@ import CreateNewSqlRequestForm from './CreateNewSqlRequestForm.vue'
 import SqlTextArea from '../../generic/SqlTextArea.vue'
 import MetadataStore from '../../../ts/metadata'
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
+import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 @Component({
     components: {
@@ -246,7 +262,8 @@ import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
         CommentManager,
         CreateNewSqlRequestForm,
         UserSearchFormComponent,
-        SqlTextArea
+        SqlTextArea,
+        AuditTrailViewer
     }
 })
 export default class FullEditSqlRequestComponent extends Vue {

@@ -93,73 +93,89 @@
             <v-divider></v-divider>
 
             <v-container fluid>
-                <v-row>
-                    <v-col cols="6">
-                        <create-new-request-form
-                            class="mb-4"
-                            ref="form"
-                            edit-mode
-                            load-cats
-                            :reference-cat="parentCategory"
-                            :reference-req="currentRequest"
-                            :reference-control="parentControl"
-                            @do-save="onEdit"
-                        ></create-new-request-form>
+                <v-tabs>
+                    <v-tab>Overview</v-tab>
+                    <v-tab-item>
+                        <v-row>
+                            <v-col cols="6">
+                                <create-new-request-form
+                                    class="mb-4"
+                                    ref="form"
+                                    edit-mode
+                                    load-cats
+                                    :reference-cat="parentCategory"
+                                    :reference-req="currentRequest"
+                                    :reference-control="parentControl"
+                                    @do-save="onEdit"
+                                ></create-new-request-form>
 
-                        <v-card class="mb-4">
-                            <v-card-title>
-                                Requester Information
-                            </v-card-title>
-                            <v-divider></v-divider>
+                                <v-card class="mb-4">
+                                    <v-card-title>
+                                        Requester Information
+                                    </v-card-title>
+                                    <v-divider></v-divider>
 
-                            <div class="ma-4">
-                                <user-search-form-component
-                                    label="Requester"
-                                    :user="requestUser"
-                                    readonly
-                                >
-                                </user-search-form-component>
+                                    <div class="ma-4">
+                                        <user-search-form-component
+                                            label="Requester"
+                                            :user="requestUser"
+                                            readonly
+                                        >
+                                        </user-search-form-component>
 
-                                <v-text-field
-                                    :value="requestTime"
-                                    label="Request Time"
-                                    prepend-icon="mdi-calendar"
-                                    readonly
-                                >
-                                </v-text-field>
-                            </div>
-                        </v-card>
+                                        <v-text-field
+                                            :value="requestTime"
+                                            label="Request Time"
+                                            prepend-icon="mdi-calendar"
+                                            readonly
+                                        >
+                                        </v-text-field>
+                                    </div>
+                                </v-card>
 
-                        <v-card>
-                            <v-card-title>
-                                Relevant Files
-                            </v-card-title>
-                            <v-divider></v-divider>
+                                <v-card>
+                                    <v-card-title>
+                                        Relevant Files
+                                    </v-card-title>
+                                    <v-divider></v-divider>
 
-                            <doc-file-manager
-                                :cat-id="!!parentCategory ? parentCategory.Id : -1"
-                                :request-id="currentRequest.Id"
-                                :request-linked-to-control="!!parentControl"
-                                :request-control="parentControl"
-                                disable-sample
-                                disable-delete
-                            ></doc-file-manager>
-                        </v-card>
-                    </v-col>
+                                    <doc-file-manager
+                                        :cat-id="!!parentCategory ? parentCategory.Id : -1"
+                                        :request-id="currentRequest.Id"
+                                        :request-linked-to-control="!!parentControl"
+                                        :request-control="parentControl"
+                                        disable-sample
+                                        disable-delete
+                                    ></doc-file-manager>
+                                </v-card>
+                            </v-col>
 
-                    <v-col cols="6">
-                        <v-card>
-                            <v-card-title>
-                                Comments
-                            </v-card-title>
-                            <v-divider></v-divider>
+                            <v-col cols="6">
+                                <v-card>
+                                    <v-card-title>
+                                        Comments
+                                    </v-card-title>
+                                    <v-divider></v-divider>
 
-                            <comment-manager
-                                :params="commentParams"
-                            ></comment-manager>
-                        </v-card>
-                    </v-col>
-                </v-row>
+                                    <comment-manager
+                                        :params="commentParams"
+                                    ></comment-manager>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                    </v-tab-item>
+
+                    <v-tab>Audit Trail</v-tab>
+                    <v-tab-item>
+                        <audit-trail-viewer
+                            :resource-type="['document_requests']"
+                            :resource-id="[`${currentRequest.Id}`]"
+                            no-header
+                        >
+                        </audit-trail-viewer>
+                    </v-tab-item>
+
+                </v-tabs>
             </v-container>
         </div>
     </div>
@@ -185,6 +201,7 @@ import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 import { standardFormatTime } from '../../../ts/time'
 import { allDocRequestDocCatLink, TAllDocRequestDocCatLinksOutput } from '../../../ts/api/apiDocRequestsDocCatLinks'
 import { allDocRequestControlLink, TAllDocRequestControlLinksOutput } from '../../../ts/api/apiDocRequestControlLinks'
+import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 @Component({
     components: {
@@ -192,7 +209,8 @@ import { allDocRequestControlLink, TAllDocRequestControlLinksOutput } from '../.
         CreateNewRequestForm,
         DocFileManager,
         CommentManager,
-        UserSearchFormComponent
+        UserSearchFormComponent,
+        AuditTrailViewer,
     }
 })
 export default class FullEditDocRequestComponent extends Vue {
@@ -203,10 +221,6 @@ export default class FullEditDocRequestComponent extends Vue {
     parentControl : ProcessFlowControl | null = null
 
     showHideDelete: boolean = false
-
-    $refs!: {
-        form: CreateNewRequestForm
-    }
 
     get commentParams() : Object {
         return {
@@ -256,13 +270,6 @@ export default class FullEditDocRequestComponent extends Vue {
             return ""
         }
         return standardFormatTime(this.currentRequest.CompletionTime)
-    }
-
-    @Watch('ready')
-    onReady() {
-        Vue.nextTick(() => {
-            this.$refs.form.clearForm()
-        })
     }
 
     refreshParentControl() {
