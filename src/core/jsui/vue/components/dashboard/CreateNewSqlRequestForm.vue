@@ -31,6 +31,13 @@
         >
         </user-search-form-component>
 
+        <user-search-form-component
+            class="mt-4"
+            label="Assignee"
+            :user.sync="assignee"
+        >
+        </user-search-form-component>
+
         <v-text-field
             :value="requestTime"
             label="Request Time"
@@ -121,6 +128,7 @@ export default class CreateNewSqlRequestForm extends Props {
     name : string = ""
     description: string = ""
     rules: any = rules
+    assignee : User | null = null
 
     get queryId() : number {
         if (this.forceQueryId != -1) {
@@ -170,6 +178,7 @@ export default class CreateNewSqlRequestForm extends Props {
             orgId: PageParamsStore.state.organization!.Id,
             name: this.name,
             description: this.description,
+            assigneeUserId: !!this.assignee ? this.assignee.Id : null
         }).then((resp : TUpdateSqlRequestOutput) => {
             this.$emit('do-save', resp.data)
             this.canEdit = false
@@ -190,6 +199,7 @@ export default class CreateNewSqlRequestForm extends Props {
             orgId: PageParamsStore.state.organization!.Id,
             name: this.name,
             description: this.description,
+            assigneeUserId: !!this.assignee ? this.assignee.Id : null
         }).then((resp : TNewSqlRequestOutput) => {
             this.$emit('do-save', resp.data)
             this.clearForm()
@@ -214,9 +224,11 @@ export default class CreateNewSqlRequestForm extends Props {
         if (!!this.referenceRequest) {
             this.name = this.referenceRequest.Name
             this.description = this.referenceRequest.Description
+            this.assignee = MetadataStore.getters.getUser(this.referenceRequest.AssigneeUserId)
         } else {
             this.name = ""
             this.description = ""
+            this.assignee = null
         }
     }
 }

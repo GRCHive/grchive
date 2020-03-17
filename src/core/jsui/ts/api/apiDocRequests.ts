@@ -18,6 +18,7 @@ export interface TNewDocRequestInput {
     controlId? : number
     orgId: number
     requestedUserId: number
+    assigneeUserId: number | null
     vendorProductId: number
 }
 

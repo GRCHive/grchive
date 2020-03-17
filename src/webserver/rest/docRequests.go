@@ -18,15 +18,17 @@ type NewDocumentRequestInputs struct {
 	OrgId           int32          `json:"orgId"`
 	RequestedUserId int64          `json:"requestedUserId"`
 	VendorProductId int64          `json:"vendorProductId"`
+	AssigneeUserId  core.NullInt64 `json:"assigneeUserId"`
 }
 
 type UpdateDocumentRequestInputs struct {
-	RequestId       int64  `json:"requestId"`
-	Name            string `json:"name"`
-	Description     string `json:"description"`
-	CatId           int64  `json:"catId"`
-	OrgId           int32  `json:"orgId"`
-	RequestedUserId int64  `json:"requestedUserId"`
+	RequestId       int64          `json:"requestId"`
+	Name            string         `json:"name"`
+	Description     string         `json:"description"`
+	CatId           int64          `json:"catId"`
+	OrgId           int32          `json:"orgId"`
+	RequestedUserId int64          `json:"requestedUserId"`
+	AssigneeUserId  core.NullInt64 `json:"assigneeUserId"`
 }
 
 type GetDocumentRequestInputs struct {
@@ -77,6 +79,7 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		OrgId:           inputs.OrgId,
 		RequestedUserId: inputs.RequestedUserId,
 		RequestTime:     time.Now().UTC(),
+		AssigneeUserId:  inputs.AssigneeUserId,
 	}
 
 	tx, err := database.CreateAuditTrailTx(role)
@@ -160,6 +163,7 @@ func updateDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		OrgId:           inputs.OrgId,
 		RequestedUserId: inputs.RequestedUserId,
 		RequestTime:     time.Now().UTC(),
+		AssigneeUserId:  inputs.AssigneeUserId,
 	}
 
 	err = database.UpdateDocumentRequest(&request, role)

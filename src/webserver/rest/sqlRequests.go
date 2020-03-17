@@ -10,10 +10,11 @@ import (
 )
 
 type NewSqlRequestInput struct {
-	QueryId     int64  `json:"queryId"`
-	OrgId       int32  `json:"orgId"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	QueryId        int64          `json:"queryId"`
+	OrgId          int32          `json:"orgId"`
+	Name           string         `json:"name"`
+	Description    string         `json:"description"`
+	AssigneeUserId core.NullInt64 `json:"assigneeUserId"`
 }
 
 func newSqlRequest(w http.ResponseWriter, r *http.Request) {
@@ -43,12 +44,13 @@ func newSqlRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	request := core.DbSqlQueryRequest{
-		QueryId:      inputs.QueryId,
-		UploadTime:   time.Now().UTC(),
-		UploadUserId: userId,
-		OrgId:        inputs.OrgId,
-		Name:         inputs.Name,
-		Description:  inputs.Description,
+		QueryId:        inputs.QueryId,
+		UploadTime:     time.Now().UTC(),
+		UploadUserId:   userId,
+		AssigneeUserId: inputs.AssigneeUserId,
+		OrgId:          inputs.OrgId,
+		Name:           inputs.Name,
+		Description:    inputs.Description,
 	}
 
 	err = database.CreateNewSqlQueryRequest(&request, role)
@@ -183,10 +185,11 @@ func getSqlRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 type UpdateSqlRequestInput struct {
-	RequestId   int64  `json:"requestId"`
-	OrgId       int32  `json:"orgId"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	RequestId      int64          `json:"requestId"`
+	OrgId          int32          `json:"orgId"`
+	Name           string         `json:"name"`
+	Description    string         `json:"description"`
+	AssigneeUserId core.NullInt64 `json:"assigneeUserId"`
 }
 
 func updateSqlRequest(w http.ResponseWriter, r *http.Request) {
@@ -209,10 +212,11 @@ func updateSqlRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	request := core.DbSqlQueryRequest{
-		Id:          inputs.RequestId,
-		OrgId:       inputs.OrgId,
-		Name:        inputs.Name,
-		Description: inputs.Description,
+		Id:             inputs.RequestId,
+		OrgId:          inputs.OrgId,
+		Name:           inputs.Name,
+		Description:    inputs.Description,
+		AssigneeUserId: inputs.AssigneeUserId,
 	}
 
 	err = database.UpdateSqlQueryRequest(&request, role)

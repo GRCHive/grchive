@@ -92,13 +92,14 @@ type DbSqlQuery struct {
 }
 
 type DbSqlQueryRequest struct {
-	Id           int64     `db:"id"`
-	QueryId      int64     `db:"query_id"`
-	UploadTime   time.Time `db:"upload_time"`
-	UploadUserId int64     `db:"upload_user_id"`
-	OrgId        int32     `db:"org_id"`
-	Name         string    `db:"name"`
-	Description  string    `db:"description"`
+	Id             int64     `db:"id"`
+	QueryId        int64     `db:"query_id"`
+	UploadTime     time.Time `db:"upload_time"`
+	UploadUserId   int64     `db:"upload_user_id"`
+	AssigneeUserId NullInt64 `db:"assignee"`
+	OrgId          int32     `db:"org_id"`
+	Name           string    `db:"name"`
+	Description    string    `db:"description"`
 }
 
 type DbSqlQueryRequestApproval struct {

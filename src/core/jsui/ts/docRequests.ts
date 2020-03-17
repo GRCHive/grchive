@@ -4,6 +4,7 @@ export interface DocumentRequest {
     Description:     string
     OrgId:           number
     RequestedUserId: number
+    AssigneeUserId:  number | null
     CompletionTime:  Date | null
     RequestTime:     Date
 }

@@ -57,6 +57,10 @@ export default class SqlRequestTable extends ResourceTableProps {
                 }
             },
             {
+                text: 'Assignee',
+                value: 'assignee',
+            },
+            {
                 text: 'Approval',
                 value: 'approval',
             },
@@ -159,6 +163,7 @@ export default class SqlRequestTable extends ResourceTableProps {
             requester: createUserString(MetadataStore.getters.getUser(inp.UploadUserId)),
             requestTime: inp.UploadTime,
             approval: this.idToApproval[inp.Id],
+            assignee: createUserString(MetadataStore.getters.getUser(inp.AssigneeUserId)),
             value: inp
         }
     }

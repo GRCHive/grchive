@@ -36,6 +36,10 @@ export default class DocRequestTable extends ResourceTableProps {
                 }
             },
             {
+                text: 'Assignee',
+                value: 'assignee',
+            },
+            {
                 text: 'Complete',
                 value: 'complete',
             },
@@ -60,6 +64,7 @@ export default class DocRequestTable extends ResourceTableProps {
             requester: createUserString(MetadataStore.getters.getUser(inp.RequestedUserId)),
             requestTime: inp.RequestTime,
             complete: !!inp.CompletionTime,
+            assignee: createUserString(MetadataStore.getters.getUser(inp.AssigneeUserId)),
             value: inp
         }
     }

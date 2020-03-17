@@ -18,14 +18,16 @@ func CreateNewDocumentRequestWithTx(request *core.DocumentRequest, role *core.Ro
 			description,
 			org_id,
 			requested_user_id,
-			request_time
+			request_time,
+			assignee
 		)
 		VALUES (
 			:name,
 			:description,
 			:org_id,
 			:requested_user_id,
-			:request_time
+			:request_time,
+			:assignee
 		)
 		RETURNING id
 	`, request)
@@ -69,7 +71,8 @@ func UpdateDocumentRequest(request *core.DocumentRequest, role *core.Role) error
 	rows, err := tx.NamedQuery(`
 		UPDATE document_requests
 		SET name = :name,
-			description = :description
+			description = :description,
+			assignee = :assignee
 		WHERE id = :id
 			AND org_id = :org_id
 		RETURNING *

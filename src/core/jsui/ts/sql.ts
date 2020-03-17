@@ -92,6 +92,7 @@ export interface DbSqlQueryRequest {
     QueryId         : number
     UploadTime      : Date
     UploadUserId    : number
+    AssigneeUserId  : number | null
     OrgId           : number
     Name            : string
     Description     : string

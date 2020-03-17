@@ -18,8 +18,24 @@ func CreateNewSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.
 	}
 
 	rows, err := tx.NamedQuery(`
-		INSERT INTO database_sql_query_requests (query_id, upload_time, upload_user_id, org_id, name, description)
-		VALUES (:query_id, :upload_time, :upload_user_id, :org_id, :name, :description)
+		INSERT INTO database_sql_query_requests (
+			query_id,
+			upload_time,
+			upload_user_id,
+			org_id,
+			name,
+			description,
+			assignee
+		)
+		VALUES (
+			:query_id,
+			:upload_time,
+			:upload_user_id,
+			:org_id,
+			:name,
+			:description,
+			:assignee
+		)
 		RETURNING id
 	`, request)
 	if err != nil {
@@ -62,7 +78,8 @@ func UpdateSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.Rol
 	rows, err := tx.NamedQuery(`
 		UPDATE database_sql_query_requests
 		SET name = :name,
-			description = :description
+			description = :description,
+			assignee = :assignee
 		WHERE id = :id
 			AND org_id = :org_id
 		RETURNING *

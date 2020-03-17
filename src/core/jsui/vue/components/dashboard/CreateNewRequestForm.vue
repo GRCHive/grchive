@@ -20,6 +20,13 @@
                     :readonly="!canEdit"
         ></v-textarea> 
 
+        <user-search-form-component
+            class="mt-4"
+            label="Assignee"
+            :user.sync="assignee"
+        >
+        </user-search-form-component>
+
         <v-select
             v-model="currentLinkage"
             :items="requestLinkageItems"
@@ -94,8 +101,10 @@ import { ControlDocumentationCategory } from '../../../ts/controls'
 import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { DocumentRequest, RequestLinkageMode, requestLinkageItems } from '../../../ts/docRequests'
+import MetadataStore from '../../../ts/metadata'
 import DocumentCategorySearchFormComponent from '../../generic/DocumentCategorySearchFormComponent.vue'
 import ControlSearchFormComponent from '../../generic/ControlSearchFormComponent.vue'
+import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 
 const Props = Vue.extend({
     props: {
@@ -134,7 +143,8 @@ const Props = Vue.extend({
     },
     components: {
         DocumentCategorySearchFormComponent,
-        ControlSearchFormComponent
+        ControlSearchFormComponent,
+        UserSearchFormComponent
     }
 })
 
@@ -147,6 +157,7 @@ export default class CreateNewRequestForm extends Props {
     realCat: ControlDocumentationCategory | null = null
     linkControl : ProcessFlowControl | null = null
     canEdit: boolean = false
+    assignee : User | null = null
 
     currentLinkage : RequestLinkageMode = RequestLinkageMode.None
     requestLinkageItems: any[] = requestLinkageItems
@@ -189,7 +200,8 @@ export default class CreateNewRequestForm extends Props {
             description: this.description,
             orgId: PageParamsStore.state.organization!.Id,
             requestedUserId: PageParamsStore.state.user!.Id,
-            vendorProductId: this.vendorProductId
+            vendorProductId: this.vendorProductId,
+            assigneeUserId: !!this.assignee ? this.assignee.Id : null
         }
 
         if (this.currentLinkage == RequestLinkageMode.DocCat) {
@@ -215,7 +227,8 @@ export default class CreateNewRequestForm extends Props {
             description: this.description,
             orgId: PageParamsStore.state.organization!.Id,
             requestedUserId: PageParamsStore.state.user!.Id,
-            vendorProductId: this.vendorProductId
+            vendorProductId: this.vendorProductId,
+            assigneeUserId: !!this.assignee ? this.assignee.Id : null
         }
 
         // Don't let people update cat or controls. NO need 
@@ -250,6 +263,7 @@ export default class CreateNewRequestForm extends Props {
             this.name = this.referenceReq.Name
             this.description = this.referenceReq.Description
             this.realCat = this.referenceCat
+            this.assignee = MetadataStore.getters.getUser(this.referenceReq.AssigneeUserId)
         } else {
             this.name = ""
             this.description = ""
@@ -257,6 +271,7 @@ export default class CreateNewRequestForm extends Props {
                 this.realCat = null
             }
             this.linkControl = null
+            this.assignee = null
         }
 
         if (!!this.referenceCat || this.catId != -1) {

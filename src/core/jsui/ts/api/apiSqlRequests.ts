@@ -22,6 +22,7 @@ export interface TNewSqlRequestInput {
     orgId : number
     name: string
     description: string
+    assigneeUserId: number | null
 }
 
 export interface TNewSqlRequestOutput {
@@ -96,6 +97,7 @@ export interface TUpdateSqlRequestInput {
     orgId : number
     name: string
     description: string
+    assigneeUserId: number | null
 }
 
 export interface TUpdateSqlRequestOutput {
