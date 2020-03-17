@@ -170,8 +170,6 @@ func updateDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		DueDate:         inputs.DueDate,
 	}
 
-	core.Info(request.DueDate)
-
 	err = database.UpdateDocumentRequest(&request, role)
 	if err != nil {
 		core.Warning("Failed to update doc request: " + err.Error())
