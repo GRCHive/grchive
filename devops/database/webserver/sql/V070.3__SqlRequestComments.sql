@@ -53,6 +53,6 @@ $$
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_delete_sql_request_comment_threads
-    BEFORE DELETE ON sql_request_comment_threads
+    AFTER DELETE ON sql_request_comment_threads
     FOR EACH ROW
     EXECUTE FUNCTION sql_request_comment_threads_cleanup();

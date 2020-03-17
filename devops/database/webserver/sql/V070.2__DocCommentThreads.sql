@@ -53,6 +53,6 @@ $$
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_delete_file_comment_threads
-    BEFORE DELETE ON file_comment_threads
+    AFTER DELETE ON file_comment_threads
     FOR EACH ROW
     EXECUTE FUNCTION file_comment_threads_cleanup();
