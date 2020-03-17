@@ -180,8 +180,20 @@ export default Vue.extend({
         }
     },
     methods: {
+        clearForm() {
+            this.dateString = standardFormatDate(new Date())
+            this.file = null
+            this.altName = ""
+            this.description =  ""
+            this.chosenCat =  {} as ControlDocumentationCategory
+            this.chosenFolder = null
+
+            this.uploadUser = PageParamsStore.state.user!
+            this.chosenControl = this.requestControl
+        },
         onCancel() {
             this.$emit('do-cancel')
+            this.clearForm()
         },
         submitForm() {
             if (!this.canSubmit) {
@@ -206,6 +218,7 @@ export default Vue.extend({
             }).then((resp : TUploadControlDocOutput) => {
                 this.progressOverlay = false
                 this.$emit('do-save', resp.data.File, resp.data.Version)
+                this.clearForm()
             }).catch((err : any) => {
                 this.progressOverlay = false
                 // @ts-ignore
@@ -226,8 +239,7 @@ export default Vue.extend({
         }
     },
     mounted() {
-        this.uploadUser = PageParamsStore.state.user!
-        this.chosenControl = this.requestControl
+        this.clearForm()
     }
 })
 
