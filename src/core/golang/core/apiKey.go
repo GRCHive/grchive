@@ -37,3 +37,8 @@ func (key ApiKey) SecondsToExpiration(c Clock) int {
 func (key ApiKey) IsExpired(c Clock) bool {
 	return key.SecondsToExpiration(c) <= 0
 }
+
+// Refresh if only 10 Minutes left.
+func (key ApiKey) NeedsRefresh(c Clock) bool {
+	return key.SecondsToExpiration(c) <= 10*60+1
+}

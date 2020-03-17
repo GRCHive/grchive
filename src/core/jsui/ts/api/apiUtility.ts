@@ -29,6 +29,6 @@ export function startTemporaryApiKeyRefresh() {
     let timeoutMs : number = Math.max(expirationTime.getTime() - new Date().getTime() - 10 * 60 * 1000, 1)
 
     setTimeout(() => {
-        axios.get('/dashboard')
+        axios.get('/dashboard').then(startTemporaryApiKeyRefresh)
     }, timeoutMs)
 }
