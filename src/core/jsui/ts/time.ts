@@ -12,7 +12,17 @@ export function standardFormatDate(dt : Date) : string {
 }
 
 export function createLocalDateFromDateString(str : string) : Date {
-    let dt = new Date(str)
-    dt.setDate(dt.getUTCDate())
+    let data = str.split('-')
+
+    if (data.length != 3) {
+        return new Date()
+    }
+
+    let dt = new Date()
+    dt.setFullYear(
+        parseInt(data[0]),
+        parseInt(data[1])-1,
+        parseInt(data[2])
+    )
     return dt
 }
