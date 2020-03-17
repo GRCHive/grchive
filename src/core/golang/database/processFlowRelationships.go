@@ -188,7 +188,7 @@ func FindRisksRelatedToControl(controlId int64, role *core.Role) ([]*core.Risk, 
 	}
 	risks := make([]*core.Risk, 0)
 	err := dbConn.Select(&risks, `
-		SELECT DISTINCT risk.id, risk.name, risk.description
+		SELECT DISTINCT risk.*
 		FROM process_flow_risk_control AS riskcontrol
 		INNER JOIN process_flow_risks AS risk
 			ON risk.id = riskcontrol.risk_id
