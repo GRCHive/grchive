@@ -344,6 +344,20 @@ func GetDocumentComments(fileId int64, orgId int32, role *core.Role) ([]*core.Co
 	`, fileId, orgId)
 }
 
+func GetDocumentCommentThreadId(fileId int64, orgId int32, role *core.Role) (int64, error) {
+	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessView) {
+		return -1, core.ErrorUnauthorized
+	}
+
+	threadId := int64(-1)
+	err := dbConn.Get(&threadId, `
+		SELECT thread_id
+		FROM file_comment_threads
+		WHERE file_id = $1 AND org_id = $2
+	`, fileId, orgId)
+	return threadId, err
+}
+
 func InsertDocumentComment(fileId int64, orgId int32, comment *core.Comment, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceControlDocumentationMetadata, core.AccessEdit) {
 		return core.ErrorUnauthorized

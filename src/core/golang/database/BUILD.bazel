@@ -25,6 +25,7 @@ go_library(
         "inviteCodes.go",
         "nodeGLLinks.go",
         "nodeSystemLinks.go",
+        "notifications.go",
         "organizations.go",
         "processFlowEdges.go",
         "processFlowIO.go",

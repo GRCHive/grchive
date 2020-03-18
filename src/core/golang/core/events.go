@@ -18,5 +18,4 @@ type Event struct {
 	Object         interface{}
 	IndirectObject interface{}
 	Timestamp      time.Time
-	Critical       bool
 }

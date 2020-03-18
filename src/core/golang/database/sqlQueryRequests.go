@@ -334,7 +334,7 @@ func MarkRunCodeAsUsed(hashCode string, requestId int64, orgId int32, role *core
 }
 
 func GetSqlRequestComments(requestId int64, orgId int32, role *core.Role) ([]*core.Comment, error) {
-	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessView) {
+	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
 
@@ -344,6 +344,20 @@ func GetSqlRequestComments(requestId int64, orgId int32, role *core.Role) ([]*co
 		WHERE src.sql_request_id = $1
 			AND src.org_id = $2
 	`, requestId, orgId)
+}
+
+func GetSqlRequestCommentThreadId(requestId int64, orgId int32, role *core.Role) (int64, error) {
+	if !role.Permissions.HasAccess(core.ResourceDbSqlRequest, core.AccessView) {
+		return -1, core.ErrorUnauthorized
+	}
+
+	threadId := int64(-1)
+	err := dbConn.Get(&threadId, `
+		SELECT thread_id
+		FROM sql_request_comment_threads
+		WHERE sql_request_id = $1 AND org_id = $2
+	`, requestId, orgId)
+	return threadId, err
 }
 
 func InsertSqlRequestComment(requestId int64, orgId int32, comment *core.Comment, role *core.Role) error {

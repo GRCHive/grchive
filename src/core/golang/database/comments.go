@@ -95,3 +95,17 @@ func DeleteComment(commentId int64, userId int64) error {
 	}
 	return tx.Commit()
 }
+
+func FindUsersInCommentThread(threadId int64) ([]*core.User, error) {
+	users := make([]*core.User, 0)
+	err := dbConn.Select(&users, `
+		SELECT DISINCT u.*
+		FROM users AS u
+		INNER JOIN comments AS c
+			ON c.user_id = u.id
+		INNER JOIN comment_threads AS t
+			ON t.id = c.thread_id
+		WHERE t.id = $1
+	`, threadId)
+	return users, err
+}

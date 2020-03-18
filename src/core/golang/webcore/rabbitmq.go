@@ -140,7 +140,7 @@ func SetupChannel(channel *amqp.Channel) {
 		core.Error("Failed to declare notification exchange: " + err.Error())
 	}
 
-	_, err = channel.QueueDeclare(
+	q, err := channel.QueueDeclare(
 		"",    // name
 		false, // durable
 		false, // delete when unused
@@ -151,6 +151,18 @@ func SetupChannel(channel *amqp.Channel) {
 
 	if err != nil {
 		core.Error("Failed to declare notification queue: " + err.Error())
+	}
+
+	err = channel.QueueBind(
+		q.Name,                // queue name
+		"",                    // routing key
+		NOTIFICATION_EXCHANGE, // exchange
+		false,                 // no wait
+		nil,                   // arguments
+	)
+
+	if err != nil {
+		core.Error("Failed to bind notification queue to exchange: " + err.Error())
 	}
 }
 
