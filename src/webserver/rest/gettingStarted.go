@@ -74,22 +74,16 @@ func postGettingStartedInterest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
-		Exchange: webcore.EVENT_EXCHANGE,
-		Queue:    "",
-		Body: webcore.EventMessage{
-			Event: core.Event{
-				Subject: core.User{
-					FirstName: data.Name,
-					LastName:  "",
-					Email:     data.Email,
-				},
-				Verb:           core.VerbGettingStarted,
-				Object:         nil,
-				IndirectObject: nil,
-				Timestamp:      time.Now().UTC(),
-			},
+	webcore.SendEventToRabbitMQ(core.Event{
+		Subject: core.User{
+			FirstName: data.Name,
+			LastName:  "",
+			Email:     data.Email,
 		},
+		Verb:           core.VerbGettingStarted,
+		Object:         nil,
+		IndirectObject: nil,
+		Timestamp:      time.Now().UTC(),
 	})
 
 	jsonWriter.Encode(struct{}{})

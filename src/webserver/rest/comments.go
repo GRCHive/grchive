@@ -146,18 +146,12 @@ func newComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
-		Exchange: webcore.EVENT_EXCHANGE,
-		Queue:    "",
-		Body: webcore.EventMessage{
-			Event: core.Event{
-				Subject:        *user,
-				Verb:           core.VerbComment,
-				Object:         object,
-				IndirectObject: nil,
-				Timestamp:      time.Now().UTC(),
-			},
-		},
+	webcore.SendEventToRabbitMQ(core.Event{
+		Subject:        *user,
+		Verb:           core.VerbComment,
+		Object:         object,
+		IndirectObject: nil,
+		Timestamp:      time.Now().UTC(),
 	})
 
 	jsonWriter.Encode(comment)

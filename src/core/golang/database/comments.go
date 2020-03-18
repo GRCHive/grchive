@@ -99,7 +99,7 @@ func DeleteComment(commentId int64, userId int64) error {
 func FindUsersInCommentThread(threadId int64) ([]*core.User, error) {
 	users := make([]*core.User, 0)
 	err := dbConn.Select(&users, `
-		SELECT DISINCT u.*
+		SELECT DISTINCT u.*
 		FROM users AS u
 		INNER JOIN comments AS c
 			ON c.user_id = u.id

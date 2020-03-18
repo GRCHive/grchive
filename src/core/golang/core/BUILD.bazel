@@ -49,6 +49,7 @@ go_library(
         "time.go",
         "timer.go",
         "tls.go",
+        "typeRegistry.go",
         "types.go",
         "url.go",
         "user.go",

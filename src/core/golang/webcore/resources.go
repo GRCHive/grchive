@@ -7,6 +7,10 @@ import (
 )
 
 func GetOrgIdFromResource(in interface{}) (int32, error) {
+	if in == nil {
+		return -1, nil
+	}
+
 	switch v := in.(type) {
 	case core.Database:
 		return v.OrgId, nil
@@ -44,7 +48,7 @@ func GetOrgIdFromResource(in interface{}) (int32, error) {
 		return v.OrgId, nil
 	}
 
-	return 0, errors.New("Unsupported resource.")
+	return 0, errors.New("Unsupported resource (GetOrgIdFromResource).")
 }
 
 func FindRelevantUsersForResource(in interface{}, commentThread bool) ([]*core.User, error) {

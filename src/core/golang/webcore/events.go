@@ -35,22 +35,26 @@ func FindRelevantUsersForEvent(event *core.Event) ([]*core.User, error) {
 	// we need to add all "relevant" users.
 	isComment := (event.Verb == core.VerbComment)
 
-	objectUsers, err := FindRelevantUsersForResource(event.Object, isComment)
-	if err != nil {
-		return nil, err
+	if event.Object != nil {
+		objectUsers, err := FindRelevantUsersForResource(event.Object, isComment)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, u := range objectUsers {
+			addUser(u)
+		}
 	}
 
-	for _, u := range objectUsers {
-		addUser(u)
-	}
+	if event.IndirectObject != nil {
+		indirectUsers, err := FindRelevantUsersForResource(event.IndirectObject, isComment)
+		if err != nil {
+			return nil, err
+		}
 
-	indirectUsers, err := FindRelevantUsersForResource(event.IndirectObject, isComment)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, u := range indirectUsers {
-		addUser(u)
+		for _, u := range indirectUsers {
+			addUser(u)
+		}
 	}
 
 	return users, nil

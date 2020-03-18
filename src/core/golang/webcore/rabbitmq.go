@@ -40,7 +40,9 @@ type DatabaseRefreshMessage struct {
 }
 
 type EventMessage struct {
-	Event core.Event
+	Event              core.Event
+	ObjectType         string
+	IndirectObjectType string
 }
 
 type NotificationMessage struct {

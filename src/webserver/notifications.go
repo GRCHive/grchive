@@ -29,18 +29,12 @@ func onNotifyControlOwnerChange(data string) error {
 		return err
 	}
 
-	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
-		Exchange: webcore.EVENT_EXCHANGE,
-		Queue:    "",
-		Body: webcore.EventMessage{
-			Event: core.Event{
-				Subject:        parsedData.User,
-				Verb:           core.VerbAssign,
-				Object:         assignedToUser,
-				IndirectObject: parsedData.Control,
-				Timestamp:      time.Now().UTC(),
-			},
-		},
+	webcore.SendEventToRabbitMQ(core.Event{
+		Subject:        parsedData.User,
+		Verb:           core.VerbAssign,
+		Object:         assignedToUser,
+		IndirectObject: parsedData.Control,
+		Timestamp:      time.Now().UTC(),
 	})
 
 	return nil
@@ -67,18 +61,12 @@ func onNotifyDocRequestAssigneeChange(data string) error {
 		return err
 	}
 
-	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
-		Exchange: webcore.EVENT_EXCHANGE,
-		Queue:    "",
-		Body: webcore.EventMessage{
-			Event: core.Event{
-				Subject:        parsedData.User,
-				Verb:           core.VerbAssign,
-				Object:         assignedToUser,
-				IndirectObject: parsedData.Request,
-				Timestamp:      time.Now().UTC(),
-			},
-		},
+	webcore.SendEventToRabbitMQ(core.Event{
+		Subject:        parsedData.User,
+		Verb:           core.VerbAssign,
+		Object:         assignedToUser,
+		IndirectObject: parsedData.Request,
+		Timestamp:      time.Now().UTC(),
 	})
 
 	return nil
@@ -92,32 +80,20 @@ func onNotifyDocRequestStatusChange(data string) error {
 	}
 
 	if parsedData.Request.CompletionTime.NullTime.Valid {
-		webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
-			Exchange: webcore.EVENT_EXCHANGE,
-			Queue:    "",
-			Body: webcore.EventMessage{
-				Event: core.Event{
-					Subject:        parsedData.User,
-					Verb:           core.VerbComplete,
-					Object:         parsedData.Request,
-					IndirectObject: nil,
-					Timestamp:      time.Now().UTC(),
-				},
-			},
+		webcore.SendEventToRabbitMQ(core.Event{
+			Subject:        parsedData.User,
+			Verb:           core.VerbComplete,
+			Object:         parsedData.Request,
+			IndirectObject: nil,
+			Timestamp:      time.Now().UTC(),
 		})
 	} else {
-		webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
-			Exchange: webcore.EVENT_EXCHANGE,
-			Queue:    "",
-			Body: webcore.EventMessage{
-				Event: core.Event{
-					Subject:        parsedData.User,
-					Verb:           core.VerbReopen,
-					Object:         parsedData.Request,
-					IndirectObject: nil,
-					Timestamp:      time.Now().UTC(),
-				},
-			},
+		webcore.SendEventToRabbitMQ(core.Event{
+			Subject:        parsedData.User,
+			Verb:           core.VerbReopen,
+			Object:         parsedData.Request,
+			IndirectObject: nil,
+			Timestamp:      time.Now().UTC(),
 		})
 	}
 
@@ -145,18 +121,12 @@ func onNotifySqlRequestAssigneeChange(data string) error {
 		return err
 	}
 
-	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
-		Exchange: webcore.EVENT_EXCHANGE,
-		Queue:    "",
-		Body: webcore.EventMessage{
-			Event: core.Event{
-				Subject:        parsedData.User,
-				Verb:           core.VerbAssign,
-				Object:         assignedToUser,
-				IndirectObject: parsedData.Request,
-				Timestamp:      time.Now().UTC(),
-			},
-		},
+	webcore.SendEventToRabbitMQ(core.Event{
+		Subject:        parsedData.User,
+		Verb:           core.VerbAssign,
+		Object:         assignedToUser,
+		IndirectObject: parsedData.Request,
+		Timestamp:      time.Now().UTC(),
 	})
 
 	return nil
@@ -186,18 +156,12 @@ func onNotifySqlRequestApprovalChange(data string) error {
 		verb = core.VerbReject
 	}
 
-	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
-		Exchange: webcore.EVENT_EXCHANGE,
-		Queue:    "",
-		Body: webcore.EventMessage{
-			Event: core.Event{
-				Subject:        parsedData.User,
-				Verb:           verb,
-				Object:         request,
-				IndirectObject: nil,
-				Timestamp:      time.Now().UTC(),
-			},
-		},
+	webcore.SendEventToRabbitMQ(core.Event{
+		Subject:        parsedData.User,
+		Verb:           verb,
+		Object:         request,
+		IndirectObject: nil,
+		Timestamp:      time.Now().UTC(),
 	})
 
 	return nil

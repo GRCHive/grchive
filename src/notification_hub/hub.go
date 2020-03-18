@@ -22,16 +22,26 @@ func generateNotification(data []byte) *webcore.RabbitMQError {
 		return &webcore.RabbitMQError{err, false}
 	}
 
-	if incomingMessage.Event.Verb == core.VerbGettingStarted {
-		return handleGettingStartedEvent(&incomingMessage.Event)
-	}
-
-	notification, err := webcore.CreateNotificationFromEvent(&incomingMessage.Event)
+	event, err := incomingMessage.RecreateEvent()
 	if err != nil {
 		return &webcore.RabbitMQError{err, false}
 	}
 
-	relevantUsers, err := webcore.FindRelevantUsersForEvent(&incomingMessage.Event)
+	if event.Verb == core.VerbGettingStarted {
+		return handleGettingStartedEvent(event)
+	}
+
+	relevantUsers, err := webcore.FindRelevantUsersForEvent(event)
+	if err != nil {
+		return &webcore.RabbitMQError{err, false}
+	}
+
+	// If we don't need to notify anyone then don't do any further work.
+	if len(relevantUsers) == 0 {
+		return nil
+	}
+
+	notification, err := webcore.CreateNotificationFromEvent(event)
 	if err != nil {
 		return &webcore.RabbitMQError{err, false}
 	}

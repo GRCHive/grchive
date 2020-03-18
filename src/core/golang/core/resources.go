@@ -28,6 +28,9 @@ const (
 )
 
 func GetResourceTypeId(in interface{}) (string, int64, error) {
+	if in == nil {
+		return "", -1, nil
+	}
 
 	switch v := in.(type) {
 	case Database:
@@ -72,5 +75,5 @@ func GetResourceTypeId(in interface{}) (string, int64, error) {
 		return ResourceUser, v.Id, nil
 	}
 
-	return "", 0, errors.New("Unsupported resource.")
+	return "", 0, errors.New("Unsupported resource (GetResourceTypeId).")
 }
