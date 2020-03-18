@@ -44,13 +44,13 @@ func RegisterUser(user RegisterUserData) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return "", errors.New("Okta Register User failed")
-	}
-
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", errors.New("Okta Register User failed: " + string(body))
 	}
 
 	rootObj := map[string]*json.RawMessage{}
