@@ -8,8 +8,12 @@ import (
 )
 
 const DEFAULT_EXCHANGE string = ""
+const EVENT_EXCHANGE string = "events"
+const NOTIFICATION_EXCHANGE string = "notifications"
+
 const FILE_PREVIEW_QUEUE string = "filepreview"
 const DATABASE_REFRESH_QUEUE string = "dbrefresh"
+const EVENT_NOTIFICATION_QUEUE string = "eventnotification"
 
 const CHANNEL_BUFFER int = 12
 
@@ -35,9 +39,20 @@ type DatabaseRefreshMessage struct {
 	Refresh core.DbRefresh
 }
 
+type EventMessage struct {
+	Event core.Event
+}
+
+type NotificationMessage struct {
+	Notification core.Notification
+}
+
 type RecvMsgFn func([]byte) *RabbitMQError
 
 func SetupChannel(channel *amqp.Channel) {
+	//
+	// Default Exchange
+	//
 	_, err := channel.QueueDeclare(
 		FILE_PREVIEW_QUEUE, // name
 		true,               // durable
@@ -62,6 +77,80 @@ func SetupChannel(channel *amqp.Channel) {
 
 	if err != nil {
 		core.Error("Failed to declare database refresh queue: " + err.Error())
+	}
+
+	//
+	// Event Exchange
+	//
+
+	err = channel.ExchangeDeclare(
+		EVENT_EXCHANGE, // name
+		"fanout",       // type
+		true,           // durable
+		false,          // auto delete
+		false,          // internal
+		false,          // no wait
+		nil,            // arguments
+	)
+
+	if err != nil {
+		core.Error("Failed to declare event exchange: " + err.Error())
+	}
+
+	_, err = channel.QueueDeclare(
+		EVENT_NOTIFICATION_QUEUE, // name
+		true,                     // durable
+		false,                    // auto delete
+		false,                    // exclusive
+		false,                    // no wait
+		nil,                      // arguments
+	)
+
+	if err != nil {
+		core.Error("Failed to declare event notification queue: " + err.Error())
+	}
+
+	err = channel.QueueBind(
+		EVENT_NOTIFICATION_QUEUE, // queue name
+		"",                       // routing key
+		EVENT_EXCHANGE,           // exchange
+		false,                    // no wait
+		nil,                      // arguments
+	)
+
+	if err != nil {
+		core.Error("Failed to bind event notification queue to exchange: " + err.Error())
+	}
+
+	//
+	// Notification Exchange
+	//
+
+	err = channel.ExchangeDeclare(
+		NOTIFICATION_EXCHANGE, // name
+		"fanout",              // type
+		false,                 // durable
+		false,                 // auto delete
+		false,                 // internal
+		false,                 // no wait
+		nil,                   // arguments
+	)
+
+	if err != nil {
+		core.Error("Failed to declare notification exchange: " + err.Error())
+	}
+
+	_, err = channel.QueueDeclare(
+		"",    // name
+		false, // durable
+		false, // delete when unused
+		true,  // exclusive
+		false, // no wait
+		nil,   // arguments
+	)
+
+	if err != nil {
+		core.Error("Failed to declare notification queue: " + err.Error())
 	}
 }
 
