@@ -78,7 +78,9 @@ func main() {
 	core.Init()
 	database.Init()
 	database.InitListeners(map[string]database.ListenHandler{
-		database.NotifyChannelControlOwner: onNotifyControlOwnerChange,
+		database.NotifyChannelControlOwner:       onNotifyControlOwnerChange,
+		database.NotifyChannelDocRequestAssignee: onNotifyDocRequestAssigneeChange,
+		database.NotifyChannelDocRequestStatus:   onNotifyDocRequestStatusChange,
 	})
 	render.RegisterTemplates()
 	webcore.InitializeWebcore()

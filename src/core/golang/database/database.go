@@ -19,7 +19,9 @@ func Init() {
 type ListenHandler func(data string) error
 
 const (
-	NotifyChannelControlOwner string = "controlowner"
+	NotifyChannelControlOwner       string = "controlowner"
+	NotifyChannelDocRequestAssignee        = "docrequestassignee"
+	NotifyChannelDocRequestStatus          = "docrequeststatus"
 )
 
 func InitListeners(config map[string]ListenHandler) {
