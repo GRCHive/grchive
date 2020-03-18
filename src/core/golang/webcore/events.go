@@ -8,6 +8,10 @@ func FindRelevantUsersForEvent(event *core.Event) ([]*core.User, error) {
 	users := make([]*core.User, 0)
 	userFound := map[int64]bool{}
 
+	// We don't care about making the person who triggered this event
+	// receive a notification about an action they did themselves.
+	userFound[event.Subject.Id] = true
+
 	addUser := func(u *core.User) {
 		if u == nil {
 			return
