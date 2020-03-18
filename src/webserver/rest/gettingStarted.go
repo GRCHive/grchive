@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/webcore"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type tGettingStartedInterest struct {
@@ -71,6 +73,24 @@ func postGettingStartedInterest(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
+	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
+		Exchange: webcore.EVENT_EXCHANGE,
+		Queue:    "",
+		Body: webcore.EventMessage{
+			Event: core.Event{
+				Subject: core.User{
+					FirstName: data.Name,
+					LastName:  "",
+					Email:     data.Email,
+				},
+				Verb:           core.VerbGettingStarted,
+				Object:         nil,
+				IndirectObject: nil,
+				Timestamp:      time.Now().UTC(),
+			},
+		},
+	})
 
 	jsonWriter.Encode(struct{}{})
 }
