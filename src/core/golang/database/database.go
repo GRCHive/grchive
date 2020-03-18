@@ -22,6 +22,8 @@ const (
 	NotifyChannelControlOwner       string = "controlowner"
 	NotifyChannelDocRequestAssignee        = "docrequestassignee"
 	NotifyChannelDocRequestStatus          = "docrequeststatus"
+	NotifyChannelSqlRequestAssignee        = "sqlrequestassignee"
+	NotifyChannelSqlRequestStatus          = "sqlrequeststatus"
 )
 
 func InitListeners(config map[string]ListenHandler) {

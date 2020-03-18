@@ -10,6 +10,8 @@ const (
 	VerbComplete                 = "completed"
 	VerbReopen                   = "reopened"
 	VerbComment                  = "commented on"
+	VerbApprove                  = "approved"
+	VerbReject                   = "rejected"
 )
 
 type Event struct {

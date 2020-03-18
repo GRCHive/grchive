@@ -81,6 +81,8 @@ func main() {
 		database.NotifyChannelControlOwner:       onNotifyControlOwnerChange,
 		database.NotifyChannelDocRequestAssignee: onNotifyDocRequestAssigneeChange,
 		database.NotifyChannelDocRequestStatus:   onNotifyDocRequestStatusChange,
+		database.NotifyChannelSqlRequestAssignee: onNotifySqlRequestAssigneeChange,
+		database.NotifyChannelSqlRequestStatus:   onNotifySqlRequestApprovalChange,
 	})
 	render.RegisterTemplates()
 	webcore.InitializeWebcore()
