@@ -62,35 +62,103 @@ func newComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user, err := database.FindUserFromId(role.UserId)
+	if err != nil {
+		core.Warning("Failed to get user: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	comment := commentFromInputs(inputs.Comment)
 
+	var object interface{} = nil
 	if inputs.SqlRequestId.NullInt64.Valid {
 		err = database.InsertSqlRequestComment(
 			inputs.SqlRequestId.NullInt64.Int64,
 			inputs.OrgId,
 			comment,
 			role)
+
+		if err != nil {
+			core.Warning("Failed to insert SQL request comments: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		object, err = database.GetSqlRequest(
+			inputs.SqlRequestId.NullInt64.Int64,
+			inputs.OrgId,
+			role)
+		if err != nil {
+			core.Warning("Failed to get SQL request: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	} else if inputs.RequestId.NullInt64.Valid {
 		err = database.InsertDocumentRequestComment(
 			inputs.RequestId.NullInt64.Int64,
 			inputs.OrgId,
 			comment,
 			role)
+
+		if err != nil {
+			core.Warning("Failed to insert doc request comments: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		object, err = database.GetDocumentRequest(
+			inputs.RequestId.NullInt64.Int64,
+			inputs.OrgId,
+			role)
+		if err != nil {
+			core.Warning("Failed to get doc request: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 	} else if inputs.FileId.NullInt64.Valid {
 		err = database.InsertDocumentComment(
 			inputs.FileId.NullInt64.Int64,
 			inputs.OrgId,
 			comment,
 			role)
-	} else {
-		err = errors.New("Invalid comment type.")
-	}
 
-	if err != nil {
-		core.Warning("Failed to insert comments: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		if err != nil {
+			core.Warning("Failed to insert document comments: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		object, err = database.GetControlDocumentation(
+			inputs.FileId.NullInt64.Int64,
+			inputs.OrgId,
+			role)
+		if err != nil {
+			core.Warning("Failed to get doc request: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+	} else {
+		core.Warning("Invalid combination of inputs for new comment")
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
+		Exchange: webcore.EVENT_EXCHANGE,
+		Queue:    "",
+		Body: webcore.EventMessage{
+			Event: core.Event{
+				Subject:        *user,
+				Verb:           core.VerbComment,
+				Object:         object,
+				IndirectObject: nil,
+				Timestamp:      time.Now().UTC(),
+			},
+		},
+	})
 
 	jsonWriter.Encode(comment)
 }
