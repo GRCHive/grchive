@@ -110,7 +110,10 @@ import { PageParamsStore } from '../../../ts/pageParams'
 export default Vue.extend({
     props : {
         nodeId: Number,
-        riskId: Number,
+        riskId: {
+            type: Number,
+            default: -1,
+        },
         editMode: {
             type: Boolean,
             default: false

@@ -13,6 +13,7 @@ go_binary(
     srcs = [
         "main.go",
         "dashboard.go",
+        "notifications.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",

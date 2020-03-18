@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 	"gitlab.com/grchive/grchive/core"
 	"time"
 )
@@ -14,6 +14,49 @@ func Init() {
 	dbConn.SetMaxOpenConns(10)
 	dbConn.SetMaxIdleConns(5)
 	dbConn.SetConnMaxLifetime(5 * time.Minute)
+}
+
+type ListenHandler func(data string) error
+
+const (
+	NotifyChannelControlOwner string = "controlowner"
+)
+
+func InitListeners(config map[string]ListenHandler) {
+	minDuration, err := time.ParseDuration("5s")
+	if err != nil {
+		core.Error("Failed to parse min duration: " + err.Error())
+	}
+
+	maxDuration, err := time.ParseDuration("5m")
+	if err != nil {
+		core.Error("Failed to parse max duration: " + err.Error())
+	}
+
+	listener := pq.NewListener(
+		core.EnvConfig.DatabaseConnString,
+		minDuration,
+		maxDuration,
+		nil)
+
+	for k := range config {
+		err = listener.Listen(k)
+		if err != nil {
+			core.Error("Failed to listen to channel: " + err.Error())
+		}
+	}
+
+	go func() {
+		defer listener.Close()
+		for {
+			n := <-listener.Notify
+			handler := config[n.Channel]
+			err = handler(n.Extra)
+			if err != nil {
+				core.Warning("Failed to handle DB notify: " + err.Error())
+			}
+		}
+	}()
 }
 
 func CreateTx() *sqlx.Tx {

@@ -77,6 +77,9 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 func main() {
 	core.Init()
 	database.Init()
+	database.InitListeners(map[string]database.ListenHandler{
+		database.NotifyChannelControlOwner: onNotifyControlOwnerChange,
+	})
 	render.RegisterTemplates()
 	webcore.InitializeWebcore()
 	mail.InitializeMailAPI(core.EnvConfig.Mail.Provider, core.EnvConfig.Mail.Key)
