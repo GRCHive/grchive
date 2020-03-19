@@ -14,3 +14,9 @@ type Notification struct {
 	IndirectObjectType string    `db:"indirect_object_type"`
 	IndirectObjectId   int64     `db:"indirect_object_id"`
 }
+
+type NotificationWrapper struct {
+	Notification Notification `db:"notif"`
+	OrgName      string       `db:"org_group_name"`
+	Read         bool         `db:"read"`
+}

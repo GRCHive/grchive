@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/webcore"
@@ -20,6 +21,8 @@ func onNotifyControlOwnerChange(data string) error {
 		return err
 	}
 
+	fmt.Printf("%+v\n", parsedData)
+
 	if !parsedData.Control.OwnerId.NullInt64.Valid {
 		return nil
 	}
@@ -32,8 +35,8 @@ func onNotifyControlOwnerChange(data string) error {
 	webcore.SendEventToRabbitMQ(core.Event{
 		Subject:        parsedData.User,
 		Verb:           core.VerbAssign,
-		Object:         assignedToUser,
-		IndirectObject: parsedData.Control,
+		Object:         parsedData.Control,
+		IndirectObject: assignedToUser,
 		Timestamp:      time.Now().UTC(),
 	})
 
@@ -64,8 +67,8 @@ func onNotifyDocRequestAssigneeChange(data string) error {
 	webcore.SendEventToRabbitMQ(core.Event{
 		Subject:        parsedData.User,
 		Verb:           core.VerbAssign,
-		Object:         assignedToUser,
-		IndirectObject: parsedData.Request,
+		Object:         parsedData.Request,
+		IndirectObject: assignedToUser,
 		Timestamp:      time.Now().UTC(),
 	})
 
@@ -124,8 +127,8 @@ func onNotifySqlRequestAssigneeChange(data string) error {
 	webcore.SendEventToRabbitMQ(core.Event{
 		Subject:        parsedData.User,
 		Verb:           core.VerbAssign,
-		Object:         assignedToUser,
-		IndirectObject: parsedData.Request,
+		Object:         parsedData.Request,
+		IndirectObject: assignedToUser,
 		Timestamp:      time.Now().UTC(),
 	})
 

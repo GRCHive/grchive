@@ -54,7 +54,7 @@ func (m EventMessage) RecreateEvent() (*core.Event, error) {
 		rObject := reflect.New(core.TypeRegistry[m.IndirectObjectType])
 		object := rObject.Interface()
 
-		raw, err := json.Marshal(m.Event.Object)
+		raw, err := json.Marshal(m.Event.IndirectObject)
 		if err != nil {
 			return nil, err
 		}

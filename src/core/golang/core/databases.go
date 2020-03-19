@@ -103,6 +103,10 @@ type DbSqlQueryRequest struct {
 	Description    string    `db:"description"`
 }
 
+func (r *DbSqlQueryRequest) UnmarshalJSON(data []byte) error {
+	return FlexibleJsonStructUnmarshal(data, r)
+}
+
 type DbSqlQueryRequestApproval struct {
 	RequestId        int64     `db:"request_id"`
 	OrgId            int32     `db:"org_id"`

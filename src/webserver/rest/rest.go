@@ -49,6 +49,8 @@ func registerAPIPaths(r *mux.Router) {
 	registerCommentsAPIPaths(s)
 	registerDeploymentAPIPaths(s)
 	registerVendorAPIPaths(s)
+	registerNotificationAPIPaths(s)
+	registerResourceAPIPaths(s)
 }
 
 func registerAuditTrailAPIPaths(r *mux.Router) {
@@ -451,4 +453,14 @@ func registerVendorProductSocAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiVendorProductSocPrefix).Subrouter()
 	s.HandleFunc(core.ApiNewEndpoint, linkVendorProductSoc).Methods("POST")
 	s.HandleFunc(core.ApiDeleteEndpoint, unlinkVendorProductSoc).Methods("POST")
+}
+
+func registerNotificationAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiNotificationPrefix).Subrouter()
+	s.HandleFunc(core.ApiAllEndpoint, allNotifications).Methods("GET")
+}
+
+func registerResourceAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiResourcePrefix).Subrouter()
+	s.HandleFunc(core.ApiGetEndpoint, getResource).Methods("GET")
 }

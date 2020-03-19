@@ -56,7 +56,7 @@ func LinkNotificationToUsersWithTx(notificationId int64, orgId int32, users []*c
 
 	builder := strings.Builder{}
 	builder.WriteString(`
-		INSERT INTO user_notifications (user_id, org_id, notification_id)
+		INSERT INTO user_notifications (notification_id, org_id, user_id)
 		VALUES
 	`)
 
@@ -68,4 +68,31 @@ func LinkNotificationToUsersWithTx(notificationId int64, orgId int32, users []*c
 
 	_, err := tx.Exec(builder.String(), notificationId, orgId)
 	return err
+}
+
+func AllNotificationsForUserId(userId int64) ([]*core.NotificationWrapper, error) {
+	notifications := make([]*core.NotificationWrapper, 0)
+	err := dbConn.Select(&notifications, `
+		SELECT
+			n.id AS "notif.id",
+			n.org_id AS "notif.org_id",
+			n.time AS "notif.time",
+			n.subject_type AS "notif.subject_type",
+			n.subject_id AS "notif.subject_id",
+			n.verb AS "notif.verb",
+			n.object_type AS "notif.object_type",
+			n.object_id AS "notif.object_id",
+			n.indirect_object_type AS "notif.indirect_object_type",
+			n.indirect_object_id AS "notif.indirect_object_id",
+			o.org_group_name AS "org_group_name",
+			un.read IS NOT NULL AS "read"
+		FROM notifications AS n
+		INNER JOIN user_notifications AS un
+			ON un.notification_id = n.id
+		INNER JOIN organizations AS o
+			ON o.id = un.org_id
+		WHERE un.user_id = $1
+		ORDER BY n.time DESC
+	`, userId)
+	return notifications, err
 }

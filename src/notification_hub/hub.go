@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/webcore"
@@ -27,10 +28,13 @@ func generateNotification(data []byte) *webcore.RabbitMQError {
 		return &webcore.RabbitMQError{err, false}
 	}
 
+	fmt.Printf("%+v\n", event)
+
 	if event.Verb == core.VerbGettingStarted {
 		return handleGettingStartedEvent(event)
 	}
 
+	core.Debug("\tFind Relevant Users")
 	relevantUsers, err := webcore.FindRelevantUsersForEvent(event)
 	if err != nil {
 		return &webcore.RabbitMQError{err, false}
@@ -48,18 +52,21 @@ func generateNotification(data []byte) *webcore.RabbitMQError {
 
 	tx := database.CreateTx()
 
+	core.Debug("\tInsert Notification")
 	err = database.InsertNotificationWithTx(notification, tx)
 	if err != nil {
 		tx.Rollback()
 		return &webcore.RabbitMQError{err, false}
 	}
 
+	core.Debug("\tLink Notification")
 	err = database.LinkNotificationToUsersWithTx(notification.Id, notification.OrgId, relevantUsers, tx)
 	if err != nil {
 		tx.Rollback()
 		return &webcore.RabbitMQError{err, false}
 	}
 
+	core.Debug("\tCommit")
 	err = tx.Commit()
 	if err != nil {
 		return &webcore.RabbitMQError{err, true}

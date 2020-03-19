@@ -28,3 +28,18 @@ func MergeMaps(input ...map[string]interface{}) map[string]interface{} {
 	}
 	return retMap
 }
+
+func GetFromMapWithKeyOptions(input map[string]interface{}, keys ...string) interface{} {
+	for _, k := range keys {
+		if k == "" {
+			continue
+		}
+
+		v, ok := input[k]
+		if !ok {
+			continue
+		}
+		return v
+	}
+	return nil
+}

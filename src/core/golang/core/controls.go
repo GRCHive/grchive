@@ -27,3 +27,7 @@ type ControlFilterData struct {
 var NullControlFilterData ControlFilterData = ControlFilterData{
 	NumRisks: NullNumericFilterData,
 }
+
+func (c *Control) UnmarshalJSON(data []byte) error {
+	return FlexibleJsonStructUnmarshal(data, c)
+}

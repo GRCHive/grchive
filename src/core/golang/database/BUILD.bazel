@@ -33,6 +33,7 @@ go_library(
         "processFlowNodes.go",
         "processFlowRelationships.go",
         "processFlows.go",
+        "resources.go",
         "risks.go",
         "roles.go",
         "samlIdp.go",

@@ -352,3 +352,7 @@ export const deleteVendorProductSocLinkUrl : string = "/api/vendor/product/soc/d
 
 export const allAuditTrailLinkUrl : string = "/api/auditlog/all"
 export const getAuditTrailLinkUrl : string = "/api/auditlog/get"
+
+export const allNotificationUrl : string = "/api/notifications/all"
+
+export const getResourceHandleUrl : string = "/api/resource/get"

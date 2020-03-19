@@ -27,6 +27,7 @@ go_library(
         "hashIds.go",
         "infrastructure.go",
         "inviteCodes.go",
+        "json.go",
         "log.go",
         "maps.go",
         "messageHub.go",

@@ -37,6 +37,7 @@ const (
 	SingleGLAccountRouteName       = "SingleGLAccount"
 	FullGLAccountRouteName         = "FullGL"
 	SingleDocRequestRouteName      = "SingleDocRequest"
+	SingleSqlRequestRouteName      = "SingleSqlRequest"
 	SingleDocumentationRouteName   = "SingleDocumentation"
 )
 

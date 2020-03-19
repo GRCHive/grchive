@@ -2,6 +2,11 @@ package core
 
 import "errors"
 
+type ResourceHandle struct {
+	DisplayText string     `json:"displayText"`
+	ResourceUri NullString `json:"resourceUri"`
+}
+
 const (
 	ResourceDatabase         string = "database_resources"
 	ResourceDatabaseConn     string = "database_connection_info"

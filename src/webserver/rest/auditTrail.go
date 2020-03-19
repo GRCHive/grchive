@@ -173,11 +173,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 
 	resourceStillExists := latestEvent.Action != "DELETE"
 
-	type ResourceHandle struct {
-		DisplayText string          `json:"displayText"`
-		ResourceUri core.NullString `json:"resourceUri"`
-	}
-	var handle ResourceHandle
+	var handle core.ResourceHandle
 
 	if latestData != nil {
 		switch event.ResourceType {
@@ -260,12 +256,11 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 					queryId,
 				)
 
-				handle.ResourceUri = core.CreateNullString(
-					webcore.MustGetRouteUrlAbsolute(
-						webcore.SingleDatabaseRouteName,
-						core.DashboardOrgOrgQueryId, org.OktaGroupName,
-						core.DashboardOrgDbQueryId, strconv.FormatInt(int64(math.Round(metadata["db_id"].(float64))), 10),
-					))
+				handle.ResourceUri = core.CreateNullString(webcore.MustGetRouteUrlAbsolute(
+					webcore.SingleSqlRequestRouteName,
+					core.DashboardOrgOrgQueryId, org.OktaGroupName,
+					core.DashboardOrgSqlRequestQueryId, event.ResourceId,
+				))
 			} else {
 				handle.DisplayText = "UNKNOWN"
 			}
@@ -691,7 +686,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 
 	handle.ResourceUri.NullString.Valid = resourceStillExists
 	jsonWriter.Encode(struct {
-		Handle ResourceHandle
+		Handle core.ResourceHandle
 		Diff   map[string]interface{}
 	}{
 		Handle: handle,

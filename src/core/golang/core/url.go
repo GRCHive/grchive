@@ -278,6 +278,12 @@ const ApiVendorProductSocPrefix = "/soc"
 // API - Audit Trail
 const ApiAuditTrailPrefix = "/auditlog"
 
+// API - Notification
+const ApiNotificationPrefix = "/notifications"
+
+// API - Resource
+const ApiResourcePrefix = "/resource"
+
 // Websocket
 const WebsocketPrefix string = "/ws"
 

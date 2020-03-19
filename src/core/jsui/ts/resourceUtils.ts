@@ -4,6 +4,18 @@ export interface ResourceHandle {
     resourceUri: string | null
 }
 
+export function resourceTypeToIcon(typ : string) : string {
+    switch (typ) {
+    case 'database_sql_query_requests':
+        return 'mdi-database-search'
+    case 'document_requests':
+        return 'mdi-file-search'
+    case 'process_flow_controls':
+        return 'mdi-shield-lock-outline'
+    }
+    return 'mdi-alert-circle-outline'
+}
+
 export function standardizeResourceType(typ : string) : string {
     switch (typ) {
         case 'database_connection_info':

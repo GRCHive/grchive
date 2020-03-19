@@ -3,10 +3,9 @@
         <template v-slot:activator="{on}">
             <v-badge
                 color="red"
-                bottom
                 dot
                 overlap
-                :value="hasNotifications"
+                :value="hasUnreadNotifications"
                 :offset-x="16"
                 :offset-y="16"
             >
@@ -16,7 +15,20 @@
             </v-badge>
         </template>
 
-        <v-list>
+        <v-list
+            dense
+            tile
+            min-width="400"
+            max-width="400"
+        >
+            <template v-for="(item, index) in allNotifications">
+                <notification-display
+                    :key="`display-${index}`"
+                    :notification="item"
+                >
+                </notification-display>
+                <v-divider :key="`divider-${index}`"></v-divider>
+            </template>
         </v-list>
     </v-menu>
 
@@ -26,12 +38,26 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import NotificationStore, { NotificationWrapper } from '../../../ts/notifications'
+import NotificationDisplay from './NotificationDisplay.vue'
 
-@Component
+@Component({
+    components: {
+        NotificationDisplay
+    }
+})
 export default class MiniNotificationMenu extends Vue {
 
-    get hasNotifications() : boolean {
-        return true
+    get allNotifications() : NotificationWrapper[] {
+        return NotificationStore.state.allNotifications
+    }
+
+    get hasUnreadNotifications() : boolean {
+        return NotificationStore.getters.hasUnreadNotifications
+    }
+
+    mounted() {
+        NotificationStore.dispatch('pullNotifications')
     }
 }
 

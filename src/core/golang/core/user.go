@@ -16,3 +16,7 @@ type UserWithRole struct {
 	RoleId int64 `db:"role_id"`
 	OrgId  int32 `db:"org_id"`
 }
+
+func (u *User) UnmarshalJSON(data []byte) error {
+	return FlexibleJsonStructUnmarshal(data, u)
+}

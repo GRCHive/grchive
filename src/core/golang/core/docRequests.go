@@ -15,3 +15,7 @@ type DocumentRequest struct {
 	CompletionTime  NullTime  `db:"completion_time"`
 	RequestTime     time.Time `db:"request_time"`
 }
+
+func (r *DocumentRequest) UnmarshalJSON(data []byte) error {
+	return FlexibleJsonStructUnmarshal(data, r)
+}
