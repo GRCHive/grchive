@@ -1,0 +1,19 @@
+{{- if eq .subject "" -}}
+Someone
+{{- else -}}
+{{ .subject }}
+{{- end -}}
+&nbsp;{{ .verb }}
+{{- if ne .object "" -}}
+{{- if eq .objectUrl "" -}}
+&nbsp;{{ .object }}
+{{- else -}}
+&nbsp;<a href="{{ .objectUrl }}">{{ .object }}</a>
+{{- end -}}
+{{- end -}}
+{{- if ne .indirectObject "" -}}
+&nbsp;{{ .indirectObject }}
+{{- end -}}
+&nbsp;at {{ .timestamp }}.<br><br>
+
+Thank you!

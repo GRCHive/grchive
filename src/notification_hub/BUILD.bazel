@@ -7,10 +7,12 @@ go_binary(
     srcs = ["hub.go"],
     data = [
         "//src/webserver/config:config",
+        "//src/webserver:templates",
     ],
     deps = [
         "//src/core/golang/core:webserver_core_library",
         "//src/core/golang/database:webserver_database_library",
         "//src/core/golang/webcore:webserver_webcore_library",
+        "//src/mail_api/golang:mail_golang_api",
     ],
 )

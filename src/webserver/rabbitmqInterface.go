@@ -2,10 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/mail_api"
 	"gitlab.com/grchive/grchive/webcore"
+	"html/template"
 	"strconv"
+	"time"
 )
 
 func receiveNotification(data []byte) *webcore.RabbitMQError {
@@ -33,6 +37,64 @@ func receiveNotification(data []byte) *webcore.RabbitMQError {
 				Read:         false,
 			},
 		)
+	}
+
+	sendNotification(&incomingMessage.Notification, incomingMessage.RelevantUsers)
+
+	return nil
+}
+
+func sendNotification(notification *core.Notification, users []*core.User) error {
+	emailTemplate, err := template.ParseFiles("src/webserver/templates/email/notification.tmpl")
+	if err != nil {
+		return err
+	}
+
+	subjectHandle, err := webcore.GetResourceHandle(notification.SubjectType, notification.SubjectId, notification.OrgId)
+	if err != nil {
+		return err
+	}
+
+	objectHandle, err := webcore.GetResourceHandle(notification.ObjectType, notification.ObjectId, notification.OrgId)
+	if err != nil {
+		return err
+	}
+
+	indirectObjectHandle, err := webcore.GetResourceHandle(notification.IndirectObjectType, notification.IndirectObjectId, notification.OrgId)
+	if err != nil {
+		return err
+	}
+
+	org, err := database.FindOrganizationFromId(notification.OrgId)
+	if err != nil {
+		return err
+	}
+
+	message, err := core.TemplateToString(emailTemplate, map[string]string{
+		"subject":        subjectHandle.DisplayText,
+		"verb":           notification.Verb,
+		"object":         objectHandle.DisplayText,
+		"objectUrl":      objectHandle.ResourceUri.NullString.String,
+		"indirectObject": indirectObjectHandle.DisplayText,
+		"timestamp":      notification.Time.Format(time.UnixDate),
+	})
+
+	if err != nil {
+		return err
+	}
+
+	for _, u := range users {
+		mailPayload := mail.MailPayload{
+			From: core.EnvConfig.Mail.VeriEmailFrom,
+			To: mail.Email{
+				Name:  fmt.Sprintf("%s %s", u.FirstName, u.LastName),
+				Email: u.Email,
+			},
+			Subject: fmt.Sprintf("Notification in %s for %s", org.Name, objectHandle.DisplayText),
+			Message: message,
+		}
+
+		mail.MailProvider.SendMail(mailPayload)
 	}
 
 	return nil

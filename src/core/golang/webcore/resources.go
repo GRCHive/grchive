@@ -4,6 +4,7 @@ import (
 	"errors"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"strconv"
 )
 
 func GetOrgIdFromResource(in interface{}) (int32, error) {
@@ -129,4 +130,49 @@ func FindRelevantUsersForResource(in interface{}, commentThread bool) ([]*core.U
 	}
 
 	return users, nil
+}
+
+func GetResourceHandle(typ string, id int64, orgId int32) (*core.ResourceHandle, error) {
+	if typ == "" {
+		return &core.ResourceHandle{}, nil
+	}
+
+	name, err := database.GetResourceName(typ, id)
+	if err != nil {
+		return nil, err
+	}
+
+	org, err := database.FindOrganizationFromId(orgId)
+	if err != nil {
+		return nil, err
+	}
+
+	resourceIdStr := strconv.FormatInt(id, 10)
+
+	var url core.NullString
+	switch typ {
+	case core.ResourceControl:
+		url = core.CreateNullString(MustGetRouteUrlAbsolute(
+			SingleControlRouteName,
+			core.DashboardOrgOrgQueryId, org.OktaGroupName,
+			core.DashboardOrgControlQueryId, resourceIdStr,
+		))
+	case core.ResourceDocRequest:
+		url = core.CreateNullString(MustGetRouteUrlAbsolute(
+			SingleDocRequestRouteName,
+			core.DashboardOrgOrgQueryId, org.OktaGroupName,
+			core.DashboardOrgDocRequestQueryId, resourceIdStr,
+		))
+	case core.ResourceSqlQueryRequest:
+		url = core.CreateNullString(MustGetRouteUrlAbsolute(
+			SingleSqlRequestRouteName,
+			core.DashboardOrgOrgQueryId, org.OktaGroupName,
+			core.DashboardOrgSqlRequestQueryId, resourceIdStr,
+		))
+	}
+
+	return &core.ResourceHandle{
+		DisplayText: name,
+		ResourceUri: url,
+	}, nil
 }

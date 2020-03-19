@@ -3,10 +3,8 @@ package rest
 import (
 	"encoding/json"
 	"gitlab.com/grchive/grchive/core"
-	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/webcore"
 	"net/http"
-	"strconv"
 )
 
 type GetResourceInputs struct {
@@ -34,46 +32,12 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name, err := database.GetResourceName(inputs.ResourceType, inputs.ResourceId)
+	handle, err := webcore.GetResourceHandle(inputs.ResourceType, inputs.ResourceId, inputs.OrgId)
 	if err != nil {
-		core.Warning("Failed to get resource handle: " + err.Error())
+		core.Warning("Failed to get handle: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	org, err := database.FindOrganizationFromId(inputs.OrgId)
-	if err != nil {
-		core.Warning("Failed to find org: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	resourceIdStr := strconv.FormatInt(inputs.ResourceId, 10)
-
-	var url core.NullString
-	switch inputs.ResourceType {
-	case core.ResourceControl:
-		url = core.CreateNullString(webcore.MustGetRouteUrlAbsolute(
-			webcore.SingleControlRouteName,
-			core.DashboardOrgOrgQueryId, org.OktaGroupName,
-			core.DashboardOrgControlQueryId, resourceIdStr,
-		))
-	case core.ResourceDocRequest:
-		url = core.CreateNullString(webcore.MustGetRouteUrlAbsolute(
-			webcore.SingleDocRequestRouteName,
-			core.DashboardOrgOrgQueryId, org.OktaGroupName,
-			core.DashboardOrgDocRequestQueryId, resourceIdStr,
-		))
-	case core.ResourceSqlQueryRequest:
-		url = core.CreateNullString(webcore.MustGetRouteUrlAbsolute(
-			webcore.SingleSqlRequestRouteName,
-			core.DashboardOrgOrgQueryId, org.OktaGroupName,
-			core.DashboardOrgSqlRequestQueryId, resourceIdStr,
-		))
-	}
-
-	jsonWriter.Encode(core.ResourceHandle{
-		DisplayText: name,
-		ResourceUri: url,
-	})
+	jsonWriter.Encode(*handle)
 }
