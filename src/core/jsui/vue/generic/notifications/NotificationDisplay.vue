@@ -169,5 +169,4 @@ export default class NotificationDisplay extends Props {
     margin-bottom: auto !important;
 }
 
-
 </style>

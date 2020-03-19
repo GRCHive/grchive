@@ -70,7 +70,7 @@ func LinkNotificationToUsersWithTx(notificationId int64, orgId int32, users []*c
 	return err
 }
 
-func AllNotificationsForUserId(userId int64) ([]*core.NotificationWrapper, error) {
+func AllNotificationsForUserId(userId int64, offset int64) ([]*core.NotificationWrapper, error) {
 	notifications := make([]*core.NotificationWrapper, 0)
 	err := dbConn.Select(&notifications, `
 		SELECT
@@ -93,7 +93,9 @@ func AllNotificationsForUserId(userId int64) ([]*core.NotificationWrapper, error
 			ON o.id = un.org_id
 		WHERE un.user_id = $1
 		ORDER BY n.time DESC
-	`, userId)
+		LIMIT 25
+		OFFSET $2
+	`, userId, offset)
 	return notifications, err
 }
 

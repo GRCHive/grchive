@@ -29,7 +29,9 @@
 
         <v-divider></v-divider>
         <v-list
-            class="py-0 notif-container"
+            class="py-0"
+            :id="uniqueScrollerId"
+            :style="notificationViewerStyle"
             dense
             tile
         >
@@ -41,6 +43,17 @@
                 </notification-display>
                 <v-divider :key="`divider-${index}`"></v-divider>
             </template>
+
+            <v-list-item
+                v-if="loadingMoreNotifications"
+            >
+                <v-list-item-content>
+                    <span class="subtitle-1 flex-center">
+                        <v-progress-circular class="center-y" indeterminate size="16"></v-progress-circular>
+                        <span class="ml-2">Loading...</span>
+                    </span>
+                </v-list-item-content>
+            </v-list-item>
         </v-list>
     </div>
 </template>
@@ -55,17 +68,60 @@ import { markNotificationRead } from '../../../ts/api/apiNotifications'
 import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
 
+let counter = 0
+
+const Props = Vue.extend({
+    props: {
+        limit: {
+            type: Number,
+            default: -1
+        },
+        useWindowScroll: {
+            type: Boolean,
+            default: false
+        }
+    }
+})
+
 @Component({
     components: {
         NotificationDisplay
     }
 })
-export default class NotificationViewer extends Vue {
+export default class NotificationViewer extends Props {
     get allNotifications() : NotificationWrapper[] {
-        return NotificationStore.state.allNotifications
+        if (this.limit == -1) {
+            return NotificationStore.state.allNotifications
+        }
+        return NotificationStore.state.allNotifications.slice(0, this.limit)
+    }
+
+    get uniqueScrollerId() : string {
+        counter += 1
+        return `notification-scroll-${counter}`
+    }
+
+    get loadingMoreNotifications() : boolean {
+        return NotificationStore.state.requestInProgress
     }
 
     mounted() {
+        this.pullMoreNotifications()
+
+        if (this.useWindowScroll) {
+            window.addEventListener('wheel', this.handleWheel)
+        } else {
+            // Not sure why Typescript doesn't like this line?
+            //@ts-ignore
+            document.querySelector(`#${this.uniqueScrollerId}`)!.addEventListener('wheel', this.handleWheel)
+        }
+    }
+
+    pullMoreNotifications() {
+        if (this.allNotifications.length >= this.limit && this.limit != -1) {
+            return
+        }
+
         NotificationStore.dispatch('pullNotifications')
     }
 
@@ -87,6 +143,44 @@ export default class NotificationViewer extends Vue {
         })
     }
 
+    get notificationViewerStyle() : any {
+        if (this.useWindowScroll) {
+            return {}
+        }
+
+        return {
+            "max-height": "80vh",
+            "overflow": "auto"
+        }
+    }
+
+    handleWheel(e : MouseEvent) {
+        let currentScroll: number = 0
+        let maxScroll: number = 0
+
+        //@ts-ignore
+        let ele : HTMLElement = document.querySelector(`#${this.uniqueScrollerId}`)!
+
+        if (this.useWindowScroll) {
+            currentScroll = window.pageYOffset
+            maxScroll = document.documentElement.scrollHeight - document.documentElement.clientHeight
+        } else {
+            currentScroll = ele.scrollTop
+            maxScroll = ele.scrollHeight - ele.offsetHeight
+        }
+
+        // Just in case we have multiple notification viewers active,
+        // we don't really want to trigger multiple pull requests.
+
+        //@ts-ignore
+        if (!ele.contains(e.target)) {
+            return
+        }
+
+        if (currentScroll >= maxScroll) {
+            this.pullMoreNotifications()
+        }
+    }
 }
 
 </script>
@@ -96,13 +190,14 @@ export default class NotificationViewer extends Vue {
     flex: 6 1 !important;
 }
 
-.notif-container {
-    overflow: auto;
-}
-
 .white-bg {
     background-color: white;
 }
 
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
 
 </style>

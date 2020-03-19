@@ -10,6 +10,7 @@ import (
 
 type AllNotificationInputs struct {
 	UserId int64 `webcore:"userId"`
+	Offset int64 `webcore:"offset"`
 }
 
 func allNotifications(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +38,7 @@ func allNotifications(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	notifications, err := database.AllNotificationsForUserId(inputs.UserId)
+	notifications, err := database.AllNotificationsForUserId(inputs.UserId, inputs.Offset)
 	if err != nil {
 		core.Warning("Failed to get user notifications.")
 		w.WriteHeader(http.StatusInternalServerError)

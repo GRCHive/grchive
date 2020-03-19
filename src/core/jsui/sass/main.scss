@@ -32,3 +32,13 @@
 .disable-flex {
     flex: none !important;
 }
+
+.center-x {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.center-y {
+    margin-top: auto;
+    margin-bottom: auto;
+}

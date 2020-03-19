@@ -26,43 +26,69 @@ export function cleanJsonNotificationWrapper(n : NotificationWrapper) {
 }
 
 interface NotificationStoreState {
-    notificationsPulled: boolean
     allNotifications : NotificationWrapper[]
+    canPullMore: boolean
+    requestInProgress: boolean
 }
 
 const notificationStoreOptions: StoreOptions<NotificationStoreState> = {
     state: {
-        notificationsPulled: false,
         allNotifications: [],
+        canPullMore: true,
+        requestInProgress : false
     },
     mutations: {
-        startNotificationPull(state) {
-            state.notificationsPulled = true
+        startPull(state) {
+            state.requestInProgress = true
         },
-        setNotifications(state, data) {
-            state.allNotifications = data
+        stopPull(state) {
+            state.requestInProgress = false
+        },
+        addNotifications(state, data) {
+            state.allNotifications.push(...data)
         },
         markAllAsRead(state) {
             state.allNotifications.forEach((ele : NotificationWrapper) => {
                 ele.Read = true
             })
+        },
+        stopAllowingPull(state) {
+            state.canPullMore = false
         }
     },
     actions: {
         pullNotifications(context) {
-            context.commit('startNotificationPull')
+            if (!context.state.canPullMore || context.state.requestInProgress) {
+                return
+            }
+
+            context.commit('startPull')
             allNotifications({
                 userId: PageParamsStore.state.user!.Id,
+                offset: context.state.allNotifications.length,
             }).then((resp : TAllNotificationOutput) => {
-                context.commit('setNotifications', resp.data)
+                context.commit(
+                    'addNotifications',
+                    resp.data.filter((ele : NotificationWrapper) => !context.getters.notificationIdSet.has(ele.Notification.Id))
+                )
+
+                if (resp.data.length == 0) {
+                    context.commit('stopAllowingPull')
+                }
+
+                context.commit('stopPull')
             }).catch((err : any) => {
                 console.log(err)
+                context.commit('stopPull')
             })
         }
     },
     getters: {
         hasUnreadNotifications(state) : boolean {
             return state.allNotifications.some((ele : NotificationWrapper) => !ele.Read)
+        },
+        notificationIdSet(state): Set<number> {
+            return new Set<number>(state.allNotifications.map((ele : NotificationWrapper) => ele.Notification.Id))
         }
     }
 }

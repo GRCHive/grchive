@@ -5,7 +5,7 @@
 
         <user-home-page-nav-bar></user-home-page-nav-bar>
         <v-content class="ma-4">
-            <notification-viewer></notification-viewer>
+            <notification-viewer use-window-scroll></notification-viewer>
         </v-content>
     </div>
 </template>

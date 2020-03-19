@@ -13,6 +13,7 @@ import { postFormJson } from '../http'
 
 export interface TAllNotificationInput {
     userId: number
+    offset: number
 }
 
 export interface TAllNotificationOutput {

@@ -22,7 +22,7 @@
 
         <div class="menu-container">
             <notification-viewer
-                class="notif-container"
+                :limit="25"
             ></notification-viewer>
 
             <v-btn
@@ -70,10 +70,6 @@ export default class MiniNotificationMenu extends Vue {
 .menu-container {
     min-width: 400px;
     max-width: 400px;
-}
-
-.notif-container {
-    max-height: 80vh;
 }
 
 .white-bg {
