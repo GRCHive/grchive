@@ -50,7 +50,7 @@
 
             <v-divider></v-divider>
             <v-list
-                class="py-0"
+                class="py-0 notif-container"
                 dense
                 tile
             >
@@ -128,6 +128,11 @@ export default class MiniNotificationMenu extends Vue {
 .menu-container {
     min-width: 400px;
     max-width: 400px;
+}
+
+.notif-container {
+    max-height: 80vh;
+    overflow: auto;
 }
 
 .white-bg {
