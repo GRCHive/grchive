@@ -14,6 +14,7 @@ go_binary(
         "main.go",
         "dashboard.go",
         "notifications.go",
+        "rabbitmqInterface.go",
     ],
     deps = [
         "@com_github_gorilla_mux//:go_default_library",

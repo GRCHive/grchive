@@ -290,6 +290,7 @@ const ApiResourcePrefix = "/resource"
 const WebsocketPrefix string = "/ws"
 
 var WebsocketProcessFlowNodeDisplaySettingsEndpoint = fmt.Sprintf("/flownodedisp/{%s}", ProcessFlowQueryId)
+var WebsocketUserNotificationsEndpoint = fmt.Sprintf("/notifications/{%s}", DashboardUserQueryId)
 
 func CreateUrlWithParams(input string, params map[string]string) (string, error) {
 	gUrl, err := url.Parse(input)

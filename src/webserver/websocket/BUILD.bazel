@@ -6,6 +6,7 @@ go_library(
     name = "webserver_websocket_library",
     srcs = [
         "processFlowNodeDisplaySettings.go",
+        "notifications.go",
         "websocket.go",
     ],
     importpath = "gitlab.com/grchive/grchive/websocket",

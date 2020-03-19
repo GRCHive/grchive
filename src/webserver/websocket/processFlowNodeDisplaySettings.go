@@ -27,6 +27,11 @@ func processProcessFlowNodeDisplaySettings(conn *websocket.Conn, r *http.Request
 		return
 	}
 
+	if role == nil {
+		core.Warning("No role found.")
+		return
+	}
+
 	// Channel to receive communications from the message hub
 	// about relevant events to send to the user.
 	var hubChannel chan core.MessagePayload = make(chan core.MessagePayload)

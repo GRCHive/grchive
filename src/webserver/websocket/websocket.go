@@ -11,7 +11,8 @@ import (
 	"time"
 )
 
-const HeartbeatInterval int = 360
+// Send a fairly often heartbeat to make sure we close off websocket connections if they're dead.
+const HeartbeatInterval int = 5
 
 var upgrader = websocket.Upgrader{}
 
@@ -26,6 +27,9 @@ func RegisterPaths(r *mux.Router) {
 
 	s.HandleFunc(core.WebsocketProcessFlowNodeDisplaySettingsEndpoint,
 		createWebsocketWrapper(processProcessFlowNodeDisplaySettings))
+
+	s.HandleFunc(core.WebsocketUserNotificationsEndpoint,
+		createWebsocketWrapper(processUserNotifications))
 }
 
 // This is mainly just for keep alive to ensure that we don't trigger
@@ -83,7 +87,8 @@ func readWebsocketRole(conn *websocket.Conn) (*core.Role, error) {
 
 		role, err := webcore.GetRoleFromKey(key, payload.OrgId)
 		if err != nil {
-			return nil, err
+			// Not necessarily an error for certain paths.
+			return nil, nil
 		}
 
 		return role, nil

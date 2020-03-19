@@ -6,9 +6,9 @@ import (
 )
 
 // Handles passing messages to relevant listeners.
-// The users of this file must be able to treat the functionality
-// in this file as being able to pass/receive messages to all
-// running instances of the webserver.
+// This functionality is only to pass messages between different parts of
+// a single instance of the webserver. If it needs to be passed to others
+// then a message should be sent out via RabbitMQ.
 
 type MessageType uint
 type MessageSubtype string
@@ -16,6 +16,7 @@ type MessagePayload interface{}
 
 const (
 	UpdateDisplaySettingsForProcessFlowNode MessageType = iota
+	MHUserNotification
 )
 
 type SubtypeListenerMap map[MessageSubtype]*list.List

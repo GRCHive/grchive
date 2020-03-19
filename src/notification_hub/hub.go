@@ -73,7 +73,8 @@ func generateNotification(data []byte) *webcore.RabbitMQError {
 		Exchange: webcore.NOTIFICATION_EXCHANGE,
 		Queue:    "",
 		Body: webcore.NotificationMessage{
-			Notification: *notification,
+			Notification:  *notification,
+			RelevantUsers: relevantUsers,
 		},
 	})
 
@@ -84,7 +85,7 @@ func main() {
 	core.Init()
 	database.Init()
 
-	webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ, core.EnvConfig.Tls)
+	webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ, webcore.QueueConfig{}, core.EnvConfig.Tls)
 	defer webcore.DefaultRabbitMQ.Cleanup()
 
 	forever := make(chan bool)

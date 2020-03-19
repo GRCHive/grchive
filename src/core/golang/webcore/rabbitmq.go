@@ -15,11 +15,20 @@ const FILE_PREVIEW_QUEUE string = "filepreview"
 const DATABASE_REFRESH_QUEUE string = "dbrefresh"
 const EVENT_NOTIFICATION_QUEUE string = "eventnotification"
 
+const (
+	NotificationQueueId int = iota
+)
+
 const CHANNEL_BUFFER int = 12
 
 type RabbitMQError struct {
 	Err     error
 	Requeue bool
+}
+
+type AmqpChannelWrapper struct {
+	Channel *amqp.Channel
+	Queues  map[int]string
 }
 
 func (e RabbitMQError) Error() string {
@@ -46,12 +55,18 @@ type EventMessage struct {
 }
 
 type NotificationMessage struct {
-	Notification core.Notification
+	Notification  core.Notification
+	RelevantUsers []*core.User
 }
 
 type RecvMsgFn func([]byte) *RabbitMQError
 
-func SetupChannel(channel *amqp.Channel) {
+func SetupChannel(channel *amqp.Channel, cfg QueueConfig, idx int, isConsume bool) *AmqpChannelWrapper {
+	wrapper := AmqpChannelWrapper{
+		Channel: channel,
+		Queues:  map[int]string{},
+	}
+
 	//
 	// Default Exchange
 	//
@@ -138,34 +153,40 @@ func SetupChannel(channel *amqp.Channel) {
 		nil,                   // arguments
 	)
 
-	if err != nil {
-		core.Error("Failed to declare notification exchange: " + err.Error())
+	if cfg.NotificationConsume && idx == 0 && isConsume {
+		if err != nil {
+			core.Error("Failed to declare notification exchange: " + err.Error())
+		}
+
+		q, err := channel.QueueDeclare(
+			"",    // name
+			false, // durable
+			false, // delete when unused
+			true,  // exclusive
+			false, // no wait
+			nil,   // arguments
+		)
+
+		if err != nil {
+			core.Error("Failed to declare notification queue: " + err.Error())
+		}
+
+		err = channel.QueueBind(
+			q.Name,                // queue name
+			"",                    // routing key
+			NOTIFICATION_EXCHANGE, // exchange
+			false,                 // no wait
+			nil,                   // arguments
+		)
+
+		if err != nil {
+			core.Error("Failed to bind notification queue to exchange: " + err.Error())
+		}
+
+		wrapper.Queues[NotificationQueueId] = q.Name
 	}
 
-	q, err := channel.QueueDeclare(
-		"",    // name
-		false, // durable
-		false, // delete when unused
-		true,  // exclusive
-		false, // no wait
-		nil,   // arguments
-	)
-
-	if err != nil {
-		core.Error("Failed to declare notification queue: " + err.Error())
-	}
-
-	err = channel.QueueBind(
-		q.Name,                // queue name
-		"",                    // routing key
-		NOTIFICATION_EXCHANGE, // exchange
-		false,                 // no wait
-		nil,                   // arguments
-	)
-
-	if err != nil {
-		core.Error("Failed to bind notification queue to exchange: " + err.Error())
-	}
+	return &wrapper
 }
 
 type PublishMessage struct {
@@ -174,19 +195,26 @@ type PublishMessage struct {
 	Body     interface{}
 }
 
+type QueueConfig struct {
+	NotificationConsume bool
+}
+
 type RabbitMQInterface interface {
 	// Setup functions
-	Connect(core.RabbitMQConfig, *core.TLSConfig)
+	Connect(core.RabbitMQConfig, QueueConfig, *core.TLSConfig)
 	Cleanup()
 
 	// Message IO
 	SendMessage(PublishMessage)
 	ReceiveMessages(string, RecvMsgFn) error
+
+	// Consumer Queue Names
+	GetConsumerQueueName(id int) string
 }
 
 type RabbitMQConnection struct {
 	Connection *amqp.Connection
-	Channels   []*amqp.Channel
+	Channels   []*AmqpChannelWrapper
 
 	publishChannel chan PublishMessage
 }
@@ -200,7 +228,7 @@ func (r *RabbitMQConnection) publishWorker(idx int) {
 			core.Error("Failed to marshal message: " + err.Error())
 		}
 
-		err = r.Channels[idx].Publish(
+		err = r.Channels[idx].Channel.Publish(
 			msg.Exchange,
 			msg.Queue,
 			false, // mandatory
@@ -218,7 +246,7 @@ func (r *RabbitMQConnection) publishWorker(idx int) {
 	}
 }
 
-func CreateRabbitMQConnection(cfg core.RabbitMQConfig, tls *core.TLSConfig, numChannels int) *RabbitMQConnection {
+func CreateRabbitMQConnection(cfg core.RabbitMQConfig, q QueueConfig, tls *core.TLSConfig, numChannels int, isConsume bool) *RabbitMQConnection {
 	var connection *amqp.Connection
 	var err error
 	url := generateUrlFromConfig(cfg)
@@ -237,16 +265,17 @@ func CreateRabbitMQConnection(cfg core.RabbitMQConfig, tls *core.TLSConfig, numC
 
 	c := RabbitMQConnection{
 		Connection:     connection,
-		Channels:       make([]*amqp.Channel, numChannels),
+		Channels:       make([]*AmqpChannelWrapper, numChannels),
 		publishChannel: make(chan PublishMessage, CHANNEL_BUFFER),
 	}
 
 	for i := 0; i < numChannels; i++ {
-		c.Channels[i], err = connection.Channel()
+		ch, err := connection.Channel()
 		if err != nil {
 			core.Error("Failed to create channel: " + err.Error())
 		}
-		SetupChannel(c.Channels[i])
+		wrapper := SetupChannel(ch, q, i, isConsume)
+		c.Channels[i] = wrapper
 		go c.publishWorker(i)
 	}
 
@@ -258,7 +287,7 @@ func (c *RabbitMQConnection) SendMessage(msg PublishMessage) {
 }
 
 func (c *RabbitMQConnection) ReceiveMessages(queue string, fn RecvMsgFn) error {
-	msgs, err := c.Channels[0].Consume(
+	msgs, err := c.Channels[0].Channel.Consume(
 		queue,
 		"",    // consumer
 		false, // auto-ack
@@ -293,7 +322,7 @@ func (c *RabbitMQConnection) ReceiveMessages(queue string, fn RecvMsgFn) error {
 
 func (c *RabbitMQConnection) Close() {
 	for i := 0; i < len(c.Channels); i++ {
-		c.Channels[i].Close()
+		c.Channels[i].Channel.Close()
 	}
 	c.Connection.Close()
 }
@@ -313,9 +342,9 @@ func generateUrlFromConfig(cfg core.RabbitMQConfig) string {
 	return fmt.Sprintf("%s%s:%s@%s:%d/", prefix, cfg.Username, cfg.Password, cfg.Host, cfg.Port)
 }
 
-func (r *RealRabbitMQInterface) Connect(cfg core.RabbitMQConfig, tls *core.TLSConfig) {
-	r.publish = CreateRabbitMQConnection(cfg, tls, 4)
-	r.consume = CreateRabbitMQConnection(cfg, tls, 1)
+func (r *RealRabbitMQInterface) Connect(cfg core.RabbitMQConfig, q QueueConfig, tls *core.TLSConfig) {
+	r.publish = CreateRabbitMQConnection(cfg, q, tls, 4, false)
+	r.consume = CreateRabbitMQConnection(cfg, q, tls, 1, true)
 }
 
 func (r *RealRabbitMQInterface) SendMessage(msg PublishMessage) {
@@ -329,6 +358,10 @@ func (r *RealRabbitMQInterface) ReceiveMessages(queue string, fn RecvMsgFn) erro
 func (r *RealRabbitMQInterface) Cleanup() {
 	r.publish.Close()
 	r.consume.Close()
+}
+
+func (r *RealRabbitMQInterface) GetConsumerQueueName(id int) string {
+	return r.consume.Channels[0].Queues[NotificationQueueId]
 }
 
 var DefaultRabbitMQ = RealRabbitMQInterface{}

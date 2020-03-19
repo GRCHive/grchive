@@ -98,7 +98,12 @@ func main() {
 	}, core.EnvConfig.Tls.Config())
 	gcloud.DefaultGCloudApi.InitFromJson(core.EnvConfig.Gcloud.AuthFilename)
 
-	webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ, core.EnvConfig.Tls)
+	webcore.DefaultRabbitMQ.Connect(
+		*core.EnvConfig.RabbitMQ,
+		webcore.QueueConfig{
+			NotificationConsume: true,
+		},
+		core.EnvConfig.Tls)
 	defer webcore.DefaultRabbitMQ.Cleanup()
 
 	baser := mux.NewRouter().StrictSlash(true)
@@ -153,6 +158,8 @@ func main() {
 
 	// Custom 404
 	r.NotFoundHandler = http.HandlerFunc(render.Render404)
+
+	SetupRabbitMQInterface()
 
 	// TODO: Configurable port?
 	srv := &http.Server{

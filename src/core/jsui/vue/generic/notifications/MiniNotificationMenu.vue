@@ -61,6 +61,13 @@ export default class MiniNotificationMenu extends Vue {
     get allNotificationUrl() : string {
         return createMyNotificationsUrl(PageParamsStore.state.user!.Id)
     }
+
+    mounted() {
+        // Probably the safest place to do this since this will be on every page...
+        NotificationStore.dispatch('initialize', {
+            host: PageParamsStore.state.site!.Host,
+        })
+    }
 }
 
 </script>
