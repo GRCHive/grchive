@@ -3,6 +3,7 @@
         <v-list-item
             :class="notification.Read ? '' : 'unread-notification'"
             :href="resourceUrl"
+            @click.stop="onClick"
             v-if="ready"
             two-line
         >
@@ -41,6 +42,7 @@ import { TGetResourceHandleOutput , getResourceHandle } from '../../../ts/api/ap
 import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { standardFormatTime } from '../../../ts/time'
+import { markNotificationRead } from '../../../ts/api/apiNotifications'
 
 const Props = Vue.extend({
     props: {
@@ -107,6 +109,13 @@ export default class NotificationDisplay extends Props {
             "Contact Us",
             contactUsUrl,
             true);
+    }
+
+    onClick() {
+        markNotificationRead({
+            userId: PageParamsStore.state.user!.Id,
+            notificationIds: [this.notification.Notification.Id]
+        })
     }
 
     refreshResourceHandles() {

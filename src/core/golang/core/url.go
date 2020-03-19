@@ -102,6 +102,7 @@ const ApiDeleteEndpoint = "/delete"
 const ApiUpdateEndpoint = "/update"
 const ApiDuplicateEndpoint = "/duplicate"
 const ApiRunEndpoint = "/run"
+const ApiReadEndpoint = "/read"
 
 // API
 const ApiUrl string = "/api"

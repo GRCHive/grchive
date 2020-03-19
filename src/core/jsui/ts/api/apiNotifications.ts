@@ -1,13 +1,15 @@
 import axios from 'axios'
 import * as qs from 'query-string'
 import {
-    allNotificationUrl
+    allNotificationUrl,
+    readNotificationUrl,
 } from '../url'
 import {
     NotificationWrapper,
     cleanJsonNotificationWrapper,
 } from '../notifications'
 import { getAPIRequestConfig } from './apiUtility'
+import { postFormJson } from '../http'
 
 export interface TAllNotificationInput {
     userId: number
@@ -22,4 +24,13 @@ export function allNotifications(inp : TAllNotificationInput) : Promise<TAllNoti
         resp.data.forEach(cleanJsonNotificationWrapper)
         return resp
     })
+}
+
+export interface TMarkNotificationReadInput {
+    userId: number
+    notificationIds: number[]
+}
+
+export function markNotificationRead(inp : TMarkNotificationReadInput) : Promise<void> {
+    return postFormJson<void>(readNotificationUrl, inp, getAPIRequestConfig())
 }

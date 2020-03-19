@@ -458,6 +458,7 @@ func registerVendorProductSocAPIPaths(r *mux.Router) {
 func registerNotificationAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiNotificationPrefix).Subrouter()
 	s.HandleFunc(core.ApiAllEndpoint, allNotifications).Methods("GET")
+	s.HandleFunc(core.ApiReadEndpoint, markNotificationRead).Methods("POST")
 }
 
 func registerResourceAPIPaths(r *mux.Router) {

@@ -354,5 +354,6 @@ export const allAuditTrailLinkUrl : string = "/api/auditlog/all"
 export const getAuditTrailLinkUrl : string = "/api/auditlog/get"
 
 export const allNotificationUrl : string = "/api/notifications/all"
+export const readNotificationUrl : string = "/api/notifications/read"
 
 export const getResourceHandleUrl : string = "/api/resource/get"

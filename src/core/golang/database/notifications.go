@@ -96,3 +96,22 @@ func AllNotificationsForUserId(userId int64) ([]*core.NotificationWrapper, error
 	`, userId)
 	return notifications, err
 }
+
+func MarkNotificationsAsRead(userId int64, notifications []int64) error {
+	tx := dbConn.MustBegin()
+
+	for _, nId := range notifications {
+		_, err := tx.Exec(`
+			UPDATE user_notifications
+			SET read = NOW()
+			WHERE user_id = $1 AND notification_id = $2
+		`, userId, nId)
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
