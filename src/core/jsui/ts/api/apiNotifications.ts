@@ -29,6 +29,7 @@ export function allNotifications(inp : TAllNotificationInput) : Promise<TAllNoti
 export interface TMarkNotificationReadInput {
     userId: number
     notificationIds: number[]
+    all: boolean
 }
 
 export function markNotificationRead(inp : TMarkNotificationReadInput) : Promise<void> {

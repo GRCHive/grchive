@@ -83,4 +83,5 @@ func createUserSubrouter(r *mux.Router) {
 	s.HandleFunc(core.DashboardUserHomeUrl, render.RenderDashboardUserHomePage).Name(webcore.DashboardUserHomeRouteName)
 	s.HandleFunc(core.DashboardUserOrgUrl, render.RenderDashboardUserOrgsPage).Name(webcore.DashboardUserOrgsRouteName)
 	s.HandleFunc(core.DashboardUserProfileUrl, render.RenderDashboardUserProfilePage)
+	s.HandleFunc(core.DashboardUserNotificationsUrl, render.RenderDashboardUserNotificationsPage)
 }

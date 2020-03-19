@@ -8,7 +8,11 @@
 import Vue from 'vue'
 import VueSetup from '../../../ts/vueSetup'
 import LocalSettings from '../../../ts/localSettings'
-import { createMyProfileUrl, createMyOrgsUrl } from '../../../ts/url'
+import { 
+    createMyProfileUrl,
+    createMyOrgsUrl,
+    createMyNotificationsUrl
+} from '../../../ts/url'
 import GenericNavBar from '../GenericNavBar.vue'
 import { PageParamsStore }  from '../../../ts/pageParams'
 
@@ -20,6 +24,11 @@ export default Vue.extend({
                     title: 'Organizations',
                     icon: 'mdi-account-group',
                     url: createMyOrgsUrl(PageParamsStore.state.user!.Id),
+                },
+                {
+                    title: 'Notifications',
+                    icon: 'mdi-bell',
+                    url: createMyNotificationsUrl(PageParamsStore.state.user!.Id),
                 },
                 {
                     title: 'Profile',

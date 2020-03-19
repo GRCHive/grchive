@@ -50,6 +50,7 @@ func allNotifications(w http.ResponseWriter, r *http.Request) {
 type MarkNotificationReadInputs struct {
 	UserId          int64   `json:"userId"`
 	NotificationIds []int64 `json:"notificationIds"`
+	All             bool    `json:"all"`
 }
 
 func markNotificationRead(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +75,12 @@ func markNotificationRead(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.MarkNotificationsAsRead(inputs.UserId, inputs.NotificationIds)
+	if inputs.All {
+		err = database.MarkAllNotificationsAsRead(inputs.UserId)
+	} else {
+		err = database.MarkNotificationsAsRead(inputs.UserId, inputs.NotificationIds)
+	}
+
 	if err != nil {
 		core.Warning("Failed to mark notifications as read: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

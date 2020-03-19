@@ -140,6 +140,10 @@ func RenderDashboardUserOrgsPage(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardUserOrgsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
+func RenderDashboardUserNotificationsPage(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardUserNotificationsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
+}
+
 func RenderDashboardUserProfilePage(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardUserProfileTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }

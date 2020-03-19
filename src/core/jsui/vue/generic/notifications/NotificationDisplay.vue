@@ -114,14 +114,15 @@ export default class NotificationDisplay extends Props {
     onClick() {
         markNotificationRead({
             userId: PageParamsStore.state.user!.Id,
-            notificationIds: [this.notification.Notification.Id]
+            notificationIds: [this.notification.Notification.Id],
+            all: false
         })
     }
 
     refreshResourceHandles() {
         if (this.notification.Notification.SubjectType != "") {
             getResourceHandle({
-                orgId: PageParamsStore.state.organization!.Id,
+                orgId: this.notification.Notification.OrgId,
                 resourceType: this.notification.Notification.SubjectType,
                 resourceId: this.notification.Notification.SubjectId,
             }).then((resp : TGetResourceHandleOutput) => {
@@ -131,7 +132,7 @@ export default class NotificationDisplay extends Props {
 
         if (this.notification.Notification.ObjectType != "") {
             getResourceHandle({
-                orgId: PageParamsStore.state.organization!.Id,
+                orgId: this.notification.Notification.OrgId,
                 resourceType: this.notification.Notification.ObjectType,
                 resourceId: this.notification.Notification.ObjectId,
             }).then((resp : TGetResourceHandleOutput) => {
@@ -141,7 +142,7 @@ export default class NotificationDisplay extends Props {
 
         if (this.notification.Notification.IndirectObjectType != "") {
             getResourceHandle({
-                orgId: PageParamsStore.state.organization!.Id,
+                orgId: this.notification.Notification.OrgId,
                 resourceType: this.notification.Notification.IndirectObjectType,
                 resourceId: this.notification.Notification.IndirectObjectId,
             }).then((resp : TGetResourceHandleOutput) => {

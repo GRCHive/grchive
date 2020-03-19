@@ -28,6 +28,7 @@ const (
 	DashboardSingleFlowTemplateKey
 	DashboardUserOrgsTemplateKey
 	DashboardUserProfileTemplateKey
+	DashboardUserNotificationsTemplateKey
 	DashboardRisksTemplateKey
 	DashboardSingleRiskTemplateKey
 	DashboardControlsTemplateKey
@@ -159,6 +160,8 @@ func RegisterTemplates() {
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardUserOrgs.tmpl")
 	allTemplates[DashboardUserProfileTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardUserProfile.tmpl")
+	allTemplates[DashboardUserNotificationsTemplateKey] =
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardUserNotifications.tmpl")
 
 	// Audit Trail
 	allTemplates[DashboardOrgAuditTrailTemplateKey] =

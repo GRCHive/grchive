@@ -115,3 +115,19 @@ func MarkNotificationsAsRead(userId int64, notifications []int64) error {
 
 	return tx.Commit()
 }
+
+func MarkAllNotificationsAsRead(userId int64) error {
+	tx := dbConn.MustBegin()
+
+	_, err := tx.Exec(`
+		UPDATE user_notifications
+		SET read = NOW()
+		WHERE user_id = $1
+	`, userId)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}

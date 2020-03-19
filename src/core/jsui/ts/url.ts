@@ -45,6 +45,10 @@ export function createMyOrgsUrl(id : number) : string {
     return `${myAccountBaseUrl}/${id}/orgs`
 }
 
+export function createMyNotificationsUrl(id : number) : string {
+    return `${myAccountBaseUrl}/${id}/notifications`
+}
+
 export function createOrgUrl(org : string) : string {
     return `/dashboard/org/${org}`
 }

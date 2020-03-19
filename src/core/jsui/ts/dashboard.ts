@@ -16,6 +16,7 @@ const DashboardOrgControls = () => import( /* webpackChunkName: "DashboardOrgCon
 const DashboardOrgSingleControl = () => import( /* webpackChunkName: "DashboardOrgSingleControl" */ '../vue/pages/dashboard/DashboardOrgSingleControl.vue')
 const DashboardUserProfile = () => import( /* webpackChunkName: "DashboardUserProfile" */ '../vue/pages/dashboard/DashboardUserProfile.vue')
 const DashboardUserOrgs = () => import( /* webpackChunkName: "DashboardUserOrgs" */ '../vue/pages/dashboard/DashboardUserOrgs.vue')
+const DashboardUserNotifications = () => import( /* webpackChunkName: "DashboardUserNotifications" */ '../vue/pages/dashboard/DashboardUserNotifications.vue')
 const DashboardOrgSettingsUsers = () => import( /* webpackChunkName: "DashboardOrgSettingsUsers" */ '../vue/pages/dashboard/DashboardOrgSettingsUsers.vue')
 const DashboardOrgSettingsRoles = () => import( /* webpackChunkName: "DashboardOrgSettingsRoles" */ '../vue/pages/dashboard/DashboardOrgSettingsRoles.vue')
 const DashboardOrgSettingsSingleRole = () => import( /* webpackChunkName: "DashboardOrgSettingsSingleRole" */ '../vue/pages/dashboard/DashboardOrgSettingsSingleRole.vue')
@@ -67,6 +68,7 @@ function mountApp(inData : PageParamsStoreState) {
             DashboardOrgSingleControl,
             DashboardUserProfile,
             DashboardUserOrgs,
+            DashboardUserNotifications,
             DashboardOrgSettingsUsers,
             DashboardOrgSettingsRoles,
             DashboardOrgSettingsSingleRole,

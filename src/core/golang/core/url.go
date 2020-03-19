@@ -77,6 +77,7 @@ var DashboardUserPrefix string = fmt.Sprintf("/user/{%s}", DashboardUserQueryId)
 const DashboardUserHomeUrl string = "/"
 const DashboardUserOrgUrl string = "/orgs"
 const DashboardUserProfileUrl string = "/profile"
+const DashboardUserNotificationsUrl string = "/notifications"
 
 // Dashboard - General Ledger
 const DashboardGeneralLedgerPrefix string = "/gl"
