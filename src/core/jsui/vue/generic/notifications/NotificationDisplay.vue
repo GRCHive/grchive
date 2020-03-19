@@ -1,7 +1,8 @@
 <template>
-    <div>
+    <div 
+        :class="'d-flex ' + ((notification.Read && !forceUnreadDisplay) ? '' : 'unread-notification')"
+    >
         <v-list-item
-            :class="notification.Read ? '' : 'unread-notification'"
             :href="resourceUrl"
             @click.stop="onClick"
             v-if="ready"
@@ -29,6 +30,12 @@
         <v-row align="center" justify="center" class="py-4" v-else>
             <v-progress-circular indeterminate size="16"></v-progress-circular>
         </v-row>
+
+        <v-btn icon @click.stop="close" class="center-y" v-if="enableClose">
+            <v-icon small>
+                mdi-close-circle-outline
+            </v-icon>
+        </v-btn>
     </div>
 </template>
 
@@ -49,6 +56,14 @@ const Props = Vue.extend({
         notification: {
             type: Object,
             default: () => Object() as NotificationWrapper
+        },
+        forceUnreadDisplay : {
+            type: Boolean,
+            default: false,
+        },
+        enableClose: {
+            type: Boolean,
+            default: false
         }
     }
 })
@@ -153,6 +168,10 @@ export default class NotificationDisplay extends Props {
 
     mounted() {
         this.refreshResourceHandles()
+    }
+
+    close() {
+        this.$emit('close')
     }
 }
 

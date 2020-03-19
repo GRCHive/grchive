@@ -1,42 +1,43 @@
 <template>
-    <v-menu
-        :close-on-content-click="false"
-        offset-y
-        bottom
-        left
-    >
-        <template v-slot:activator="{on}">
-            <v-badge
-                color="red"
-                dot
-                overlap
-                :value="hasUnreadNotifications"
-                :offset-x="16"
-                :offset-y="16"
-            >
-                <v-btn color="primary" icon v-on="on">
-                    <v-icon>mdi-bell</v-icon>
+    <div>
+        <v-menu
+            :close-on-content-click="false"
+            offset-y
+            bottom
+            left
+        >
+            <template v-slot:activator="{on}">
+                <v-badge
+                    color="red"
+                    dot
+                    overlap
+                    :value="hasUnreadNotifications"
+                    :offset-x="16"
+                    :offset-y="16"
+                >
+                    <v-btn color="primary" icon v-on="on">
+                        <v-icon>mdi-bell</v-icon>
+                    </v-btn>
+                </v-badge>
+            </template>
+
+            <div class="menu-container">
+                <notification-viewer
+                    :limit="25"
+                ></notification-viewer>
+
+                <v-btn
+                    block
+                    text
+                    color="primary"
+                    class="white-bg"
+                    :href="allNotificationUrl"
+                >
+                    See All
                 </v-btn>
-            </v-badge>
-        </template>
-
-        <div class="menu-container">
-            <notification-viewer
-                :limit="25"
-            ></notification-viewer>
-
-            <v-btn
-                block
-                text
-                color="primary"
-                class="white-bg"
-                :href="allNotificationUrl"
-            >
-                See All
-            </v-btn>
-        </div>
-    </v-menu>
-
+            </div>
+        </v-menu>
+    </div>
 </template>
 
 <script lang="ts">
@@ -50,7 +51,7 @@ import { PageParamsStore } from '../../../ts/pageParams'
 
 @Component({
     components: {
-        NotificationViewer
+        NotificationViewer,
     }
 })
 export default class MiniNotificationMenu extends Vue {
@@ -67,6 +68,7 @@ export default class MiniNotificationMenu extends Vue {
         NotificationStore.dispatch('initialize', {
             host: PageParamsStore.state.site!.Host,
         })
+        NotificationStore.dispatch('pullNotifications')
     }
 }
 

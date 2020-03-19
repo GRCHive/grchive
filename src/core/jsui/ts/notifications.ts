@@ -28,6 +28,7 @@ export function cleanJsonNotificationWrapper(n : NotificationWrapper) {
 
 interface NotificationStoreState {
     allNotifications : NotificationWrapper[]
+    recentNotifications : NotificationWrapper[]
     canPullMore: boolean
     requestInProgress: boolean
     wsConnected: boolean
@@ -56,19 +57,21 @@ function connectWebsocket(context : any, host : string) {
                 }
             }
 
-
             websocketConnection.onmessage = (e : MessageEvent) => {
                 let data : NotificationWrapper = JSON.parse(e.data)
                 cleanJsonNotificationWrapper(data)
 
-                context.commit('pushNotification', data)
+                context.dispatch('pushNotification', data)
             }
         })
 }
 
+const browserNotificationTimeMs = 5000
+
 const notificationStoreOptions: StoreOptions<NotificationStoreState> = {
     state: {
         allNotifications: [],
+        recentNotifications: [],
         canPullMore: true,
         requestInProgress : false,
         wsConnected: false
@@ -85,6 +88,17 @@ const notificationStoreOptions: StoreOptions<NotificationStoreState> = {
         },
         pushNotification(state, notif) {
             state.allNotifications.unshift(notif)
+            state.recentNotifications.unshift(notif)
+        },
+        removeRecentNotification(state, id) {
+            let idx : number = state.recentNotifications.findIndex(
+                    (ele : NotificationWrapper) => ele.Notification.Id == id
+            )
+
+            if (idx == -1) {
+                return
+            }
+            state.recentNotifications.splice(idx, 1)
         },
         markAllAsRead(state) {
             state.allNotifications.forEach((ele : NotificationWrapper) => {
@@ -123,6 +137,12 @@ const notificationStoreOptions: StoreOptions<NotificationStoreState> = {
                 console.log(err)
                 context.commit('stopPull')
             })
+        },
+        pushNotification(context, notif) {
+            context.commit('pushNotification', notif)
+            setTimeout(() => {
+                context.commit('removeRecentNotification', notif.Notification.Id)
+            }, browserNotificationTimeMs)
         },
         initialize(context, {host}) {
             connectWebsocket(context, host)

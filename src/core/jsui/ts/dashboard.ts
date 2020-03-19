@@ -38,6 +38,7 @@ const DashboardOrgSingleVendor = () => import( /* webpackChunkName: "DashboardOr
 const DashboardOrgSingleDocFile = () => import( /* webpackChunkName: "DashboardOrgSingleDocFile" */ '../vue/pages/dashboard/DashboardOrgSingleDocFile.vue')
 const DashboardOrgAuditTrail = () => import (/* webpackChunkName: "DashboardOrgAuditTrail" */ '../vue/pages/dashboard/DashboardOrgAuditTrail.vue')
 const SnackBar = () => import( /* webpackChunkName: "SnackBar" */ '../vue/components/SnackBar.vue')
+const NotificationPopupManager = () => import( /* webpackChunkName: "NotificationPopupManager" */ '../vue/generic/notifications/NotificationPopupManager.vue')
 import { getCurrentCSRF } from './csrf'
 import { PageParamsStore, PageParamsStoreState  } from '../ts/pageParams'
 import { startTemporaryApiKeyRefresh } from '../ts/api/apiUtility'
@@ -90,6 +91,7 @@ function mountApp(inData : PageParamsStoreState) {
             DashboardOrgSingleSqlRequest,
             DashboardOrgAuditTrail,
             SnackBar,
+            NotificationPopupManager
         },
         vuetify: vueOpts.vuetify,
         mounted() {
