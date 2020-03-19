@@ -21,8 +21,10 @@
                 Support
                 <v-icon color="primary" small>mdi-email</v-icon>
             </v-btn>
-            <v-menu offset-y>
 
+            <mini-notification-menu></mini-notification-menu>
+
+            <v-menu offset-y>
                 <template v-slot:activator="{ on }">
                     <v-btn text
                            color="primary"
@@ -59,10 +61,12 @@ import {createLogoutUrl, createMyAccountUrl, createMailtoUrl } from '../../../ts
 import { getCurrentCSRF } from '../../../ts/csrf'
 import { PageParamsStore } from '../../../ts/pageParams'
 import VerifyEmailBanner from '../VerifyEmailBanner.vue'
+import MiniNotificationMenu from '../../generic/notifications/MiniNotificationMenu.vue'
 
 export default Vue.extend({
     components: {
-        VerifyEmailBanner
+        VerifyEmailBanner,
+        MiniNotificationMenu
     },
     data: function() {
         return {
