@@ -41,6 +41,11 @@ const notificationStoreOptions: StoreOptions<NotificationStoreState> = {
         },
         setNotifications(state, data) {
             state.allNotifications = data
+        },
+        markAllAsRead(state) {
+            state.allNotifications.forEach((ele : NotificationWrapper) => {
+                ele.Read = true
+            })
         }
     },
     actions: {

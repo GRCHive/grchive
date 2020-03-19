@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/webcore"
@@ -27,8 +26,6 @@ func generateNotification(data []byte) *webcore.RabbitMQError {
 	if err != nil {
 		return &webcore.RabbitMQError{err, false}
 	}
-
-	fmt.Printf("%+v\n", event)
 
 	if event.Verb == core.VerbGettingStarted {
 		return handleGettingStartedEvent(event)
