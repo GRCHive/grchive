@@ -53,6 +53,12 @@ if [ -z $MINIKUBE ]; then
     kubectl apply -f deployment.prod.yaml
     cd ../
 
+    export NOTIFICATION_HUB_IMAGE=registry.gitlab.com/grchive/grchive/notification_hub:`git rev-parse HEAD`
+    cd notification_hub
+    envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+    kubectl apply -f deployment.prod.yaml
+    cd ../
+
     export WEBSERVER_IMAGE=registry.gitlab.com/grchive/grchive/webserver:`git rev-parse HEAD`
     export NGINX_IMAGE=registry.gitlab.com/grchive/grchive/nginx:`git rev-parse HEAD`
     cd webserver
@@ -66,6 +72,7 @@ else
     kubectl delete deployment database-fetcher-deployment
     kubectl delete deployment database-query-runner-deployment
     kubectl delete deployment webserver-deployment
+    kubectl delete deployment notification-hub-deployment
 
     cd postgresql
     cp endpoint.yaml.tmpl endpoint.yaml
@@ -93,6 +100,10 @@ else
     cd ../
 
     cd database_fetcher
+    kubectl apply -f deployment.dev.yaml
+    cd ../
+
+    cd notification_hub
     kubectl apply -f deployment.dev.yaml
     cd ../
 

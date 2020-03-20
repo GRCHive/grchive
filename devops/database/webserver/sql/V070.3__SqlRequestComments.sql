@@ -32,12 +32,11 @@ $$ LANGUAGE plpgsql;
 
 DO $$
 BEGIN
-    PERFORM (WITH unique_threads AS (
+    PERFORM convert_old_sql_request_thread(ut.sql_request_id, ut.org_id)
+    FROM (
         SELECT DISTINCT sql_request_id, org_id
         FROM sql_request_comments
-    )
-    SELECT convert_old_sql_request_thread(sql_request_id, org_id)
-    FROM unique_threads);
+    ) AS ut;
 END $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS convert_old_sql_request_thread;

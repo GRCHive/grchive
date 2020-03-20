@@ -31,13 +31,13 @@ $$
 $$ LANGUAGE plpgsql;
 
 DO $$
+DECLARE
 BEGIN
-    PERFORM (WITH unique_threads AS (
+    PERFORM convert_old_doc_request_thread(ut.request_id, ut.org_id)
+    FROM (
         SELECT DISTINCT request_id, org_id
         FROM document_request_comments
-    )
-    SELECT convert_old_doc_request_thread(request_id, org_id)
-    FROM unique_threads);
+    ) AS ut;
 END $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS convert_old_doc_request_thread;

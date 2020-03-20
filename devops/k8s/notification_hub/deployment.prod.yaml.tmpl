@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: notification-hub-deployment
+    labels:
+        app: notification-hub
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: notification-hub
+    template:
+        metadata:
+            labels:
+                app: notification-hub
+        spec:
+            containers:
+                - name: notification-hub-container
+                  image: ${NOTIFICATION_HUB_IMAGE}
+                  volumeMounts:
+                  - mountPath: /opt/certs/rootca
+                    name: rootca
+                    readOnly: true
+                - name: cloudsql-proxy
+                  image: gcr.io/cloudsql-docker/gce-proxy:1.16
+                  ports:
+                    - containerPort: 5432
+                  command: ["/cloud_sql_proxy",
+                             "-instances=${GRCHIVE_PROJECT}:us-central1:${POSTGRES_INSTANCE_NAME}=tcp:5432",
+                             "-credential_file=/secrets/gke/gcloud-service-account.json"]
+                  securityContext:
+                      runAsUser: 2  # non-root user
+                      allowPrivilegeEscalation: false
+                  volumeMounts:
+                      - name: gke-service-account
+                        mountPath: /secrets/gke
+                        readOnly: true
+                  resources:
+                        requests:
+                            cpu: "10m"
+                        limits:
+                            cpu: "100m"
+            volumes:
+                - name: gke-service-account
+                  secret:
+                    secretName: gke-service-account
+                - name: rootca
+                  secret:
+                    secretName: rootca
+                    defaultMode: 256
+            imagePullSecrets:
+                - name: regcred

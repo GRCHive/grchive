@@ -93,6 +93,7 @@ if [[ -z "$NOBUILD" ]]; then
     ${DIR}/build_webserver_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_database_refresh_worker.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_database_runner_worker.sh ${EXTRA_BUILD_OPTIONS}
+    ${DIR}/build_notification_hub.sh ${EXTRA_BUILD_OPTIONS}
 fi
 
 if [[ ! -z "$DO_TERRAFORM" ]]; then
