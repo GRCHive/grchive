@@ -379,3 +379,31 @@ KOTLINC_RELEASE = {
 }
 
 kotlin_repositories(compiler_release = KOTLINC_RELEASE)
+
+# Java/Maven
+
+RULES_JVM_EXTERNAL_TAG = "3.0"
+RULES_JVM_EXTERNAL_SHA = "62133c125bf4109dfd9d2af64830208356ce4ef8b165a6ef15bbff7460b35c3a"
+
+http_archive(
+    name = "rules_jvm_external",
+    strip_prefix = "rules_jvm_external-%s" % RULES_JVM_EXTERNAL_TAG,
+    sha256 = RULES_JVM_EXTERNAL_SHA,
+    url = "https://github.com/bazelbuild/rules_jvm_external/archive/%s.zip" % RULES_JVM_EXTERNAL_TAG,
+)
+
+load("@rules_jvm_external//:defs.bzl", "maven_install")
+
+maven_install(
+    artifacts = [
+        "org.jdbi:jdbi3-bom:3.12.2",
+        "org.jdbi:jdbi3-kotlin:3.12.2",
+        "org.jdbi:jdbi3-postgres:3.12.2",
+        "org.junit.platform:junit-platform-console:1.6.0",
+        "io.kotest:kotest-runner-junit5-jvm:4.0.0-BETA3",
+        "io.kotest:kotest-assertions-core-jvm:4.0.0-BETA3",
+    ],
+    repositories = [
+        "https://repo1.maven.org/maven2",
+    ],
+)

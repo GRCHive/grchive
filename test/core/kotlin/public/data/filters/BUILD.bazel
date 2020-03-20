@@ -1,0 +1,17 @@
+package(default_visibility = ["//visibility:public"])
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_test")
+
+kt_jvm_test(
+    name = "equal_test",
+    srcs = ["EqualTest.kt"],
+    main_class = "org.junit.platform.console.ConsoleLauncher",
+    args = [
+        '--select-package=test.grchive.core.public.data.filters',
+    ],
+    deps = [
+        "//src/core/kotlin/public:grchive_public_core",
+        "@maven//:org_junit_platform_junit_platform_console",
+        "@maven//:io_kotest_kotest_runner_junit5_jvm",
+        "@maven//:io_kotest_kotest_assertions_core_jvm",
+    ],
+)
