@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/storage"
 	"context"
 	"google.golang.org/api/option"
+	"hash/crc32"
 	"io/ioutil"
 )
 
@@ -18,6 +19,8 @@ type RealGCloudStorageApi struct {
 	client *storage.Client
 }
 
+var crc32cTable *crc32.Table = crc32.MakeTable(crc32.Castagnoli)
+
 func (s *RealGCloudStorageApi) Init(opt option.ClientOption) {
 	var err error
 
@@ -31,6 +34,9 @@ func (s *RealGCloudStorageApi) Init(opt option.ClientOption) {
 func (s *RealGCloudStorageApi) Upload(bucket string, filename string, data []byte) error {
 	obj := s.client.Bucket(bucket).Object(filename)
 	wr := obj.NewWriter(context.Background())
+	wr.SendCRC32C = true
+	wr.ObjectAttrs.CRC32C = crc32.Checksum(data, crc32cTable)
+
 	_, err := wr.Write(data)
 	if err != nil {
 		return err
