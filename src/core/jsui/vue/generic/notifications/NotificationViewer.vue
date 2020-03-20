@@ -20,11 +20,13 @@
                 </v-btn>
             </v-list-item-action>
 
+            <!--
             <v-list-item-action>
                 <v-btn x-small color="primary" text>
                     Settings
                 </v-btn>
             </v-list-item-action>
+            -->
         </v-list-item>
 
         <v-divider></v-divider>
