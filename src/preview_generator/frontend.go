@@ -24,7 +24,7 @@ func generatePreview(data []byte) *webcore.RabbitMQError {
 	storage := gcloud.DefaultGCloudApi.GetStorageApi()
 
 	// Download file from B2.
-	encryptedBytes, err := storage.Download(msg.Storage.BucketId, msg.Storage.StorageId)
+	encryptedBytes, err := storage.Download(msg.Storage.BucketId, msg.Storage.StorageId, core.EnvConfig.HmacKey)
 	if err != nil {
 		return &webcore.RabbitMQError{err, true}
 	}

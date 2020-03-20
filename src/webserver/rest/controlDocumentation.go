@@ -553,7 +553,7 @@ func downloadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	storage := gcloud.DefaultGCloudApi.GetStorageApi()
-	encryptedBytes, err := storage.Download(version.BucketId, version.StorageId)
+	encryptedBytes, err := storage.Download(version.BucketId, version.StorageId, core.EnvConfig.HmacKey)
 	if err != nil {
 		core.Warning("Can't get file from Backblaze: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

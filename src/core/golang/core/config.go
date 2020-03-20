@@ -91,6 +91,7 @@ type EnvConfigData struct {
 	Login              *LoginConfig
 	Okta               *OktaConfig
 	SessionKeys        [][]byte
+	HmacKey            []byte
 	UseSecureCookies   bool
 	Company            *CompanyConfig
 	Vault              *VaultConfig
@@ -159,6 +160,12 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 			Error(err.Error())
 		}
 	}
+
+	envConfig.HmacKey, err = hex.DecodeString(tomlConfig.Get("security.hmac_key").(string))
+	if err != nil {
+		Error(err.Error())
+	}
+
 	envConfig.UseSecureCookies = tomlConfig.Get("security.use_secure_cookies").(bool)
 
 	envConfig.Company = new(CompanyConfig)
