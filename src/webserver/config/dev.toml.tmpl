@@ -83,3 +83,12 @@ port = ${GRPC_QUERY_RUNNER_PORT}
 enable = ${GRPC_QUERY_RUNNER_TLS}
 cert = "/opt/certs/query_runner/query-runner-service.crt"
 key = "/opt/certs/query_runner/query-runner-service.key"
+
+[registry]
+
+[registry.gitlab]
+username = "${GKE_REGISTRY_USER}"
+password = "${GKE_REGISTRY_PASSWORD}"
+
+[kotlin]
+bucket = "${KOTLIN_LIB_BUCKET}"

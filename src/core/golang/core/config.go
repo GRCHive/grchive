@@ -84,6 +84,15 @@ type TLSConfig struct {
 	TLSRootCaCert string
 }
 
+type ContainerRegistryAuth struct {
+	Username string
+	Password string
+}
+
+type KotlinConfigData struct {
+	LibraryBucket string
+}
+
 type EnvConfigData struct {
 	SelfUri            string
 	SelfDomain         string
@@ -101,6 +110,8 @@ type EnvConfigData struct {
 	RabbitMQ           *RabbitMQConfig
 	Grpc               *GrpcEndpoints
 	Tls                *TLSConfig
+	GitlabRegistryAuth *ContainerRegistryAuth
+	Kotlin             *KotlinConfigData
 }
 
 var EnvConfig *EnvConfigData
@@ -207,6 +218,13 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 
 	envConfig.Tls = new(TLSConfig)
 	envConfig.Tls.TLSRootCaCert = tomlConfig.Get("tls.root_ca").(string)
+
+	envConfig.GitlabRegistryAuth = new(ContainerRegistryAuth)
+	envConfig.GitlabRegistryAuth.Username = tomlConfig.Get("registry.gitlab.username").(string)
+	envConfig.GitlabRegistryAuth.Password = tomlConfig.Get("registry.gitlab.password").(string)
+
+	envConfig.Kotlin = new(KotlinConfigData)
+	envConfig.Kotlin.LibraryBucket = tomlConfig.Get("kotlin.bucket").(string)
 
 	return envConfig
 }

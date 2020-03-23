@@ -37,9 +37,16 @@ func (s *RealGCloudStorageApi) Upload(bucket string, filename string, data []byt
 
 	wr.SendCRC32C = true
 
-	uploadData, err := appendHMACSHA512(data, key)
-	if err != nil {
-		return err
+	var uploadData []byte
+	var err error
+
+	if len(key) > 0 {
+		uploadData, err = appendHMACSHA512(data, key)
+		if err != nil {
+			return err
+		}
+	} else {
+		uploadData = data
 	}
 
 	wr.ObjectAttrs.CRC32C = crc32.Checksum(uploadData, crc32cTable)
@@ -62,6 +69,10 @@ func (s *RealGCloudStorageApi) Download(bucket string, filename string, key []by
 	bytes, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(key) == 0 {
+		return bytes, nil
 	}
 
 	rawData, err := verifyHMACSHA512(bytes, key)

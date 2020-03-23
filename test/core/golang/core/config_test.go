@@ -51,16 +51,18 @@ func getNestedField(val reflect.Value, field string) reflect.Value {
 func generateTestToml(config GenerateTomlConfig) (*toml.Tree, *core.EnvConfigData) {
 	newTree, _ := toml.TreeFromMap(map[string]interface{}{})
 	newData := core.EnvConfigData{
-		Okta:     new(core.OktaConfig),
-		Login:    new(core.LoginConfig),
-		Company:  new(core.CompanyConfig),
-		Vault:    new(core.VaultConfig),
-		Gcloud:   new(core.GCloudConfig),
-		Mail:     new(core.MailConfig),
-		HashId:   new(core.HashIdConfigData),
-		RabbitMQ: new(core.RabbitMQConfig),
-		Grpc:     new(core.GrpcEndpoints),
-		Tls:      new(core.TLSConfig),
+		Okta:               new(core.OktaConfig),
+		Login:              new(core.LoginConfig),
+		Company:            new(core.CompanyConfig),
+		Vault:              new(core.VaultConfig),
+		Gcloud:             new(core.GCloudConfig),
+		Mail:               new(core.MailConfig),
+		HashId:             new(core.HashIdConfigData),
+		RabbitMQ:           new(core.RabbitMQConfig),
+		Grpc:               new(core.GrpcEndpoints),
+		Tls:                new(core.TLSConfig),
+		GitlabRegistryAuth: new(core.ContainerRegistryAuth),
+		Kotlin:             new(core.KotlinConfigData),
 	}
 
 	newDataVal := reflect.ValueOf(&newData).Elem()
@@ -148,6 +150,9 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"Grpc.QueryRunner.TLSCert", "grpc.query_runner.tls.cert", "certfile", nil},
 					{"Grpc.QueryRunner.TLSKey", "grpc.query_runner.tls.key", "keyfile", nil},
 					{"Tls.TLSRootCaCert", "tls.root_ca", "root_ca", nil},
+					{"GitlabRegistryAuth.Username", "registry.gitlab.username", "testuser", nil},
+					{"GitlabRegistryAuth.Password", "registry.gitlab.password", "testpassword", nil},
+					{"Kotlin.LibraryBucket", "kotlin.bucket", "testbucket", nil},
 				},
 			},
 			parseError: false,

@@ -6,7 +6,7 @@ import (
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/gcloud_api"
 	"gitlab.com/grchive/grchive/vault_api"
-	"os"
+	//"os"
 )
 
 func main() {
@@ -26,14 +26,18 @@ func main() {
 	orgId := flag.Int("orgId", -1, "Org ID to retrieve data for.")
 	roleId := flag.Int64("roleId", -1, "Role to run script as.")
 	immediate := flag.Bool("immediate", false, "Whether to run immediately.")
+	kotlinVersion := flag.String("kversion", "latest", "Version of the Kotlin container to use.")
+	libraryVersion := flag.String("lversion", "0.1", "Version of the Core library to use.")
 	local := flag.Bool("local", false, "Whether to filepath inputs instead of retrieving from DB.")
 	flag.Parse()
+
+	//defer os.RemoveAll(libraryStorageDir)
 
 	if *immediate {
 		var err error
 		if *local {
 			dirName, err := createHostWorkspaceDirectory(*scriptFname, *jarFname)
-			defer os.RemoveAll(dirName)
+			//defer os.RemoveAll(dirName)
 			if err != nil {
 				core.Error("Failed to setup workspace directory: " + err.Error())
 			}
@@ -46,7 +50,8 @@ func main() {
 					CpuAllocation:          1.0,
 					MemBytesAllocation:     core.Gigabytes(1.0),
 					DiskSizeBytes:          core.Gigabytes(1.0),
-					KotlinContainerVersion: "latest",
+					KotlinContainerVersion: *kotlinVersion,
+					GrchiveCoreVersion:     *libraryVersion,
 				},
 			)
 

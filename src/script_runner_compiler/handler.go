@@ -8,7 +8,14 @@ import (
 	"path/filepath"
 )
 
+const (
+	RetCodeOK          int = 0
+	RetCodeCompileFail     = 1
+	RetCodeRunFail         = 2
+)
+
 type KotlinOutput struct {
+	RetCode          int
 	CompiledJarFname string
 	Logs             string
 }
@@ -74,12 +81,17 @@ func handleLocal(dirName string, orgId int32, roleId int64, runSettings core.Scr
 	core.Info("VOLUME: ", workspaceVolumeName)
 	core.Info("WORKSPACE: ", dirName)
 
-	err := createKotlinContainer(dirName, containerName, workspaceVolumeName, runSettings)
+	runtime, err := pullRuntimeEnvironment(runSettings)
 	if err != nil {
 		return nil, err
 	}
 
-	err = runKotlinContainer(containerName, runSettings)
+	err = createKotlinContainer(dirName, containerName, workspaceVolumeName, runSettings, runtime)
+	if err != nil {
+		return nil, err
+	}
+
+	retCode, err := runKotlinContainer(containerName, runSettings)
 	if err != nil {
 		return nil, err
 	}
@@ -89,10 +101,14 @@ func handleLocal(dirName string, orgId int32, roleId int64, runSettings core.Scr
 		return nil, err
 	}
 
-	outputJarFname := getExpectedCompiledJarFname(dirName)
-	err = copyDataFromContainer(containerName, getExpectedCompiledJarFname(dockerOutputDir), outputJarFname)
-	if err != nil {
-		return nil, err
+	var outputJarFname string
+
+	if retCode != RetCodeCompileFail {
+		outputJarFname := getExpectedCompiledJarFname(dirName)
+		err = copyDataFromContainer(containerName, getExpectedCompiledJarFname(dockerOutputDir), outputJarFname)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	err = removeKotlinContainer(containerName, workspaceVolumeName)
@@ -101,6 +117,7 @@ func handleLocal(dirName string, orgId int32, roleId int64, runSettings core.Scr
 	}
 
 	return &KotlinOutput{
+		RetCode:          retCode,
 		CompiledJarFname: outputJarFname,
 		Logs:             logs,
 	}, nil

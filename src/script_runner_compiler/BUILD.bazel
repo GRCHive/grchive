@@ -7,7 +7,9 @@ go_binary(
     srcs = [
         "docker.go",
         "frontend.go",
-        "handler.go"
+        "handler.go",
+        "runtime.go",
+        "library.go",
     ],
     data = [
         "//src/webserver/config:config",

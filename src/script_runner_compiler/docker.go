@@ -3,7 +3,9 @@ package main
 import (
 	"archive/tar"
 	"context"
+	"encoding/base64"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/docker/docker/api/types"
@@ -20,22 +22,45 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
 const dockerWorkspaceDir string = "/data"
 const dockerOutputDir string = "/output"
 
+var dockerImageMap map[string]bool = map[string]bool{}
+var dockerImageMutex sync.RWMutex = sync.RWMutex{}
+
 func mustDockerCreateClient(c *client.Client, err error) *client.Client {
 	if err != nil {
 		core.Error("Failed to create client: " + err.Error())
+	}
+
+	// Cache a map of every image we have locally.
+	imgList, err := c.ImageList(
+		context.Background(),
+		types.ImageListOptions{
+			All: true,
+		},
+	)
+
+	if err != nil {
+		core.Error("Failed to pull image list: " + err.Error())
+	}
+
+	for _, img := range imgList {
+		if len(img.RepoTags) == 0 {
+			continue
+		}
+		dockerImageMap[img.RepoTags[0]] = true
 	}
 	return c
 }
 
 var dockerClient *client.Client = mustDockerCreateClient(client.NewEnvClient())
 
-func createKotlinContainer(workspaceDir string, containerName string, workspaceVolumeName string, settings core.ScriptRunSettings) error {
+func createKotlinContainer(workspaceDir string, containerName string, workspaceVolumeName string, settings core.ScriptRunSettings, runtime *RuntimeEnvironment) error {
 	_, err := dockerClient.VolumeCreate(context.Background(), volume.VolumeCreateBody{
 		Driver: "local",
 		DriverOpts: map[string]string{
@@ -51,6 +76,7 @@ func createKotlinContainer(workspaceDir string, containerName string, workspaceV
 	}
 
 	inputDir := "/input"
+	libraryDir := "/library"
 
 	args := strslice.StrSlice{}
 	if settings.CompileOnly {
@@ -63,11 +89,7 @@ func createKotlinContainer(workspaceDir string, containerName string, workspaceV
 	}
 
 	args = append(args, "--jar", getExpectedJarFname(inputDir))
-
-	if settings.GrchiveCoreVersion != "" {
-		args = append(args, "--version", settings.GrchiveCoreVersion)
-	}
-
+	args = append(args, "--library", filepath.Join(libraryDir, filepath.Base(runtime.CoreLibPath)))
 	args = append(args, "--output", getExpectedCompiledJarFname(dockerOutputDir))
 
 	const defaultCPUPeriod int64 = 100000
@@ -75,7 +97,7 @@ func createKotlinContainer(workspaceDir string, containerName string, workspaceV
 	_, err = dockerClient.ContainerCreate(
 		context.Background(),
 		&container.Config{
-			Image: fmt.Sprintf("registry.gitlab.com/grchive/grchive/kotlin_runner:%s", settings.KotlinContainerVersion),
+			Image: runtime.ContainerPath,
 			Cmd:   args,
 		},
 		&container.HostConfig{
@@ -84,6 +106,12 @@ func createKotlinContainer(workspaceDir string, containerName string, workspaceV
 					Type:     mount.TypeBind,
 					Source:   workspaceDir,
 					Target:   inputDir,
+					ReadOnly: true,
+				},
+				mount.Mount{
+					Type:     mount.TypeBind,
+					Source:   filepath.Dir(runtime.CoreLibPath),
+					Target:   libraryDir,
 					ReadOnly: true,
 				},
 				mount.Mount{
@@ -109,7 +137,7 @@ func createKotlinContainer(workspaceDir string, containerName string, workspaceV
 	return nil
 }
 
-func runKotlinContainer(containerName string, settings core.ScriptRunSettings) error {
+func runKotlinContainer(containerName string, settings core.ScriptRunSettings) (int, error) {
 	err := dockerClient.ContainerStart(
 		context.Background(),
 		containerName,
@@ -117,7 +145,7 @@ func runKotlinContainer(containerName string, settings core.ScriptRunSettings) e
 	)
 
 	if err != nil {
-		return err
+		return -1, err
 	}
 
 	// Block until container is done running.
@@ -128,16 +156,16 @@ func runKotlinContainer(containerName string, settings core.ScriptRunSettings) e
 		)
 
 		if err != nil {
-			return err
+			return -1, err
 		}
 
 		if !json.ContainerJSONBase.State.Running {
-			break
+			return json.ContainerJSONBase.State.ExitCode, nil
 		}
 
 		time.Sleep(1 * time.Second)
 	}
-	return nil
+	return -1, nil
 }
 
 func copyDataFromContainer(containerName string, containerSrc string, hostDst string) error {
@@ -227,7 +255,7 @@ func readLogsFromContainer(containerName string) (string, error) {
 		var prefix string
 		if header[0] == 1 {
 			prefix = "STDOUT"
-		} else if header[1] == 2 {
+		} else if header[0] == 2 {
 			prefix = "STDERR"
 		}
 
@@ -256,4 +284,56 @@ func removeKotlinContainer(containerName string, workspaceVolumeName string) err
 	}
 
 	return dockerClient.VolumeRemove(context.Background(), workspaceVolumeName, true)
+}
+
+func pullKotlinImage(imageName string) error {
+	dockerImageMutex.RLock()
+	_, ok := dockerImageMap[imageName]
+	dockerImageMutex.RUnlock()
+
+	if !ok {
+		auth := types.AuthConfig{
+			Username: core.EnvConfig.GitlabRegistryAuth.Username,
+			Password: core.EnvConfig.GitlabRegistryAuth.Password,
+		}
+
+		authBytes, err := json.Marshal(auth)
+		if err != nil {
+			return err
+		}
+
+		authBase64 := base64.URLEncoding.EncodeToString(authBytes)
+
+		rc, err := dockerClient.ImagePull(
+			context.Background(),
+			imageName,
+			types.ImagePullOptions{
+				RegistryAuth: authBase64,
+			},
+		)
+
+		if err != nil {
+			return err
+		}
+
+		defer rc.Close()
+
+		resp, err := dockerClient.ImageLoad(
+			context.Background(),
+			rc,
+			false,
+		)
+
+		if err != nil {
+			return err
+		}
+
+		defer resp.Body.Close()
+
+		dockerImageMutex.Lock()
+		dockerImageMap[imageName] = true
+		dockerImageMutex.Unlock()
+	}
+
+	return nil
 }
