@@ -41,6 +41,7 @@ case "$ENV" in
         export GRCHIVE_DOC_BUCKET="grchive-prod"
         export TERRAFORM_FOLDER="prod"
         export INGRESS_ENV="prod"
+        export KOTLIN_LIB_BUCKET="grchive-kotlin-lib-prod"
 
         USE_ENV_VARIABLES=1
         DO_TERRAFORM=1
@@ -62,6 +63,7 @@ case "$ENV" in
         export GRCHIVE_DOC_BUCKET="grchive-staging"
         export TERRAFORM_FOLDER="staging"
         export INGRESS_ENV="staging"
+        export KOTLIN_LIB_BUCKET="grchive-kotlin-lib-staging"
 
         USE_ENV_VARIABLES=1
         DO_TERRAFORM=1
