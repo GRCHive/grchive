@@ -16,6 +16,7 @@ import (
 	"gitlab.com/grchive/grchive/core"
 	"io"
 	"io/ioutil"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -40,7 +41,7 @@ func createKotlinContainer(workspaceDir string, containerName string, workspaceV
 		DriverOpts: map[string]string{
 			"type":   "tmpfs",
 			"device": "tmpfs",
-			//"o":      fmt.Sprintf("size=%db", settings.DiskSizeBytes),
+			"o":      fmt.Sprintf("size=%d", settings.DiskSizeBytes),
 		},
 		Name: workspaceVolumeName,
 	})
@@ -69,6 +70,8 @@ func createKotlinContainer(workspaceDir string, containerName string, workspaceV
 
 	args = append(args, "--output", getExpectedCompiledJarFname(dockerOutputDir))
 
+	const defaultCPUPeriod int64 = 100000
+
 	_, err = dockerClient.ContainerCreate(
 		context.Background(),
 		&container.Config{
@@ -88,6 +91,11 @@ func createKotlinContainer(workspaceDir string, containerName string, workspaceV
 					Source: workspaceVolumeName,
 					Target: dockerWorkspaceDir,
 				},
+			},
+			Resources: container.Resources{
+				Memory:    settings.MemBytesAllocation,
+				CPUPeriod: defaultCPUPeriod,
+				CPUQuota:  int64(math.Round(float64(defaultCPUPeriod) * settings.CpuAllocation)),
 			},
 		},
 		&network.NetworkingConfig{},

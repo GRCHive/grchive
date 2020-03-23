@@ -6,7 +6,7 @@ import (
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/gcloud_api"
 	"gitlab.com/grchive/grchive/vault_api"
-	//	"os"
+	"os"
 )
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 		var err error
 		if *local {
 			dirName, err := createHostWorkspaceDirectory(*scriptFname, *jarFname)
-			//defer os.RemoveAll(dirName)
+			defer os.RemoveAll(dirName)
 			if err != nil {
 				core.Error("Failed to setup workspace directory: " + err.Error())
 			}
