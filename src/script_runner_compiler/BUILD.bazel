@@ -1,0 +1,30 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+
+go_binary(
+    name = "frontend",
+    srcs = [
+        "docker.go",
+        "frontend.go",
+        "handler.go"
+    ],
+    data = [
+        "//src/webserver/config:config",
+        "//devops/gcloud:gcloud-webserver-account.json",
+    ],
+    deps = [
+        "//src/gcloud_api/golang:gcloud_golang_api",
+        "//src/core/golang/core:webserver_core_library",
+        "//src/core/golang/database:webserver_database_library",
+        "//src/core/golang/webcore:webserver_webcore_library",
+        "//src/vault_api/golang:vault_golang_api",
+        "@com_github_docker_docker//api/types:go_default_library",
+        "@com_github_docker_docker//api/types/container:go_default_library",
+        "@com_github_docker_docker//api/types/mount:go_default_library",
+        "@com_github_docker_docker//api/types/network:go_default_library",
+        "@com_github_docker_docker//api/types/strslice:go_default_library",
+        "@com_github_docker_docker//api/types/volume:go_default_library",
+        "@com_github_docker_docker//client:go_default_library",
+    ],
+)

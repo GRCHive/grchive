@@ -23,6 +23,7 @@ COPY run.py /
 
 RUN groupadd -r kotlin && useradd -r -g kotlin kotlin
 RUN mkdir /data && chown -R kotlin /data
+RUN mkdir /output && chown -R kotlin /output
 WORKDIR /data
 
 VOLUME ["/data"]

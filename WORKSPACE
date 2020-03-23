@@ -227,6 +227,13 @@ go_repository(
     tag = "v1.27.1"
 )
 
+go_repository(
+    name = "com_github_docker_docker",
+    importpath = "github.com/docker/docker",
+    tag = "v19.03.8"
+)
+
+
 # NODE
 http_archive(
     name = "build_bazel_rules_nodejs",
