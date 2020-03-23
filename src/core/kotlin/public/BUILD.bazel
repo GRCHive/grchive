@@ -13,3 +13,30 @@ kt_jvm_library(
         "@maven//:org_jdbi_jdbi3_postgres",
     ],
 )
+
+genrule(
+    name = "deploy",
+    srcs = [
+        ":grchive_public_core",
+        "//devops/gcloud:gcloud-webserver-account.json",
+    ],
+    outs = [
+        "deploy_grchive_public_core.sh",
+    ],
+    cmd = """touch $@ && . $(location //build:bash_env) && \
+        echo "#!/bin/bash" >> $@ && \
+        echo "gcloud auth activate-service-account --key-file $(location //devops/gcloud:gcloud-webserver-account.json)" >> $@ && \
+        echo "gcloud config set project $${GRCHIVE_PROJECT}" >> $@ && \
+        echo "gcloud config set compute/zone us-central1-c" >> $@ && \
+        echo "gsutil cp $(location :grchive_public_core) gs://$${KOTLIN_LIB_BUCKET}/grchive_public_core.v$${KOTLIN_CORE_LIB_MAJOR_VERSION}.$${KOTLIN_CORE_LIB_MINOR_VERSION}.jar" >> $@ && \
+        echo "HASH_FILE=$$(mktemp)" >> $@ && \
+        echo "sha256sum $(location :grchive_public_core) | awk '{print \$$1}' > \$${HASH_FILE}" >> $@ && \
+        echo "gsutil cp \$${HASH_FILE} gs://$${KOTLIN_LIB_BUCKET}/grchive_public_core.v$${KOTLIN_CORE_LIB_MAJOR_VERSION}.$${KOTLIN_CORE_LIB_MINOR_VERSION}.sha256" >> $@ && \
+        echo "rm \$${HASH_FILE}" >> $@ && \
+        chmod +x $@ 
+    """,
+    executable = True,
+    tools = [
+        "//build:bash_env"
+    ]
+)

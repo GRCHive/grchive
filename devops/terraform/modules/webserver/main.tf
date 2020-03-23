@@ -140,6 +140,16 @@ resource "google_storage_bucket" "webserver-control-doc-store" {
     }
 }
 
+resource "google_storage_bucket" "webserver-kotlin-lib-store" {
+    name     = var.kotlin_lib_bucket
+    location = "US-CENTRAL1"
+    bucket_policy_only = true
+
+    versioning {
+        enabled = true
+    }
+}
+
 resource "google_compute_address" "gke-outbound-network-us-central1-nat-ip" {
     count   = 1
     name    = "gke-outbound-network-us-central1-nat-ip-${count.index}"

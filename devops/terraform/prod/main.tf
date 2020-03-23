@@ -39,4 +39,5 @@ module "webserver" {
     source = "../modules/webserver"
 
     doc_storage_bucket = "grchive-prod"
+    kotlin_lib_bucket = "grchive-kotlin-lib-prod"
 }
