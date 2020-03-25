@@ -7,10 +7,9 @@ kt_jvm_library(
     deps = [
         "@maven//:org_jdbi_jdbi3_bom",
         "@maven//:org_jdbi_jdbi3_postgres",
-    ],
-    exports = [
-        "@maven//:org_jdbi_jdbi3_bom",
-        "@maven//:org_jdbi_jdbi3_postgres",
+        "@maven//:org_jdbi_jdbi3_kotlin",
+        "@maven//:org_tomlj_tomlj",
+        "@maven//:com_zaxxer_HikariCP",
     ],
 )
 

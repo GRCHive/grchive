@@ -409,6 +409,8 @@ maven_install(
         "org.junit.platform:junit-platform-console:1.6.0",
         "io.kotest:kotest-runner-junit5-jvm:4.0.0-BETA3",
         "io.kotest:kotest-assertions-core-jvm:4.0.0-BETA3",
+        "org.tomlj:tomlj:1.0.0",
+        "com.zaxxer:HikariCP:3.4.2",
     ],
     repositories = [
         "https://repo1.maven.org/maven2",
