@@ -2,7 +2,7 @@ package grchive.core.utility
 
 import java.lang.StringBuilder
 
-const val kHexChars = "0123456789ABCDEF"
+const val kHexChars = "0123456789abcdef"
 
 /**
  * Hex encodes the input byte array.
