@@ -15,14 +15,15 @@ import org.jdbi.v3.core.kotlin.*
  */
 class GrchiveDataSource(val cfg : Config, val apiKey : String) 
     : DatabaseDataSource(createGrchiveHikariDataSource(cfg.database)) {
+    val activeRole : FullRole
 
     init {
         jdbi.installPlugin(PostgresPlugin())
         jdbi.registerRowMapper(ApiKeyMapper())
 
-        val key : ApiKey? = jdbi.withHandleUnchecked {
-            getApiKeyFromRawKey(it, apiKey)!!
+        activeRole = jdbi.withHandleUnchecked {
+            val key : ApiKey = getApiKeyFromRawKey(it, apiKey)!!
+            getRoleAttachedToApiKey(it, key.id)!!
         }
-        println(key?.expirationDate)
     }
 }

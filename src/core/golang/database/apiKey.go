@@ -10,7 +10,7 @@ func StoreApiKey(key *core.ApiKey) error {
 		INSERT INTO api_keys ( hashed_api_key, expiration_date)
 		VALUES (
 			:hashed_api_key,
-			:expiration_date,
+			:expiration_date
 		)
 		RETURNING id
 	`, key)
@@ -26,8 +26,9 @@ func StoreApiKey(key *core.ApiKey) error {
 		tx.Rollback()
 		return err
 	}
+	rows.Close()
 
-	_, err = tx.NamedExec(`
+	_, err = tx.Exec(`
 		INSERT INTO api_key_to_users (api_key_id, user_id)
 		VALUES (
 			$1,
@@ -40,7 +41,6 @@ func StoreApiKey(key *core.ApiKey) error {
 		return err
 	}
 
-	rows.Close()
 	err = tx.Commit()
 	return err
 }

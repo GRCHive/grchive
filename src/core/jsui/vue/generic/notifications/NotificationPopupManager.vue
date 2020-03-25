@@ -32,7 +32,6 @@ export default class NotificationPopupManager extends Vue {
         this.notificationHeights = this.recentNotifications.map(() => 80)
 
         Vue.nextTick(() => {
-            console.log(this.$refs)
             for (let i = 0; i < this.notificationHeights.length; ++i) {
                 //@ts-ignore
                 let ele : HTMLElement = this.$refs[`popup${i}`][0].$el
