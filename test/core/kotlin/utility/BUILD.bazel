@@ -1,18 +1,11 @@
 package(default_visibility = ["//visibility:public"])
-load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_test")
+load("//test/core/kotlin:build.bzl", "generate_kotlin_test")
 
-kt_jvm_test(
+generate_kotlin_test(
     name = "hex_test",
     srcs = ["HexTest.kt"],
-    main_class = "org.junit.platform.console.ConsoleLauncher",
-    args = [
-        '--select-package=test.grchive.core.utility',
-    ],
+    pkg = "test.grchive.core.utility",
     deps = [
         "//src/core/kotlin:grchive_public_core",
-        "@maven//:org_junit_platform_junit_platform_console",
-        "@maven//:io_kotest_kotest_runner_junit5_jvm",
-        "@maven//:io_kotest_kotest_assertions_core_jvm",
     ],
 )
-

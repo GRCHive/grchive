@@ -10,6 +10,7 @@ kt_jvm_library(
         "@maven//:org_jdbi_jdbi3_kotlin",
         "@maven//:org_tomlj_tomlj",
         "@maven//:com_zaxxer_HikariCP",
+        "@maven//:org_postgresql_postgresql",
     ],
 )
 

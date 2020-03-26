@@ -97,6 +97,8 @@ type EnvConfigData struct {
 	SelfUri            string
 	SelfDomain         string
 	DatabaseConnString string
+	DatabaseUsername   string
+	DatabasePassword   string
 	Login              *LoginConfig
 	Okta               *OktaConfig
 	SessionKeys        [][]byte
@@ -140,6 +142,8 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.SelfUri = tomlConfig.Get("self_uri").(string)
 	envConfig.SelfDomain = tomlConfig.Get("self_domain").(string)
 	envConfig.DatabaseConnString = tomlConfig.Get("database.connection").(string)
+	envConfig.DatabaseUsername = tomlConfig.Get("database.username").(string)
+	envConfig.DatabasePassword = tomlConfig.Get("database.password").(string)
 
 	envConfig.Okta = new(OktaConfig)
 	envConfig.Okta.BaseUrl = tomlConfig.Get("okta.url").(string)

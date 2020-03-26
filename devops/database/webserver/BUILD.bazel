@@ -1,0 +1,5 @@
+package(default_visibility = ["//visibility:public"])
+filegroup(
+    name = "flyway-webserver",
+    srcs = glob(["sql/*.sql"])
+)

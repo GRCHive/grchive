@@ -19,12 +19,12 @@ class HexEncodeTest: StringSpec({
             row(0x7, "07"),
             row(0x8, "08"),
             row(0x9, "09"),
-            row(0xA, "0A"),
-            row(0xB, "0B"),
-            row(0xC, "0C"),
-            row(0xD, "0D"),
-            row(0xE, "0E"),
-            row(0xF, "0F")
+            row(0xA, "0a"),
+            row(0xB, "0b"),
+            row(0xC, "0c"),
+            row(0xD, "0d"),
+            row(0xE, "0e"),
+            row(0xF, "0f")
         ) {
             inp, ref -> 
                 hexEncode(ByteArray(1){ inp.toByte() }) shouldBe ref
@@ -34,8 +34,8 @@ class HexEncodeTest: StringSpec({
     "Hex Longer" {
         forAll(
             row(0x0000, "00000000"),
-            row(0x1230FA, "001230FA"),
-            row(0xABCDEF, "00ABCDEF")
+            row(0x1230FA, "001230fa"),
+            row(0xABCDEF, "00abcdef")
         ) {
             inp, ref -> 
                 val testByte = ByteArray(4)

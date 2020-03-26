@@ -22,7 +22,6 @@ fun genericStringHash(alg : String, inp : String) : String? {
     } catch (e : NoSuchAlgorithmException) {
         return null
     }
-    return null
 }
 
 /**

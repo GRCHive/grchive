@@ -6,7 +6,9 @@ company_name = "GRCHive"
 domain = "grchive.com"
 
 [database]
-connection = "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/audit?sslmode=disable&timezone=UTC"
+connection = "${POSTGRES_HOST}:${POSTGRES_PORT}/audit?sslmode=disable&timezone=UTC"
+username = "${POSTGRES_USER}"
+password = "${POSTGRES_PASSWORD}"
 
 [okta]
 url = "${OKTA_URL}"

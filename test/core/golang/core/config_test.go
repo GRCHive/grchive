@@ -101,6 +101,8 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"SelfUri", "self_uri", "test_uri", nil},
 					{"SelfDomain", "self_domain", "test_domain", nil},
 					{"DatabaseConnString", "database.connection", "connection_string", nil},
+					{"DatabaseUsername", "database.username", "username", nil},
+					{"DatabasePassword", "database.password", "password", nil},
 					{"Okta.BaseUrl", "okta.url", "okta_base_url", nil},
 					{"Okta.ApiEndpoint", "okta.api_endpoint", "okta_apiendpoint", nil},
 					{"Okta.ApiKey", "okta.api_key", "okta_apikey", nil},

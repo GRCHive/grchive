@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	"gitlab.com/grchive/grchive/core"
@@ -10,7 +11,12 @@ import (
 var dbConn *sqlx.DB
 
 func Init() {
-	dbConn = sqlx.MustConnect("postgres", core.EnvConfig.DatabaseConnString)
+	dbConn = sqlx.MustConnect(
+		"postgres",
+		fmt.Sprintf("postgres://%s:%s@%s",
+			core.EnvConfig.DatabaseUsername,
+			core.EnvConfig.DatabasePassword,
+			core.EnvConfig.DatabaseConnString))
 	dbConn.SetMaxOpenConns(10)
 	dbConn.SetMaxIdleConns(5)
 	dbConn.SetConnMaxLifetime(5 * time.Minute)

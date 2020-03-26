@@ -1,0 +1,23 @@
+package(default_visibility = ["//visibility:public"])
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library")
+
+kt_jvm_library(
+    name = "test_core",
+    srcs = glob(["**/*.kt"]),
+    resources = [
+        "//devops/database/webserver:flyway-webserver"
+    ],
+    deps = [
+        "//src/core/kotlin:grchive_public_core",
+        "@maven//:org_jdbi_jdbi3_bom",
+        "@maven//:org_jdbi_jdbi3_postgres",
+        "@maven//:org_jdbi_jdbi3_kotlin",
+        "@maven//:org_testcontainers_testcontainers",
+        "@maven//:org_testcontainers_postgresql",
+        "@maven//:io_kotest_kotest_runner_junit5_jvm",
+        "@maven//:io_kotest_kotest_assertions_core_jvm",
+        "@maven//:com_zaxxer_HikariCP",
+        "@maven//:org_postgresql_postgresql",
+        "@maven//:org_flywaydb_flyway_core",
+    ],
+)
