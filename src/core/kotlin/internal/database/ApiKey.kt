@@ -4,7 +4,6 @@ import org.jdbi.v3.core.Handle
 import java.util.Optional
 import grchive.core.data.types.grchive.ApiKey
 import grchive.core.data.types.grchive.hashRawApiKey
-import grchive.core.data.types.grchive.ApiKeyMapper
 
 /**
  * Finds the [ApiKey] with the given raw (un-hashed) API key.
@@ -19,6 +18,5 @@ internal fun getApiKeyFromRawKey(hd : Handle, rawKey : String) : ApiKey? {
 		FROM api_keys AS key
 		WHERE hashed_api_key = ?
     """, hashRawApiKey(rawKey)).mapTo(ApiKey::class.java).findOne()
-
     return if (res.isPresent()) res.get() else null
 }

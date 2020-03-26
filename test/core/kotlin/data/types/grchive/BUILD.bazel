@@ -2,9 +2,9 @@ package(default_visibility = ["//visibility:public"])
 load("//test/core/kotlin:build.bzl", "generate_kotlin_test")
 
 generate_kotlin_test(
-    name = "apikey_test",
-    srcs = ["ApiKeyTest.kt"],
-    pkg = 'test.grchive.core.internal.database',
+    name = "rolepermissions_test",
+    srcs = ["RolePermissionsTest.kt"],
+    pkg = 'test.grchive.core.data.types.grchive',
     deps = [
         "//src/core/kotlin:grchive_public_core",
     ],
@@ -14,9 +14,9 @@ generate_kotlin_test(
 )
 
 generate_kotlin_test(
-    name = "role_test",
-    srcs = ["RoleTest.kt"],
-    pkg = 'test.grchive.core.internal.database',
+    name = "apikey_test",
+    srcs = ["ApiKeyTest.kt"],
+    pkg = 'test.grchive.core.data.types.grchive',
     deps = [
         "//src/core/kotlin:grchive_public_core",
     ],

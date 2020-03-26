@@ -12,8 +12,9 @@ import org.jdbi.v3.core.kotlin.*
  *
  * @property cfg The GRCHive configuration to access the data sources.
  * @property apiKey The API key used to authorize actions on GRCHive data.
+ * @property orgId The unique ID of the organization to access data for.
  */
-class GrchiveDataSource(val cfg : Config, val apiKey : String) 
+class GrchiveDataSource(val cfg : Config, val apiKey : String, val orgId : Int) 
     : DatabaseDataSource(createGrchiveHikariDataSource(cfg.database)) {
     val activeRole : FullRole
 
@@ -22,7 +23,7 @@ class GrchiveDataSource(val cfg : Config, val apiKey : String)
 
         activeRole = jdbi.withHandleUnchecked {
             val key : ApiKey = getApiKeyFromRawKey(it, apiKey)!!
-            getRoleAttachedToApiKey(it, key.id)!!
+            getRoleAttachedToApiKey(it, key.id, orgId)!!
         }
     }
 }

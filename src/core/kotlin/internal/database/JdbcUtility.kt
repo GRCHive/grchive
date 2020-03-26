@@ -2,6 +2,7 @@ package grchive.core.internal.database
 
 import com.zaxxer.hikari.*
 import org.jdbi.v3.core.Jdbi
+import org.jdbi.v3.core.mapper.reflect.ConstructorMapper
 import org.jdbi.v3.postgres.PostgresPlugin
 
 import grchive.core.data.types.grchive.*
@@ -17,5 +18,8 @@ internal fun createGrchiveHikariDataSource(cfg : DatabaseConfig) : HikariDataSou
 
 fun setupGrchiveJdbi(jdbi : Jdbi) {
     jdbi.installPlugin(PostgresPlugin())
-    jdbi.registerRowMapper(ApiKeyMapper())
+    jdbi.registerRowMapper(ConstructorMapper.factory(ApiKey::class.java))
+    jdbi.registerRowMapper(ConstructorMapper.factory(Role::class.java))
+    jdbi.registerRowMapper(ConstructorMapper.factory(RolePermissions::class.java))
+    jdbi.registerRowMapper(ConstructorMapper.factory(FullRole::class.java))
 }

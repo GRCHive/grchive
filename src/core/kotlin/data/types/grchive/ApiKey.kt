@@ -3,8 +3,7 @@ package grchive.core.data.types.grchive
 import java.sql.ResultSet
 import java.time.OffsetDateTime
 
-import org.jdbi.v3.core.mapper.RowMapper
-import org.jdbi.v3.core.statement.StatementContext
+import org.jdbi.v3.core.mapper.reflect.ColumnName
 
 import grchive.core.security.hashStringSHA512
 
@@ -21,19 +20,10 @@ import grchive.core.security.hashStringSHA512
  * @property expirationDate When this API key will expire.
  */
 internal data class ApiKey (
-    val id : Long,
-    val hashedKey : String,
-    val expirationDate : OffsetDateTime
+    @ColumnName("id") val id : Long,
+    @ColumnName("hashed_api_key") val hashedKey : String,
+    @ColumnName("expiration_date") val expirationDate : OffsetDateTime
 )
-
-internal class ApiKeyMapper : RowMapper<ApiKey> {
-    override fun map(rs : ResultSet, ctx : StatementContext) : ApiKey {
-        return ApiKey(
-            rs.getLong("id"),
-            rs.getString("hashed_api_key"),
-            rs.getObject("expiration_date", OffsetDateTime::class.java))
-    }
-}
 
 fun hashRawApiKey(key : String) : String? {
     return hashStringSHA512(key)
