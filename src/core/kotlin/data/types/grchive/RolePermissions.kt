@@ -9,8 +9,17 @@ enum class AccessType(val bit : Int) {
     None(0b000),
     View(0b001),
     Edit(0b010),
-    Manage(0b100)
+    Manage(0b100),
+    All(0b111)
 }
+
+/**
+ * The exception that gets thrown whenever a resource is accessed without the role having proper permissions.
+ *
+ * @property res The resource requested.
+ * @property access The access requested.
+ */
+class ResourcePermissionDeniedException(val res : Resources, val access : AccessType) : Exception("Permission denied for resource access.")
 
 /**
  * Unions multiple access types together to create a unioned access type.
@@ -51,42 +60,88 @@ fun unionAccessType(vararg v : AccessType) : Int {
  */
 data class RolePermissions (
     @field:GrchiveResource(Resources.ResourceOrgUsers) @ColumnName("users_access")
-    val orgUsersAccess : Int = 0,
+    val orgUsersAccess : Int,
     @field:GrchiveResource(Resources.ResourceOrgRoles) @ColumnName("roles_access")
-    val orgRolesAccess : Int = 0,
+    val orgRolesAccess : Int,
     @field:GrchiveResource(Resources.ResourceProcessFlows) @ColumnName("flow_access")
-    val processFlowsAccess : Int = 0,
+    val processFlowsAccess : Int,
     @field:GrchiveResource(Resources.ResourceControls) @ColumnName("control_access")
-    val controlsAccess : Int = 0,
+    val controlsAccess : Int,
     @field:GrchiveResource(Resources.ResourceControlDocumentation) @ColumnName("doc_access")
-    val controlDocumentationAccess : Int = 0,
+    val controlDocumentationAccess : Int,
     @field:GrchiveResource(Resources.ResourceControlDocumentationMetadata) @ColumnName("doc_meta_access")
-    val controlDocMetadataAccess : Int = 0,
+    val controlDocMetadataAccess : Int,
     @field:GrchiveResource(Resources.ResourceRisks) @ColumnName("risk_access")
-    val risksAccess: Int = 0,
+    val risksAccess: Int,
     @field:GrchiveResource(Resources.ResourceGeneralLedger) @ColumnName("gl_access")
-    val glAccess : Int = 0,
+    val glAccess : Int,
     @field:GrchiveResource(Resources.ResourceSystems) @ColumnName("system_access")
-    val systemAccess : Int = 0,
+    val systemAccess : Int,
     @field:GrchiveResource(Resources.ResourceDatabases) @ColumnName("db_access")
-    val dbAccess : Int = 0,
+    val dbAccess : Int,
     @field:GrchiveResource(Resources.ResourceDbConnections) @ColumnName("db_conn_access")
-    val dbConnectionAccess : Int = 0,
+    val dbConnectionAccess : Int,
     @field:GrchiveResource(Resources.ResourceDocRequests) @ColumnName("doc_request_access")
-    val docRequestAccess : Int = 0,
+    val docRequestAccess : Int,
     @field:GrchiveResource(Resources.ResourceDeployments) @ColumnName("deployment_access")
-    val deploymentAccess : Int = 0,
+    val deploymentAccess : Int,
     @field:GrchiveResource(Resources.ResourceServers) @ColumnName("server_access")
-    val serverAccess : Int = 0,
+    val serverAccess : Int,
     @field:GrchiveResource(Resources.ResourceVendors) @ColumnName("vendor_access")
-    val vendorAccess : Int = 0,
+    val vendorAccess : Int,
     @field:GrchiveResource(Resources.ResourceDbSql) @ColumnName("db_sql_access")
-    val dbSqlAccess: Int = 0,
+    val dbSqlAccess: Int,
     @field:GrchiveResource(Resources.ResourceDbSqlQuery) @ColumnName("db_sql_query_access")
-    val dbSqlQueryAccess : Int = 0,
+    val dbSqlQueryAccess : Int,
     @field:GrchiveResource(Resources.ResourceDbSqlRequest) @ColumnName("db_sql_requests_access")
-    val dbSqlRequestAccess : Int = 0
+    val dbSqlRequestAccess : Int
 )
+
+fun emptyRolePermissions() : RolePermissions {
+    return RolePermissions(
+        AccessType.None.bit /* orgUsersAccess */,
+        AccessType.None.bit /* orgRolesAccess */,
+        AccessType.None.bit /* processFlowsAccess */,
+        AccessType.None.bit /* controlsAccess */,
+        AccessType.None.bit /* controlDocumentationAccess */,
+        AccessType.None.bit /* controlDocMetadataAccess */,
+        AccessType.None.bit /* risksAccess*/,
+        AccessType.None.bit /* glAccess */,
+        AccessType.None.bit /* systemAccess */,
+        AccessType.None.bit /* dbAccess */,
+        AccessType.None.bit /* dbConnectionAccess */,
+        AccessType.None.bit /* docRequestAccess */,
+        AccessType.None.bit /* deploymentAccess */,
+        AccessType.None.bit /* serverAccess */,
+        AccessType.None.bit /* vendorAccess */,
+        AccessType.None.bit /* dbSqlAccess*/,
+        AccessType.None.bit /* dbSqlQueryAccess */,
+        AccessType.None.bit /* dbSqlRequestAccess */
+    )
+}
+
+fun fullRolePermissions() : RolePermissions {
+    return RolePermissions(
+        AccessType.All.bit /* orgUsersAccess */,
+        AccessType.All.bit /* orgRolesAccess */,
+        AccessType.All.bit /* processFlowsAccess */,
+        AccessType.All.bit /* controlsAccess */,
+        AccessType.All.bit /* controlDocumentationAccess */,
+        AccessType.All.bit /* controlDocMetadataAccess */,
+        AccessType.All.bit /* risksAccess*/,
+        AccessType.All.bit /* glAccess */,
+        AccessType.All.bit /* systemAccess */,
+        AccessType.All.bit /* dbAccess */,
+        AccessType.All.bit /* dbConnectionAccess */,
+        AccessType.All.bit /* docRequestAccess */,
+        AccessType.All.bit /* deploymentAccess */,
+        AccessType.All.bit /* serverAccess */,
+        AccessType.All.bit /* vendorAccess */,
+        AccessType.All.bit /* dbSqlAccess*/,
+        AccessType.All.bit /* dbSqlQueryAccess */,
+        AccessType.All.bit /* dbSqlRequestAccess */
+    )
+}
 
 /**
  * Returns the unioned access type for the given resource in the permission map.
@@ -115,5 +170,30 @@ fun getRolePermissionForResource(p : RolePermissions, r : Resources) : Int {
         Resources.ResourceDbSql -> p.dbSqlAccess
         Resources.ResourceDbSqlQuery -> p.dbSqlQueryAccess
         Resources.ResourceDbSqlRequest -> p.dbSqlRequestAccess
+    }
+}
+
+/**
+ * Utility function to check if a role has a certain type of access to a resource.
+ *
+ * @param p The [RolePermissions] object to check.
+ * @param r The [Resources] to check access for.
+ * @param a The type of desired [AccessType].
+ * @return True if the role has the requested access.
+ */
+fun roleHasAccess(p : RolePermissions, r : Resources, a : AccessType) : Boolean {
+    return (getRolePermissionForResource(p, r) and a.bit) != 0
+}
+
+/**
+ * Check if the role has access, if not, throw an exception of type [ResourcePermissionDeniedException].
+ *
+ * @param p The [RolePermissions] object to check.
+ * @param r The [Resources] to check access for.
+ * @param a The type of desired [AccessType].
+ */
+fun roleMustHaveAccess(p : RolePermissions, r : Resources, a : AccessType) {
+    if (!roleHasAccess(p, r, a)) {
+        throw ResourcePermissionDeniedException(r, a)
     }
 }

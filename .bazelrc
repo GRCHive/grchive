@@ -6,6 +6,15 @@ run --loading_phase_threads=1
 build --java_toolchain=@bazel_tools//tools/jdk:toolchain_java11
 build --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_java11
 
+test --java_toolchain=@bazel_tools//tools/jdk:toolchain_java11
+test --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_java11
+
+run --java_toolchain=@bazel_tools//tools/jdk:toolchain_java11
+run --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_java11
+
+build --javabase=@bazel_tools//tools/jdk:remote_jdk11
+build --host_javabase=@bazel_tools//tools/jdk:remote_jdk11
+
 test --javabase=@bazel_tools//tools/jdk:remote_jdk11
 test --host_javabase=@bazel_tools//tools/jdk:remote_jdk11
 

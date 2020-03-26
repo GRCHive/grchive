@@ -20,5 +20,5 @@ def generate_kotlin_test(
             "@maven//:org_testcontainers_testcontainers",
             "@maven//:org_testcontainers_postgresql",
             "//test/lib:test_core"
-        ]
+        ],
     )

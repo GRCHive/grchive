@@ -1,6 +1,7 @@
 package grchive.core.data.types.grchive
 
 import org.jdbi.v3.core.mapper.reflect.ColumnName
+import org.jdbi.v3.core.mapper.reflect.JdbiConstructor
 import org.jdbi.v3.core.mapper.Nested
 
 /**
@@ -14,7 +15,7 @@ import org.jdbi.v3.core.mapper.Nested
  * @property isAdmin If true, this is an admin role and should have all permissions.
  * @property orgId The organization this role belongs to.
  */
-data class Role (
+data class Role constructor(
     @ColumnName("id") val id : Long,
     @ColumnName("name") val name : String,
     @ColumnName("description") val description : String,

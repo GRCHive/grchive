@@ -1,6 +1,7 @@
 package grchive.core.data.types.grchive
 
 import java.time.OffsetDateTime
+import org.jdbi.v3.core.mapper.reflect.ColumnName
 
 /**
  * Contains basic information about a process flow.
@@ -13,10 +14,10 @@ import java.time.OffsetDateTime
  * @property lastUpdatedTime When the process flow metadata was last updated.
  */
 data class ProcessFlowMetadata (
-    val id : Long,
-    val name : String,
-    val orgId: Int,
-    val description : String,
-    val creationTime : OffsetDateTime,
-    val lastUpdatedTime : OffsetDateTime
+    @ColumnName("id") val id : Long,
+    @ColumnName("name") val name : String,
+    @ColumnName("org_id") val orgId: Int,
+    @ColumnName("description") val description : String,
+    @ColumnName("created_time") val creationTime : OffsetDateTime,
+    @ColumnName("last_updated_time") val lastUpdatedTime : OffsetDateTime
 )

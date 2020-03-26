@@ -22,4 +22,5 @@ fun setupGrchiveJdbi(jdbi : Jdbi) {
     jdbi.registerRowMapper(ConstructorMapper.factory(Role::class.java))
     jdbi.registerRowMapper(ConstructorMapper.factory(RolePermissions::class.java))
     jdbi.registerRowMapper(ConstructorMapper.factory(FullRole::class.java))
+    jdbi.registerRowMapper(ConstructorMapper.factory(ProcessFlowMetadata::class.java))
 }

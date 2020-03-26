@@ -415,6 +415,7 @@ maven_install(
         "org.testcontainers:postgresql:1.13.0",
         "org.postgresql:postgresql:42.2.11",
         "org.flywaydb:flyway-core:6.3.2",
+        "org.slf4j:slf4j-log4j12:1.7.30",
     ],
     repositories = [
         "https://repo1.maven.org/maven2",

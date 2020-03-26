@@ -8,5 +8,5 @@ import org.jdbi.v3.core.Jdbi
  * connected to using JDBC.
  */
 open class DatabaseDataSource (val ds : DataSource) : RawDataSource {
-    protected val jdbi : Jdbi = Jdbi.create(ds)
+    internal val jdbi : Jdbi = Jdbi.create(ds)
 }

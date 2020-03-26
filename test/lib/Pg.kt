@@ -22,11 +22,13 @@ open class KotestGrchivePgContainer(val initFn : (handle: Handle) -> Unit): Test
         pg.start()
 
         // Migrate the database to have the proper schema.
+        // Note: Don't try to use classpath location here since 
+        // it's broken when not using JDK 8.
         val flyway = Flyway.configure().dataSource(
             pg.getJdbcUrl(),
             pg.getUsername(),
             pg.getPassword())
-            .locations("classpath:devops/database/webserver/sql")
+            .locations("filesystem:devops/database/webserver/sql")
             .load()
         flyway.migrate()
 

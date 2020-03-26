@@ -5,7 +5,10 @@ kt_jvm_library(
     name = "test_core",
     srcs = glob(["**/*.kt"]),
     resources = [
-        "//devops/database/webserver:flyway-webserver"
+        "//test/lib/src/main/resources:log4j.properties",
+    ],
+    data = [
+        "//devops/database/webserver:flyway-webserver",
     ],
     deps = [
         "//src/core/kotlin:grchive_public_core",
@@ -19,5 +22,6 @@ kt_jvm_library(
         "@maven//:com_zaxxer_HikariCP",
         "@maven//:org_postgresql_postgresql",
         "@maven//:org_flywaydb_flyway_core",
+        "@maven//:org_slf4j_slf4j_log4j12",
     ],
 )

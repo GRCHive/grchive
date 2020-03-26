@@ -24,3 +24,15 @@ generate_kotlin_test(
         "//src/core/kotlin:grchive_public_core",
     ]
 )
+
+generate_kotlin_test(
+    name = "processflowmetadata_test",
+    srcs = ["ProcessFlowMetadataTest.kt"],
+    pkg = 'test.grchive.core.internal.database',
+    deps = [
+        "//src/core/kotlin:grchive_public_core",
+    ],
+    friends = [
+        "//src/core/kotlin:grchive_public_core",
+    ]
+)
