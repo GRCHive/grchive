@@ -45,4 +45,8 @@ class Config {
             result.getString("database.password")!!
         )
     }
+
+    internal constructor(db : DatabaseConfig) {
+        database = db
+    }
 }

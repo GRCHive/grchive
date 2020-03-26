@@ -1,0 +1,14 @@
+package(default_visibility = ["//visibility:public"])
+load("//test/core/kotlin:build.bzl", "generate_kotlin_test")
+
+generate_kotlin_test(
+    name = "grchivedatasource_test",
+    srcs = ["GrchiveDataSource.kt"],
+    pkg = 'test.grchive.core.data.sources',
+    deps = [
+        "//src/core/kotlin:grchive_public_core",
+    ],
+    friends = [
+        "//src/core/kotlin:grchive_public_core",
+    ]
+)

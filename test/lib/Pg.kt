@@ -15,7 +15,7 @@ class GPostgreSQLContainer : PostgreSQLContainer<GPostgreSQLContainer>("postgres
 
 open class KotestGrchivePgContainer(val initFn : (handle: Handle) -> Unit): TestListener {
     public var pg : GPostgreSQLContainer = GPostgreSQLContainer()
-    private var ds : HikariDataSource? = null
+    public var ds : HikariDataSource? = null
     private var jdbi : Jdbi? = null
 
     override suspend fun beforeSpec(spec : Spec) {

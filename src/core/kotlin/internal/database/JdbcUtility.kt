@@ -8,11 +8,12 @@ import org.jdbi.v3.postgres.PostgresPlugin
 import grchive.core.data.types.grchive.*
 import grchive.core.internal.DatabaseConfig
 
-internal fun createGrchiveHikariDataSource(cfg : DatabaseConfig) : HikariDataSource {
+internal fun createGrchiveHikariDataSource(cfg : DatabaseConfig, ro : Boolean) : HikariDataSource {
     val ds = HikariDataSource()
     ds.setJdbcUrl("jdbc:postgresql://${cfg.connection}") 
     ds.setUsername(cfg.username)
     ds.setPassword(cfg.password)
+    ds.setReadOnly(ro)
     return ds
 }
 
