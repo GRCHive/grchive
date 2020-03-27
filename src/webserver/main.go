@@ -75,8 +75,13 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	core.Debug("Core Init")
 	core.Init()
+
+	core.Debug("Database Init")
 	database.Init()
+
+	core.Debug("Database Init Listeners")
 	database.InitListeners(map[string]database.ListenHandler{
 		database.NotifyChannelControlOwner:       onNotifyControlOwnerChange,
 		database.NotifyChannelDocRequestAssignee: onNotifyDocRequestAssigneeChange,
@@ -84,20 +89,33 @@ func main() {
 		database.NotifyChannelSqlRequestAssignee: onNotifySqlRequestAssigneeChange,
 		database.NotifyChannelSqlRequestStatus:   onNotifySqlRequestApprovalChange,
 	})
+
+	core.Debug("Render Init")
 	render.RegisterTemplates()
+
+	core.Debug("Webcore Init")
 	webcore.InitializeWebcore()
+
+	core.Debug("Mail Init")
 	mail.InitializeMailAPI(core.EnvConfig.Mail.Provider, core.EnvConfig.Mail.Key)
+
+	core.Debug("Okta Init")
 	okta.InitializeOktaAPI(okta.OktaConfig{
 		ApiKey:    core.EnvConfig.Okta.ApiKey,
 		ApiDomain: core.EnvConfig.Okta.BaseUrl,
 	})
+
+	core.Debug("Vault Init")
 	vault.Initialize(vault.VaultConfig{
 		Url:      core.EnvConfig.Vault.Url,
 		Username: core.EnvConfig.Vault.Username,
 		Password: core.EnvConfig.Vault.Password,
 	}, core.EnvConfig.Tls.Config())
+
+	core.Debug("GCloud Init")
 	gcloud.DefaultGCloudApi.InitFromJson(core.EnvConfig.Gcloud.AuthFilename)
 
+	core.Debug("RabbitMQ Init")
 	webcore.DefaultRabbitMQ.Connect(
 		*core.EnvConfig.RabbitMQ,
 		webcore.QueueConfig{

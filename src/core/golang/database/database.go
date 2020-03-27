@@ -10,13 +10,15 @@ import (
 
 var dbConn *sqlx.DB
 
+func createJdbcUrl() string {
+	return fmt.Sprintf("postgres://%s:%s@%s",
+		core.EnvConfig.DatabaseUsername,
+		core.EnvConfig.DatabasePassword,
+		core.EnvConfig.DatabaseConnString)
+}
+
 func Init() {
-	dbConn = sqlx.MustConnect(
-		"postgres",
-		fmt.Sprintf("postgres://%s:%s@%s",
-			core.EnvConfig.DatabaseUsername,
-			core.EnvConfig.DatabasePassword,
-			core.EnvConfig.DatabaseConnString))
+	dbConn = sqlx.MustConnect("postgres", createJdbcUrl())
 	dbConn.SetMaxOpenConns(10)
 	dbConn.SetMaxIdleConns(5)
 	dbConn.SetConnMaxLifetime(5 * time.Minute)
@@ -44,7 +46,7 @@ func InitListeners(config map[string]ListenHandler) {
 	}
 
 	listener := pq.NewListener(
-		core.EnvConfig.DatabaseConnString,
+		createJdbcUrl(),
 		minDuration,
 		maxDuration,
 		nil)

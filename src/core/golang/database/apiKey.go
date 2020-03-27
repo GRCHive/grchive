@@ -57,8 +57,8 @@ func UpdateApiKey(key *core.ApiKey) error {
 		tx.Rollback()
 		return err
 	}
-	err = tx.Commit()
-	return err
+
+	return tx.Commit()
 }
 
 // This function will return an error if an error occurs BUT
