@@ -163,7 +163,7 @@ func findNodesHelper(role *core.Role, condition string, args ...interface{}) ([]
 		nodes = append(nodes, &newNode)
 
 		orgId := int32(dataMap["org_id"].(int64))
-		err = LogAuditSelectWithTx(orgId, core.ResourceFlowNode, strconv.FormatInt(newNode.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdFlowNode, strconv.FormatInt(newNode.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

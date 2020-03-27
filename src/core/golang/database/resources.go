@@ -27,20 +27,20 @@ func GetResourceName(typ string, id int64) (string, error) {
 	}
 
 	switch typ {
-	case core.ResourceUser:
+	case core.ResourceIdUser:
 		return fmt.Sprintf("%s %s (%s)",
 			data["first_name"].(string),
 			data["last_name"].(string),
 			data["email"].(string),
 		), nil
-	case core.ResourceControl:
+	case core.ResourceIdControl:
 		return fmt.Sprintf("%s (%s)",
 			data["name"].(string),
 			data["identifier"].(string),
 		), nil
-	case core.ResourceDocRequest:
+	case core.ResourceIdDocRequest:
 		return data["name"].(string), nil
-	case core.ResourceSqlQueryRequest:
+	case core.ResourceIdSqlQueryRequest:
 		return data["name"].(string), nil
 	}
 

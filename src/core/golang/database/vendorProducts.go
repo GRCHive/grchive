@@ -55,7 +55,7 @@ func AllVendorProductsForVendor(vendorId int64, orgId int32, role *core.Role) ([
 	}
 
 	for _, p := range products {
-		err = LogAuditSelectWithTx(orgId, core.ResourceVendorProduct, strconv.FormatInt(p.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdVendorProduct, strconv.FormatInt(p.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -78,7 +78,7 @@ func GetVendorProduct(productId int64, vendorId int64, orgId int32, role *core.R
 	if err != nil {
 		return nil, err
 	}
-	return &product, LogAuditSelect(orgId, core.ResourceVendorProduct, strconv.FormatInt(product.Id, 10), role)
+	return &product, LogAuditSelect(orgId, core.ResourceIdVendorProduct, strconv.FormatInt(product.Id, 10), role)
 }
 
 func UpdateVendorProduct(product *core.VendorProduct, role *core.Role) error {

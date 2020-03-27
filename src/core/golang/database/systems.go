@@ -60,7 +60,7 @@ func GetAllSystemsForOrg(orgId int32, role *core.Role) ([]*core.System, error) {
 	}
 
 	for _, s := range systems {
-		err = LogAuditSelectWithTx(orgId, core.ResourceSystem, strconv.FormatInt(s.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdSystem, strconv.FormatInt(s.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -97,7 +97,7 @@ func GetAllSystemsForOrgWithDeployment(orgId int32, deploymentType int32, role *
 	}
 
 	for _, s := range systems {
-		err = LogAuditSelectWithTx(orgId, core.ResourceSystem, strconv.FormatInt(s.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdSystem, strconv.FormatInt(s.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -124,7 +124,7 @@ func GetSystem(sysId int64, orgId int32, role *core.Role) (*core.System, error) 
 		return nil, err
 	}
 
-	return &sys, LogAuditSelect(orgId, core.ResourceSystem, strconv.FormatInt(sys.Id, 10), role)
+	return &sys, LogAuditSelect(orgId, core.ResourceIdSystem, strconv.FormatInt(sys.Id, 10), role)
 }
 
 func EditSystem(sys *core.System, role *core.Role) error {

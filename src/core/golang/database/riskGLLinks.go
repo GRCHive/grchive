@@ -34,7 +34,7 @@ func FindGeneralLedgerAccountsLinkedToRisk(riskId int64, orgId int32, role *core
 	}
 
 	for _, a := range accounts {
-		err = LogAuditSelectWithTx(orgId, core.ResourceGLAcc, strconv.FormatInt(a.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdGLAcc, strconv.FormatInt(a.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -75,7 +75,7 @@ func FindRisksLinkedToGeneralLedgerAccount(accountId int64, orgId int32, role *c
 	}
 
 	for _, r := range risks {
-		err = LogAuditSelectWithTx(orgId, core.ResourceRisk, strconv.FormatInt(r.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdRisk, strconv.FormatInt(r.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

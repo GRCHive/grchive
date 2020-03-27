@@ -51,6 +51,7 @@ func registerAPIPaths(r *mux.Router) {
 	registerVendorAPIPaths(s)
 	registerNotificationAPIPaths(s)
 	registerResourceAPIPaths(s)
+	registerAutomationAPIPaths(s)
 }
 
 func registerAuditTrailAPIPaths(r *mux.Router) {
@@ -464,4 +465,23 @@ func registerNotificationAPIPaths(r *mux.Router) {
 func registerResourceAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiResourcePrefix).Subrouter()
 	s.HandleFunc(core.ApiGetEndpoint, getResource).Methods("GET")
+}
+
+func registerAutomationAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.DashboardAutomationPrefix).Subrouter()
+	registerDataAPIPaths(s)
+}
+
+func registerDataAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.DashboardDataPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, newClientData).Methods("POST")
+	s.HandleFunc(core.ApiAllEndpoint, allClientData).Methods("GET")
+	s.HandleFunc(core.ApiDeleteEndpoint, deleteClientData).Methods("POST")
+
+	registerDataSourceAPIPaths(s)
+}
+
+func registerDataSourceAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.DashboardDataSourcePrefix).Subrouter()
+	s.HandleFunc(core.ApiAllEndpoint, allDataSourceOptions)
 }

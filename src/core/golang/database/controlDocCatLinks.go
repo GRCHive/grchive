@@ -35,7 +35,7 @@ func FindControlsLinkedToDocCat(catId int64, orgId int32, role *core.Role) ([]*c
 	}
 
 	for _, c := range controls {
-		err = LogAuditSelectWithTx(orgId, core.ResourceControl, strconv.FormatInt(c.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdControl, strconv.FormatInt(c.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

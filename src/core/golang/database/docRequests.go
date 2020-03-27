@@ -113,7 +113,7 @@ func GetDocumentRequest(requestId int64, orgId int32, role *core.Role) (*core.Do
 		return nil, err
 	}
 
-	return &req, LogAuditSelect(orgId, core.ResourceDocRequest, strconv.FormatInt(req.Id, 10), role)
+	return &req, LogAuditSelect(orgId, core.ResourceIdDocRequest, strconv.FormatInt(req.Id, 10), role)
 }
 
 func DeleteDocumentRequest(requestId int64, orgId int32, role *core.Role) error {
@@ -188,7 +188,7 @@ func GetAllDocumentRequestsForVendorProduct(productId int64, orgId int32, role *
 	}
 
 	for _, r := range requests {
-		err = LogAuditSelectWithTx(orgId, core.ResourceDocRequest, strconv.FormatInt(r.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdDocRequest, strconv.FormatInt(r.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -220,7 +220,7 @@ func GetAllDocumentRequestsForOrganization(orgId int32, role *core.Role) ([]*cor
 	}
 
 	for _, r := range requests {
-		err = LogAuditSelectWithTx(orgId, core.ResourceDocRequest, strconv.FormatInt(r.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdDocRequest, strconv.FormatInt(r.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

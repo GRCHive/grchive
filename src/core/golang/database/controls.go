@@ -45,7 +45,7 @@ func FindAllControlsForOrganization(org *core.Organization, filter core.ControlF
 	}
 
 	for _, c := range controls {
-		err = LogAuditSelectWithTx(c.OrgId, core.ResourceControl, strconv.FormatInt(c.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(c.OrgId, core.ResourceIdControl, strconv.FormatInt(c.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -274,7 +274,7 @@ func FindControl(controlId int64, role *core.Role) (*core.Control, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &control, LogAuditSelect(control.OrgId, core.ResourceControl, strconv.FormatInt(control.Id, 10), role)
+	return &control, LogAuditSelect(control.OrgId, core.ResourceIdControl, strconv.FormatInt(control.Id, 10), role)
 }
 
 func getTableNameForControlDocCatIO(isInput bool) string {

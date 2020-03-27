@@ -98,7 +98,7 @@ func GetAllVersionsFileStorage(fileId int64, orgId int32, role *core.Role) ([]*c
 	}
 
 	for _, r := range retData {
-		err = LogAuditSelectWithTx(orgId, core.ResourceFileStorage, strconv.FormatInt(r.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdFileStorage, strconv.FormatInt(r.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -128,7 +128,7 @@ func GetFileVersionStorageData(fileId int64, orgId int32, version int32, role *c
 		return nil, err
 	}
 
-	return &data, LogAuditSelect(orgId, core.ResourceFileStorage, strconv.FormatInt(data.Id, 10), role)
+	return &data, LogAuditSelect(orgId, core.ResourceIdFileStorage, strconv.FormatInt(data.Id, 10), role)
 }
 
 func GetPreviewFileVersionStorageDataFromStorageData(storage *core.FileStorageData, role *core.Role) (*core.FileStorageData, error) {
@@ -159,7 +159,7 @@ func GetPreviewFileVersionStorageDataFromStorageData(storage *core.FileStorageDa
 	if err != nil {
 		return nil, err
 	}
-	return &data, LogAuditSelect(storage.OrgId, core.ResourceFileStorage, strconv.FormatInt(data.Id, 10), role)
+	return &data, LogAuditSelect(storage.OrgId, core.ResourceIdFileStorage, strconv.FormatInt(data.Id, 10), role)
 }
 
 func GetPreviewFileVersionStorageData(fileId int64, orgId int32, version int32, role *core.Role) (*core.FileStorageData, error) {
@@ -194,5 +194,5 @@ func GetPreviewFileVersionStorageData(fileId int64, orgId int32, version int32, 
 	if err != nil {
 		return nil, err
 	}
-	return &data, LogAuditSelect(orgId, core.ResourceFileStorage, strconv.FormatInt(data.Id, 10), role)
+	return &data, LogAuditSelect(orgId, core.ResourceIdFileStorage, strconv.FormatInt(data.Id, 10), role)
 }

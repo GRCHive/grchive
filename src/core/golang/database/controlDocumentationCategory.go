@@ -130,7 +130,7 @@ func GetAllDocumentationCategoriesForOrg(orgId int32, role *core.Role) ([]*core.
 	}
 
 	for _, c := range cats {
-		err = LogAuditSelectWithTx(orgId, core.ResourceDocCat, strconv.FormatInt(c.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdDocCat, strconv.FormatInt(c.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -155,5 +155,5 @@ func GetDocumentationCategory(catId int64, orgId int32, role *core.Role) (*core.
 	if err != nil {
 		return nil, err
 	}
-	return cat, LogAuditSelect(orgId, core.ResourceDocCat, strconv.FormatInt(cat.Id, 10), role)
+	return cat, LogAuditSelect(orgId, core.ResourceIdDocCat, strconv.FormatInt(cat.Id, 10), role)
 }

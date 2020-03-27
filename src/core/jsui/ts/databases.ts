@@ -1,4 +1,5 @@
 import MetadataStore from './metadata'
+import { NumericFilterData, NullNumericFilterData } from './filters'
 
 export interface DatabaseType {
     Id: number
@@ -40,4 +41,11 @@ export function getDbTypeAsString(db : Database) : string {
     } else {
         return typ.Name
     }
+}
+
+export interface DatabaseFilterData {
+    Type: NumericFilterData
+}
+export let NullDatabaseFilterData : DatabaseFilterData = {
+    Type: JSON.parse(JSON.stringify(NullNumericFilterData))
 }

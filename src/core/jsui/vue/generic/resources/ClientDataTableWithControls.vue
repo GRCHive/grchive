@@ -3,7 +3,7 @@
         <v-list-item class="pa-0">
             <v-list-item-content class="disable-flex mr-4">
                 <v-list-item-title class="title">
-                    Databases
+                    Data Objects
                 </v-list-item-title>
             </v-list-item-content>
             <v-list-item-action>
@@ -26,24 +26,28 @@
                             New
                         </v-btn>
                     </template>
-                    <create-new-database-form
+
+                    <create-new-client-data-form
                         @do-cancel="showHideNew = false"
-                        @do-save="onSaveDatabase">
-                    </create-new-database-form>
+                        @do-save="onNewClientData"
+                    >
+                    </create-new-client-data-form>
                 </v-dialog>
             </v-list-item-action>
         </v-list-item>
         <v-divider></v-divider>
-        <db-table
-            :resources="filteredDbs"
+
+        <client-data-table
+            :value="value"
+            :resources="filteredData"
             :search="filterText"
             :use-crud-delete="!disableDelete"
             :confirm-delete="!disableDelete"
-            @delete="deleteDb"
+            @delete="deleteData"
             @input="modifySelected"
             :selectable="enableSelect"
             :multi="enableSelect"
-        ></db-table>
+        ></client-data-table>
     </div>
 </template>
 
@@ -51,13 +55,16 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import DbTable from '../DbTable.vue'
-import { Database, NullDatabaseFilterData } from '../../../ts/databases'
-import { TAllDatabaseOutputs, allDatabase } from '../../../ts/api/apiDatabases'
-import { PageParamsStore } from '../../../ts/pageParams'
+import ClientDataTable from '../ClientDataTable.vue'
+import { FullClientDataWithLink } from '../../../ts/clientData'
+import { 
+    allClientData, TAllClientDataOutput,
+    newClientData, TNewClientDataOutput,
+    deleteClientData
+} from '../../../ts/api/apiClientData'
 import { contactUsUrl } from '../../../ts/url'
-import CreateNewDatabaseForm from '../../components/dashboard/CreateNewDatabaseForm.vue'
-import { deleteDatabase } from '../../../ts/api/apiDatabases'
+import { PageParamsStore } from '../../../ts/pageParams'
+import CreateNewClientDataForm from '../../components/dashboard/CreateNewClientDataForm.vue'
 
 const Props = Vue.extend({
     props: {
@@ -86,62 +93,28 @@ const Props = Vue.extend({
 
 @Component({
     components: {
-        DbTable,
-        CreateNewDatabaseForm
+        ClientDataTable,
+        CreateNewClientDataForm
     }
 })
-export default class DbTableWithControls extends Props {
-    allDbs : Database[] = []
+export default class ClientDataTableWithControls extends Props {
     showHideNew: boolean = false
     filterText : string = ""
+    data : FullClientDataWithLink[] = []
 
     get excludeSet() : Set<number> {
-        return new Set<number>(this.exclude.map((ele : any) => ele.Id))
+        return new Set<number>(this.exclude.map((ele : any) => ele.Data.Id))
     }
 
-    get filteredDbs() : Database[] {
-        return this.allDbs.filter((ele : Database) => !this.excludeSet.has(ele.Id))
+    get filteredData() : FullClientDataWithLink[] {
+        return this.data.filter((ele : FullClientDataWithLink) => !this.excludeSet.has(ele.Data.Id))
     }
 
-    refreshDatabases() {
-        allDatabase({
+    refreshData() {
+        allClientData({
             orgId: PageParamsStore.state.organization!.Id,
-            filter: NullDatabaseFilterData,
-        }).then((resp : TAllDatabaseOutputs) => {
-            this.allDbs = resp.data
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops. Something went wrong. Try again.",
-                false,
-                "",
-                contactUsUrl,
-                true);
-        })
-    }
-
-    mounted() {
-        this.refreshDatabases()
-    }
-
-    onSaveDatabase(db : Database) {
-        this.showHideNew = false
-        this.allDbs.unshift(db)
-    }
-
-    modifySelected(vals : Database[]) {
-        this.$emit('input', vals)
-    }
-
-    deleteDb(db : Database) {
-        deleteDatabase({
-            dbId: db.Id,
-            orgId: PageParamsStore.state.organization!.Id
-        }).then(() => {
-            this.allDbs.splice(
-                this.allDbs.findIndex((ele : Database) =>
-                    ele.Id == db.Id),
-                1)
+        }).then((resp : TAllClientDataOutput) => {
+            this.data = resp.data
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
@@ -151,6 +124,42 @@ export default class DbTableWithControls extends Props {
                 contactUsUrl,
                 true);
         })
+    }
+
+    onNewClientData(data : FullClientDataWithLink) {
+        this.showHideNew = false
+        this.data.unshift(data)
+    }
+
+    mounted() {
+        this.refreshData()
+    }
+
+    deleteData(data : FullClientDataWithLink) {
+        deleteClientData({
+            orgId: PageParamsStore.state.organization!.Id,
+            dataId: data.Data.Id,
+        }).then(() => {
+            let idx = this.data.findIndex((ele : FullClientDataWithLink) => {
+                return ele.Data.Id == data.Data.Id
+            })
+            if (idx == -1) {
+                return
+            }
+            this.data.splice(idx, 1)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    modifySelected(vals : FullClientDataWithLink[]) {
+        this.$emit('input', vals)
     }
 }
 

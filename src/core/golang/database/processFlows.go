@@ -42,7 +42,7 @@ func FindProcessFlowWithId(id int64, role *core.Role) (*core.ProcessFlow, error)
 		return nil, err
 	}
 
-	return flow, LogAuditSelect(flow.Org.Id, core.ResourceProcessFlow, strconv.FormatInt(flow.Id, 10), role)
+	return flow, LogAuditSelect(flow.Org.Id, core.ResourceIdProcessFlow, strconv.FormatInt(flow.Id, 10), role)
 }
 
 func UpdateProcessFlow(flow *core.ProcessFlow, role *core.Role) error {
@@ -129,7 +129,7 @@ func FindOrganizationProcessFlows(org *core.Organization, role *core.Role) ([]*c
 	}
 
 	for _, p := range result {
-		err = LogAuditSelectWithTx(org.Id, core.ResourceProcessFlow, strconv.FormatInt(p.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(org.Id, core.ResourceIdProcessFlow, strconv.FormatInt(p.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

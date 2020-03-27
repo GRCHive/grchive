@@ -95,6 +95,11 @@ var DashboardSingleSystemEndpoint string = fmt.Sprintf("%s/{%s}", DashboardSyste
 var DashboardSingleDbEndpoint string = fmt.Sprintf("%s/{%s}", DashboardDbSystemsEndpoint, DashboardOrgDbQueryId)
 var DashboardSingleServerEndpoint string = fmt.Sprintf("%s/{%s}", DashboardServersEndpoint, DashboardOrgServerQueryId)
 
+// Dashboard - Automation
+const DashboardAutomationPrefix string = "/auto"
+const DashboardDataPrefix string = "/data"
+const DashboardDataSourcePrefix string = "/source"
+
 // Generic API Actions
 const ApiNewEndpoint = "/new"
 const ApiAllEndpoint = "/all"

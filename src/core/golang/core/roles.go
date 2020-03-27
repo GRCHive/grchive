@@ -37,6 +37,7 @@ const (
 	ResourceDbSql
 	ResourceDbSqlQuery
 	ResourceDbSqlRequest
+	ResourceClientData
 )
 
 var AvailableResources []ResourceType = []ResourceType{
@@ -58,6 +59,7 @@ var AvailableResources []ResourceType = []ResourceType{
 	ResourceDbSql,
 	ResourceDbSqlQuery,
 	ResourceDbSqlRequest,
+	ResourceClientData,
 }
 
 type PermissionsMap struct {
@@ -79,6 +81,7 @@ type PermissionsMap struct {
 	DbSqlAccess                AccessType `db:"db_sql_access"`
 	DbSqlQueryAccess           AccessType `db:"db_sql_query_access"`
 	DbSqlRequestAccess         AccessType `db:"db_sql_requests_access"`
+	ClientDataAccess           AccessType `db:"client_data_access"`
 }
 
 type RoleMetadata struct {
@@ -120,6 +123,7 @@ func CreateViewOnlyAccessPermission() PermissionsMap {
 		DbSqlAccess:                AccessView,
 		DbSqlQueryAccess:           AccessView,
 		DbSqlRequestAccess:         AccessView,
+		ClientDataAccess:           AccessView,
 	}
 }
 
@@ -143,6 +147,7 @@ func CreateAllAccessPermission() PermissionsMap {
 		DbSqlAccess:                CreateOwnerAccessType(),
 		DbSqlQueryAccess:           CreateOwnerAccessType(),
 		DbSqlRequestAccess:         CreateOwnerAccessType(),
+		ClientDataAccess:           CreateOwnerAccessType(),
 	}
 }
 
@@ -214,6 +219,8 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 		return p.DbSqlQueryAccess
 	case ResourceDbSqlRequest:
 		return p.DbSqlRequestAccess
+	case ResourceClientData:
+		return p.ClientDataAccess
 	}
 	return AccessNone
 }
@@ -222,56 +229,42 @@ func (p *PermissionsMap) SetAccessType(resource ResourceType, access AccessType)
 	switch resource {
 	case ResourceOrgUsers:
 		p.OrgUsersAccess = access
-		break
 	case ResourceOrgRoles:
 		p.OrgRolesAccess = access
-		break
 	case ResourceProcessFlows:
 		p.ProcessFlowsAccess = access
-		break
 	case ResourceControls:
 		p.ControlsAccess = access
-		break
 	case ResourceControlDocumentation:
 		p.ControlDocumentationAccess = access
-		break
 	case ResourceControlDocumentationMetadata:
 		p.ControlDocMetadataAccess = access
-		break
 	case ResourceRisks:
 		p.RisksAccess = access
-		break
 	case ResourceGeneralLedger:
 		p.GLAccess = access
-		break
 	case ResourceSystems:
 		p.SystemAccess = access
-		break
 	case ResourceDatabases:
 		p.DbAccess = access
-		break
 	case ResourceDbConnections:
 		p.DbConnectionAccess = access
-		break
 	case ResourceDocRequests:
 		p.DocRequestAccess = access
-		break
 	case ResourceDeployments:
 		p.DeploymentAccess = access
-		break
 	case ResourceServers:
 		p.ServerAccess = access
-		break
 	case ResourceVendors:
 		p.VendorAccess = access
-		break
 	case ResourceDbSql:
 		p.DbSqlAccess = access
-		break
 	case ResourceDbSqlQuery:
 		p.DbSqlQueryAccess = access
 	case ResourceDbSqlRequest:
 		p.DbSqlRequestAccess = access
+	case ResourceClientData:
+		p.ClientDataAccess = access
 	}
 }
 

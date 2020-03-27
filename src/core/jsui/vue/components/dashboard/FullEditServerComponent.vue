@@ -208,7 +208,7 @@ import { deleteServer } from '../../../ts/api/apiServers'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl, createOrgServersUrl } from '../../../ts/url'
 import { System } from '../../../ts/systems'
-import { Database } from '../../../ts/databases'
+import { Database, NullDatabaseFilterData } from '../../../ts/databases'
 import SystemsTable from '../../generic/SystemsTable.vue'
 import SystemTableWithControls from '../../generic/resources/SystemTableWithControls.vue'
 import DbTable from '../../generic/DbTable.vue'
@@ -338,6 +338,7 @@ export default class FullEditServerComponent extends Vue {
             allDatabase({
                 orgId: PageParamsStore.state.organization!.Id,
                 deploymentType: KSelfHosted,
+                filter: NullDatabaseFilterData,
             }).then((resp : TAllDatabaseOutputs) => {
                 this.allDatabases = resp.data
                 if (!!this.allDatabases) {

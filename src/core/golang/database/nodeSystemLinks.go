@@ -68,7 +68,7 @@ func AllSystemsLinkedToNode(nodeId int64, orgId int32, role *core.Role) ([]*core
 	}
 
 	for _, s := range systems {
-		err = LogAuditSelectWithTx(orgId, core.ResourceSystem, strconv.FormatInt(s.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdSystem, strconv.FormatInt(s.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -116,7 +116,7 @@ func AllFlowsRelatedToSystem(systemId int64, orgId int32, role *core.Role) ([]*c
 	}
 
 	for _, f := range flows {
-		err = LogAuditSelectWithTx(orgId, core.ResourceProcessFlow, strconv.FormatInt(f.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdProcessFlow, strconv.FormatInt(f.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

@@ -23,7 +23,7 @@ func CreateNotificationFromEvent(event *core.Event) (*core.Notification, error) 
 	notification := core.Notification{
 		OrgId:              orgId,
 		Time:               event.Timestamp,
-		SubjectType:        core.ResourceUser,
+		SubjectType:        core.ResourceIdUser,
 		SubjectId:          event.Subject.Id,
 		Verb:               string(event.Verb),
 		ObjectType:         objectType,

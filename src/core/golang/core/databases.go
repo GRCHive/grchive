@@ -124,3 +124,11 @@ type DbSqlQueryRunCode struct {
 	HashedCode     string    `db:"hashed_code"`
 	Salt           string    `db:"salt"`
 }
+
+type DatabaseFilterData struct {
+	Type NumericFilterData
+}
+
+var NullDatabaseFilterData DatabaseFilterData = DatabaseFilterData{
+	Type: NullNumericFilterData,
+}

@@ -164,7 +164,7 @@ func findAllRisksFromDbHelper(role *core.Role, stmt *sqlx.Stmt, args ...interfac
 	}
 
 	for _, r := range risks {
-		err = LogAuditSelectWithTx(r.OrgId, core.ResourceRisk, strconv.FormatInt(r.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(r.OrgId, core.ResourceIdRisk, strconv.FormatInt(r.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -239,5 +239,5 @@ func FindRisk(riskId int64, role *core.Role) (*core.Risk, error) {
 		return nil, err
 	}
 
-	return &risk, LogAuditSelect(risk.OrgId, core.ResourceRisk, strconv.FormatInt(risk.Id, 10), role)
+	return &risk, LogAuditSelect(risk.OrgId, core.ResourceIdRisk, strconv.FormatInt(risk.Id, 10), role)
 }

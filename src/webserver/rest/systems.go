@@ -169,7 +169,7 @@ func getSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	allDb, err := database.GetAllDatabasesForOrg(org.Id, role)
+	allDb, err := database.GetAllDatabasesForOrg(org.Id, core.NullDatabaseFilterData, role)
 	if err != nil {
 		core.Warning("Failed to get all databases: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

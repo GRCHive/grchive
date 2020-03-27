@@ -23,7 +23,7 @@ func GetOrgGLCategories(orgId int32, role *core.Role) ([]*core.GeneralLedgerCate
 	}
 
 	for _, c := range cats {
-		err = LogAuditSelectWithTx(orgId, core.ResourceGLCat, strconv.FormatInt(c.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdGLCat, strconv.FormatInt(c.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -51,7 +51,7 @@ func GetOrgGLAccounts(orgId int32, role *core.Role) ([]*core.GeneralLedgerAccoun
 	}
 
 	for _, a := range accs {
-		err = LogAuditSelectWithTx(orgId, core.ResourceGLAcc, strconv.FormatInt(a.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdGLAcc, strconv.FormatInt(a.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -194,7 +194,7 @@ func GetGLAccountFromDbId(accId int64, orgId int32, role *core.Role) (*core.Gene
 		return nil, err
 	}
 
-	return &acc, LogAuditSelect(orgId, core.ResourceGLAcc, strconv.FormatInt(acc.Id, 10), role)
+	return &acc, LogAuditSelect(orgId, core.ResourceIdGLAcc, strconv.FormatInt(acc.Id, 10), role)
 }
 
 func FindGLAccountParentCategories(acc *core.GeneralLedgerAccount, role *core.Role) ([]*core.GeneralLedgerCategory, error) {
@@ -228,7 +228,7 @@ func FindGLAccountParentCategories(acc *core.GeneralLedgerAccount, role *core.Ro
 	}
 
 	for _, c := range parents {
-		err = LogAuditSelectWithTx(acc.OrgId, core.ResourceGLCat, strconv.FormatInt(c.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(acc.OrgId, core.ResourceIdGLCat, strconv.FormatInt(c.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

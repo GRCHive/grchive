@@ -8,28 +8,29 @@ type ResourceHandle struct {
 }
 
 const (
-	ResourceDatabase         string = "database_resources"
-	ResourceDatabaseConn     string = "database_connection_info"
-	ResourceSqlQueryMetadata string = "database_sql_metadata"
-	ResourceSqlQuery         string = "database_sql_queries"
-	ResourceSqlQueryRequest  string = "database_sql_query_requests"
-	ResourceDocMetadata      string = "file_metadata"
-	ResourceVendor           string = "vendors"
-	ResourceVendorProduct    string = "vendor_products"
-	ResourceProcessFlow      string = "process_flows"
-	ResourceFlowNode         string = "process_flow_nodes"
-	ResourceFlowNodeInput    string = "process_flow_node_inputs"
-	ResourceFlowNodeOutput   string = "process_flow_node_outputs"
-	ResourceFileStorage      string = "file_storage"
-	ResourceGLCat            string = "general_ledger_categories"
-	ResourceGLAcc            string = "general_ledger_accounts"
-	ResourceServer           string = "infrastructure_servers"
-	ResourceSystem           string = "systems"
-	ResourceDocRequest       string = "document_requests"
-	ResourceDocCat           string = "process_flow_control_documentation_categories"
-	ResourceRisk             string = "process_flow_risks"
-	ResourceControl          string = "process_flow_controls"
-	ResourceUser             string = "users"
+	ResourceIdDatabase         string = "database_resources"
+	ResourceIdDatabaseConn     string = "database_connection_info"
+	ResourceIdSqlQueryMetadata string = "database_sql_metadata"
+	ResourceIdSqlQuery         string = "database_sql_queries"
+	ResourceIdSqlQueryRequest  string = "database_sql_query_requests"
+	ResourceIdDocMetadata      string = "file_metadata"
+	ResourceIdVendor           string = "vendors"
+	ResourceIdVendorProduct    string = "vendor_products"
+	ResourceIdProcessFlow      string = "process_flows"
+	ResourceIdFlowNode         string = "process_flow_nodes"
+	ResourceIdFlowNodeInput    string = "process_flow_node_inputs"
+	ResourceIdFlowNodeOutput   string = "process_flow_node_outputs"
+	ResourceIdFileStorage      string = "file_storage"
+	ResourceIdGLCat            string = "general_ledger_categories"
+	ResourceIdGLAcc            string = "general_ledger_accounts"
+	ResourceIdServer           string = "infrastructure_servers"
+	ResourceIdSystem           string = "systems"
+	ResourceIdDocRequest       string = "document_requests"
+	ResourceIdDocCat           string = "process_flow_control_documentation_categories"
+	ResourceIdRisk             string = "process_flow_risks"
+	ResourceIdControl          string = "process_flow_controls"
+	ResourceIdUser             string = "users"
+	ResourceIdClientData       string = "client_data"
 )
 
 func GetResourceTypeId(in interface{}) (string, int64, error) {
@@ -39,45 +40,47 @@ func GetResourceTypeId(in interface{}) (string, int64, error) {
 
 	switch v := in.(type) {
 	case Database:
-		return ResourceDatabase, v.Id, nil
+		return ResourceIdDatabase, v.Id, nil
 	case DatabaseConnection:
-		return ResourceDatabaseConn, v.Id, nil
+		return ResourceIdDatabaseConn, v.Id, nil
 	case DbSqlQueryMetadata:
-		return ResourceSqlQueryMetadata, v.Id, nil
+		return ResourceIdSqlQueryMetadata, v.Id, nil
 	case DbSqlQuery:
-		return ResourceSqlQuery, v.Id, nil
+		return ResourceIdSqlQuery, v.Id, nil
 	case DbSqlQueryRequest:
-		return ResourceSqlQueryRequest, v.Id, nil
+		return ResourceIdSqlQueryRequest, v.Id, nil
 	case ControlDocumentationFile:
-		return ResourceDocMetadata, v.Id, nil
+		return ResourceIdDocMetadata, v.Id, nil
 	case Vendor:
-		return ResourceVendor, v.Id, nil
+		return ResourceIdVendor, v.Id, nil
 	case VendorProduct:
-		return ResourceVendorProduct, v.Id, nil
+		return ResourceIdVendorProduct, v.Id, nil
 	case ProcessFlow:
-		return ResourceProcessFlow, v.Id, nil
+		return ResourceIdProcessFlow, v.Id, nil
 	case ProcessFlowNode:
-		return ResourceFlowNode, v.Id, nil
+		return ResourceIdFlowNode, v.Id, nil
 	case FileStorageData:
-		return ResourceFileStorage, v.Id, nil
+		return ResourceIdFileStorage, v.Id, nil
 	case GeneralLedgerCategory:
-		return ResourceGLCat, v.Id, nil
+		return ResourceIdGLCat, v.Id, nil
 	case GeneralLedgerAccount:
-		return ResourceGLAcc, v.Id, nil
+		return ResourceIdGLAcc, v.Id, nil
 	case Server:
-		return ResourceServer, v.Id, nil
+		return ResourceIdServer, v.Id, nil
 	case System:
-		return ResourceSystem, v.Id, nil
+		return ResourceIdSystem, v.Id, nil
 	case DocumentRequest:
-		return ResourceDocRequest, v.Id, nil
+		return ResourceIdDocRequest, v.Id, nil
 	case ControlDocumentationCategory:
-		return ResourceDocCat, v.Id, nil
+		return ResourceIdDocCat, v.Id, nil
 	case Risk:
-		return ResourceRisk, v.Id, nil
+		return ResourceIdRisk, v.Id, nil
 	case Control:
-		return ResourceControl, v.Id, nil
+		return ResourceIdControl, v.Id, nil
 	case User:
-		return ResourceUser, v.Id, nil
+		return ResourceIdUser, v.Id, nil
+	case ClientData:
+		return ResourceIdClientData, v.Id, nil
 	}
 
 	return "", 0, errors.New("Unsupported resource (GetResourceTypeId).")

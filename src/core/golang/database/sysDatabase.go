@@ -2,6 +2,7 @@ package database
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/jmoiron/sqlx/types"
 	"gitlab.com/grchive/grchive/core"
 	"strconv"
@@ -53,17 +54,20 @@ func InsertNewDatabase(db *core.Database, role *core.Role) error {
 	return tx.Commit()
 }
 
-func GetAllDatabasesForOrg(orgId int32, role *core.Role) ([]*core.Database, error) {
+func GetAllDatabasesForOrg(orgId int32, filter core.DatabaseFilterData, role *core.Role) ([]*core.Database, error) {
 	if !role.Permissions.HasAccess(core.ResourceDatabases, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
 
 	dbs := make([]*core.Database, 0)
-	err := dbConn.Select(&dbs, `
+	err := dbConn.Select(&dbs, fmt.Sprintf(`
 		SELECT *
 		FROM database_resources
-		WHERE org_id = $1
-	`, orgId)
+		WHERE org_id = $1 AND
+			%s
+	`,
+		buildNumericFilter("type_id", filter.Type),
+	), orgId)
 
 	if err != nil {
 		return nil, err
@@ -75,7 +79,7 @@ func GetAllDatabasesForOrg(orgId int32, role *core.Role) ([]*core.Database, erro
 	}
 
 	for _, d := range dbs {
-		err = LogAuditSelectWithTx(orgId, core.ResourceDatabase, strconv.FormatInt(d.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdDatabase, strconv.FormatInt(d.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -85,13 +89,13 @@ func GetAllDatabasesForOrg(orgId int32, role *core.Role) ([]*core.Database, erro
 	return dbs, tx.Commit()
 }
 
-func GetAllDatabasesForOrgWithDeployment(orgId int32, deploymentType int32, role *core.Role) ([]*core.Database, error) {
+func GetAllDatabasesForOrgWithDeployment(orgId int32, deploymentType int32, filter core.DatabaseFilterData, role *core.Role) ([]*core.Database, error) {
 	if !role.Permissions.HasAccess(core.ResourceDatabases, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
 
 	dbs := make([]*core.Database, 0)
-	err := dbConn.Select(&dbs, `
+	err := dbConn.Select(&dbs, fmt.Sprintf(`
 		SELECT db.*
 		FROM database_resources AS db
 		INNER JOIN deployment_db_link AS link
@@ -100,7 +104,10 @@ func GetAllDatabasesForOrgWithDeployment(orgId int32, deploymentType int32, role
 			ON dp.id = link.deployment_id
 		WHERE db.org_id = $1
 			AND dp.deployment_type = $2
-	`, orgId, deploymentType)
+			%s
+	`,
+		buildNumericFilter("db.type_id", filter.Type),
+	), orgId, deploymentType)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +118,7 @@ func GetAllDatabasesForOrgWithDeployment(orgId int32, deploymentType int32, role
 	}
 
 	for _, d := range dbs {
-		err = LogAuditSelectWithTx(orgId, core.ResourceDatabase, strconv.FormatInt(d.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdDatabase, strconv.FormatInt(d.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -137,7 +144,7 @@ func GetDb(dbId int64, orgId int32, role *core.Role) (*core.Database, error) {
 		return nil, err
 	}
 
-	return &db, LogAuditSelect(orgId, core.ResourceDatabase, strconv.FormatInt(db.Id, 10), role)
+	return &db, LogAuditSelect(orgId, core.ResourceIdDatabase, strconv.FormatInt(db.Id, 10), role)
 }
 
 func GetDbType(dbId int64, orgId int32, role *core.Role) (*core.DatabaseType, error) {
@@ -313,7 +320,7 @@ func FindDatabaseConnectionForDatabase(dbId int64, orgId int32, role *core.Role)
 		return nil, err
 	}
 
-	return &conn, LogAuditSelect(orgId, core.ResourceDatabaseConn, strconv.FormatInt(conn.Id, 10), role)
+	return &conn, LogAuditSelect(orgId, core.ResourceIdDatabaseConn, strconv.FormatInt(conn.Id, 10), role)
 }
 
 func DeleteDatabaseConnection(connId int64, dbId int64, orgId int32, role *core.Role) error {

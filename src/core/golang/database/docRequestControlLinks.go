@@ -46,7 +46,7 @@ func FindControlLinkedToDocRequest(requestId int64, orgId int32, role *core.Role
 	if err != nil {
 		return nil, err
 	}
-	return &control, LogAuditSelect(orgId, core.ResourceControl, strconv.FormatInt(control.Id, 10), role)
+	return &control, LogAuditSelect(orgId, core.ResourceIdControl, strconv.FormatInt(control.Id, 10), role)
 }
 
 func FindDocRequestsLinkedToControl(controlId int64, orgId int32, role *core.Role) ([]*core.DocumentRequest, error) {
@@ -73,7 +73,7 @@ func FindDocRequestsLinkedToControl(controlId int64, orgId int32, role *core.Rol
 	}
 
 	for _, r := range requests {
-		err = LogAuditSelectWithTx(orgId, core.ResourceDocRequest, strconv.FormatInt(r.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdDocRequest, strconv.FormatInt(r.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

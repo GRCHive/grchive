@@ -58,7 +58,7 @@ func FindFlowsRelatedToRisk(riskId int64, role *core.Role) ([]*core.ProcessFlow,
 	}
 
 	for _, f := range flows {
-		err = LogAuditSelectWithTx(f.Org.Id, core.ResourceProcessFlow, strconv.FormatInt(f.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(f.Org.Id, core.ResourceIdProcessFlow, strconv.FormatInt(f.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -104,7 +104,7 @@ func FindFlowsRelatedToControl(controlId int64, role *core.Role) ([]*core.Proces
 	}
 
 	for _, f := range flows {
-		err = LogAuditSelectWithTx(f.Org.Id, core.ResourceProcessFlow, strconv.FormatInt(f.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(f.Org.Id, core.ResourceIdProcessFlow, strconv.FormatInt(f.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -172,7 +172,7 @@ func FindControlsRelatedToRisk(riskId int64, role *core.Role) ([]*core.Control, 
 	}
 
 	for _, c := range controls {
-		err = LogAuditSelectWithTx(c.OrgId, core.ResourceControl, strconv.FormatInt(c.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(c.OrgId, core.ResourceIdControl, strconv.FormatInt(c.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -205,7 +205,7 @@ func FindRisksRelatedToControl(controlId int64, role *core.Role) ([]*core.Risk, 
 	}
 
 	for _, r := range risks {
-		err = LogAuditSelectWithTx(r.OrgId, core.ResourceRisk, strconv.FormatInt(r.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(r.OrgId, core.ResourceIdRisk, strconv.FormatInt(r.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

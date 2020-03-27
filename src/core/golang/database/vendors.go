@@ -60,7 +60,7 @@ func AllVendorsForOrganization(orgId int32, role *core.Role) ([]*core.Vendor, er
 	}
 
 	for _, v := range vendors {
-		err = LogAuditSelectWithTx(orgId, core.ResourceVendor, strconv.FormatInt(v.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdVendor, strconv.FormatInt(v.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -88,7 +88,7 @@ func GetVendorFromId(vendorId int64, orgId int32, role *core.Role) (*core.Vendor
 		return nil, err
 	}
 
-	return &vendor, LogAuditSelect(orgId, core.ResourceVendor, strconv.FormatInt(vendor.Id, 10), role)
+	return &vendor, LogAuditSelect(orgId, core.ResourceIdVendor, strconv.FormatInt(vendor.Id, 10), role)
 }
 
 func DeleteVendor(vendorId int64, orgId int32, role *core.Role) error {

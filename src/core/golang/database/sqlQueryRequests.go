@@ -163,7 +163,7 @@ func GetAllSqlRequestsForDb(dbId int64, orgId int32, role *core.Role) ([]*core.D
 	}
 
 	for _, d := range data {
-		err = LogAuditSelectWithTx(orgId, core.ResourceSqlQueryRequest, strconv.FormatInt(d.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdSqlQueryRequest, strconv.FormatInt(d.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -196,7 +196,7 @@ func GetAllSqlRequestsForOrg(orgId int32, role *core.Role) ([]*core.DbSqlQueryRe
 	}
 
 	for _, d := range data {
-		err = LogAuditSelectWithTx(orgId, core.ResourceSqlQueryRequest, strconv.FormatInt(d.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdSqlQueryRequest, strconv.FormatInt(d.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -222,7 +222,7 @@ func GetSqlRequest(requestId int64, orgId int32, role *core.Role) (*core.DbSqlQu
 		return nil, err
 	}
 
-	return &req, LogAuditSelect(orgId, core.ResourceSqlQueryRequest, strconv.FormatInt(req.Id, 10), role)
+	return &req, LogAuditSelect(orgId, core.ResourceIdSqlQueryRequest, strconv.FormatInt(req.Id, 10), role)
 }
 
 func GetSqlRequestStatus(requestId int64, orgId int32, role *core.Role) (*core.DbSqlQueryRequestApproval, error) {

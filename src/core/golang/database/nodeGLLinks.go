@@ -68,7 +68,7 @@ func AllGLLinkedToNode(nodeId int64, orgId int32, role *core.Role) ([]*core.Gene
 	}
 
 	for _, a := range accounts {
-		err = LogAuditSelectWithTx(orgId, core.ResourceGLAcc, strconv.FormatInt(a.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdGLAcc, strconv.FormatInt(a.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -116,7 +116,7 @@ func AllFlowsRelatedToGL(accountId int64, orgId int32, role *core.Role) ([]*core
 	}
 
 	for _, f := range flows {
-		err = LogAuditSelectWithTx(orgId, core.ResourceProcessFlow, strconv.FormatInt(f.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdProcessFlow, strconv.FormatInt(f.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

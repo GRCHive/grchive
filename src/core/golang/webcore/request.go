@@ -239,6 +239,13 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 				return err
 			}
 			dataValue = reflect.ValueOf(t)
+		case core.DatabaseFilterDataType:
+			t := core.DatabaseFilterData{}
+			err := json.Unmarshal([]byte(data[0]), &t)
+			if err != nil {
+				return err
+			}
+			dataValue = reflect.ValueOf(t)
 		case core.AuditTrailFilterDataType:
 			t := core.AuditTrailFilterData{}
 			err := json.Unmarshal([]byte(data[0]), &t)

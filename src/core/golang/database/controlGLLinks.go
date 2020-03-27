@@ -34,7 +34,7 @@ func FindGeneralLedgerAccountsLinkedToControl(controlId int64, orgId int32, role
 	}
 
 	for _, a := range accounts {
-		err = LogAuditSelectWithTx(orgId, core.ResourceGLAcc, strconv.FormatInt(a.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdGLAcc, strconv.FormatInt(a.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -75,7 +75,7 @@ func FindControlsLinkedToGeneralLedgerAccount(accountId int64, orgId int32, role
 	}
 
 	for _, c := range controls {
-		err = LogAuditSelectWithTx(orgId, core.ResourceControl, strconv.FormatInt(c.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdControl, strconv.FormatInt(c.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

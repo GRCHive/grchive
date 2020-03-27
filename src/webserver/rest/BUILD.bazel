@@ -6,6 +6,7 @@ go_library(
     name = "webserver_rest_library",
     srcs = [
         "auditTrail.go",
+        "clientData.go",
         "comments.go",
         "controlDocVersions.go",
         "controlDocumentation.go",

@@ -108,7 +108,7 @@ func AllServersForOrganization(orgId int32, role *core.Role) ([]*core.Server, er
 	}
 
 	for _, s := range servers {
-		err = LogAuditSelectWithTx(orgId, core.ResourceServer, strconv.FormatInt(s.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdServer, strconv.FormatInt(s.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -133,7 +133,7 @@ func GetServer(serverId int64, orgId int32, role *core.Role) (*core.Server, erro
 		return nil, err
 	}
 
-	return &server, LogAuditSelect(orgId, core.ResourceServer, strconv.FormatInt(server.Id, 10), role)
+	return &server, LogAuditSelect(orgId, core.ResourceIdServer, strconv.FormatInt(server.Id, 10), role)
 }
 
 func AllServersForDeployment(deployId int64, orgId int32, role *core.Role) ([]*core.Server, error) {
@@ -160,7 +160,7 @@ func AllServersForDeployment(deployId int64, orgId int32, role *core.Role) ([]*c
 	}
 
 	for _, s := range servers {
-		err = LogAuditSelectWithTx(orgId, core.ResourceServer, strconv.FormatInt(s.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdServer, strconv.FormatInt(s.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -201,7 +201,7 @@ func GetSystemsLinkedToServer(serverId int64, orgId int32, role *core.Role) ([]*
 	}
 
 	for _, r := range systems {
-		err = LogAuditSelectWithTx(orgId, core.ResourceSystem, strconv.FormatInt(r.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdSystem, strconv.FormatInt(r.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -242,7 +242,7 @@ func GetDatabasesLinkedToServer(serverId int64, orgId int32, role *core.Role) ([
 	}
 
 	for _, r := range dbs {
-		err = LogAuditSelectWithTx(orgId, core.ResourceDatabase, strconv.FormatInt(r.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdDatabase, strconv.FormatInt(r.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

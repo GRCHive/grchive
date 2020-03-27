@@ -36,7 +36,7 @@ func FindSystemsLinkedToControl(controlId int64, orgId int32, role *core.Role) (
 	}
 
 	for _, s := range systems {
-		err = LogAuditSelectWithTx(orgId, core.ResourceSystem, strconv.FormatInt(s.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdSystem, strconv.FormatInt(s.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -73,7 +73,7 @@ func FindControlsLinkedToSystem(systemId int64, orgId int32, role *core.Role) ([
 	}
 
 	for _, c := range controls {
-		err = LogAuditSelectWithTx(orgId, core.ResourceControl, strconv.FormatInt(c.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdControl, strconv.FormatInt(c.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

@@ -46,6 +46,7 @@ func createOrganizationSubrouter(r *mux.Router) {
 	createOrganizationSettingsSubrouter(s)
 	createOrganizationGLSubrouter(s)
 	createOrganizationSystemSubrouter(s)
+	createOrganizationAutomationSubrouter(s)
 }
 
 func createOrganizationGLSubrouter(r *mux.Router) {
@@ -72,6 +73,16 @@ func createOrganizationSettingsSubrouter(r *mux.Router) {
 	s.HandleFunc(core.DashboardOrgSettingsUsersEndpoint, render.RenderDashboardOrgSettingsUsers).Name(webcore.OrgSettingsUsersRouteName)
 	s.HandleFunc(core.DashboardOrgSettingsRolesEndpoint, render.RenderDashboardOrgSettingsRoles)
 	s.HandleFunc(core.DashboardOrgSettingsSingleRoleEndpoint, render.RenderDashboardOrgSettingsSingleRole)
+}
+
+func createOrganizationAutomationSubrouter(r *mux.Router) {
+	s := r.PathPrefix(core.DashboardAutomationPrefix).Subrouter()
+	createOrganizationDataSubrouter(s)
+}
+
+func createOrganizationDataSubrouter(r *mux.Router) {
+	s := r.PathPrefix(core.DashboardDataPrefix).Subrouter()
+	s.HandleFunc("/", render.RenderClientData)
 }
 
 func createUserSubrouter(r *mux.Router) {

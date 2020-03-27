@@ -180,7 +180,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 		case "database_connection_info":
 			dbId := int64(math.Round(event.ResourceExtraData["db_id"].(float64)))
 			dbData, err := database.GetLatestAuditModificationHistoryData(
-				core.ResourceDatabase,
+				core.ResourceIdDatabase,
 				strconv.FormatInt(dbId, 10),
 				role,
 			)
@@ -222,7 +222,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 		case "database_sql_query_requests":
 			metadataId := int64(math.Round(event.ResourceExtraData["sql_metadata_id"].(float64)))
 			metadata, err := database.GetLatestAuditModificationHistoryData(
-				core.ResourceSqlQueryMetadata,
+				core.ResourceIdSqlQueryMetadata,
 				strconv.FormatInt(metadataId, 10),
 				role,
 			)
@@ -235,7 +235,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 
 			queryId := int64(math.Round(event.ResourceExtraData["query_id"].(float64)))
 			query, err := database.GetLatestAuditModificationHistoryData(
-				core.ResourceSqlQuery,
+				core.ResourceIdSqlQuery,
 				strconv.FormatInt(queryId, 10),
 				role,
 			)
@@ -267,7 +267,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 		case "database_sql_metadata":
 			dbId := int64(math.Round(event.ResourceExtraData["db_id"].(float64)))
 			dbData, err := database.GetLatestAuditModificationHistoryData(
-				core.ResourceDatabase,
+				core.ResourceIdDatabase,
 				strconv.FormatInt(dbId, 10),
 				role,
 			)
@@ -298,7 +298,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 		case "database_sql_queries":
 			dbId := int64(math.Round(event.ResourceExtraData["db_id"].(float64)))
 			dbData, err := database.GetLatestAuditModificationHistoryData(
-				core.ResourceDatabase,
+				core.ResourceIdDatabase,
 				strconv.FormatInt(dbId, 10),
 				role,
 			)
@@ -311,7 +311,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 
 			metadataId := int64(math.Round(event.ResourceExtraData["sql_metadata_id"].(float64)))
 			metadata, err := database.GetLatestAuditModificationHistoryData(
-				core.ResourceSqlQueryMetadata,
+				core.ResourceIdSqlQueryMetadata,
 				strconv.FormatInt(metadataId, 10),
 				role,
 			)
@@ -367,7 +367,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 		case "file_storage":
 			fileId := int64(math.Round(event.ResourceExtraData["file_id"].(float64)))
 			fileData, err := database.GetLatestAuditModificationHistoryData(
-				core.ResourceDocMetadata,
+				core.ResourceIdDocMetadata,
 				strconv.FormatInt(fileId, 10),
 				role,
 			)
@@ -481,7 +481,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 		case "process_flow_nodes":
 			flowId := int64(math.Round(event.ResourceExtraData["process_flow_id"].(float64)))
 			flowData, err := database.GetLatestAuditModificationHistoryData(
-				core.ResourceProcessFlow,
+				core.ResourceIdProcessFlow,
 				strconv.FormatInt(flowId, 10),
 				role,
 			)
@@ -512,7 +512,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 		case "process_flow_node_inputs":
 			flowId := int64(math.Round(event.ResourceExtraData["process_flow_id"].(float64)))
 			flowData, err := database.GetLatestAuditModificationHistoryData(
-				core.ResourceProcessFlow,
+				core.ResourceIdProcessFlow,
 				strconv.FormatInt(flowId, 10),
 				role,
 			)
@@ -525,7 +525,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 
 			nodeId := int64(math.Round(event.ResourceExtraData["node_id"].(float64)))
 			nodeData, err := database.GetLatestAuditModificationHistoryData(
-				core.ResourceFlowNode,
+				core.ResourceIdFlowNode,
 				strconv.FormatInt(nodeId, 10),
 				role,
 			)
@@ -558,7 +558,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 		case "process_flow_node_outputs":
 			flowId := int64(math.Round(event.ResourceExtraData["process_flow_id"].(float64)))
 			flowData, err := database.GetLatestAuditModificationHistoryData(
-				core.ResourceProcessFlow,
+				core.ResourceIdProcessFlow,
 				strconv.FormatInt(flowId, 10),
 				role,
 			)
@@ -571,7 +571,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 
 			nodeId := int64(math.Round(event.ResourceExtraData["node_id"].(float64)))
 			nodeData, err := database.GetLatestAuditModificationHistoryData(
-				core.ResourceFlowNode,
+				core.ResourceIdFlowNode,
 				strconv.FormatInt(nodeId, 10),
 				role,
 			)
@@ -640,7 +640,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 		case "vendor_products":
 			vendorId := int64(math.Round(event.ResourceExtraData["vendor_id"].(float64)))
 			vendorData, err := database.GetLatestAuditModificationHistoryData(
-				core.ResourceVendor,
+				core.ResourceIdVendor,
 				strconv.FormatInt(vendorId, 10),
 				role,
 			)

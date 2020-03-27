@@ -1,7 +1,7 @@
 import axios from 'axios'
 import * as qs from 'query-string'
 import { getAPIRequestConfig } from './apiUtility'
-import { DatabaseType, Database, DatabaseConnection } from '../databases'
+import { DatabaseType, Database, DatabaseConnection, DatabaseFilterData } from '../databases'
 import { postFormJson } from '../http'
 import {
     newDatabaseUrl,
@@ -44,6 +44,7 @@ export function newDatabase(inp : TNewDatabaseInputs) : Promise<TNewDatabaseOutp
 export interface TAllDatabaseInputs {
     orgId: number
     deploymentType? : number
+    filter: DatabaseFilterData
 }
 
 export interface TAllDatabaseOutputs {
@@ -51,7 +52,12 @@ export interface TAllDatabaseOutputs {
 }
 
 export function allDatabase(inp : TAllDatabaseInputs) : Promise<TAllDatabaseOutputs> {
-    return axios.get(allDatabaseUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+    let passData : any = {
+        orgId: inp.orgId,
+        deploymentType: inp.deploymentType,
+        filter: JSON.stringify(inp.filter),
+    }
+    return axios.get(allDatabaseUrl + '?' + qs.stringify(passData), getAPIRequestConfig())
 }
 
 export interface TEditDatabaseInputs extends TNewDatabaseInputs {

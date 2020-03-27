@@ -194,7 +194,7 @@ func GetSocDocumentationForVendorProduct(productId int64, orgId int32, role *cor
 	}
 
 	for _, r := range retArr {
-		err = LogAuditSelectWithTx(orgId, core.ResourceDocMetadata, strconv.FormatInt(r.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdDocMetadata, strconv.FormatInt(r.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -224,7 +224,7 @@ func GetControlDocumentation(fileId int64, orgId int32, role *core.Role) (*core.
 		return nil, err
 	}
 
-	return &retFile, LogAuditSelect(orgId, core.ResourceDocMetadata, strconv.FormatInt(retFile.Id, 10), role)
+	return &retFile, LogAuditSelect(orgId, core.ResourceIdDocMetadata, strconv.FormatInt(retFile.Id, 10), role)
 }
 
 func GetControlDocumentationStorage(fileId int64, orgId int32, role *core.Role) (*core.FileStorageData, error) {
@@ -253,7 +253,7 @@ func GetControlDocumentationStorage(fileId int64, orgId int32, role *core.Role) 
 		return nil, err
 	}
 
-	return &retFile, LogAuditSelect(orgId, core.ResourceFileStorage, strconv.FormatInt(retFile.Id, 10), role)
+	return &retFile, LogAuditSelect(orgId, core.ResourceIdFileStorage, strconv.FormatInt(retFile.Id, 10), role)
 }
 
 func GetControlDocumentationForCategory(catId int64, orgId int32, role *core.Role) ([]*core.ControlDocumentationFile, error) {
@@ -279,7 +279,7 @@ func GetControlDocumentationForCategory(catId int64, orgId int32, role *core.Rol
 	}
 
 	for _, r := range retArr {
-		err = LogAuditSelectWithTx(orgId, core.ResourceDocMetadata, strconv.FormatInt(r.Id, 10), role, tx)
+		err = LogAuditSelectWithTx(orgId, core.ResourceIdDocMetadata, strconv.FormatInt(r.Id, 10), role, tx)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

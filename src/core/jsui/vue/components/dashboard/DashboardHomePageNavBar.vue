@@ -121,12 +121,12 @@ export default Vue.extend({
                         {
                             title: 'Data',
                             icon: 'mdi-table',
-                            url: '#',
+                            url: PageParamsStore.state.organization!.Url + 'auto/data',
                         },
                         {
                             title: 'Scripts',
                             icon: 'mdi-code-tags',
-                            url: '#',
+                            url: PageParamsStore.state.organization!.Url + 'auto/scripts',
                         },
                     ],
                 },

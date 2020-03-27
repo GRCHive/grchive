@@ -32,23 +32,23 @@ func buildHistResourceFilter(types []string, ids []string) string {
 
 		subTyp := ""
 		switch typ {
-		case core.ResourceDocMetadata:
+		case core.ResourceIdDocMetadata:
 			subTyp = "file_id"
-		case core.ResourceDocCat:
+		case core.ResourceIdDocCat:
 			subTyp = "cat_id"
-		case core.ResourceVendor:
+		case core.ResourceIdVendor:
 			subTyp = "vendor_id"
-		case core.ResourceGLCat:
+		case core.ResourceIdGLCat:
 			subTyp = "gl_parent_cat_id"
-		case core.ResourceProcessFlow:
+		case core.ResourceIdProcessFlow:
 			subTyp = "process_flow_id"
-		case core.ResourceFlowNode:
+		case core.ResourceIdFlowNode:
 			subTyp = "node_id"
-		case core.ResourceDatabase:
+		case core.ResourceIdDatabase:
 			subTyp = "db_id"
-		case core.ResourceSqlQueryMetadata:
+		case core.ResourceIdSqlQueryMetadata:
 			subTyp = "sql_metadata_id"
-		case core.ResourceSqlQuery:
+		case core.ResourceIdSqlQuery:
 			subTyp = "query_id"
 		}
 
@@ -401,7 +401,7 @@ func retrieveResourceExtraData(resourceType string, resourceId string) (map[stri
 	var err error
 
 	switch resourceType {
-	case core.ResourceFileStorage:
+	case core.ResourceIdFileStorage:
 		storageId, err := strconv.ParseInt(resourceId, 10, 64)
 		if err != nil {
 			return nil, err
@@ -414,7 +414,7 @@ func retrieveResourceExtraData(resourceType string, resourceId string) (map[stri
 				ON f.id = s.metadata_id
 			WHERE s.id = $1
 		`, storageId)
-	case core.ResourceDocMetadata:
+	case core.ResourceIdDocMetadata:
 		fileId, err := strconv.ParseInt(resourceId, 10, 64)
 		if err != nil {
 			return nil, err
@@ -425,7 +425,7 @@ func retrieveResourceExtraData(resourceType string, resourceId string) (map[stri
 			FROM file_metadata AS r
 			WHERE r.id = $1
 		`, fileId)
-	case core.ResourceVendorProduct:
+	case core.ResourceIdVendorProduct:
 		productId, err := strconv.ParseInt(resourceId, 10, 64)
 		if err != nil {
 			return nil, err
@@ -436,7 +436,7 @@ func retrieveResourceExtraData(resourceType string, resourceId string) (map[stri
 			FROM vendor_products AS p
 			WHERE p.id = $1
 		`, productId)
-	case core.ResourceGLCat:
+	case core.ResourceIdGLCat:
 		catId, err := strconv.ParseInt(resourceId, 10, 64)
 		if err != nil {
 			return nil, err
@@ -447,7 +447,7 @@ func retrieveResourceExtraData(resourceType string, resourceId string) (map[stri
 			FROM general_ledger_categories AS c
 			WHERE c.id = $1
 		`, catId)
-	case core.ResourceGLAcc:
+	case core.ResourceIdGLAcc:
 		accId, err := strconv.ParseInt(resourceId, 10, 64)
 		if err != nil {
 			return nil, err
@@ -458,7 +458,7 @@ func retrieveResourceExtraData(resourceType string, resourceId string) (map[stri
 			FROM general_ledger_accounts AS a
 			WHERE a.id = $1
 		`, accId)
-	case core.ResourceFlowNode:
+	case core.ResourceIdFlowNode:
 		nodeId, err := strconv.ParseInt(resourceId, 10, 64)
 		if err != nil {
 			return nil, err
@@ -469,7 +469,7 @@ func retrieveResourceExtraData(resourceType string, resourceId string) (map[stri
 			FROM process_flow_nodes AS n
 			WHERE n.id = $1
 		`, nodeId)
-	case core.ResourceFlowNodeInput:
+	case core.ResourceIdFlowNodeInput:
 		ioId, err := strconv.ParseInt(resourceId, 10, 64)
 		if err != nil {
 			return nil, err
@@ -482,7 +482,7 @@ func retrieveResourceExtraData(resourceType string, resourceId string) (map[stri
 				ON n.id = io.parent_node_id
 			WHERE id = $1
 		`, ioId)
-	case core.ResourceFlowNodeOutput:
+	case core.ResourceIdFlowNodeOutput:
 		ioId, err := strconv.ParseInt(resourceId, 10, 64)
 		if err != nil {
 			return nil, err
@@ -495,7 +495,7 @@ func retrieveResourceExtraData(resourceType string, resourceId string) (map[stri
 				ON n.id = io.parent_node_id
 			WHERE id = $1
 		`, ioId)
-	case core.ResourceSqlQueryMetadata:
+	case core.ResourceIdSqlQueryMetadata:
 		queryId, err := strconv.ParseInt(resourceId, 10, 64)
 		if err != nil {
 			return nil, err
@@ -506,7 +506,7 @@ func retrieveResourceExtraData(resourceType string, resourceId string) (map[stri
 			FROM database_sql_metadata AS r
 			WHERE r.id = $1
 		`, queryId)
-	case core.ResourceSqlQuery:
+	case core.ResourceIdSqlQuery:
 		queryId, err := strconv.ParseInt(resourceId, 10, 64)
 		if err != nil {
 			return nil, err
@@ -519,7 +519,7 @@ func retrieveResourceExtraData(resourceType string, resourceId string) (map[stri
 				ON m.id = r.metadata_id
 			WHERE r.id = $1
 		`, queryId)
-	case core.ResourceDatabaseConn:
+	case core.ResourceIdDatabaseConn:
 		connId, err := strconv.ParseInt(resourceId, 10, 64)
 		if err != nil {
 			return nil, err
@@ -530,7 +530,7 @@ func retrieveResourceExtraData(resourceType string, resourceId string) (map[stri
 			FROM database_connection_info AS r
 			WHERE r.id = $1
 		`, connId)
-	case core.ResourceSqlQueryRequest:
+	case core.ResourceIdSqlQueryRequest:
 		reqId, err := strconv.ParseInt(resourceId, 10, 64)
 		if err != nil {
 			return nil, err

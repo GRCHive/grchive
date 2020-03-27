@@ -57,6 +57,7 @@ fun unionAccessType(vararg v : AccessType) : Int {
  * @property dbSqlAccess
  * @property dbSqlQueryAccess
  * @property dbSqlRequestAccess
+ * @property clientDataAccess
  */
 data class RolePermissions (
     @field:GrchiveResource(Resources.ResourceOrgUsers) @ColumnName("users_access")
@@ -95,6 +96,8 @@ data class RolePermissions (
     val dbSqlQueryAccess : Int,
     @field:GrchiveResource(Resources.ResourceDbSqlRequest) @ColumnName("db_sql_requests_access")
     val dbSqlRequestAccess : Int
+    @field:GrchiveResource(Resources.ResourceClientData) @ColumnName("client_data_access")
+    val clientDataAccess : Int
 )
 
 fun emptyRolePermissions() : RolePermissions {
@@ -117,6 +120,7 @@ fun emptyRolePermissions() : RolePermissions {
         AccessType.None.bit /* dbSqlAccess*/,
         AccessType.None.bit /* dbSqlQueryAccess */,
         AccessType.None.bit /* dbSqlRequestAccess */
+        AccessType.None.bit /* clientDataAccess */,
     )
 }
 
@@ -139,7 +143,8 @@ fun fullRolePermissions() : RolePermissions {
         AccessType.All.bit /* vendorAccess */,
         AccessType.All.bit /* dbSqlAccess*/,
         AccessType.All.bit /* dbSqlQueryAccess */,
-        AccessType.All.bit /* dbSqlRequestAccess */
+        AccessType.All.bit /* dbSqlRequestAccess */,
+        AccessType.All.bit /* clientDataAccess */,
     )
 }
 
@@ -170,6 +175,7 @@ fun getRolePermissionForResource(p : RolePermissions, r : Resources) : Int {
         Resources.ResourceDbSql -> p.dbSqlAccess
         Resources.ResourceDbSqlQuery -> p.dbSqlQueryAccess
         Resources.ResourceDbSqlRequest -> p.dbSqlRequestAccess
+        Resources.ResourceClientData -> p.clientDataAccess
     }
 }
 

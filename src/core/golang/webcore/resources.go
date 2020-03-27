@@ -151,19 +151,19 @@ func GetResourceHandle(typ string, id int64, orgId int32) (*core.ResourceHandle,
 
 	var url core.NullString
 	switch typ {
-	case core.ResourceControl:
+	case core.ResourceIdControl:
 		url = core.CreateNullString(MustGetRouteUrlAbsolute(
 			SingleControlRouteName,
 			core.DashboardOrgOrgQueryId, org.OktaGroupName,
 			core.DashboardOrgControlQueryId, resourceIdStr,
 		))
-	case core.ResourceDocRequest:
+	case core.ResourceIdDocRequest:
 		url = core.CreateNullString(MustGetRouteUrlAbsolute(
 			SingleDocRequestRouteName,
 			core.DashboardOrgOrgQueryId, org.OktaGroupName,
 			core.DashboardOrgDocRequestQueryId, resourceIdStr,
 		))
-	case core.ResourceSqlQueryRequest:
+	case core.ResourceIdSqlQueryRequest:
 		url = core.CreateNullString(MustGetRouteUrlAbsolute(
 			SingleSqlRequestRouteName,
 			core.DashboardOrgOrgQueryId, org.OktaGroupName,
