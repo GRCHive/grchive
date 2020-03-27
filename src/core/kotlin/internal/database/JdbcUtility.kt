@@ -18,7 +18,6 @@ internal fun createGrchiveHikariDataSource(cfg : DatabaseConfig, ro : Boolean) :
 }
 
 fun setupGrchiveJdbi(jdbi : Jdbi) {
-    jdbi.installPlugin(PostgresPlugin())
     jdbi.registerRowMapper(ConstructorMapper.factory(ApiKey::class.java))
     jdbi.registerRowMapper(ConstructorMapper.factory(Role::class.java))
     jdbi.registerRowMapper(ConstructorMapper.factory(RolePermissions::class.java))

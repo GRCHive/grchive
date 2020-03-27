@@ -11,7 +11,7 @@ import grchive.core.internal.database.getAllProcessFlowMetadata
 
 final class ProcessFlowMetadataFetcher : DataFetcher<ProcessFlowMetadata, GrchiveDataSource> {
     override fun fetch(source : GrchiveDataSource, filters : Map<String, Filter>) : List<ProcessFlowMetadata> {
-        return source.jdbi.withHandleUnchecked {
+        return source.db.jdbi.withHandleUnchecked {
             getAllProcessFlowMetadata(it, source.orgId, source.activeRole, filters)
         }
     }

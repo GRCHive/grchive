@@ -14,7 +14,7 @@ import grchive.core.utility.database.ReadOnlyHandler
  * @property ds A Java DataSource from which to create connections.
  * @property ro A read only handler for the database in question.
  */
-internal open class DatabaseDataSource(val ds : DataSource, val ro : ReadOnlyHandler) : RawDataSource {
+open class DatabaseDataSource internal constructor(val ds : DataSource, val ro : ReadOnlyHandler) : RawDataSource {
     internal val jdbi : Jdbi = Jdbi.create(ds)
 
     open fun <T> withHandle(cb : (hd : Handle) -> T) : T {

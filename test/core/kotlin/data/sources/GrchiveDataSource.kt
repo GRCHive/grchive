@@ -95,8 +95,6 @@ class GrchiveDataSourceTest: StringSpec({
             validRawKey,
             refOrgId
         )
-
-        println(pg.ds!!.getJdbcUrl().replace("jdbc:postgresql://", "") + "&readOnly=true")
     }
 
     "Check Active Role" {
@@ -105,14 +103,14 @@ class GrchiveDataSourceTest: StringSpec({
     }
 
     "SELECT OK" {
-        ds!!.withHandle {
+        ds!!.db.withHandle {
             val testPv : String = it.createQuery("SELECT version()").mapTo(String::class.java).one()
             testPv shouldBe refPv
         }
     }
 
     "Handle Read Only" {
-        ds!!.withHandle {
+        ds!!.db.withHandle {
             it.isReadOnly() shouldBe true
             it.getConnection().isReadOnly() shouldBe true
         }
@@ -120,7 +118,7 @@ class GrchiveDataSourceTest: StringSpec({
 
     "INSERT FAIL" {
         shouldThrow<Exception> {
-            ds!!.withHandle {
+            ds!!.db.withHandle {
                 it.createUpdate("""
                     INSERT INTO get_started_interest (name, email)
                     VALUES ('Test', 'test')
@@ -131,7 +129,7 @@ class GrchiveDataSourceTest: StringSpec({
 
     "DELETE FAIL" {
         shouldThrow<Exception> {
-            ds!!.withHandle {
+            ds!!.db.withHandle {
                 it.createUpdate("""
                     DELETE FROM api_keys
                 """).execute()
@@ -141,7 +139,7 @@ class GrchiveDataSourceTest: StringSpec({
 
     "UPDATE FAIL" {
         shouldThrow<Exception> {
-            ds!!.withHandle {
+            ds!!.db.withHandle {
                 it.createUpdate("""
                     UPDATE organizations
                     SET name = 'Ooogity'
@@ -152,7 +150,7 @@ class GrchiveDataSourceTest: StringSpec({
 
     "DROP TABLE FAIL" {
         shouldThrow<Exception> {
-            ds!!.withHandle {
+            ds!!.db.withHandle {
                 it.createUpdate("""
                     DROP TABLE organizations
                 """).execute()
@@ -162,7 +160,7 @@ class GrchiveDataSourceTest: StringSpec({
 
     "CREATE TABLE FAIL" {
         shouldThrow<Exception> {
-            ds!!.withHandle {
+            ds!!.db.withHandle {
                 it.createUpdate("""
                     CREATE TABLE test (
                         id BIGSERIAL PRIMARY KEY
@@ -175,7 +173,7 @@ class GrchiveDataSourceTest: StringSpec({
 
     "TRUNCATE TABLE FAIL" {
         shouldThrow<Exception> {
-            ds!!.withHandle {
+            ds!!.db.withHandle {
                 it.createUpdate("""
                     TRUNCATE TABLE organizations
                 """).execute()
@@ -185,7 +183,7 @@ class GrchiveDataSourceTest: StringSpec({
 
     "ALTER TABLE FAIL" {
         shouldThrow<Exception> {
-            ds!!.withHandle {
+            ds!!.db.withHandle {
                 it.createUpdate("""
                     ALTER TABLE organizations
                     ADD COLUMN test BIGINT UNIQUE;

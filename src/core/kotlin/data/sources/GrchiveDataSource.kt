@@ -1,10 +1,10 @@
 package grchive.core.data.sources
 
+import grchive.core.data.sources.databases.PostgresDataSource
 import grchive.core.data.types.grchive.*
 
 import grchive.core.internal.Config
 import grchive.core.internal.database.*
-import grchive.core.utility.database.PostgresReadOnlyHandler
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.*
 
@@ -15,14 +15,15 @@ import org.jdbi.v3.core.kotlin.*
  * @property apiKey The API key used to authorize actions on GRCHive data.
  * @property orgId The unique ID of the organization to access data for.
  */
-class GrchiveDataSource(val cfg : Config, val apiKey : String, val orgId : Int) 
-    : DatabaseDataSource(createGrchiveHikariDataSource(cfg.database, true), PostgresReadOnlyHandler()) {
+class GrchiveDataSource(val cfg : Config, val apiKey : String, val orgId : Int) {
     val activeRole : FullRole
 
-    init {
-        setupGrchiveJdbi(jdbi)
+    val db = PostgresDataSource(createGrchiveHikariDataSource(cfg.database, true))
 
-        activeRole = withHandle {
+    init {
+        setupGrchiveJdbi(db.jdbi)
+
+        activeRole = db.withHandle {
             val key : ApiKey = getApiKeyFromRawKey(it, apiKey)!!
             getRoleAttachedToApiKey(it, key.id, orgId)!!
         }
