@@ -36,7 +36,7 @@ import {
     DataSourceOptionNode,
     DataSourceOptionTree
 } from '../../ts/clientData'
-import { allSupportedDataSources, TAllDataSourceOutput } from '../../ts/api/apiClientData'
+import { allSupportedDataSources, TAllDataSourceOutput } from '../../ts/api/apiDataSource'
 import { contactUsUrl } from '../../ts/url'
 import { Database } from '../../ts/databases'
 import { PageParamsStore } from '../../ts/pageParams'

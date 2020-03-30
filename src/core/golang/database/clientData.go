@@ -39,7 +39,7 @@ func NewClientDataWithTx(data *core.ClientData, role *core.Role, tx *sqlx.Tx) er
 
 func LinkClientDataToSourceWithTx(
 	dataId int64,
-	sourceId int64,
+	sourceId core.SourceId,
 	sourceTarget map[string]interface{},
 	orgId int32,
 	role *core.Role,

@@ -484,4 +484,5 @@ func registerDataAPIPaths(r *mux.Router) {
 func registerDataSourceAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardDataSourcePrefix).Subrouter()
 	s.HandleFunc(core.ApiAllEndpoint, allDataSourceOptions)
+	s.HandleFunc(core.ApiGetEndpoint, getDataSource)
 }

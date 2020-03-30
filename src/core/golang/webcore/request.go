@@ -253,6 +253,13 @@ func UnmarshalRequestForm(r *http.Request, output interface{}) error {
 				return err
 			}
 			dataValue = reflect.ValueOf(t)
+		case core.DataSourceLinkReflectType:
+			t := core.DataSourceLink{}
+			err := json.Unmarshal([]byte(data[0]), &t)
+			if err != nil {
+				return err
+			}
+			dataValue = reflect.ValueOf(t)
 		default:
 			return errors.New("Unsupported type: " + fieldType.Name)
 		}

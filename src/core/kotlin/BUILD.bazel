@@ -1,9 +1,14 @@
 package(default_visibility = ["//visibility:public"])
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library")
 
+filegroup(
+    name = "source_files",
+    srcs = glob(["**/*.kt"]),
+)
+
 kt_jvm_library(
     name = "grchive_public_core",
-    srcs = glob(["**/*.kt"]),
+    srcs = [ ":source_files" ],
     deps = [
         "@maven//:org_jdbi_jdbi3_bom",
         "@maven//:org_jdbi_jdbi3_postgres",

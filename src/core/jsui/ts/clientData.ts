@@ -28,7 +28,7 @@ export interface DataSourceLink {
 
 export interface FullClientDataWithLink {
     Data : ClientData
-    DataSourceLink : DataSourceLink
+    Link: DataSourceLink
 }
 
 export class DataSourceOptionNode {

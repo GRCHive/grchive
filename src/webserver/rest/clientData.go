@@ -12,7 +12,7 @@ type NewClientDataInput struct {
 	OrgId        int32                  `json:"orgId"`
 	Name         string                 `json:"name"`
 	Description  string                 `json:"description"`
-	SourceId     int64                  `json:"sourceId"`
+	SourceId     core.SourceId          `json:"sourceId"`
 	SourceTarget map[string]interface{} `json:"sourceTarget"`
 }
 
@@ -142,27 +142,4 @@ func deleteClientData(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-}
-
-func allDataSourceOptions(w http.ResponseWriter, r *http.Request) {
-	jsonWriter := json.NewEncoder(w)
-	w.Header().Set("Content-Type", "application/json")
-
-	// The only thing we can do for metadata requests is to make sure
-	// a valid API key is found.
-	_, err := webcore.FindApiKeyInContext(r.Context())
-	if err != nil {
-		core.Warning("Can't find API key: " + err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	options, err := database.AllDataSourceOptions()
-	if err != nil {
-		core.Warning("Failed to get all data source options: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	jsonWriter.Encode(options)
 }

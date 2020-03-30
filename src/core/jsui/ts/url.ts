@@ -371,3 +371,4 @@ export const allClientDataUrl : string = "/api/auto/data/all"
 export const deleteClientDataUrl : string = "/api/auto/data/delete"
 
 export const allDataSourceUrl : string = "/api/auto/data/source/all"
+export const getDataSourceUrl : string = "/api/auto/data/source/get"

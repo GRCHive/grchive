@@ -4,12 +4,10 @@ import { getAPIRequestConfig } from './apiUtility'
 import { postFormJson } from '../http'
 import {
     FullClientDataWithLink,
-    DataSourceOption  
 } from '../clientData'
 import { 
     newClientDataUrl,
     allClientDataUrl,
-    allDataSourceUrl,
     deleteClientDataUrl,
 } from '../url'
 
@@ -39,14 +37,6 @@ export interface TAllClientDataOutput {
 
 export function allClientData(inp : TAllClientDataInput) : Promise<TAllClientDataOutput> {
     return axios.get(allClientDataUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
-}
-
-export interface TAllDataSourceOutput {
-    data: DataSourceOption[]
-}
-
-export function allSupportedDataSources() : Promise<TAllDataSourceOutput> {
-    return axios.get(allDataSourceUrl, getAPIRequestConfig())
 }
 
 export interface TDeleteClientDataInput {

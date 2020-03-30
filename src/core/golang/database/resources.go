@@ -42,6 +42,8 @@ func GetResourceName(typ string, id int64) (string, error) {
 		return data["name"].(string), nil
 	case core.ResourceIdSqlQueryRequest:
 		return data["name"].(string), nil
+	case core.ResourceIdDatabase:
+		return data["name"].(string), nil
 	}
 
 	return "", errors.New("Unsupported resource type: " + typ)

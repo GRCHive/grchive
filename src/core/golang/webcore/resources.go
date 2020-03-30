@@ -169,6 +169,12 @@ func GetResourceHandle(typ string, id int64, orgId int32) (*core.ResourceHandle,
 			core.DashboardOrgOrgQueryId, org.OktaGroupName,
 			core.DashboardOrgSqlRequestQueryId, resourceIdStr,
 		))
+	case core.ResourceIdDatabase:
+		url = core.CreateNullString(MustGetRouteUrlAbsolute(
+			SingleDatabaseRouteName,
+			core.DashboardOrgOrgQueryId, org.OktaGroupName,
+			core.DashboardOrgDbQueryId, resourceIdStr,
+		))
 	}
 
 	return &core.ResourceHandle{

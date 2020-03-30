@@ -22,11 +22,18 @@ type DataSourceOption struct {
 }
 
 type DataSourceLink struct {
-	OrgId        int32 `db:"org_id"`
-	DataId       int64 `db:"data_id"`
-	SourceId     int64 `db:"source_id"`
+	OrgId        int32    `db:"org_id"`
+	DataId       int64    `db:"data_id"`
+	SourceId     SourceId `db:"source_id"`
 	SourceTarget map[string]interface{}
 }
+
+type SourceId int64
+
+const (
+	SourceGrchive    SourceId = 1
+	SourceDbPostgres          = 2
+)
 
 type FullClientDataWithLink struct {
 	Data ClientData     `db:"data"`

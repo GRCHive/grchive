@@ -16,6 +16,7 @@ go_library(
         "controlSystemLinks.go",
         "controls.go",
         "databases.go",
+        "dataSource.go",
         "deployment.go",
         "docRequests.go",
         "docRequestDocCatLinks.go",
