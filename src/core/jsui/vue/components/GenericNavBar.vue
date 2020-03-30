@@ -111,4 +111,12 @@ export default Vue.extend({
     color: rgba(0, 0, 0, 0.54) !important;
 }
 
+>>>.v-navigation-drawer__content {
+    overflow-y: hidden;
+}
+
+>>>.v-navigation-drawer__content:hover {
+    overflow-y: auto;
+}
+
 </style>
