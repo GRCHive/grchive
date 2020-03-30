@@ -8,7 +8,7 @@ import { PageParamsStore } from '../../ts/pageParams'
 import { ResourceHandle } from '../../ts/resourceUtils'
 import { DataSourceLink } from '../../ts/clientData'
 import { getDataSource, TGetDataSourceOutput } from '../../ts/api/apiDataSource'
-import { contactUsUrl } from '../../ts/url'
+import { contactUsUrl, createSingleClientDataUrl } from '../../ts/url'
 
 @Component({
     components: {
@@ -46,6 +46,10 @@ export default class ClientDataTable extends ResourceTableProps {
     }
 
     goToData(item : any) {
+        window.location.assign(createSingleClientDataUrl(
+            PageParamsStore.state.organization!.OktaGroupName,
+            item.value.Data.Id
+        ))
     }
 
     retrieveSourceResourceHandle(dataId : number, link : DataSourceLink) {
@@ -132,6 +136,5 @@ export default class ClientDataTable extends ResourceTableProps {
         )
     }
 }
-
 
 </script>

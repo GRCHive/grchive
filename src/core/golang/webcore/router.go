@@ -39,6 +39,7 @@ const (
 	SingleDocRequestRouteName      = "SingleDocRequest"
 	SingleSqlRequestRouteName      = "SingleSqlRequest"
 	SingleDocumentationRouteName   = "SingleDocumentation"
+	SingleClientDataRouteName      = "SingleClientData"
 )
 
 var globalRouter *mux.Router

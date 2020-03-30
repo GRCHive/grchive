@@ -47,6 +47,8 @@ $$
                 THEN 'Vendor'
             WHEN r='vendor_products'
                 THEN 'Vendor Product'
+            WHEN r='client_data'
+                THEN 'Data Object'
         END INTO nm;
         RETURN nm;
     END;

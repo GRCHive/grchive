@@ -47,6 +47,8 @@ func GetOrgIdFromResource(in interface{}) (int32, error) {
 		return v.OrgId, nil
 	case core.Control:
 		return v.OrgId, nil
+	case core.ClientData:
+		return v.OrgId, nil
 	}
 
 	return 0, errors.New("Unsupported resource (GetOrgIdFromResource).")
@@ -175,8 +177,13 @@ func GetResourceHandle(typ string, id int64, orgId int32) (*core.ResourceHandle,
 			core.DashboardOrgOrgQueryId, org.OktaGroupName,
 			core.DashboardOrgDbQueryId, resourceIdStr,
 		))
+	case core.ResourceIdClientData:
+		url = core.CreateNullString(MustGetRouteUrlAbsolute(
+			SingleClientDataRouteName,
+			core.DashboardOrgOrgQueryId, org.OktaGroupName,
+			core.DashboardOrgClientDataQueryId, resourceIdStr,
+		))
 	}
-
 	return &core.ResourceHandle{
 		DisplayText: name,
 		ResourceUri: url,

@@ -141,6 +141,10 @@ export function createSingleSqlRequestUrl(org : string, id: number) : string {
     return `/dashboard/org/${org}/requests/sql/${id}`
 }
 
+export function createSingleClientDataUrl(org : string, id: number) : string {
+    return `/dashboard/org/${org}/auto/data/${id}`
+}
+
 export function createUserProfileEditAPIUrl(id : number) : string {
     return `/api/user/${id}/profile`
 }

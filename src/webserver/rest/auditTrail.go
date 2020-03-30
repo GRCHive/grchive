@@ -668,7 +668,26 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 			} else {
 				handle.DisplayText = "UNKNOWN"
 			}
+		case "client_data":
+			dataId, err := strconv.ParseInt(event.ResourceId, 10, 64)
+			if err != nil {
+				core.Warning("Failed to get client data ID: " + err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 
+			hd, err := webcore.GetResourceHandle(
+				event.ResourceType,
+				dataId,
+				org.Id,
+			)
+
+			if err != nil {
+				core.Warning("Failed to get client data resource URI: " + err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			handle = *hd
 		}
 	} else {
 		handle.DisplayText = "UNKNOWN"

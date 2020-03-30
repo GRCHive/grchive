@@ -40,6 +40,7 @@ const DashboardOrgDocFileQueryId string = "docFileId"
 const DashboardOrgDocRequestQueryId string = "reqId"
 const DashboardOrgSqlRequestQueryId string = "sqlReqId"
 const DashboardOrgVendorQueryId string = "vendorId"
+const DashboardOrgClientDataQueryId string = "clientDataId"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 
@@ -99,6 +100,8 @@ var DashboardSingleServerEndpoint string = fmt.Sprintf("%s/{%s}", DashboardServe
 const DashboardAutomationPrefix string = "/auto"
 const DashboardDataPrefix string = "/data"
 const DashboardDataSourcePrefix string = "/source"
+
+var DashboardSingleDataEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgClientDataQueryId)
 
 // Generic API Actions
 const ApiNewEndpoint = "/new"

@@ -5,6 +5,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
 	"gitlab.com/grchive/grchive/core"
+	"strconv"
 )
 
 func NewClientDataWithTx(data *core.ClientData, role *core.Role, tx *sqlx.Tx) error {
@@ -93,6 +94,11 @@ func AllClientDataForOrganization(orgId int32, role *core.Role) ([]*core.FullCli
 	}
 	defer rows.Close()
 
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
 	for rows.Next() {
 		newData := core.FullClientDataWithLink{}
 		jsonData := types.JSONText{}
@@ -107,18 +113,26 @@ func AllClientDataForOrganization(orgId int32, role *core.Role) ([]*core.FullCli
 			&jsonData,
 		)
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 
 		err = jsonData.Unmarshal(&newData.Link.SourceTarget)
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 
 		data = append(data, &newData)
+
+		err = LogAuditSelectWithTx(newData.Data.OrgId, core.ResourceIdClientData, strconv.FormatInt(newData.Data.Id, 10), role, tx)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
 	}
 
-	return data, nil
+	return data, tx.Commit()
 }
 
 func DeleteClientData(dataId int64, orgId int32, role *core.Role) error {
