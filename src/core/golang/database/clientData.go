@@ -2,6 +2,8 @@ package database
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
 	"gitlab.com/grchive/grchive/core"
@@ -38,6 +40,27 @@ func NewClientDataWithTx(data *core.ClientData, role *core.Role, tx *sqlx.Tx) er
 	return nil
 }
 
+func UpdateClientDataWithTx(data *core.ClientData, role *core.Role, tx *sqlx.Tx) error {
+	if !role.Permissions.HasAccess(core.ResourceClientData, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.NamedExec(`
+		UPDATE client_data
+		SET name = :name,
+			description = :description
+		WHERE id = :id
+			AND org_id = :org_id
+	`, data)
+
+	return err
+}
+
 func LinkClientDataToSourceWithTx(
 	dataId int64,
 	sourceId core.SourceId,
@@ -63,17 +86,20 @@ func LinkClientDataToSourceWithTx(
 	_, err = tx.Exec(`
 		INSERT INTO client_data_source_link (org_id, data_id, source_id, source_target)
 		VALUES ($4, $1, $2, $3)
+		ON CONFLICT (data_id) DO UPDATE SET
+			source_id = EXCLUDED.source_id,
+			source_target = EXCLUDED.source_target
 	`, dataId, sourceId, string(rawTarget), orgId)
 	return err
 }
 
-func AllClientDataForOrganization(orgId int32, role *core.Role) ([]*core.FullClientDataWithLink, error) {
+func getClientDataHelper(role *core.Role, conditions string, args ...interface{}) ([]*core.FullClientDataWithLink, error) {
 	if !role.Permissions.HasAccess(core.ResourceClientData, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
 
 	data := make([]*core.FullClientDataWithLink, 0)
-	rows, err := dbConn.Queryx(`
+	rows, err := dbConn.Queryx(fmt.Sprintf(`
 		SELECT
 			data.id AS "data.id",
 			data.org_id AS "data.org_id",
@@ -86,8 +112,8 @@ func AllClientDataForOrganization(orgId int32, role *core.Role) ([]*core.FullCli
 		FROM client_data AS data
 		INNER JOIN client_data_source_link AS link
 			ON link.data_id = data.id
-		WHERE data.org_id = $1
-	`, orgId)
+		%s
+	`, conditions), args...)
 
 	if err != nil {
 		return nil, err
@@ -133,6 +159,28 @@ func AllClientDataForOrganization(orgId int32, role *core.Role) ([]*core.FullCli
 	}
 
 	return data, tx.Commit()
+}
+
+func AllClientDataForOrganization(orgId int32, role *core.Role) ([]*core.FullClientDataWithLink, error) {
+	return getClientDataHelper(role, `
+		WHERE data.org_id = $1
+	`, orgId)
+}
+
+func GetClientDataFromId(dataId int64, orgId int32, role *core.Role) (*core.FullClientDataWithLink, error) {
+	data, err := getClientDataHelper(role, `
+		WHERE data.id = $1 AND data.org_id = $2
+	`, dataId, orgId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(data) == 0 {
+		return nil, errors.New("No client data found.")
+	}
+
+	return data[0], nil
 }
 
 func DeleteClientData(dataId int64, orgId int32, role *core.Role) error {

@@ -25,6 +25,7 @@
         <data-source-form-component
             v-model="source"
             :rules="[rules.required]"
+            :readonly="!canEdit"
         >
         </data-source-form-component>
     </v-form>
@@ -67,7 +68,11 @@ import * as rules from '../../../ts/formRules'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
 import { DataSourceLink } from '../../../ts/clientData'
-import { TNewClientDataOutput, newClientData } from '../../../ts/api/apiClientData'
+import {
+    TNewClientDataOutput, newClientData,
+    TUpdateClientDataOutput, updateClientData,
+} from '../../../ts/api/apiClientData'
+import { FullClientDataWithLink } from '../../../ts/clientData'
 import DataSourceFormComponent from '../../generic/DataSourceFormComponent.vue'
 
 const Props = Vue.extend({
@@ -76,6 +81,10 @@ const Props = Vue.extend({
             type: Boolean,
             default: false
         },
+        referenceData: {
+            type: Object,
+            default: () => Object() as FullClientDataWithLink | null
+        }
     }
 })
 
@@ -119,6 +128,25 @@ export default class CreateNewClientDataForm extends Props {
     }
 
     doEdit() {
+        updateClientData({
+            dataId: this.referenceData!.Data.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            name: this.name,
+            description: this.description,
+            sourceId: this.source!.SourceId,
+            sourceTarget: this.source!.SourceTarget,
+        }).then((resp : TNewClientDataOutput) => {
+            this.$emit('do-save', resp.data)
+            this.canEdit = false
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 
     save() {
@@ -135,8 +163,15 @@ export default class CreateNewClientDataForm extends Props {
     }
 
     clearForm() {
-        this.name = ""
-        this.description = ""
+        if (!!this.referenceData) {
+            this.name = this.referenceData.Data.Name
+            this.description = this.referenceData.Data.Description
+            this.source = JSON.parse(JSON.stringify(this.referenceData.Link))
+        } else {
+            this.name = ""
+            this.description = ""
+            this.source = null
+        }
     }
 }
 

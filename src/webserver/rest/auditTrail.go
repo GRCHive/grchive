@@ -669,25 +669,17 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 				handle.DisplayText = "UNKNOWN"
 			}
 		case "client_data":
-			dataId, err := strconv.ParseInt(event.ResourceId, 10, 64)
-			if err != nil {
-				core.Warning("Failed to get client data ID: " + err.Error())
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-
-			hd, err := webcore.GetResourceHandle(
-				event.ResourceType,
-				dataId,
-				org.Id,
+			handle.DisplayText = fmt.Sprintf(
+				"%s #%s",
+				latestData["name"].(string),
+				event.ResourceId,
 			)
 
-			if err != nil {
-				core.Warning("Failed to get client data resource URI: " + err.Error())
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-			handle = *hd
+			handle.ResourceUri = core.CreateNullString(webcore.MustGetRouteUrlAbsolute(
+				webcore.SingleClientDataRouteName,
+				core.DashboardOrgOrgQueryId, org.OktaGroupName,
+				core.DashboardOrgClientDataQueryId, event.ResourceId,
+			))
 		}
 	} else {
 		handle.DisplayText = "UNKNOWN"

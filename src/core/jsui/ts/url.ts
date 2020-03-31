@@ -371,7 +371,9 @@ export const readNotificationUrl : string = "/api/notifications/read"
 export const getResourceHandleUrl : string = "/api/resource/get"
 
 export const newClientDataUrl : string = "/api/auto/data/new"
+export const updateClientDataUrl : string = "/api/auto/data/update"
 export const allClientDataUrl : string = "/api/auto/data/all"
+export const getClientDataUrl : string = "/api/auto/data/get"
 export const deleteClientDataUrl : string = "/api/auto/data/delete"
 
 export const allDataSourceUrl : string = "/api/auto/data/source/all"

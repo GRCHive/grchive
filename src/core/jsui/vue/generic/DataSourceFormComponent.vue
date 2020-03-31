@@ -7,6 +7,8 @@
             :key="d - 1"
             :items="levelTags(d - 1)"
             :rules="rules"
+            :value="selectedTags[d - 1]"
+            :readonly="readonly"
             @input="changeSelectedTag(d - 1, arguments[0])"
         >
         </v-select>
@@ -18,6 +20,7 @@
                     :value="db"
                     :rules="rules"
                     :type-id="forceDbTypeId"
+                    :readonly="readonly"
                     @input="onSelectDb"
                 >
                 </database-search-form-component>
@@ -30,6 +33,7 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import {
     DataSourceLink,
     DataSourceOption,
@@ -37,6 +41,7 @@ import {
     DataSourceOptionTree
 } from '../../ts/clientData'
 import { allSupportedDataSources, TAllDataSourceOutput } from '../../ts/api/apiDataSource'
+import { getDatabase, TGetDatabaseOutputs } from '../../ts/api/apiDatabases'
 import { contactUsUrl } from '../../ts/url'
 import { Database } from '../../ts/databases'
 import { PageParamsStore } from '../../ts/pageParams'
@@ -55,6 +60,10 @@ const Props = Vue.extend({
         dataId: {
             type: Number,
             default: -1,
+        },
+        readonly: {
+            type: Boolean,
+            default: false
         }
     }
 })
@@ -118,12 +127,13 @@ export default class DataSourceFormComponent extends Props {
             this.clearSource()
         }
 
-        this.sync()
+        this.syncToValue()
     }
 
     refreshOptions() {
         allSupportedDataSources().then((resp : TAllDataSourceOutput) => {
             this.options = resp.data
+            this.syncFromValue()
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
@@ -141,7 +151,7 @@ export default class DataSourceFormComponent extends Props {
 
     onSelectDb(db : Database) {
         this.db = db
-        this.sync()
+        this.syncToValue()
     }
 
     clearSource() {
@@ -172,7 +182,7 @@ export default class DataSourceFormComponent extends Props {
         return -1
     }
 
-    sync() {
+    syncToValue() {
         if (!!this.currentNode && this.currentNode.isLeaf) {
             let obj : DataSourceLink = {
                 OrgId: PageParamsStore.state.organization!.Id,
@@ -183,6 +193,44 @@ export default class DataSourceFormComponent extends Props {
             this.$emit('input', obj)
         } else {
             this.$emit('input', null)
+        }
+    }
+
+    @Watch('value')
+    syncFromValue() {
+        this.selectedTags = []
+        if (!this.value) {
+            return
+        }
+
+        let idx : number = this.options.findIndex((ele : DataSourceOption) => 
+            ele.Id == this.value.SourceId
+        )
+
+        if (idx == -1) {
+            return
+        }
+
+        let opt : DataSourceOption = this.options[idx]
+        // We want to ignore the initial 'Root' tag since that isn't a
+        // tag that the user gets to select.
+        this.selectedTags = opt.Name.split('.').slice(1)
+
+        if (opt.Name == 'Root.Database.PostgreSQL') {
+            getDatabase({
+                dbId: this.value.SourceTarget['id'],
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then((resp : TGetDatabaseOutputs) => {
+                this.db = resp.data.Database
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
         }
     }
 }

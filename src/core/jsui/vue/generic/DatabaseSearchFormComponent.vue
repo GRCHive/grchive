@@ -6,6 +6,7 @@
     :items="items"
     :rules="rules"
     :label="label"
+    :readonly="readonly"
     @input="onInput"
 >
 
@@ -41,6 +42,10 @@ const Props = Vue.extend({
         label: {
             type: String,
             default: "",
+        },
+        readonly: {
+            type: Boolean,
+            default: false
         }
     }
 })

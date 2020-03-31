@@ -475,7 +475,9 @@ func registerAutomationAPIPaths(r *mux.Router) {
 func registerDataAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardDataPrefix).Subrouter()
 	s.HandleFunc(core.ApiNewEndpoint, newClientData).Methods("POST")
+	s.HandleFunc(core.ApiUpdateEndpoint, updateClientData).Methods("POST")
 	s.HandleFunc(core.ApiAllEndpoint, allClientData).Methods("GET")
+	s.HandleFunc(core.ApiGetEndpoint, getClientData).Methods("GET")
 	s.HandleFunc(core.ApiDeleteEndpoint, deleteClientData).Methods("POST")
 
 	registerDataSourceAPIPaths(s)
