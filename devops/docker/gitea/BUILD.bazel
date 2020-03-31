@@ -16,5 +16,17 @@ container_image(
         "SSH_PORT": "2999",
         "INSTALL_LOCK": "true",
         "SECRET_KEY": env["GITEA_SECRET_KEY"],
-    }
+        "DISABLE_REGISTRATION" : "true",
+    },
+)
+
+genrule(
+    name = "docker_access_token",
+    srcs = [ "docker_setup_extract_access.sh" ],
+    outs = [ "script.sh" ],
+    cmd = ". $(location //build:bash_env) && envsubst '$${GITEA_TOKEN} $${VAULT_HOST} $${VAULT_PORT} $${VAULT_USER} $${VAULT_PASSWORD} $${VAULT_TOKEN}' < $< > $@",
+    executable = True,
+    tools = [
+        "//build:bash_env"
+    ]
 )

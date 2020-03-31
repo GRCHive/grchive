@@ -15,6 +15,8 @@ This document will assume that the git checkout directory is set in an environme
 - Libreoffice
 - jpegoptim
 - imagemagick
+- curl
+- jq
 
 ## Build Variables
 
@@ -75,6 +77,7 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 ### Gitea
 
 - `GITEA_SECRET_KEY`: The secret key to use for the Gitea installation.
+- `GITEA_TOKEN`: The Vault path at which to store the Gitea token.
 
 ## Setup Dependencies
 
@@ -155,7 +158,7 @@ Replace `${VAULT_HOST}` and `${VAULT_PORT}` with the corresponding values in the
 
 - `cd $SRC`
 - `bazel run //devops/docker/vault:vault`
-- `docker run --network=host bazel/devops/docker/vault:vault`
+- `docker run --network=host --name vault bazel/devops/docker/vault:vault`
 - `vault operator init -address="${VAULT_HOST}:${VAULT_PORT}" -n 1 -t 1`
 - Store the unseal key and the root token somehwere.
 - `vault operator unseal -address="${VAULT_HOST}:${VAULT_PORT}"`
@@ -172,6 +175,39 @@ Replace `${RABBITMQ_PORT}` with the corresponding value in the `variables.bzl` f
 - `cd $SRC`
 - `bazel run //devops/docker/rabbitmq:rabbitmq`
 - `docker run --hostname rabbitmq --mount source=rabbitmqmnt,target=/var/lib/rabbitmq -p ${RABBITMQ_PORT}:${RABBITMQ_PORT} bazel/devops/docker/rabbitmq:rabbitmq`
+
+
+## Gitea
+
+We use Gitea to store and track changes to client code (data objects, scripts, etc.).
+Gitea relies on access to a running PostgreSQL database which you should have setup at this point already.
+Additionally, we will be setting up an NFS server to use as the storage volume for the Gitea container.
+
+### NFS Server
+
+- `mkdir /srv/nfs/gitea && chown -R $(whoami) /srv/nfs/gitea`
+- `cd $SRC`
+- `bazel run //devops/docker/nfs:nfs-server`
+- `docker run -v /srv/nfs/gitea:/srv/nfs/gitea --name nfssrv --privileged -p 2049:2049 bazel/devops/docker/nfs:nfs-server`
+
+Retrieve the IP address and then create an NFS volume in Docker for future use.
+
+- `export NFS_IP=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' nfssrv)`
+- `docker volume create --driver local --opt type=nfs --opt o=vers=4,addr=$NFS_IP,rw --opt device=:/ gitea-nfsvolume`
+
+### Gitea
+
+- `cd $SRC`
+- `bazel run //devops/docker/gitea:gitea`
+- `docker run --network host --name gitea --mount source=gitea-nfsvolume,target=/data bazel/devops/docker/gitea:gitea`
+
+At this point, we will need to create the initial admin user and obtain the access token that we will use throughout the rest of our apps.
+Run 
+```
+bazel run --action_env VAULT_TOKEN="$YOUR_ROOT_TOKEN" //devops/docker/gitea:docker_access_token
+```
+to obtain the access token and set store it in the Vault server at the path specified by  `GITEA_TOKEN` in the `variables.bzl` file.
+Note that this assumes that Gitea Docker container as well as the Vault Docker container are up and running.
 
 ## Build and Run Webserver
 
@@ -228,29 +264,6 @@ If you wish to run the Docker container:
 
 - `bazel run //devops/docker/database_query_runner:docker_database_query_runner`
 
-## Gitea
-
-We use Gitea to store and track changes to client code (data objects, scripts, etc.).
-Gitea relies on access to a running PostgreSQL database which you should have setup at this point already.
-Additionally, we will be setting up an NFS server to use as the storage volume for the Gitea container.
-
-### NFS Server
-
-- `mkdir /srv/nfs/gitea && chown -R $(whoami) /srv/nfs/gitea`
-- `cd $SRC`
-- `bazel run //devops/docker/nfs:nfs-server`
-- `docker run -v /srv/nfs/gitea:/srv/nfs/gitea --name nfssrv --privileged -p 2049:2049 bazel/devops/docker/nfs:nfs-server`
-
-Retrieve the IP address and then create an NFS volume in Docker for future use.
-
-- `export NFS_IP=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' nfssrv)`
-- `docker volume create --driver local --opt type=nfs --opt o=vers=4,addr=$NFS_IP,rw --opt device=:/srv/nfs/gitea gitea-nfsvolume`
-
-### Gitea
-
-- `cd $SRC`
-- `bazel run //devops/docker/gitea:gitea`
-- `docker run --network host --mount source=gitea-nfsvolume,target=/data bazel/devops/docker/gitea:gitea`
 
 ## Run Tests
 
