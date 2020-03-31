@@ -24,6 +24,7 @@
                         v-model="showHideDelete"
                         persistent
                         max-width="40%"
+                        v-if="!!selectedRefresh"
                     >
                         <template v-slot:activator="{on}">
                             <v-btn
