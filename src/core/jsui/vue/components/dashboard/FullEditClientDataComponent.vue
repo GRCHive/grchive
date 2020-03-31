@@ -49,6 +49,7 @@
                     <v-tab-item>
                         <generic-code-editor
                             lang="text/x-kotlin"
+                            full-height
                         >
                         </generic-code-editor>
                     </v-tab-item>

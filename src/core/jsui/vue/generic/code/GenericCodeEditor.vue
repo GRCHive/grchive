@@ -14,8 +14,10 @@ import CodeMirror from 'codemirror/lib/codemirror.js'
 
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/material.css'
+import 'codemirror/addon/display/autorefresh.js'
 
 import ( /* webpackChunkName: "codemirrorClikeMode" */ 'codemirror/mode/clike/clike.js')
+import ( /* webpackChunkName: "codemirrorSqlMode" */ 'codemirror/mode/sql/sql.js')
 
 const Props = Vue.extend({
     props: {
@@ -28,6 +30,10 @@ const Props = Vue.extend({
             default: "",
         },
         readonly: {
+            type: Boolean,
+            default: false,
+        },
+        fullHeight: {
             type: Boolean,
             default: false,
         }
@@ -60,6 +66,7 @@ export default class GenericCodeEditor extends Props {
                 lineNumbers: true,
                 readOnly: this.readonly,
                 value: this.value,
+                autoRefresh: true
             }
         )
 
@@ -67,7 +74,11 @@ export default class GenericCodeEditor extends Props {
             this.$emit('input', this.cm!.getValue())
         })
 
-        this.cm!.setSize(null, this.desiredHeight)
+        if (this.fullHeight) {
+            this.cm!.setSize(null, this.desiredHeight)
+        }
+
+        this.cm!.setValue(this.value)
     }
 
     @Watch('readonly')
@@ -77,7 +88,9 @@ export default class GenericCodeEditor extends Props {
 
     @Watch('value')
     watchValue() {
-        this.cm!.setValue(this.value)
+        if (this.cm!.getValue() != this.value) {
+            this.cm!.setValue(this.value)
+        }
     }
 }
 
