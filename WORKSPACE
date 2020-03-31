@@ -339,11 +339,25 @@ container_pull(
 )
 
 container_pull(
+    name = "debian-slim",
+    registry = "index.docker.io",
+    repository = "library/debian",
+    tag = "buster-slim"
+)
+
+container_pull(
     name = "preview-generator-base",
     registry = "registry.gitlab.com",
     repository = "grchive/grchive/preview_generator_base",
     digest = "sha256:81eb0ab818da89880bbfd372c8bb873ab683aecb301f1f5eba347ac1ff62c547",
     tag = "latest"
+)
+
+container_pull(
+    name = "gitea",
+    registry = "index.docker.io",
+    repository = "gitea/gitea",
+    tag = "1.11.3"
 )
 
 load(

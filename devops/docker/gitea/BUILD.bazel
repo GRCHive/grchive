@@ -1,0 +1,20 @@
+package(default_visibility=["//visibility:public"])
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("//build:variables.bzl", "env")
+
+container_image(
+    name = "gitea",
+    base = "@gitea//image",
+    env = {
+        "RUN_MODE": "prod",
+        "DB_TYPE": "postgres",
+        "DB_HOST": "{0}:{1}".format(env["POSTGRES_HOST"], env["POSTGRES_PORT"]),
+        "DB_NAME": "gitea",
+        "DB_USER": env["POSTGRES_USER"],
+        "DB_PASSWD" : env["POSTGRES_PASSWORD"],
+        "DISABLE_SSH" : "true",
+        "SSH_PORT": "2999",
+        "INSTALL_LOCK": "true",
+        "SECRET_KEY": env["GITEA_SECRET_KEY"],
+    }
+)

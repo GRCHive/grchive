@@ -55,6 +55,7 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 
 - `SECURITY_KEY_0`: A key used to encrypt webserver cookies.
 - `SECURITY_KEY_1`: A key used to encrypt webserver cookies.
+- `HMAC_KEY`: A key used to generate HMACs (e.g. for uploading/downloading from Google Cloud Sorage).
 
 ### Sendgrid
 
@@ -70,6 +71,10 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `GRPC_QUERY_RUNNER_PORT`: The port the database_query_runner worker is listening on.
 - `GRPC_QUERY_RUNNER_TLS`: Whether or not the query runner should use TLS for communication.
 - `ROOT_CA_CRT`: Path to the root certificate used for the self-signed certificates.
+
+### Gitea
+
+- `GITEA_SECRET_KEY`: The secret key to use for the Gitea installation.
 
 ## Setup Dependencies
 
@@ -222,6 +227,30 @@ This relies on having a running PostgreSQL database.
 If you wish to run the Docker container:
 
 - `bazel run //devops/docker/database_query_runner:docker_database_query_runner`
+
+## Gitea
+
+We use Gitea to store and track changes to client code (data objects, scripts, etc.).
+Gitea relies on access to a running PostgreSQL database which you should have setup at this point already.
+Additionally, we will be setting up an NFS server to use as the storage volume for the Gitea container.
+
+### NFS Server
+
+- `mkdir /srv/nfs/gitea && chown -R $(whoami) /srv/nfs/gitea`
+- `cd $SRC`
+- `bazel run //devops/docker/nfs:nfs-server`
+- `docker run -v /srv/nfs/gitea:/srv/nfs/gitea --name nfssrv --privileged -p 2049:2049 bazel/devops/docker/nfs:nfs-server`
+
+Retrieve the IP address and then create an NFS volume in Docker for future use.
+
+- `export NFS_IP=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' nfssrv)`
+- `docker volume create --driver local --opt type=nfs --opt o=vers=4,addr=$NFS_IP,rw --opt device=:/srv/nfs/gitea gitea-nfsvolume`
+
+### Gitea
+
+- `cd $SRC`
+- `bazel run //devops/docker/gitea:gitea`
+- `docker run --network host --mount source=gitea-nfsvolume,target=/data bazel/devops/docker/gitea:gitea`
 
 ## Run Tests
 

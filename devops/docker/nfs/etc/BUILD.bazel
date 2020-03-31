@@ -1,0 +1,11 @@
+package(default_visibility=["//visibility:public"])
+
+genrule(
+    name = "exports",
+    srcs = [ "exports.tmpl"],
+    outs = [ "exports" ],
+    cmd = ". $(location //build:bash_env) && envsubst < $< > $@",
+    tools = [
+        "//build:bash_env"
+    ]
+)

@@ -1,0 +1,29 @@
+package(default_visibility=["//visibility:public"])
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("@io_bazel_rules_docker//docker/package_managers:download_pkgs.bzl", "download_pkgs")
+load("@io_bazel_rules_docker//docker/package_managers:install_pkgs.bzl", "install_pkgs")
+load("//build:variables.bzl", "env")
+
+download_pkgs(
+    name = "download-nfs-server",
+    packages = ["netbase", "nfs-kernel-server"],
+    image_tar = "@debian-slim//image",
+)
+
+install_pkgs(
+    name = "install-nfs-server",
+    image_tar = "@debian-slim//image",
+    installables_tar = ":download-nfs-server.tar",
+    output_image_name = "docker-nfs-server",
+)
+
+container_image (
+    name = "nfs-server",
+    base = ":install-nfs-server",
+    volumes = [ "/srv/nfs/gitea" ],
+    files = [
+        "entrypoint.sh",
+        "//devops/docker/nfs/etc:exports"
+    ],
+    entrypoint = "exec /entrypoint.sh"
+)
