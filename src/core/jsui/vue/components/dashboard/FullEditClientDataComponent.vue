@@ -47,6 +47,10 @@
 
                     <v-tab>Code</v-tab>
                     <v-tab-item>
+                        <generic-code-editor
+                            lang="text/x-kotlin"
+                        >
+                        </generic-code-editor>
                     </v-tab-item>
 
                     <v-tab>Audit Trail</v-tab>
@@ -80,12 +84,14 @@ import { contactUsUrl } from '../../../ts/url'
 import ResourceHandleRenderer from '../../generic/ResourceHandleRenderer.vue'
 import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 import CreateNewClientDataForm from './CreateNewClientDataForm.vue'
+import GenericCodeEditor from '../../generic/code/GenericCodeEditor.vue'
 
 @Component({
     components: {
         ResourceHandleRenderer,
         AuditTrailViewer,
         CreateNewClientDataForm,
+        GenericCodeEditor,
     }
 })
 export default class FullEditClientDataComponent extends Vue {
