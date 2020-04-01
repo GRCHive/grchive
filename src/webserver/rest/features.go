@@ -42,6 +42,10 @@ func enableFeature(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
+		// At this point we should be able to revert the link we did earlier safely
+		// just so the user isn't stuck waiting forever. If this fails, oh well.
+		database.ClearFeatureForOrganization(inputs.FeatureId, inputs.OrgId, role)
+
 		core.Warning("Failed to enable feature: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return

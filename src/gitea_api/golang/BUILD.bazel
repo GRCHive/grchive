@@ -1,13 +1,10 @@
 package(default_visibility = ["//visibility:public"])
-
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
-    name = "vault_golang_api",
+    name = "api",
     srcs = glob([
         "**/*.go",
     ]),
-    importpath = "gitlab.com/grchive/grchive/vault_api",
-    deps = [
-    ],
+    importpath = "gitlab.com/grchive/grchive/gitea_api",
 )

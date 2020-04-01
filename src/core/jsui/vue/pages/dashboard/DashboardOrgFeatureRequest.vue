@@ -23,6 +23,7 @@
                     <v-row justify="center" v-else>
                         <v-col cols="12">
                             <p class="subtitle-1 text-center">Your request is in progress. Check back soon!</p>
+                            <p class="subtitle-1 text-center">If your request is not processed shortly, please refresh and contact us.</p>
                         </v-col>
 
                         <v-col cols="6">

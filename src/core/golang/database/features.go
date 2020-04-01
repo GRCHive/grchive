@@ -29,6 +29,25 @@ func EnableFeatureForOrganization(featureId core.FeatureId, orgId int32, role *c
 	return tx.Commit()
 }
 
+func ClearFeatureForOrganization(featureId core.FeatureId, orgId int32, role *core.Role) error {
+	if !role.RoleMetadata.IsAdmin {
+		return core.ErrorUnauthorized
+	}
+
+	tx := CreateTx()
+	_, err := tx.Exec(`
+		DELETE FROM organization_enabled_features
+		WHERE feature_id = $1 AND org_id = $2
+	`, featureId, orgId)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
 func MarkFeatureAsFulfilled(featureId core.FeatureId, orgId int32, role *core.Role) error {
 	if !role.RoleMetadata.IsAdmin {
 		return core.ErrorUnauthorized

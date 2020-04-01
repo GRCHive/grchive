@@ -357,7 +357,8 @@ container_pull(
     name = "gitea",
     registry = "index.docker.io",
     repository = "gitea/gitea",
-    tag = "1.11.3"
+    digest = "sha256:9e9b5d8148c8361cebd0bc1271197a04521774734bdea02fe1a1006e7894e4e7",
+    tag = "latest"
 )
 
 load(

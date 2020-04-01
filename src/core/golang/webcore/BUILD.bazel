@@ -15,6 +15,7 @@ go_library(
         "//src/mail_api/golang:mail_golang_api",
         "//src/okta_api/golang:okta_golang_api",
         "//src/vault_api/golang:vault_golang_api",
+        "//src/gitea_api/golang:api",
         "@com_github_google_go_querystring//query:go_default_library",
         "@com_github_google_uuid//:go_default_library",
         "@com_github_gorilla_mux//:go_default_library",

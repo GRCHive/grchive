@@ -6,6 +6,7 @@ import (
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/gcloud_api"
+	"gitlab.com/grchive/grchive/gitea_api"
 	"gitlab.com/grchive/grchive/mail_api"
 	"gitlab.com/grchive/grchive/okta_api"
 	"gitlab.com/grchive/grchive/render"
@@ -123,6 +124,19 @@ func main() {
 		},
 		core.EnvConfig.Tls)
 	defer webcore.DefaultRabbitMQ.Cleanup()
+
+	core.Debug("Gitea Init")
+	giteaToken, err := vault.GetSecretWithKey(core.EnvConfig.Gitea.Token, "token")
+	if err != nil {
+		core.Error("Failed to get Gitea token: " + err.Error())
+	}
+
+	gitea.GlobalGiteaApi.MustInitialize(gitea.GiteaConfig{
+		Protocol: core.EnvConfig.Gitea.Protocol,
+		Host:     core.EnvConfig.Gitea.Host,
+		Port:     core.EnvConfig.Gitea.Port,
+		Token:    giteaToken,
+	})
 
 	baser := mux.NewRouter().StrictSlash(true)
 	baser.HandleFunc("/healthz", healthCheck)

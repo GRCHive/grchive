@@ -78,6 +78,9 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 
 - `GITEA_SECRET_KEY`: The secret key to use for the Gitea installation.
 - `GITEA_TOKEN`: The Vault path at which to store the Gitea token.
+- `GITEA_HOST`: The hostname/IP at which the Gitea instance is accessible.
+- `GITEA_PORT`: The port at which the Gitea instance is accessible.
+- `GITEA_PROTOCOL`: The protocol (http/https) with which to connect to Gitea.
 
 ## Setup Dependencies
 

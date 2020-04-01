@@ -93,6 +93,13 @@ type KotlinConfigData struct {
 	LibraryBucket string
 }
 
+type GiteaConfigData struct {
+	Token    string
+	Host     string
+	Port     int32
+	Protocol string
+}
+
 type EnvConfigData struct {
 	SelfUri            string
 	SelfDomain         string
@@ -114,6 +121,7 @@ type EnvConfigData struct {
 	Tls                *TLSConfig
 	GitlabRegistryAuth *ContainerRegistryAuth
 	Kotlin             *KotlinConfigData
+	Gitea              *GiteaConfigData
 }
 
 var EnvConfig *EnvConfigData
@@ -229,6 +237,12 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 
 	envConfig.Kotlin = new(KotlinConfigData)
 	envConfig.Kotlin.LibraryBucket = tomlConfig.Get("kotlin.bucket").(string)
+
+	envConfig.Gitea = new(GiteaConfigData)
+	envConfig.Gitea.Host = tomlConfig.Get("gitea.host").(string)
+	envConfig.Gitea.Port = int32(tomlConfig.Get("gitea.port").(int64))
+	envConfig.Gitea.Protocol = tomlConfig.Get("gitea.protocol").(string)
+	envConfig.Gitea.Token = tomlConfig.Get("gitea.token").(string)
 
 	return envConfig
 }
