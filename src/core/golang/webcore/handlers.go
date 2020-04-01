@@ -268,3 +268,39 @@ func HTTPRedirectStatusCodes(next http.Handler) http.Handler {
 		}
 	})
 }
+
+// Create a Gorilla Mux Middleware function that will check that all the given features
+// are enabled. If not, will render a page that's dedicated to allowing the user to enable
+// the feature.
+func CreateFeatureCheck(
+	failure http.HandlerFunc,
+	needEnableFn http.HandlerFunc,
+	pendingFn http.HandlerFunc,
+	feature core.FeatureId) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			org, err := FindOrganizationInContext(r.Context())
+			if err != nil {
+				core.Info("Failed to find organization: " + core.ErrorString(err))
+				failure.ServeHTTP(w, r)
+				return
+			}
+
+			enabled, pending, err := database.IsFeatureEnabledForOrganization(feature, org.Id)
+			if err != nil {
+				core.Info("Failed to retrieve whether feature was enabled: " + core.ErrorString(err))
+				failure.ServeHTTP(w, r)
+				return
+			}
+
+			if enabled {
+				next.ServeHTTP(w, r)
+			} else if pending {
+				pendingFn.ServeHTTP(w, r)
+			} else {
+				needEnableFn.ServeHTTP(w, r)
+			}
+		})
+	}
+
+}

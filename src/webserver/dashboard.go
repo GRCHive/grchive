@@ -77,6 +77,22 @@ func createOrganizationSettingsSubrouter(r *mux.Router) {
 
 func createOrganizationAutomationSubrouter(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardAutomationPrefix).Subrouter()
+	s.Use(webcore.CreateFeatureCheck(
+		// Failure
+		func(w http.ResponseWriter, r *http.Request) {
+			render.Render404(w, r)
+		},
+		// Need Enable
+		func(w http.ResponseWriter, r *http.Request) {
+			render.RenderFeatureRequestPage(w, r, core.AutomationFeature, false)
+		},
+		// Pending
+		func(w http.ResponseWriter, r *http.Request) {
+			render.RenderFeatureRequestPage(w, r, core.AutomationFeature, true)
+		},
+		core.AutomationFeature,
+	))
+
 	createOrganizationDataSubrouter(s)
 }
 

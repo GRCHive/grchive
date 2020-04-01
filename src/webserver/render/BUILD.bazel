@@ -13,6 +13,7 @@ go_library(
     importpath = "gitlab.com/grchive/grchive/render",
     deps = [
         "//src/core/golang/core:webserver_core_library",
+        "//src/core/golang/database:webserver_database_library",
         "//src/core/golang/webcore:webserver_webcore_library",
     ],
 )

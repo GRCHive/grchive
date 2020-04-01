@@ -2,6 +2,7 @@ package render
 
 import (
 	"gitlab.com/grchive/grchive/core"
+	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/webcore"
 	"net/http"
 	"strconv"
@@ -299,4 +300,23 @@ func RenderRedirectPage(w http.ResponseWriter, r *http.Request, url string) {
 		CreateRedirectParams(w, r, "Oops!",
 			"Something went wrong! Please try again.",
 			url))
+}
+
+func RenderFeatureRequestPage(w http.ResponseWriter, r *http.Request, featureId core.FeatureId, pending bool) {
+	featureName, err := database.GetFeatureName(featureId)
+	if err != nil {
+		Render404(w, r)
+	}
+
+	RenderTemplate(
+		w,
+		DashboardOrgFeatureRequestTemplateKey,
+		"dashboardBase",
+		BuildPageTemplateParametersFull(r),
+		map[string]interface{}{
+			"FeatureName": featureName,
+			"FeatureId":   featureId,
+			"Pending":     pending,
+		},
+	)
 }

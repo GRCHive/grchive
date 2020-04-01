@@ -294,6 +294,9 @@ const ApiNotificationPrefix = "/notifications"
 // API - Resource
 const ApiResourcePrefix = "/resource"
 
+// API - Features
+const ApiFeaturePrefix = "/feature"
+
 // Websocket
 const WebsocketPrefix string = "/ws"
 

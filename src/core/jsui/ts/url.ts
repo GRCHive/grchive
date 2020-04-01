@@ -378,3 +378,5 @@ export const deleteClientDataUrl : string = "/api/auto/data/delete"
 
 export const allDataSourceUrl : string = "/api/auto/data/source/all"
 export const getDataSourceUrl : string = "/api/auto/data/source/get"
+
+export const enableFeatureUrl : string = "/api/feature/new"

@@ -52,6 +52,7 @@ func registerAPIPaths(r *mux.Router) {
 	registerNotificationAPIPaths(s)
 	registerResourceAPIPaths(s)
 	registerAutomationAPIPaths(s)
+	registerFeatureAPIPaths(s)
 }
 
 func registerAuditTrailAPIPaths(r *mux.Router) {
@@ -487,4 +488,9 @@ func registerDataSourceAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardDataSourcePrefix).Subrouter()
 	s.HandleFunc(core.ApiAllEndpoint, allDataSourceOptions)
 	s.HandleFunc(core.ApiGetEndpoint, getDataSource)
+}
+
+func registerFeatureAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiFeaturePrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, enableFeature)
 }
