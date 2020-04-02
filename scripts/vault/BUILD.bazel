@@ -1,0 +1,1 @@
+exports_files(["get_vault_secret_http.sh"])

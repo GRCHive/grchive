@@ -6,6 +6,7 @@ import (
 
 const CreateRepoEndpoint = "/user/repos"
 const TransferRepoEndpoint = "/repos/%s/%s/transfer"
+const AddCollabEndpoint = "/repos/%s/%s/collaborators/%s"
 
 func (r *RealGiteaApi) RepositoryCreate(token GiteaToken, repo GiteaRepository) error {
 	_, err := r.sendGiteaRequestWithToken(
@@ -27,6 +28,20 @@ func (r *RealGiteaApi) RepositoryTransfer(from GiteaUserlike, to GiteaUserlike, 
 		map[string]interface{}{
 			"new_owner": to.GetUsername(),
 		},
+	)
+	return err
+}
+
+func (r *RealGiteaApi) RepositoryAddCollaborator(repo GiteaRepository, owner GiteaUserlike, collab GiteaUserlike) error {
+	_, err := r.sendGiteaRequestWithToken(
+		"PUT",
+		fmt.Sprintf(AddCollabEndpoint,
+			owner.GetUsername(),
+			repo.Name,
+			collab.GetUsername(),
+		),
+		r.cfg.Token,
+		map[string]interface{}{},
 	)
 	return err
 }

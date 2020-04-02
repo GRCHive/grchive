@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/drone_api"
 	"gitlab.com/grchive/grchive/gcloud_api"
 	"gitlab.com/grchive/grchive/gitea_api"
 	"gitlab.com/grchive/grchive/mail_api"
@@ -136,6 +137,14 @@ func main() {
 		Host:     core.EnvConfig.Gitea.Host,
 		Port:     core.EnvConfig.Gitea.Port,
 		Token:    giteaToken,
+	})
+
+	core.Debug("Drone Init")
+	drone.GlobalDroneApi.MustInitialize(drone.DroneConfig{
+		Protocol: core.EnvConfig.Drone.Protocol,
+		Host:     core.EnvConfig.Drone.Host,
+		Port:     core.EnvConfig.Drone.Port,
+		Token:    core.EnvConfig.Drone.Token,
 	})
 
 	baser := mux.NewRouter().StrictSlash(true)

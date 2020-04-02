@@ -17,6 +17,7 @@ This document will assume that the git checkout directory is set in an environme
 - imagemagick
 - curl
 - jq
+- git
 
 ## Build Variables
 
@@ -77,10 +78,21 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 ### Gitea
 
 - `GITEA_SECRET_KEY`: The secret key to use for the Gitea installation.
-- `GITEA_TOKEN`: The Vault path at which to store the Gitea token.
+- `GITEA_TOKEN`: The Vault path at which to store the Gitea API token.
 - `GITEA_HOST`: The hostname/IP at which the Gitea instance is accessible.
 - `GITEA_PORT`: The port at which the Gitea instance is accessible.
 - `GITEA_PROTOCOL`: The protocol (http/https) with which to connect to Gitea.
+
+### Drone
+
+- `DRONE_GITEA_CLIENT_SECRET_VAULT`: The Vault secret path where we store the Gitea OAuth client id and secret.
+- `DRONE_DATABASE`: The database to use for Drone CI persistence.
+- `DRONE_DATABASE_SECRET`: An encryption key to use to encrypt Drone secrets. This must be 32 bytes long.
+- `DRONE_RPC_SECRET`: A shared secret between the Drone server and Drone runners.
+- `DRONE_SERVER_PROTO`: Protocol to use to access the Drone server (http/https).
+- `DRONE_SERVER_HOST`: Host at which to access the Drone server (do not include the port number).
+- `DRONE_SERVER_PORT`: Port at which to listen to Drone HTTP requests.
+- `DRONE_TOKEN`: The token with which to access the Drone API.
 
 ## Setup Dependencies
 
@@ -198,6 +210,9 @@ Retrieve the IP address and then create an NFS volume in Docker for future use.
 - `export NFS_IP=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' nfssrv)`
 - `docker volume create --driver local --opt type=nfs --opt o=vers=4,addr=$NFS_IP,rw --opt device=:/ gitea-nfsvolume`
 
+If the NFS port is already bound (2049), stop the NFS service on your local machine.
+You may need to run `sudo modprobe nfs` to get this step to work; alternatively, you can try to start and then stop the NFS service.
+
 ### Gitea
 
 - `cd $SRC`
@@ -211,6 +226,26 @@ bazel run --action_env VAULT_TOKEN="$YOUR_ROOT_TOKEN" //devops/docker/gitea:dock
 ```
 to obtain the access token and set store it in the Vault server at the path specified by  `GITEA_TOKEN` in the `variables.bzl` file.
 Note that this assumes that Gitea Docker container as well as the Vault Docker container are up and running.
+
+## Drone CI
+
+- `cd $SRC/devops/docker/drone`
+- `./setup_drone.sh`
+- `bazel run //devops/docker/drone:drone`
+- `docker run --network host bazel/devops/docker/drone:drone`
+
+At this point, you need to authorize Drone to access Gitea; this can only be done manually.
+Point your browser to `${DRONE_PROTOCOL}://${DRONE_SERVER_HOST}:${DRONE_SERVER_PORT}` and login using the following credentials:
+
+```
+Username: grchive-gitea-admin
+Password: ${PASSWORD}
+```
+
+You can find the right value for `${PASSWORD}` by querying Vault:
+```
+vault kv get -address="${VAULT_HOST}:${VAULT_PORT}" -field=password secret/gitea/token
+```
 
 ## Build and Run Webserver
 

@@ -4,26 +4,12 @@ import (
 	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/drone_api"
 	"gitlab.com/grchive/grchive/gitea_api"
 	"gitlab.com/grchive/grchive/vault_api"
 )
 
-func EnableAutomationFeature(orgId int32) error {
-	grchiveOrg, err := database.FindOrganizationFromId(orgId)
-	if err != nil {
-		return err
-	}
-
-	// This functioln needs to setup organization specific things
-	// in Gitea and Drone CI.
-	// 	1) Create an organization specific user for us to assume the identity of.
-	// 	2) Create an organization and repository for holding all the
-	// 	   org's Kotlin code in Gitea. Note that due the limitiations of the Gitea
-	// 	   API I *think* we have to create the repository as the user and then transfer
-	// 	   the repository to the organization. Doesn't really matter but might as well
-	// 	   organize.
-	//  3) Put in default template code for the project.
-	//  4) Enable the repository in Drone CI.
+func enableAutomationGitea(grchiveOrg *core.Organization) error {
 	pw, err := core.RandomHexString(32)
 	if err != nil {
 		return err
@@ -73,6 +59,17 @@ func EnableAutomationFeature(orgId int32) error {
 		return err
 	}
 
+	// Add the admin user as a collaborator on the repository so that we can access it
+	// from Drone CI.
+	// TODO: Move admin username to config.
+	err = gitea.GlobalGiteaApi.RepositoryAddCollaborator(repository, giteaOrg, gitea.GiteaUser{
+		Username: "grchive-gitea-admin",
+	})
+
+	if err != nil {
+		return err
+	}
+
 	userTokenVaultPath := fmt.Sprintf("secret/webserver/gitea/tokens/%s", user.Username)
 	err = vault.StoreSecret(userTokenVaultPath, map[string]string{
 		"name":  token.Name,
@@ -82,7 +79,56 @@ func EnableAutomationFeature(orgId int32) error {
 		return err
 	}
 
-	err = database.LinkOrganizationToGitea(orgId, giteaOrg.Username, repository.Name, user.Username, userTokenVaultPath)
+	err = database.LinkOrganizationToGitea(grchiveOrg.Id, giteaOrg.Username, repository.Name, user.Username, userTokenVaultPath)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func enableAutomationDrone(org *core.Organization) error {
+	repo, err := database.GetLinkedGiteaRepository(org.Id)
+	if err != nil {
+		return err
+	}
+
+	// Need to force a sync here or else the repository won't
+	// show up in Drone and thus enabling it will do nothing.
+	err = drone.GlobalDroneApi.RepoSync()
+	if err != nil {
+		return err
+	}
+
+	err = drone.GlobalDroneApi.RepoEnable(repo.GiteaOrg, repo.GiteaRepo)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func EnableAutomationFeature(orgId int32) error {
+	grchiveOrg, err := database.FindOrganizationFromId(orgId)
+	if err != nil {
+		return err
+	}
+
+	// This function needs to setup organization specific things
+	// in Gitea and Drone CI.
+	// 	1) Create an organization specific user for us to assume the identity of.
+	// 	2) Create an organization and repository for holding all the
+	// 	   org's Kotlin code in Gitea. Note that due the limitiations of the Gitea
+	// 	   API I *think* we have to create the repository as the user and then transfer
+	// 	   the repository to the organization. Doesn't really matter but might as well
+	// 	   organize.
+	//  3) Put in default template code for the project.
+	//  4) Enable the repository in Drone CI.
+	err = enableAutomationGitea(grchiveOrg)
+	if err != nil {
+		return err
+	}
+
+	err = enableAutomationDrone(grchiveOrg)
 	if err != nil {
 		return err
 	}

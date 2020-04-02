@@ -100,6 +100,13 @@ type GiteaConfigData struct {
 	Protocol string
 }
 
+type DroneConfigData struct {
+	Token    string
+	Host     string
+	Port     int32
+	Protocol string
+}
+
 type EnvConfigData struct {
 	SelfUri            string
 	SelfDomain         string
@@ -122,6 +129,7 @@ type EnvConfigData struct {
 	GitlabRegistryAuth *ContainerRegistryAuth
 	Kotlin             *KotlinConfigData
 	Gitea              *GiteaConfigData
+	Drone              *DroneConfigData
 }
 
 var EnvConfig *EnvConfigData
@@ -243,6 +251,12 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.Gitea.Port = int32(tomlConfig.Get("gitea.port").(int64))
 	envConfig.Gitea.Protocol = tomlConfig.Get("gitea.protocol").(string)
 	envConfig.Gitea.Token = tomlConfig.Get("gitea.token").(string)
+
+	envConfig.Drone = new(DroneConfigData)
+	envConfig.Drone.Host = tomlConfig.Get("drone.host").(string)
+	envConfig.Drone.Port = int32(tomlConfig.Get("drone.port").(int64))
+	envConfig.Drone.Protocol = tomlConfig.Get("drone.protocol").(string)
+	envConfig.Drone.Token = tomlConfig.Get("drone.token").(string)
 
 	return envConfig
 }

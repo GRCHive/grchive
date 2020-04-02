@@ -1,0 +1,24 @@
+package(default_visibility=["//visibility:public"])
+
+genrule(
+    name="drone_dockerfile",
+    srcs = ["Dockerfile.tmpl"],
+    outs = ["Dockerfile"],
+    cmd = ". $(location //build:bash_env) && envsubst < $< > $@",
+    tools = [
+        "//build:bash_env"
+    ],
+)
+
+sh_binary(
+    name="drone",
+    srcs = [ "build.sh" ],
+    data = [
+        ":drone_dockerfile",
+        "drone_workdir/bin/drone-agent",
+        "drone_workdir/bin/drone-controller",
+        "drone_workdir/bin/drone-server",
+        "run.sh",
+        "//scripts/vault:get_vault_secret_http.sh",
+    ],
+)

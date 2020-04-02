@@ -1,4 +1,4 @@
-package gitea
+package drone
 
 import (
 	"bytes"
@@ -9,17 +9,22 @@ import (
 	"net/http"
 )
 
-type RealGiteaApi struct {
-	cfg    GiteaConfig
+type RealDroneApi struct {
+	cfg    DroneConfig
 	client *http.Client
 }
 
-var GlobalGiteaApi = RealGiteaApi{}
+var GlobalDroneApi = RealDroneApi{}
 
-func (r RealGiteaApi) sendGiteaRequest(
+func (d *RealDroneApi) MustInitialize(cfg DroneConfig) {
+	d.cfg = cfg
+	d.client = &http.Client{}
+}
+
+func (r RealDroneApi) sendDroneRequest(
 	method string,
-	fullUrl string,
-	headers map[string]string,
+	endpoint string,
+	token string,
 	data interface{},
 ) (map[string]*json.RawMessage, error) {
 	body := &bytes.Buffer{}
@@ -32,17 +37,15 @@ func (r RealGiteaApi) sendGiteaRequest(
 		body = bytes.NewBuffer(jsonBuffer)
 	}
 
+	fullUrl := r.cfg.apiUrl() + endpoint
 	req, err := http.NewRequest(method, fullUrl, body)
 	if err != nil {
 		return nil, err
 	}
 
-	for k, v := range headers {
-		req.Header.Set(k, v)
-	}
-
 	req.Header.Set("accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	resp, err := r.client.Do(req)
 	if err != nil {
@@ -59,7 +62,7 @@ func (r RealGiteaApi) sendGiteaRequest(
 		resp.StatusCode != http.StatusCreated &&
 		resp.StatusCode != http.StatusAccepted &&
 		resp.StatusCode != http.StatusNoContent {
-		return nil, errors.New(fmt.Sprintf("%s -> %d -- Gitea Request Failed: %s", fullUrl, resp.StatusCode, string(respBodyData)))
+		return nil, errors.New(fmt.Sprintf("%s -> %d -- Drone Request Failed: %s", fullUrl, resp.StatusCode, string(respBodyData)))
 	}
 
 	rootObj := map[string]*json.RawMessage{}
@@ -71,35 +74,4 @@ func (r RealGiteaApi) sendGiteaRequest(
 	}
 
 	return rootObj, nil
-}
-
-func (r RealGiteaApi) sendGiteaRequestWithUserAuth(
-	method string,
-	endpoint string,
-	user GiteaUser,
-	data interface{},
-) (map[string]*json.RawMessage, error) {
-	return r.sendGiteaRequest(
-		method,
-		r.cfg.apiUrlUserAuth(user)+endpoint,
-		map[string]string{},
-		data,
-	)
-}
-
-func (r RealGiteaApi) sendGiteaRequestWithToken(
-	method string,
-	endpoint string,
-	token string,
-	data interface{},
-) (map[string]*json.RawMessage, error) {
-	return r.sendGiteaRequest(
-		method,
-		r.cfg.apiUrl()+endpoint,
-		map[string]string{
-			"Authorization": fmt.Sprintf("token %s", token),
-		},
-		data,
-	)
-
 }
