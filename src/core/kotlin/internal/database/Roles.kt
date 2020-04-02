@@ -50,7 +50,7 @@ internal val resourceToColumnName = mapOf(
 	Resources.ResourceVendors to                      "permissions_vendor_access",
 	Resources.ResourceDbSql to                        "permissions_db_sql_access",
 	Resources.ResourceDbSqlQuery to                   "permissions_db_sql_query_access",
-	Resources.ResourceDbSqlRequest to                 "permissions_db_sql_requests_access"
+	Resources.ResourceDbSqlRequest to                 "permissions_db_sql_requests_access",
     Resources.ResourceClientData to                   "permissions_client_data_access"
 )
 

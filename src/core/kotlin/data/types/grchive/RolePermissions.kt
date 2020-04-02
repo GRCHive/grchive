@@ -95,7 +95,7 @@ data class RolePermissions (
     @field:GrchiveResource(Resources.ResourceDbSqlQuery) @ColumnName("db_sql_query_access")
     val dbSqlQueryAccess : Int,
     @field:GrchiveResource(Resources.ResourceDbSqlRequest) @ColumnName("db_sql_requests_access")
-    val dbSqlRequestAccess : Int
+    val dbSqlRequestAccess : Int,
     @field:GrchiveResource(Resources.ResourceClientData) @ColumnName("client_data_access")
     val clientDataAccess : Int
 )
@@ -119,8 +119,8 @@ fun emptyRolePermissions() : RolePermissions {
         AccessType.None.bit /* vendorAccess */,
         AccessType.None.bit /* dbSqlAccess*/,
         AccessType.None.bit /* dbSqlQueryAccess */,
-        AccessType.None.bit /* dbSqlRequestAccess */
-        AccessType.None.bit /* clientDataAccess */,
+        AccessType.None.bit /* dbSqlRequestAccess */,
+        AccessType.None.bit /* clientDataAccess */
     )
 }
 
@@ -144,7 +144,7 @@ fun fullRolePermissions() : RolePermissions {
         AccessType.All.bit /* dbSqlAccess*/,
         AccessType.All.bit /* dbSqlQueryAccess */,
         AccessType.All.bit /* dbSqlRequestAccess */,
-        AccessType.All.bit /* clientDataAccess */,
+        AccessType.All.bit /* clientDataAccess */
     )
 }
 

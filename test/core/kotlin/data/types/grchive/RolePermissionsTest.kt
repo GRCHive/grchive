@@ -8,6 +8,7 @@ import grchive.core.data.types.grchive.unionAccessType
 import grchive.core.data.types.grchive.GrchiveResource
 import grchive.core.data.types.grchive.Resources
 import grchive.core.data.types.grchive.RolePermissions
+import grchive.core.data.types.grchive.emptyRolePermissions
 import grchive.core.data.types.grchive.getRolePermissionForResource
 
 import kotlin.reflect.full.findParameterByName
@@ -41,7 +42,7 @@ class UnionAccessTypeTest: StringSpec({
 class GetRolePermissionForResourceTest: StringSpec({
     "Test" {
         for (r in enumValues<Resources>()) {
-            val p = RolePermissions()
+            val p = emptyRolePermissions()
             getRolePermissionForResource(p, r) shouldBe 0
 
             // This test will 1) find the field that is annotated with the right resource using

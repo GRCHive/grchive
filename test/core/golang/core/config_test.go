@@ -63,6 +63,8 @@ func generateTestToml(config GenerateTomlConfig) (*toml.Tree, *core.EnvConfigDat
 		Tls:                new(core.TLSConfig),
 		GitlabRegistryAuth: new(core.ContainerRegistryAuth),
 		Kotlin:             new(core.KotlinConfigData),
+		Gitea:              new(core.GiteaConfigData),
+		Drone:              new(core.DroneConfigData),
 	}
 
 	newDataVal := reflect.ValueOf(&newData).Elem()
@@ -155,6 +157,14 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"GitlabRegistryAuth.Username", "registry.gitlab.username", "testuser", nil},
 					{"GitlabRegistryAuth.Password", "registry.gitlab.password", "testpassword", nil},
 					{"Kotlin.LibraryBucket", "kotlin.bucket", "testbucket", nil},
+					{"Gitea.Host", "gitea.host", "host", nil},
+					{"Gitea.Port", "gitea.port", int64(128), int32(128)},
+					{"Gitea.Protocol", "gitea.protocol", "protocl", nil},
+					{"Gitea.Token", "gitea.token", "token", nil},
+					{"Drone.Host", "drone.host", "host", nil},
+					{"Drone.Port", "drone.port", int64(128), int32(128)},
+					{"Drone.Protocol", "drone.protocol", "protocl", nil},
+					{"Drone.Token", "drone.token", "token", nil},
 				},
 			},
 			parseError: false,
