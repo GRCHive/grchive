@@ -55,22 +55,19 @@ func (r RealGiteaApi) sendGiteaRequest(
 		return nil, err
 	}
 
+	rootObj := map[string]*json.RawMessage{}
+	err = json.Unmarshal(respBodyData, &rootObj)
+
 	if resp.StatusCode != http.StatusOK &&
 		resp.StatusCode != http.StatusCreated &&
 		resp.StatusCode != http.StatusAccepted &&
 		resp.StatusCode != http.StatusNoContent {
-		return nil, errors.New(fmt.Sprintf("%s -> %d -- Gitea Request Failed: %s", fullUrl, resp.StatusCode, string(respBodyData)))
+		// The Unmarshal might fail if there's no body.
+		// That's up to whoever calls this function to handle/know based off the API spec.
+		return rootObj, errors.New(fmt.Sprintf("%s -> %d -- Gitea Request Failed: %s", fullUrl, resp.StatusCode, string(respBodyData)))
 	}
 
-	rootObj := map[string]*json.RawMessage{}
-	err = json.Unmarshal(respBodyData, &rootObj)
-	if err != nil {
-		// This isn't necessarily an error since not all
-		// requests will return something.
-		return rootObj, nil
-	}
-
-	return rootObj, nil
+	return rootObj, err
 }
 
 func (r RealGiteaApi) sendGiteaRequestWithUserAuth(

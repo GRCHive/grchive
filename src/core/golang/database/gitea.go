@@ -27,3 +27,44 @@ func GetLinkedGiteaRepository(orgId int32) (*core.LinkedGiteaRepository, error) 
 	`, orgId)
 	return &repo, err
 }
+
+func GetGiteaTemplateHashForOrg(orgId int32) (string, error) {
+	rows, err := dbConn.Queryx(`
+		SELECT sha256sum
+		FROM organization_gitea_repository_template
+		WHERE org_id = $1
+	`, orgId)
+
+	if err != nil {
+		return "", err
+	}
+
+	defer rows.Close()
+
+	if !rows.Next() {
+		return "", nil
+	}
+
+	hash := ""
+	err = rows.Scan(&hash)
+	if err != nil {
+		return "", err
+	}
+
+	return hash, nil
+}
+
+func StoreGiteaTemplateHashForOrg(orgId int32, hash string) error {
+	tx := CreateTx()
+	_, err := tx.Exec(`
+		INSERT INTO organization_gitea_repository_template (org_id, sha256sum)
+		VALUES ($1, $2)
+	`, orgId, hash)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}

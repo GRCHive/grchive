@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
-	"gitlab.com/grchive/grchive/drone_api"
-	"gitlab.com/grchive/grchive/gitea_api"
-	"gitlab.com/grchive/grchive/vault_api"
+	drone "gitlab.com/grchive/grchive/drone_api"
+	gitea "gitlab.com/grchive/grchive/gitea_api"
+	vault "gitlab.com/grchive/grchive/vault_api"
 )
 
 func enableAutomationGitea(grchiveOrg *core.Organization) error {
@@ -46,7 +46,8 @@ func enableAutomationGitea(grchiveOrg *core.Organization) error {
 	}
 
 	repository := gitea.GiteaRepository{
-		Name: fmt.Sprintf("grchive-automation-%s", grchiveOrg.OktaGroupName),
+		Name:  fmt.Sprintf("grchive-automation-%s", grchiveOrg.OktaGroupName),
+		Owner: user.Username,
 	}
 
 	err = gitea.GlobalGiteaApi.RepositoryCreate(*token, repository)
@@ -54,7 +55,7 @@ func enableAutomationGitea(grchiveOrg *core.Organization) error {
 		return err
 	}
 
-	err = gitea.GlobalGiteaApi.RepositoryTransfer(user, giteaOrg, repository)
+	err = gitea.GlobalGiteaApi.RepositoryTransfer(user, giteaOrg, &repository)
 	if err != nil {
 		return err
 	}
@@ -62,7 +63,7 @@ func enableAutomationGitea(grchiveOrg *core.Organization) error {
 	// Add the admin user as a collaborator on the repository so that we can access it
 	// from Drone CI.
 	// TODO: Move admin username to config.
-	err = gitea.GlobalGiteaApi.RepositoryAddCollaborator(repository, giteaOrg, gitea.GiteaUser{
+	err = gitea.GlobalGiteaApi.RepositoryAddCollaborator(repository, gitea.GiteaUser{
 		Username: "grchive-gitea-admin",
 	})
 
@@ -129,6 +130,11 @@ func EnableAutomationFeature(orgId int32) error {
 	}
 
 	err = enableAutomationDrone(grchiveOrg)
+	if err != nil {
+		return err
+	}
+
+	err = UpdateGiteaRepositoryTemplate(grchiveOrg.Id)
 	if err != nil {
 		return err
 	}

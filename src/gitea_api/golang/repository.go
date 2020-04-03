@@ -7,6 +7,7 @@ import (
 const CreateRepoEndpoint = "/user/repos"
 const TransferRepoEndpoint = "/repos/%s/%s/transfer"
 const AddCollabEndpoint = "/repos/%s/%s/collaborators/%s"
+const FileContentEndpoint = "/repos/%s/%s/contents/%s"
 
 func (r *RealGiteaApi) RepositoryCreate(token GiteaToken, repo GiteaRepository) error {
 	_, err := r.sendGiteaRequestWithToken(
@@ -14,13 +15,16 @@ func (r *RealGiteaApi) RepositoryCreate(token GiteaToken, repo GiteaRepository) 
 		CreateRepoEndpoint,
 		token.Token,
 		map[string]interface{}{
-			"name": repo.Name,
+			"auto_init":      true,
+			"default_branch": "master",
+			"name":           repo.Name,
+			"private":        true,
 		},
 	)
 	return err
 }
 
-func (r *RealGiteaApi) RepositoryTransfer(from GiteaUserlike, to GiteaUserlike, repo GiteaRepository) error {
+func (r *RealGiteaApi) RepositoryTransfer(from GiteaUserlike, to GiteaUserlike, repo *GiteaRepository) error {
 	_, err := r.sendGiteaRequestWithToken(
 		"POST",
 		fmt.Sprintf(TransferRepoEndpoint, from.GetUsername(), repo.Name),
@@ -29,19 +33,52 @@ func (r *RealGiteaApi) RepositoryTransfer(from GiteaUserlike, to GiteaUserlike, 
 			"new_owner": to.GetUsername(),
 		},
 	)
+
+	if err != nil {
+		repo.Owner = to.GetUsername()
+	}
+
 	return err
 }
 
-func (r *RealGiteaApi) RepositoryAddCollaborator(repo GiteaRepository, owner GiteaUserlike, collab GiteaUserlike) error {
+func (r *RealGiteaApi) RepositoryAddCollaborator(repo GiteaRepository, collab GiteaUserlike) error {
 	_, err := r.sendGiteaRequestWithToken(
 		"PUT",
 		fmt.Sprintf(AddCollabEndpoint,
-			owner.GetUsername(),
+			repo.Owner,
 			repo.Name,
 			collab.GetUsername(),
 		),
 		r.cfg.Token,
 		map[string]interface{}{},
+	)
+	return err
+}
+
+func (r *RealGiteaApi) RepositoryCreateFile(repo GiteaRepository, path string, content string) error {
+	_, err := r.sendGiteaRequestWithToken(
+		"POST",
+		fmt.Sprintf(FileContentEndpoint,
+			repo.Owner,
+			repo.Name,
+			path,
+		),
+		r.cfg.Token,
+		nil,
+	)
+	return err
+}
+
+func (r *RealGiteaApi) RepositoryUpdateFile(repo GiteaRepository, path string, content string) error {
+	_, err := r.sendGiteaRequestWithToken(
+		"PUT",
+		fmt.Sprintf(FileContentEndpoint,
+			repo.Owner,
+			repo.Name,
+			path,
+		),
+		r.cfg.Token,
+		nil,
 	)
 	return err
 }

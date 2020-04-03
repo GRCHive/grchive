@@ -40,5 +40,6 @@ go_binary(
         "//src/core/jsui:corejsui-loader-templates",
         "//src/webserver/config:config",
         "//devops/gcloud:gcloud-webserver-account.json",
+        "//devops/gitea:gitea-project-template",
     ]
 )

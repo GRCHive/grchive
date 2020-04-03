@@ -1,0 +1,11 @@
+package(default_visibility=["//visibility:public"])
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
+
+pkg_tar(
+    name = "gitea-project-template",
+    strip_prefix = "template",
+    extension = "tar.gz",
+    srcs = glob([
+        "template/**/*",
+    ])
+)

@@ -44,7 +44,8 @@ func (o GiteaOrganization) GetUsername() string {
 }
 
 type GiteaRepository struct {
-	Name string
+	Name  string
+	Owner string
 }
 
 type GiteaToken struct {
