@@ -107,6 +107,10 @@ type DroneConfigData struct {
 	Protocol string
 }
 
+type FeatureFlags struct {
+	Automation bool
+}
+
 type EnvConfigData struct {
 	SelfUri            string
 	SelfDomain         string
@@ -130,6 +134,7 @@ type EnvConfigData struct {
 	Kotlin             *KotlinConfigData
 	Gitea              *GiteaConfigData
 	Drone              *DroneConfigData
+	Features           *FeatureFlags
 }
 
 var EnvConfig *EnvConfigData
@@ -257,6 +262,9 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.Drone.Port = int32(tomlConfig.Get("drone.port").(int64))
 	envConfig.Drone.Protocol = tomlConfig.Get("drone.protocol").(string)
 	envConfig.Drone.Token = tomlConfig.Get("drone.token").(string)
+
+	envConfig.Features = new(FeatureFlags)
+	envConfig.Features.Automation = tomlConfig.Get("features.automation").(bool)
 
 	return envConfig
 }
