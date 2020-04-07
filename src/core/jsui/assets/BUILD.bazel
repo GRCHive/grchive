@@ -1,7 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
 asset_files = glob([
-    "raw/*.jpg",
+    "raw/**/*.jpg",
 ])
 
 filegroup(
@@ -10,7 +10,7 @@ filegroup(
 )
 
 genrule(
-    name = "corejsui-assets",
+    name = "corejsui-image-assets",
     srcs = [
         ":corejsui-raw-assets",
     ],
@@ -23,4 +23,13 @@ genrule(
            do \
                cp `basename $$O` $$O;\
            done"
+)
+
+filegroup(
+    name = "corejsui-assets",
+    srcs = [
+        ":corejsui-image-assets",
+    ] + glob([
+        "icons/**/*.svg"
+    ])
 )
