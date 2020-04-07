@@ -1,5 +1,5 @@
 <template>
-    <v-app-bar app>
+    <v-app-bar>
         <v-toolbar-title color="primary">
             <a :href="homePageUrl">{{ companyName }} </a>
         </v-toolbar-title>
