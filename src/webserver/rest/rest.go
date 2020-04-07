@@ -471,6 +471,7 @@ func registerResourceAPIPaths(r *mux.Router) {
 func registerAutomationAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardAutomationPrefix).Subrouter()
 	registerDataAPIPaths(s)
+	registerCodeAPIPaths(s)
 }
 
 func registerDataAPIPaths(r *mux.Router) {
@@ -488,6 +489,13 @@ func registerDataSourceAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardDataSourcePrefix).Subrouter()
 	s.HandleFunc(core.ApiAllEndpoint, allDataSourceOptions)
 	s.HandleFunc(core.ApiGetEndpoint, getDataSource)
+}
+
+func registerCodeAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.DashboardCodePrefix).Subrouter()
+	s.HandleFunc(core.ApiSaveEndpoint, saveCode)
+	s.HandleFunc(core.ApiGetEndpoint, getCode)
+	s.HandleFunc(core.ApiAllEndpoint, allCode)
 }
 
 func registerFeatureAPIPaths(r *mux.Router) {

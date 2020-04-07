@@ -58,6 +58,7 @@ fun unionAccessType(vararg v : AccessType) : Int {
  * @property dbSqlQueryAccess
  * @property dbSqlRequestAccess
  * @property clientDataAccess
+ * @property managedCodeAccess
  */
 data class RolePermissions (
     @field:GrchiveResource(Resources.ResourceOrgUsers) @ColumnName("users_access")
@@ -97,7 +98,9 @@ data class RolePermissions (
     @field:GrchiveResource(Resources.ResourceDbSqlRequest) @ColumnName("db_sql_requests_access")
     val dbSqlRequestAccess : Int,
     @field:GrchiveResource(Resources.ResourceClientData) @ColumnName("client_data_access")
-    val clientDataAccess : Int
+    val clientDataAccess : Int,
+    @field:GrchiveResource(Resources.ResourceManagedCode) @ColumnName("managed_code_access")
+    val managedCodeAccess : Int
 )
 
 fun emptyRolePermissions() : RolePermissions {
@@ -120,7 +123,8 @@ fun emptyRolePermissions() : RolePermissions {
         AccessType.None.bit /* dbSqlAccess*/,
         AccessType.None.bit /* dbSqlQueryAccess */,
         AccessType.None.bit /* dbSqlRequestAccess */,
-        AccessType.None.bit /* clientDataAccess */
+        AccessType.None.bit /* clientDataAccess */,
+        AccessType.None.bit /* managedCodeAccess */
     )
 }
 
@@ -144,7 +148,8 @@ fun fullRolePermissions() : RolePermissions {
         AccessType.All.bit /* dbSqlAccess*/,
         AccessType.All.bit /* dbSqlQueryAccess */,
         AccessType.All.bit /* dbSqlRequestAccess */,
-        AccessType.All.bit /* clientDataAccess */
+        AccessType.All.bit /* clientDataAccess */,
+        AccessType.All.bit /* managedCodeAccess */
     )
 }
 
@@ -176,6 +181,7 @@ fun getRolePermissionForResource(p : RolePermissions, r : Resources) : Int {
         Resources.ResourceDbSqlQuery -> p.dbSqlQueryAccess
         Resources.ResourceDbSqlRequest -> p.dbSqlRequestAccess
         Resources.ResourceClientData -> p.clientDataAccess
+        Resources.ResourceManagedCode -> p.managedCodeAccess
     }
 }
 

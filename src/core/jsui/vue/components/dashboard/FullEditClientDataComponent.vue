@@ -20,12 +20,12 @@
             </v-list-item>
             <v-divider></v-divider>
 
-            <v-container fluid>
+            <v-container fluid class="pa-0">
                 <v-tabs>
                     <v-tab>Overview</v-tab>
                     <v-tab-item>
                         <v-row>
-                            <v-col cols="8">
+                            <v-col cols="12">
                                 <create-new-client-data-form
                                     edit-mode
                                     :reference-data="data"
@@ -33,25 +33,18 @@
                                 >
                                 </create-new-client-data-form>
                             </v-col>
-
-                            <v-col cols="4">
-                                <v-card class="mb-4">
-                                    <v-card-title>
-                                        Linked Scripts
-                                    </v-card-title>
-                                    <v-divider></v-divider>
-                                </v-card>
-                            </v-col>
                         </v-row>
                     </v-tab-item>
 
                     <v-tab>Code</v-tab>
                     <v-tab-item>
-                        <generic-code-editor
+                        <v-divider></v-divider>
+                        <managed-code-ide
+                            :data-id="data.Data.Id"
                             lang="text/x-kotlin"
                             full-height
                         >
-                        </generic-code-editor>
+                        </managed-code-ide>
                     </v-tab-item>
 
                     <v-tab>Audit Trail</v-tab>
@@ -81,18 +74,22 @@ import { getDataSource, TGetDataSourceOutput } from '../../../ts/api/apiDataSour
 import { getClientData, TGetClientDataOutput} from '../../../ts/api/apiClientData'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
+import { 
+    allCode, TAllCodeOutput,
+} from '../../../ts/api/apiCode'
+import { ManagedCode } from '../../../ts/code'
 
 import ResourceHandleRenderer from '../../generic/ResourceHandleRenderer.vue'
 import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 import CreateNewClientDataForm from './CreateNewClientDataForm.vue'
-import GenericCodeEditor from '../../generic/code/GenericCodeEditor.vue'
+import ManagedCodeIde from '../../generic/code/ManagedCodeIDE.vue'
 
 @Component({
     components: {
         ResourceHandleRenderer,
         AuditTrailViewer,
         CreateNewClientDataForm,
-        GenericCodeEditor,
+        ManagedCodeIde,
     }
 })
 export default class FullEditClientDataComponent extends Vue {

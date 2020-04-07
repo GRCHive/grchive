@@ -19,7 +19,7 @@ import 'codemirror/addon/display/autorefresh.js'
 import ( /* webpackChunkName: "codemirrorClikeMode" */ 'codemirror/mode/clike/clike.js')
 import ( /* webpackChunkName: "codemirrorSqlMode" */ 'codemirror/mode/sql/sql.js')
 
-const Props = Vue.extend({
+export const Props = Vue.extend({
     props: {
         value: {
             type: String,

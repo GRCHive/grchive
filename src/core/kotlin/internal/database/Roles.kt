@@ -29,7 +29,8 @@ internal val resourceToDatabaseMap = mapOf(
 	Resources.ResourceDbSql to                        "resource_db_sql_access",
 	Resources.ResourceDbSqlQuery to                   "resource_db_sql_query_access",
 	Resources.ResourceDbSqlRequest to                 "resource_db_sql_requests_access",
-    Resources.ResourceClientData to                   "resource_client_data_access"
+    Resources.ResourceClientData to                   "resource_client_data_access",
+    Resources.ResourceManagedCode to                  "resource_managed_code_access"
 )
 
 internal val resourceToColumnName = mapOf(
@@ -51,7 +52,8 @@ internal val resourceToColumnName = mapOf(
 	Resources.ResourceDbSql to                        "permissions_db_sql_access",
 	Resources.ResourceDbSqlQuery to                   "permissions_db_sql_query_access",
 	Resources.ResourceDbSqlRequest to                 "permissions_db_sql_requests_access",
-    Resources.ResourceClientData to                   "permissions_client_data_access"
+    Resources.ResourceClientData to                   "permissions_client_data_access",
+    Resources.ResourceManagedCode to                  "permissions_managed_code_access"
 )
 
 private fun createResourceSelect() : String {

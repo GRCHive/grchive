@@ -1,10 +1,19 @@
 package core
 
+import (
+	"fmt"
+	"github.com/gosimple/slug"
+)
+
 type ClientData struct {
 	Id          int64  `db:"id"`
 	OrgId       int32  `db:"org_id"`
 	Name        string `db:"name"`
 	Description string `db:"description"`
+}
+
+func (c ClientData) Filename(ext string) string {
+	return fmt.Sprintf("%s-%d.%s", slug.Make(c.Name), c.Id, ext)
 }
 
 type ClientDataVersion struct {

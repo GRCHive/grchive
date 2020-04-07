@@ -19,7 +19,8 @@ enum class Resources {
 	ResourceDbSql,
 	ResourceDbSqlQuery,
 	ResourceDbSqlRequest,
-    ResourceClientData
+    ResourceClientData,
+    ResourceManagedCode
 }
 
 /**

@@ -233,6 +233,17 @@ go_repository(
     tag = "v19.03.8"
 )
 
+go_repository(
+    name = "com_github_rainycape_unicode",
+    importpath = "github.com/rainycape/unidecode",
+    commit = "cb7f23ec59bec0d61b19c56cd88cee3d0cc1870c"
+)
+
+go_repository(
+    name = "com_github_gosimple_slug",
+    importpath = "github.com/gosimple/slug",
+    tag = "v1.9.0"
+)
 
 # NODE
 http_archive(

@@ -1,0 +1,45 @@
+<template>
+    <v-toolbar flat height="30px">
+        <v-menu offset-y>
+            <template v-slot:activator="{ on }">
+                <v-btn text color="accent" v-on="on">
+                    File
+                    <v-icon small color="accent">mdi-chevron-down</v-icon>
+                </v-btn>
+            </template>
+
+            <v-list dense>
+                <v-list-item dense @click="save">
+                    <v-list-item-title>
+                        Save
+                    </v-list-item-title>
+                </v-list-item>
+                <v-divider></v-divider>
+            </v-list>
+        </v-menu>
+    </v-toolbar>
+</template>
+
+
+<script lang="ts">
+
+import Vue from 'vue'
+import Component from 'vue-class-component'
+
+@Component
+export default class GenericCodeToolbar extends Vue {
+    save() {
+        this.$emit('save')
+    }
+
+    handleHotkeys(e : KeyboardEvent) {
+        if (e.ctrlKey) {
+            if (e.key == 's') {
+                this.save()
+                e.preventDefault()
+            }
+        }
+    }
+}
+
+</script>

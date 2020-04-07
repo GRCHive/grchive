@@ -33,6 +33,8 @@ export interface Permissions {
     DbSqlAccess               : AccessType
     DbSqlQueryAccess          : AccessType
     DbSqlRequestAccess        : AccessType
+	ClientDataAccess          : AccessType
+	ManagedCodeAccess         : AccessType
 }
 
 export interface FullRole {

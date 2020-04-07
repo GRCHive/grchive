@@ -17,5 +17,6 @@ type GiteaApi interface {
 	RepositoryAddCollaborator(GiteaRepository, GiteaUserlike) error
 
 	RepositoryCreateFile(GiteaRepository, string, string) error
-	RepositoryUpdateFile(GiteaRepository, string, string) error
+	RepositoryUpdateFile(GiteaRepository, string, string, string) error
+	RepositoryGetFile(GiteaRepository, string) (string, string, error)
 }

@@ -380,3 +380,7 @@ export const allDataSourceUrl : string = "/api/auto/data/source/all"
 export const getDataSourceUrl : string = "/api/auto/data/source/get"
 
 export const enableFeatureUrl : string = "/api/feature/new"
+
+export const saveCodeUrl : string = "/api/auto/code/save"
+export const allCodeUrl : string = "/api/auto/code/all"
+export const getCodeUrl : string = "/api/auto/code/get"

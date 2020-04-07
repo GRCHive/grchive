@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"crypto/sha256"
-	"encoding/base64"
 	"encoding/hex"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
@@ -88,8 +87,6 @@ func UpdateGiteaRepositoryTemplate(orgId int32) error {
 
 		}
 
-		base64Data := base64.StdEncoding.EncodeToString(fileData)
-
 		// There isn't a universal commit file sort of function via the
 		// Gitea API so make two HTTP requests for each file:
 		// 1) Try to create a new file.
@@ -97,17 +94,23 @@ func UpdateGiteaRepositoryTemplate(orgId int32) error {
 		// 3) Only fail if both of those operations fail.
 		gitPath := strings.TrimPrefix(header.Name, "./")
 
-		err = gitea.GlobalGiteaApi.RepositoryCreateFile(
+		_, err = gitea.GlobalGiteaApi.RepositoryCreateFile(
 			repo,
 			gitPath,
-			base64Data,
+			string(fileData),
 		)
 
 		if err != nil {
-			err = gitea.GlobalGiteaApi.RepositoryUpdateFile(
+			_, sha, err := gitea.GlobalGiteaApi.RepositoryGetFile(repo, gitPath)
+			if err != nil {
+				return err
+			}
+
+			_, err = gitea.GlobalGiteaApi.RepositoryUpdateFile(
 				repo,
 				gitPath,
-				base64Data,
+				string(fileData),
+				sha,
 			)
 
 			if err != nil {

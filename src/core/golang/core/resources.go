@@ -31,6 +31,7 @@ const (
 	ResourceIdControl          string = "process_flow_controls"
 	ResourceIdUser             string = "users"
 	ResourceIdClientData       string = "client_data"
+	ResourceIdManagedCode      string = "managed_kotlin_code"
 )
 
 func GetResourceTypeId(in interface{}) (string, int64, error) {

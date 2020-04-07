@@ -1,6 +1,8 @@
 package gitea
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 )
 
@@ -55,8 +57,18 @@ func (r *RealGiteaApi) RepositoryAddCollaborator(repo GiteaRepository, collab Gi
 	return err
 }
 
-func (r *RealGiteaApi) RepositoryCreateFile(repo GiteaRepository, path string, content string) error {
-	_, err := r.sendGiteaRequestWithToken(
+func getCommitShaFromResponse(resp map[string]*json.RawMessage) (string, error) {
+	commitData := map[string]interface{}{}
+	err := json.Unmarshal(*resp["commit"], &commitData)
+	if err != nil {
+		return "", err
+	}
+	return commitData["sha"].(string), nil
+}
+
+func (r *RealGiteaApi) RepositoryCreateFile(repo GiteaRepository, path string, content string) (string, error) {
+	base64Data := base64.StdEncoding.EncodeToString([]byte(content))
+	resp, err := r.sendGiteaRequestWithToken(
 		"POST",
 		fmt.Sprintf(FileContentEndpoint,
 			repo.Owner,
@@ -64,14 +76,44 @@ func (r *RealGiteaApi) RepositoryCreateFile(repo GiteaRepository, path string, c
 			path,
 		),
 		r.cfg.Token,
-		nil,
+		map[string]interface{}{
+			"content": base64Data,
+		},
 	)
-	return err
+
+	if err != nil {
+		return "", err
+	}
+
+	return getCommitShaFromResponse(resp)
 }
 
-func (r *RealGiteaApi) RepositoryUpdateFile(repo GiteaRepository, path string, content string) error {
-	_, err := r.sendGiteaRequestWithToken(
+func (r *RealGiteaApi) RepositoryUpdateFile(repo GiteaRepository, path string, content string, sha string) (string, error) {
+	base64Data := base64.StdEncoding.EncodeToString([]byte(content))
+	resp, err := r.sendGiteaRequestWithToken(
 		"PUT",
+		fmt.Sprintf(FileContentEndpoint,
+			repo.Owner,
+			repo.Name,
+			path,
+		),
+		r.cfg.Token,
+		map[string]interface{}{
+			"content": base64Data,
+			"sha":     sha,
+		},
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return getCommitShaFromResponse(resp)
+}
+
+func (r *RealGiteaApi) RepositoryGetFile(repo GiteaRepository, path string) (string, string, error) {
+	resp, err := r.sendGiteaRequestWithToken(
+		"GET",
 		fmt.Sprintf(FileContentEndpoint,
 			repo.Owner,
 			repo.Name,
@@ -80,5 +122,28 @@ func (r *RealGiteaApi) RepositoryUpdateFile(repo GiteaRepository, path string, c
 		r.cfg.Token,
 		nil,
 	)
-	return err
+
+	if err != nil {
+		return "", "", err
+	}
+
+	content := ""
+	sha := ""
+
+	err = json.Unmarshal(*resp["content"], &content)
+	if err != nil {
+		return "", "", err
+	}
+
+	decoded, err := base64.StdEncoding.DecodeString(content)
+	if err != nil {
+		return "", "", err
+	}
+
+	err = json.Unmarshal(*resp["sha"], &sha)
+	if err != nil {
+		return "", "", err
+	}
+
+	return string(decoded), sha, err
 }

@@ -135,6 +135,18 @@
             v-model="permissions.DbSqlRequestAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+
+        <access-type-editor
+            label="Data"
+            v-model="permissions.ClientDataAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+
+        <access-type-editor
+            label="Code"
+            v-model="permissions.ManagedCodeAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
     </v-form>
 
     <v-card-actions>
@@ -225,6 +237,8 @@ export default Vue.extend({
             DbSqlAccess: AccessType.NoAccess,
             DbSqlQueryAccess: AccessType.NoAccess,
             DbSqlRequestAccess: AccessType.NoAccess,
+            ClientDataAccess: AccessType.NoAccess,
+            ManagedCodeAccess: AccessType.NoAccess,
         },
     }),
     computed: {
@@ -310,6 +324,8 @@ export default Vue.extend({
                     DbSqlAccess: AccessType.NoAccess,
                     DbSqlQueryAccess: AccessType.NoAccess,
                     DbSqlRequestAccess: AccessType.NoAccess,
+                    ClientDataAccess: AccessType.NoAccess,
+                    ManagedCodeAccess: AccessType.NoAccess,
                 }
             } else {
                 this.name = this.referenceRole.RoleMetadata.Name

@@ -100,6 +100,7 @@ var DashboardSingleServerEndpoint string = fmt.Sprintf("%s/{%s}", DashboardServe
 const DashboardAutomationPrefix string = "/auto"
 const DashboardDataPrefix string = "/data"
 const DashboardDataSourcePrefix string = "/source"
+const DashboardCodePrefix string = "/code"
 
 var DashboardSingleDataEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgClientDataQueryId)
 
@@ -112,6 +113,7 @@ const ApiUpdateEndpoint = "/update"
 const ApiDuplicateEndpoint = "/duplicate"
 const ApiRunEndpoint = "/run"
 const ApiReadEndpoint = "/read"
+const ApiSaveEndpoint = "/save"
 
 // API
 const ApiUrl string = "/api"
