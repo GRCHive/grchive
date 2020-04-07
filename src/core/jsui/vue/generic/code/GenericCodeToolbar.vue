@@ -1,22 +1,32 @@
 <template>
     <v-toolbar flat height="30px">
-        <v-menu offset-y>
-            <template v-slot:activator="{ on }">
-                <v-btn text color="accent" v-on="on">
-                    File
-                    <v-icon small color="accent">mdi-chevron-down</v-icon>
-                </v-btn>
-            </template>
+        <v-toolbar-items>
+            <v-menu offset-y>
+                <template v-slot:activator="{ on }">
+                    <v-btn text color="accent" v-on="on">
+                        File
+                        <v-icon small color="accent">mdi-chevron-down</v-icon>
+                    </v-btn>
+                </template>
 
-            <v-list dense>
-                <v-list-item dense @click="save">
-                    <v-list-item-title>
-                        Save
-                    </v-list-item-title>
-                </v-list-item>
-                <v-divider></v-divider>
-            </v-list>
-        </v-menu>
+                <v-list dense>
+                    <v-list-item dense @click="save">
+                        <v-list-item-title>
+                            Save
+                        </v-list-item-title>
+                    </v-list-item>
+                    <v-divider></v-divider>
+                </v-list>
+            </v-menu>
+        </v-toolbar-items>
+
+        <v-spacer></v-spacer>
+
+        <span v-if="saveInProgress">
+            Saving...
+            <v-progress-circular indeterminate size="16"></v-progress-circular>
+        </span>
+
     </v-toolbar>
 </template>
 
@@ -31,7 +41,11 @@ const Props = Vue.extend({
         codeValue : {
             type : String,
             default: "",
-        }
+        },
+        saveInProgress: { 
+            type: Boolean,
+            default: false,
+        },
     }
 })
 

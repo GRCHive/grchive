@@ -4,6 +4,7 @@
         :lang="lang"
         :readonly="readonly"
         :full-height="fullHeight"
+        :save-in-progress="saveInProgress"
         @input="onInput"
         @save="onSave"
     >
@@ -43,6 +44,7 @@ const ManagedProps = Vue.extend({
 export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     codeString : string = ""
     loading: boolean = false
+    saveInProgress: boolean = false
 
     allCode : ManagedCode[] = []
     selectedCode : ManagedCode | null = null
@@ -53,8 +55,8 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
 
     @Watch('selectedCode')
     pullCode() {
-        this.codeString = ""
         if (!this.selectedCode) {
+            this.codeString = ""
             return
         }
 
@@ -116,6 +118,8 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
             code: this.codeString,
         }
 
+        this.saveInProgress = true
+
         if (this.dataId != -1) {
             params.dataId = this.dataId
         }
@@ -123,7 +127,9 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
         saveCode(params).then((resp : TSaveCodeOutput) => {
             this.allCode.unshift(resp.data)
             this.selectedCode = resp.data
+            this.saveInProgress = false
         }).catch((err : any) => {
+            this.saveInProgress = false
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
                 "Oops! Something went wrong. Try again.",

@@ -4,6 +4,7 @@
             @save="onEvent('save', ...arguments)"
             ref="toolbar"
             :code-value="value"
+            :save-in-progress="saveInProgress"
         >
         </generic-code-toolbar>
 
@@ -24,9 +25,18 @@
 <script lang="ts">
 
 import Vue from 'vue'
-import Component from 'vue-class-component'
+import Component, {mixins} from 'vue-class-component'
 import GenericCodeEditor, { Props } from './GenericCodeEditor.vue'
 import GenericCodeToolbar from './GenericCodeToolbar.vue'
+
+const IdeProps = Vue.extend({
+    props: {
+        saveInProgress: {
+            type: Boolean,
+            default: false,
+        }
+    }
+})
 
 @Component({
     components: {
@@ -34,7 +44,7 @@ import GenericCodeToolbar from './GenericCodeToolbar.vue'
         GenericCodeEditor,
     }
 })
-export default class GenericCodeIDE extends Props {
+export default class GenericCodeIDE extends mixins(Props, IdeProps) {
 
     $refs!: {
         editor: GenericCodeEditor,
