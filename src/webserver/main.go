@@ -126,26 +126,28 @@ func main() {
 		core.EnvConfig.Tls)
 	defer webcore.DefaultRabbitMQ.Cleanup()
 
-	core.Debug("Gitea Init")
-	giteaToken, err := vault.GetSecretWithKey(core.EnvConfig.Gitea.Token, "token")
-	if err != nil {
-		core.Error("Failed to get Gitea token: " + err.Error())
+	if core.EnvConfig.Features.Automation {
+		core.Debug("Gitea Init")
+		giteaToken, err := vault.GetSecretWithKey(core.EnvConfig.Gitea.Token, "token")
+		if err != nil {
+			core.Error("Failed to get Gitea token: " + err.Error())
+		}
+
+		gitea.GlobalGiteaApi.MustInitialize(gitea.GiteaConfig{
+			Protocol: core.EnvConfig.Gitea.Protocol,
+			Host:     core.EnvConfig.Gitea.Host,
+			Port:     core.EnvConfig.Gitea.Port,
+			Token:    giteaToken,
+		})
+
+		core.Debug("Drone Init")
+		drone.GlobalDroneApi.MustInitialize(drone.DroneConfig{
+			Protocol: core.EnvConfig.Drone.Protocol,
+			Host:     core.EnvConfig.Drone.Host,
+			Port:     core.EnvConfig.Drone.Port,
+			Token:    core.EnvConfig.Drone.Token,
+		})
 	}
-
-	gitea.GlobalGiteaApi.MustInitialize(gitea.GiteaConfig{
-		Protocol: core.EnvConfig.Gitea.Protocol,
-		Host:     core.EnvConfig.Gitea.Host,
-		Port:     core.EnvConfig.Gitea.Port,
-		Token:    giteaToken,
-	})
-
-	core.Debug("Drone Init")
-	drone.GlobalDroneApi.MustInitialize(drone.DroneConfig{
-		Protocol: core.EnvConfig.Drone.Protocol,
-		Host:     core.EnvConfig.Drone.Host,
-		Port:     core.EnvConfig.Drone.Port,
-		Token:    core.EnvConfig.Drone.Token,
-	})
 
 	baser := mux.NewRouter().StrictSlash(true)
 	baser.HandleFunc("/healthz", healthCheck)
