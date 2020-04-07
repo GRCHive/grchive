@@ -42,7 +42,7 @@
 
                         <feature-highlight
                             headline="Risk and Control Management"
-                            description="Deepen insight into the relationships each aspect of your organization plays and how that affects your organization’s risks and controls, enabling you to make educated decisions without ever having to second guess yourself."
+                            description="Gain back time spent on maintaining risk matrices and other governance documentation by letting GRCHive do it for you. Changes to controls, risks, systems, vendors, and more update related downstream and upstream components to keep process relationships always up to date."
                             flip
                             id="riskcontrol"
                         >
