@@ -59,6 +59,8 @@ func StoreGiteaTemplateHashForOrg(orgId int32, hash string) error {
 	_, err := tx.Exec(`
 		INSERT INTO organization_gitea_repository_template (org_id, sha256sum)
 		VALUES ($1, $2)
+		ON CONFLICT (org_id) DO UPDATE SET
+			sha256sum = EXCLUDED.sha256sum
 	`, orgId, hash)
 
 	if err != nil {

@@ -9,6 +9,7 @@ import (
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/gitea_api"
+	"html/template"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -41,6 +42,11 @@ func UpdateGiteaRepositoryTemplate(orgId int32) error {
 
 	if orgHash == giteaTemplateSHA256 {
 		return nil
+	}
+
+	org, err := database.FindOrganizationFromId(orgId)
+	if err != nil {
+		return err
 	}
 
 	gzf, err := gzip.NewReader(giteaTemplateRawData)
@@ -83,8 +89,29 @@ func UpdateGiteaRepositoryTemplate(orgId int32) error {
 			return err
 		}
 
-		if strings.HasSuffix(header.Name, ".tmpl") {
+		strData := string(fileData)
 
+		useFilename := header.Name
+		if strings.HasSuffix(header.Name, ".tmpl") {
+			useFilename = strings.TrimSuffix(useFilename, ".tmpl")
+
+			tmpl, err := template.New(header.Name).Parse(strData)
+			if err != nil {
+				return err
+			}
+
+			strData, err = core.TemplateToString(tmpl, map[string]string{
+				// TODO: Let user choose this
+				"GRCHIVE_ORG_IDENTIFIER": org.OktaGroupName,
+				// TODO: Do we need to actually update teh version in the pom?
+				"GRCHIVE_CLIENT_LIB_VERSION": "0.1",
+				// TODO: ????
+				"GRCHIVE_ORG_URL": "",
+			})
+
+			if err != nil {
+				return err
+			}
 		}
 
 		// There isn't a universal commit file sort of function via the
@@ -92,12 +119,12 @@ func UpdateGiteaRepositoryTemplate(orgId int32) error {
 		// 1) Try to create a new file.
 		// 2) If that fails for whatever reason, try to update the file.
 		// 3) Only fail if both of those operations fail.
-		gitPath := strings.TrimPrefix(header.Name, "./")
+		gitPath := strings.TrimPrefix(useFilename, "./")
 
 		_, err = gitea.GlobalGiteaApi.RepositoryCreateFile(
 			repo,
 			gitPath,
-			string(fileData),
+			strData,
 		)
 
 		if err != nil {
@@ -109,7 +136,7 @@ func UpdateGiteaRepositoryTemplate(orgId int32) error {
 			_, err = gitea.GlobalGiteaApi.RepositoryUpdateFile(
 				repo,
 				gitPath,
-				string(fileData),
+				strData,
 				sha,
 			)
 

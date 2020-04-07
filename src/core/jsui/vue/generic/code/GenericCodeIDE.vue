@@ -3,6 +3,7 @@
         <generic-code-toolbar
             @save="onEvent('save', ...arguments)"
             ref="toolbar"
+            :code-value="value"
         >
         </generic-code-toolbar>
 

@@ -26,9 +26,21 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 
+const Props = Vue.extend({
+    props: {
+        codeValue : {
+            type : String,
+            default: "",
+        }
+    }
+})
+
 @Component
-export default class GenericCodeToolbar extends Vue {
+export default class GenericCodeToolbar extends Props {
+    savedValue : string = ""
+
     save() {
+        this.savedValue = this.codeValue
         this.$emit('save')
     }
 
@@ -39,6 +51,18 @@ export default class GenericCodeToolbar extends Vue {
                 e.preventDefault()
             }
         }
+    }
+
+    handleUnload(e : Event) {
+        if (this.codeValue != this.savedValue) {
+            e.preventDefault()
+            e.returnValue = false
+        }
+    }
+
+    mounted() {
+        this.savedValue = this.codeValue
+        window.addEventListener('beforeunload', this.handleUnload)
     }
 }
 

@@ -30,6 +30,11 @@ func StoreManagedCodeToGitea(code *core.ManagedCode, script string, role *core.R
 		return err
 	}
 
+	err = UpdateGiteaRepositoryTemplate(code.OrgId)
+	if err != nil {
+		return err
+	}
+
 	giteaRepo := gitea.GiteaRepository{
 		Owner: grcRepo.GiteaOrg,
 		Name:  grcRepo.GiteaRepo,
