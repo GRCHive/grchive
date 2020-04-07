@@ -118,14 +118,14 @@ func (r *RealGiteaApi) RepositoryUpdateFile(repo GiteaRepository, path string, c
 	return getCommitFileShaFromResponse(resp)
 }
 
-func (r *RealGiteaApi) RepositoryGetFile(repo GiteaRepository, path string) (string, string, error) {
+func (r *RealGiteaApi) RepositoryGetFile(repo GiteaRepository, path string, ref string) (string, string, error) {
 	resp, err := r.sendGiteaRequestWithToken(
 		"GET",
 		fmt.Sprintf(FileContentEndpoint,
 			repo.Owner,
 			repo.Name,
 			path,
-		),
+		)+"?ref="+ref,
 		r.cfg.Token,
 		nil,
 	)

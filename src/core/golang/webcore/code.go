@@ -20,7 +20,7 @@ func GetManagedCodeFromGitea(codeId int64, orgId int32, role *core.Role) (string
 	content, _, err := gitea.GlobalGiteaApi.RepositoryGetFile(gitea.GiteaRepository{
 		Owner: grcRepo.GiteaOrg,
 		Name:  grcRepo.GiteaRepo,
-	}, code.GitPath)
+	}, code.GitPath, code.GitHash)
 	return content, err
 }
 
@@ -43,7 +43,7 @@ func StoreManagedCodeToGitea(code *core.ManagedCode, script string, role *core.R
 	// We need to check if the file exists or not in Gitea irrespective of what our database thinks
 	// since it's possible for our code to get into a state where the file exists in Gitea but we do not
 	// have it tracked in the database.
-	_, sha, err := gitea.GlobalGiteaApi.RepositoryGetFile(giteaRepo, code.GitPath)
+	_, sha, err := gitea.GlobalGiteaApi.RepositoryGetFile(giteaRepo, code.GitPath, "master")
 
 	// Assume a non-nil error means that the file doesn't exist. If it turns out we're wrong,
 	// we should get another error when we try to create a new file.

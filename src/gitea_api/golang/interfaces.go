@@ -18,5 +18,5 @@ type GiteaApi interface {
 
 	RepositoryCreateFile(GiteaRepository, string, string) (string, error)
 	RepositoryUpdateFile(GiteaRepository, string, string, string) (string, error)
-	RepositoryGetFile(GiteaRepository, string) (string, string, error)
+	RepositoryGetFile(GiteaRepository, string, string) (string, string, error)
 }

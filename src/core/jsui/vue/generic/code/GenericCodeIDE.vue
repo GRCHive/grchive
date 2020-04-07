@@ -6,6 +6,9 @@
             :code-value="value"
             :save-in-progress="saveInProgress"
         >
+            <template v-slot:custom-status>
+                <slot name="custom-status"></slot>
+            </template>
         </generic-code-toolbar>
 
         <generic-code-editor

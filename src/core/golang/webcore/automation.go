@@ -128,7 +128,7 @@ func UpdateGiteaRepositoryTemplate(orgId int32) error {
 		)
 
 		if err != nil {
-			_, sha, err := gitea.GlobalGiteaApi.RepositoryGetFile(repo, gitPath)
+			_, sha, err := gitea.GlobalGiteaApi.RepositoryGetFile(repo, gitPath, "master")
 			if err != nil {
 				return err
 			}

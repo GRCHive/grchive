@@ -1,5 +1,5 @@
 <template>
-    <v-toolbar flat height="30px">
+    <v-toolbar flat height="38px">
         <v-toolbar-items>
             <v-menu offset-y>
                 <template v-slot:activator="{ on }">
@@ -27,6 +27,7 @@
             <v-progress-circular indeterminate size="16"></v-progress-circular>
         </span>
 
+        <slot name="custom-status"></slot>
     </v-toolbar>
 </template>
 
