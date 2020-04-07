@@ -121,7 +121,7 @@ func UpdateGiteaRepositoryTemplate(orgId int32) error {
 		// 3) Only fail if both of those operations fail.
 		gitPath := strings.TrimPrefix(useFilename, "./")
 
-		_, err = gitea.GlobalGiteaApi.RepositoryCreateFile(
+		_, _, err = gitea.GlobalGiteaApi.RepositoryCreateFile(
 			repo,
 			gitPath,
 			strData,
@@ -133,7 +133,7 @@ func UpdateGiteaRepositoryTemplate(orgId int32) error {
 				return err
 			}
 
-			_, err = gitea.GlobalGiteaApi.RepositoryUpdateFile(
+			_, _, err = gitea.GlobalGiteaApi.RepositoryUpdateFile(
 				repo,
 				gitPath,
 				strData,

@@ -48,13 +48,13 @@ func StoreManagedCodeToGitea(code *core.ManagedCode, script string, role *core.R
 	// Assume a non-nil error means that the file doesn't exist. If it turns out we're wrong,
 	// we should get another error when we try to create a new file.
 	if err != nil {
-		code.GitHash, err = gitea.GlobalGiteaApi.RepositoryCreateFile(
+		code.GitHash, code.GiteaFileSha, err = gitea.GlobalGiteaApi.RepositoryCreateFile(
 			giteaRepo,
 			code.GitPath,
 			script,
 		)
 	} else {
-		code.GitHash, err = gitea.GlobalGiteaApi.RepositoryUpdateFile(
+		code.GitHash, code.GiteaFileSha, err = gitea.GlobalGiteaApi.RepositoryUpdateFile(
 			giteaRepo,
 			code.GitPath,
 			script,

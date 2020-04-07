@@ -57,16 +57,23 @@ func (r *RealGiteaApi) RepositoryAddCollaborator(repo GiteaRepository, collab Gi
 	return err
 }
 
-func getCommitShaFromResponse(resp map[string]*json.RawMessage) (string, error) {
+func getCommitFileShaFromResponse(resp map[string]*json.RawMessage) (string, string, error) {
 	commitData := map[string]interface{}{}
 	err := json.Unmarshal(*resp["commit"], &commitData)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	return commitData["sha"].(string), nil
+
+	contentData := map[string]interface{}{}
+	err = json.Unmarshal(*resp["content"], &contentData)
+	if err != nil {
+		return "", "", err
+	}
+
+	return commitData["sha"].(string), contentData["sha"].(string), nil
 }
 
-func (r *RealGiteaApi) RepositoryCreateFile(repo GiteaRepository, path string, content string) (string, error) {
+func (r *RealGiteaApi) RepositoryCreateFile(repo GiteaRepository, path string, content string) (string, string, error) {
 	base64Data := base64.StdEncoding.EncodeToString([]byte(content))
 	resp, err := r.sendGiteaRequestWithToken(
 		"POST",
@@ -82,13 +89,13 @@ func (r *RealGiteaApi) RepositoryCreateFile(repo GiteaRepository, path string, c
 	)
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return getCommitShaFromResponse(resp)
+	return getCommitFileShaFromResponse(resp)
 }
 
-func (r *RealGiteaApi) RepositoryUpdateFile(repo GiteaRepository, path string, content string, sha string) (string, error) {
+func (r *RealGiteaApi) RepositoryUpdateFile(repo GiteaRepository, path string, content string, sha string) (string, string, error) {
 	base64Data := base64.StdEncoding.EncodeToString([]byte(content))
 	resp, err := r.sendGiteaRequestWithToken(
 		"PUT",
@@ -105,10 +112,10 @@ func (r *RealGiteaApi) RepositoryUpdateFile(repo GiteaRepository, path string, c
 	)
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return getCommitShaFromResponse(resp)
+	return getCommitFileShaFromResponse(resp)
 }
 
 func (r *RealGiteaApi) RepositoryGetFile(repo GiteaRepository, path string) (string, string, error) {
