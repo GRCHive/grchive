@@ -170,7 +170,7 @@
                             <v-col cols="3">
                                 <feature-summary
                                     headline="Security"
-                                    description="All the data transmitted to, from, and within GRCHive is encrypted using TLS to ensure your organization's confidential information is protected. Additionally, documentation on Google Cloud are encrypted and signed to ensure confidentialiality and integrity."
+                                    description="All the data transmitted to, from, and within GRCHive is encrypted using TLS to ensure your organization's confidential information is protected. Additionally, your documentation is are encrypted and signed before being stored on Google Cloud to ensure confidentiality and integrity."
                                     id="security"
                                 >
                                     <template v-slot:image>
