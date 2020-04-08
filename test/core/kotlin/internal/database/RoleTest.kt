@@ -43,7 +43,8 @@ class RoleTest: StringSpec({
         unionAccessType(AccessType.Edit) /* dbSqlAccess */,
         unionAccessType(AccessType.View) /* dbSqlQueryAccess */,
         unionAccessType(AccessType.None) /* dbSqlRequestAccess */,
-        unionAccessType(AccessType.View) /* clientDataAccess */
+        unionAccessType(AccessType.View) /* clientDataAccess */,
+        unionAccessType(AccessType.View, AccessType.Edit, AccessType.Manage) /* managedCodeAccess */
     )
 
     val pg = KotestGrchivePgContainer {

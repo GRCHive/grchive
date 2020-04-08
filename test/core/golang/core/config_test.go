@@ -65,6 +65,8 @@ func generateTestToml(config GenerateTomlConfig) (*toml.Tree, *core.EnvConfigDat
 		Kotlin:             new(core.KotlinConfigData),
 		Gitea:              new(core.GiteaConfigData),
 		Drone:              new(core.DroneConfigData),
+		Features:           new(core.FeatureFlags),
+		Artifactory:        new(core.ArtifactoryConfigData),
 	}
 
 	newDataVal := reflect.ValueOf(&newData).Elem()
@@ -161,10 +163,13 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"Gitea.Port", "gitea.port", int64(128), int32(128)},
 					{"Gitea.Protocol", "gitea.protocol", "protocl", nil},
 					{"Gitea.Token", "gitea.token", "token", nil},
+					{"Features.Automation", "features.automation", true, nil},
 					{"Drone.Host", "drone.host", "host", nil},
 					{"Drone.Port", "drone.port", int64(128), int32(128)},
 					{"Drone.Protocol", "drone.protocol", "protocl", nil},
 					{"Drone.Token", "drone.token", "token", nil},
+					{"Artifactory.Host", "artifactory.host", "host", nil},
+					{"Artifactory.Port", "artifactory.port", int64(128), int32(128)},
 				},
 			},
 			parseError: false,
