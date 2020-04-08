@@ -45,7 +45,7 @@ func loadTemplateParamsForOrg(org *core.Organization) (map[string]string, string
 		// TODO: ????
 		"GRCHIVE_ORG_URL":  "",
 		"ARTIFACTORY_HOST": core.EnvConfig.Artifactory.Host,
-		"ARTIFACTORY_PORT": strconv.FormatInt(int64(core.EnvConfig.Artfiactory.Port), 10),
+		"ARTIFACTORY_PORT": strconv.FormatInt(int64(core.EnvConfig.Artifactory.Port), 10),
 	}
 
 	templateJsonRaw, err := json.Marshal(templateParams)
