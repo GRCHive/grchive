@@ -26,6 +26,13 @@
     </dependency>
   </dependencies>
 
+  <distributionManagement>
+    <repository>
+        <id>central</id>
+        <name>libs-release</name>
+        <url>http://{{ .ARTIFACTORY_HOST }}:{{ .ARTIFACTORY_PORT }}/artifactory/libs-release-local</url>
+    </repository>
+  </distributionManagement>
 
   <build>
     <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>

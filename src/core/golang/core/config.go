@@ -111,6 +111,11 @@ type FeatureFlags struct {
 	Automation bool
 }
 
+type ArtifactoryConfigData struct {
+	Host string
+	Port int32
+}
+
 type EnvConfigData struct {
 	SelfUri            string
 	SelfDomain         string
@@ -135,6 +140,7 @@ type EnvConfigData struct {
 	Gitea              *GiteaConfigData
 	Drone              *DroneConfigData
 	Features           *FeatureFlags
+	Artfactory         *ArtifactoryConfigData
 }
 
 var EnvConfig *EnvConfigData
@@ -265,6 +271,10 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 
 	envConfig.Features = new(FeatureFlags)
 	envConfig.Features.Automation = tomlConfig.Get("features.automation").(bool)
+
+	envConfig.Artfactory = new(ArtifactoryConfigData)
+	envConfig.Artfactory.Host = tomlConfig.Get("artifactory.host").(string)
+	envConfig.Artfactory.Port = int32(tomlConfig.Get("artifactory.port").(int64))
 
 	return envConfig
 }

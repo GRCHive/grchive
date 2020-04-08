@@ -94,6 +94,29 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `DRONE_SERVER_PORT`: Port at which to listen to Drone HTTP requests.
 - `DRONE_TOKEN`: The token with which to access the Drone API.
 
+### Artifactory
+
+- `ARTIFACTORY_DATABASE`: The database name to use for Artifactory.
+- `ARTIFACTORY_HOST`: The hostname or IP at which to access Artifactory.
+- `ARTIFACTORY_PORT`: The port at which to listen to Artifactory requests.
+- `ARTIFACTORY_EXTERNAL_PORT`: The port at which to listen to frontend Artifactory requests.
+- `ARTIFACTORY_JOIN_KEY`: The `joinKey` config variable for Artifactory.
+- `ARTIFACTORY_MASTER_KEY`: The `masterKey` config variable for Artifactory.
+- `ARTIFACTORY_DEPLOY_USER` : Deployment username in Artifactory.
+- `ARTIFACTORY_ENCRYPTED_PASSWORD` : Encrypted password of the deployment user in Artifactory.
+
+## Grchive Standard Ports
+
+- Webserver: `8080`
+- Nginx: `80` (HTTP), `443` (HTTPS)
+- RabbitMQ: `5672` (HTTP), `5671` (HTTPS)
+- PostgreSQL: `5432`
+- Vault: `8200`
+- GRPC Query Runner: `6000`
+- Gitea: `3000`
+- Drone: `8888`
+- Artifactory: `9998` (Artifacts), `9999` (Frontend)
+
 ## Setup Dependencies
 
 - Install Blaze.
@@ -211,7 +234,7 @@ Retrieve the IP address and then create an NFS volume in Docker for future use.
 - `docker volume create --driver local --opt type=nfs --opt o=vers=4,addr=$NFS_IP,rw --opt device=:/ gitea-nfsvolume`
 
 If the NFS port is already bound (2049), stop the NFS service on your local machine.
-You may need to run `sudo modprobe nfs` to get this step to work; alternatively, you can try to start and then stop the NFS service.
+You may need to run `sudo modprobe nfs` to get this step to work; alternatively, you can try to start and then stop the NFS service on your machine.
 
 ### Gitea
 
@@ -246,6 +269,36 @@ You can find the right value for `${PASSWORD}` by querying Vault:
 ```
 vault kv get -address="${VAULT_HOST}:${VAULT_PORT}" -field=password secret/gitea/token
 ```
+
+## Artifactory
+
+- `cd $SRC`
+- `bazel run //devops/docker/artifactory:artifactory`
+- `docker run --network host --name artifactory -v /srv/artifactory:/opt/jfrog/artifactory/var/data/artifactory/filestore bazel/devops/docker/artifactory:artifactory`
+
+You will need to restart the server the first time you run the above command for it to properly pick up all the initial configuration.
+
+- `docker stop artifactory`
+- `docker start artifactory`
+
+At this point, Artifactory should be fully functional.
+You will want to point your browser to `http://${ARTIFACTORY_HOST}:${ARTIFACTORY_EXTERNAL_PORT}` and login using the following credentials:
+
+```
+Username: admin
+Password: password
+```
+
+- Go to the user management page (Administration > Identity and Access > Users) and change the admin password (and setup an admin email address).
+- Furthermore, create a new user to use for deployment purposes with the default settings and a username and password of your choice.
+- Next, create a new Permission (Administration > Identity and Access > Permissions) named `Deploy`.
+- Under `Resources`, add the `libs-release-local` and `libs-snapshot-local` repositories.
+- Under `Users`, add the newly created user and give the user `Read`, `Annotate`, `Deploy/Cache`, and `Delete/Overwrite` permissions for Repositories.
+- Logout as the admin and sign in as the deployment user.
+- Click on `Welcome, {USERNAME}` and click `Edit Profile`.
+- Enter the password and `Unlock`.
+- Show the `Encrypted Password` and save this as `ARTIFACTORY_ENCRYPTED_PASSWORD` in `build/variables.bzl`.
+- Save the deployment username as `ARTIFACTORY_DEPLOY_USER` in `build/variables.bzl`.
 
 ## Build and Run Webserver
 

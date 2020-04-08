@@ -28,40 +28,42 @@ func GetLinkedGiteaRepository(orgId int32) (*core.LinkedGiteaRepository, error) 
 	return &repo, err
 }
 
-func GetGiteaTemplateHashForOrg(orgId int32) (string, error) {
+func GetGiteaTemplateHashForOrg(orgId int32) (string, string, error) {
 	rows, err := dbConn.Queryx(`
-		SELECT sha256sum
+		SELECT sha256sum, template256sum
 		FROM organization_gitea_repository_template
 		WHERE org_id = $1
 	`, orgId)
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	defer rows.Close()
 
 	if !rows.Next() {
-		return "", nil
+		return "", "", nil
 	}
 
 	hash := ""
-	err = rows.Scan(&hash)
+	templateHash := ""
+	err = rows.Scan(&hash, &templateHash)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return hash, nil
+	return hash, templateHash, nil
 }
 
-func StoreGiteaTemplateHashForOrg(orgId int32, hash string) error {
+func StoreGiteaTemplateHashForOrg(orgId int32, hash string, templateHash string) error {
 	tx := CreateTx()
 	_, err := tx.Exec(`
-		INSERT INTO organization_gitea_repository_template (org_id, sha256sum)
-		VALUES ($1, $2)
+		INSERT INTO organization_gitea_repository_template (org_id, sha256sum, template256sum)
+		VALUES ($1, $2, $3)
 		ON CONFLICT (org_id) DO UPDATE SET
-			sha256sum = EXCLUDED.sha256sum
-	`, orgId, hash)
+			sha256sum = EXCLUDED.sha256sum,
+			template256sum = EXCLUDED.template256sum
+	`, orgId, hash, templateHash)
 
 	if err != nil {
 		tx.Rollback()

@@ -372,6 +372,13 @@ container_pull(
     tag = "latest"
 )
 
+container_pull(
+    name = "artifactory",
+    registry = "docker.bintray.io",
+    repository = "jfrog/artifactory-oss",
+    tag = "7.3.2"
+)
+
 load(
     "@io_bazel_rules_docker//go:image.bzl",
     _go_image_repos = "repositories",

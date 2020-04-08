@@ -1,0 +1,37 @@
+package(default_visibility=["//visibility:public"])
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("//build:variables.bzl", "env")
+
+genrule(
+    name = "system-config",
+    srcs = [ "system.yaml.tmpl" ],
+    outs = [ "opt/jfrog/artifactory/var/etc/system.yaml" ],
+    cmd = ". $(location //build:bash_env) && envsubst < $< > $@",
+    tools = [
+        "//build:bash_env"
+    ]
+)
+
+genrule(
+    name ="bootstrap-config",
+    srcs = [ "artifactory.config.import.yml.tmpl" ],
+    outs = [ "opt/jfrog/artifactory/var/etc/artifactory/artifactory.config.import.yml" ],
+    cmd = ". $(location //build:bash_env) && envsubst < $< > $@",
+    tools = [
+        "//build:bash_env"
+    ]
+
+)
+
+container_image(
+    name = "artifactory",
+    base = "@artifactory//image",
+    files = [
+        ":system-config",
+        ":bootstrap-config",
+        "entrypoint.sh",
+    ],
+    data_path = ".",
+    entrypoint = "exec /entrypoint.sh",
+    user = "root",
+)

@@ -6,12 +6,14 @@ import (
 	"compress/gzip"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/gitea_api"
 	"html/template"
 	"io"
 	"io/ioutil"
+	"strconv"
 	"strings"
 )
 
@@ -32,21 +34,50 @@ func loadGiteaTemplate() {
 	giteaTemplateSHA256 = hex.EncodeToString(rawSha256[:])
 }
 
-func UpdateGiteaRepositoryTemplate(orgId int32) error {
-	// If the current hash doesn't exist or if it doesn't match up with what
-	// the latest version is, then we want to regenerate the template.
-	orgHash, err := database.GetGiteaTemplateHashForOrg(orgId)
+func loadTemplateParamsForOrg(org *core.Organization) (map[string]string, string, error) {
+	// We also need to check the hash on the template parameters since if that
+	// changes, we also want to regenerate.
+	templateParams := map[string]string{
+		// TODO: Let user choose this
+		"GRCHIVE_ORG_IDENTIFIER": org.OktaGroupName,
+		// TODO: Do we need to actually update teh version in the pom?
+		"GRCHIVE_CLIENT_LIB_VERSION": "0.1",
+		// TODO: ????
+		"GRCHIVE_ORG_URL":  "",
+		"ARTIFACTORY_HOST": core.EnvConfig.Artfactory.Host,
+		"ARTIFACTORY_PORT": strconv.FormatInt(int64(core.EnvConfig.Artfactory.Port), 10),
+	}
+
+	templateJsonRaw, err := json.Marshal(templateParams)
 	if err != nil {
-		return err
+		return nil, "", err
 	}
 
-	if orgHash == giteaTemplateSHA256 {
-		return nil
-	}
+	rawSha256 := sha256.Sum256(templateJsonRaw)
+	sha256hex := hex.EncodeToString(rawSha256[:])
+	return templateParams, sha256hex, nil
+}
 
+func UpdateGiteaRepositoryTemplate(orgId int32) error {
 	org, err := database.FindOrganizationFromId(orgId)
 	if err != nil {
 		return err
+	}
+
+	// If the current hash doesn't exist or if it doesn't match up with what
+	// the latest version is, then we want to regenerate the template.
+	orgHash, templateHash, err := database.GetGiteaTemplateHashForOrg(orgId)
+	if err != nil {
+		return err
+	}
+
+	templateParams, testTemplateHash, err := loadTemplateParamsForOrg(org)
+	if err != nil {
+		return err
+	}
+
+	if orgHash == giteaTemplateSHA256 && templateHash == testTemplateHash {
+		return nil
 	}
 
 	gzf, err := gzip.NewReader(giteaTemplateRawData)
@@ -100,14 +131,7 @@ func UpdateGiteaRepositoryTemplate(orgId int32) error {
 				return err
 			}
 
-			strData, err = core.TemplateToString(tmpl, map[string]string{
-				// TODO: Let user choose this
-				"GRCHIVE_ORG_IDENTIFIER": org.OktaGroupName,
-				// TODO: Do we need to actually update teh version in the pom?
-				"GRCHIVE_CLIENT_LIB_VERSION": "0.1",
-				// TODO: ????
-				"GRCHIVE_ORG_URL": "",
-			})
+			strData, err = core.TemplateToString(tmpl, templateParams)
 
 			if err != nil {
 				return err
@@ -146,5 +170,5 @@ func UpdateGiteaRepositoryTemplate(orgId int32) error {
 		}
 	}
 
-	return database.StoreGiteaTemplateHashForOrg(orgId, giteaTemplateSHA256)
+	return database.StoreGiteaTemplateHashForOrg(orgId, giteaTemplateSHA256, testTemplateHash)
 }

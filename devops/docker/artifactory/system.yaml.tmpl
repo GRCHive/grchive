@@ -1,0 +1,31 @@
+configVersion: 1
+
+shared:
+    extraJavaOpts: "-server -Xms512m -Xmx2g -Xss256k -XX:+UseG1GC"
+
+    security:
+        joinKey: "${ARTIFACTORY_JOIN_KEY}"
+        masterKey: "${ARTIFACTORY_MASTER_KEY}"
+
+    database:
+        type: postgresql
+        driver: org.postgresql.Driver
+        url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${ARTIFACTORY_DATABASE}
+        username: ${POSTGRES_USER}
+        password: ${POSTGRES_PASSWORD}
+
+    logging:
+        consoleLog:
+            enabled: true
+
+        rotation:
+            maxSizeMb: 25
+            maxFiles: 4
+            compress: true
+
+artifactory:
+    port: ${ARTIFACTORY_PORT}
+
+router:
+    entrypoints:
+        externalPort: ${ARTIFACTORY_EXTERNAL_PORT}

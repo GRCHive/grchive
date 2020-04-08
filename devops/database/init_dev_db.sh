@@ -8,4 +8,5 @@ $1 createdb audit -O DEVUSER
 $1 createdb vault -O DEVUSER
 $1 createdb gitea -O DEVUSER
 $1 createdb drone -O DEVUSER
+$1 createdb artifactory -O DEVUSER
 echo "!!! Start/Enable the PostgreSQL service for your OS."
