@@ -7,7 +7,7 @@
         :save-in-progress="saveInProgress"
         @input="onInput"
         @save="onSave"
-        v-if="!!selectedCode && !initialLoad"
+        v-if="!initialLoad"
     >
         <template v-slot:custom-status>
             <v-col cols="auto">
@@ -90,6 +90,7 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     pullCode() {
         if (!this.selectedCode) {
             this.codeString = ""
+            this.initialLoad = false
             return
         }
 
@@ -134,6 +135,12 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
                 this.selectedCode = this.allCode[0]
             } else {
                 this.selectedCode = null
+
+                // Force pull to get proper behavior as if
+                // the selected code changed. This should
+                // be cheap so even if the code DID change
+                // not much should happen.
+                this.pullCode()
             }
         }).catch((err : any) => {
             // @ts-ignore

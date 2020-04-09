@@ -93,7 +93,7 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `DRONE_SERVER_HOST`: Host at which to access the Drone server (do not include the port number).
 - `DRONE_SERVER_PORT`: Port at which to listen to Drone HTTP requests.
 - `DRONE_TOKEN`: The token with which to access the Drone API.
-- `DRONE_RUNNER_TYPE`: The runner type to be used in the Drone pipeline. Should be `exec` locally and `kubernetes` in production.
+- `DRONE_RUNNER_TYPE`: The runner type to be used in the Drone pipeline. Should be `docker` locally and `kubernetes` in production.
 
 ### Artifactory
 

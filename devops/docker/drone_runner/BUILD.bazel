@@ -11,5 +11,6 @@ container_image(
         "DRONE_RPC_SECRET": env["DRONE_RPC_SECRET"],
         "DRONE_UI_DISABLE": "true",
         "DRONE_RUNNER_CAPACITY": "2",
+        "DRONE_RUNNER_NETWORKS": "c3p0",
     }
 )
