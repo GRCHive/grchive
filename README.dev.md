@@ -190,7 +190,7 @@ To ensure that these applications can talk to each other, we will place them all
     ```
     docker run \
         --network c3p0 \
-        --rm --name psql \
+        --name psql \
         -v /var/lib/postgres/data:/var/lib/postgresql/data \
         postgres:12.2
     ```
@@ -231,7 +231,7 @@ Replace `${VAULT_PORT}` with the corresponding value in the `variables.bzl` file
 
 - `cd $SRC`
 - `bazel run //devops/docker/vault:vault`
-- `docker run --network=c3p0 --rm --name vault bazel/devops/docker/vault:vault`
+- `docker run --network=c3p0 --name vault bazel/devops/docker/vault:vault`
 - Set `VAULT_HOST` to be the result of `docker inspect -f '{{.NetworkSettings.Networks.c3p0.IPAddress}}' vault` prefixed by `http://`.
 - `vault operator init -address="${VAULT_HOST}:${VAULT_PORT}" -n 1 -t 1`
 - Store the unseal key and the root token somehwere.
@@ -248,7 +248,7 @@ Replace `${RABBITMQ_PORT}` with the corresponding value in the `variables.bzl` f
 
 - `cd $SRC`
 - `bazel run //devops/docker/rabbitmq:rabbitmq`
-- `docker run --rm --name rabbitmq --hostname rabbitmq --mount source=rabbitmqmnt,target=/var/lib/rabbitmq --network c3p0 bazel/devops/docker/rabbitmq:rabbitmq`
+- `docker run --name rabbitmq --hostname rabbitmq --mount source=rabbitmqmnt,target=/var/lib/rabbitmq --network c3p0 bazel/devops/docker/rabbitmq:rabbitmq`
 - Set `RABBITMQ_HOST` to be the result of `docker inspect -f '{{.NetworkSettings.Networks.c3p0.IPAddress}}' rabbitmq`.
 
 ## Gitea
@@ -262,7 +262,7 @@ Additionally, we will be setting up an NFS server to use as the storage volume f
 - `mkdir /srv/nfs/gitea && chown -R $(whoami) /srv/nfs/gitea`
 - `cd $SRC`
 - `bazel run //devops/docker/nfs:nfs-server`
-- `docker run -v /srv/nfs/gitea:/srv/nfs/gitea --rm --name nfssrv --privileged --network c3p0 bazel/devops/docker/nfs:nfs-server`
+- `docker run -v /srv/nfs/gitea:/srv/nfs/gitea --name nfssrv --privileged --network c3p0 bazel/devops/docker/nfs:nfs-server`
 
 Retrieve the IP address and then create an NFS volume in Docker for future use.
 
@@ -275,7 +275,7 @@ You may need to run `sudo modprobe nfs` to get this step to work; alternatively,
 
 - `cd $SRC`
 - `bazel run //devops/docker/gitea:gitea`
-- `docker run --network c3p0 --rm --name gitea --mount source=gitea-nfsvolume,target=/data bazel/devops/docker/gitea:gitea`
+- `docker run --network c3p0 --name gitea --mount source=gitea-nfsvolume,target=/data bazel/devops/docker/gitea:gitea`
 - Set `GITEA_HOST` to be the result of `docker inspect -f '{{.NetworkSettings.Networks.c3p0.IPAddress}}' gitea`.
 
 At this point, we will need to create the initial admin user and obtain the access token that we will use throughout the rest of our apps.
@@ -290,7 +290,7 @@ Note that this assumes that Gitea Docker container as well as the Vault Docker c
 
 - `cd $SRC`
 - `bazel run //devops/docker/artifactory:artifactory`
-- `docker run --network c3p0 --rm --name artifactory -v /srv/artifactory:/opt/jfrog/artifactory/var/data/artifactory/filestore bazel/devops/docker/artifactory:artifactory`
+- `docker run --network c3p0 --name artifactory -v /srv/artifactory:/opt/jfrog/artifactory/var/data/artifactory/filestore bazel/devops/docker/artifactory:artifactory`
 
 You will need to rerun the `docker run` command the first time you run the above command for it to properly pick up all the initial configuration.
 
@@ -318,17 +318,15 @@ Password: password
 - `cd $SRC/devops/docker/drone`
 - `./setup_drone.sh`
 - `bazel run //devops/docker/drone:drone`
-- `docker run --network c3p0 --rm --name drone bazel/devops/docker/drone:drone`
+- `docker run --network c3p0 --name drone bazel/devops/docker/drone:drone`
 - Set `DRONE_SERVER_HOST` to the result of `docker inspect -f '{{.NetworkSettings.Networks.c3p0.IPAddress}}' drone`.
 - At this point you will need to re-run
     ```
     bazel run --action_env VAULT_TOKEN="$YOUR_ROOT_TOKEN" //devops/docker/gitea:docker_access_token
     ```
     to re-setup Gitea access.
-- Next you will have to rebuild the Drone container to ensure that it points properly to Gitea given the new access token.
-    - `docker stop drone`
-    - `bazel run //devops/docker/drone:drone`
-    - `docker run --network c3p0 --rm --name drone bazel/devops/docker/drone:drone`
+- Next you will have to restart the Drone container.
+    - `docker stop drone && docker start drone`
 
 At this point, you need to authorize Drone to access Gitea; this can only be done manually.
 Point your browser to `${DRONE_PROTOCOL}://${DRONE_SERVER_HOST}:${DRONE_SERVER_PORT}` and login using the following credentials:
@@ -347,7 +345,7 @@ vault kv get -address="${VAULT_HOST}:${VAULT_PORT}" -field=password secret/gitea
 
 - `cd $SRC`
 - `bazel run //devops/docker/drone_runner:drone-runner`
-- `docker run --network c3p0 -v /var/run/docker.sock:/var/run/docker.sock --rm --name drone-runner bazel/devops/docker/drone_runner:drone-runner`
+- `docker run --network c3p0 -v /var/run/docker.sock:/var/run/docker.sock --name drone-runner bazel/devops/docker/drone_runner:drone-runner`
 
 ## Build and Run Webserver
 
