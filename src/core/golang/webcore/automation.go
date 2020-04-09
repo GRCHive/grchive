@@ -43,9 +43,10 @@ func loadTemplateParamsForOrg(org *core.Organization) (map[string]string, string
 		// TODO: Do we need to actually update teh version in the pom?
 		"GRCHIVE_CLIENT_LIB_VERSION": "0.1",
 		// TODO: ????
-		"GRCHIVE_ORG_URL":  "",
-		"ARTIFACTORY_HOST": core.EnvConfig.Artifactory.Host,
-		"ARTIFACTORY_PORT": strconv.FormatInt(int64(core.EnvConfig.Artifactory.Port), 10),
+		"GRCHIVE_ORG_URL":   "",
+		"ARTIFACTORY_HOST":  core.EnvConfig.Artifactory.Host,
+		"ARTIFACTORY_PORT":  strconv.FormatInt(int64(core.EnvConfig.Artifactory.Port), 10),
+		"DRONE_RUNNER_TYPE": core.EnvConfig.Drone.RunnerType,
 	}
 
 	templateJsonRaw, err := json.Marshal(templateParams)
@@ -148,7 +149,10 @@ func UpdateGiteaRepositoryTemplate(orgId int32) error {
 		_, _, err = gitea.GlobalGiteaApi.RepositoryCreateFile(
 			repo,
 			gitPath,
-			strData,
+			gitea.GiteaCreateFileOptions{
+				Content: strData,
+				Message: "Update Repository Template [CI SKIP]",
+			},
 		)
 
 		if err != nil {
@@ -160,7 +164,10 @@ func UpdateGiteaRepositoryTemplate(orgId int32) error {
 			_, _, err = gitea.GlobalGiteaApi.RepositoryUpdateFile(
 				repo,
 				gitPath,
-				strData,
+				gitea.GiteaCreateFileOptions{
+					Content: strData,
+					Message: "Update Repository Template [CI SKIP]",
+				},
 				sha,
 			)
 

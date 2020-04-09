@@ -51,13 +51,17 @@ func StoreManagedCodeToGitea(code *core.ManagedCode, script string, role *core.R
 		code.GitHash, code.GiteaFileSha, err = gitea.GlobalGiteaApi.RepositoryCreateFile(
 			giteaRepo,
 			code.GitPath,
-			script,
+			gitea.GiteaCreateFileOptions{
+				Content: script,
+			},
 		)
 	} else {
 		code.GitHash, code.GiteaFileSha, err = gitea.GlobalGiteaApi.RepositoryUpdateFile(
 			giteaRepo,
 			code.GitPath,
-			script,
+			gitea.GiteaCreateFileOptions{
+				Content: script,
+			},
 			sha,
 		)
 	}

@@ -8,7 +8,7 @@ const AdminCreateUserEndpoint string = "/admin/users"
 const AdminCreateOrgEndpoint string = "/admin/users/%s/orgs"
 
 func (r *RealGiteaApi) AdminCreateUser(user GiteaUser) error {
-	_, err := r.sendGiteaRequestWithToken(
+	_, _, err := r.sendGiteaRequestWithToken(
 		"POST",
 		AdminCreateUserEndpoint,
 		r.cfg.Token,
@@ -26,7 +26,7 @@ func (r *RealGiteaApi) AdminCreateUser(user GiteaUser) error {
 }
 
 func (r *RealGiteaApi) AdminCreateOrganization(user GiteaUser, org GiteaOrganization) error {
-	_, err := r.sendGiteaRequestWithToken(
+	_, _, err := r.sendGiteaRequestWithToken(
 		"POST",
 		fmt.Sprintf(AdminCreateOrgEndpoint, user.Username),
 		r.cfg.Token,

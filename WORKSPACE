@@ -379,6 +379,14 @@ container_pull(
     tag = "7.3.2"
 )
 
+container_pull(
+    name = "drone-runner-docker",
+    registry = "index.docker.io",
+    repository = "drone/drone-runner-docker",
+    tag = "1.2",
+    digest = "sha256:41b645856068583529a831a79f9e10d8ec5b905234555d51b12223b90a25cd6b",
+)
+
 load(
     "@io_bazel_rules_docker//go:image.bzl",
     _go_image_repos = "repositories",

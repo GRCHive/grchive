@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net/http"
 )
 
 const CreateRepoEndpoint = "/user/repos"
@@ -12,7 +13,7 @@ const AddCollabEndpoint = "/repos/%s/%s/collaborators/%s"
 const FileContentEndpoint = "/repos/%s/%s/contents/%s"
 
 func (r *RealGiteaApi) RepositoryCreate(token GiteaToken, repo GiteaRepository) error {
-	_, err := r.sendGiteaRequestWithToken(
+	_, _, err := r.sendGiteaRequestWithToken(
 		"POST",
 		CreateRepoEndpoint,
 		token.Token,
@@ -27,7 +28,7 @@ func (r *RealGiteaApi) RepositoryCreate(token GiteaToken, repo GiteaRepository) 
 }
 
 func (r *RealGiteaApi) RepositoryTransfer(from GiteaUserlike, to GiteaUserlike, repo *GiteaRepository) error {
-	_, err := r.sendGiteaRequestWithToken(
+	_, _, err := r.sendGiteaRequestWithToken(
 		"POST",
 		fmt.Sprintf(TransferRepoEndpoint, from.GetUsername(), repo.Name),
 		r.cfg.Token,
@@ -36,7 +37,7 @@ func (r *RealGiteaApi) RepositoryTransfer(from GiteaUserlike, to GiteaUserlike, 
 		},
 	)
 
-	if err != nil {
+	if err == nil {
 		repo.Owner = to.GetUsername()
 	}
 
@@ -44,7 +45,7 @@ func (r *RealGiteaApi) RepositoryTransfer(from GiteaUserlike, to GiteaUserlike, 
 }
 
 func (r *RealGiteaApi) RepositoryAddCollaborator(repo GiteaRepository, collab GiteaUserlike) error {
-	_, err := r.sendGiteaRequestWithToken(
+	sc, _, err := r.sendGiteaRequestWithToken(
 		"PUT",
 		fmt.Sprintf(AddCollabEndpoint,
 			repo.Owner,
@@ -54,6 +55,11 @@ func (r *RealGiteaApi) RepositoryAddCollaborator(repo GiteaRepository, collab Gi
 		r.cfg.Token,
 		map[string]interface{}{},
 	)
+
+	if sc == http.StatusNoContent {
+		return nil
+	}
+
 	return err
 }
 
@@ -73,9 +79,8 @@ func getCommitFileShaFromResponse(resp map[string]*json.RawMessage) (string, str
 	return commitData["sha"].(string), contentData["sha"].(string), nil
 }
 
-func (r *RealGiteaApi) RepositoryCreateFile(repo GiteaRepository, path string, content string) (string, string, error) {
-	base64Data := base64.StdEncoding.EncodeToString([]byte(content))
-	resp, err := r.sendGiteaRequestWithToken(
+func (r *RealGiteaApi) RepositoryCreateFile(repo GiteaRepository, path string, opts GiteaCreateFileOptions) (string, string, error) {
+	_, resp, err := r.sendGiteaRequestWithToken(
 		"POST",
 		fmt.Sprintf(FileContentEndpoint,
 			repo.Owner,
@@ -83,9 +88,7 @@ func (r *RealGiteaApi) RepositoryCreateFile(repo GiteaRepository, path string, c
 			path,
 		),
 		r.cfg.Token,
-		map[string]interface{}{
-			"content": base64Data,
-		},
+		opts.PrepareApiBody(),
 	)
 
 	if err != nil {
@@ -95,9 +98,11 @@ func (r *RealGiteaApi) RepositoryCreateFile(repo GiteaRepository, path string, c
 	return getCommitFileShaFromResponse(resp)
 }
 
-func (r *RealGiteaApi) RepositoryUpdateFile(repo GiteaRepository, path string, content string, sha string) (string, string, error) {
-	base64Data := base64.StdEncoding.EncodeToString([]byte(content))
-	resp, err := r.sendGiteaRequestWithToken(
+func (r *RealGiteaApi) RepositoryUpdateFile(repo GiteaRepository, path string, opts GiteaCreateFileOptions, sha string) (string, string, error) {
+	body := opts.PrepareApiBody()
+	body["sha"] = sha
+
+	_, resp, err := r.sendGiteaRequestWithToken(
 		"PUT",
 		fmt.Sprintf(FileContentEndpoint,
 			repo.Owner,
@@ -105,10 +110,7 @@ func (r *RealGiteaApi) RepositoryUpdateFile(repo GiteaRepository, path string, c
 			path,
 		),
 		r.cfg.Token,
-		map[string]interface{}{
-			"content": base64Data,
-			"sha":     sha,
-		},
+		body,
 	)
 
 	if err != nil {
@@ -119,7 +121,7 @@ func (r *RealGiteaApi) RepositoryUpdateFile(repo GiteaRepository, path string, c
 }
 
 func (r *RealGiteaApi) RepositoryGetFile(repo GiteaRepository, path string, ref string) (string, string, error) {
-	resp, err := r.sendGiteaRequestWithToken(
+	_, resp, err := r.sendGiteaRequestWithToken(
 		"GET",
 		fmt.Sprintf(FileContentEndpoint,
 			repo.Owner,

@@ -101,10 +101,11 @@ type GiteaConfigData struct {
 }
 
 type DroneConfigData struct {
-	Token    string
-	Host     string
-	Port     int32
-	Protocol string
+	Token      string
+	Host       string
+	Port       int32
+	Protocol   string
+	RunnerType string
 }
 
 type FeatureFlags struct {
@@ -268,6 +269,7 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.Drone.Port = int32(tomlConfig.Get("drone.port").(int64))
 	envConfig.Drone.Protocol = tomlConfig.Get("drone.protocol").(string)
 	envConfig.Drone.Token = tomlConfig.Get("drone.token").(string)
+	envConfig.Drone.RunnerType = tomlConfig.Get("drone.runner_type").(string)
 
 	envConfig.Features = new(FeatureFlags)
 	envConfig.Features.Automation = tomlConfig.Get("features.automation").(bool)

@@ -1,0 +1,11 @@
+---
+kind: pipeline
+type: {{ .DRONE_RUNNER_TYPE }}
+name: default
+
+steps:
+- name: build
+  image: alpine
+  commands:
+  - echo "...STARTING GRCHIVE CLIENT BUILD..."
+  - echo "...FINISH GRCHIVE CLIENT BUILD..."

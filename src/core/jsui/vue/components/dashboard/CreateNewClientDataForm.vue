@@ -83,7 +83,7 @@ const Props = Vue.extend({
         },
         referenceData: {
             type: Object,
-            default: () => Object() as FullClientDataWithLink | null
+            default: () => null as FullClientDataWithLink | null
         }
     }
 })

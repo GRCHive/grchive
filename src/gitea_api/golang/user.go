@@ -8,7 +8,7 @@ import (
 const UserTokenEndpoint = "/users/%s/tokens"
 
 func (r *RealGiteaApi) UserCreateAccessToken(user GiteaUser, tokenName string) (*GiteaToken, error) {
-	data, err := r.sendGiteaRequestWithUserAuth(
+	_, data, err := r.sendGiteaRequestWithUserAuth(
 		"POST",
 		fmt.Sprintf(UserTokenEndpoint, user.Username),
 		user,

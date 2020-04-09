@@ -7,7 +7,7 @@ import (
 const OrgCreateRepoEndpoint = "/orgs/%s/repos"
 
 func (r *RealGiteaApi) CreateRepositoryForOrganization(repo GiteaRepository, org GiteaOrganization) error {
-	_, err := r.sendGiteaRequestWithToken(
+	_, _, err := r.sendGiteaRequestWithToken(
 		"POST",
 		fmt.Sprintf(OrgCreateRepoEndpoint, org.Username),
 		r.cfg.Token,

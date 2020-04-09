@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"encoding/base64"
 	"fmt"
 )
 
@@ -51,4 +52,17 @@ type GiteaRepository struct {
 type GiteaToken struct {
 	Name  string
 	Token string
+}
+
+type GiteaCreateFileOptions struct {
+	Content string
+	Message string
+}
+
+func (o GiteaCreateFileOptions) PrepareApiBody() map[string]interface{} {
+	base64Data := base64.StdEncoding.EncodeToString([]byte(o.Content))
+	return map[string]interface{}{
+		"content": base64Data,
+		"message": o.Message,
+	}
 }

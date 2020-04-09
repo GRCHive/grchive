@@ -168,6 +168,7 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"Drone.Port", "drone.port", int64(128), int32(128)},
 					{"Drone.Protocol", "drone.protocol", "protocl", nil},
 					{"Drone.Token", "drone.token", "token", nil},
+					{"Drone.RunnerType", "drone.runner_type", "typetype", nil},
 					{"Artifactory.Host", "artifactory.host", "host", nil},
 					{"Artifactory.Port", "artifactory.port", int64(128), int32(128)},
 				},

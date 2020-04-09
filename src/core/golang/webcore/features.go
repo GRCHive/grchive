@@ -25,11 +25,13 @@ func enableAutomationGitea(grchiveOrg *core.Organization) error {
 		FullName: grchiveOrg.Name,
 	}
 
+	core.Debug(" -- Gitea Admin Create User")
 	err = gitea.GlobalGiteaApi.AdminCreateUser(user)
 	if err != nil {
 		return err
 	}
 
+	core.Debug(" -- Gitea Create Access Token")
 	token, err := gitea.GlobalGiteaApi.UserCreateAccessToken(user, "grchive-webserver-access-token")
 	if err != nil {
 		return err
@@ -40,6 +42,7 @@ func enableAutomationGitea(grchiveOrg *core.Organization) error {
 		FullName: grchiveOrg.Name,
 	}
 
+	core.Debug(" -- Gitea Admin Create Org")
 	err = gitea.GlobalGiteaApi.AdminCreateOrganization(user, giteaOrg)
 	if err != nil {
 		return err
@@ -50,11 +53,13 @@ func enableAutomationGitea(grchiveOrg *core.Organization) error {
 		Owner: user.Username,
 	}
 
+	core.Debug(" -- Gitea Repository Create")
 	err = gitea.GlobalGiteaApi.RepositoryCreate(*token, repository)
 	if err != nil {
 		return err
 	}
 
+	core.Debug(" -- Gitea Repository Transfer")
 	err = gitea.GlobalGiteaApi.RepositoryTransfer(user, giteaOrg, &repository)
 	if err != nil {
 		return err
@@ -63,6 +68,7 @@ func enableAutomationGitea(grchiveOrg *core.Organization) error {
 	// Add the admin user as a collaborator on the repository so that we can access it
 	// from Drone CI.
 	// TODO: Move admin username to config.
+	core.Debug(" -- Gitea Repository Add Collaborator")
 	err = gitea.GlobalGiteaApi.RepositoryAddCollaborator(repository, gitea.GiteaUser{
 		Username: "grchive-gitea-admin",
 	})
@@ -71,6 +77,7 @@ func enableAutomationGitea(grchiveOrg *core.Organization) error {
 		return err
 	}
 
+	core.Debug(" -- Gitea Vault Store Secret")
 	userTokenVaultPath := fmt.Sprintf("secret/webserver/gitea/tokens/%s", user.Username)
 	err = vault.StoreSecret(userTokenVaultPath, map[string]string{
 		"name":  token.Name,
@@ -80,6 +87,7 @@ func enableAutomationGitea(grchiveOrg *core.Organization) error {
 		return err
 	}
 
+	core.Debug(" -- Gitea Link Organization to Gitea")
 	err = database.LinkOrganizationToGitea(grchiveOrg.Id, giteaOrg.Username, repository.Name, user.Username, userTokenVaultPath)
 	if err != nil {
 		return err
