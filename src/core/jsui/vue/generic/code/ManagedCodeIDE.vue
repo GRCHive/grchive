@@ -48,7 +48,11 @@ const ManagedProps = Vue.extend({
         dataId: {
             type: Number,
             default: -1,
-        }
+        },
+        scriptId: {
+            type: Number,
+            default: -1,
+        },
     }
 })
 
@@ -104,6 +108,10 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
             params.dataId = this.dataId
         }
 
+        if (this.scriptId != -1) {
+            params.scriptId = this.scriptId
+        }
+
         getCode(params).then((resp : TGetCodeOutput) => {
             this.codeString = resp.data
             this.loading = false
@@ -127,6 +135,10 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
 
         if (this.dataId != -1) {
             params.dataId = this.dataId
+        }
+
+        if (this.scriptId != -1) {
+            params.scriptId = this.scriptId
         }
 
         allCode(params).then((resp : TAllCodeOutput) => {
@@ -163,6 +175,10 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
 
         if (this.dataId != -1) {
             params.dataId = this.dataId
+        }
+
+        if (this.scriptId != -1) {
+            params.scriptId = this.scriptId
         }
 
         saveCode(params).then((resp : TSaveCodeOutput) => {

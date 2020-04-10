@@ -23,6 +23,24 @@ func AllManagedCodeForDataId(dataId int64, orgId int32, role *core.Role) ([]*cor
 	return code, err
 }
 
+func AllManagedCodeForScriptId(scriptId int64, orgId int32, role *core.Role) ([]*core.ManagedCode, error) {
+	if !role.Permissions.HasAccess(core.ResourceClientScripts, core.AccessView) ||
+		!role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	code := make([]*core.ManagedCode, 0)
+	err := dbConn.Select(&code, `
+		SELECT code.*
+		FROM managed_code AS code
+		INNER JOIN code_to_client_scripts_link AS link
+			ON link.code_id = code.id
+		WHERE link.script_id = $1 AND link.org_id = $2
+		ORDER BY code.id DESC
+	`, scriptId, orgId)
+	return code, err
+}
+
 func CheckValidCodeDataLink(codeId int64, dataId int64, orgId int32, role *core.Role) (bool, error) {
 	if !role.Permissions.HasAccess(core.ResourceClientData, core.AccessView) ||
 		!role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
@@ -63,6 +81,46 @@ func LinkCodeToData(codeId int64, dataId int64, orgId int32, role *core.Role) er
 	return tx.Commit()
 }
 
+func CheckValidCodeScriptLink(codeId int64, scriptId int64, orgId int32, role *core.Role) (bool, error) {
+	if !role.Permissions.HasAccess(core.ResourceClientScripts, core.AccessView) ||
+		!role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
+		return false, core.ErrorUnauthorized
+	}
+
+	rows, err := dbConn.Queryx(`
+		SELECT *
+		FROM code_to_client_scripts_link AS link
+		WHERE link.code_id = $1 
+			AND link.script_id = $2
+			AND link.org_id = $3
+	`, codeId, scriptId, orgId)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	return rows.Next(), nil
+}
+
+func LinkCodeToScript(scriptId int64, dataId int64, orgId int32, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceClientScripts, core.AccessEdit) ||
+		!role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	tx := CreateTx()
+	_, err := tx.Exec(`
+		INSERT INTO code_to_client_scripts_link (code_id, script_id, org_id)
+		VALUES ($1, $2, $3)
+	`, scriptId, dataId, orgId)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
 func GetLatestCodeForData(dataId int64, orgId int32, role *core.Role) (*core.ManagedCode, error) {
 	if !role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
 		return nil, core.ErrorUnauthorized
@@ -78,6 +136,24 @@ func GetLatestCodeForData(dataId int64, orgId int32, role *core.Role) (*core.Man
 		ORDER BY code.id DESC
 		LIMIT 1
 	`, dataId, orgId)
+	return &code, err
+}
+
+func GetLatestCodeForScript(scriptId int64, orgId int32, role *core.Role) (*core.ManagedCode, error) {
+	if !role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	code := core.ManagedCode{}
+	err := dbConn.Get(&code, `
+		SELECT code.*
+		FROM managed_code AS code
+		INNER JOIN code_to_client_scripts_link AS link
+			ON link.code_id = code.id
+		WHERE link.script_id = $1 AND link.org_id = $2
+		ORDER BY code.id DESC
+		LIMIT 1
+	`, scriptId, orgId)
 	return &code, err
 }
 

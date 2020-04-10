@@ -13,6 +13,7 @@ export interface TSaveCodeInput {
     orgId: number
     code : string
     dataId? : number
+    scriptId? : number
 }
 
 export interface TSaveCodeOutput {
@@ -29,6 +30,7 @@ export function saveCode(inp : TSaveCodeInput) : Promise<TSaveCodeOutput> {
 export interface TAllCodeInput {
     orgId: number
     dataId? : number
+    scriptId? : number
 }
 
 export interface TAllCodeOutput {
@@ -45,6 +47,7 @@ export function allCode(inp : TAllCodeInput) : Promise<TAllCodeOutput> {
 export interface TGetCodeInput {
     orgId: number
     dataId? : number
+    scriptId? : number
     codeId : number
 }
 

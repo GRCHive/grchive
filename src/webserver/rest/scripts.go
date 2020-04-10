@@ -180,6 +180,20 @@ func deleteClientScript(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	code, err := database.GetLatestCodeForScript(inputs.ScriptId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to find latest code for data: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = webcore.DeleteManagedCodeFromGitea(code)
+	if err != nil {
+		core.Warning("Failed to delete code from Gitea: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	err = database.DeleteClientScript(inputs.ScriptId, inputs.OrgId, role)
 	if err != nil {
 		core.Warning("Failed to delete client data: " + err.Error())

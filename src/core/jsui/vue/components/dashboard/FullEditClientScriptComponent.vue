@@ -54,6 +54,12 @@
                     <v-tab>Code</v-tab>
                     <v-tab-item>
                         <v-divider></v-divider>
+                        <managed-code-ide
+                            :script-id="data.Id"
+                            lang="text/x-kotlin"
+                            full-height
+                        >
+                        </managed-code-ide>
                     </v-tab-item>
 
                     <v-tab>Audit Trail</v-tab>
@@ -79,11 +85,13 @@ import {
 } from '../../../ts/api/apiScripts'
 import CreateNewScriptForm from './CreateNewScriptForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
+import ManagedCodeIde from '../../generic/code/ManagedCodeIDE.vue'
 
 @Component({
     components: {
         CreateNewScriptForm,
         GenericDeleteConfirmationForm,
+        ManagedCodeIde
     }
 })
 export default class FullEditClientScriptComponent extends Vue {

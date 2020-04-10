@@ -11,9 +11,10 @@ import (
 )
 
 type SaveCodeInput struct {
-	OrgId  int32          `json:"orgId"`
-	Code   string         `json:"code"`
-	DataId core.NullInt64 `json:"dataId"`
+	OrgId    int32          `json:"orgId"`
+	Code     string         `json:"code"`
+	DataId   core.NullInt64 `json:"dataId"`
+	ScriptId core.NullInt64 `json:"scriptId"`
 }
 
 func saveCode(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +36,7 @@ func saveCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !inputs.DataId.NullInt64.Valid {
+	if !inputs.DataId.NullInt64.Valid && !inputs.ScriptId.NullInt64.Valid {
 		core.Warning("Invalid combination of inputs.")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -58,6 +59,15 @@ func saveCode(w http.ResponseWriter, r *http.Request) {
 		// For now, assume Kotlin always. If we want to support more in the future we'll have to
 		// somehow get this information from the user or something.
 		managedCode.GitPath = fmt.Sprintf("src/main/kotlin/data/%s", clientData.Data.Filename("kt"))
+	} else if inputs.ScriptId.NullInt64.Valid {
+		script, err := database.GetClientScriptFromId(inputs.ScriptId.NullInt64.Int64, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get client script: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		managedCode.GitPath = fmt.Sprintf("src/main/kotlin/scripts/%s", script.Filename("kt"))
 	}
 
 	// There is a possibility here that the link will fail after the storing to Gitea succeeds.
@@ -72,6 +82,8 @@ func saveCode(w http.ResponseWriter, r *http.Request) {
 
 	if inputs.DataId.NullInt64.Valid {
 		err = database.LinkCodeToData(managedCode.Id, inputs.DataId.NullInt64.Int64, inputs.OrgId, role)
+	} else if inputs.ScriptId.NullInt64.Valid {
+		err = database.LinkCodeToScript(managedCode.Id, inputs.ScriptId.NullInt64.Int64, inputs.OrgId, role)
 	}
 
 	if err != nil {
@@ -84,9 +96,10 @@ func saveCode(w http.ResponseWriter, r *http.Request) {
 }
 
 type GetCodeInput struct {
-	OrgId  int32          `webcore:"orgId"`
-	CodeId int64          `webcore:"codeId"`
-	DataId core.NullInt64 `webcore:"dataId,optional"`
+	OrgId    int32          `webcore:"orgId"`
+	CodeId   int64          `webcore:"codeId"`
+	DataId   core.NullInt64 `webcore:"dataId,optional"`
+	ScriptId core.NullInt64 `webcore:"scriptId,optional"`
 }
 
 func getCode(w http.ResponseWriter, r *http.Request) {
@@ -117,6 +130,13 @@ func getCode(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+	} else if inputs.ScriptId.NullInt64.Valid {
+		ok, err := database.CheckValidCodeScriptLink(inputs.CodeId, inputs.ScriptId.NullInt64.Int64, inputs.OrgId, role)
+		if err != nil || !ok {
+			core.Warning("Invalid code script link: " + core.ErrorString(err))
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 	} else {
 		core.Warning("Invalid combination of inputs.")
 		w.WriteHeader(http.StatusBadRequest)
@@ -133,8 +153,9 @@ func getCode(w http.ResponseWriter, r *http.Request) {
 }
 
 type AllCodeInput struct {
-	OrgId  int32          `webcore:"orgId"`
-	DataId core.NullInt64 `webcore:"dataId,optional"`
+	OrgId    int32          `webcore:"orgId"`
+	DataId   core.NullInt64 `webcore:"dataId,optional"`
+	ScriptId core.NullInt64 `webcore:"scriptId,optional"`
 }
 
 func allCode(w http.ResponseWriter, r *http.Request) {
@@ -160,6 +181,8 @@ func allCode(w http.ResponseWriter, r *http.Request) {
 
 	if inputs.DataId.NullInt64.Valid {
 		code, err = database.AllManagedCodeForDataId(inputs.DataId.NullInt64.Int64, inputs.OrgId, role)
+	} else if inputs.ScriptId.NullInt64.Valid {
+		code, err = database.AllManagedCodeForScriptId(inputs.ScriptId.NullInt64.Int64, inputs.OrgId, role)
 	} else {
 		core.Warning("Invalid combination of inputs.")
 		w.WriteHeader(http.StatusBadRequest)
