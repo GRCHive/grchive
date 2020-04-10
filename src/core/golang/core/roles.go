@@ -39,6 +39,7 @@ const (
 	ResourceDbSqlRequest
 	ResourceClientData
 	ResourceManagedCode
+	ResourceClientScripts
 )
 
 var AvailableResources []ResourceType = []ResourceType{
@@ -62,6 +63,7 @@ var AvailableResources []ResourceType = []ResourceType{
 	ResourceDbSqlRequest,
 	ResourceClientData,
 	ResourceManagedCode,
+	ResourceClientScripts,
 }
 
 type PermissionsMap struct {
@@ -85,6 +87,7 @@ type PermissionsMap struct {
 	DbSqlRequestAccess         AccessType `db:"db_sql_requests_access"`
 	ClientDataAccess           AccessType `db:"client_data_access"`
 	ManagedCodeAccess          AccessType `db:"managed_code_access"`
+	ClientScriptsAccess        AccessType `db:"client_script_access"`
 }
 
 type RoleMetadata struct {
@@ -128,6 +131,7 @@ func CreateViewOnlyAccessPermission() PermissionsMap {
 		DbSqlRequestAccess:         AccessView,
 		ClientDataAccess:           AccessView,
 		ManagedCodeAccess:          AccessView,
+		ClientScriptsAccess:        AccessView,
 	}
 }
 
@@ -153,6 +157,7 @@ func CreateAllAccessPermission() PermissionsMap {
 		DbSqlRequestAccess:         CreateOwnerAccessType(),
 		ClientDataAccess:           CreateOwnerAccessType(),
 		ManagedCodeAccess:          CreateOwnerAccessType(),
+		ClientScriptsAccess:        CreateOwnerAccessType(),
 	}
 }
 
@@ -228,6 +233,8 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 		return p.ClientDataAccess
 	case ResourceManagedCode:
 		return p.ManagedCodeAccess
+	case ResourceClientScripts:
+		return p.ClientScriptsAccess
 	}
 	return AccessNone
 }
@@ -274,6 +281,8 @@ func (p *PermissionsMap) SetAccessType(resource ResourceType, access AccessType)
 		p.ClientDataAccess = access
 	case ResourceManagedCode:
 		p.ManagedCodeAccess = access
+	case ResourceClientScripts:
+		p.ClientScriptsAccess = access
 	}
 }
 

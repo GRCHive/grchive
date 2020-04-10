@@ -94,12 +94,19 @@ func createOrganizationAutomationSubrouter(r *mux.Router) {
 	))
 
 	createOrganizationDataSubrouter(s)
+	createOrganizationScriptSubrouter(s)
 }
 
 func createOrganizationDataSubrouter(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardDataPrefix).Subrouter()
 	s.HandleFunc("/", render.RenderClientData)
 	s.HandleFunc(core.DashboardSingleDataEndpoint, render.RenderSingleClientData).Name(webcore.SingleClientDataRouteName)
+}
+
+func createOrganizationScriptSubrouter(r *mux.Router) {
+	s := r.PathPrefix(core.DashboardScriptPrefix).Subrouter()
+	s.HandleFunc("/", render.RenderClientScripts)
+	s.HandleFunc(core.DashboardSingleDataEndpoint, render.RenderSingleClientScript).Name(webcore.SingleClientScriptRouteName)
 }
 
 func createUserSubrouter(r *mux.Router) {

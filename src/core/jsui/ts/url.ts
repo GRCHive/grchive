@@ -384,3 +384,7 @@ export const enableFeatureUrl : string = "/api/feature/new"
 export const saveCodeUrl : string = "/api/auto/code/save"
 export const allCodeUrl : string = "/api/auto/code/all"
 export const getCodeUrl : string = "/api/auto/code/get"
+
+export const newClientScriptUrl : string = "/api/auto/scripts/new"
+export const allClientScriptsUrl : string = "/api/auto/scripts/all"
+export const deleteClientScriptUrl : string = "/api/auto/scripts/delete"

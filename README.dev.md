@@ -411,7 +411,6 @@ If you wish to run the Docker container:
 
 - `bazel run //devops/docker/database_query_runner:docker_database_query_runner`
 
-
 ## Run Tests
 
 - `cd $SRC`

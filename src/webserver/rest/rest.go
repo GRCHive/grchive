@@ -472,6 +472,7 @@ func registerAutomationAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardAutomationPrefix).Subrouter()
 	registerDataAPIPaths(s)
 	registerCodeAPIPaths(s)
+	registerScriptsAPIPaths(s)
 }
 
 func registerDataAPIPaths(r *mux.Router) {
@@ -496,6 +497,13 @@ func registerCodeAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiSaveEndpoint, saveCode)
 	s.HandleFunc(core.ApiGetEndpoint, getCode)
 	s.HandleFunc(core.ApiAllEndpoint, allCode)
+}
+
+func registerScriptsAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.DashboardScriptPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, newClientScript).Methods("POST")
+	s.HandleFunc(core.ApiAllEndpoint, allClientScripts).Methods("GET")
+	s.HandleFunc(core.ApiDeleteEndpoint, deleteClientScript).Methods("POST")
 }
 
 func registerFeatureAPIPaths(r *mux.Router) {
