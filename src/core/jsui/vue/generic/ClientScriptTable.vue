@@ -6,7 +6,7 @@ import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
 import { PageParamsStore } from '../../ts/pageParams'
 import { ResourceHandle } from '../../ts/resourceUtils'
-import { contactUsUrl } from '../../ts/url'
+import { contactUsUrl, createSingleScriptUrl } from '../../ts/url'
 
 @Component({
     components: {
@@ -36,10 +36,10 @@ export default class ClientScriptTable extends ResourceTableProps {
     }
 
     goToScript(item : any) {
-        //window.location.assign(createSingleClientScriptUrl(
-        //    PageParamsStore.state.organization!.OktaGroupName,
-        //    item.value.Data.Id
-        //))
+        window.location.assign(createSingleScriptUrl(
+            PageParamsStore.state.organization!.OktaGroupName,
+            item.value.Id
+        ))
     }
 
     renderExpansion(props : any) : VNode {

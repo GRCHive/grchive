@@ -63,6 +63,7 @@ import { contactUsUrl } from '../../../ts/url'
 import { ClientScript } from '../../../ts/clientScripts'
 import {
     newClientScript, TNewClientScriptOutput,
+    updateClientScript, TUpdateClientScriptOutput,
 } from '../../../ts/api/apiScripts'
 
 const Props = Vue.extend({
@@ -111,6 +112,23 @@ export default class CreateNewScriptForm extends Props {
     }
 
     doEdit() {
+        updateClientScript({
+            orgId: PageParamsStore.state.organization!.Id,
+            name: this.name,
+            description: this.description,
+            scriptId: this.referenceScript!.Id,
+        }).then((resp : TUpdateClientScriptOutput) => {
+            this.$emit('do-save', resp.data)
+            this.canEdit = false
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 
     save() {

@@ -8,13 +8,8 @@
             <v-list-item two-line>
                 <v-list-item-content id="reqTitle">
                     <v-list-item-title class="title">
-                        Data Object: {{ data.Data.Name }}
+                        Script: {{ data.Name }}
                     </v-list-item-title>
-
-                    <v-list-item-subtitle v-if="!!source">
-                        Source:
-                        <resource-handle-renderer :handle="source"></resource-handle-renderer>
-                    </v-list-item-subtitle>
                 </v-list-item-content>
                 <v-spacer></v-spacer>
 
@@ -29,8 +24,8 @@
                     </template>
 
                     <generic-delete-confirmation-form
-                        item-name="data objects"
-                        :items-to-delete="[data.Data.Name]"
+                        item-name="script"
+                        :items-to-delete="[data.Name]"
                         :use-global-deletion="false"
                         @do-cancel="showHideDelete = false"
                         @do-delete="onDelete">
@@ -45,13 +40,13 @@
                     <v-tab-item>
                         <v-row>
                             <v-col cols="12">
-                                <create-new-client-data-form
-                                    edit-mode
-                                    :reference-data="data"
-                                    @do-save="onEditData"
+                                <create-new-script-form
                                     class="ma-4"
+                                    edit-mode
+                                    :reference-script="data"
+                                    @do-save="onEditScript"
                                 >
-                                </create-new-client-data-form>
+                                </create-new-script-form>
                             </v-col>
                         </v-row>
                     </v-tab-item>
@@ -59,23 +54,10 @@
                     <v-tab>Code</v-tab>
                     <v-tab-item>
                         <v-divider></v-divider>
-                        <managed-code-ide
-                            :data-id="data.Data.Id"
-                            lang="text/x-kotlin"
-                            full-height
-                        >
-                        </managed-code-ide>
                     </v-tab-item>
 
                     <v-tab>Audit Trail</v-tab>
                     <v-tab-item>
-                        <audit-trail-viewer
-                            :resource-type="['client_data']"
-                            :resource-id="[`${data.Data.Id}`]"
-                            no-header
-                        >
-                        </audit-trail-viewer>
-
                     </v-tab-item>
                 </v-tabs>
             </v-container>
@@ -88,76 +70,45 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { FullClientDataWithLink } from '../../../ts/clientData'
-import { ResourceHandle } from '../../../ts/resourceUtils'
-import { getDataSource, TGetDataSourceOutput } from '../../../ts/api/apiDataSource'
-import { getClientData, TGetClientDataOutput, deleteClientData } from '../../../ts/api/apiClientData'
 import { PageParamsStore } from '../../../ts/pageParams'
-import { contactUsUrl, createOrgClientDataUrl } from '../../../ts/url'
-import { 
-    allCode, TAllCodeOutput,
-} from '../../../ts/api/apiCode'
-import { ManagedCode } from '../../../ts/code'
-
-import ResourceHandleRenderer from '../../generic/ResourceHandleRenderer.vue'
-import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
-import CreateNewClientDataForm from './CreateNewClientDataForm.vue'
-import ManagedCodeIde from '../../generic/code/ManagedCodeIDE.vue'
+import { contactUsUrl, createOrgScriptUrl } from '../../../ts/url'
+import { ClientScript } from '../../../ts/clientScripts'
+import {
+    getClientScript, TGetClientScriptOutput,
+    deleteClientScript
+} from '../../../ts/api/apiScripts'
+import CreateNewScriptForm from './CreateNewScriptForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 
 @Component({
     components: {
-        ResourceHandleRenderer,
-        AuditTrailViewer,
-        CreateNewClientDataForm,
-        ManagedCodeIde,
+        CreateNewScriptForm,
         GenericDeleteConfirmationForm,
     }
 })
-export default class FullEditClientDataComponent extends Vue {
-    data : FullClientDataWithLink | null = null
-    source : ResourceHandle | null = null
+export default class FullEditClientScriptComponent extends Vue {
+    data : ClientScript | null = null
     showHideDelete : boolean = false
 
     get ready() : boolean {
         return !!this.data
     }
 
-    onEditData(data : FullClientDataWithLink) {
+    onEditScript(data : ClientScript) {
         this.data = data
-        this.refreshSource()
-    }
-
-    refreshSource() {
-        this.source = null
-        getDataSource({
-            source: this.data!.Link
-        }).then((resp : TGetDataSourceOutput) => {
-            this.source = resp.data
-        }).catch((err: any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
     }
 
     refreshData() {
         this.data = null
-        this.source = null
 
         let data = window.location.pathname.split('/')
         let resourceId = Number(data[data.length - 1])
 
-        getClientData({
+        getClientScript({
             orgId: PageParamsStore.state.organization!.Id,
-            dataId: resourceId,
-        }).then((resp : TGetClientDataOutput) => {
+            scriptId: resourceId,
+        }).then((resp : TGetClientScriptOutput) => {
             this.data = resp.data
-            this.refreshSource()
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
@@ -174,11 +125,11 @@ export default class FullEditClientDataComponent extends Vue {
     }
 
     onDelete() {
-        deleteClientData({
+        deleteClientScript({
             orgId: PageParamsStore.state.organization!.Id,
-            dataId: this.data!.Data.Id,
+            scriptId: this.data!.Id,
         }).then(() => {
-            window.location.replace(createOrgClientDataUrl(PageParamsStore.state.organization!.OktaGroupName))
+            window.location.replace(createOrgScriptUrl(PageParamsStore.state.organization!.OktaGroupName))
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

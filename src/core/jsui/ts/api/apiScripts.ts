@@ -9,6 +9,8 @@ import {
     newClientScriptUrl,
     allClientScriptsUrl,
     deleteClientScriptUrl,
+    getClientScriptUrl,
+    updateClientScriptUrl
 } from '../url'
 
 export interface TNewClientScriptInput {
@@ -23,6 +25,18 @@ export interface TNewClientScriptOutput {
 
 export function newClientScript(inp : TNewClientScriptInput) : Promise<TNewClientScriptOutput> {
     return postFormJson<TNewClientScriptOutput>(newClientScriptUrl, inp, getAPIRequestConfig())
+}
+
+export interface TUpdateClientScriptInput extends TNewClientScriptInput {
+    scriptId: number
+}
+
+export interface TUpdateClientScriptOutput {
+    data: ClientScript
+}
+
+export function updateClientScript(inp : TUpdateClientScriptInput) : Promise<TUpdateClientScriptOutput> {
+    return postFormJson<TUpdateClientScriptOutput>(updateClientScriptUrl, inp, getAPIRequestConfig())
 }
 
 export interface TAllClientScriptsInput {
@@ -43,4 +57,17 @@ export interface TDeleteClientScriptInput {
 
 export function deleteClientScript(inp : TDeleteClientScriptInput) : Promise<void> {
     return postFormJson<void>(deleteClientScriptUrl, inp, getAPIRequestConfig())
+}
+
+export interface TGetClientScriptInput {
+    orgId: number
+    scriptId: number
+}
+
+export interface TGetClientScriptOutput {
+    data: ClientScript
+}
+
+export function getClientScript(inp : TGetClientScriptInput) : Promise<TGetClientScriptOutput> {
+    return axios.get(getClientScriptUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
 }

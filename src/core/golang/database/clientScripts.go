@@ -49,6 +49,32 @@ func NewClientScript(script *core.ClientScript, role *core.Role) error {
 	return tx.Commit()
 }
 
+func UpdateClientScript(data *core.ClientScript, role *core.Role) error {
+	if !role.Permissions.HasAccess(core.ResourceClientScripts, core.AccessEdit) {
+		return core.ErrorUnauthorized
+	}
+
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.NamedExec(`
+		UPDATE client_scripts
+		SET name = :name,
+			description = :description
+		WHERE id = :id
+			AND org_id = :org_id
+	`, data)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
 func AllClientScriptsForOrganization(orgId int32, role *core.Role) ([]*core.ClientScript, error) {
 	if !role.Permissions.HasAccess(core.ResourceClientScripts, core.AccessView) {
 		return nil, core.ErrorUnauthorized
@@ -61,6 +87,20 @@ func AllClientScriptsForOrganization(orgId int32, role *core.Role) ([]*core.Clie
 		WHERE org_id = $1
 	`, orgId)
 	return scripts, err
+}
+
+func GetClientScriptFromId(scriptId int64, orgId int32, role *core.Role) (*core.ClientScript, error) {
+	if !role.Permissions.HasAccess(core.ResourceClientScripts, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	script := core.ClientScript{}
+	err := dbConn.Get(&script, `
+		SELECT *
+		FROM client_scripts
+		WHERE id = $1 AND org_id = $2
+	`, scriptId, orgId)
+	return &script, err
 }
 
 func DeleteClientScript(scriptId int64, orgId int32, role *core.Role) error {

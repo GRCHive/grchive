@@ -141,8 +141,20 @@ export function createSingleSqlRequestUrl(org : string, id: number) : string {
     return `/dashboard/org/${org}/requests/sql/${id}`
 }
 
+export function createOrgClientDataUrl(org : string) : string {
+    return `/dashboard/org/${org}/auto/data`
+}
+
 export function createSingleClientDataUrl(org : string, id: number) : string {
     return `/dashboard/org/${org}/auto/data/${id}`
+}
+
+export function createOrgScriptUrl(org : string) : string {
+    return `/dashboard/org/${org}/auto/scripts`
+}
+
+export function createSingleScriptUrl(org : string, id: number) : string {
+    return `/dashboard/org/${org}/auto/scripts/${id}`
 }
 
 export function createUserProfileEditAPIUrl(id : number) : string {
@@ -388,3 +400,5 @@ export const getCodeUrl : string = "/api/auto/code/get"
 export const newClientScriptUrl : string = "/api/auto/scripts/new"
 export const allClientScriptsUrl : string = "/api/auto/scripts/all"
 export const deleteClientScriptUrl : string = "/api/auto/scripts/delete"
+export const getClientScriptUrl : string = "/api/auto/scripts/get"
+export const updateClientScriptUrl : string = "/api/auto/scripts/update"

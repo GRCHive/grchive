@@ -503,7 +503,9 @@ func registerScriptsAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardScriptPrefix).Subrouter()
 	s.HandleFunc(core.ApiNewEndpoint, newClientScript).Methods("POST")
 	s.HandleFunc(core.ApiAllEndpoint, allClientScripts).Methods("GET")
+	s.HandleFunc(core.ApiGetEndpoint, getClientScript).Methods("GET")
 	s.HandleFunc(core.ApiDeleteEndpoint, deleteClientScript).Methods("POST")
+	s.HandleFunc(core.ApiUpdateEndpoint, updateClientScript).Methods("POST")
 }
 
 func registerFeatureAPIPaths(r *mux.Router) {
