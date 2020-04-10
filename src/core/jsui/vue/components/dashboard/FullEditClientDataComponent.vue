@@ -30,6 +30,7 @@
                                     edit-mode
                                     :reference-data="data"
                                     @do-save="onEditData"
+                                    class="ma-4"
                                 >
                                 </create-new-client-data-form>
                             </v-col>
