@@ -1,6 +1,7 @@
 package webcore
 
 import (
+	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/gitea_api"
@@ -22,6 +23,25 @@ func GetManagedCodeFromGitea(codeId int64, orgId int32, role *core.Role) (string
 		Name:  grcRepo.GiteaRepo,
 	}, code.GitPath, code.GitHash)
 	return content, err
+}
+
+func DeleteManagedCodeFromGitea(code *core.ManagedCode) error {
+	grcRepo, err := database.GetLinkedGiteaRepository(code.OrgId)
+	if err != nil {
+		return err
+	}
+
+	giteaRepo := gitea.GiteaRepository{
+		Owner: grcRepo.GiteaOrg,
+		Name:  grcRepo.GiteaRepo,
+	}
+
+	err = gitea.GlobalGiteaApi.RepositoryDeleteFile(giteaRepo, code.GitPath, gitea.GiteaDeleteFileOptions{
+		Message: fmt.Sprintf("Delete file - %s", code.GitPath),
+		Sha:     code.GiteaFileSha,
+	})
+
+	return err
 }
 
 func StoreManagedCodeToGitea(code *core.ManagedCode, script string, role *core.Role) error {

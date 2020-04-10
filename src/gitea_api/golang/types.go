@@ -66,3 +66,8 @@ func (o GiteaCreateFileOptions) PrepareApiBody() map[string]interface{} {
 		"message": o.Message,
 	}
 }
+
+type GiteaDeleteFileOptions struct {
+	Message string `json:"message"`
+	Sha     string `json:"sha"`
+}

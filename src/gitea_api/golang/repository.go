@@ -156,3 +156,22 @@ func (r *RealGiteaApi) RepositoryGetFile(repo GiteaRepository, path string, ref 
 
 	return string(decoded), sha, err
 }
+
+func (r *RealGiteaApi) RepositoryDeleteFile(repo GiteaRepository, path string, opts GiteaDeleteFileOptions) error {
+	_, _, err := r.sendGiteaRequestWithToken(
+		"DELETE",
+		fmt.Sprintf(FileContentEndpoint,
+			repo.Owner,
+			repo.Name,
+			path,
+		),
+		r.cfg.Token,
+		opts,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

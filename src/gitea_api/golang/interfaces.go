@@ -18,5 +18,6 @@ type GiteaApi interface {
 
 	RepositoryCreateFile(GiteaRepository, string, GiteaCreateFileOptions) (string, error)
 	RepositoryUpdateFile(GiteaRepository, string, GiteaCreateFileOptions, string) (string, error)
+	RepositoryDeleteFile(GiteaRepository, string, GiteaDeleteFileOptions) error
 	RepositoryGetFile(GiteaRepository, string, string) (string, string, error)
 }

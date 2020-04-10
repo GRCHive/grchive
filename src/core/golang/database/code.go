@@ -63,6 +63,24 @@ func LinkCodeToData(codeId int64, dataId int64, orgId int32, role *core.Role) er
 	return tx.Commit()
 }
 
+func GetLatestCodeForData(dataId int64, orgId int32, role *core.Role) (*core.ManagedCode, error) {
+	if !role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	code := core.ManagedCode{}
+	err := dbConn.Get(&code, `
+		SELECT code.*
+		FROM managed_code AS code
+		INNER JOIN code_to_client_data_link AS link
+			ON link.code_id = code.id
+		WHERE link.data_id = $1 AND link.org_id = $2
+		ORDER BY code.id DESC
+		LIMIT 1
+	`, dataId, orgId)
+	return &code, err
+}
+
 func GetCode(codeId int64, orgId int32, role *core.Role) (*core.ManagedCode, error) {
 	if !role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
 		return nil, core.ErrorUnauthorized
