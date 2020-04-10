@@ -278,7 +278,7 @@ Retrieve the IP address and then create an NFS volume in Docker for future use.
 - `export NFS_IP=$(docker inspect -f '{{ .NetworkSettings.Networks.c3p0.IPAddress }}' nfssrv)`
 - `docker volume create --driver local --opt type=nfs --opt o=vers=4,addr=$NFS_IP,rw --opt device=:/ gitea-nfsvolume`
 
-You may need to run `sudo modprobe nfs` to get this step to work; alternatively, you can try to start and then stop the NFS service on your machine.
+You may need to run `sudo modprobe nfs` to get this step to work; alternatively, you can try to start the NFS service on your machine.
 
 ### Gitea
 
