@@ -13,7 +13,7 @@ genrule(
 )
 
 sh_binary(
-    name="drone",
+    name="drone-build",
     srcs = [ "build.sh" ],
     data = [
         ":drone_dockerfile",
@@ -24,3 +24,23 @@ sh_binary(
         "//scripts/vault:get_vault_secret_http.sh",
     ],
 )
+
+genrule(
+    name="drone-cli",
+    srcs = [ "@drone-cli//file" ],
+    outs = [ "drone" ],
+    cmd = "tar xvf $< -C $(RULEDIR)"
+)
+
+genrule(
+    name = "link_to_gitea",
+    srcs = [ "link_to_gitea.sh" ],
+    outs = [ "script.sh" ],
+    cmd = ". $(location //build:bash_env) && CLI=$(location :drone-cli) envsubst ' $${CLI} $${GITEA_HOST} $${GITEA_PORT} $${GITEA_PROTOCOL} $${GITEA_TOKEN} $${VAULT_HOST} $${VAULT_PORT} $${VAULT_TOKEN} $${DRONE_GITEA_CLIENT_SECRET_VAULT} $${DRONE_SERVER_PROTO} $${DRONE_SERVER_HOST} $${DRONE_SERVER_PORT} $${DRONE_TOKEN} $${GKE_REGISTRY_USER} $${GKE_REGISTRY_PASSWORD} $${GITEA_GLOBAL_ORG}' < $< > $@",
+    executable = True,
+    tools = [
+        "//build:bash_env",
+        ":drone-cli",
+    ]
+)
+

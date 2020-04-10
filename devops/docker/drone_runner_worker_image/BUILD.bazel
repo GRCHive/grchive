@@ -1,0 +1,26 @@
+package(default_visibility = ["//visibility:public"])
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+
+go_image(
+    name = "binary",
+    base = "//devops/docker/kotlin_base:latest",
+    binary = "//src/drone_runner_worker:worker",
+)
+
+genrule(
+    name = "artifactory-settings",
+    srcs = [ "settings.xml.tmpl" ],
+    outs = [ "root/.m2/settings.xml" ],
+    cmd = ". $(location //build:bash_env) && envsubst < $< > $@",
+    tools = [
+        "//build:bash_env"
+    ]
+)
+
+container_image(
+    name = "latest",
+    base = ":binary",
+    files = [ ":artifactory-settings" ],
+    data_path = "."
+)

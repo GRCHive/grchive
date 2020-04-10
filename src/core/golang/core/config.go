@@ -94,18 +94,21 @@ type KotlinConfigData struct {
 }
 
 type GiteaConfigData struct {
-	Token    string
-	Host     string
-	Port     int32
-	Protocol string
+	Token     string
+	Host      string
+	Port      int32
+	Protocol  string
+	GlobalOrg string
 }
 
 type DroneConfigData struct {
-	Token      string
-	Host       string
-	Port       int32
-	Protocol   string
-	RunnerType string
+	Token           string
+	Host            string
+	Port            int32
+	Protocol        string
+	RunnerType      string
+	RunnerImage     string
+	RunnerImagePull string
 }
 
 type FeatureFlags struct {
@@ -263,6 +266,7 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.Gitea.Port = int32(tomlConfig.Get("gitea.port").(int64))
 	envConfig.Gitea.Protocol = tomlConfig.Get("gitea.protocol").(string)
 	envConfig.Gitea.Token = tomlConfig.Get("gitea.token").(string)
+	envConfig.Gitea.GlobalOrg = tomlConfig.Get("gitea.global_org").(string)
 
 	envConfig.Drone = new(DroneConfigData)
 	envConfig.Drone.Host = tomlConfig.Get("drone.host").(string)
@@ -270,6 +274,8 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.Drone.Protocol = tomlConfig.Get("drone.protocol").(string)
 	envConfig.Drone.Token = tomlConfig.Get("drone.token").(string)
 	envConfig.Drone.RunnerType = tomlConfig.Get("drone.runner_type").(string)
+	envConfig.Drone.RunnerImage = tomlConfig.Get("drone.runner_image").(string)
+	envConfig.Drone.RunnerImagePull = tomlConfig.Get("drone.runner_image_pull").(string)
 
 	envConfig.Features = new(FeatureFlags)
 	envConfig.Features.Automation = tomlConfig.Get("features.automation").(bool)

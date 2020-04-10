@@ -10,11 +10,11 @@ import (
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/gitea_api"
-	"html/template"
 	"io"
 	"io/ioutil"
 	"strconv"
 	"strings"
+	"text/template"
 )
 
 // Better way to do this than hard coding?
@@ -38,15 +38,13 @@ func loadTemplateParamsForOrg(org *core.Organization) (map[string]string, string
 	// We also need to check the hash on the template parameters since if that
 	// changes, we also want to regenerate.
 	templateParams := map[string]string{
-		// TODO: Let user choose this
-		"GRCHIVE_ORG_IDENTIFIER": org.OktaGroupName,
-		// TODO: Do we need to actually update teh version in the pom?
-		"GRCHIVE_CLIENT_LIB_VERSION": "0.1",
-		// TODO: ????
-		"GRCHIVE_ORG_URL":   "",
-		"ARTIFACTORY_HOST":  core.EnvConfig.Artifactory.Host,
-		"ARTIFACTORY_PORT":  strconv.FormatInt(int64(core.EnvConfig.Artifactory.Port), 10),
-		"DRONE_RUNNER_TYPE": core.EnvConfig.Drone.RunnerType,
+		// TODO: Let user choose this?
+		"GRCHIVE_ORG_IDENTIFIER":  org.OktaGroupName,
+		"ARTIFACTORY_HOST":        core.EnvConfig.Artifactory.Host,
+		"ARTIFACTORY_PORT":        strconv.FormatInt(int64(core.EnvConfig.Artifactory.Port), 10),
+		"DRONE_RUNNER_TYPE":       core.EnvConfig.Drone.RunnerType,
+		"DRONE_RUNNER_IMAGE":      core.EnvConfig.Drone.RunnerImage,
+		"DRONE_RUNNER_IMAGE_PULL": core.EnvConfig.Drone.RunnerImagePull,
 	}
 
 	templateJsonRaw, err := json.Marshal(templateParams)
@@ -132,7 +130,7 @@ func UpdateGiteaRepositoryTemplate(orgId int32) error {
 				return err
 			}
 
-			strData, err = core.TemplateToString(tmpl, templateParams)
+			strData, err = core.TextTemplateToString(tmpl, templateParams)
 
 			if err != nil {
 				return err

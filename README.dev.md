@@ -75,6 +75,12 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `GRPC_QUERY_RUNNER_TLS`: Whether or not the query runner should use TLS for communication.
 - `ROOT_CA_CRT`: Path to the root certificate used for the self-signed certificates.
 
+### Registry
+
+- `GKE_REGISTRY_USER`: Username for pulling from our Gitlab registry.
+- `GKE_REGISTRY_PASSWORD`: Password (token) for pulling from our Gitlab registry.
+- `GKE_REGISTRY_VAULT`: Where we store a secret for accessing the Gitlab registry in the form of the Docker config.json.
+
 ### Gitea
 
 - `GITEA_SECRET_KEY`: The secret key to use for the Gitea installation.
@@ -82,6 +88,7 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `GITEA_HOST`: The hostname/IP at which the Gitea instance is accessible.
 - `GITEA_PORT`: The port at which the Gitea instance is accessible.
 - `GITEA_PROTOCOL`: The protocol (http/https) with which to connect to Gitea.
+- `GITEA_GLOBAL_ORG`: A global organization to hold all client repositories.
 
 ### Drone
 
@@ -94,6 +101,8 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `DRONE_SERVER_PORT`: Port at which to listen to Drone HTTP requests.
 - `DRONE_TOKEN`: The token with which to access the Drone API.
 - `DRONE_RUNNER_TYPE`: The runner type to be used in the Drone pipeline. Should be `docker` locally and `kubernetes` in production.
+- `DRONE_RUNNER_IMAGE`: The Docker image to use for running Drone pipelines.
+- `DRONE_RUNNER_IMAGE_PULL`: Should be `never` locally and `always` in production.
 
 ### Artifactory
 
@@ -317,16 +326,9 @@ Password: password
 
 - `cd $SRC/devops/docker/drone`
 - `./setup_drone.sh`
-- `bazel run //devops/docker/drone:drone`
+- `bazel run //devops/docker/drone:drone-build`
 - `docker run --network c3p0 --name drone bazel/devops/docker/drone:drone`
 - Set `DRONE_SERVER_HOST` to the result of `docker inspect -f '{{.NetworkSettings.Networks.c3p0.IPAddress}}' drone`.
-- At this point you will need to re-run
-    ```
-    bazel run --action_env VAULT_TOKEN="$YOUR_ROOT_TOKEN" //devops/docker/gitea:docker_access_token
-    ```
-    to re-setup Gitea access.
-- Next you will have to restart the Drone container.
-    - `docker stop drone && docker start drone`
 
 At this point, you need to authorize Drone to access Gitea; this can only be done manually.
 Point your browser to `${DRONE_PROTOCOL}://${DRONE_SERVER_HOST}:${DRONE_SERVER_PORT}` and login using the following credentials:
@@ -341,10 +343,17 @@ You can find the right value for `${PASSWORD}` by querying Vault:
 vault kv get -address="${VAULT_HOST}:${VAULT_PORT}" -field=password secret/gitea/token
 ```
 
+You will also need to set `DRONE_TOKEN` to be the value found under `Your Personal Token` under `User Settings`.
+Finally, 
+
+- `bazel run --action_env VAULT_TOKEN="$YOUR_ROOT_TOKEN" //devops/docker/drone:link_to_gitea`
+- `docker stop drone && docker start drone`
+
 ### Drone CI Runner
 
 - `cd $SRC`
 - `bazel run //devops/docker/drone_runner:drone-runner`
+- `bazel run //devops/docker/drone_runner_worker_image:latest`
 - `docker run --network c3p0 -v /var/run/docker.sock:/var/run/docker.sock --name drone-runner bazel/devops/docker/drone_runner:drone-runner`
 
 ## Build and Run Webserver

@@ -37,17 +37,6 @@ func enableAutomationGitea(grchiveOrg *core.Organization) error {
 		return err
 	}
 
-	giteaOrg := gitea.GiteaOrganization{
-		Username: grchiveOrg.OktaGroupName,
-		FullName: grchiveOrg.Name,
-	}
-
-	core.Debug(" -- Gitea Admin Create Org")
-	err = gitea.GlobalGiteaApi.AdminCreateOrganization(user, giteaOrg)
-	if err != nil {
-		return err
-	}
-
 	repository := gitea.GiteaRepository{
 		Name:  fmt.Sprintf("grchive-automation-%s", grchiveOrg.OktaGroupName),
 		Owner: user.Username,
@@ -60,7 +49,9 @@ func enableAutomationGitea(grchiveOrg *core.Organization) error {
 	}
 
 	core.Debug(" -- Gitea Repository Transfer")
-	err = gitea.GlobalGiteaApi.RepositoryTransfer(user, giteaOrg, &repository)
+	err = gitea.GlobalGiteaApi.RepositoryTransfer(user, gitea.GiteaOrganization{
+		Username: core.EnvConfig.Gitea.GlobalOrg,
+	}, &repository)
 	if err != nil {
 		return err
 	}
@@ -88,7 +79,7 @@ func enableAutomationGitea(grchiveOrg *core.Organization) error {
 	}
 
 	core.Debug(" -- Gitea Link Organization to Gitea")
-	err = database.LinkOrganizationToGitea(grchiveOrg.Id, giteaOrg.Username, repository.Name, user.Username, userTokenVaultPath)
+	err = database.LinkOrganizationToGitea(grchiveOrg.Id, repository.Owner, repository.Name, user.Username, userTokenVaultPath)
 	if err != nil {
 		return err
 	}

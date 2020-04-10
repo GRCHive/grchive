@@ -49,7 +49,7 @@ func SendEmailVerificationWithTx(user *core.User, tx *sqlx.Tx) error {
 		return err
 	}
 
-	message, err := core.TemplateToString(emailVerificationTemplate, map[string]string{
+	message, err := core.HtmlTemplateToString(emailVerificationTemplate, map[string]string{
 		"userFullName":     user.FullName(),
 		"productName":      core.EnvConfig.Company.CompanyName,
 		"verificationLink": veriLink,

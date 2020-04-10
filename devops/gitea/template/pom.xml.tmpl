@@ -6,10 +6,8 @@
 
   <groupId>com.grchive.{{ .GRCHIVE_ORG_IDENTIFIER }}</groupId>
   <artifactId>client-lib</artifactId>
-  <version>{{ .GRCHIVE_CLIENT_LIB_VERSION }}</version>
-
+  <version>0.0</version>
   <name>client-lib</name>
-  <url>{{ .GRCHIVE_ORG_URL }}</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -28,8 +26,8 @@
 
   <distributionManagement>
     <repository>
-        <id>central</id>
-        <name>libs-release</name>
+        <id>artifactory-central</id>
+        <name>libs-release-local</name>
         <url>http://{{ .ARTIFACTORY_HOST }}:{{ .ARTIFACTORY_PORT }}/artifactory/libs-release-local</url>
     </repository>
   </distributionManagement>

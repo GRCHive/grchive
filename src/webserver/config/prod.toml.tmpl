@@ -100,6 +100,7 @@ protocol = "${GITEA_PROTOCOL}"
 host = "${GITEA_HOST}"
 port = ${GITEA_PORT}
 token = "${GITEA_TOKEN}"
+global_org = "${GITEA_GLOBAL_ORG}"
 
 [drone]
 protocol = "${DRONE_SERVER_PROTO}"
@@ -107,6 +108,8 @@ host = "${DRONE_SERVER_HOST}"
 port = ${DRONE_SERVER_PORT}
 token = "${DRONE_TOKEN}"
 runner_type = "${DRONE_RUNNER_TYPE}"
+runner_image = "${DRONE_RUNNER_IMAGE}"
+runner_image_pull = "${DRONE_RUNNER_IMAGE_PULL}"
 
 [features]
 automation = false

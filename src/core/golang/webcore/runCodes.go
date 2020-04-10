@@ -67,7 +67,7 @@ func SendRunCodeViaEmail(runCode *core.DbSqlQueryRunCode, rawCode string) error 
 		return err
 	}
 
-	message, err := core.TemplateToString(emailTemplate, map[string]string{
+	message, err := core.HtmlTemplateToString(emailTemplate, map[string]string{
 		"queryName": fmt.Sprintf("%s v%d", metadata.Name, query.Version),
 		"runCode":   rawCode,
 	})

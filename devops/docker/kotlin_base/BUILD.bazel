@@ -1,0 +1,139 @@
+package(default_visibility = ["//visibility:public"])
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("@io_bazel_rules_docker//docker/package_managers:download_pkgs.bzl", "download_pkgs")
+load("@io_bazel_rules_docker//docker/package_managers:install_pkgs.bzl", "install_pkgs")
+
+genrule(
+    name = "kotlinc",
+    srcs = [ "@kotlin//file" ],
+    outs = [
+        "kotlinc/bin/kapt",
+        "kotlinc/bin/kapt.bat",
+        "kotlinc/bin/kotlin",
+        "kotlinc/bin/kotlin.bat",
+        "kotlinc/bin/kotlinc",
+        "kotlinc/bin/kotlinc.bat",
+        "kotlinc/bin/kotlinc-js",
+        "kotlinc/bin/kotlinc-js.bat",
+        "kotlinc/bin/kotlinc-jvm",
+        "kotlinc/bin/kotlinc-jvm.bat",
+        "kotlinc/bin/kotlin-dce-js",
+        "kotlinc/bin/kotlin-dce-js.bat",
+        "kotlinc/lib/allopen-compiler-plugin.jar",
+        "kotlinc/lib/android-extensions-compiler.jar",
+        "kotlinc/lib/android-extensions-runtime.jar",
+        "kotlinc/lib/annotations-13.0.jar",
+        "kotlinc/lib/atomicfu-common-0.11.12.jar",
+        "kotlinc/lib/config-1.3.1.jar",
+        "kotlinc/lib/js.engines.jar",
+        "kotlinc/lib/jvm-abi-gen.jar",
+        "kotlinc/lib/kotlin-annotation-processing-cli.jar",
+        "kotlinc/lib/kotlin-annotation-processing.jar",
+        "kotlinc/lib/kotlin-annotation-processing-runtime.jar",
+        "kotlinc/lib/kotlin-annotations-android.jar",
+        "kotlinc/lib/kotlin-annotations-jvm.jar",
+        "kotlinc/lib/kotlin-annotations-jvm-sources.jar",
+        "kotlinc/lib/kotlin-ant.jar",
+        "kotlinc/lib/kotlin-compiler.jar",
+        "kotlinc/lib/kotlin-daemon-client.jar",
+        "kotlinc/lib/kotlin-daemon-client-new.jar",
+        "kotlinc/lib/kotlin-daemon.jar",
+        "kotlinc/lib/kotlin-imports-dumper-compiler-plugin.jar",
+        "kotlinc/lib/kotlin-main-kts.jar",
+        "kotlinc/lib/kotlin-preloader.jar",
+        "kotlinc/lib/kotlin-reflect.jar",
+        "kotlinc/lib/kotlin-reflect-sources.jar",
+        "kotlinc/lib/kotlin-runner.jar",
+        "kotlinc/lib/kotlin-scripting-common.jar",
+        "kotlinc/lib/kotlin-scripting-compiler-impl.jar",
+        "kotlinc/lib/kotlin-scripting-compiler.jar",
+        "kotlinc/lib/kotlin-scripting-js.jar",
+        "kotlinc/lib/kotlin-scripting-jvm.jar",
+        "kotlinc/lib/kotlin-script-runtime.jar",
+        "kotlinc/lib/kotlin-script-runtime-sources.jar",
+        "kotlinc/lib/kotlin-source-sections-compiler-plugin.jar",
+        "kotlinc/lib/kotlin-stdlib.jar",
+        "kotlinc/lib/kotlin-stdlib-jdk7.jar",
+        "kotlinc/lib/kotlin-stdlib-jdk7-sources.jar",
+        "kotlinc/lib/kotlin-stdlib-jdk8.jar",
+        "kotlinc/lib/kotlin-stdlib-jdk8-sources.jar",
+        "kotlinc/lib/kotlin-stdlib-js.jar",
+        "kotlinc/lib/kotlin-stdlib-js-sources.jar",
+        "kotlinc/lib/kotlin-stdlib-sources.jar",
+        "kotlinc/lib/kotlin-test.jar",
+        "kotlinc/lib/kotlin-test-js.jar",
+        "kotlinc/lib/kotlin-test-js-sources.jar",
+        "kotlinc/lib/kotlin-test-junit5.jar",
+        "kotlinc/lib/kotlin-test-junit5-sources.jar",
+        "kotlinc/lib/kotlin-test-junit.jar",
+        "kotlinc/lib/kotlin-test-junit-sources.jar",
+        "kotlinc/lib/kotlin-test-sources.jar",
+        "kotlinc/lib/kotlin-test-testng.jar",
+        "kotlinc/lib/kotlin-test-testng-sources.jar",
+        "kotlinc/lib/kotlinx-coroutines-core-1.0.1.jar",
+        "kotlinc/lib/kotlinx-coroutines-core-common-1.0.1.jar",
+        "kotlinc/lib/kotlinx-coroutines-io-0.1.1.jar",
+        "kotlinc/lib/kotlinx-coroutines-io-jvm-0.1.1.jar",
+        "kotlinc/lib/kotlinx-coroutines-jdk8-1.0.1.jar",
+        "kotlinc/lib/kotlinx-io-0.1.1.jar",
+        "kotlinc/lib/kotlinx-io-jvm-0.1.1.jar",
+        "kotlinc/lib/kotlinx-serialization-compiler-plugin.jar",
+        "kotlinc/lib/ktor-network-1.0.1.jar",
+        "kotlinc/lib/ktor-utils-1.0.1.jar",
+        "kotlinc/lib/ktor-utils-jvm-1.0.1.jar",
+        "kotlinc/lib/mutability-annotations-compat.jar",
+        "kotlinc/lib/noarg-compiler-plugin.jar",
+        "kotlinc/lib/sam-with-receiver-compiler-plugin.jar",
+        "kotlinc/lib/slf4j-api-1.7.25.jar",
+        "kotlinc/lib/trove4j.jar",
+    ],
+    cmd = "unzip $< -d $(RULEDIR)"
+)
+
+genrule (
+    name = "tmp",
+    srcs = [],
+    outs = [ "usr/share/man/man1/TEMP" ],
+    cmd = "mkdir -p $$(dirname $@) && touch $@",
+)
+
+container_image (
+    name = "fixed-base",
+    base = "@debian-slim//image",
+    files = [
+        ":tmp",
+    ],
+    data_path = "."
+)
+
+download_pkgs(
+    name = "download-deps",
+    packages = [
+        "software-properties-common",
+        "curl",
+        "unzip",
+        "wget",
+        "gnupg2",
+        "gosu",
+        "maven",
+        "default-jre",
+        "default-jdk",
+    ],
+    image_tar = ":fixed-base.tar"
+)
+
+install_pkgs(
+    name = "install-deps",
+    image_tar = ":fixed-base.tar",
+    installables_tar = ":download-deps.tar",
+    output_image_name = "docker-kotlin-base-base"
+)
+
+container_image (
+    name = "latest",
+    base = ":install-deps",
+    files = [
+        ":kotlinc"
+    ],
+    data_path = "."
+)

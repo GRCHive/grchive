@@ -1,0 +1,18 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+
+go_binary(
+    name = "worker",
+    srcs = glob([
+        "**/*.go",
+    ]),
+    data = [
+        "//src/webserver/config:config",
+    ],
+    deps = [
+        "//src/core/golang/core:webserver_core_library",
+        "//src/core/golang/database:webserver_database_library",
+        "//src/core/golang/webcore:webserver_webcore_library",
+    ],
+)

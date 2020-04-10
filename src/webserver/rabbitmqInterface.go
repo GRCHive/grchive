@@ -70,7 +70,7 @@ func sendNotification(notification *core.Notification, users []*core.User) error
 		return err
 	}
 
-	message, err := core.TemplateToString(emailTemplate, map[string]string{
+	message, err := core.HtmlTemplateToString(emailTemplate, map[string]string{
 		"subject":        subjectHandle.DisplayText,
 		"verb":           notification.Verb,
 		"object":         objectHandle.DisplayText,

@@ -426,6 +426,14 @@ KOTLINC_RELEASE = {
     "sha256": KOTLINC_RELEASE_SHA,
 }
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+KOTLIN_VERSION = "1.3.70"
+http_file(
+    name = "kotlin",
+    urls = ["https://github.com/JetBrains/kotlin/releases/download/v{0}/kotlin-compiler-{0}.zip".format(KOTLIN_VERSION)],
+    sha256 = "709d782ff707a633278bac4c63bab3026b768e717f8aaf62de1036c994bc89c7",
+)
+
 kotlin_repositories(compiler_release = KOTLINC_RELEASE)
 
 # Java/Maven
@@ -461,4 +469,11 @@ maven_install(
     repositories = [
         "https://repo1.maven.org/maven2",
     ],
+)
+
+# Others
+http_file(
+    name = "drone-cli",
+    urls = ["https://github.com/drone/drone-cli/releases/latest/download/drone_linux_amd64.tar.gz"],
+    sha256 = "c28f724eb44ad756e550789824b9c73d4970da884966bc71552a281815c13f0a",
 )

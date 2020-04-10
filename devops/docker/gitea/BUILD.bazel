@@ -27,7 +27,7 @@ genrule(
     name = "docker_access_token",
     srcs = [ "docker_setup_extract_access.sh" ],
     outs = [ "script.sh" ],
-    cmd = ". $(location //build:bash_env) && envsubst '$${GITEA_HOST} $${GITEA_PORT} $${GITEA_PROTOCOL} $${GITEA_TOKEN} $${VAULT_HOST} $${VAULT_PORT} $${VAULT_USER} $${VAULT_PASSWORD} $${VAULT_TOKEN} $${DRONE_GITEA_CLIENT_ID_VAULT} $${DRONE_GITEA_CLIENT_SECRET_VAULT} $${DRONE_SERVER_PROTO} $${DRONE_SERVER_HOST} $${DRONE_SERVER_PORT}' < $< > $@",
+    cmd = ". $(location //build:bash_env) && envsubst '$${GITEA_HOST} $${GITEA_PORT} $${GITEA_PROTOCOL} $${GITEA_TOKEN} $${GITEA_GLOBAL_ORG} $${VAULT_HOST} $${VAULT_PORT} $${VAULT_TOKEN}' < $< > $@",
     executable = True,
     tools = [
         "//build:bash_env"

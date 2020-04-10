@@ -44,7 +44,7 @@ func SendInviteCodeEmailCode(invite *core.InviteCode, code string) error {
 		return err
 	}
 
-	message, err := core.TemplateToString(emailInvitationTemplate, map[string]string{
+	message, err := core.HtmlTemplateToString(emailInvitationTemplate, map[string]string{
 		"userFullName":     user.FullName(),
 		"productName":      core.EnvConfig.Company.CompanyName,
 		"inviteLink":       inviteLink,
