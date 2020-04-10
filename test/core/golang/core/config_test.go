@@ -163,6 +163,7 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"Gitea.Port", "gitea.port", int64(128), int32(128)},
 					{"Gitea.Protocol", "gitea.protocol", "protocl", nil},
 					{"Gitea.Token", "gitea.token", "token", nil},
+					{"Gitea.GlobalOrg", "gitea.global_org", "grchive", nil},
 					{"Features.Automation", "features.automation", true, nil},
 					{"Drone.Host", "drone.host", "host", nil},
 					{"Drone.Port", "drone.port", int64(128), int32(128)},
