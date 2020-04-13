@@ -1,5 +1,5 @@
 import { 
-    StringFilterData, NullStringFilterData,
+    StringFilterData, NullStringFilterData, StringComparisonOperators,
     TimeRangeFilterData, NullTimeRangeFilterDate, cleanTimeRangeFilterDataFromJson
 } from './filters'
 
@@ -27,7 +27,10 @@ export interface AuditTrailFilterData {
 
 export let NullAuditTrailFilterData : AuditTrailFilterData = {
     ResourceTypeFilter : JSON.parse(JSON.stringify(NullStringFilterData)),
-    ActionFilter: JSON.parse(JSON.stringify(NullStringFilterData)),
+    ActionFilter: JSON.parse(JSON.stringify({
+        Op: StringComparisonOperators.NotEqual,
+        Target: "SELECT",
+    })),
     UserFilter: JSON.parse(JSON.stringify(NullStringFilterData)),
     TimeRangeFilter: cleanTimeRangeFilterDataFromJson(JSON.parse(JSON.stringify(NullTimeRangeFilterDate))),
 }
