@@ -58,6 +58,7 @@ import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
 import CreateNewDatabaseForm from '../../components/dashboard/CreateNewDatabaseForm.vue'
 import { deleteDatabase } from '../../../ts/api/apiDatabases'
+import { KNoHost } from '../../../ts/deployments'
 
 const Props = Vue.extend({
     props: {
@@ -80,7 +81,11 @@ const Props = Vue.extend({
         enableSelect: {
             type: Boolean,
             default: false,
-        }
+        },
+        deploymentType: {
+            type: Number,
+            default: KNoHost
+        },
     }
 })
 
@@ -104,10 +109,16 @@ export default class DbTableWithControls extends Props {
     }
 
     refreshDatabases() {
-        allDatabase({
+        let params : any = {
             orgId: PageParamsStore.state.organization!.Id,
             filter: NullDatabaseFilterData,
-        }).then((resp : TAllDatabaseOutputs) => {
+        }
+
+        if (this.deploymentType != KNoHost) {
+            params.deploymentType = this.deploymentType
+        }
+
+        allDatabase(params).then((resp : TAllDatabaseOutputs) => {
             this.allDbs = resp.data
         }).catch((err : any) => {
             // @ts-ignore

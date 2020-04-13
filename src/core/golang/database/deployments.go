@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
@@ -168,6 +169,11 @@ func GetSystemDeploymentId(systemId int64, orgId int32, role *core.Role) (int64,
 	if err != nil {
 		return -1, err
 	}
+
+	if deploy == nil {
+		return -1, errors.New("No deployment found.")
+	}
+
 	return deploy.Id, nil
 }
 
@@ -176,6 +182,11 @@ func GetDatabaseDeploymentId(dbId int64, orgId int32, role *core.Role) (int64, e
 	if err != nil {
 		return -1, err
 	}
+
+	if deploy == nil {
+		return -1, errors.New("No deployment found.")
+	}
+
 	return deploy.Id, nil
 }
 

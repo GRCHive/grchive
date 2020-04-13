@@ -52,6 +52,7 @@
                         disable-delete
                         enable-select
                         :exclude="relevantDbs"
+                        :deployment-type="KSelfHosted"
                     >
                     </db-table-with-controls>
 
@@ -136,7 +137,7 @@
                                                 <v-list-item @click="startLinkSystems">
                                                     <v-list-item-title>Add Systems</v-list-item-title>
                                                 </v-list-item>
-                                                <v-list-item @click="startLinkDatabases">
+                                                <v-list-item @click="showHideLinkDatabases = true">
                                                     <v-list-item-title>Add Databases</v-list-item-title>
                                                 </v-list-item>
                                             </v-list>
@@ -199,7 +200,6 @@ import Component from 'vue-class-component'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import CreateNewServerForm from './CreateNewServerForm.vue'
 import { Server } from '../../../ts/infrastructure'
-import { KSelfHosted } from '../../../ts/deployments'
 import { getServer, TGetServerOutput } from '../../../ts/api/apiServers'
 import { getAllSystems, TAllSystemsOutputs } from '../../../ts/api/apiSystems'
 import { allDatabase, TAllDatabaseOutputs } from '../../../ts/api/apiDatabases'
@@ -209,6 +209,7 @@ import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl, createOrgServersUrl } from '../../../ts/url'
 import { System } from '../../../ts/systems'
 import { Database, NullDatabaseFilterData } from '../../../ts/databases'
+import { KSelfHosted } from '../../../ts/deployments'
 import SystemsTable from '../../generic/SystemsTable.vue'
 import SystemTableWithControls from '../../generic/resources/SystemTableWithControls.vue'
 import DbTable from '../../generic/DbTable.vue'
@@ -227,6 +228,8 @@ import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
     }
 })
 export default class FullEditServerComponent extends Vue {
+    KSelfHosted: number = KSelfHosted
+
     currentServer: Server = {} as Server
     relevantSystems : System[] = []
     relevantDbs : Database[] = []
@@ -242,16 +245,7 @@ export default class FullEditServerComponent extends Vue {
     allSystems : System[] | null = null
     systemsToLink : System[] = []
 
-    allDatabases : Database[] | null = null
     databasesToLink : Database[] = []
-
-    get linkableDatabases() : Database[] {
-        if (!this.allDatabases) {
-            return []
-        }
-        let idSet = new Set<number>(this.relevantDbs.map((ele : Database) => ele.Id))
-        return this.allDatabases.filter((ele : Database) => !idSet.has(ele.Id))
-    }
 
     get linkableSystems() : System[] {
         if (!this.allSystems) {
@@ -330,31 +324,6 @@ export default class FullEditServerComponent extends Vue {
             })
         } else {
             this.showHideLinkSystems = true
-        }
-    }
-
-    startLinkDatabases() {
-        if (!this.allDatabases) {
-            allDatabase({
-                orgId: PageParamsStore.state.organization!.Id,
-                deploymentType: KSelfHosted,
-                filter: NullDatabaseFilterData,
-            }).then((resp : TAllDatabaseOutputs) => {
-                this.allDatabases = resp.data
-                if (!!this.allDatabases) {
-                    this.startLinkDatabases()
-                }
-            }).catch((err : any) => {
-                // @ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong. Try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
-            })
-        } else {
-            this.showHideLinkDatabases = true
         }
     }
 

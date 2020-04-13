@@ -104,7 +104,7 @@ func GetAllDatabasesForOrgWithDeployment(orgId int32, deploymentType int32, filt
 			ON dp.id = link.deployment_id
 		WHERE db.org_id = $1
 			AND dp.deployment_type = $2
-			%s
+			AND %s
 	`,
 		buildNumericFilter("db.type_id", filter.Type),
 	), orgId, deploymentType)
