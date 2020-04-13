@@ -372,6 +372,12 @@ If you wish to run the Docker container:
 
 - `bazel run //devops/docker/webserver:docker_webserver`
 
+## Build and Run Notification Hub.
+
+- `cd $SRC`
+- `bazel build //src/notification_hub:hub`
+- `bazel run //src/notification_hub:hub`
+
 ## Build and Run Preview Generator
 
 The preview generator worker listens on RabbitMQ for an files that clients upload and generates a PDF preview.
