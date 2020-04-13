@@ -21,6 +21,7 @@
                         disable-delete
                         enable-select
                         :exclude="relevantSystems"
+                        :deployment-type="KSelfHosted"
                     >
                     </system-table-with-controls>
 
@@ -134,7 +135,7 @@
                                             </template>
 
                                             <v-list dense>
-                                                <v-list-item @click="startLinkSystems">
+                                                <v-list-item @click="showHideLinkSystems = true">
                                                     <v-list-item-title>Add Systems</v-list-item-title>
                                                 </v-list-item>
                                                 <v-list-item @click="showHideLinkDatabases = true">
@@ -242,18 +243,8 @@ export default class FullEditServerComponent extends Vue {
     showHideLinkSystems : boolean = false
     showHideLinkDatabases : boolean = false
 
-    allSystems : System[] | null = null
     systemsToLink : System[] = []
-
     databasesToLink : Database[] = []
-
-    get linkableSystems() : System[] {
-        if (!this.allSystems) {
-            return []
-        }
-        let idSet = new Set<number>(this.relevantSystems.map((ele : System) => ele.Id))
-        return this.allSystems.filter((ele : System) => !idSet.has(ele.Id))
-    }
 
     refreshData() {
         let data = window.location.pathname.split('/')
@@ -301,30 +292,6 @@ export default class FullEditServerComponent extends Vue {
 
     onEdit(s : Server) {
         this.currentServer = s
-    }
-
-    startLinkSystems() {
-        if (!this.allSystems) {
-            getAllSystems({
-                orgId: PageParamsStore.state.organization!.Id,
-                deploymentType: KSelfHosted,
-            }).then((resp : TAllSystemsOutputs) => {
-                this.allSystems = resp.data
-                if (!!this.allSystems) {
-                    this.startLinkSystems()
-                }
-            }).catch((err : any) => {
-                // @ts-ignore
-                this.$root.$refs.snackbar.showSnackBar(
-                    "Oops! Something went wrong. Try again.",
-                    true,
-                    "Contact Us",
-                    contactUsUrl,
-                    true);
-            })
-        } else {
-            this.showHideLinkSystems = true
-        }
     }
 
     linkToSystems() {

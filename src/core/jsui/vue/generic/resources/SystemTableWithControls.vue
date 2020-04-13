@@ -60,6 +60,7 @@ import { TAllSystemsOutputs, getAllSystems } from '../../../ts/api/apiSystems'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
 import { deleteSystem, TDeleteSystemOutputs } from '../../../ts/api/apiSystems'
+import { KNoHost } from '../../../ts/deployments'
 import SystemsTable from '../SystemsTable.vue'
 
 const Props = Vue.extend({
@@ -83,7 +84,11 @@ const Props = Vue.extend({
         enableSelect: {
             type: Boolean,
             default: false,
-        }
+        },
+        deploymentType: {
+            type: Number,
+            default: KNoHost
+        },
     }
 })
 
@@ -112,9 +117,15 @@ export default class SystemTableWithControls extends Props {
     }
 
     refreshSystems() {
-        getAllSystems({
+        let params : any = {
             orgId: PageParamsStore.state.organization!.Id
-        }).then((resp : TAllSystemsOutputs) => {
+        }
+
+        if (this.deploymentType != KNoHost) {
+            params.deploymentType = this.deploymentType
+        }
+
+        getAllSystems(params).then((resp : TAllSystemsOutputs) => {
             this.systems = resp.data
         }).catch((err : any) => {
             // @ts-ignore
