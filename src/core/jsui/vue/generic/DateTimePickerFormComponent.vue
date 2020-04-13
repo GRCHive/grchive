@@ -5,6 +5,7 @@
         :close-on-content-click="false"
         content-class="dt-menu"
         :disabled="readonly"
+        min-width="0px"
     >
         <template v-slot:activator="{ on }">
             <v-text-field
