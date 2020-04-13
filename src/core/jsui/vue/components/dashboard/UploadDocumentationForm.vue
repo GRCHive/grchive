@@ -147,18 +147,22 @@ export default Vue.extend({
         altName: "",
         description: "",
         uploadUser: {} as User,
-        chosenCat: {} as ControlDocumentationCategory,
+        chosenCat: null as ControlDocumentationCategory | null,
         chosenControl: null as ProcessFlowControl | null,
         chosenFolder: null as FileFolder | null,
     }),
     computed : {
         canSubmit() : boolean {
-            return !!this.file && this.formValid
+            return !!this.file && this.formValid && this.finalCatId != -1
         },
 
         finalCatId() : number {
             if (this.catId == -1) {
-                return this.chosenCat.Id
+                if (!!this.chosenCat) {
+                    return this.chosenCat!.Id
+                } else {
+                    return -1
+                }
             }
             return this.catId
         },
@@ -185,7 +189,7 @@ export default Vue.extend({
             this.file = null
             this.altName = ""
             this.description =  ""
-            this.chosenCat =  {} as ControlDocumentationCategory
+            this.chosenCat =  null as ControlDocumentationCategory | null
             this.chosenFolder = null
 
             this.uploadUser = PageParamsStore.state.user!
