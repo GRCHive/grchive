@@ -36,7 +36,6 @@
         <v-text-field v-model="password"
                       label="Password"
                       filled
-                      :rules="[rules.required]"
                       type="password">
         </v-text-field>
 
