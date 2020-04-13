@@ -93,7 +93,13 @@ export default class NotificationDisplay extends Props {
         }
 
         if (!!this.indirectObjectHandle) {
-            text.push('to')
+            // "Machine learning" to figure out which word we need to use
+            // to make a grammatically correct sentence..haha.
+            if (this.notification.Notification.Verb == 'unassigned') {
+                text.push('from')
+            } else {
+                text.push('to')
+            }
             text.push(this.indirectObjectHandle.displayText)
         }
 

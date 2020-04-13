@@ -10,8 +10,9 @@ import (
 )
 
 type ControlEvent struct {
-	User    core.User
-	Control core.Control
+	User       core.User
+	Control    core.Control
+	OldControl core.Control
 }
 
 func onNotifyControlOwnerChange(data string) error {
@@ -23,29 +24,43 @@ func onNotifyControlOwnerChange(data string) error {
 
 	fmt.Printf("%+v\n", parsedData)
 
-	if !parsedData.Control.OwnerId.NullInt64.Valid {
-		return nil
+	if parsedData.Control.OwnerId.NullInt64.Valid {
+		assignedToUser, err := database.FindUserFromId(parsedData.Control.OwnerId.NullInt64.Int64)
+		if err != nil {
+			return err
+		}
+
+		webcore.SendEventToRabbitMQ(core.Event{
+			Subject:        parsedData.User,
+			Verb:           core.VerbAssign,
+			Object:         parsedData.Control,
+			IndirectObject: assignedToUser,
+			Timestamp:      time.Now().UTC(),
+		})
 	}
 
-	assignedToUser, err := database.FindUserFromId(parsedData.Control.OwnerId.NullInt64.Int64)
-	if err != nil {
-		return err
-	}
+	if parsedData.OldControl.OwnerId.NullInt64.Valid && parsedData.Control.OwnerId != parsedData.OldControl.OwnerId {
+		assignedToUser, err := database.FindUserFromId(parsedData.OldControl.OwnerId.NullInt64.Int64)
+		if err != nil {
+			return err
+		}
 
-	webcore.SendEventToRabbitMQ(core.Event{
-		Subject:        parsedData.User,
-		Verb:           core.VerbAssign,
-		Object:         parsedData.Control,
-		IndirectObject: assignedToUser,
-		Timestamp:      time.Now().UTC(),
-	})
+		webcore.SendEventToRabbitMQ(core.Event{
+			Subject:        parsedData.User,
+			Verb:           core.VerbUnassign,
+			Object:         parsedData.Control,
+			IndirectObject: assignedToUser,
+			Timestamp:      time.Now().UTC(),
+		})
+	}
 
 	return nil
 }
 
 type DocRequestEvent struct {
-	User    core.User
-	Request core.DocumentRequest
+	User       core.User
+	Request    core.DocumentRequest
+	OldRequest core.DocumentRequest
 }
 
 func onNotifyDocRequestAssigneeChange(data string) error {
@@ -55,22 +70,35 @@ func onNotifyDocRequestAssigneeChange(data string) error {
 		return err
 	}
 
-	if !parsedData.Request.AssigneeUserId.NullInt64.Valid {
-		return nil
+	if parsedData.Request.AssigneeUserId.NullInt64.Valid {
+		assignedToUser, err := database.FindUserFromId(parsedData.Request.AssigneeUserId.NullInt64.Int64)
+		if err != nil {
+			return err
+		}
+
+		webcore.SendEventToRabbitMQ(core.Event{
+			Subject:        parsedData.User,
+			Verb:           core.VerbAssign,
+			Object:         parsedData.Request,
+			IndirectObject: assignedToUser,
+			Timestamp:      time.Now().UTC(),
+		})
 	}
 
-	assignedToUser, err := database.FindUserFromId(parsedData.Request.AssigneeUserId.NullInt64.Int64)
-	if err != nil {
-		return err
-	}
+	if parsedData.OldRequest.AssigneeUserId.NullInt64.Valid && parsedData.Request.AssigneeUserId != parsedData.OldRequest.AssigneeUserId {
+		assignedToUser, err := database.FindUserFromId(parsedData.OldRequest.AssigneeUserId.NullInt64.Int64)
+		if err != nil {
+			return err
+		}
 
-	webcore.SendEventToRabbitMQ(core.Event{
-		Subject:        parsedData.User,
-		Verb:           core.VerbAssign,
-		Object:         parsedData.Request,
-		IndirectObject: assignedToUser,
-		Timestamp:      time.Now().UTC(),
-	})
+		webcore.SendEventToRabbitMQ(core.Event{
+			Subject:        parsedData.User,
+			Verb:           core.VerbUnassign,
+			Object:         parsedData.Request,
+			IndirectObject: assignedToUser,
+			Timestamp:      time.Now().UTC(),
+		})
+	}
 
 	return nil
 }
@@ -104,8 +132,9 @@ func onNotifyDocRequestStatusChange(data string) error {
 }
 
 type SqlRequestEvent struct {
-	User    core.User
-	Request core.DbSqlQueryRequest
+	User       core.User
+	Request    core.DbSqlQueryRequest
+	OldRequest core.DbSqlQueryRequest
 }
 
 func onNotifySqlRequestAssigneeChange(data string) error {
@@ -115,22 +144,35 @@ func onNotifySqlRequestAssigneeChange(data string) error {
 		return err
 	}
 
-	if !parsedData.Request.AssigneeUserId.NullInt64.Valid {
-		return nil
+	if parsedData.Request.AssigneeUserId.NullInt64.Valid {
+		assignedToUser, err := database.FindUserFromId(parsedData.Request.AssigneeUserId.NullInt64.Int64)
+		if err != nil {
+			return err
+		}
+
+		webcore.SendEventToRabbitMQ(core.Event{
+			Subject:        parsedData.User,
+			Verb:           core.VerbAssign,
+			Object:         parsedData.Request,
+			IndirectObject: assignedToUser,
+			Timestamp:      time.Now().UTC(),
+		})
 	}
 
-	assignedToUser, err := database.FindUserFromId(parsedData.Request.AssigneeUserId.NullInt64.Int64)
-	if err != nil {
-		return err
-	}
+	if parsedData.OldRequest.AssigneeUserId.NullInt64.Valid && parsedData.Request.AssigneeUserId != parsedData.OldRequest.AssigneeUserId {
+		assignedToUser, err := database.FindUserFromId(parsedData.OldRequest.AssigneeUserId.NullInt64.Int64)
+		if err != nil {
+			return err
+		}
 
-	webcore.SendEventToRabbitMQ(core.Event{
-		Subject:        parsedData.User,
-		Verb:           core.VerbAssign,
-		Object:         parsedData.Request,
-		IndirectObject: assignedToUser,
-		Timestamp:      time.Now().UTC(),
-	})
+		webcore.SendEventToRabbitMQ(core.Event{
+			Subject:        parsedData.User,
+			Verb:           core.VerbUnassign,
+			Object:         parsedData.Request,
+			IndirectObject: assignedToUser,
+			Timestamp:      time.Now().UTC(),
+		})
+	}
 
 	return nil
 }
