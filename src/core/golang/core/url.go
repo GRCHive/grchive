@@ -103,6 +103,7 @@ const DashboardDataPrefix string = "/data"
 const DashboardDataSourcePrefix string = "/source"
 const DashboardCodePrefix string = "/code"
 const DashboardScriptPrefix string = "/scripts"
+const DashboardLogsPrefix string = "/logs"
 
 var DashboardSingleDataEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgClientDataQueryId)
 var DashboardSingleScriptEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgClientScriptQueryId)

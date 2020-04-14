@@ -402,3 +402,5 @@ export const allClientScriptsUrl : string = "/api/auto/scripts/all"
 export const deleteClientScriptUrl : string = "/api/auto/scripts/delete"
 export const getClientScriptUrl : string = "/api/auto/scripts/get"
 export const updateClientScriptUrl : string = "/api/auto/scripts/update"
+
+export const getLogUrl: string = "/api/auto/logs/get"

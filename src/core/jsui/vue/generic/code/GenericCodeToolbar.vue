@@ -8,7 +8,6 @@
                         <v-icon small color="accent">mdi-chevron-down</v-icon>
                     </v-btn>
                 </template>
-
                 <v-list dense>
                     <v-list-item dense @click="save">
                         <v-list-item-title>
@@ -18,6 +17,8 @@
                     <v-divider></v-divider>
                 </v-list>
             </v-menu>
+
+            <slot name="custom-menu"></slot>
         </v-toolbar-items>
 
         <v-spacer></v-spacer>

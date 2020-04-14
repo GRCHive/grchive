@@ -1,29 +1,73 @@
 <template>
-    <generic-code-ide
-        :value="codeString"
-        :lang="lang"
-        :readonly="readonly"
-        :full-height="fullHeight"
-        :save-in-progress="saveInProgress"
-        @input="onInput"
-        @save="onSave"
-        v-if="!initialLoad"
-    >
-        <template v-slot:custom-status>
-            <v-col cols="auto">
-                <v-select
-                    dense
-                    solo
-                    flat
-                    hide-details
-                    :items="allCodeItems"
-                    label="Version"
-                    v-model="selectedCode"
+    <div>
+        <generic-code-toolbar
+            @save="onSave"
+            ref="toolbar"
+            :code-value="value"
+            :save-in-progress="saveInProgress"
+        >
+            <template v-slot:custom-menu>
+                <v-menu offset-y>
+                    <template v-slot:activator="{ on }">
+                        <v-btn text color="accent" v-on="on">
+                            Logs
+                            <v-icon small color="accent">mdi-chevron-down</v-icon>
+                        </v-btn>
+                    </template>
+                    <v-list dense>
+                        <v-list-item dense @click="showLogs = !showLogs">
+                            <v-list-item-action>
+                                <v-checkbox :input-value="showLogs">
+                                </v-checkbox>
+                            </v-list-item-action>
+                            <v-list-item-title>
+                                Build Logs
+                            </v-list-item-title>
+                        </v-list-item>
+                        <v-divider></v-divider>
+                    </v-list>
+                </v-menu>
+            </template>
+            <template v-slot:custom-status>
+                <v-col cols="auto">
+                    <v-select
+                        dense
+                        solo
+                        flat
+                        hide-details
+                        :items="allCodeItems"
+                        label="Version"
+                        v-model="selectedCode"
+                    >
+                    </v-select>
+                </v-col>
+            </template>
+        </generic-code-toolbar>
+        <v-divider></v-divider>
+
+        <dynamic-split-container :enable-col-b="showLogs">
+            <template v-slot:first-col>
+                <generic-code-editor
+                    :value="codeString"
+                    :lang="lang"
+                    :readonly="readonly"
+                    :full-height="fullHeight"
+                    @input="onInput"
+                    ref="editor"
                 >
-                </v-select>
-            </v-col>
-        </template>
-    </generic-code-ide>
+                </generic-code-editor>
+            </template>
+
+            <template v-slot:second-col>
+                <log-viewer
+                    :code="selectedCode"
+                    full-height
+                >
+                </log-viewer>
+            </template>
+        </dynamic-split-container>
+
+    </div>
 </template>
 
 <script lang="ts">
@@ -31,8 +75,8 @@
 import Vue from 'vue'
 import Component, { mixins } from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
-import { Props } from './GenericCodeEditor.vue'
-import GenericCodeIde from './GenericCodeIDE.vue'
+import GenericCodeEditor, { Props } from './GenericCodeEditor.vue'
+import GenericCodeToolbar from './GenericCodeToolbar.vue'
 import { ManagedCode } from '../../../ts/code'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { 
@@ -42,6 +86,8 @@ import {
 } from '../../../ts/api/apiCode'
 import { contactUsUrl } from '../../../ts/url'
 import { standardFormatTime } from '../../../ts/time'
+import LogViewer from '../logs/LogViewer.vue'
+import DynamicSplitContainer from '../DynamicSplitContainer.vue'
 
 const ManagedProps = Vue.extend({
     props: {
@@ -58,12 +104,16 @@ const ManagedProps = Vue.extend({
 
 @Component({
     components: {
-        GenericCodeIde,
+        LogViewer,
+        DynamicSplitContainer,
+        GenericCodeToolbar,
+        GenericCodeEditor,
     }
 })
 export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     codeString : string = ""
     loading: boolean = false
+    showLogs: boolean = false
 
     // This is equivalent to loading for the first time
     // we load code. We need this because the code toolbar
@@ -78,6 +128,11 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
 
     allCode : ManagedCode[] = []
     selectedCode : ManagedCode | null = null
+
+    $refs!: {
+        editor: GenericCodeEditor,
+        toolbar: GenericCodeToolbar,
+    }
 
     onInput(text : string) {
         this.codeString = text
@@ -197,13 +252,33 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
         })
     }
 
+    onEvent(event : string, ...args : any[]) {
+        this.$emit(event, ...args)
+    }
+
     mounted() {
         this.refreshCode()
+        //@ts-ignore
+        let ele : HTMLElement = this.$refs.editor.$el
+        // Add events here to let toolbar handle input events.
+        document.addEventListener('keydown', (e : KeyboardEvent) => {
+            if (!document.activeElement) {
+                return
+            }
+            
+            // This needs to be here so that the delete doesn't
+            // accidentally trigger a hotkey when a dialog is
+            // in focus.
+            if (!ele.contains(document.activeElement)) {
+                return
+            }
+
+            this.$refs.toolbar.handleHotkeys(e)
+        })
     }
 }
 
 </script>
-
 
 <style scoped>
 

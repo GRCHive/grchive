@@ -131,6 +131,7 @@ type EnvConfigData struct {
 	SessionKeys        [][]byte
 	HmacKey            []byte
 	UseSecureCookies   bool
+	LogEncryptionPath  string
 	Company            *CompanyConfig
 	Vault              *VaultConfig
 	Gcloud             *GCloudConfig
@@ -213,6 +214,7 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	}
 
 	envConfig.UseSecureCookies = tomlConfig.Get("security.use_secure_cookies").(bool)
+	envConfig.LogEncryptionPath = tomlConfig.Get("security.log_encryption_path").(string)
 
 	envConfig.Company = new(CompanyConfig)
 	envConfig.Company.CompanyName = tomlConfig.Get("company.company_name").(string)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/vault_api"
 	"os"
 )
 
@@ -34,6 +35,11 @@ func run(dir string) {
 func main() {
 	core.Init()
 	database.Init()
+	vault.Initialize(vault.VaultConfig{
+		Url:      core.EnvConfig.Vault.Url,
+		Username: core.EnvConfig.Vault.Username,
+		Password: core.EnvConfig.Vault.Password,
+	}, core.EnvConfig.Tls.Config())
 
 	repoDir := flag.String("dir", "", "Directory containing source code to build.")
 	flag.Parse()

@@ -36,7 +36,11 @@ export const Props = Vue.extend({
         fullHeight: {
             type: Boolean,
             default: false,
-        }
+        },
+        fixedWidth: {
+            type: Number,
+            default: -1,
+        },
     }
 })
 
@@ -78,7 +82,15 @@ export default class GenericCodeEditor extends Props {
             this.cm!.setSize(null, this.desiredHeight)
         }
 
+        this.refreshWidth()
         this.cm!.setValue(this.value)
+    }
+
+    @Watch('fixedWidth')
+    refreshWidth() {
+        if (this.fixedWidth != -1) {
+            this.cm!.setSize(this.fixedWidth, null)
+        }
     }
 
     @Watch('readonly')

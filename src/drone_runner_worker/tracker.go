@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/vault_api"
 	"strings"
 	"time"
 )
@@ -49,7 +50,12 @@ func (t *Tracker) MarkSuccess(jarPath string) {
 }
 
 func (t *Tracker) End() {
-	err := database.FinishDroneCIJob(t.commit, t.success, t.logs.String(), t.jar)
+	encryptedLogs, err := vault.TransitEncrypt(core.EnvConfig.LogEncryptionPath, []byte(t.logs.String()))
+	if err != nil {
+		core.Error("Failed to encrypt logs:" + err.Error())
+	}
+
+	err = database.FinishDroneCIJob(t.commit, t.success, string(encryptedLogs), t.jar)
 	if err != nil {
 		core.Error("Failed to record start in DB:" + err.Error())
 	}
