@@ -197,3 +197,37 @@ func allCode(w http.ResponseWriter, r *http.Request) {
 
 	jsonWriter.Encode(code)
 }
+
+type GetCodeBuildStatusInput struct {
+	OrgId      int32  `webcore:"orgId"`
+	CommitHash string `webcore:"commitHash"`
+}
+
+func getCodeBuildStatus(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := GetCodeBuildStatusInput{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	status, err := database.GetCodeBuildStatus(inputs.CommitHash, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get build status: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(status)
+}

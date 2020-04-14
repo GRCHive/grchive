@@ -12,3 +12,8 @@ type ManagedCode struct {
 	GitPath      string    `db:"git_path"`
 	GiteaFileSha string    `db:"gitea_file_sha"`
 }
+
+type CodeBuildStatus struct {
+	Pending bool
+	Success bool
+}

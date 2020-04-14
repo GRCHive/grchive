@@ -206,3 +206,38 @@ func InsertManagedCode(code *core.ManagedCode, role *core.Role) error {
 
 	return tx.Commit()
 }
+
+func GetCodeBuildStatus(commit string, orgId int32, role *core.Role) (*core.CodeBuildStatus, error) {
+	if !role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	rows, err := dbConn.Queryx(`
+		SELECT 
+			CASE
+				WHEN time_end IS NULL THEN true
+				ELSE false
+			END,
+			success
+		FROM managed_code_drone_ci
+		WHERE commit_hash = $1 AND org_id = $2
+	`, commit, orgId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	status := core.CodeBuildStatus{
+		Pending: true,
+	}
+
+	if rows.Next() {
+		err = rows.Scan(&status.Pending, &status.Success)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &status, nil
+}

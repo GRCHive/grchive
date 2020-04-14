@@ -39,6 +39,23 @@
                         label="Version"
                         v-model="selectedCode"
                     >
+                        <template v-slot:item="{ item }">
+                            <code-build-status
+                                :commit="item.value.GitHash"
+                                class="mr-2"
+                            >
+                            </code-build-status>
+                            {{ item.text }} 
+                        </template>
+
+                        <template v-slot:selection="{ item }">
+                            <code-build-status
+                                :commit="item.value.GitHash"
+                                class="mr-2"
+                            >
+                            </code-build-status>
+                            {{ item.text }} 
+                        </template>
                     </v-select>
                 </v-col>
             </template>
@@ -88,6 +105,7 @@ import { contactUsUrl } from '../../../ts/url'
 import { standardFormatTime } from '../../../ts/time'
 import LogViewer from '../logs/LogViewer.vue'
 import DynamicSplitContainer from '../DynamicSplitContainer.vue'
+import CodeBuildStatus from './CodeBuildStatus.vue'
 
 const ManagedProps = Vue.extend({
     props: {
@@ -108,6 +126,7 @@ const ManagedProps = Vue.extend({
         DynamicSplitContainer,
         GenericCodeToolbar,
         GenericCodeEditor,
+        CodeBuildStatus,
     }
 })
 export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {

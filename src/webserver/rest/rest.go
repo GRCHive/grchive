@@ -498,6 +498,13 @@ func registerCodeAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiSaveEndpoint, saveCode)
 	s.HandleFunc(core.ApiGetEndpoint, getCode)
 	s.HandleFunc(core.ApiAllEndpoint, allCode)
+
+	registerCodeStatusAPIPaths(s)
+}
+
+func registerCodeStatusAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.DashboardStatusPrefix).Subrouter()
+	s.HandleFunc(core.ApiGetEndpoint, getCodeBuildStatus)
 }
 
 func registerScriptsAPIPaths(r *mux.Router) {

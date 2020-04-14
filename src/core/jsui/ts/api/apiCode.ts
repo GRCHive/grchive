@@ -6,6 +6,7 @@ import {
     saveCodeUrl,
     allCodeUrl,
     getCodeUrl,
+    getCodeBuildStatusUrl,
 } from '../url'
 import { ManagedCode, cleanManagedCodeFromJson } from '../code'
 
@@ -57,4 +58,21 @@ export interface TGetCodeOutput {
 
 export function getCode(inp : TGetCodeInput) : Promise<TGetCodeOutput> {
     return axios.get(getCodeUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+}
+
+
+export interface TGetCodeBuildStatusInput {
+    orgId: number
+    commitHash : string
+}
+
+export interface TGetCodeBuildStatusOutput {
+    data: {
+        Pending: boolean
+        Success: boolean
+    }
+}
+
+export function getCodeBuildStatus(inp : TGetCodeBuildStatusInput) : Promise<TGetCodeBuildStatusOutput> {
+    return axios.get(getCodeBuildStatusUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
 }
