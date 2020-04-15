@@ -17,3 +17,16 @@ type CodeBuildStatus struct {
 	Pending bool
 	Success bool
 }
+
+type SupportedCodeParameterType struct {
+	Id         int32  `db:"id"`
+	Name       string `db:"name"`
+	GolangType string `db:"golang_type" json:"-"`
+	KotlinType string `db:"kotlin_type" json:"-"`
+}
+
+type CodeParameter struct {
+	LinkId  int64  `db:"link_id" yaml:"-" json:"-"`
+	Name    string `db:"name"`
+	ParamId int32  `db:"param_type"`
+}

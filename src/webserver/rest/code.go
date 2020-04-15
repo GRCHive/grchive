@@ -11,10 +11,14 @@ import (
 )
 
 type SaveCodeInput struct {
-	OrgId    int32          `json:"orgId"`
-	Code     string         `json:"code"`
-	DataId   core.NullInt64 `json:"dataId"`
-	ScriptId core.NullInt64 `json:"scriptId"`
+	OrgId      int32          `json:"orgId"`
+	Code       string         `json:"code"`
+	DataId     core.NullInt64 `json:"dataId"`
+	ScriptId   core.NullInt64 `json:"scriptId"`
+	ScriptData *struct {
+		Params       []*core.CodeParameter `json:"params"`
+		ClientDataId []int64               `json:"clientDataId"`
+	} `json:"scriptData"`
 }
 
 func saveCode(w http.ResponseWriter, r *http.Request) {
@@ -68,12 +72,38 @@ func saveCode(w http.ResponseWriter, r *http.Request) {
 		}
 
 		managedCode.GitPath = fmt.Sprintf("src/main/kotlin/scripts/%s", script.Filename("kt"))
+		metadataGitPath := fmt.Sprintf("src/main/kotlin/scripts/%s", script.MetadataFilename())
+
+		// Hack the StoreManagedCodeToGitea to store a file in an easy way but not keep track of it in the DB.
+		tmpCode := core.ManagedCode{
+			OrgId:   managedCode.OrgId,
+			GitPath: metadataGitPath,
+		}
+
+		metadata, err := webcore.GenerateScriptMetadataYaml(inputs.ScriptData.Params, inputs.ScriptData.ClientDataId)
+		if err != nil {
+			core.Warning("Failed to generate metadata code: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		err = webcore.StoreManagedCodeToGitea(
+			&tmpCode,
+			metadata,
+			nil,
+			"[CI SKIP] Update Metadata: "+metadataGitPath,
+		)
+		if err != nil {
+			core.Warning("Failed to store metadata : " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// There is a possibility here that the link will fail after the storing to Gitea succeeds.
 	// Do we care in that case? We can probably survive just losing a link since storing an
 	// extra commit in Gitea won't hurt us.
-	err = webcore.StoreManagedCodeToGitea(&managedCode, inputs.Code, role)
+	err = webcore.StoreManagedCodeToGitea(&managedCode, inputs.Code, role, "Update: "+managedCode.GitPath)
 	if err != nil {
 		core.Warning("Failed to store managed code: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

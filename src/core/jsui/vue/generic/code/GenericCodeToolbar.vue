@@ -40,10 +40,6 @@ import Component from 'vue-class-component'
 
 const Props = Vue.extend({
     props: {
-        codeValue : {
-            type : String,
-            default: "",
-        },
         saveInProgress: { 
             type: Boolean,
             default: false,
@@ -53,10 +49,7 @@ const Props = Vue.extend({
 
 @Component
 export default class GenericCodeToolbar extends Props {
-    savedValue : string = ""
-
     save() {
-        this.savedValue = this.codeValue
         this.$emit('save')
     }
 
@@ -67,18 +60,6 @@ export default class GenericCodeToolbar extends Props {
                 e.preventDefault()
             }
         }
-    }
-
-    handleUnload(e : Event) {
-        if (this.codeValue != this.savedValue) {
-            e.preventDefault()
-            e.returnValue = false
-        }
-    }
-
-    mounted() {
-        this.savedValue = this.codeValue
-        window.addEventListener('beforeunload', this.handleUnload)
     }
 }
 

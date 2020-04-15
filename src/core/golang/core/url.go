@@ -307,6 +307,9 @@ const ApiFeaturePrefix = "/feature"
 // Websocket
 const WebsocketPrefix string = "/ws"
 
+// Metadata
+const ApiMetadataPrefix = "/metadata"
+
 var WebsocketProcessFlowNodeDisplaySettingsEndpoint = fmt.Sprintf("/flownodedisp/{%s}", ProcessFlowQueryId)
 var WebsocketUserNotificationsEndpoint = fmt.Sprintf("/notifications/{%s}", DashboardUserQueryId)
 

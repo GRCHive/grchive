@@ -29,6 +29,7 @@ go_library(
         "@org_golang_google_grpc//credentials:go_default_library",
         "@in_gopkg_square_go_jose_v2//:go_default_library",
         "@io_k8s_klog//:go_default_library",
+        "@in_gopkg_yaml_v2//:go_default_library",
     ],
     data = [
         "//devops/gitea:gitea-project-template",

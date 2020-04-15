@@ -10,3 +10,13 @@ export interface ManagedCode {
 export function cleanManagedCodeFromJson(c : ManagedCode) {
     c.ActionTime = new Date(c.ActionTime)
 }
+
+export interface SupportedParamType {
+    Id : number
+    Name : string
+}
+
+export interface CodeParamType {
+    Name: string
+    ParamId: number
+}

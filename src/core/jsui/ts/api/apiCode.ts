@@ -8,13 +8,24 @@ import {
     getCodeUrl,
     getCodeBuildStatusUrl,
 } from '../url'
-import { ManagedCode, cleanManagedCodeFromJson } from '../code'
+import { 
+    ManagedCode,
+    cleanManagedCodeFromJson,
+    CodeParamType,
+} from '../code'
+import {
+    ClientData
+} from '../clientData'
 
 export interface TSaveCodeInput {
     orgId: number
     code : string
     dataId? : number
     scriptId? : number
+    scriptData? : {
+        params : (CodeParamType | null)[],
+        clientDataId: number[],
+    }
 }
 
 export interface TSaveCodeOutput {

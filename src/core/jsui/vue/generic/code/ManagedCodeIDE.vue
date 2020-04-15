@@ -3,7 +3,6 @@
         <generic-code-toolbar
             @save="onSave"
             ref="toolbar"
-            :code-value="value"
             :save-in-progress="saveInProgress"
         >
             <template v-slot:custom-menu>
@@ -62,28 +61,39 @@
         </generic-code-toolbar>
         <v-divider></v-divider>
 
-        <dynamic-split-container :enable-col-b="showLogs">
-            <template v-slot:first-col>
-                <generic-code-editor
-                    :value="codeString"
-                    :lang="lang"
-                    :readonly="readonly"
-                    :full-height="fullHeight"
-                    @input="onInput"
-                    ref="editor"
-                >
-                </generic-code-editor>
-            </template>
+        <v-row>
+            <v-col :cols="scriptId != -1 ? 9 : 12" class="pa-0">
+                <dynamic-split-container :enable-col-b="showLogs">
+                    <template v-slot:first-col>
+                        <generic-code-editor
+                            :value="codeString"
+                            :lang="lang"
+                            :readonly="readonly"
+                            :full-height="fullHeight"
+                            @input="onInput"
+                            ref="editor"
+                        >
+                        </generic-code-editor>
+                    </template>
 
-            <template v-slot:second-col>
-                <log-viewer
-                    :code="selectedCode"
-                    full-height
-                >
-                </log-viewer>
-            </template>
-        </dynamic-split-container>
+                    <template v-slot:second-col>
+                        <log-viewer
+                            :code="selectedCode"
+                            full-height
+                        >
+                        </log-viewer>
+                    </template>
+                </dynamic-split-container>
+            </v-col>
 
+            <v-col cols="3" v-if="scriptId != -1" class="pr-2 py-0 pl-0">
+                <script-params-editor
+                    :linked-client-data.sync="currentLinkedClientData"
+                    :script-parameter-types.sync="currentScriptParams"
+                >
+                </script-params-editor>
+            </v-col>
+        </v-row>
     </div>
 </template>
 
@@ -103,9 +113,15 @@ import {
 } from '../../../ts/api/apiCode'
 import { contactUsUrl } from '../../../ts/url'
 import { standardFormatTime } from '../../../ts/time'
+import { FullClientDataWithLink } from '../../../ts/clientData'
+import {
+    CodeParamType
+} from '../../../ts/code'
+
 import LogViewer from '../logs/LogViewer.vue'
 import DynamicSplitContainer from '../DynamicSplitContainer.vue'
 import CodeBuildStatus from './CodeBuildStatus.vue'
+import ScriptParamsEditor from './ScriptParamsEditor.vue'
 
 const ManagedProps = Vue.extend({
     props: {
@@ -127,10 +143,13 @@ const ManagedProps = Vue.extend({
         GenericCodeToolbar,
         GenericCodeEditor,
         CodeBuildStatus,
+        ScriptParamsEditor,
     }
 })
 export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     codeString : string = ""
+    lastSavedCodeString : string = ""
+
     loading: boolean = false
     showLogs: boolean = false
 
@@ -147,6 +166,9 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
 
     allCode : ManagedCode[] = []
     selectedCode : ManagedCode | null = null
+
+    currentLinkedClientData : FullClientDataWithLink[] = []
+    currentScriptParams : (CodeParamType | null)[] = []
 
     $refs!: {
         editor: GenericCodeEditor,
@@ -188,6 +210,7 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
 
         getCode(params).then((resp : TGetCodeOutput) => {
             this.codeString = resp.data
+            this.lastSavedCodeString = this.codeString
             this.loading = false
             this.initialLoad = false
         }).catch((err : any) => {
@@ -253,6 +276,10 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
 
         if (this.scriptId != -1) {
             params.scriptId = this.scriptId
+            params.scriptData = {
+                params: this.currentScriptParams,
+                clientDataId: this.currentLinkedClientData.map((ele : FullClientDataWithLink) => ele.Data.Id),
+            }
         }
 
         saveCode(params).then((resp : TSaveCodeOutput) => {
@@ -275,6 +302,13 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
         this.$emit(event, ...args)
     }
 
+    handleUnload(e : Event) {
+        if (this.codeString != this.lastSavedCodeString) {
+            e.preventDefault()
+            e.returnValue = false
+        }
+    }
+
     mounted() {
         this.refreshCode()
         //@ts-ignore
@@ -294,6 +328,8 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
 
             this.$refs.toolbar.handleHotkeys(e)
         })
+
+        window.addEventListener('beforeunload', this.handleUnload)
     }
 }
 

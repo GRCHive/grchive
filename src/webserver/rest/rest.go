@@ -53,6 +53,7 @@ func registerAPIPaths(r *mux.Router) {
 	registerResourceAPIPaths(s)
 	registerAutomationAPIPaths(s)
 	registerFeatureAPIPaths(s)
+	registerMetadataAPIPaths(s)
 }
 
 func registerAuditTrailAPIPaths(r *mux.Router) {
@@ -524,4 +525,9 @@ func registerLogsAPIPaths(r *mux.Router) {
 func registerFeatureAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiFeaturePrefix).Subrouter()
 	s.HandleFunc(core.ApiNewEndpoint, enableFeature)
+}
+
+func registerMetadataAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.ApiMetadataPrefix).Subrouter()
+	s.HandleFunc("/paramTypes", getParamTypesMetadata).Methods("GET")
 }
