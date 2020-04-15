@@ -251,3 +251,54 @@ func GetCodeBuildStatus(commit string, orgId int32, role *core.Role) (*core.Code
 
 	return &status, nil
 }
+
+func CreateScriptRun(codeId int64, orgId int32, scriptId int64, role *core.Role) (*core.ScriptRun, error) {
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return nil, err
+	}
+
+	run := core.ScriptRun{}
+	err = WrapTx(tx, func() error {
+		rows, err := tx.Queryx(`
+			INSERT INTO script_runs (link_id, start_time)
+			SELECT link.id, NOW()
+			FROM code_to_client_scripts_link AS link
+			WHERE link.code_id = $1 AND link.org_id = $2 AND link.script_id = $3
+			RETURNING *
+		`, codeId, orgId, scriptId)
+
+		if err != nil {
+			return err
+		}
+
+		defer rows.Close()
+		rows.Next()
+		return rows.StructScan(&run)
+	})
+	return &run, err
+}
+
+func FinishBuildScriptRun(runId int64, success bool, logs string) error {
+	tx := CreateTx()
+	return WrapTx(tx, func() error {
+		_, err := tx.Exec(`
+			UPDATE script_runs
+			SET build_success = $1,
+				build_finish_time = NOW(),
+				build_log = $2
+			WHERE id = $3
+		`, success, logs, runId)
+		return err
+	})
+}
+
+func GetScriptRun(runId int64) (*core.ScriptRun, error) {
+	run := core.ScriptRun{}
+	err := dbConn.Get(&run, `
+		SELECT *
+		FROM script_runs
+		WHERE id = $1
+	`, runId)
+	return &run, err
+}

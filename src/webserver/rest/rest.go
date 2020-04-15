@@ -499,6 +499,7 @@ func registerCodeAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiSaveEndpoint, saveCode)
 	s.HandleFunc(core.ApiGetEndpoint, getCode)
 	s.HandleFunc(core.ApiAllEndpoint, allCode)
+	s.HandleFunc(core.ApiRunEndpoint, runCode)
 
 	registerCodeStatusAPIPaths(s)
 }

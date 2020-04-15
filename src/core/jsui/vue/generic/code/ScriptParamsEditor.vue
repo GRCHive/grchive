@@ -142,6 +142,8 @@
                             color="success"
                             class="pr-2"
                             v-on="on"
+                            :disabled="disableRun"
+                            :loading="runInProgress"
                         >
                             Run
                             <v-divider vertical class="mx-2"></v-divider>
@@ -193,7 +195,15 @@ const Props = Vue.extend({
         readonly: {
             type: Boolean,
             default: false,
-        }
+        },
+        disableRun: {
+            type: Boolean,
+            default: false,
+        },
+        runInProgress: {
+            type: Boolean,
+            default: false,
+        },
     }
 })
 

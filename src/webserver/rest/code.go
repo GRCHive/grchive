@@ -2,11 +2,13 @@ package rest
 
 import (
 	"encoding/json"
-	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	drone "gitlab.com/grchive/grchive/drone_api"
+	gitea "gitlab.com/grchive/grchive/gitea_api"
 	"gitlab.com/grchive/grchive/webcore"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -62,7 +64,7 @@ func saveCode(w http.ResponseWriter, r *http.Request) {
 
 		// For now, assume Kotlin always. If we want to support more in the future we'll have to
 		// somehow get this information from the user or something.
-		managedCode.GitPath = fmt.Sprintf("src/main/kotlin/data/%s", clientData.Data.Filename("kt"))
+		managedCode.GitPath = clientData.Data.Filename("kt")
 	} else if inputs.ScriptId.NullInt64.Valid {
 		script, err := database.GetClientScriptFromId(inputs.ScriptId.NullInt64.Int64, inputs.OrgId, role)
 		if err != nil {
@@ -71,8 +73,8 @@ func saveCode(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		managedCode.GitPath = fmt.Sprintf("src/main/kotlin/scripts/%s", script.Filename("kt"))
-		metadataGitPath := fmt.Sprintf("src/main/resources/scripts/%s", script.MetadataFilename())
+		managedCode.GitPath = script.Filename("kt")
+		metadataGitPath := script.MetadataFilename()
 
 		// Hack the StoreManagedCodeToGitea to store a file in an easy way but not keep track of it in the DB.
 		tmpCode := core.ManagedCode{
@@ -87,6 +89,8 @@ func saveCode(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// This needs to happen before the code so that running the code at a certain revision will also pick up
+		// the metadata changes.
 		err = webcore.StoreManagedCodeToGitea(
 			&tmpCode,
 			metadata,
@@ -354,4 +358,120 @@ func getCodeBuildStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(status)
+}
+
+type RunCodeInput struct {
+	OrgId  int32 `json:"orgId"`
+	CodeId int64 `json:"codeId"`
+	Latest bool  `json:"latest"`
+}
+
+func runCode(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := RunCodeInput{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	code, err := database.GetCode(inputs.CodeId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to find code: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Need to make sure this code is linked to a script - otherwise
+	// "running" it makes no sense.
+	script, err := database.GetScriptForCode(inputs.CodeId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to find script: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if !inputs.Latest {
+		// In the case where we're not trying to run the latest code, we need to
+		// make sure that the version that the client requested to run has actually
+		// compiled successfully. We let the request go through even if the compilation
+		// is pending as this is just a preliminary check. The runner should be able to
+		// handle not finding the JAR (or seeing that the build status is still pending).
+		status, err := database.GetCodeBuildStatus(code.GitHash, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get status: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		if !status.Pending && !status.Success {
+			core.Warning("Failed to run a script that failed to compile.")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	}
+
+	// Create a DB entry to track the run. Return this to the user.
+	// We don't need to roll this back in case of an error later on as
+	// ideally any later stages will log those changes and just let the user
+	// know there in the logs stored in the DB.
+	run, err := database.CreateScriptRun(code.Id, inputs.OrgId, script.Id, role)
+	if err != nil {
+		core.Warning("Failed to create script run: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if inputs.Latest {
+		repo, err := database.GetLinkedGiteaRepository(inputs.OrgId)
+		if err != nil {
+			core.Warning("Failed to get linked Gitea repository: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		// In this case, we need to fire off a Drone CI job to compile the latest code + the current script revision.
+		// We must specify branch/commit here due to a Gitea issue with the /repos/{owner}/{repo}/commits/{ref} API endpoint
+		// that Drone uses to find the latest commit of the branch. This endpoint doesn't work in Gitea so we need to specify the
+		// commit directly.
+		commitSha, err := gitea.GlobalGiteaApi.RepositoryGitGetRefSha(
+			gitea.GiteaRepository{
+				Owner: repo.GiteaOrg,
+				Name:  repo.GiteaRepo,
+			},
+			"refs/heads/master",
+		)
+
+		if err != nil {
+			core.Warning("Failed to get latest Git commit: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		err = drone.GlobalDroneApi.BuildCreate(repo.GiteaOrg, repo.GiteaRepo, map[string]string{
+			"branch":     "master",
+			"commit":     commitSha,
+			"SCRIPT_RUN": strconv.FormatInt(run.Id, 10),
+		})
+
+		if err != nil {
+			core.Warning("Failed to create Drone build: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	} else {
+		// In this case, we can directly send off a request to make the script runner run this script.
+	}
+
+	jsonWriter.Encode(run.Id)
 }

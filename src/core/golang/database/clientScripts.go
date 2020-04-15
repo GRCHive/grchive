@@ -193,3 +193,43 @@ func GetLinkedParametersToScriptCode(scriptId int64, codeId int64, orgId int32, 
 	`, scriptId, codeId, orgId)
 	return params, err
 }
+
+func GetScriptForCode(codeId int64, orgId int32, role *core.Role) (*core.ClientScript, error) {
+	if !role.Permissions.HasAccess(core.ResourceClientScripts, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	script := core.ClientScript{}
+	err := dbConn.Get(&script, `
+		SELECT script.*
+		FROM client_scripts AS script
+		INNER JOIN code_to_client_scripts_link AS link
+			ON link.script_id = script.id
+		WHERE link.code_id = $1 AND link.org_id = $2
+	`, codeId, orgId)
+	return &script, err
+}
+
+func GetScriptFromScriptCodeLink(linkId int64) (*core.ClientScript, error) {
+	script := core.ClientScript{}
+	err := dbConn.Get(&script, `
+		SELECT script.*
+		FROM client_scripts AS script
+		INNER JOIN code_to_client_scripts_link AS link
+			ON link.script_id = script.id
+		WHERE link.id = $1
+	`, linkId)
+	return &script, err
+}
+
+func GetCodeFromScriptCodeLink(linkId int64) (*core.ManagedCode, error) {
+	code := core.ManagedCode{}
+	err := dbConn.Get(&code, `
+		SELECT code.*
+		FROM managed_code AS code
+		INNER JOIN code_to_client_scripts_link AS link
+			ON link.code_id = code.id
+		WHERE link.id = $1
+	`, linkId)
+	return &code, err
+}

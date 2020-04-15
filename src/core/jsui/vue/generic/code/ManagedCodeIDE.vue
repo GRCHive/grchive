@@ -1,5 +1,29 @@
 <template>
     <div>
+        <v-dialog v-model="showHideConfirmRunSave" persistent max-width="40%">
+            <v-card>
+                <v-card-title>
+                    Did you mean to save?
+                </v-card-title>
+                <v-divider></v-divider>
+
+                <div class="ma-2">
+                    Running this script at latest without saving will not pick up your latest changes. If that is not what you meant to do, please hit Cancel and Save before running the script again.
+                </div>
+
+                <v-divider></v-divider>
+                <v-card-actions>
+                    <v-btn color="primary" @click="showHideConfirmRunSave = false">
+                        Cancel
+                    </v-btn>
+                    <v-spacer></v-spacer>
+                    <v-btn color="error" @click="run(selectedCode, true)">
+                        Continue
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
         <generic-code-toolbar
             @save="onSave"
             @revert="pullCode"
@@ -64,7 +88,7 @@
                 </v-col>
 
                 <v-icon>
-                    {{ readonly ? 'mdi-eye' : 'mdi-pencil' }}
+                    {{ finalReadonly ? 'mdi-eye' : 'mdi-pencil' }}
                 </v-icon>
             </template>
         </generic-code-toolbar>
@@ -77,7 +101,7 @@
                         <generic-code-editor
                             :value="codeString"
                             :lang="lang"
-                            :readonly="readonly"
+                            :readonly="finalReadonly"
                             :full-height="fullHeight"
                             @input="onInput"
                             ref="editor"
@@ -99,9 +123,11 @@
                 <script-params-editor
                     :linked-client-data.sync="currentLinkedClientData"
                     :script-parameter-types.sync="currentScriptParams"
-                    :readonly="readonly"
+                    :readonly="finalReadonly"
+                    :run-in-progress="runInProgress"
                     @runLatest="runScriptLatest"
                     @runRevision="runScriptAtRevision"
+                    :disableRun="!selectedCode"
                 >
                 </script-params-editor>
             </v-col>
@@ -122,6 +148,7 @@ import {
     getCode, TGetCodeOutput,
     allCode, TAllCodeOutput,
     saveCode, TSaveCodeOutput,
+    runCode, TRunCodeOutput,
 } from '../../../ts/api/apiCode'
 import { contactUsUrl } from '../../../ts/url'
 import { standardFormatTime } from '../../../ts/time'
@@ -166,6 +193,8 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     loading: boolean = false
     showLogs: boolean = false
 
+    showHideConfirmRunSave : boolean = false
+
     // This is equivalent to loading for the first time
     // we load code. We need this because the code toolbar
     // will use 'codeString' when mounted to determine if the user
@@ -176,6 +205,7 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     initialLoad: boolean = true
 
     saveInProgress: boolean = false
+    runInProgress: boolean = false
 
     allCode : ManagedCode[] = []
     selectedCode : ManagedCode | null = null
@@ -199,11 +229,11 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
         this.codeString = text
     }
 
-    get readonly() : boolean {
+    get finalReadonly() : boolean {
         // Make only the latest revision non readonly.
         // This way the "Run at Revision" functionality becomes more clear as they won't
         // be able to have changes to it.
-        return !this.selectedCode || this.allCode.length == 0 ||
+        return this.readonly || !this.selectedCode || this.allCode.length == 0 ||
             this.allCode[0].Id != this.selectedCode!.Id
     }
 
@@ -380,10 +410,41 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
         if (this.dirty) {
             // Need to make sure the user knows that their latest changes won't be picked up
             // until they save.
+            this.showHideConfirmRunSave = true
+            return
         }
+
+        this.run(this.selectedCode, true)
     }
 
     runScriptAtRevision() {
+        this.run(this.selectedCode, false)
+    }
+
+    run(code : ManagedCode | null, latest : boolean) {
+        if (!code) {
+            return
+        }
+
+        this.runInProgress = true
+
+        runCode({
+            orgId: PageParamsStore.state.organization!.Id,
+            codeId: code!.Id,
+            latest: latest,
+        }).then((resp : TRunCodeOutput) => {
+            console.log(`Script Run ID: ${resp.data}`)
+            this.runInProgress = false
+        }).catch((err : any) => {
+            this.runInProgress = false
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 }
 

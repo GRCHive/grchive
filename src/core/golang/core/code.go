@@ -30,3 +30,15 @@ type CodeParameter struct {
 	Name    string `db:"name"`
 	ParamId int32  `db:"param_type"`
 }
+
+type ScriptRun struct {
+	Id              int64      `db:"id"`
+	LinkId          int64      `db:"link_id"`
+	StartTime       time.Time  `db:"start_time"`
+	BuildFinishTime NullTime   `db:"build_finish_time"`
+	BuildSuccess    bool       `db:"build_success"`
+	RunFinishTime   NullTime   `db:"run_finish_time"`
+	RunSuccess      bool       `db:"run_success"`
+	BuildLog        NullString `db:"build_log"`
+	RunLog          NullString `db:"run_log"`
+}

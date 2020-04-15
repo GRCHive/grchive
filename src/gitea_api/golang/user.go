@@ -21,17 +21,23 @@ func (r *RealGiteaApi) UserCreateAccessToken(user GiteaUser, tokenName string) (
 		return nil, err
 	}
 
+	dictResponse := map[string]*json.RawMessage{}
+	err = json.Unmarshal(data, &dictResponse)
+	if err != nil {
+		return nil, err
+	}
+
 	// The docs (https://try.gitea.io/api/swagger#/user/userCreateToken) say that
 	// the results should come back in the header but getting the data from the body
 	// works fine so...
 	token := GiteaToken{}
 
-	err = json.Unmarshal(*data["name"], &token.Name)
+	err = json.Unmarshal(*dictResponse["name"], &token.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	err = json.Unmarshal(*data["sha1"], &token.Token)
+	err = json.Unmarshal(*dictResponse["sha1"], &token.Token)
 	if err != nil {
 		return nil, err
 	}

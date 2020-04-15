@@ -13,9 +13,9 @@ type ClientScript struct {
 }
 
 func (s ClientScript) Filename(ext string) string {
-	return fmt.Sprintf("%s-%d.%s", slug.Make(s.Name), s.Id, ext)
+	return fmt.Sprintf("src/main/kotlin/scripts/%s-%d.%s", slug.Make(s.Name), s.Id, ext)
 }
 
 func (s ClientScript) MetadataFilename() string {
-	return fmt.Sprintf("metadata-%s-%d.yaml", slug.Make(s.Name), s.Id)
+	return fmt.Sprintf("src/main/resources/scripts/metadata-%s-%d.yaml", slug.Make(s.Name), s.Id)
 }

@@ -13,7 +13,7 @@ type ClientData struct {
 }
 
 func (c ClientData) Filename(ext string) string {
-	return fmt.Sprintf("%s-%d.%s", slug.Make(c.Name), c.Id, ext)
+	return fmt.Sprintf("src/main/kotlin/data/%s-%d.%s", slug.Make(c.Name), c.Id, ext)
 }
 
 type ClientDataVersion struct {

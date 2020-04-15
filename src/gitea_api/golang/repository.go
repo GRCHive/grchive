@@ -3,14 +3,17 @@ package gitea
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 const CreateRepoEndpoint = "/user/repos"
 const TransferRepoEndpoint = "/repos/%s/%s/transfer"
 const AddCollabEndpoint = "/repos/%s/%s/collaborators/%s"
 const FileContentEndpoint = "/repos/%s/%s/contents/%s"
+const GitSingleRefEndpoint = "/repos/%s/%s/git/refs/%s"
 
 func (r *RealGiteaApi) RepositoryCreate(token GiteaToken, repo GiteaRepository) error {
 	_, _, err := r.sendGiteaRequestWithToken(
@@ -63,15 +66,21 @@ func (r *RealGiteaApi) RepositoryAddCollaborator(repo GiteaRepository, collab Gi
 	return err
 }
 
-func getCommitFileShaFromResponse(resp map[string]*json.RawMessage) (string, string, error) {
+func getCommitFileShaFromResponse(resp json.RawMessage) (string, string, error) {
+	dictResponse := map[string]*json.RawMessage{}
+	err := json.Unmarshal(resp, &dictResponse)
+	if err != nil {
+		return "", "", err
+	}
+
 	commitData := map[string]interface{}{}
-	err := json.Unmarshal(*resp["commit"], &commitData)
+	err = json.Unmarshal(*dictResponse["commit"], &commitData)
 	if err != nil {
 		return "", "", err
 	}
 
 	contentData := map[string]interface{}{}
-	err = json.Unmarshal(*resp["content"], &contentData)
+	err = json.Unmarshal(*dictResponse["content"], &contentData)
 	if err != nil {
 		return "", "", err
 	}
@@ -139,7 +148,13 @@ func (r *RealGiteaApi) RepositoryGetFile(repo GiteaRepository, path string, ref 
 	content := ""
 	sha := ""
 
-	err = json.Unmarshal(*resp["content"], &content)
+	dictResponse := map[string]*json.RawMessage{}
+	err = json.Unmarshal(resp, &dictResponse)
+	if err != nil {
+		return "", "", err
+	}
+
+	err = json.Unmarshal(*dictResponse["content"], &content)
 	if err != nil {
 		return "", "", err
 	}
@@ -149,7 +164,7 @@ func (r *RealGiteaApi) RepositoryGetFile(repo GiteaRepository, path string, ref 
 		return "", "", err
 	}
 
-	err = json.Unmarshal(*resp["sha"], &sha)
+	err = json.Unmarshal(*dictResponse["sha"], &sha)
 	if err != nil {
 		return "", "", err
 	}
@@ -174,4 +189,45 @@ func (r *RealGiteaApi) RepositoryDeleteFile(repo GiteaRepository, path string, o
 	}
 
 	return nil
+}
+
+func (r *RealGiteaApi) RepositoryGitGetRefSha(repo GiteaRepository, ref string) (string, error) {
+	_, resp, err := r.sendGiteaRequestWithToken(
+		"GET",
+		fmt.Sprintf(GitSingleRefEndpoint,
+			repo.Owner,
+			repo.Name,
+			strings.TrimPrefix(ref, "refs/"),
+		),
+		r.cfg.Token,
+		nil,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	arrResponse := []json.RawMessage{}
+	err = json.Unmarshal(resp, &arrResponse)
+	if err != nil {
+		return "", err
+	}
+
+	if len(arrResponse) == 0 {
+		return "", errors.New("Failed to find ref.")
+	}
+
+	refData := map[string]json.RawMessage{}
+	err = json.Unmarshal(arrResponse[0], &refData)
+	if err != nil {
+		return "", err
+	}
+
+	objData := map[string]string{}
+	err = json.Unmarshal(refData["object"], &objData)
+	if err != nil {
+		return "", err
+	}
+
+	return objData["sha"], nil
 }

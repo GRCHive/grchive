@@ -15,6 +15,8 @@ go_library(
         "//src/gcloud_api/golang:gcloud_golang_api",
         "//src/vault_api/golang:vault_golang_api",
         "//src/webserver/render:webserver_render_library",
+        "//src/drone_api/golang:api",
+        "//src/gitea_api/golang:api",
         "//src/proto:go_proto_sql_query",
         "//src/generic_database_api/golang/utility:library",
         "@com_github_google_go_querystring//query:go_default_library",

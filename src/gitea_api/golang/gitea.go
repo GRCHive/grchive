@@ -21,7 +21,7 @@ func (r RealGiteaApi) sendGiteaRequest(
 	fullUrl string,
 	headers map[string]string,
 	data interface{},
-) (int, map[string]*json.RawMessage, error) {
+) (int, json.RawMessage, error) {
 	body := &bytes.Buffer{}
 	if data != nil {
 		jsonBuffer, err := json.Marshal(data)
@@ -55,7 +55,7 @@ func (r RealGiteaApi) sendGiteaRequest(
 		return -1, nil, err
 	}
 
-	rootObj := map[string]*json.RawMessage{}
+	rootObj := json.RawMessage{}
 	err = json.Unmarshal(respBodyData, &rootObj)
 
 	if resp.StatusCode != http.StatusOK &&
@@ -75,7 +75,7 @@ func (r RealGiteaApi) sendGiteaRequestWithUserAuth(
 	endpoint string,
 	user GiteaUser,
 	data interface{},
-) (int, map[string]*json.RawMessage, error) {
+) (int, json.RawMessage, error) {
 	return r.sendGiteaRequest(
 		method,
 		r.cfg.apiUrlUserAuth(user)+endpoint,
@@ -89,7 +89,7 @@ func (r RealGiteaApi) sendGiteaRequestWithToken(
 	endpoint string,
 	token string,
 	data interface{},
-) (int, map[string]*json.RawMessage, error) {
+) (int, json.RawMessage, error) {
 	return r.sendGiteaRequest(
 		method,
 		r.cfg.apiUrl()+endpoint,

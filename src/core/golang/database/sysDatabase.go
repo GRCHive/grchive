@@ -3,7 +3,6 @@ package database
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
 	"gitlab.com/grchive/grchive/core"
 	"strconv"
@@ -377,15 +376,6 @@ func LinkSystemsToDatabase(dbId int64, orgId int32, sysIds []int64, role *core.R
 			tx.Rollback()
 			return err
 		}
-	}
-	return tx.Commit()
-}
-
-func WrapTx(tx *sqlx.Tx, fn func() error) error {
-	err := fn()
-	if err != nil {
-		tx.Rollback()
-		return err
 	}
 	return tx.Commit()
 }

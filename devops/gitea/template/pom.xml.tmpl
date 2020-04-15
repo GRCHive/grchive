@@ -30,6 +30,12 @@
         <name>libs-release-local</name>
         <url>http://{{ .ARTIFACTORY_HOST }}:{{ .ARTIFACTORY_PORT }}/artifactory/libs-release-local</url>
     </repository>
+
+    <snapshotRepository>
+        <id>artifactory-snapshots</id>
+        <name>libs-snapshot-local</name>
+        <url>http://{{ .ARTIFACTORY_HOST }}:{{ .ARTIFACTORY_PORT }}/artifactory/libs-snapshot-local</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <build>

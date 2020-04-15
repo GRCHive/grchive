@@ -322,6 +322,11 @@ Password: password
 - Show the `Encrypted Password` and save this as `ARTIFACTORY_ENCRYPTED_PASSWORD` in `build/variables.bzl`.
 - Save the deployment username as `ARTIFACTORY_DEPLOY_USER` in `build/variables.bzl`.
 
+Artifactory also has some bizarre default settings for the release and snapshot repositories.
+Go to `Settings > Repositories > Repositories` and modify
+- `libs-release-local` to only `Handle Releases`
+- `libs-snapshot-local` to only `Handle Snapshots`
+
 ## Drone CI
 
 - `cd $SRC/devops/docker/drone`

@@ -7,6 +7,11 @@ COPY drone_workdir/bin/drone-agent .
 COPY drone_workdir/bin/drone-controller .
 COPY drone_workdir/bin/drone-server .
 
+ENV DRONE_LOGS_DEBUG false
+ENV DRONE_LOGS_TEXT true
+ENV DRONE_LOGS_PRETTY true
+ENV DRONE_LOGS_COLOR true
+
 ENV DRONE_GITEA_CLIENT_SECRET_VAULT ${DRONE_GITEA_CLIENT_SECRET_VAULT}
 ENV DRONE_GITEA_SERVER ${GITEA_PROTOCOL}://${GITEA_HOST}:${GITEA_PORT}
 

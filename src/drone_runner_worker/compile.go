@@ -3,8 +3,12 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/gitea_api"
+	"io/ioutil"
+	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -16,7 +20,7 @@ func trackedRunCmd(tracker *Tracker, args string) error {
 	cmd.Dir = tracker.workDir
 
 	out, err := cmd.CombinedOutput()
-	tracker.logs.WriteString(string(out) + "\n")
+	tracker.Log(string(out) + "\n")
 
 	if err != nil {
 		return err
@@ -27,7 +31,7 @@ func trackedRunCmd(tracker *Tracker, args string) error {
 
 func computeJarPathFromMvn(tracker *Tracker) (string, error) {
 	// For simplicity, this calls our pre-built script in every repository.
-	cmd := exec.Command("bash", path.Join(tracker.workDir, "get_jar_from_mvn.sh"))
+	cmd := exec.Command("bash", filepath.Join(tracker.workDir, "get_jar_from_mvn.sh"))
 	cmd.Dir = tracker.workDir
 
 	stdout := bytes.Buffer{}
@@ -41,7 +45,74 @@ func computeJarPathFromMvn(tracker *Tracker) (string, error) {
 	return strings.TrimSpace(stdout.String()), nil
 }
 
+func checkoutScriptToRevision(tracker *Tracker) error {
+	run, err := database.GetScriptRun(tracker.scriptRunId.NullInt64.Int64)
+	if err != nil {
+		return err
+	}
+
+	script, err := database.GetScriptFromScriptCodeLink(run.LinkId)
+	if err != nil {
+		return err
+	}
+
+	code, err := database.GetCodeFromScriptCodeLink(run.LinkId)
+	if err != nil {
+		return err
+	}
+
+	repo, err := database.GetLinkedGiteaRepository(script.OrgId)
+	if err != nil {
+		return err
+	}
+
+	gitRepo := gitea.GiteaRepository{
+		Owner: repo.GiteaOrg,
+		Name:  repo.GiteaRepo,
+	}
+
+	// Need to get script and script metadata at the specified version.
+	{
+		scriptFname := script.Filename("kt")
+		tracker.Log(fmt.Sprintf("!!! Checking out %s to %s", scriptFname, code.GitHash))
+		scriptData, _, err := gitea.GlobalGiteaApi.RepositoryGetFile(gitRepo, scriptFname, code.GitHash)
+		if err != nil {
+			return err
+		}
+
+		err = ioutil.WriteFile(filepath.Join(tracker.workDir, scriptFname), []byte(scriptData), os.FileMode(0755))
+		if err != nil {
+			return err
+		}
+	}
+
+	{
+		metadataFname := script.MetadataFilename()
+		tracker.Log(fmt.Sprintf("!!! Checking out %s to %s", metadataFname, code.GitHash))
+		metadataData, _, err := gitea.GlobalGiteaApi.RepositoryGetFile(gitRepo, metadataFname, code.GitHash)
+		if err != nil {
+			return err
+		}
+
+		err = ioutil.WriteFile(filepath.Join(tracker.workDir, metadataFname), []byte(metadataData), os.FileMode(0755))
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func compileAndDeploy(tracker *Tracker) {
+	// 0. Determine if we're doing a script run compilation. If so, check out the script to the proper version.
+	if tracker.IsScriptRunCompile() {
+		err := checkoutScriptToRevision(tracker)
+		if err != nil {
+			tracker.MarkFailure(err)
+			return
+		}
+	}
+
 	// 1. Set version of the pom.xml properly to what's stored in the tracker.
 	err := trackedRunCmd(tracker, fmt.Sprintf("mvn versions:set -DnewVersion=%s", tracker.version))
 	if err != nil {

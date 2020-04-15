@@ -15,6 +15,9 @@ type Tracker struct {
 	commit  string
 	version string
 
+	// Pipeline configuration
+	scriptRunId core.NullInt64
+
 	// Stats
 	startTime time.Time
 
@@ -24,11 +27,18 @@ type Tracker struct {
 	jar     string
 }
 
+func (t Tracker) IsScriptRunCompile() bool {
+	return t.scriptRunId.NullInt64.Valid
+}
+
 func (t *Tracker) Start() {
 	t.Log("START CI JOB")
-	err := database.StartDroneCIJob(t.commit)
-	if err != nil {
-		core.Error("Failed to record start in DB:" + err.Error())
+
+	if !t.IsScriptRunCompile() {
+		err := database.StartDroneCIJob(t.commit)
+		if err != nil {
+			core.Error("Failed to record start in DB:" + err.Error())
+		}
 	}
 
 	t.startTime = time.Now().UTC()
@@ -50,18 +60,28 @@ func (t *Tracker) MarkSuccess(jarPath string) {
 }
 
 func (t *Tracker) End() {
+	now := time.Now().UTC()
+	elapsed := now.Sub(t.startTime)
+	durationSeconds := float64(elapsed.Milliseconds()) / 1000.0
+	t.Log(fmt.Sprintf("END CI JOB [Elapsed %f seconds]", durationSeconds))
+
 	encryptedLogs, err := vault.TransitEncrypt(core.EnvConfig.LogEncryptionPath, []byte(t.logs.String()))
 	if err != nil {
 		core.Error("Failed to encrypt logs:" + err.Error())
 	}
 
-	err = database.FinishDroneCIJob(t.commit, t.success, string(encryptedLogs), t.jar)
-	if err != nil {
-		core.Error("Failed to record start in DB:" + err.Error())
-	}
+	if !t.IsScriptRunCompile() {
+		err = database.FinishDroneCIJob(t.commit, t.success, string(encryptedLogs), t.jar)
+		if err != nil {
+			core.Error("Failed to record finish in DB:" + err.Error())
+		}
 
-	now := time.Now().UTC()
-	elapsed := now.Sub(t.startTime)
-	durationSeconds := float64(elapsed.Milliseconds()) / 1000.0
-	t.Log(fmt.Sprintf("END CI JOB [Elapsed %f seconds]", durationSeconds))
+	} else {
+		err = database.FinishBuildScriptRun(t.scriptRunId.NullInt64.Int64, t.success, string(encryptedLogs))
+		if err != nil {
+			core.Error("Failed to record finish in DB:" + err.Error())
+		}
+
+		// Extra step of sending a run job to RabbitMQ.
+	}
 }

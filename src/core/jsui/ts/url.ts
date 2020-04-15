@@ -396,6 +396,7 @@ export const enableFeatureUrl : string = "/api/feature/new"
 export const saveCodeUrl : string = "/api/auto/code/save"
 export const allCodeUrl : string = "/api/auto/code/all"
 export const getCodeUrl : string = "/api/auto/code/get"
+export const runCodeUrl : string = "/api/auto/code/run"
 
 export const getCodeBuildStatusUrl : string = "/api/auto/code/status/get"
 

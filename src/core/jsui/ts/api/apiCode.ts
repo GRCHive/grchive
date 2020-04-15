@@ -7,6 +7,7 @@ import {
     allCodeUrl,
     getCodeUrl,
     getCodeBuildStatusUrl,
+    runCodeUrl,
 } from '../url'
 import { 
     ManagedCode,
@@ -92,4 +93,18 @@ export interface TGetCodeBuildStatusOutput {
 
 export function getCodeBuildStatus(inp : TGetCodeBuildStatusInput) : Promise<TGetCodeBuildStatusOutput> {
     return axios.get(getCodeBuildStatusUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+}
+
+export interface TRunCodeInput {
+    orgId: number
+    codeId: number
+    latest: boolean
+}
+
+export interface TRunCodeOutput {
+    data: number
+}
+
+export function runCode(inp : TRunCodeInput) : Promise<TRunCodeOutput> {
+    return postFormJson<TRunCodeOutput>(runCodeUrl, inp, getAPIRequestConfig())
 }

@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/gitea_api"
 	"gitlab.com/grchive/grchive/vault_api"
 	"os"
+	"strconv"
 )
 
 // A multi-part function that's responsible for
@@ -25,6 +27,21 @@ func run(dir string) {
 		version: fmt.Sprintf("0.0-%s", commitSha),
 	}
 
+	// SCRIPT_RUN: A custom variable that can be set if we need to compile specifically for running a script.
+	// In that case, behavior is modified to create a snapshot specifically for this run and this information
+	// will be passed directly to the runner instead of being stored back in the database.
+	scriptRunId, runSet := os.LookupEnv("SCRIPT_RUN")
+	if runSet {
+		id, err := strconv.ParseInt(scriptRunId, 10, 64)
+		if err != nil {
+			core.Error("Failed to get script run: " + err.Error())
+		}
+		tracker.scriptRunId = core.CreateNullInt64(id)
+
+		// Run ID should be unique.
+		tracker.version = fmt.Sprintf("0.0-%d-SNAPSHOT", id)
+	}
+
 	tracker.Start()
 
 	compileAndDeploy(&tracker)
@@ -40,6 +57,18 @@ func main() {
 		Username: core.EnvConfig.Vault.Username,
 		Password: core.EnvConfig.Vault.Password,
 	}, core.EnvConfig.Tls.Config())
+
+	giteaToken, err := vault.GetSecretWithKey(core.EnvConfig.Gitea.Token, "token")
+	if err != nil {
+		core.Error("Failed to get Gitea token: " + err.Error())
+	}
+
+	gitea.GlobalGiteaApi.MustInitialize(gitea.GiteaConfig{
+		Protocol: core.EnvConfig.Gitea.Protocol,
+		Host:     core.EnvConfig.Gitea.Host,
+		Port:     core.EnvConfig.Gitea.Port,
+		Token:    giteaToken,
+	})
 
 	repoDir := flag.String("dir", "", "Directory containing source code to build.")
 	flag.Parse()
