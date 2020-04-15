@@ -132,12 +132,31 @@
             <v-spacer></v-spacer>
 
             <v-list-item-action>
-                <v-btn 
-                    color="success"
-                    @click="run"
-                >
-                    Run
-                </v-btn>
+                <v-menu offset-y top left>
+                    <template v-slot:activator="{on}">
+                        <v-btn 
+                            color="success"
+                            class="pr-2"
+                            v-on="on"
+                        >
+                            Run
+                            <v-divider vertical class="mx-2"></v-divider>
+                            <v-icon small>
+                                mdi-chevron-down
+                            </v-icon>
+                        </v-btn>
+                    </template>
+
+                    <v-list dense>
+                        <v-list-item @click="runLatest">
+                            Latest
+                        </v-list-item>
+
+                        <v-list-item @click="runRevision">
+                            At Version
+                        </v-list-item>
+                    </v-list>
+                </v-menu>
             </v-list-item-action>
         </v-list-item>
     </div>
@@ -189,8 +208,12 @@ export default class ScriptParamsEditor extends Props {
         parent : HTMLElement
     }
 
-    run() {
-        this.$emit('run')
+    runLatest() {
+        this.$emit('runLatest')
+    }
+
+    runRevision() {
+        this.$emit('runRevision')
     }
 
     doLinkClientData() {

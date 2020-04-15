@@ -58,6 +58,10 @@
                         </template>
                     </v-select>
                 </v-col>
+
+                <v-icon color="warning" v-if="dirty" id="saveIcon">
+                    mdi-content-save
+                </v-icon>
             </template>
         </generic-code-toolbar>
         <v-divider></v-divider>
@@ -91,6 +95,8 @@
                 <script-params-editor
                     :linked-client-data.sync="currentLinkedClientData"
                     :script-parameter-types.sync="currentScriptParams"
+                    @runLatest="runScriptLatest"
+                    @runRevision="runScriptAtRevision"
                 >
                 </script-params-editor>
             </v-col>
@@ -356,6 +362,12 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
 
         window.addEventListener('beforeunload', this.handleUnload)
     }
+
+    runScriptLatest() {
+    }
+
+    runScriptAtRevision() {
+    }
 }
 
 </script>
@@ -364,6 +376,23 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
 
 >>>.v-select__selections input {
     width: 30px;
+}
+
+#saveIcon {
+    animation-duration: 1s;
+    animation-name: blinkSave;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+@keyframes blinkSave {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0.1;
+    }
 }
 
 </style>
