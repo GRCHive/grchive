@@ -33,7 +33,7 @@ const Props = Vue.extend({
     }
 })
 
-const refreshPeriodMs = 1000
+const refreshPeriodMs = 5000
 
 @Component
 export default class CodeBuildStatus extends Props {
@@ -70,6 +70,10 @@ export default class CodeBuildStatus extends Props {
             this.hasData = true
             this.isPending = resp.data.Pending
             this.isSuccess = resp.data.Success
+
+            if (this.isPending) {
+                setTimeout(this.refreshStatus, refreshPeriodMs)
+            }
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
