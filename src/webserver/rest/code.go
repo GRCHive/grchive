@@ -72,7 +72,7 @@ func saveCode(w http.ResponseWriter, r *http.Request) {
 		}
 
 		managedCode.GitPath = fmt.Sprintf("src/main/kotlin/scripts/%s", script.Filename("kt"))
-		metadataGitPath := fmt.Sprintf("src/main/kotlin/scripts/%s", script.MetadataFilename())
+		metadataGitPath := fmt.Sprintf("src/main/resources/scripts/%s", script.MetadataFilename())
 
 		// Hack the StoreManagedCodeToGitea to store a file in an easy way but not keep track of it in the DB.
 		tmpCode := core.ManagedCode{
