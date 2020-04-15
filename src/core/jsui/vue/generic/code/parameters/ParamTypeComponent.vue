@@ -79,15 +79,25 @@ export default class ParamTypeComponent extends Props {
             ParamId: this.paramTypeId,
         }
 
+        if (nm == this.paramName) {
+            return
+        }
+
         this.$emit('input', newVal)
     }
 
     onChangeType(typ : SupportedParamType) {
         this.selectedType = typ
+
+        if (typ.Id == this.paramTypeId) {
+            return
+        }
+
         let newVal = <CodeParamType>{
             Name: this.paramName,
             ParamId: typ.Id,
         }
+
         this.$emit('input', newVal)
     }
 }

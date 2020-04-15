@@ -134,6 +134,7 @@
             <v-list-item-action>
                 <v-btn 
                     color="success"
+                    @click="run"
                 >
                     Run
                 </v-btn>
@@ -186,6 +187,10 @@ export default class ScriptParamsEditor extends Props {
 
     $refs! : {
         parent : HTMLElement
+    }
+
+    run() {
+        this.$emit('run')
     }
 
     doLinkClientData() {

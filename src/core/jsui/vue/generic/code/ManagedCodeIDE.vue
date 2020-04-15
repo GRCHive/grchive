@@ -149,7 +149,8 @@ const ManagedProps = Vue.extend({
 })
 export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     codeString : string = ""
-    lastSavedCodeString : string = ""
+
+    dirty : boolean = false
 
     loading: boolean = false
     showLogs: boolean = false
@@ -174,6 +175,13 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     $refs!: {
         editor: GenericCodeEditor,
         toolbar: GenericCodeToolbar,
+    }
+
+    @Watch('codeString')
+    @Watch('currentLinkedClientData')
+    @Watch('currentScriptParams')
+    markDirty() {
+        this.dirty = true
     }
 
     onInput(text : string) {
@@ -217,9 +225,18 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
                 this.currentScriptParams = resp.data.ScriptData.Params
             }
 
-            this.lastSavedCodeString = this.codeString
             this.loading = false
             this.initialLoad = false
+
+            // A hack to make sure the initial code/params pull doesn't make
+            // us as being dirty. Use two nextTick() here because I think the
+            // @Watch also triggers on the next tick so resetting dirty needs
+            // to take place after two ticks.
+            Vue.nextTick(() => {
+                Vue.nextTick(() => {
+                    this.dirty = false
+                })
+            })
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
@@ -293,6 +310,7 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
             this.allCode.unshift(resp.data)
             this.selectedCode = resp.data
             this.saveInProgress = false
+            this.dirty = false
         }).catch((err : any) => {
             this.saveInProgress = false
             // @ts-ignore
@@ -310,7 +328,7 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     }
 
     handleUnload(e : Event) {
-        if (this.codeString != this.lastSavedCodeString) {
+        if (this.dirty) {
             e.preventDefault()
             e.returnValue = false
         }
