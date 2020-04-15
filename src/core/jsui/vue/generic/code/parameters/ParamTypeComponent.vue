@@ -10,6 +10,7 @@
                 label="Name"
                 dense
                 :rules="rules"
+                :readonly="readonly"
             >
             </v-text-field>
         </v-list-item-content>
@@ -20,6 +21,7 @@
                 @input="onChangeType"
                 :rules="rules"
                 :initial-id="paramTypeId"
+                :readonly="readonly"
             >
             </supported-param-type-select-component>
         </v-list-item-content>
@@ -41,6 +43,10 @@ const Props = Vue.extend({
         value: {
             type: Object,
             default: () => null as CodeParamType | null
+        },
+        readonly: {
+            type: Boolean,
+            default: false,
         },
         rules: {
             type: Array,

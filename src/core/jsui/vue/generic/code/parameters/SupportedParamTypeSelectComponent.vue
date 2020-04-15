@@ -6,6 +6,7 @@
         filled
         :items="typeItems"
         :rules="rules"
+        :readonly="readonly"
     >
     </v-select>
 </template>
@@ -30,6 +31,10 @@ const Props = Vue.extend({
         rules: {
             type: Array,
             default: () => []
+        },
+        readonly: {
+            type: Boolean,
+            default: false,
         },
         initialId: {
             type: Number,

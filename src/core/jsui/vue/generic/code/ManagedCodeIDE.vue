@@ -29,6 +29,10 @@
                 </v-menu>
             </template>
             <template v-slot:custom-status>
+                <v-icon color="warning" v-if="dirty" id="saveIcon">
+                    mdi-content-save
+                </v-icon>
+
                 <v-col cols="auto">
                     <v-select
                         dense
@@ -59,8 +63,8 @@
                     </v-select>
                 </v-col>
 
-                <v-icon color="warning" v-if="dirty" id="saveIcon">
-                    mdi-content-save
+                <v-icon>
+                    {{ readonly ? 'mdi-eye' : 'mdi-pencil' }}
                 </v-icon>
             </template>
         </generic-code-toolbar>
@@ -95,6 +99,7 @@
                 <script-params-editor
                     :linked-client-data.sync="currentLinkedClientData"
                     :script-parameter-types.sync="currentScriptParams"
+                    :readonly="readonly"
                     @runLatest="runScriptLatest"
                     @runRevision="runScriptAtRevision"
                 >
@@ -192,6 +197,14 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
 
     onInput(text : string) {
         this.codeString = text
+    }
+
+    get readonly() : boolean {
+        // Make only the latest revision non readonly.
+        // This way the "Run at Revision" functionality becomes more clear as they won't
+        // be able to have changes to it.
+        return !this.selectedCode || this.allCode.length == 0 ||
+            this.allCode[0].Id != this.selectedCode!.Id
     }
 
     get allCodeItems() : any[] {
@@ -364,6 +377,10 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     }
 
     runScriptLatest() {
+        if (this.dirty) {
+            // Need to make sure the user knows that their latest changes won't be picked up
+            // until they save.
+        }
     }
 
     runScriptAtRevision() {

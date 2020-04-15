@@ -18,6 +18,7 @@
                                 color="primary"
                                 icon
                                 v-on="on"
+                                :disabled="readonly"
                             >
                                 <v-icon>
                                     mdi-plus
@@ -59,7 +60,7 @@
 
             <client-data-table
                 :resources="linkedClientData"
-                use-crud-delete
+                :use-crud-delete="!readonly"
                 @delete="unlinkClientData"
             >
             </client-data-table>
@@ -78,6 +79,7 @@
                         color="primary"
                         icon
                         @click="addEmptyParameterType"
+                        :disabled="readonly"
                     >
                         <v-icon>
                             mdi-plus
@@ -93,6 +95,7 @@
                         :key="`type-${index}`"
                         v-model="scriptParameterTypes[index]"
                         :rules="[rules.required]"
+                        :readonly="readonly"
                     >
                     </param-type-component>
 
@@ -100,6 +103,7 @@
                         color="error"
                         icon
                         @click="removeParameterType(index)"
+                        :disabled="readonly"
                     >
                         <v-icon>
                             mdi-delete
@@ -186,6 +190,10 @@ const Props = Vue.extend({
             type: Array as () => Array<CodeParamType | null>,
             default: () => [],
         },
+        readonly: {
+            type: Boolean,
+            default: false,
+        }
     }
 })
 
