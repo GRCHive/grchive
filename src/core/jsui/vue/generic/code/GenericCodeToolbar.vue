@@ -15,6 +15,12 @@
                         </v-list-item-title>
                     </v-list-item>
                     <v-divider></v-divider>
+                    <v-list-item dense @click="revert">
+                        <v-list-item-title>
+                            Revert
+                        </v-list-item-title>
+                    </v-list-item>
+                    <v-divider></v-divider>
                 </v-list>
             </v-menu>
 
@@ -51,6 +57,10 @@ const Props = Vue.extend({
 export default class GenericCodeToolbar extends Props {
     save() {
         this.$emit('save')
+    }
+
+    revert() {
+        this.$emit('revert')
     }
 
     handleHotkeys(e : KeyboardEvent) {

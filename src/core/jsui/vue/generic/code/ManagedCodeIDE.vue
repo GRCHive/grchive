@@ -2,6 +2,7 @@
     <div>
         <generic-code-toolbar
             @save="onSave"
+            @revert="pullCode"
             ref="toolbar"
             :save-in-progress="saveInProgress"
         >

@@ -129,14 +129,6 @@
 
         <v-divider></v-divider>
         <v-list-item>
-            <v-list-item-action>
-                <v-btn 
-                    color="warning"
-                >
-                    Revert
-                </v-btn>
-            </v-list-item-action>
-
             <v-spacer></v-spacer>
 
             <v-list-item-action>
