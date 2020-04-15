@@ -1,5 +1,6 @@
 <template>
     <v-select
+        dense
         :value="value"
         @input="onInput"
         filled
@@ -13,6 +14,7 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import { SupportedParamType } from '../../../../ts/code'
 import {
     TCodeParameterTypeMetadataOutput, getCodeParameterTypeMetadata
@@ -28,7 +30,11 @@ const Props = Vue.extend({
         rules: {
             type: Array,
             default: () => []
-        }
+        },
+        initialId: {
+            type: Number,
+            default: -1,
+        },
     }
 })
 
@@ -63,6 +69,19 @@ export default class SupportedParamTypeSelectComponent extends Props {
 
     mounted() {
         this.refreshSupportedTypes()
+    }
+
+    @Watch('supportedTypes')
+    @Watch('initialId')
+    resyncFromId() {
+        if (this.initialId == -1) {
+            return
+        }
+        let idx : number = this.supportedTypes.findIndex((ele : SupportedParamType) => ele.Id == this.initialId)
+        if (idx == -1) {
+            return
+        }
+        this.onInput(this.supportedTypes[idx])
     }
 }
 

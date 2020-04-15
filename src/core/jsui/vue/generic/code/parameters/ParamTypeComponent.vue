@@ -2,7 +2,7 @@
     <v-list-item
         class="pa-0"
     >
-        <v-list-item-content class="mr-1">
+        <v-list-item-content class="mr-1 pa-0">
             <v-text-field
                 :value="paramName"
                 @input="onChangeName"
@@ -14,11 +14,12 @@
             </v-text-field>
         </v-list-item-content>
 
-        <v-list-item-content class="ml-1">
+        <v-list-item-content class="ml-1 pa-0">
             <supported-param-type-select-component
                 :value="selectedType"
                 @input="onChangeType"
                 :rules="rules"
+                :initial-id="paramTypeId"
             >
             </supported-param-type-select-component>
         </v-list-item-content>

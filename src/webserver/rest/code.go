@@ -112,14 +112,64 @@ func saveCode(w http.ResponseWriter, r *http.Request) {
 
 	if inputs.DataId.NullInt64.Valid {
 		err = database.LinkCodeToData(managedCode.Id, inputs.DataId.NullInt64.Int64, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to link code to data: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	} else if inputs.ScriptId.NullInt64.Valid {
-		err = database.LinkCodeToScript(managedCode.Id, inputs.ScriptId.NullInt64.Int64, inputs.OrgId, role)
-	}
+		tx, err := database.CreateAuditTrailTx(role)
+		if err != nil {
+			core.Warning("Failed to create tx: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 
-	if err != nil {
-		core.Warning("Failed to link code: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		err = database.WrapTx(tx, func() error {
+			err := database.LinkCodeToScriptWithTx(managedCode.Id, inputs.ScriptId.NullInt64.Int64, inputs.OrgId, role, tx)
+			if err != nil {
+				return err
+			}
+
+			for _, p := range inputs.ScriptData.Params {
+				err = database.LinkScriptToParameterWithTx(
+					inputs.ScriptId.NullInt64.Int64,
+					managedCode.Id,
+					inputs.OrgId,
+					p.Name,
+					p.ParamId,
+					role,
+					tx,
+				)
+
+				if err != nil {
+					return err
+				}
+			}
+
+			for _, d := range inputs.ScriptData.ClientDataId {
+				err = database.LinkScriptToDataSourceWithTx(
+					inputs.ScriptId.NullInt64.Int64,
+					managedCode.Id,
+					inputs.OrgId,
+					d,
+					role,
+					tx,
+				)
+
+				if err != nil {
+					return err
+				}
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			core.Warning("Failed to link script: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	jsonWriter.Encode(managedCode)
@@ -179,7 +229,51 @@ func getCode(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	jsonWriter.Encode(code)
+
+	type RetScriptData struct {
+		Params     []*core.CodeParameter
+		ClientData []*core.FullClientDataWithLink
+	}
+
+	ret := struct {
+		Code       string
+		ScriptData *RetScriptData
+	}{
+		Code:       code,
+		ScriptData: nil,
+	}
+
+	if inputs.ScriptId.NullInt64.Valid {
+		ret.ScriptData = &RetScriptData{}
+
+		ret.ScriptData.Params, err = database.GetLinkedParametersToScriptCode(
+			inputs.ScriptId.NullInt64.Int64,
+			inputs.CodeId,
+			inputs.OrgId,
+			role,
+		)
+
+		if err != nil {
+			core.Warning("Failed to get linked parameters: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		ret.ScriptData.ClientData, err = database.GetLinkedDataSourceToScriptCode(
+			inputs.ScriptId.NullInt64.Int64,
+			inputs.CodeId,
+			inputs.OrgId,
+			role,
+		)
+
+		if err != nil {
+			core.Warning("Failed to get linked client data: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
+	jsonWriter.Encode(ret)
 }
 
 type AllCodeInput struct {

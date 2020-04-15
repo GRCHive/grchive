@@ -209,7 +209,13 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
         }
 
         getCode(params).then((resp : TGetCodeOutput) => {
-            this.codeString = resp.data
+            this.codeString = resp.data.Code
+
+            if (!!resp.data.ScriptData) {
+                this.currentLinkedClientData = resp.data.ScriptData.ClientData
+                this.currentScriptParams = resp.data.ScriptData.Params
+            }
+
             this.lastSavedCodeString = this.codeString
             this.loading = false
             this.initialLoad = false

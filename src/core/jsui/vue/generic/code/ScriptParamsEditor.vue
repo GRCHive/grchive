@@ -88,7 +88,7 @@
             <v-divider inset></v-divider>
 
             <template v-for="(item, index) in scriptParameterTypes">
-                <div class="paramContainer">
+                <div class="paramContainer mt-2">
                     <param-type-component
                         :key="`type-${index}`"
                         v-model="scriptParameterTypes[index]"

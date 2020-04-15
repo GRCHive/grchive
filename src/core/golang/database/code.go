@@ -101,17 +101,27 @@ func CheckValidCodeScriptLink(codeId int64, scriptId int64, orgId int32, role *c
 	return rows.Next(), nil
 }
 
-func LinkCodeToScript(scriptId int64, dataId int64, orgId int32, role *core.Role) error {
+func LinkCodeToScriptWithTx(scriptId int64, dataId int64, orgId int32, role *core.Role, tx *sqlx.Tx) error {
 	if !role.Permissions.HasAccess(core.ResourceClientScripts, core.AccessEdit) ||
 		!role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
 
-	tx := CreateTx()
-	_, err := tx.Exec(`
+	err := UpgradeTxToAudit(tx, role)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`
 		INSERT INTO code_to_client_scripts_link (code_id, script_id, org_id)
 		VALUES ($1, $2, $3)
 	`, scriptId, dataId, orgId)
+	return err
+}
+
+func LinkCodeToScript(scriptId int64, dataId int64, orgId int32, role *core.Role) error {
+	tx := CreateTx()
+	err := LinkCodeToScriptWithTx(scriptId, dataId, orgId, role, tx)
 
 	if err != nil {
 		tx.Rollback()

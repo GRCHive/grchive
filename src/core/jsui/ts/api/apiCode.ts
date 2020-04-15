@@ -14,7 +14,7 @@ import {
     CodeParamType,
 } from '../code'
 import {
-    ClientData
+    FullClientDataWithLink
 } from '../clientData'
 
 export interface TSaveCodeInput {
@@ -64,7 +64,13 @@ export interface TGetCodeInput {
 }
 
 export interface TGetCodeOutput {
-    data: string
+    data: {
+        Code: string
+        ScriptData? : {
+            Params : (CodeParamType | null)[],
+            ClientData: FullClientDataWithLink[],
+        }
+    }
 }
 
 export function getCode(inp : TGetCodeInput) : Promise<TGetCodeOutput> {
