@@ -60,12 +60,26 @@ var dockerClient *client.Client = mustDockerCreateClient(client.NewEnvClient())
 
 const defaultCPUPeriod int64 = 100000
 
-func createKotlinContainer(workspaceDir string, containerName string) error {
+func createKotlinContainer(workspaceDir string, containerName string, newArgs ...string) error {
 	entrypoint := append(strslice.StrSlice{}, "/data/run.sh")
-	args := append(strslice.StrSlice{}, "POOOOOOOOP")
+	args := append(strslice.StrSlice{}, newArgs...)
+
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	// This is mainly to support development environments (I think) where
+	// the directory where we are running in just contains a symbolic link to the
+	// real file. So in reality we want to mount the directory of the real file
+	// because the symbolic link won't work in the Docker container.
+	configPath, err := core.FindAbsolutePathThroughSymbolicLink(filepath.Join(wd, "src", "webserver", "config", "config.toml"))
+	if err != nil {
+		return err
+	}
 
 	runnerNetwork := os.Getenv("SCRIPT_RUNNER_NETWORK")
-	_, err := dockerClient.ContainerCreate(
+	_, err = dockerClient.ContainerCreate(
 		context.Background(),
 		&container.Config{
 			Image:      core.EnvConfig.Drone.RunnerImage,
@@ -80,6 +94,12 @@ func createKotlinContainer(workspaceDir string, containerName string) error {
 					Source:   workspaceDir,
 					Target:   "/data",
 					ReadOnly: false,
+				},
+				mount.Mount{
+					Type:     mount.TypeBind,
+					Source:   filepath.Dir(configPath),
+					Target:   "/config",
+					ReadOnly: true,
 				},
 			},
 			Resources: container.Resources{

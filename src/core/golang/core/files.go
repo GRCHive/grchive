@@ -60,3 +60,19 @@ func CopyFile(src string, dst string) error {
 
 	return nil
 }
+
+func FindAbsolutePathThroughSymbolicLink(path string) (string, error) {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return path, err
+	}
+
+	if info.Mode()&os.ModeSymlink != 0 {
+		path, err = os.Readlink(path)
+		if err != nil {
+			return path, err
+		}
+	}
+
+	return path, nil
+}

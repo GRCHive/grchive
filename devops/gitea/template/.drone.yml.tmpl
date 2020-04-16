@@ -9,6 +9,7 @@ steps:
   pull: {{ .DRONE_RUNNER_IMAGE_PULL }}
   commands:
   - echo "...STARTING GRCHIVE CLIENT BUILD..."
+  - mvn install:install-file -Dfile=/src/core/kotlin/grchive_public_core.jar -DgroupId=com.grchive -DartifactId=core-lib -Dversion=0.1 -Dpackaging=jar -DgeneratePom=true
   - cd /app/src/drone_runner_worker/worker.runfiles/grchive
   - ../../worker -dir /drone/src
   - echo "...FINISH GRCHIVE CLIENT BUILD..."

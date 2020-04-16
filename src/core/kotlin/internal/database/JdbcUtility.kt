@@ -8,6 +8,8 @@ import org.jdbi.v3.postgres.PostgresPlugin
 import grchive.core.data.types.grchive.*
 import grchive.core.internal.DatabaseConfig
 
+import grchive.core.utility.database.JdbcKotlinMapColumnMapper
+
 internal fun createGrchiveHikariDataSource(cfg : DatabaseConfig, ro : Boolean) : HikariDataSource {
     val ds = HikariDataSource()
     ds.setJdbcUrl("jdbc:postgresql://${cfg.connection}") 
@@ -23,4 +25,12 @@ fun setupGrchiveJdbi(jdbi : Jdbi) {
     jdbi.registerRowMapper(ConstructorMapper.factory(RolePermissions::class.java))
     jdbi.registerRowMapper(ConstructorMapper.factory(FullRole::class.java))
     jdbi.registerRowMapper(ConstructorMapper.factory(ProcessFlowMetadata::class.java))
+    jdbi.registerRowMapper(ConstructorMapper.factory(SupportedParameterType::class.java))
+    jdbi.registerRowMapper(ConstructorMapper.factory(ClientData::class.java))
+    jdbi.registerRowMapper(ConstructorMapper.factory(DataSourceOption::class.java))
+    jdbi.registerRowMapper(ConstructorMapper.factory(ClientDataSourceLink::class.java))
+    jdbi.registerRowMapper(ConstructorMapper.factory(ClientScript::class.java))
+    jdbi.registerRowMapper(ConstructorMapper.factory(ScriptRun::class.java))
+
+    jdbi.registerColumnMapper(JdbcKotlinMapColumnMapper())
 }

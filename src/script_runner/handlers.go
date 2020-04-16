@@ -3,7 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/iancoleman/strcase"
 	"gitlab.com/grchive/grchive/core"
+	"gitlab.com/grchive/grchive/database"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -95,9 +97,32 @@ func handleRunTracker(tracker *Tracker, runId int64, jar string) error {
 		}
 	}
 
+	// Get Client Script information.
+	run, err := database.GetScriptRun(tracker.runId)
+	if err != nil {
+		return err
+	}
+
+	script, err := database.GetScriptFromScriptCodeLink(run.LinkId)
+	if err != nil {
+		return err
+	}
+
+	// Determine expected package and function name.
+	// 	- Package: com.grchive.web.client
+	// 	- Class: ${Package}.${Upper Camel-case script name}_${Script Id}Kt
+	// 	- Function: Lower Camel-case script name.
+	className := fmt.Sprintf(
+		"com.grchive.web.client.%s_%dKt",
+		strcase.ToCamel(script.Name),
+		script.Id,
+	)
+	functionName := strcase.ToLowerCamel(script.Name)
+	metadataName := strings.TrimPrefix(script.MetadataFilename(), "src/main/resources")
+
 	// Kick off Docker container to handle the job.
 	containerName := fmt.Sprintf("script-runner-%d", runId)
-	err = createKotlinContainer(workDir, containerName)
+	err = createKotlinContainer(workDir, containerName, className, functionName, metadataName, strconv.FormatInt(runId, 10))
 	if err != nil {
 		return err
 	}
@@ -126,7 +151,9 @@ func handleRunTracker(tracker *Tracker, runId int64, jar string) error {
 }
 
 func handleRun(runId int64, jar string) error {
-	tracker := Tracker{}
+	tracker := Tracker{
+		runId: runId,
+	}
 	err := tracker.Start()
 
 	if err == nil {

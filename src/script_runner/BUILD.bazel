@@ -32,5 +32,6 @@ go_binary(
         "@com_github_docker_docker//api/types/strslice:go_default_library",
         "@com_github_docker_docker//api/types/volume:go_default_library",
         "@com_github_docker_docker//client:go_default_library",
+        "@com_github_iancoleman_strcase//:go_default_library",
     ],
 )

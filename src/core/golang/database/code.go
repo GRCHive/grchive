@@ -261,12 +261,12 @@ func CreateScriptRun(codeId int64, orgId int32, scriptId int64, role *core.Role)
 	run := core.ScriptRun{}
 	err = WrapTx(tx, func() error {
 		rows, err := tx.Queryx(`
-			INSERT INTO script_runs (link_id, start_time)
-			SELECT link.id, NOW()
+			INSERT INTO script_runs (link_id, start_time, user_id)
+			SELECT link.id, NOW(), $4
 			FROM code_to_client_scripts_link AS link
 			WHERE link.code_id = $1 AND link.org_id = $2 AND link.script_id = $3
 			RETURNING *
-		`, codeId, orgId, scriptId)
+		`, codeId, orgId, scriptId, role.UserId)
 
 		if err != nil {
 			return err

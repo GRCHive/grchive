@@ -27,8 +27,8 @@ type SupportedCodeParameterType struct {
 
 type CodeParameter struct {
 	LinkId  int64  `db:"link_id" yaml:"-" json:"-"`
-	Name    string `db:"name"`
-	ParamId int32  `db:"param_type"`
+	Name    string `db:"name" yaml:"name"`
+	ParamId int32  `db:"param_type" yaml:"paramId"`
 }
 
 type ScriptRun struct {
@@ -43,4 +43,5 @@ type ScriptRun struct {
 	RunSuccess      bool       `db:"run_success"`
 	BuildLog        NullString `db:"build_log"`
 	RunLog          NullString `db:"run_log"`
+	UserId          int64      `db:"user_id"`
 }

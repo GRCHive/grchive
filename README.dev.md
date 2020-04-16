@@ -326,6 +326,7 @@ Artifactory also has some bizarre default settings for the release and snapshot 
 Go to `Settings > Repositories > Repositories` and modify
 - `libs-release-local` to only `Handle Releases`
 - `libs-snapshot-local` to only `Handle Snapshots`
+- `libs-snapshot-local` and `libs-release-local` to only have an include pattern of `com/grchive/**/*`
 
 ## Drone CI
 

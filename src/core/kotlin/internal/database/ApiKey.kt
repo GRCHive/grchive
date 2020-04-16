@@ -1,7 +1,9 @@
 package grchive.core.internal.database
 
 import org.jdbi.v3.core.Handle
+
 import java.util.Optional
+
 import grchive.core.data.types.grchive.ApiKey
 import grchive.core.data.types.grchive.hashRawApiKey
 

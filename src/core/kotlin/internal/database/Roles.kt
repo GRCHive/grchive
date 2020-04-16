@@ -80,13 +80,14 @@ private fun createResourceJoin() : String {
 }
 
 /**
- * Finds the [FullRole] for the given unhashed API key.
+ * Finds the [FullRole] for the given user in the organization.
  *
  * @param hd A JDBI handle.
- * @param apiKeyId The unique ID of the API key.
+ * @param userId The User ID with an assigned role.
+ * @param orgId The org ID that the user belongs to.
  * @return A [FullRole] if found. Null if not.
  */
-fun getRoleAttachedToApiKey(hd : Handle, apiKeyId : Long, orgId : Int) : FullRole? {
+fun getUserRoleForOrg(hd : Handle, userId : Long, orgId : Int) : FullRole? {
     val res : Optional<FullRole> = hd.select("""
 		SELECT
             role.id AS "role_id",
@@ -97,11 +98,11 @@ fun getRoleAttachedToApiKey(hd : Handle, apiKeyId : Long, orgId : Int) : FullRol
             role.org_id AS "role_org_id"
             ${createResourceSelect()}
 		FROM organization_available_roles AS role
-        INNER JOIN api_key_roles AS lnk
-            ON lnk.role_id = role.id
         ${createResourceJoin()}
-        WHERE lnk.api_key_id = ? AND lnk.org_id = ?
-    """, apiKeyId, orgId).mapTo(FullRole::class.java).findOne()
+        INNER JOIN user_roles AS ur
+            ON ur.role_id = role.id
+        WHERE ur.user_id = ? AND ur.org_id = ?
+    """, userId, orgId).mapTo(FullRole::class.java).findOne()
 
     return if (res.isPresent()) res.get() else null
 }

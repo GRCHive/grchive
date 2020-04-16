@@ -491,6 +491,11 @@ go_repository(
     version = "v0.0.0-20180917221912-90fa682c2a6e",
 )
 
+go_repository(
+    name = "com_github_iancoleman_strcase",
+    importpath = "github.com/iancoleman/strcase",
+    commit = "16388991a33441046539eb716cff4d294d556c70",
+)
 
 # NODE
 http_archive(
@@ -712,6 +717,9 @@ maven_install(
         "org.postgresql:postgresql:42.2.11",
         "org.flywaydb:flyway-core:6.3.2",
         "org.slf4j:slf4j-log4j12:1.7.30",
+        "com.fasterxml.jackson.core:jackson-databind:2.10.3",
+        "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.3",
+        "com.fasterxml.jackson.module:jackson-module-kotlin:2.10.3",
     ],
     repositories = [
         "https://repo1.maven.org/maven2",
