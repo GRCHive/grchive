@@ -14,6 +14,7 @@ const NOTIFICATION_EXCHANGE string = "notifications"
 const FILE_PREVIEW_QUEUE string = "filepreview"
 const DATABASE_REFRESH_QUEUE string = "dbrefresh"
 const EVENT_NOTIFICATION_QUEUE string = "eventnotification"
+const SCRIPT_RUNNER_QUEUE string = "scriptrun"
 
 const (
 	NotificationQueueId int = iota
@@ -59,9 +60,14 @@ type NotificationMessage struct {
 	RelevantUsers []*core.User
 }
 
+type ScriptRunnerMessage struct {
+	RunId int64
+	Jar   string
+}
+
 type RecvMsgFn func([]byte) *RabbitMQError
 
-func SetupChannel(channel *amqp.Channel, cfg QueueConfig, idx int, isConsume bool) *AmqpChannelWrapper {
+func SetupChannel(channel *amqp.Channel, cfg MQClientConfig, idx int, isConsume bool) *AmqpChannelWrapper {
 	wrapper := AmqpChannelWrapper{
 		Channel: channel,
 		Queues:  map[int]string{},
@@ -195,13 +201,17 @@ type PublishMessage struct {
 	Body     interface{}
 }
 
-type QueueConfig struct {
+type MQClientConfig struct {
+	// Queue Enabled Flags
 	NotificationConsume bool
+
+	// QoS
+	ConsumerQos int
 }
 
 type RabbitMQInterface interface {
 	// Setup functions
-	Connect(core.RabbitMQConfig, QueueConfig, *core.TLSConfig)
+	Connect(core.RabbitMQConfig, MQClientConfig, *core.TLSConfig)
 	Cleanup()
 
 	// Message IO
@@ -246,7 +256,7 @@ func (r *RabbitMQConnection) publishWorker(idx int) {
 	}
 }
 
-func CreateRabbitMQConnection(cfg core.RabbitMQConfig, q QueueConfig, tls *core.TLSConfig, numChannels int, isConsume bool) *RabbitMQConnection {
+func CreateRabbitMQConnection(cfg core.RabbitMQConfig, q MQClientConfig, tls *core.TLSConfig, numChannels int, isConsume bool) *RabbitMQConnection {
 	var connection *amqp.Connection
 	var err error
 	url := generateUrlFromConfig(cfg)
@@ -274,8 +284,17 @@ func CreateRabbitMQConnection(cfg core.RabbitMQConfig, q QueueConfig, tls *core.
 		if err != nil {
 			core.Error("Failed to create channel: " + err.Error())
 		}
+
+		if isConsume {
+			err = ch.Qos(q.ConsumerQos, 0, false)
+			if err != nil {
+				core.Error("Failed to consumer QoS: " + err.Error())
+			}
+		}
+
 		wrapper := SetupChannel(ch, q, i, isConsume)
 		c.Channels[i] = wrapper
+
 		go c.publishWorker(i)
 	}
 
@@ -342,7 +361,7 @@ func generateUrlFromConfig(cfg core.RabbitMQConfig) string {
 	return fmt.Sprintf("%s%s:%s@%s:%d/", prefix, cfg.Username, cfg.Password, cfg.Host, cfg.Port)
 }
 
-func (r *RealRabbitMQInterface) Connect(cfg core.RabbitMQConfig, q QueueConfig, tls *core.TLSConfig) {
+func (r *RealRabbitMQInterface) Connect(cfg core.RabbitMQConfig, q MQClientConfig, tls *core.TLSConfig) {
 	r.publish = CreateRabbitMQConnection(cfg, q, tls, 4, false)
 	r.consume = CreateRabbitMQConnection(cfg, q, tls, 1, true)
 }

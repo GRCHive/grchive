@@ -2,18 +2,22 @@ package(default_visibility = ["//visibility:public"])
 
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 
+filegroup(
+    name = "template",
+    srcs = glob([
+        "template/**/*",
+    ])
+)
+
 go_binary(
     name = "frontend",
-    srcs = [
-        "docker.go",
-        "frontend.go",
-        "handler.go",
-        "runtime.go",
-        "library.go",
-    ],
+    srcs = glob([
+        "**/*.go",
+    ]),
     data = [
         "//src/webserver/config:config",
         "//devops/gcloud:gcloud-webserver-account.json",
+        ":template",
     ],
     deps = [
         "//src/gcloud_api/golang:gcloud_golang_api",

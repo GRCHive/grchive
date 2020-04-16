@@ -13,12 +13,10 @@ import (
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/strslice"
-	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 	"gitlab.com/grchive/grchive/core"
 	"io"
 	"io/ioutil"
-	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -60,71 +58,35 @@ func mustDockerCreateClient(c *client.Client, err error) *client.Client {
 
 var dockerClient *client.Client = mustDockerCreateClient(client.NewEnvClient())
 
-func createKotlinContainer(workspaceDir string, containerName string, workspaceVolumeName string, settings core.ScriptRunSettings, runtime *RuntimeEnvironment) error {
-	_, err := dockerClient.VolumeCreate(context.Background(), volume.VolumeCreateBody{
-		Driver: "local",
-		DriverOpts: map[string]string{
-			"type":   "tmpfs",
-			"device": "tmpfs",
-			"o":      fmt.Sprintf("size=%d", settings.DiskSizeBytes),
-		},
-		Name: workspaceVolumeName,
-	})
+const defaultCPUPeriod int64 = 100000
 
-	if err != nil {
-		return err
-	}
+func createKotlinContainer(workspaceDir string, containerName string) error {
+	entrypoint := append(strslice.StrSlice{}, "/data/run.sh")
+	args := append(strslice.StrSlice{}, "POOOOOOOOP")
 
-	inputDir := "/input"
-	libraryDir := "/library"
-
-	args := strslice.StrSlice{}
-	if settings.CompileOnly {
-		args = append(args, "--compile_only")
-	}
-
-	args = append(args, "--script", getExpectedScriptFname(inputDir))
-	if settings.ScriptChecksum != "" {
-		args = append(args, "--checksum", settings.ScriptChecksum)
-	}
-
-	args = append(args, "--jar", getExpectedJarFname(inputDir))
-	args = append(args, "--library", filepath.Join(libraryDir, filepath.Base(runtime.CoreLibPath)))
-	args = append(args, "--output", getExpectedCompiledJarFname(dockerOutputDir))
-
-	const defaultCPUPeriod int64 = 100000
-
-	_, err = dockerClient.ContainerCreate(
+	runnerNetwork := os.Getenv("SCRIPT_RUNNER_NETWORK")
+	_, err := dockerClient.ContainerCreate(
 		context.Background(),
 		&container.Config{
-			Image: runtime.ContainerPath,
-			Cmd:   args,
+			Image:      core.EnvConfig.Drone.RunnerImage,
+			Entrypoint: entrypoint,
+			Cmd:        args,
+			WorkingDir: "/data",
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{
 				mount.Mount{
 					Type:     mount.TypeBind,
 					Source:   workspaceDir,
-					Target:   inputDir,
-					ReadOnly: true,
-				},
-				mount.Mount{
-					Type:     mount.TypeBind,
-					Source:   filepath.Dir(runtime.CoreLibPath),
-					Target:   libraryDir,
-					ReadOnly: true,
-				},
-				mount.Mount{
-					Type:   mount.TypeVolume,
-					Source: workspaceVolumeName,
-					Target: dockerWorkspaceDir,
+					Target:   "/data",
+					ReadOnly: false,
 				},
 			},
 			Resources: container.Resources{
-				Memory:    settings.MemBytesAllocation,
 				CPUPeriod: defaultCPUPeriod,
-				CPUQuota:  int64(math.Round(float64(defaultCPUPeriod) * settings.CpuAllocation)),
+				CPUQuota:  defaultCPUPeriod,
 			},
+			NetworkMode: container.NetworkMode(runnerNetwork),
 		},
 		&network.NetworkingConfig{},
 		containerName,
@@ -137,7 +99,7 @@ func createKotlinContainer(workspaceDir string, containerName string, workspaceV
 	return nil
 }
 
-func runKotlinContainer(containerName string, settings core.ScriptRunSettings) (int, error) {
+func runKotlinContainer(containerName string) (int, error) {
 	err := dockerClient.ContainerStart(
 		context.Background(),
 		containerName,
@@ -273,7 +235,7 @@ func readLogsFromContainer(containerName string) (string, error) {
 	return logBuilder.String(), nil
 }
 
-func removeKotlinContainer(containerName string, workspaceVolumeName string) error {
+func removeKotlinContainer(containerName string) error {
 	err := dockerClient.ContainerRemove(
 		context.Background(),
 		containerName,
@@ -283,7 +245,7 @@ func removeKotlinContainer(containerName string, workspaceVolumeName string) err
 		return err
 	}
 
-	return dockerClient.VolumeRemove(context.Background(), workspaceVolumeName, true)
+	return nil
 }
 
 func pullKotlinImage(imageName string) error {

@@ -120,8 +120,9 @@ func main() {
 	core.Debug("RabbitMQ Init")
 	webcore.DefaultRabbitMQ.Connect(
 		*core.EnvConfig.RabbitMQ,
-		webcore.QueueConfig{
+		webcore.MQClientConfig{
 			NotificationConsume: true,
+			ConsumerQos:         5,
 		},
 		core.EnvConfig.Tls)
 	defer webcore.DefaultRabbitMQ.Cleanup()

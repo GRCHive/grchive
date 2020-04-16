@@ -279,6 +279,18 @@ func CreateScriptRun(codeId int64, orgId int32, scriptId int64, role *core.Role)
 	return &run, err
 }
 
+func StartBuildScriptRun(runId int64) error {
+	tx := CreateTx()
+	return WrapTx(tx, func() error {
+		_, err := tx.Exec(`
+			UPDATE script_runs
+			SET build_start_time = NOW()
+			WHERE id = $1
+		`, runId)
+		return err
+	})
+}
+
 func FinishBuildScriptRun(runId int64, success bool, logs string) error {
 	tx := CreateTx()
 	return WrapTx(tx, func() error {
@@ -287,6 +299,32 @@ func FinishBuildScriptRun(runId int64, success bool, logs string) error {
 			SET build_success = $1,
 				build_finish_time = NOW(),
 				build_log = $2
+			WHERE id = $3
+		`, success, logs, runId)
+		return err
+	})
+}
+
+func StartExecuteScriptRun(runId int64) error {
+	tx := CreateTx()
+	return WrapTx(tx, func() error {
+		_, err := tx.Exec(`
+			UPDATE script_runs
+			SET run_start_time = NOW()
+			WHERE id = $1
+		`, runId)
+		return err
+	})
+}
+
+func FinishExecuteScriptRun(runId int64, success bool, logs string) error {
+	tx := CreateTx()
+	return WrapTx(tx, func() error {
+		_, err := tx.Exec(`
+			UPDATE script_runs
+			SET run_success = $1,
+				run_finish_time = NOW(),
+				run_log = $2
 			WHERE id = $3
 		`, success, logs, runId)
 		return err

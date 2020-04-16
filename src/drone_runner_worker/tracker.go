@@ -39,6 +39,11 @@ func (t *Tracker) Start() {
 		if err != nil {
 			core.Error("Failed to record start in DB:" + err.Error())
 		}
+	} else {
+		err := database.StartBuildScriptRun(t.scriptRunId.NullInt64.Int64)
+		if err != nil {
+			core.Error("Failed to record start in DB:" + err.Error())
+		}
 	}
 
 	t.startTime = time.Now().UTC()

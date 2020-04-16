@@ -130,7 +130,9 @@ func main() {
 	}, core.EnvConfig.Tls.Config())
 	gcloud.DefaultGCloudApi.InitFromJson(core.EnvConfig.Gcloud.AuthFilename)
 
-	webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ, webcore.QueueConfig{}, core.EnvConfig.Tls)
+	webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ, webcore.MQClientConfig{
+		ConsumerQos: 1,
+	}, core.EnvConfig.Tls)
 	defer webcore.DefaultRabbitMQ.Cleanup()
 
 	forever := make(chan bool)

@@ -102,7 +102,9 @@ func main() {
 	database.Init()
 	mail.InitializeMailAPI(core.EnvConfig.Mail.Provider, core.EnvConfig.Mail.Key)
 
-	webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ, webcore.QueueConfig{}, core.EnvConfig.Tls)
+	webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ, webcore.MQClientConfig{
+		ConsumerQos: 5,
+	}, core.EnvConfig.Tls)
 	defer webcore.DefaultRabbitMQ.Cleanup()
 
 	forever := make(chan bool)
