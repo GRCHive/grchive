@@ -71,12 +71,16 @@ func handleRunTracker(tracker *Tracker, runId int64, jar string) error {
 	tracker.Log("WORK DIR: "+workDir, true)
 	//defer os.RemoveAll(workDir)
 
+	mavenDep := strings.Split(jar, ":")
 	// Copy over the template while replacing all the .tmpl files with an automatically generate
 	// file using certain predetermine variables. This code could probably be shared with the webserver
 	// which does something similar for Gitea repository template generation?
 	templateParams := map[string]string{
-		"ARTIFACTORY_HOST": core.EnvConfig.Artifactory.Host,
-		"ARTIFACTORY_PORT": strconv.FormatInt(int64(core.EnvConfig.Artifactory.Port), 10),
+		"ARTIFACTORY_HOST":   core.EnvConfig.Artifactory.Host,
+		"ARTIFACTORY_PORT":   strconv.FormatInt(int64(core.EnvConfig.Artifactory.Port), 10),
+		"CLIENT_GROUP_ID":    mavenDep[0],
+		"CLIENT_ARTIFACT_ID": mavenDep[1],
+		"CLIENT_VERSION":     mavenDep[2],
 	}
 
 	templateDirItems, err := ioutil.ReadDir(templateDir)

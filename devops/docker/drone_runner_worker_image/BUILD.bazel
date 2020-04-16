@@ -21,6 +21,9 @@ genrule(
 container_image(
     name = "latest",
     base = ":binary",
-    files = [ ":artifactory-settings" ],
+    files = [
+        ":artifactory-settings",
+        "//src/core/kotlin:grchive_public_core",
+    ],
     data_path = "."
 )
