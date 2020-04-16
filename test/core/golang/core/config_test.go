@@ -132,6 +132,7 @@ func TestLoadEnvConfig(t *testing.T) {
 					}},
 					{"HmacKey", "security.hmac_key", "ABCDEF", mustDecodeString("ABCDEF")},
 					{"UseSecureCookies", "security.use_secure_cookies", true, nil},
+					{"LogEncryptionPath", "security.log_encryption_path", "path", nil},
 					{"Company.CompanyName", "company.company_name", "company_name", nil},
 					{"Company.Domain", "company.domain", "domain", nil},
 					{"Vault.Url", "vault.url", "url", nil},
