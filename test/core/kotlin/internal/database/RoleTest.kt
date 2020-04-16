@@ -17,7 +17,6 @@ import grchive.core.data.types.grchive.unionAccessType
 
 import grchive.core.internal.database.resourceToDatabaseMap
 import grchive.core.internal.database.resourceToColumnName
-import grchive.core.internal.database.getRoleAttachedToApiKey
 
 class RoleTest: StringSpec({
     val validRawKey = "ABCDEFGHIJKLMNOP"
@@ -92,40 +91,6 @@ class RoleTest: StringSpec({
                 .bind(2, getRolePermissionForResource(refPermissions, v))
                 .execute()
         }
-
-        it.createUpdate("""
-            INSERT INTO api_key_roles (role_id, api_key_id, org_id)
-            VALUES (?, ?, ?)
-        """)
-            .bind(0, refRole.id)
-            .bind(1, apiKeyId)
-            .bind(2, refOrgId)
-            .execute()
     }
     listener(pg)
-
-    "getRoleAttachedToApiKey - Find Role" {
-        pg.useHandle {
-            val role = getRoleAttachedToApiKey(it, apiKeyId, refOrgId)
-            role.shouldNotBeNull()
-
-            role.role shouldBe refRole
-            role.permissions shouldBe refPermissions
-        }
-    }
-
-    "getRoleAttachedToApiKey - No Role (Wrong Key Id)" {
-        pg.useHandle {
-            val role = getRoleAttachedToApiKey(it, 252626, refOrgId)
-            role.shouldBeNull()
-        }
-    }
-
-    "getRoleAttachedToApiKey - No Role (Wrong Org Id)" {
-        pg.useHandle {
-            val role = getRoleAttachedToApiKey(it, apiKeyId, 2222)
-            role.shouldBeNull()
-        }
-    }
-
 })
