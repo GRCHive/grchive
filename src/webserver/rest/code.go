@@ -470,7 +470,24 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
+		// Grab JAR path from drone CI since that's the only place we store it.
+		// This is hitting the same DB table as the GetCodeBuildStatus call earlier, can we merge it somehow?
+		jar, err := database.GetCodeJar(code.Id, code.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get JAR for code: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		// In this case, we can directly send off a request to make the script runner run this script.
+		webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
+			Exchange: webcore.DEFAULT_EXCHANGE,
+			Queue:    webcore.SCRIPT_RUNNER_QUEUE,
+			Body: webcore.ScriptRunnerMessage{
+				RunId: run.Id,
+				Jar:   jar,
+			},
+		})
 	}
 
 	jsonWriter.Encode(run.Id)

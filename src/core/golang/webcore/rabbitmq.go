@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/streadway/amqp"
 	"gitlab.com/grchive/grchive/core"
+	"sync/atomic"
+	"time"
 )
 
 const DEFAULT_EXCHANGE string = ""
@@ -100,6 +102,19 @@ func SetupChannel(channel *amqp.Channel, cfg MQClientConfig, idx int, isConsume 
 
 	if err != nil {
 		core.Error("Failed to declare database refresh queue: " + err.Error())
+	}
+
+	_, err = channel.QueueDeclare(
+		SCRIPT_RUNNER_QUEUE, // name
+		true,                // durable
+		false,               // auto delete
+		false,               // exclusive
+		false,               // no wait
+		nil,                 // arguments
+	)
+
+	if err != nil {
+		core.Error("Failed to declare script runner queue: " + err.Error())
 	}
 
 	//
@@ -217,6 +232,7 @@ type RabbitMQInterface interface {
 	// Message IO
 	SendMessage(PublishMessage)
 	ReceiveMessages(string, RecvMsgFn) error
+	WaitForAllMessagesToBeSent()
 
 	// Consumer Queue Names
 	GetConsumerQueueName(id int) string
@@ -226,12 +242,14 @@ type RabbitMQConnection struct {
 	Connection *amqp.Connection
 	Channels   []*AmqpChannelWrapper
 
-	publishChannel chan PublishMessage
+	publishChannel    chan PublishMessage
+	publishInProgress int64
 }
 
 func (r *RabbitMQConnection) publishWorker(idx int) {
 	for {
 		msg := <-r.publishChannel
+		defer atomic.AddInt64(&r.publishInProgress, -1)
 
 		byteMsg, err := json.Marshal(msg.Body)
 		if err != nil {
@@ -302,6 +320,7 @@ func CreateRabbitMQConnection(cfg core.RabbitMQConfig, q MQClientConfig, tls *co
 }
 
 func (c *RabbitMQConnection) SendMessage(msg PublishMessage) {
+	atomic.AddInt64(&c.publishInProgress, 1)
 	c.publishChannel <- msg
 }
 
@@ -381,6 +400,16 @@ func (r *RealRabbitMQInterface) Cleanup() {
 
 func (r *RealRabbitMQInterface) GetConsumerQueueName(id int) string {
 	return r.consume.Channels[0].Queues[NotificationQueueId]
+}
+
+func (r *RealRabbitMQInterface) WaitForAllMessagesToBeSent() {
+	for {
+		if atomic.LoadInt64(&r.publish.publishInProgress) == 0 {
+			break
+		}
+
+		time.Sleep(1 * time.Second)
+	}
 }
 
 var DefaultRabbitMQ = RealRabbitMQInterface{}

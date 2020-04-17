@@ -5,6 +5,7 @@ import (
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/vault_api"
+	"gitlab.com/grchive/grchive/webcore"
 	"strings"
 	"time"
 )
@@ -87,6 +88,16 @@ func (t *Tracker) End() {
 			core.Error("Failed to record finish in DB:" + err.Error())
 		}
 
-		// Extra step of sending a run job to RabbitMQ.
+		if t.success {
+			// Extra step of sending a run job to RabbitMQ only if this was successful.
+			webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
+				Exchange: webcore.DEFAULT_EXCHANGE,
+				Queue:    webcore.SCRIPT_RUNNER_QUEUE,
+				Body: webcore.ScriptRunnerMessage{
+					RunId: t.scriptRunId.NullInt64.Int64,
+					Jar:   t.jar,
+				},
+			})
+		}
 	}
 }

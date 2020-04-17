@@ -7,6 +7,7 @@ import (
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/gitea_api"
 	"gitlab.com/grchive/grchive/vault_api"
+	"gitlab.com/grchive/grchive/webcore"
 	"os"
 	"strconv"
 )
@@ -52,6 +53,8 @@ func run(dir string) {
 func main() {
 	core.Init()
 	database.Init()
+	webcore.InitializeWebcore()
+
 	vault.Initialize(vault.VaultConfig{
 		Url:      core.EnvConfig.Vault.Url,
 		Username: core.EnvConfig.Vault.Username,
@@ -70,7 +73,17 @@ func main() {
 		Token:    giteaToken,
 	})
 
+	core.Debug("RabbitMQ Init")
+	webcore.DefaultRabbitMQ.Connect(
+		*core.EnvConfig.RabbitMQ,
+		webcore.MQClientConfig{},
+		core.EnvConfig.Tls)
+	defer webcore.DefaultRabbitMQ.Cleanup()
+
 	repoDir := flag.String("dir", "", "Directory containing source code to build.")
 	flag.Parse()
 	run(*repoDir)
+
+	// Ensure all rabbitmq messages got sent to ensure that script run messages get sent before exiting.
+	webcore.DefaultRabbitMQ.WaitForAllMessagesToBeSent()
 }

@@ -16,10 +16,16 @@ func processScriptRunnerMessages(data []byte) *webcore.RabbitMQError {
 	if err != nil {
 		return &webcore.RabbitMQError{err, false}
 	}
-	return &webcore.RabbitMQError{
-		handleRun(msg.RunId, msg.Jar),
-		false,
+
+	err = handleRun(msg.RunId, msg.Jar)
+	if err != nil {
+		return &webcore.RabbitMQError{
+			err,
+			false,
+		}
 	}
+
+	return nil
 }
 
 func main() {

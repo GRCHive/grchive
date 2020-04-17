@@ -217,6 +217,20 @@ func InsertManagedCode(code *core.ManagedCode, role *core.Role) error {
 	return tx.Commit()
 }
 
+func GetCodeJar(codeId int64, orgId int32, role *core.Role) (string, error) {
+	if !role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
+		return "", core.ErrorUnauthorized
+	}
+
+	jar := ""
+	err := dbConn.Get(&jar, `
+		SELECT jar
+		FROM managed_code_drone_ci
+		WHERE code_id = $1 AND org_id = $2
+	`, codeId, orgId)
+	return jar, err
+}
+
 func GetCodeBuildStatus(commit string, orgId int32, role *core.Role) (*core.CodeBuildStatus, error) {
 	if !role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
 		return nil, core.ErrorUnauthorized
