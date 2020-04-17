@@ -71,7 +71,7 @@ func handleRunTracker(tracker *Tracker, runId int64, jar string) error {
 		return err
 	}
 	tracker.Log("WORK DIR: "+workDir, true)
-	//defer os.RemoveAll(workDir)
+	defer os.RemoveAll(workDir)
 
 	mavenDep := strings.Split(jar, ":")
 	// Copy over the template while replacing all the .tmpl files with an automatically generate
@@ -140,7 +140,7 @@ func handleRunTracker(tracker *Tracker, runId int64, jar string) error {
 		return err
 	}
 
-	tracker.Log(logs, true)
+	tracker.Log(logs, false)
 	if retCode == 0 {
 		tracker.MarkSuccess()
 	} else {
