@@ -249,10 +249,10 @@ type RabbitMQConnection struct {
 func (r *RabbitMQConnection) publishWorker(idx int) {
 	for {
 		msg := <-r.publishChannel
-		defer atomic.AddInt64(&r.publishInProgress, -1)
 
 		byteMsg, err := json.Marshal(msg.Body)
 		if err != nil {
+			atomic.AddInt64(&r.publishInProgress, -1)
 			core.Error("Failed to marshal message: " + err.Error())
 		}
 
@@ -267,6 +267,7 @@ func (r *RabbitMQConnection) publishWorker(idx int) {
 				DeliveryMode: amqp.Persistent,
 			},
 		)
+		atomic.AddInt64(&r.publishInProgress, -1)
 
 		if err != nil {
 			core.Warning("Failed to publish : " + err.Error())
@@ -404,7 +405,8 @@ func (r *RealRabbitMQInterface) GetConsumerQueueName(id int) string {
 
 func (r *RealRabbitMQInterface) WaitForAllMessagesToBeSent() {
 	for {
-		if atomic.LoadInt64(&r.publish.publishInProgress) == 0 {
+		check := atomic.LoadInt64(&r.publish.publishInProgress)
+		if check == 0 {
 			break
 		}
 
