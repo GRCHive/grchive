@@ -95,7 +95,7 @@
         <v-divider></v-divider>
 
         <v-row>
-            <v-col :cols="scriptId != -1 ? 9 : 12" class="pa-0">
+            <v-col :cols="scriptId != -1 ? 9 : 12">
                 <dynamic-split-container :enable-col-b="showLogs">
                     <template v-slot:first-col>
                         <generic-code-editor
