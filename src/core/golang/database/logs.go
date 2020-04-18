@@ -5,6 +5,9 @@ import (
 )
 
 func GetBuildLogs(hash string, orgId int32, role *core.Role) (string, error) {
+	if !role.Permissions.HasAccess(core.ResourceBuildLog, core.AccessView) {
+		return "", core.ErrorUnauthorized
+	}
 	rows, err := dbConn.Queryx(`
 		SELECT logs
 		FROM managed_code_drone_ci
@@ -34,6 +37,9 @@ func GetBuildLogs(hash string, orgId int32, role *core.Role) (string, error) {
 }
 
 func GetBuildLogsForRun(runId int64, role *core.Role) (string, error) {
+	if !role.Permissions.HasAccess(core.ResourceScriptRun, core.AccessView) {
+		return "", core.ErrorUnauthorized
+	}
 	rows, err := dbConn.Queryx(`
 		SELECT build_log
 		FROM script_runs
@@ -63,6 +69,9 @@ func GetBuildLogsForRun(runId int64, role *core.Role) (string, error) {
 }
 
 func GetRunLogsForRun(runId int64, role *core.Role) (string, error) {
+	if !role.Permissions.HasAccess(core.ResourceScriptRun, core.AccessView) {
+		return "", core.ErrorUnauthorized
+	}
 	rows, err := dbConn.Queryx(`
 		SELECT run_log
 		FROM script_runs
