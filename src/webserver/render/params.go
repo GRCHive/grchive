@@ -1,6 +1,7 @@
 package render
 
 import (
+	"github.com/gorilla/mux"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/webcore"
 	"net/http"
@@ -29,9 +30,13 @@ type PageTemplateParameters struct {
 		OktaRedirectUri string
 		OktaScope       string
 	} `json:"auth"`
+
+	Resource struct {
+		Id string
+	} `json:"resource"`
 }
 
-func BuildPageTemplateParametersFull(r *http.Request) PageTemplateParameters {
+func BuildPageTemplateParametersFull(r *http.Request, resourceQuery string) PageTemplateParameters {
 	retParams := PageTemplateParameters{}
 	parsedData, err := webcore.FindSessionParsedDataInContext(r.Context())
 
@@ -59,6 +64,14 @@ func BuildPageTemplateParametersFull(r *http.Request) PageTemplateParameters {
 	retParams.Auth.OktaClientId = core.EnvConfig.Login.ClientId
 	retParams.Auth.OktaRedirectUri = webcore.MustGetRouteUrlAbsolute(webcore.SamlCallbackRouteName)
 	retParams.Auth.OktaScope = core.EnvConfig.Login.Scope
+
+	if resourceQuery != "" {
+		urlRouteVars := mux.Vars(r)
+		resource, ok := urlRouteVars[resourceQuery]
+		if ok {
+			retParams.Resource.Id = resource
+		}
+	}
 	return retParams
 }
 

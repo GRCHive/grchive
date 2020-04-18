@@ -12,6 +12,8 @@ import (
 type GetLogsInput struct {
 	OrgId      int32           `webcore:"orgId"`
 	CommitHash core.NullString `webcore:"commitHash,optional"`
+	RunId      core.NullInt64  `webcore:"runId,optional"`
+	RunLog     core.NullBool   `webcore:"runLog,optional"`
 }
 
 func getLogs(w http.ResponseWriter, r *http.Request) {
@@ -36,6 +38,13 @@ func getLogs(w http.ResponseWriter, r *http.Request) {
 	var encryptedLogs string
 	if inputs.CommitHash.NullString.Valid {
 		encryptedLogs, err = database.GetBuildLogs(inputs.CommitHash.NullString.String, inputs.OrgId, role)
+	} else if inputs.RunId.NullInt64.Valid {
+		runId := inputs.RunId.NullInt64.Int64
+		if inputs.RunLog.NullBool.Valid && inputs.RunLog.NullBool.Bool {
+			encryptedLogs, err = database.GetRunLogsForRun(runId, role)
+		} else {
+			encryptedLogs, err = database.GetBuildLogsForRun(runId, role)
+		}
 	} else {
 		core.Warning("Invalid inputs.")
 		w.WriteHeader(http.StatusBadRequest)

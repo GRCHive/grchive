@@ -15,5 +15,6 @@ go_library(
         "//src/core/golang/core:webserver_core_library",
         "//src/core/golang/database:webserver_database_library",
         "//src/core/golang/webcore:webserver_webcore_library",
+        "@com_github_gorilla_mux//:go_default_library",
     ],
 )

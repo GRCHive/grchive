@@ -12,6 +12,7 @@ import {
     contactUsUrl,
     createSingleScriptUrl,
     createSingleClientDataUrl,
+    createSingleBuildLogUrl,
 } from '../../ts/url'
 import { createUserString } from '../../ts/users'
 import { ClientScript } from '../../ts/clientScripts'
@@ -72,6 +73,10 @@ export default class ScriptRunTable extends ResourceTableProps {
     }
 
     goToLogs(item : any) {
+        window.location.assign(createSingleBuildLogUrl(
+            PageParamsStore.state.organization!.OktaGroupName,
+            item.value.GitHash
+        ))
     }
 
     renderId(props : any) : VNode {

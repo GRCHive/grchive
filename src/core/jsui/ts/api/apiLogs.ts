@@ -7,7 +7,9 @@ import {
 
 export interface TGetLogInput {
     orgId: number
-    commitHash : number
+    commitHash? : string
+    runId? : number
+    runLog? : boolean
 }
 
 export interface TGetLogOutput {

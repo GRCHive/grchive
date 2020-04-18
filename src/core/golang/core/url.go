@@ -42,6 +42,8 @@ const DashboardOrgSqlRequestQueryId string = "sqlReqId"
 const DashboardOrgVendorQueryId string = "vendorId"
 const DashboardOrgClientDataQueryId string = "clientDataId"
 const DashboardOrgClientScriptQueryId string = "clientScriptId"
+const DashboardOrgCommitQueryId string = "commitId"
+const DashboardOrgScriptRunQueryId string = "runId"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 
@@ -110,6 +112,9 @@ const DashboardLinkPrefix string = "/link"
 
 var DashboardSingleDataEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgClientDataQueryId)
 var DashboardSingleScriptEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgClientScriptQueryId)
+
+var DashboardSingleBuildLogEndpoint string = fmt.Sprintf("/build/{%s}", DashboardOrgCommitQueryId)
+var DashboardSingleScriptRunLogEndpoint string = fmt.Sprintf("/run/{%s}", DashboardOrgScriptRunQueryId)
 
 // Generic API Actions
 const ApiNewEndpoint = "/new"

@@ -19,7 +19,7 @@ import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 import { ManagedCode } from '../../../ts/code'
 import {
-    getLog, TGetLogOutput
+    getLog, TGetLogOutput, TGetLogInput
 } from '../../../ts/api/apiLogs'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
@@ -27,9 +27,17 @@ import Ansi2Html from 'ansi-to-html'
 
 const Props = Vue.extend({
     props: {
-        code: {
-            type: Object,
-            default: () => null as ManagedCode | null,
+        commit: {
+            type: String,
+            default: "",
+        },
+        runId: {
+            type: Number,
+            default: -1,
+        },
+        runLog: {
+            type: Boolean,
+            default: false,
         },
         fullHeight: {
             type: Boolean,
@@ -79,10 +87,19 @@ export default class LogViewer extends Props {
     @Watch('code')
     refreshLog() {
         this.rawLog = null
-        getLog({
+        
+        let params : TGetLogInput = {
             orgId: PageParamsStore.state.organization!.Id,
-            commitHash: this.code!.GitHash,
-        }).then((resp : TGetLogOutput) => {
+        }
+
+        if (this.runId != -1) {
+            params.runId = this.runId
+            params.runLog = this.runLog
+        } else {
+            params.commitHash = this.commit
+        }
+
+        getLog(params).then((resp : TGetLogOutput) => {
             this.rawLog = resp.data
         }).catch((err : any) => {
             // @ts-ignore
@@ -107,7 +124,7 @@ export default class LogViewer extends Props {
 #logContainer {
     overflow: auto;
     font-family: monospace;
-    font-size: 10px;
+    font-size: 12px;
     color: white;
     background-color: #111;
 }

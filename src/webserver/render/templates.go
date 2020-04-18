@@ -168,9 +168,9 @@ func RegisterTemplates() {
 	allTemplates[DashboardOrgLogsTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardLogs.tmpl")
 	allTemplates[DashboardOrgBuildLogsTemplateKey] =
-		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardLogs.tmpl")
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardBuildLog.tmpl")
 	allTemplates[DashboardOrgRunLogsTemplateKey] =
-		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardLogs.tmpl")
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardRunLog.tmpl")
 
 	// Dashboard Org Settings
 	allTemplates[DashboardOrgSettingsUsersTemplateKey] =

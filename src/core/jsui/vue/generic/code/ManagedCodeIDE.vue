@@ -121,7 +121,7 @@
 
                     <template v-slot:second-col>
                         <log-viewer
-                            :code="selectedCode"
+                            :commit="selectedCode.GitHash"
                             full-height
                         >
                         </log-viewer>

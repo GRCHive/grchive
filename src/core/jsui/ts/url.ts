@@ -169,6 +169,14 @@ export function createSingleVendorUrl(org: string, vendor : number) : string {
     return `/dashboard/org/${org}/vendors/${vendor}`
 }
 
+export function createSingleBuildLogUrl(org: string, commit : string) : string {
+    return `/dashboard/org/${org}/auto/logs/build/${commit}`
+}
+
+export function createSingleRunLogUrl(org: string, runId : number) : string {
+    return `/dashboard/org/${org}/auto/logs/run/${runId}`
+}
+
 export const newProcessFlowAPIUrl : string = "/api/flows/new"
 export const deleteProcessFlowAPIUrl : string = "/api/flows/delete"
 export const getAllProcessFlowAPIUrl: string = "/api/flows/"

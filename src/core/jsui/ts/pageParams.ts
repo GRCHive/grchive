@@ -25,7 +25,10 @@ export interface PageParamsStoreState {
         OktaClientId: string
         OktaRedirectUri: string
         OktaScope: string
-    } | null
+    } | null,
+    resource: {
+        Id: string
+    } | null,
 }
 
 const storeOptions: StoreOptions<PageParamsStoreState> = {
@@ -33,7 +36,8 @@ const storeOptions: StoreOptions<PageParamsStoreState> = {
         organization: null,
         user: null,
         site: null,
-        auth: null
+        auth: null,
+        resource: null,
     },
     mutations: {
         replaceState(state, data : PageParamsStoreState) {
@@ -41,6 +45,7 @@ const storeOptions: StoreOptions<PageParamsStoreState> = {
             state.user = data.user
             state.site = data.site
             state.auth = data.auth
+            state.resource = data.resource
         }
     }
 }

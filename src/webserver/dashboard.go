@@ -113,6 +113,8 @@ func createOrganizationScriptSubrouter(r *mux.Router) {
 func createOrganizationLogsSubrouter(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardLogsPrefix).Subrouter()
 	s.HandleFunc("/", render.RenderLogs)
+	s.HandleFunc(core.DashboardSingleBuildLogEndpoint, render.RenderSingleBuildLog)
+	s.HandleFunc(core.DashboardSingleScriptRunLogEndpoint, render.RenderSingleRunLog)
 }
 
 func createUserSubrouter(r *mux.Router) {

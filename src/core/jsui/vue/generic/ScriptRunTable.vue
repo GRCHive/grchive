@@ -11,6 +11,7 @@ import { PageParamsStore } from '../../ts/pageParams'
 import { 
     contactUsUrl,
     createSingleScriptUrl,
+    createSingleRunLogUrl,
 } from '../../ts/url'
 import { createUserString } from '../../ts/users'
 import { ClientScript } from '../../ts/clientScripts'
@@ -72,6 +73,10 @@ export default class ScriptRunTable extends ResourceTableProps {
     }
 
     goToRun(item : any) {
+        window.location.assign(createSingleRunLogUrl(
+            PageParamsStore.state.organization!.OktaGroupName,
+            item.value.Id
+        ))
     }
 
     retrieveInfoFromLinkId(linkId : number) {
