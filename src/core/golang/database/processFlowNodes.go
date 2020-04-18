@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
-	"strconv"
 )
 
 func DeleteProcessFlowNodeFromId(nodeId int64, role *core.Role) error {
@@ -161,13 +160,6 @@ func findNodesHelper(role *core.Role, condition string, args ...interface{}) ([]
 			return nil, err
 		}
 		nodes = append(nodes, &newNode)
-
-		orgId := int32(dataMap["org_id"].(int64))
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdFlowNode, strconv.FormatInt(newNode.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
 	}
 
 	return nodes, tx.Commit()

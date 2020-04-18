@@ -3,7 +3,6 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
-	"strconv"
 )
 
 func AddFileVersionWithTx(file *core.ControlDocumentationFile, storage *core.FileStorageData, tx *sqlx.Tx, role *core.Role) (*core.FileVersion, error) {
@@ -92,20 +91,7 @@ func GetAllVersionsFileStorage(fileId int64, orgId int32, role *core.Role) ([]*c
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, r := range retData {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdFileStorage, strconv.FormatInt(r.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return retData, tx.Commit()
+	return retData, nil
 }
 
 func GetFileVersionStorageData(fileId int64, orgId int32, version int32, role *core.Role) (*core.FileStorageData, error) {
@@ -128,7 +114,7 @@ func GetFileVersionStorageData(fileId int64, orgId int32, version int32, role *c
 		return nil, err
 	}
 
-	return &data, LogAuditSelect(orgId, core.ResourceIdFileStorage, strconv.FormatInt(data.Id, 10), role)
+	return &data, nil
 }
 
 func GetPreviewFileVersionStorageDataFromStorageData(storage *core.FileStorageData, role *core.Role) (*core.FileStorageData, error) {
@@ -159,7 +145,7 @@ func GetPreviewFileVersionStorageDataFromStorageData(storage *core.FileStorageDa
 	if err != nil {
 		return nil, err
 	}
-	return &data, LogAuditSelect(storage.OrgId, core.ResourceIdFileStorage, strconv.FormatInt(data.Id, 10), role)
+	return &data, nil
 }
 
 func GetPreviewFileVersionStorageData(fileId int64, orgId int32, version int32, role *core.Role) (*core.FileStorageData, error) {
@@ -194,5 +180,5 @@ func GetPreviewFileVersionStorageData(fileId int64, orgId int32, version int32, 
 	if err != nil {
 		return nil, err
 	}
-	return &data, LogAuditSelect(orgId, core.ResourceIdFileStorage, strconv.FormatInt(data.Id, 10), role)
+	return &data, nil
 }

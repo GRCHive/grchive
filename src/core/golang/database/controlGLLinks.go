@@ -2,7 +2,6 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
-	"strconv"
 )
 
 func FindGeneralLedgerAccountsLinkedToControl(controlId int64, orgId int32, role *core.Role) ([]*core.GeneralLedgerAccount, error) {
@@ -28,20 +27,7 @@ func FindGeneralLedgerAccountsLinkedToControl(controlId int64, orgId int32, role
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, a := range accounts {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdGLAcc, strconv.FormatInt(a.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return accounts, tx.Commit()
+	return accounts, nil
 }
 
 func FindControlsLinkedToGeneralLedgerAccount(accountId int64, orgId int32, role *core.Role) ([]*core.Control, error) {
@@ -69,18 +55,5 @@ func FindControlsLinkedToGeneralLedgerAccount(accountId int64, orgId int32, role
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, c := range controls {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdControl, strconv.FormatInt(c.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return controls, tx.Commit()
+	return controls, nil
 }

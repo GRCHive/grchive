@@ -101,12 +101,14 @@ export interface TGetCodeBuildStatusInput {
 }
 
 export interface TGetCodeBuildStatusOutput {
-    data: DroneCiStatus
+    data: DroneCiStatus | null
 }
 
 export function getCodeBuildStatus(inp : TGetCodeBuildStatusInput) : Promise<TGetCodeBuildStatusOutput> {
     return axios.get(getCodeBuildStatusUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetCodeBuildStatusOutput) => {
-        cleanDroneCiStatusFromJson(resp.data)
+        if (!!resp.data) {
+            cleanDroneCiStatusFromJson(resp.data)
+        }
         return resp
     })
 }

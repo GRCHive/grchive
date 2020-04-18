@@ -2,7 +2,6 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
-	"strconv"
 )
 
 func FindControlsLinkedToDocCat(catId int64, orgId int32, role *core.Role) ([]*core.Control, error) {
@@ -29,18 +28,5 @@ func FindControlsLinkedToDocCat(catId int64, orgId int32, role *core.Role) ([]*c
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, c := range controls {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdControl, strconv.FormatInt(c.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return controls, tx.Commit()
+	return controls, nil
 }

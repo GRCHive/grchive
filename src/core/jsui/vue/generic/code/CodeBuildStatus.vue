@@ -58,7 +58,7 @@ export default class CodeBuildStatus extends Props {
         }).then((resp : TGetCodeBuildStatusOutput) => {
             this.status = resp.data
 
-            if (!this.status.Success && !this.status.TimeEnd) {
+            if (!this.status || (!this.status.Success && !this.status.TimeEnd)) {
                 setTimeout(this.refreshStatus, refreshPeriodMs)
             }
         }).catch((err : any) => {

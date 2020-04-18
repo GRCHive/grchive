@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
-	"strconv"
 	"strings"
 )
 
@@ -158,20 +157,7 @@ func findAllRisksFromDbHelper(role *core.Role, stmt *sqlx.Stmt, args ...interfac
 		risks = append(risks, &r)
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, r := range risks {
-		err = LogAuditSelectWithTx(r.OrgId, core.ResourceIdRisk, strconv.FormatInt(r.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return risks, tx.Commit()
+	return risks, nil
 }
 
 func FindAllRisksForProcessFlow(flowId int64, role *core.Role) ([]*core.Risk, error) {
@@ -239,5 +225,5 @@ func FindRisk(riskId int64, role *core.Role) (*core.Risk, error) {
 		return nil, err
 	}
 
-	return &risk, LogAuditSelect(risk.OrgId, core.ResourceIdRisk, strconv.FormatInt(risk.Id, 10), role)
+	return &risk, nil
 }

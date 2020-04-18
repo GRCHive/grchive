@@ -1,7 +1,6 @@
 package database
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
@@ -50,6 +49,10 @@ func buildHistResourceFilter(types []string, ids []string) string {
 			subTyp = "sql_metadata_id"
 		case core.ResourceIdSqlQuery:
 			subTyp = "query_id"
+		case core.ResourceIdClientData:
+			subTyp = "client_data_id"
+		case core.ResourceIdClientScripts:
+			subTyp = "client_script_id"
 		}
 
 		if len(subTyp) > 0 {
@@ -560,62 +563,4 @@ func retrieveResourceExtraData(resourceType string, resourceId string) (map[stri
 	}
 
 	return data, nil
-}
-
-func LogAuditSelectWithTx(orgId int32, resourceType string, resourceId string, role *core.Role, tx *sqlx.Tx) error {
-	err := UpgradeTxToAudit(tx, role)
-	if err != nil {
-		return err
-	}
-
-	extraData, err := retrieveResourceExtraData(resourceType, resourceId)
-	if err != nil {
-		return err
-	}
-
-	rawExtraData, err := json.Marshal(extraData)
-	if err != nil {
-		return err
-	}
-
-	_, err = tx.Exec(`
-		INSERT INTO global_audit_event_history(
-			org_id,
-			resource_type,
-			resource_id,
-			resource_extra_data,
-			action,
-			performed_at,
-			pgrole_id
-		)
-		SELECT 
-			$1,
-			$2,
-			$3,
-			$4,
-			'SELECT',
-			NOW(),
-			pg.oid
-		FROM pg_roles AS pg
-		WHERE pg.rolname = current_user
-	`, orgId, resourceType, resourceId, string(rawExtraData))
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func LogAuditSelect(orgId int32, resourceType string, resourceId string, role *core.Role) error {
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return err
-	}
-
-	err = LogAuditSelectWithTx(orgId, resourceType, resourceId, role, tx)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	return tx.Commit()
 }

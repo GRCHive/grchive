@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx/types"
 	"gitlab.com/grchive/grchive/core"
-	"strconv"
 )
 
 func GetAllSupportedDatabaseTypes(role *core.Role) ([]*core.DatabaseType, error) {
@@ -73,20 +72,7 @@ func GetAllDatabasesForOrg(orgId int32, filter core.DatabaseFilterData, role *co
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, d := range dbs {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdDatabase, strconv.FormatInt(d.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return dbs, tx.Commit()
+	return dbs, nil
 }
 
 func GetAllDatabasesForOrgWithDeployment(orgId int32, deploymentType int32, filter core.DatabaseFilterData, role *core.Role) ([]*core.Database, error) {
@@ -112,20 +98,7 @@ func GetAllDatabasesForOrgWithDeployment(orgId int32, deploymentType int32, filt
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, d := range dbs {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdDatabase, strconv.FormatInt(d.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return dbs, tx.Commit()
+	return dbs, nil
 }
 
 func GetDb(dbId int64, orgId int32, role *core.Role) (*core.Database, error) {
@@ -144,7 +117,7 @@ func GetDb(dbId int64, orgId int32, role *core.Role) (*core.Database, error) {
 		return nil, err
 	}
 
-	return &db, LogAuditSelect(orgId, core.ResourceIdDatabase, strconv.FormatInt(db.Id, 10), role)
+	return &db, nil
 }
 
 func GetDbType(dbId int64, orgId int32, role *core.Role) (*core.DatabaseType, error) {
@@ -320,7 +293,7 @@ func FindDatabaseConnectionForDatabase(dbId int64, orgId int32, role *core.Role)
 		return nil, err
 	}
 
-	return &conn, LogAuditSelect(orgId, core.ResourceIdDatabaseConn, strconv.FormatInt(conn.Id, 10), role)
+	return &conn, nil
 }
 
 func DeleteDatabaseConnection(connId int64, dbId int64, orgId int32, role *core.Role) error {

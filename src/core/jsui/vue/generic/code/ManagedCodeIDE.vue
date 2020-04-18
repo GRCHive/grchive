@@ -248,8 +248,8 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
         // Make only the latest revision non readonly.
         // This way the "Run at Revision" functionality becomes more clear as they won't
         // be able to have changes to it.
-        return this.readonly || !this.selectedCode || this.allCode.length == 0 ||
-            this.allCode[0].Id != this.selectedCode!.Id
+        return this.readonly || (!this.selectedCode && this.allCode.length != 0) ||
+            (this.allCode.length > 0 && this.allCode[0].Id != this.selectedCode!.Id)
     }
 
     get allCodeItems() : any[] {

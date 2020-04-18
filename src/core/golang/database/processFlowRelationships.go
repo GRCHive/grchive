@@ -2,7 +2,6 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
-	"strconv"
 )
 
 func FindNodeRiskRelationships(flowId int64, role *core.Role) ([]*core.NodeRiskRelationship, error) {
@@ -52,20 +51,7 @@ func FindFlowsRelatedToRisk(riskId int64, role *core.Role) ([]*core.ProcessFlow,
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, f := range flows {
-		err = LogAuditSelectWithTx(f.Org.Id, core.ResourceIdProcessFlow, strconv.FormatInt(f.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return flows, tx.Commit()
+	return flows, nil
 }
 
 func FindFlowsRelatedToControl(controlId int64, role *core.Role) ([]*core.ProcessFlow, error) {
@@ -98,20 +84,7 @@ func FindFlowsRelatedToControl(controlId int64, role *core.Role) ([]*core.Proces
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, f := range flows {
-		err = LogAuditSelectWithTx(f.Org.Id, core.ResourceIdProcessFlow, strconv.FormatInt(f.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return flows, tx.Commit()
+	return flows, nil
 }
 
 func FindNodeControlRelationships(flowId int64, role *core.Role) ([]*core.NodeControlRelationship, error) {
@@ -166,20 +139,7 @@ func FindControlsRelatedToRisk(riskId int64, role *core.Role) ([]*core.Control, 
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, c := range controls {
-		err = LogAuditSelectWithTx(c.OrgId, core.ResourceIdControl, strconv.FormatInt(c.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return controls, tx.Commit()
+	return controls, nil
 }
 
 func FindRisksRelatedToControl(controlId int64, role *core.Role) ([]*core.Risk, error) {
@@ -199,18 +159,5 @@ func FindRisksRelatedToControl(controlId int64, role *core.Role) ([]*core.Risk, 
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, r := range risks {
-		err = LogAuditSelectWithTx(r.OrgId, core.ResourceIdRisk, strconv.FormatInt(r.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return risks, tx.Commit()
+	return risks, nil
 }

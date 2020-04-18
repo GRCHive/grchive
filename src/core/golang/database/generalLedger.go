@@ -2,7 +2,6 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
-	"strconv"
 )
 
 func GetOrgGLCategories(orgId int32, role *core.Role) ([]*core.GeneralLedgerCategory, error) {
@@ -17,20 +16,7 @@ func GetOrgGLCategories(orgId int32, role *core.Role) ([]*core.GeneralLedgerCate
 		WHERE org_id = $1
 	`, orgId)
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, c := range cats {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdGLCat, strconv.FormatInt(c.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return cats, tx.Commit()
+	return cats, err
 }
 
 func GetOrgGLAccounts(orgId int32, role *core.Role) ([]*core.GeneralLedgerAccount, error) {
@@ -45,20 +31,7 @@ func GetOrgGLAccounts(orgId int32, role *core.Role) ([]*core.GeneralLedgerAccoun
 		WHERE org_id = $1
 	`, orgId)
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, a := range accs {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdGLAcc, strconv.FormatInt(a.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return accs, tx.Commit()
+	return accs, err
 }
 
 func CreateNewGLCategory(cat *core.GeneralLedgerCategory, role *core.Role) error {
@@ -194,7 +167,7 @@ func GetGLAccountFromDbId(accId int64, orgId int32, role *core.Role) (*core.Gene
 		return nil, err
 	}
 
-	return &acc, LogAuditSelect(orgId, core.ResourceIdGLAcc, strconv.FormatInt(acc.Id, 10), role)
+	return &acc, nil
 }
 
 func FindGLAccountParentCategories(acc *core.GeneralLedgerAccount, role *core.Role) ([]*core.GeneralLedgerCategory, error) {
@@ -222,20 +195,7 @@ func FindGLAccountParentCategories(acc *core.GeneralLedgerAccount, role *core.Ro
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, c := range parents {
-		err = LogAuditSelectWithTx(acc.OrgId, core.ResourceIdGLCat, strconv.FormatInt(c.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return parents, tx.Commit()
+	return parents, nil
 }
 
 func UpdateGLAccount(acc *core.GeneralLedgerAccount, role *core.Role) error {

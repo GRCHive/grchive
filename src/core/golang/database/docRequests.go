@@ -3,7 +3,6 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
-	"strconv"
 	"time"
 )
 
@@ -113,7 +112,7 @@ func GetDocumentRequest(requestId int64, orgId int32, role *core.Role) (*core.Do
 		return nil, err
 	}
 
-	return &req, LogAuditSelect(orgId, core.ResourceIdDocRequest, strconv.FormatInt(req.Id, 10), role)
+	return &req, nil
 }
 
 func DeleteDocumentRequest(requestId int64, orgId int32, role *core.Role) error {
@@ -182,20 +181,7 @@ func GetAllDocumentRequestsForVendorProduct(productId int64, orgId int32, role *
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, r := range requests {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdDocRequest, strconv.FormatInt(r.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return requests, tx.Commit()
+	return requests, nil
 }
 
 func GetAllDocumentRequestsForOrganization(orgId int32, role *core.Role) ([]*core.DocumentRequest, error) {
@@ -214,20 +200,7 @@ func GetAllDocumentRequestsForOrganization(orgId int32, role *core.Role) ([]*cor
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, r := range requests {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdDocRequest, strconv.FormatInt(r.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return requests, tx.Commit()
+	return requests, nil
 }
 
 func FulfillDocumentRequestWithTx(requestId int64, fileId int64, orgId int32, role *core.Role, tx *sqlx.Tx) error {

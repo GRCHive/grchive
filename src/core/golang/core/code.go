@@ -49,12 +49,12 @@ type ScriptRun struct {
 }
 
 type DroneCiStatus struct {
-	CodeId     int64     `db:"code_id"`
-	OrgId      int32     `db:"org_id"`
-	CommitHash string    `db:"commit_hash"`
-	TimeStart  time.Time `db:"time_start"`
-	TimeEnd    NullTime  `db:"time_end"`
-	Success    bool      `db:"success"`
-	Logs       string    `db:"logs" json:"-"`
-	Jar        string    `db:"jar" json:"-"`
+	CodeId     int64      `db:"code_id"`
+	OrgId      int32      `db:"org_id"`
+	CommitHash string     `db:"commit_hash"`
+	TimeStart  time.Time  `db:"time_start"`
+	TimeEnd    NullTime   `db:"time_end"`
+	Success    bool       `db:"success"`
+	Logs       NullString `db:"logs" json:"-"`
+	Jar        NullString `db:"jar" json:"-"`
 }

@@ -3,7 +3,6 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
-	"strconv"
 )
 
 func AddDocRequestControlLinkWithTx(requestId int64, controlId int64, orgId int32, role *core.Role, tx *sqlx.Tx) error {
@@ -46,7 +45,7 @@ func FindControlLinkedToDocRequest(requestId int64, orgId int32, role *core.Role
 	if err != nil {
 		return nil, err
 	}
-	return &control, LogAuditSelect(orgId, core.ResourceIdControl, strconv.FormatInt(control.Id, 10), role)
+	return &control, nil
 }
 
 func FindDocRequestsLinkedToControl(controlId int64, orgId int32, role *core.Role) ([]*core.DocumentRequest, error) {
@@ -67,18 +66,5 @@ func FindDocRequestsLinkedToControl(controlId int64, orgId int32, role *core.Rol
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, r := range requests {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdDocRequest, strconv.FormatInt(r.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return requests, tx.Commit()
+	return requests, nil
 }

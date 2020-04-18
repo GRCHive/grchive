@@ -2,7 +2,6 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
-	"strconv"
 )
 
 func FindSystemsLinkedToRisk(riskId int64, orgId int32, role *core.Role) ([]*core.System, error) {
@@ -28,20 +27,7 @@ func FindSystemsLinkedToRisk(riskId int64, orgId int32, role *core.Role) ([]*cor
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, s := range systems {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdSystem, strconv.FormatInt(s.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return systems, tx.Commit()
+	return systems, nil
 }
 
 func FindRisksLinkedToSystem(systemId int64, orgId int32, role *core.Role) ([]*core.Risk, error) {
@@ -69,18 +55,5 @@ func FindRisksLinkedToSystem(systemId int64, orgId int32, role *core.Role) ([]*c
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, r := range risks {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdRisk, strconv.FormatInt(r.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return risks, tx.Commit()
+	return risks, nil
 }

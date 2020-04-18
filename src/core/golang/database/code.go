@@ -263,12 +263,23 @@ func GetCodeBuildStatus(commit string, orgId int32, role *core.Role) (*core.Dron
 		return nil, core.ErrorUnauthorized
 	}
 
-	status := core.DroneCiStatus{}
-	err := dbConn.Get(&status, `
+	rows, err := dbConn.Queryx(`
 		SELECT *
 		FROM managed_code_drone_ci
 		WHERE commit_hash = $1 AND org_id = $2
 	`, commit, orgId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, nil
+	}
+
+	status := core.DroneCiStatus{}
+	err = rows.StructScan(&status)
 	return &status, err
 }
 

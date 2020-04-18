@@ -175,7 +175,9 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 
 	var handle core.ResourceHandle
 
+	core.Info("get latest")
 	if latestData != nil {
+		core.Info("has latest")
 		switch event.ResourceType {
 		case "database_connection_info":
 			dbId := int64(math.Round(event.ResourceExtraData["db_id"].(float64)))
@@ -679,6 +681,18 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 				webcore.SingleClientDataRouteName,
 				core.DashboardOrgOrgQueryId, org.OktaGroupName,
 				core.DashboardOrgClientDataQueryId, event.ResourceId,
+			))
+		case "client_scripts":
+			handle.DisplayText = fmt.Sprintf(
+				"%s #%s",
+				latestData["name"].(string),
+				event.ResourceId,
+			)
+
+			handle.ResourceUri = core.CreateNullString(webcore.MustGetRouteUrlAbsolute(
+				webcore.SingleClientScriptRouteName,
+				core.DashboardOrgOrgQueryId, org.OktaGroupName,
+				core.DashboardOrgClientScriptQueryId, event.ResourceId,
 			))
 		}
 	} else {

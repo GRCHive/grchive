@@ -2,7 +2,6 @@ package database
 
 import (
 	"gitlab.com/grchive/grchive/core"
-	"strconv"
 )
 
 func FindSystemsLinkedToControl(controlId int64, orgId int32, role *core.Role) ([]*core.System, error) {
@@ -30,20 +29,7 @@ func FindSystemsLinkedToControl(controlId int64, orgId int32, role *core.Role) (
 		return nil, err
 	}
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, s := range systems {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdSystem, strconv.FormatInt(s.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return systems, tx.Commit()
+	return systems, nil
 }
 
 func FindControlsLinkedToSystem(systemId int64, orgId int32, role *core.Role) ([]*core.Control, error) {
@@ -67,18 +53,5 @@ func FindControlsLinkedToSystem(systemId int64, orgId int32, role *core.Role) ([
 		WHERE sys.id = $1 AND sys.org_id = $2
 	`, systemId, orgId)
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, c := range controls {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdControl, strconv.FormatInt(c.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return controls, tx.Commit()
+	return controls, err
 }

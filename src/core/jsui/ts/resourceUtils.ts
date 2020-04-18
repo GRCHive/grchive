@@ -62,6 +62,8 @@ export function standardizeResourceType(typ : string) : string {
             return 'Vendor Product'
         case 'client_data':
             return 'Data Object'
+        case 'client_scripts':
+            return 'Script'
     }
 
     return 'UNKNOWN'

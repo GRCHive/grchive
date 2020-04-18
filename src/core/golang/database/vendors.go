@@ -3,7 +3,6 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
-	"strconv"
 )
 
 func NewVendorWithTx(vendor *core.Vendor, role *core.Role, tx *sqlx.Tx) error {
@@ -54,20 +53,7 @@ func AllVendorsForOrganization(orgId int32, role *core.Role) ([]*core.Vendor, er
 		WHERE vnd.org_id = $1
 	`, orgId)
 
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, v := range vendors {
-		err = LogAuditSelectWithTx(orgId, core.ResourceIdVendor, strconv.FormatInt(v.Id, 10), role, tx)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	return vendors, tx.Commit()
+	return vendors, err
 }
 
 func GetVendorFromId(vendorId int64, orgId int32, role *core.Role) (*core.Vendor, error) {
@@ -88,7 +74,7 @@ func GetVendorFromId(vendorId int64, orgId int32, role *core.Role) (*core.Vendor
 		return nil, err
 	}
 
-	return &vendor, LogAuditSelect(orgId, core.ResourceIdVendor, strconv.FormatInt(vendor.Id, 10), role)
+	return &vendor, nil
 }
 
 func DeleteVendor(vendorId int64, orgId int32, role *core.Role) error {
