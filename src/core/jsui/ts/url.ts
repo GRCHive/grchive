@@ -408,6 +408,7 @@ export const getCodeLinkUrl : string = "/api/auto/code/link"
 
 export const runCodeUrl : string = "/api/auto/code/runs/new"
 export const allCodeRunsUrl : string = "/api/auto/code/runs/all"
+export const getCodeRunUrl : string = "/api/auto/code/runs/get"
 
 export const getCodeBuildStatusUrl : string = "/api/auto/code/status/get"
 

@@ -509,6 +509,7 @@ func registerCodeRunAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardRunPrefix).Subrouter()
 	s.HandleFunc(core.ApiNewEndpoint, runCode).Methods("POST")
 	s.HandleFunc(core.ApiAllEndpoint, allCodeRuns).Methods("GET")
+	s.HandleFunc(core.ApiGetEndpoint, getCodeRun).Methods("GET")
 }
 
 func registerCodeStatusAPIPaths(r *mux.Router) {

@@ -337,7 +337,7 @@ func FinishExecuteScriptRun(runId int64, success bool, logs string) error {
 	})
 }
 
-func GetScriptRun(runId int64) (*core.ScriptRun, error) {
+func GetScriptRun(runId int64, role *core.Role) (*core.ScriptRun, error) {
 	run := core.ScriptRun{}
 	err := dbConn.Get(&run, `
 		SELECT *

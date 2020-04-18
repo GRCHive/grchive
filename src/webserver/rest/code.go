@@ -531,6 +531,40 @@ func allCodeRuns(w http.ResponseWriter, r *http.Request) {
 	jsonWriter.Encode(runs)
 }
 
+type GetCodeRunInput struct {
+	OrgId int32 `webcore:"orgId"`
+	RunId int64 `webcore:"runId"`
+}
+
+func getCodeRun(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := GetCodeRunInput{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	run, err := database.GetScriptRun(inputs.RunId, role)
+	if err != nil {
+		core.Warning("Failed to get script run: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(run)
+}
+
 type GetScriptCodeLinkInput struct {
 	OrgId  int32 `webcore:"orgId"`
 	LinkId int64 `webcore:"linkId"`

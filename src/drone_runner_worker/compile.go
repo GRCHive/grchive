@@ -47,7 +47,7 @@ func computeJarPathFromMvn(tracker *Tracker) (string, error) {
 }
 
 func checkoutScriptToRevision(tracker *Tracker) error {
-	run, err := database.GetScriptRun(tracker.scriptRunId.NullInt64.Int64)
+	run, err := database.GetScriptRun(tracker.scriptRunId.NullInt64.Int64, core.ServerRole)
 	if err != nil {
 		return err
 	}

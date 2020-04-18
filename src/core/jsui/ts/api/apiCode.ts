@@ -9,6 +9,7 @@ import {
     getCodeBuildStatusUrl,
     runCodeUrl,
     allCodeRunsUrl,
+    getCodeRunUrl,
     getCodeLinkUrl,
 } from '../url'
 import { 
@@ -130,6 +131,22 @@ export interface TAllCodeRunsOutput {
 export function allCodeRuns(inp : TAllCodeRunsInput) : Promise<TAllCodeRunsOutput> {
     return axios.get(allCodeRunsUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TAllCodeRunsOutput) => {
         resp.data.forEach(cleanScriptRunFromJson)
+        return resp
+    })
+}
+
+export interface TGetCodeRunInput {
+    orgId: number
+    runId : number
+}
+
+export interface TGetCodeRunOutput {
+    data: ScriptRun
+}
+
+export function getCodeRun(inp : TGetCodeRunInput) : Promise<TGetCodeRunOutput> {
+    return axios.get(getCodeRunUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetCodeRunOutput) => {
+        cleanScriptRunFromJson(resp.data)
         return resp
     })
 }

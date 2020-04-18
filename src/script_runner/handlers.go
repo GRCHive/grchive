@@ -98,7 +98,7 @@ func handleRunTracker(tracker *Tracker, runId int64, jar string) error {
 	}
 
 	// Get Client Script information.
-	run, err := database.GetScriptRun(tracker.runId)
+	run, err := database.GetScriptRun(tracker.runId, core.ServerRole)
 	if err != nil {
 		return err
 	}
