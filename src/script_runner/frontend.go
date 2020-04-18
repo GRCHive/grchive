@@ -7,7 +7,11 @@ import (
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/vault_api"
 	"gitlab.com/grchive/grchive/webcore"
+	"io/ioutil"
+	"os"
 )
+
+var mavenDir string = ""
 
 func processScriptRunnerMessages(data []byte) *webcore.RabbitMQError {
 	msg := webcore.ScriptRunnerMessage{}
@@ -17,7 +21,7 @@ func processScriptRunnerMessages(data []byte) *webcore.RabbitMQError {
 		return &webcore.RabbitMQError{err, false}
 	}
 
-	err = handleRun(msg.RunId, msg.Jar)
+	err = handleRun(msg.RunId, msg.Jar, mavenDir)
 	if err != nil {
 		return &webcore.RabbitMQError{
 			err,
@@ -43,15 +47,23 @@ func main() {
 	local := flag.Bool("local", false, "Whether to use the runId and jar flags to run locally instead of listening using RabbitMQ.")
 	flag.Parse()
 
+	// Create a directory to use as the maven root for the docker containers we spawn.
+	var err error
+	mavenDir, err = ioutil.TempDir("", "maven-root")
+	if err != nil {
+		core.Error("Failed to create maven directory: " + err.Error())
+	}
+	defer os.RemoveAll(mavenDir)
+
 	{
-		err := pullKotlinImage(core.EnvConfig.Drone.RunnerImage)
+		err = pullKotlinImage(core.EnvConfig.Drone.RunnerImage)
 		if err != nil {
 			core.Error(err)
 		}
 	}
 
 	if *local {
-		err := handleRun(*runId, *jar)
+		err = handleRun(*runId, *jar, mavenDir)
 		if err != nil {
 			core.Error("Failed to run: " + err.Error())
 		}

@@ -7,7 +7,7 @@
             {{ iconName }}
         </v-icon>
 
-        <div v-if="showTimeStamp" class="ml-2">
+        <div v-if="showTimeStamp && !notRequired && !forceFail" class="ml-2">
             <p class="ma-0 caption">
                 <span class="font-weight-bold">Start: </span>
                 {{ timeStartStr }}
@@ -36,6 +36,14 @@ const Props = Vue.extend({
             type: Boolean,
             default: false,
         },
+        notRequired: {
+            type: Boolean,
+            default: false,
+        },
+        forceFail: {
+            type: Boolean,
+            default: false,
+        }
     }
 })
 
@@ -46,7 +54,7 @@ export default class ScriptBuildRunStatus extends Props {
     }
 
     get isSuccess() {
-        return this.success
+        return this.success && !this.forceFail
     }
 
     get timeStartStr() : string {
@@ -58,7 +66,9 @@ export default class ScriptBuildRunStatus extends Props {
     }
 
     get iconColor() {
-        if (this.isPending) {
+        if (this.notRequired) {
+            return 'secondary'
+        } else if (this.isPending) {
             return 'warning'
         } else if (this.isSuccess) {
             return 'success'
@@ -68,7 +78,9 @@ export default class ScriptBuildRunStatus extends Props {
     }
 
     get iconName() {
-        if (this.isPending) {
+        if (this.notRequired) {
+            return 'mdi-minus-circle'
+        } else if (this.isPending) {
             return 'mdi-help-circle'
         } else if (this.isSuccess) {
             return 'mdi-check-circle'

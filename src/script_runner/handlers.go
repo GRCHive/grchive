@@ -122,7 +122,7 @@ func handleRunTracker(tracker *Tracker, runId int64, jar string) error {
 
 	// Kick off Docker container to handle the job.
 	containerName := fmt.Sprintf("script-runner-%d", runId)
-	err = createKotlinContainer(workDir, containerName, className, functionName, metadataName, strconv.FormatInt(runId, 10))
+	err = createKotlinContainer(workDir, containerName, tracker.mavenRootDir, className, functionName, metadataName, strconv.FormatInt(runId, 10))
 	if err != nil {
 		return err
 	}
@@ -150,9 +150,10 @@ func handleRunTracker(tracker *Tracker, runId int64, jar string) error {
 	return removeKotlinContainer(containerName)
 }
 
-func handleRun(runId int64, jar string) error {
+func handleRun(runId int64, jar string, mavenDir string) error {
 	tracker := Tracker{
-		runId: runId,
+		runId:        runId,
+		mavenRootDir: mavenDir,
 	}
 	err := tracker.Start()
 

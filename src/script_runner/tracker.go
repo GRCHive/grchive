@@ -10,7 +10,8 @@ import (
 )
 
 type Tracker struct {
-	runId int64
+	runId        int64
+	mavenRootDir string
 
 	logs    strings.Builder
 	success bool

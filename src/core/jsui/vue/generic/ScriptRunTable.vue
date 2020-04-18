@@ -19,11 +19,13 @@ import { ManagedCode } from '../../ts/code'
 import { VIcon, VProgressCircular } from 'vuetify/lib'
 import { standardFormatTime } from '../../ts/time'
 import { getClientScriptCodeFromLink, TGetClientScriptCodeFromLinkOutput } from '../../ts/api/apiScripts'
+import ScriptBuildRunStatus from './code/ScriptBuildRunStatus.vue'
 
 @Component({
     components: {
         BaseResourceTable,
         HashRenderer,
+        ScriptBuildRunStatus
     }
 })
 export default class ScriptRunTable extends ResourceTableProps {
@@ -159,119 +161,19 @@ export default class ScriptRunTable extends ResourceTableProps {
         )
     }
 
-    renderStatus(required : boolean, success: boolean, start : Date | null, end : Date | null) : VNode {
-        let icon : VNode
-
-        if (!required) {
-            icon = this.$createElement(
-                VIcon,
-                {
-                    props: {
-                        small: true,
-                    },
-                },
-                "mdi-minus-circle"
-            )
-            return icon
-        } else if (success) {
-            // Finished and we succeeded.
-            icon = this.$createElement(
-                VIcon,
-                {
-                    props: {
-                        small: true,
-                        color: "success",
-                    },
-                },
-                "mdi-check-circle"
-            )
-        } else if (!end) {
-            // Still in progress.
-            icon = this.$createElement(
-                VProgressCircular,
-                {
-                    props: {
-                        indeterminate: true,
-                        size: 16
-                    },
-                },
-                []
-            )
-        } else {
-            // Finished and failed.
-            icon = this.$createElement(
-                VIcon,
-                {
-                    props: {
-                        small: true,
-                        color: "error",
-                    },
-                },
-                "mdi-close-circle"
-            )
-        }
-
-        let times = []
-        if (!!start) {
-            times.push(this.$createElement(
-                'p',
-                {
-                    class:  ['ma-0'],
-                },
-                [
-                    this.$createElement(
-                        'span',
-                        {
-                            class: ['font-weight-bold'],
-                        },
-                        'Start: ',
-                    ),
-                    this.$createElement(
-                        'span',
-                        standardFormatTime(start!),
-                    )
-                ],
-            ))
-        }
-        if (!!end) {
-            times.push(this.$createElement(
-                'p',
-                {
-                    class:  ['ma-0'],
-                },
-                [
-                    this.$createElement(
-                        'span',
-                        {
-                            class: ['font-weight-bold'],
-                        },
-                        'End: ',
-                    ),
-                    this.$createElement(
-                        'span',
-                        standardFormatTime(end!),
-                    )
-                ],
-            ))
-        }
-
+    renderStatus(required : boolean, success: boolean, start : Date | null, end : Date | null, forceFail : boolean) : VNode {
         return this.$createElement(
-            'div',
+            ScriptBuildRunStatus,
             {
-                style: {
-                    display: 'flex',
-                },
-            },
-            [
-                icon,
-                this.$createElement(
-                    'div',
-                    {
-                        class: ['ml-2'],
-                    },
-                    times,
-                )
-            ],
+                props: {
+                    success: success,
+                    start: start,
+                    end: end,
+                    showTimeStamp: true,
+                    notRequired: !required,
+                    forceFail: forceFail
+                }
+            }
         )
     }
 
@@ -281,15 +183,17 @@ export default class ScriptRunTable extends ResourceTableProps {
             props.item.value.BuildSuccess,
             props.item.value.BuildStartTime,
             props.item.value.BuildFinishTime,
+            false,
         )
     }
 
     renderRunStatus(props : any) : VNode {
         return this.renderStatus(
             true,
-            props.item.value.BuildSuccess && props.item.value.RunSuccess,
+            props.item.value.RunSuccess,
             props.item.value.RunStartTime,
             props.item.value.RunFinishTime,
+            !props.item.value.BuildSuccess
         )
     }
    

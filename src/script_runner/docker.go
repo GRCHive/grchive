@@ -60,7 +60,7 @@ var dockerClient *client.Client = mustDockerCreateClient(client.NewEnvClient())
 
 const defaultCPUPeriod int64 = 100000
 
-func createKotlinContainer(workspaceDir string, containerName string, newArgs ...string) error {
+func createKotlinContainer(workspaceDir string, containerName string, mavenDir string, newArgs ...string) error {
 	entrypoint := append(strslice.StrSlice{}, "/data/run.sh")
 	args := append(strslice.StrSlice{}, newArgs...)
 
@@ -100,6 +100,12 @@ func createKotlinContainer(workspaceDir string, containerName string, newArgs ..
 					Source:   filepath.Dir(configPath),
 					Target:   "/config",
 					ReadOnly: true,
+				},
+				mount.Mount{
+					Type:     mount.TypeBind,
+					Source:   mavenDir,
+					Target:   "/root/.m2/repository",
+					ReadOnly: false,
 				},
 			},
 			Resources: container.Resources{
