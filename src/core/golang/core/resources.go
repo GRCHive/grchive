@@ -32,6 +32,9 @@ const (
 	ResourceIdUser             string = "users"
 	ResourceIdClientData       string = "client_data"
 	ResourceIdManagedCode      string = "managed_kotlin_code"
+	ResourceIdClientScripts    string = "client_scripts"
+	ResourceIdScriptRun        string = "script_runs"
+	ResourceIdBuildLog         string = "managed_code_drone_ci"
 )
 
 func GetResourceTypeId(in interface{}) (string, int64, error) {
@@ -82,6 +85,14 @@ func GetResourceTypeId(in interface{}) (string, int64, error) {
 		return ResourceIdUser, v.Id, nil
 	case ClientData:
 		return ResourceIdClientData, v.Id, nil
+	case ManagedCode:
+		return ResourceIdManagedCode, v.Id, nil
+	case ClientScript:
+		return ResourceIdClientScripts, v.Id, nil
+	case ScriptRun:
+		return ResourceIdScriptRun, v.Id, nil
+	case DroneCiStatus:
+		return ResourceIdBuildLog, v.CodeId, nil
 	}
 
 	return "", 0, errors.New("Unsupported resource (GetResourceTypeId).")

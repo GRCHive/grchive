@@ -69,84 +69,119 @@
             v-model="permissions.ControlDocumentationAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+        <v-divider></v-divider>
 
         <access-type-editor
             label="General Ledger"
             v-model="permissions.GLAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+        <v-divider></v-divider>
 
         <access-type-editor
             label="Systems"
             v-model="permissions.SystemAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+        <v-divider></v-divider>
 
         <access-type-editor
             label="Database"
             v-model="permissions.DbAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+        <v-divider></v-divider>
 
         <access-type-editor
             label="Database Connection"
             v-model="permissions.DbConnectionAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+        <v-divider></v-divider>
 
         <access-type-editor
             label="Document Requests"
             v-model="permissions.DocRequestAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+        <v-divider></v-divider>
 
         <access-type-editor
             label="Deployments"
             v-model="permissions.DeploymentAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+        <v-divider></v-divider>
 
         <access-type-editor
             label="Servers"
             v-model="permissions.ServerAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+        <v-divider></v-divider>
 
         <access-type-editor
             label="Vendors"
             v-model="permissions.VendorAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+        <v-divider></v-divider>
 
         <access-type-editor
             label="SQL Data"
             v-model="permissions.DbSqlAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+        <v-divider></v-divider>
 
         <access-type-editor
             label="SQL Queries"
             v-model="permissions.DbSqlQueryAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+        <v-divider></v-divider>
 
         <access-type-editor
             label="SQL Query Requests"
             v-model="permissions.DbSqlRequestAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+        <v-divider></v-divider>
 
         <access-type-editor
             label="Data"
             v-model="permissions.ClientDataAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+        <v-divider></v-divider>
 
         <access-type-editor
             label="Code"
             v-model="permissions.ManagedCodeAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+        <v-divider></v-divider>
+
+        <access-type-editor
+            label="Scripts"
+            v-model="permissions.ClientScriptsAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+        <v-divider></v-divider>
+
+        <access-type-editor
+            label="Run Logs"
+            v-model="permissions.ScriptRunAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+        <v-divider></v-divider>
+
+        <access-type-editor
+            label="Build Logs"
+            v-model="permissions.BuildLogAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+        <v-divider></v-divider>
     </v-form>
 
     <v-card-actions>
@@ -184,7 +219,7 @@
 import Vue from 'vue'
 import * as rules from "../../../ts/formRules"
 import { PageParamsStore } from '../../../ts/pageParams'
-import { Permissions, AccessType, FullRole } from '../../../ts/roles'
+import { Permissions, AccessType, FullRole, emptyPermissions } from '../../../ts/roles'
 import { TNewRoleInput, TNewRoleOutput, newRole} from '../../../ts/api/apiRoles'
 import { TEditRoleInput, TEditRoleOutput, editRole} from '../../../ts/api/apiRoles'
 import { contactUsUrl } from '../../../ts/url'
@@ -218,28 +253,7 @@ export default Vue.extend({
         rules,
         name: "",
         description: "",
-        permissions: <Permissions>{
-            OrgUsersAccess: AccessType.NoAccess,
-            OrgRolesAccess: AccessType.NoAccess,
-            ProcessFlowsAccess: AccessType.NoAccess,
-            ControlsAccess: AccessType.NoAccess,
-            ControlDocumentationAccess: AccessType.NoAccess,
-            ControlDocMetadataAccess: AccessType.NoAccess,
-            RisksAccess: AccessType.NoAccess,
-            GLAccess: AccessType.NoAccess,
-            SystemAccess: AccessType.NoAccess,
-            DbAccess: AccessType.NoAccess,
-            DbConnectionAccess: AccessType.NoAccess,
-            DocRequestAccess: AccessType.NoAccess,
-            DeploymentAccess: AccessType.NoAccess,
-            ServerAccess: AccessType.NoAccess,
-            VendorAccess: AccessType.NoAccess,
-            DbSqlAccess: AccessType.NoAccess,
-            DbSqlQueryAccess: AccessType.NoAccess,
-            DbSqlRequestAccess: AccessType.NoAccess,
-            ClientDataAccess: AccessType.NoAccess,
-            ManagedCodeAccess: AccessType.NoAccess,
-        },
+        permissions: emptyPermissions(),
     }),
     computed: {
         canSubmit() : boolean {
@@ -305,28 +319,7 @@ export default Vue.extend({
             if (!this.referenceRole) {
                 this.name = ""
                 this.description = ""
-                this.permissions = <Permissions>{
-                    OrgUsersAccess: AccessType.NoAccess,
-                    OrgRolesAccess: AccessType.NoAccess,
-                    ProcessFlowsAccess: AccessType.NoAccess,
-                    ControlsAccess: AccessType.NoAccess,
-                    ControlDocumentationAccess: AccessType.NoAccess,
-                    ControlDocMetadataAccess: AccessType.NoAccess,
-                    RisksAccess: AccessType.NoAccess,
-                    GLAccess: AccessType.NoAccess,
-                    SystemAccess: AccessType.NoAccess,
-                    DbAccess: AccessType.NoAccess,
-                    DbConnectionAccess: AccessType.NoAccess,
-                    DocRequestAccess: AccessType.NoAccess,
-                    DeploymentAccess: AccessType.NoAccess,
-                    ServerAccess: AccessType.NoAccess,
-                    VendorAccess: AccessType.NoAccess,
-                    DbSqlAccess: AccessType.NoAccess,
-                    DbSqlQueryAccess: AccessType.NoAccess,
-                    DbSqlRequestAccess: AccessType.NoAccess,
-                    ClientDataAccess: AccessType.NoAccess,
-                    ManagedCodeAccess: AccessType.NoAccess,
-                }
+                this.permissions = emptyPermissions()
             } else {
                 this.name = this.referenceRole.RoleMetadata.Name
                 this.description = this.referenceRole.RoleMetadata.Description

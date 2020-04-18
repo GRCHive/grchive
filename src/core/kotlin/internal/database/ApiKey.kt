@@ -16,9 +16,9 @@ import grchive.core.data.types.grchive.hashRawApiKey
  */
 internal fun getApiKeyFromRawKey(hd : Handle, rawKey : String) : ApiKey? {
     val res : Optional<ApiKey> = hd.select("""
-		SELECT key.*
-		FROM api_keys AS key
-		WHERE hashed_api_key = ?
+        SELECT key.*
+        FROM api_keys AS key
+        WHERE hashed_api_key = ?
     """, hashRawApiKey(rawKey)).mapTo(ApiKey::class.java).findOne()
     return if (res.isPresent()) res.get() else null
 }

@@ -1,27 +1,29 @@
 package grchive.core.data.types.grchive
 
 enum class Resources {
-	ResourceOrgUsers,
-	ResourceOrgRoles,
-	ResourceProcessFlows,
-	ResourceControls,
-	ResourceControlDocumentation,
-	ResourceControlDocumentationMetadata,
-	ResourceRisks,
-	ResourceGeneralLedger,
-	ResourceSystems,
-	ResourceDatabases,
-	ResourceDbConnections,
-	ResourceDocRequests,
-	ResourceDeployments,
-	ResourceServers,
-	ResourceVendors,
-	ResourceDbSql,
-	ResourceDbSqlQuery,
-	ResourceDbSqlRequest,
+    ResourceOrgUsers,
+    ResourceOrgRoles,
+    ResourceProcessFlows,
+    ResourceControls,
+    ResourceControlDocumentation,
+    ResourceControlDocumentationMetadata,
+    ResourceRisks,
+    ResourceGeneralLedger,
+    ResourceSystems,
+    ResourceDatabases,
+    ResourceDbConnections,
+    ResourceDocRequests,
+    ResourceDeployments,
+    ResourceServers,
+    ResourceVendors,
+    ResourceDbSql,
+    ResourceDbSqlQuery,
+    ResourceDbSqlRequest,
     ResourceClientData,
     ResourceManagedCode,
-    ResourceClientScripts
+    ResourceClientScripts,
+    ResourceScriptRun,
+    ResourceBuildLog
 }
 
 /**

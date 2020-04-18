@@ -40,6 +40,8 @@ const (
 	ResourceClientData
 	ResourceManagedCode
 	ResourceClientScripts
+	ResourceScriptRun
+	ResourceBuildLog
 )
 
 var AvailableResources []ResourceType = []ResourceType{
@@ -64,6 +66,8 @@ var AvailableResources []ResourceType = []ResourceType{
 	ResourceClientData,
 	ResourceManagedCode,
 	ResourceClientScripts,
+	ResourceScriptRun,
+	ResourceBuildLog,
 }
 
 type PermissionsMap struct {
@@ -88,6 +92,8 @@ type PermissionsMap struct {
 	ClientDataAccess           AccessType `db:"client_data_access"`
 	ManagedCodeAccess          AccessType `db:"managed_code_access"`
 	ClientScriptsAccess        AccessType `db:"client_script_access"`
+	ScriptRunAccess            AccessType `db:"script_run_access"`
+	BuildLogAccess             AccessType `db:"build_log_access"`
 }
 
 type RoleMetadata struct {
@@ -132,6 +138,8 @@ func CreateViewOnlyAccessPermission() PermissionsMap {
 		ClientDataAccess:           AccessView,
 		ManagedCodeAccess:          AccessView,
 		ClientScriptsAccess:        AccessView,
+		ScriptRunAccess:            AccessView,
+		BuildLogAccess:             AccessView,
 	}
 }
 
@@ -158,6 +166,8 @@ func CreateAllAccessPermission() PermissionsMap {
 		ClientDataAccess:           CreateOwnerAccessType(),
 		ManagedCodeAccess:          CreateOwnerAccessType(),
 		ClientScriptsAccess:        CreateOwnerAccessType(),
+		ScriptRunAccess:            CreateOwnerAccessType(),
+		BuildLogAccess:             CreateOwnerAccessType(),
 	}
 }
 
@@ -235,6 +245,10 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 		return p.ManagedCodeAccess
 	case ResourceClientScripts:
 		return p.ClientScriptsAccess
+	case ResourceScriptRun:
+		return p.ScriptRunAccess
+	case ResourceBuildLog:
+		return p.BuildLogAccess
 	}
 	return AccessNone
 }
@@ -283,6 +297,10 @@ func (p *PermissionsMap) SetAccessType(resource ResourceType, access AccessType)
 		p.ManagedCodeAccess = access
 	case ResourceClientScripts:
 		p.ClientScriptsAccess = access
+	case ResourceScriptRun:
+		p.ScriptRunAccess = access
+	case ResourceBuildLog:
+		p.BuildLogAccess = access
 	}
 }
 

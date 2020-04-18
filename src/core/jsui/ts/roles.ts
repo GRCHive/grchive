@@ -35,9 +35,40 @@ export interface Permissions {
     DbSqlRequestAccess        : AccessType
 	ClientDataAccess          : AccessType
 	ManagedCodeAccess         : AccessType
+    ClientScriptsAccess       : AccessType
+    ScriptRunAccess           : AccessType
+    BuildLogAccess            : AccessType
 }
 
 export interface FullRole {
     RoleMetadata: RoleMetadata
     Permissions: Permissions
+}
+
+export function emptyPermissions() : Permissions {
+    return {
+        OrgUsersAccess: AccessType.NoAccess,
+        OrgRolesAccess: AccessType.NoAccess,
+        ProcessFlowsAccess: AccessType.NoAccess,
+        ControlsAccess: AccessType.NoAccess,
+        ControlDocumentationAccess: AccessType.NoAccess,
+        ControlDocMetadataAccess: AccessType.NoAccess,
+        RisksAccess: AccessType.NoAccess,
+        GLAccess: AccessType.NoAccess,
+        SystemAccess: AccessType.NoAccess,
+        DbAccess: AccessType.NoAccess,
+        DbConnectionAccess: AccessType.NoAccess,
+        DocRequestAccess: AccessType.NoAccess,
+        DeploymentAccess: AccessType.NoAccess,
+        ServerAccess: AccessType.NoAccess,
+        VendorAccess: AccessType.NoAccess,
+        DbSqlAccess: AccessType.NoAccess,
+        DbSqlQueryAccess: AccessType.NoAccess,
+        DbSqlRequestAccess: AccessType.NoAccess,
+        ClientDataAccess: AccessType.NoAccess,
+        ManagedCodeAccess: AccessType.NoAccess,
+        ClientScriptsAccess: AccessType.NoAccess,
+        ScriptRunAccess: AccessType.NoAccess,
+        BuildLogAccess: AccessType.NoAccess,
+    }
 }

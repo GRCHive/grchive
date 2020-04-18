@@ -60,6 +60,8 @@ fun unionAccessType(vararg v : AccessType) : Int {
  * @property clientDataAccess
  * @property managedCodeAccess
  * @property clientScriptAccess
+ * @property scriptRunAccess
+ * @property buildLogAccess
  */
 data class RolePermissions (
     @field:GrchiveResource(Resources.ResourceOrgUsers) @ColumnName("users_access")
@@ -103,7 +105,11 @@ data class RolePermissions (
     @field:GrchiveResource(Resources.ResourceManagedCode) @ColumnName("managed_code_access")
     val managedCodeAccess : Int,
     @field:GrchiveResource(Resources.ResourceClientScripts) @ColumnName("client_scripts_access")
-    val clientScriptAccess : Int
+    val clientScriptAccess : Int,
+    @field:GrchiveResource(Resources.ResourceScriptRun) @ColumnName("script_run_access")
+    val scriptRunAccess : Int,
+    @field:GrchiveResource(Resources.ResourceBuildLog) @ColumnName("build_log_access")
+    val buildLogAccess : Int
 )
 
 fun emptyRolePermissions() : RolePermissions {
@@ -128,7 +134,9 @@ fun emptyRolePermissions() : RolePermissions {
         AccessType.None.bit /* dbSqlRequestAccess */,
         AccessType.None.bit /* clientDataAccess */,
         AccessType.None.bit /* managedCodeAccess */,
-        AccessType.None.bit /* clientScriptAccess */
+        AccessType.None.bit /* clientScriptAccess */,
+        AccessType.None.bit /* scriptRunAccess*/,
+        AccessType.None.bit /* buildLogAccess*/
     )
 }
 
@@ -154,7 +162,9 @@ fun fullRolePermissions() : RolePermissions {
         AccessType.All.bit /* dbSqlRequestAccess */,
         AccessType.All.bit /* clientDataAccess */,
         AccessType.All.bit /* managedCodeAccess */,
-        AccessType.All.bit /* clientScriptAccess */
+        AccessType.All.bit /* clientScriptAccess */,
+        AccessType.All.bit /* scriptRunAccess*/,
+        AccessType.All.bit /* buildLogAccess*/
     )
 }
 
@@ -188,6 +198,8 @@ fun getRolePermissionForResource(p : RolePermissions, r : Resources) : Int {
         Resources.ResourceClientData -> p.clientDataAccess
         Resources.ResourceManagedCode -> p.managedCodeAccess
         Resources.ResourceClientScripts -> p.clientScriptAccess
+        Resources.ResourceScriptRun -> p.scriptRunAccess
+        Resources.ResourceBuildLog -> p.buildLogAccess
     }
 }
 
