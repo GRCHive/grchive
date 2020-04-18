@@ -27,10 +27,7 @@ export interface AuditTrailFilterData {
 
 export let NullAuditTrailFilterData : AuditTrailFilterData = {
     ResourceTypeFilter : JSON.parse(JSON.stringify(NullStringFilterData)),
-    ActionFilter: JSON.parse(JSON.stringify({
-        Op: StringComparisonOperators.NotEqual,
-        Target: "SELECT",
-    })),
+    ActionFilter: JSON.parse(JSON.stringify(NullStringFilterData)),
     UserFilter: JSON.parse(JSON.stringify(NullStringFilterData)),
     TimeRangeFilter: cleanTimeRangeFilterDataFromJson(JSON.parse(JSON.stringify(NullTimeRangeFilterDate))),
 }
