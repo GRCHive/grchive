@@ -199,18 +199,33 @@ func GetScriptForCode(codeId int64, orgId int32, role *core.Role) (*core.ClientS
 		return nil, core.ErrorUnauthorized
 	}
 
-	script := core.ClientScript{}
-	err := dbConn.Get(&script, `
+	rows, err := dbConn.Queryx(`
 		SELECT script.*
 		FROM client_scripts AS script
 		INNER JOIN code_to_client_scripts_link AS link
 			ON link.script_id = script.id
 		WHERE link.code_id = $1 AND link.org_id = $2
 	`, codeId, orgId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, nil
+	}
+
+	script := core.ClientScript{}
+	err = rows.StructScan(&script)
 	return &script, err
 }
 
-func GetScriptFromScriptCodeLink(linkId int64) (*core.ClientScript, error) {
+func GetScriptFromScriptCodeLink(linkId int64, role *core.Role) (*core.ClientScript, error) {
+	if !role.Permissions.HasAccess(core.ResourceClientScripts, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
 	script := core.ClientScript{}
 	err := dbConn.Get(&script, `
 		SELECT script.*
@@ -222,7 +237,11 @@ func GetScriptFromScriptCodeLink(linkId int64) (*core.ClientScript, error) {
 	return &script, err
 }
 
-func GetCodeFromScriptCodeLink(linkId int64) (*core.ManagedCode, error) {
+func GetCodeFromScriptCodeLink(linkId int64, role *core.Role) (*core.ManagedCode, error) {
+	if !role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
 	code := core.ManagedCode{}
 	err := dbConn.Get(&code, `
 		SELECT code.*

@@ -302,6 +302,10 @@ func RenderSingleClientScript(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardOrgSingleClientScriptTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
 }
 
+func RenderLogs(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardOrgLogsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r), emptyParams)
+}
+
 func RenderRedirectPage(w http.ResponseWriter, r *http.Request, url string) {
 	RenderTemplate(w, RedirectTemplateKey, "base",
 		BuildPageTemplateParametersFull(r),

@@ -95,6 +95,7 @@ func createOrganizationAutomationSubrouter(r *mux.Router) {
 
 	createOrganizationDataSubrouter(s)
 	createOrganizationScriptSubrouter(s)
+	createOrganizationLogsSubrouter(s)
 }
 
 func createOrganizationDataSubrouter(r *mux.Router) {
@@ -107,6 +108,11 @@ func createOrganizationScriptSubrouter(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardScriptPrefix).Subrouter()
 	s.HandleFunc("/", render.RenderClientScripts)
 	s.HandleFunc(core.DashboardSingleScriptEndpoint, render.RenderSingleClientScript).Name(webcore.SingleClientScriptRouteName)
+}
+
+func createOrganizationLogsSubrouter(r *mux.Router) {
+	s := r.PathPrefix(core.DashboardLogsPrefix).Subrouter()
+	s.HandleFunc("/", render.RenderLogs)
 }
 
 func createUserSubrouter(r *mux.Router) {

@@ -5,12 +5,16 @@ import { postFormJson } from '../http'
 import {
     ClientScript,
 } from '../clientScripts'
+import {
+    ManagedCode
+} from '../code'
 import { 
     newClientScriptUrl,
     allClientScriptsUrl,
     deleteClientScriptUrl,
     getClientScriptUrl,
-    updateClientScriptUrl
+    updateClientScriptUrl,
+    getClientScriptCodeLinkUrl
 } from '../url'
 
 export interface TNewClientScriptInput {
@@ -70,4 +74,20 @@ export interface TGetClientScriptOutput {
 
 export function getClientScript(inp : TGetClientScriptInput) : Promise<TGetClientScriptOutput> {
     return axios.get(getClientScriptUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+}
+
+export interface TGetClientScriptCodeFromLinkInput {
+    orgId: number
+    linkId: number
+}
+
+export interface TGetClientScriptCodeFromLinkOutput {
+    data: {
+        Script: ClientScript
+        Code: ManagedCode
+    }
+}
+
+export function getClientScriptCodeFromLink(inp : TGetClientScriptCodeFromLinkInput) : Promise<TGetClientScriptCodeFromLinkOutput> {
+    return axios.get(getClientScriptCodeLinkUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
 }

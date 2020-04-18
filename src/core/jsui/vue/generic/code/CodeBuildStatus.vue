@@ -1,12 +1,25 @@
 <template>
     <div>
-        <v-icon
-            :color="iconColor"
-            small
-            v-if="hasData"
-        >
-            {{ iconName }}
-        </v-icon>
+        <div class="statusContainer" v-if="!!status">
+            <v-icon
+                :color="iconColor"
+                small
+            >
+                {{ iconName }}
+            </v-icon>
+
+            <div v-if="showTimeStamp" class="ml-2">
+                <p class="ma-0">
+                    <span class="font-weight-bold">Start: </span>
+                    {{ timeStartStr }}
+                </p>
+
+                <p class="ma-0" v-if="!isPending">
+                    <span class="font-weight-bold">End: </span>
+                    {{ timeEndStr }}
+                </p>
+            </div>
+        </div>
 
         <v-progress-circular
             indeterminate
@@ -21,15 +34,21 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
+import { DroneCiStatus } from '../../../ts/code'
 import {
     getCodeBuildStatus, TGetCodeBuildStatusOutput,
 } from '../../../ts/api/apiCode'
 import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
+import { standardFormatTime } from '../../../ts/time'
 
 const Props = Vue.extend({
     props: {
-        commit: String
+        commit: String,
+        showTimeStamp: {
+            type: Boolean,
+            default: false,
+        }
     }
 })
 
@@ -37,9 +56,23 @@ const refreshPeriodMs = 5000
 
 @Component
 export default class CodeBuildStatus extends Props {
-    hasData: boolean = false
-    isPending : boolean = true
-    isSuccess: boolean = false
+    status : DroneCiStatus | null = null
+
+    get isPending() {
+        return this.status!.TimeEnd == null
+    }
+
+    get isSuccess() {
+        return this.status!.Success
+    }
+
+    get timeStartStr() : string {
+        return standardFormatTime(this.status!.TimeStart)
+    }
+
+    get timeEndStr() : string {
+        return standardFormatTime(this.status!.TimeEnd!)
+    }
 
     get iconColor() {
         if (this.isPending) {
@@ -67,9 +100,7 @@ export default class CodeBuildStatus extends Props {
             orgId: PageParamsStore.state.organization!.Id,
             commitHash: this.commit,
         }).then((resp : TGetCodeBuildStatusOutput) => {
-            this.hasData = true
-            this.isPending = resp.data.Pending
-            this.isSuccess = resp.data.Success
+            this.status = resp.data
 
             if (this.isPending) {
                 setTimeout(this.refreshStatus, refreshPeriodMs)
@@ -91,3 +122,13 @@ export default class CodeBuildStatus extends Props {
 }
 
 </script>
+
+<style scoped>
+
+.statusContainer {
+    display: flex;
+    align-items: center;
+    justify-items: center;
+}
+
+</style>

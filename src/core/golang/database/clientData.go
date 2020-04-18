@@ -206,3 +206,30 @@ func AllDataSourceOptions() ([]*core.DataSourceOption, error) {
 	`)
 	return data, err
 }
+
+func GetClientDataForCode(codeId int64, orgId int32, role *core.Role) (*core.ClientData, error) {
+	if !role.Permissions.HasAccess(core.ResourceClientData, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	rows, err := dbConn.Queryx(`
+		SELECT data.*
+		FROM client_data AS data
+		INNER JOIN code_to_client_data_link AS link
+			ON link.data_id = data.id
+		WHERE link.code_id = $1 AND link.org_id = $2
+	`, codeId, orgId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, nil
+	}
+
+	data := core.ClientData{}
+	err = rows.StructScan(&data)
+	return &data, err
+}

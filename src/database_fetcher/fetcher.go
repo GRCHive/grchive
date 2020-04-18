@@ -44,7 +44,7 @@ func main() {
 			core.Error("Failed to process refresh: " + rerr.Err.Error())
 		}
 	} else {
-		webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ, webcore.QueueConfig{
+		webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ, webcore.MQClientConfig{
 			ConsumerQos: 5,
 		}, core.EnvConfig.Tls)
 		defer webcore.DefaultRabbitMQ.Cleanup()

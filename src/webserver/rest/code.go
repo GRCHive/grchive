@@ -312,9 +312,7 @@ func allCode(w http.ResponseWriter, r *http.Request) {
 	} else if inputs.ScriptId.NullInt64.Valid {
 		code, err = database.AllManagedCodeForScriptId(inputs.ScriptId.NullInt64.Int64, inputs.OrgId, role)
 	} else {
-		core.Warning("Invalid combination of inputs.")
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		code, err = database.AllManagedCodeForOrgId(inputs.OrgId, role)
 	}
 
 	if err != nil {
@@ -395,8 +393,8 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 	// Need to make sure this code is linked to a script - otherwise
 	// "running" it makes no sense.
 	script, err := database.GetScriptForCode(inputs.CodeId, inputs.OrgId, role)
-	if err != nil {
-		core.Warning("Failed to find script: " + err.Error())
+	if err != nil || script == nil {
+		core.Warning("Failed to find script: " + core.ErrorString(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -414,7 +412,7 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if !status.Pending && !status.Success {
+		if status.TimeEnd.NullTime.Valid && !status.Success {
 			core.Warning("Failed to run a script that failed to compile.")
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -425,7 +423,7 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 	// We don't need to roll this back in case of an error later on as
 	// ideally any later stages will log those changes and just let the user
 	// know there in the logs stored in the DB.
-	run, err := database.CreateScriptRun(code.Id, inputs.OrgId, script.Id, role)
+	run, err := database.CreateScriptRun(code.Id, inputs.OrgId, script.Id, inputs.Latest, role)
 	if err != nil {
 		core.Warning("Failed to create script run: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -491,4 +489,138 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonWriter.Encode(run.Id)
+}
+
+type AllCodeRunsInput struct {
+	OrgId    int32          `webcore:"orgId"`
+	ScriptId core.NullInt64 `webcore:"scriptId,optional"`
+}
+
+func allCodeRuns(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := AllCodeRunsInput{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	var runs []*core.ScriptRun
+	if inputs.ScriptId.NullInt64.Valid {
+		runs, err = database.GetAllScriptRunsForScriptId(inputs.ScriptId.NullInt64.Int64, inputs.OrgId, role)
+	} else {
+		runs, err = database.GetAllScriptRunsForOrgId(inputs.OrgId, role)
+	}
+
+	if err != nil {
+		core.Warning("Failed to get script runs: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(runs)
+}
+
+type GetScriptCodeLinkInput struct {
+	OrgId  int32 `webcore:"orgId"`
+	LinkId int64 `webcore:"linkId"`
+}
+
+func getScriptCodeLink(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := GetScriptCodeLinkInput{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	script, err := database.GetScriptFromScriptCodeLink(inputs.LinkId, role)
+	if err != nil {
+		core.Warning("Failed to get linked script: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	code, err := database.GetCodeFromScriptCodeLink(inputs.LinkId, role)
+	if err != nil {
+		core.Warning("Failed to get linked code: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(struct {
+		Script *core.ClientScript
+		Code   *core.ManagedCode
+	}{
+		Script: script,
+		Code:   code,
+	})
+}
+
+type GetCodeLinkInput struct {
+	OrgId  int32 `webcore:"orgId"`
+	CodeId int64 `webcore:"codeId"`
+}
+
+func getCodeLink(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := GetCodeLinkInput{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	script, err := database.GetScriptForCode(inputs.CodeId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get script for code: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	data, err := database.GetClientDataForCode(inputs.CodeId, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get data for code: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(struct {
+		Data   *core.ClientData
+		Script *core.ClientScript
+	}{
+		Data:   data,
+		Script: script,
+	})
 }

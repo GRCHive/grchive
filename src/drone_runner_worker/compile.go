@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/gitea_api"
 	"io/ioutil"
@@ -51,12 +52,12 @@ func checkoutScriptToRevision(tracker *Tracker) error {
 		return err
 	}
 
-	script, err := database.GetScriptFromScriptCodeLink(run.LinkId)
+	script, err := database.GetScriptFromScriptCodeLink(run.LinkId, core.ServerRole)
 	if err != nil {
 		return err
 	}
 
-	code, err := database.GetCodeFromScriptCodeLink(run.LinkId)
+	code, err := database.GetCodeFromScriptCodeLink(run.LinkId, core.ServerRole)
 	if err != nil {
 		return err
 	}

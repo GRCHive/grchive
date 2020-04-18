@@ -396,7 +396,10 @@ export const enableFeatureUrl : string = "/api/feature/new"
 export const saveCodeUrl : string = "/api/auto/code/save"
 export const allCodeUrl : string = "/api/auto/code/all"
 export const getCodeUrl : string = "/api/auto/code/get"
-export const runCodeUrl : string = "/api/auto/code/run"
+export const getCodeLinkUrl : string = "/api/auto/code/link"
+
+export const runCodeUrl : string = "/api/auto/code/runs/new"
+export const allCodeRunsUrl : string = "/api/auto/code/runs/all"
 
 export const getCodeBuildStatusUrl : string = "/api/auto/code/status/get"
 
@@ -405,6 +408,8 @@ export const allClientScriptsUrl : string = "/api/auto/scripts/all"
 export const deleteClientScriptUrl : string = "/api/auto/scripts/delete"
 export const getClientScriptUrl : string = "/api/auto/scripts/get"
 export const updateClientScriptUrl : string = "/api/auto/scripts/update"
+
+export const getClientScriptCodeLinkUrl : string = "/api/auto/scripts/link/get"
 
 export const getLogUrl: string = "/api/auto/logs/get"
 

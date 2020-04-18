@@ -6,8 +6,7 @@ import (
 )
 
 func AllManagedCodeForDataId(dataId int64, orgId int32, role *core.Role) ([]*core.ManagedCode, error) {
-	if !role.Permissions.HasAccess(core.ResourceClientData, core.AccessView) ||
-		!role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
+	if !role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
 
@@ -24,8 +23,7 @@ func AllManagedCodeForDataId(dataId int64, orgId int32, role *core.Role) ([]*cor
 }
 
 func AllManagedCodeForScriptId(scriptId int64, orgId int32, role *core.Role) ([]*core.ManagedCode, error) {
-	if !role.Permissions.HasAccess(core.ResourceClientScripts, core.AccessView) ||
-		!role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
+	if !role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
 
@@ -38,6 +36,21 @@ func AllManagedCodeForScriptId(scriptId int64, orgId int32, role *core.Role) ([]
 		WHERE link.script_id = $1 AND link.org_id = $2
 		ORDER BY code.id DESC
 	`, scriptId, orgId)
+	return code, err
+}
+
+func AllManagedCodeForOrgId(orgId int32, role *core.Role) ([]*core.ManagedCode, error) {
+	if !role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	code := make([]*core.ManagedCode, 0)
+	err := dbConn.Select(&code, `
+		SELECT code.*
+		FROM managed_code AS code
+		WHERE code.org_id = $1
+		ORDER BY code.id DESC
+	`, orgId)
 	return code, err
 }
 
@@ -183,8 +196,8 @@ func GetCode(codeId int64, orgId int32, role *core.Role) (*core.ManagedCode, err
 
 func InsertManagedCodeWithTx(code *core.ManagedCode, role *core.Role, tx *sqlx.Tx) error {
 	rows, err := tx.NamedQuery(`
-		INSERT INTO managed_code (org_id, git_hash, action_time, git_path, gitea_file_sha)
-		VALUES (:org_id, :git_hash, :action_time, :git_path, :gitea_file_sha)
+		INSERT INTO managed_code (org_id, git_hash, action_time, git_path, gitea_file_sha, user_id)
+		VALUES (:org_id, :git_hash, :action_time, :git_path, :gitea_file_sha, :user_id)
 		RETURNING id
 	`, code)
 
@@ -231,42 +244,21 @@ func GetCodeJar(codeId int64, orgId int32, role *core.Role) (string, error) {
 	return jar, err
 }
 
-func GetCodeBuildStatus(commit string, orgId int32, role *core.Role) (*core.CodeBuildStatus, error) {
+func GetCodeBuildStatus(commit string, orgId int32, role *core.Role) (*core.DroneCiStatus, error) {
 	if !role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
 
-	rows, err := dbConn.Queryx(`
-		SELECT 
-			CASE
-				WHEN time_end IS NULL THEN true
-				ELSE false
-			END,
-			success
+	status := core.DroneCiStatus{}
+	err := dbConn.Get(&status, `
+		SELECT *
 		FROM managed_code_drone_ci
 		WHERE commit_hash = $1 AND org_id = $2
 	`, commit, orgId)
-
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	status := core.CodeBuildStatus{
-		Pending: true,
-	}
-
-	if rows.Next() {
-		err = rows.Scan(&status.Pending, &status.Success)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return &status, nil
+	return &status, err
 }
 
-func CreateScriptRun(codeId int64, orgId int32, scriptId int64, role *core.Role) (*core.ScriptRun, error) {
+func CreateScriptRun(codeId int64, orgId int32, scriptId int64, requiresBuild bool, role *core.Role) (*core.ScriptRun, error) {
 	tx, err := CreateAuditTrailTx(role)
 	if err != nil {
 		return nil, err
@@ -275,12 +267,12 @@ func CreateScriptRun(codeId int64, orgId int32, scriptId int64, role *core.Role)
 	run := core.ScriptRun{}
 	err = WrapTx(tx, func() error {
 		rows, err := tx.Queryx(`
-			INSERT INTO script_runs (link_id, start_time, user_id)
-			SELECT link.id, NOW(), $4
+			INSERT INTO script_runs (link_id, start_time, user_id, requires_build)
+			SELECT link.id, NOW(), $4, $5
 			FROM code_to_client_scripts_link AS link
 			WHERE link.code_id = $1 AND link.org_id = $2 AND link.script_id = $3
 			RETURNING *
-		`, codeId, orgId, scriptId, role.UserId)
+		`, codeId, orgId, scriptId, role.UserId, requiresBuild)
 
 		if err != nil {
 			return err
@@ -353,4 +345,30 @@ func GetScriptRun(runId int64) (*core.ScriptRun, error) {
 		WHERE id = $1
 	`, runId)
 	return &run, err
+}
+
+func GetAllScriptRunsForOrgId(orgId int32, role *core.Role) ([]*core.ScriptRun, error) {
+	runs := make([]*core.ScriptRun, 0)
+	err := dbConn.Select(&runs, `
+		SELECT run.*
+		FROM script_runs AS run
+		INNER JOIN code_to_client_scripts_link AS link
+			ON link.id = run.link_id
+		WHERE link.org_id = $1
+		ORDER BY run.id DESC
+	`, orgId)
+	return runs, err
+}
+
+func GetAllScriptRunsForScriptId(scriptId int64, orgId int32, role *core.Role) ([]*core.ScriptRun, error) {
+	runs := make([]*core.ScriptRun, 0)
+	err := dbConn.Select(&runs, `
+		SELECT run.*
+		FROM script_runs AS run
+		INNER JOIN code_to_client_scripts_link AS link
+			ON link.id = run.link_id
+		WHERE link.script_id = $1 AND link.org_id = $2
+		ORDER BY run.id DESC
+	`, scriptId, orgId)
+	return runs, err
 }

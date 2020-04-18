@@ -103,7 +103,7 @@ func handleRunTracker(tracker *Tracker, runId int64, jar string) error {
 		return err
 	}
 
-	script, err := database.GetScriptFromScriptCodeLink(run.LinkId)
+	script, err := database.GetScriptFromScriptCodeLink(run.LinkId, core.ServerRole)
 	if err != nil {
 		return err
 	}

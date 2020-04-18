@@ -34,7 +34,7 @@
                 <v-menu offset-y>
                     <template v-slot:activator="{ on }">
                         <v-btn text color="accent" v-on="on">
-                            Logs
+                            View
                             <v-icon small color="accent">mdi-chevron-down</v-icon>
                         </v-btn>
                     </template>
@@ -68,6 +68,11 @@
                         v-model="selectedCode"
                     >
                         <template v-slot:item="{ item }">
+                            <hash-renderer
+                                :hash="item.value.GitHash"
+                                class="mr-2"
+                            >
+                            </hash-renderer>
                             <code-build-status
                                 :commit="item.value.GitHash"
                                 class="mr-2"
@@ -77,6 +82,11 @@
                         </template>
 
                         <template v-slot:selection="{ item }">
+                            <hash-renderer
+                                :hash="item.value.GitHash"
+                                class="mr-2"
+                            >
+                            </hash-renderer>
                             <code-build-status
                                 :commit="item.value.GitHash"
                                 class="mr-2"
@@ -161,6 +171,7 @@ import LogViewer from '../logs/LogViewer.vue'
 import DynamicSplitContainer from '../DynamicSplitContainer.vue'
 import CodeBuildStatus from './CodeBuildStatus.vue'
 import ScriptParamsEditor from './ScriptParamsEditor.vue'
+import HashRenderer from './HashRenderer.vue'
 
 const ManagedProps = Vue.extend({
     props: {
@@ -183,6 +194,7 @@ const ManagedProps = Vue.extend({
         GenericCodeEditor,
         CodeBuildStatus,
         ScriptParamsEditor,
+        HashRenderer,
     }
 })
 export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {

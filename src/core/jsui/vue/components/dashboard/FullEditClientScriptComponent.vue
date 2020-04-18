@@ -62,6 +62,14 @@
                         </managed-code-ide>
                     </v-tab-item>
 
+                    <v-tab>Run Logs</v-tab>
+                    <v-tab-item>
+                        <run-log-list
+                            :script-id="data.Id"
+                        >
+                        </run-log-list>
+                    </v-tab-item>
+
                     <v-tab>Audit Trail</v-tab>
                     <v-tab-item>
                     </v-tab-item>
@@ -86,12 +94,14 @@ import {
 import CreateNewScriptForm from './CreateNewScriptForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import ManagedCodeIde from '../../generic/code/ManagedCodeIDE.vue'
+import RunLogList from '../../generic/logs/RunLogList.vue'
 
 @Component({
     components: {
         CreateNewScriptForm,
         GenericDeleteConfirmationForm,
-        ManagedCodeIde
+        ManagedCodeIde,
+        RunLogList
     }
 })
 export default class FullEditClientScriptComponent extends Vue {

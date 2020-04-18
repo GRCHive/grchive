@@ -96,6 +96,7 @@ func StoreManagedCodeToGitea(code *core.ManagedCode, script string, role *core.R
 	// Store information in the database after since it'll be easier to handle cases where
 	// files are in Gitea but not in the database than if the file were in the database but not in Gitea.
 	if role != nil {
+		code.UserId = role.UserId
 		return database.InsertManagedCode(code, role)
 	}
 	return nil

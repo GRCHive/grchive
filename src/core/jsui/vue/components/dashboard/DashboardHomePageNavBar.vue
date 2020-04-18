@@ -128,6 +128,11 @@ export default Vue.extend({
                             icon: 'mdi-code-tags',
                             url: PageParamsStore.state.organization!.Url + 'auto/scripts',
                         },
+                        {
+                            title: 'Logs',
+                            icon: 'mdi-text-subject',
+                            url: PageParamsStore.state.organization!.Url + 'auto/logs',
+                        },
                     ],
                 },
                 {

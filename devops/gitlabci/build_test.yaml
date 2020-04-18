@@ -2,8 +2,7 @@
     stage: compile
     image: $CI_FULL_REGISTRY/ci-image:latest
     script:
-        - bazel build //src/webserver:webserver
-        - bazel build //src/preview_generator:frontend
+        - bazel build //src/...
 
 .tests:
     stage: test

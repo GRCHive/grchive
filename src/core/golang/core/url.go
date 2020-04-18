@@ -105,6 +105,8 @@ const DashboardCodePrefix string = "/code"
 const DashboardScriptPrefix string = "/scripts"
 const DashboardLogsPrefix string = "/logs"
 const DashboardStatusPrefix string = "/status"
+const DashboardRunPrefix string = "/runs"
+const DashboardLinkPrefix string = "/link"
 
 var DashboardSingleDataEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgClientDataQueryId)
 var DashboardSingleScriptEndpoint string = fmt.Sprintf("/{%s}", DashboardOrgClientScriptQueryId)
@@ -119,6 +121,7 @@ const ApiDuplicateEndpoint = "/duplicate"
 const ApiRunEndpoint = "/run"
 const ApiReadEndpoint = "/read"
 const ApiSaveEndpoint = "/save"
+const ApiLinkEndpoint = "/link"
 
 // API
 const ApiUrl string = "/api"

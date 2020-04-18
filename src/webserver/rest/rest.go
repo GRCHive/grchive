@@ -490,23 +490,30 @@ func registerDataAPIPaths(r *mux.Router) {
 
 func registerDataSourceAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardDataSourcePrefix).Subrouter()
-	s.HandleFunc(core.ApiAllEndpoint, allDataSourceOptions)
-	s.HandleFunc(core.ApiGetEndpoint, getDataSource)
+	s.HandleFunc(core.ApiAllEndpoint, allDataSourceOptions).Methods("GET")
+	s.HandleFunc(core.ApiGetEndpoint, getDataSource).Methods("GET")
 }
 
 func registerCodeAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardCodePrefix).Subrouter()
-	s.HandleFunc(core.ApiSaveEndpoint, saveCode)
-	s.HandleFunc(core.ApiGetEndpoint, getCode)
-	s.HandleFunc(core.ApiAllEndpoint, allCode)
-	s.HandleFunc(core.ApiRunEndpoint, runCode)
+	s.HandleFunc(core.ApiSaveEndpoint, saveCode).Methods("POST")
+	s.HandleFunc(core.ApiGetEndpoint, getCode).Methods("GET")
+	s.HandleFunc(core.ApiAllEndpoint, allCode).Methods("GET")
+	s.HandleFunc(core.ApiLinkEndpoint, getCodeLink).Methods("GET")
 
 	registerCodeStatusAPIPaths(s)
+	registerCodeRunAPIPaths(s)
+}
+
+func registerCodeRunAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.DashboardRunPrefix).Subrouter()
+	s.HandleFunc(core.ApiNewEndpoint, runCode).Methods("POST")
+	s.HandleFunc(core.ApiAllEndpoint, allCodeRuns).Methods("GET")
 }
 
 func registerCodeStatusAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.DashboardStatusPrefix).Subrouter()
-	s.HandleFunc(core.ApiGetEndpoint, getCodeBuildStatus)
+	s.HandleFunc(core.ApiGetEndpoint, getCodeBuildStatus).Methods("GET")
 }
 
 func registerScriptsAPIPaths(r *mux.Router) {
@@ -516,6 +523,13 @@ func registerScriptsAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiGetEndpoint, getClientScript).Methods("GET")
 	s.HandleFunc(core.ApiDeleteEndpoint, deleteClientScript).Methods("POST")
 	s.HandleFunc(core.ApiUpdateEndpoint, updateClientScript).Methods("POST")
+
+	registerScriptLinksAPIPaths(s)
+}
+
+func registerScriptLinksAPIPaths(r *mux.Router) {
+	s := r.PathPrefix(core.DashboardLinkPrefix).Subrouter()
+	s.HandleFunc(core.ApiGetEndpoint, getScriptCodeLink).Methods("GET")
 }
 
 func registerLogsAPIPaths(r *mux.Router) {
@@ -525,7 +539,7 @@ func registerLogsAPIPaths(r *mux.Router) {
 
 func registerFeatureAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiFeaturePrefix).Subrouter()
-	s.HandleFunc(core.ApiNewEndpoint, enableFeature)
+	s.HandleFunc(core.ApiNewEndpoint, enableFeature).Methods("POST")
 }
 
 func registerMetadataAPIPaths(r *mux.Router) {
