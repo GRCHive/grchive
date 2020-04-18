@@ -194,6 +194,20 @@ func GetCode(codeId int64, orgId int32, role *core.Role) (*core.ManagedCode, err
 	return &code, err
 }
 
+func GetCodeFromCommit(commit string, orgId int32, role *core.Role) (*core.ManagedCode, error) {
+	if !role.Permissions.HasAccess(core.ResourceManagedCode, core.AccessView) {
+		return nil, core.ErrorUnauthorized
+	}
+
+	code := core.ManagedCode{}
+	err := dbConn.Get(&code, `
+		SELECT *
+		FROM managed_code
+		WHERE git_hash = $1 AND org_id = $2
+	`, commit, orgId)
+	return &code, err
+}
+
 func InsertManagedCodeWithTx(code *core.ManagedCode, role *core.Role, tx *sqlx.Tx) error {
 	rows, err := tx.NamedQuery(`
 		INSERT INTO managed_code (org_id, git_hash, action_time, git_path, gitea_file_sha, user_id)

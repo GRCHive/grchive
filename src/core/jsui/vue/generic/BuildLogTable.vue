@@ -30,7 +30,7 @@ import CodeBuildStatus from './code/CodeBuildStatus.vue'
         CodeBuildStatus,
     }
 })
-export default class ScriptRunTable extends ResourceTableProps {
+export default class BuildLogTable extends ResourceTableProps {
     codeIdToObject: Record<number, ClientScript | ClientData> = Object()
     codeIdIsScript : Record<number, boolean> = Object()
     codeIdProcessed : Set<number> = new Set<number>()

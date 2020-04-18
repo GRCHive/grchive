@@ -180,10 +180,11 @@ func saveCode(w http.ResponseWriter, r *http.Request) {
 }
 
 type GetCodeInput struct {
-	OrgId    int32          `webcore:"orgId"`
-	CodeId   int64          `webcore:"codeId"`
-	DataId   core.NullInt64 `webcore:"dataId,optional"`
-	ScriptId core.NullInt64 `webcore:"scriptId,optional"`
+	OrgId      int32           `webcore:"orgId"`
+	CodeId     core.NullInt64  `webcore:"codeId,optional"`
+	CodeCommit core.NullString `webcore:"codeCommit,optional"`
+	DataId     core.NullInt64  `webcore:"dataId,optional"`
+	ScriptId   core.NullInt64  `webcore:"scriptId,optional"`
 }
 
 func getCode(w http.ResponseWriter, r *http.Request) {
@@ -205,33 +206,51 @@ func getCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var fullCode *core.ManagedCode
+	if inputs.CodeId.NullInt64.Valid {
+		fullCode, err = database.GetCode(inputs.CodeId.NullInt64.Int64, inputs.OrgId, role)
+	} else if inputs.CodeCommit.NullString.Valid {
+		fullCode, err = database.GetCodeFromCommit(inputs.CodeCommit.NullString.String, inputs.OrgId, role)
+	} else {
+		core.Warning("Invalid combination of inputs to pull code.")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if err != nil {
+		core.Warning("Failed to pull code: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	// Need to do a check that the user actually has access to the resource
-	// that wraps the code.
+	// that wraps the code. If user doesn't supply data id or script id assume
+	// that they don't actually want the code.
+	var sendCode bool = false
 	if inputs.DataId.NullInt64.Valid {
-		ok, err := database.CheckValidCodeDataLink(inputs.CodeId, inputs.DataId.NullInt64.Int64, inputs.OrgId, role)
-		if err != nil || !ok {
+		sendCode, err = database.CheckValidCodeDataLink(fullCode.Id, inputs.DataId.NullInt64.Int64, inputs.OrgId, role)
+		if err != nil || !sendCode {
 			core.Warning("Invalid code data link: " + core.ErrorString(err))
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	} else if inputs.ScriptId.NullInt64.Valid {
-		ok, err := database.CheckValidCodeScriptLink(inputs.CodeId, inputs.ScriptId.NullInt64.Int64, inputs.OrgId, role)
-		if err != nil || !ok {
+		sendCode, err = database.CheckValidCodeScriptLink(fullCode.Id, inputs.ScriptId.NullInt64.Int64, inputs.OrgId, role)
+		if err != nil || !sendCode {
 			core.Warning("Invalid code script link: " + core.ErrorString(err))
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-	} else {
-		core.Warning("Invalid combination of inputs.")
-		w.WriteHeader(http.StatusBadRequest)
-		return
 	}
 
-	code, err := webcore.GetManagedCodeFromGitea(inputs.CodeId, inputs.OrgId, role)
-	if err != nil {
-		core.Warning("Failed to get code: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	var code string = ""
+	if sendCode {
+		code, err = webcore.GetManagedCodeFromGitea(fullCode.Id, inputs.OrgId, role)
+		if err != nil {
+			core.Warning("Failed to get code: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	type RetScriptData struct {
@@ -242,9 +261,11 @@ func getCode(w http.ResponseWriter, r *http.Request) {
 	ret := struct {
 		Code       string
 		ScriptData *RetScriptData
+		Full       *core.ManagedCode
 	}{
 		Code:       code,
 		ScriptData: nil,
+		Full:       fullCode,
 	}
 
 	if inputs.ScriptId.NullInt64.Valid {
@@ -252,7 +273,7 @@ func getCode(w http.ResponseWriter, r *http.Request) {
 
 		ret.ScriptData.Params, err = database.GetLinkedParametersToScriptCode(
 			inputs.ScriptId.NullInt64.Int64,
-			inputs.CodeId,
+			fullCode.Id,
 			inputs.OrgId,
 			role,
 		)
@@ -265,7 +286,7 @@ func getCode(w http.ResponseWriter, r *http.Request) {
 
 		ret.ScriptData.ClientData, err = database.GetLinkedDataSourceToScriptCode(
 			inputs.ScriptId.NullInt64.Int64,
-			inputs.CodeId,
+			fullCode.Id,
 			inputs.OrgId,
 			role,
 		)

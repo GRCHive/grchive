@@ -71,7 +71,9 @@ export interface TGetCodeInput {
     orgId: number
     dataId? : number
     scriptId? : number
-    codeId : number
+
+    codeId? : number
+    codeCommit? : string
 }
 
 export interface TGetCodeOutput {
@@ -80,12 +82,16 @@ export interface TGetCodeOutput {
         ScriptData? : {
             Params : (CodeParamType | null)[],
             ClientData: FullClientDataWithLink[],
-        }
+        },
+        Full: ManagedCode
     }
 }
 
 export function getCode(inp : TGetCodeInput) : Promise<TGetCodeOutput> {
-    return axios.get(getCodeUrl + '?' + qs.stringify(inp), getAPIRequestConfig())
+    return axios.get(getCodeUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetCodeOutput) => {
+        cleanManagedCodeFromJson(resp.data.Full)
+        return resp
+    })
 }
 
 

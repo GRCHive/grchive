@@ -1,25 +1,13 @@
 <template>
     <div>
-        <div class="statusContainer" v-if="!!status">
-            <v-icon
-                :color="iconColor"
-                small
-            >
-                {{ iconName }}
-            </v-icon>
-
-            <div v-if="showTimeStamp" class="ml-2">
-                <p class="ma-0">
-                    <span class="font-weight-bold">Start: </span>
-                    {{ timeStartStr }}
-                </p>
-
-                <p class="ma-0" v-if="!isPending">
-                    <span class="font-weight-bold">End: </span>
-                    {{ timeEndStr }}
-                </p>
-            </div>
-        </div>
+        <script-build-run-status
+            v-if="!!status"
+            :success="status.Success"
+            :start="status.TimeStart"
+            :end="status.TimeEnd"
+            :show-time-stamp="showTimeStamp"
+        >
+        </script-build-run-status>
 
         <v-progress-circular
             indeterminate
@@ -40,7 +28,7 @@ import {
 } from '../../../ts/api/apiCode'
 import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
-import { standardFormatTime } from '../../../ts/time'
+import ScriptBuildRunStatus from './ScriptBuildRunStatus.vue'
 
 const Props = Vue.extend({
     props: {
@@ -54,45 +42,13 @@ const Props = Vue.extend({
 
 const refreshPeriodMs = 5000
 
-@Component
+@Component({
+    components: {
+        ScriptBuildRunStatus
+    }
+})
 export default class CodeBuildStatus extends Props {
     status : DroneCiStatus | null = null
-
-    get isPending() {
-        return this.status!.TimeEnd == null
-    }
-
-    get isSuccess() {
-        return this.status!.Success
-    }
-
-    get timeStartStr() : string {
-        return standardFormatTime(this.status!.TimeStart)
-    }
-
-    get timeEndStr() : string {
-        return standardFormatTime(this.status!.TimeEnd!)
-    }
-
-    get iconColor() {
-        if (this.isPending) {
-            return 'warning'
-        } else if (this.isSuccess) {
-            return 'success'
-        } else {
-            return 'error'
-        }
-    }
-
-    get iconName() {
-        if (this.isPending) {
-            return 'mdi-help-circle'
-        } else if (this.isSuccess) {
-            return 'mdi-check-circle'
-        } else {
-            return 'mdi-close-circle'
-        }
-    }
 
     @Watch('commit')
     refreshStatus() {
@@ -102,7 +58,7 @@ export default class CodeBuildStatus extends Props {
         }).then((resp : TGetCodeBuildStatusOutput) => {
             this.status = resp.data
 
-            if (this.isPending) {
+            if (!this.status.Success && !this.status.TimeEnd) {
                 setTimeout(this.refreshStatus, refreshPeriodMs)
             }
         }).catch((err : any) => {
