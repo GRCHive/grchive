@@ -175,9 +175,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 
 	var handle core.ResourceHandle
 
-	core.Info("get latest")
 	if latestData != nil {
-		core.Info("has latest")
 		switch event.ResourceType {
 		case "database_connection_info":
 			dbId := int64(math.Round(event.ResourceExtraData["db_id"].(float64)))
