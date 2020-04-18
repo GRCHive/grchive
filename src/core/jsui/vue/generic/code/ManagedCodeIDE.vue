@@ -160,7 +160,10 @@ import {
     saveCode, TSaveCodeOutput,
     runCode, TRunCodeOutput,
 } from '../../../ts/api/apiCode'
-import { contactUsUrl } from '../../../ts/url'
+import {
+    contactUsUrl,
+    createSingleRunLogUrl,
+} from '../../../ts/url'
 import { standardFormatTime } from '../../../ts/time'
 import { FullClientDataWithLink } from '../../../ts/clientData'
 import {
@@ -445,8 +448,17 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
             codeId: code!.Id,
             latest: latest,
         }).then((resp : TRunCodeOutput) => {
-            console.log(`Script Run ID: ${resp.data}`)
             this.runInProgress = false
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Your run job has been successfully submitted.",
+                true,
+                "Track",
+                createSingleRunLogUrl(
+                    PageParamsStore.state.organization!.OktaGroupName,
+                    resp.data,
+                ),
+                false);
         }).catch((err : any) => {
             this.runInProgress = false
             // @ts-ignore

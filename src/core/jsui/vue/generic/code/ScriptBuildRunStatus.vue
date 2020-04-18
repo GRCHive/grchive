@@ -8,12 +8,12 @@
         </v-icon>
 
         <div v-if="showTimeStamp && !notRequired && !forceFail" class="ml-2">
-            <p class="ma-0 caption">
+            <p class="ma-0 caption" v-if="!!start">
                 <span class="font-weight-bold">Start: </span>
                 {{ timeStartStr }}
             </p>
 
-            <p class="ma-0 caption" v-if="!isPending">
+            <p class="ma-0 caption" v-if="!!end">
                 <span class="font-weight-bold">End: </span>
                 {{ timeEndStr }}
             </p>
