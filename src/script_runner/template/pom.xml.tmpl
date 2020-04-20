@@ -33,76 +33,20 @@
         <version>{{ .CLIENT_VERSION }}</version>
     </dependency>
     <dependency>
-        <groupId>com.grchive</groupId>
-        <artifactId>core-lib</artifactId>
-        <version>0.1</version>
+        <groupId>{{ .KOTLIN_CORE_LIB_GROUP_ID }}</groupId>
+        <artifactId>{{ .KOTLIN_CORE_LIB_ARTIFACT_ID }}</artifactId>
+        <version>{{ .KOTLIN_CORE_LIB_MAJOR_VERSION }}.{{ .KOTLIN_CORE_LIB_MINOR_VERSION }}</version>
+    </dependency>
+    <dependency>
+        <groupId>{{ .KOTLIN_CORE_LIB_GROUP_ID }}</groupId>
+        <artifactId>{{ .KOTLIN_CORE_LIB_ARTIFACT_ID }}</artifactId>
+        <version>{{ .KOTLIN_CORE_LIB_MAJOR_VERSION }}.{{ .KOTLIN_CORE_LIB_MINOR_VERSION }}</version>
+        <type>pom</type>
     </dependency>
     <dependency>
         <groupId>com.github.ajalt</groupId>
         <artifactId>clikt</artifactId>
         <version>2.6.0</version>
-    </dependency>
-
-    <!-- These must be synced with WORKSPACE dependencies -->
-    <dependency>
-        <groupId>org.jdbi</groupId>
-        <artifactId>jdbi3-bom</artifactId>
-        <version>3.12.2</version>
-        <type>pom</type>
-    </dependency>
-
-    <dependency>
-        <groupId>org.jdbi</groupId>
-        <artifactId>jdbi3-kotlin</artifactId>
-        <version>3.12.2</version>
-    </dependency>
-
-    <dependency>
-        <groupId>org.jdbi</groupId>
-        <artifactId>jdbi3-postgres</artifactId>
-        <version>3.12.2</version>
-    </dependency>
-
-    <dependency>
-        <groupId>org.tomlj</groupId>
-        <artifactId>tomlj</artifactId>
-        <version>1.0.0</version>
-    </dependency>
-
-    <dependency>
-        <groupId>com.zaxxer</groupId>
-        <artifactId>HikariCP</artifactId>
-        <version>3.4.2</version>
-    </dependency>
-
-    <dependency>
-        <groupId>org.postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-        <version>42.2.11</version>
-    </dependency>
-
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-log4j12</artifactId>
-        <version>1.7.30</version>
-    </dependency>
-
-    <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>2.10.3</version>
-    </dependency>
-
-    <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-yaml</artifactId>
-        <version>2.10.3</version>
-    </dependency>
-
-    <dependency>
-        <groupId>com.fasterxml.jackson.module</groupId>
-        <artifactId>jackson-module-kotlin</artifactId>
-        <version>2.10.3</version>
     </dependency>
   </dependencies>
 

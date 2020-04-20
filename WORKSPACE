@@ -701,25 +701,14 @@ http_archive(
 )
 
 load("@rules_jvm_external//:defs.bzl", "maven_install")
-
+load("//build:maven.bzl", "MAVEN_DEP_ARTIFACTS")
 maven_install(
-    artifacts = [
-        "org.jdbi:jdbi3-bom:3.12.2",
-        "org.jdbi:jdbi3-kotlin:3.12.2",
-        "org.jdbi:jdbi3-postgres:3.12.2",
+    artifacts = MAVEN_DEP_ARTIFACTS + [
         "org.junit.platform:junit-platform-console:1.6.0",
         "io.kotest:kotest-runner-junit5-jvm:4.0.1",
         "io.kotest:kotest-assertions-core-jvm:4.0.1",
-        "org.tomlj:tomlj:1.0.0",
-        "com.zaxxer:HikariCP:3.4.2",
         "org.testcontainers:testcontainers:1.13.0",
         "org.testcontainers:postgresql:1.13.0",
-        "org.postgresql:postgresql:42.2.11",
-        "org.flywaydb:flyway-core:6.3.2",
-        "org.slf4j:slf4j-log4j12:1.7.30",
-        "com.fasterxml.jackson.core:jackson-databind:2.10.3",
-        "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.3",
-        "com.fasterxml.jackson.module:jackson-module-kotlin:2.10.3",
     ],
     repositories = [
         "https://repo1.maven.org/maven2",

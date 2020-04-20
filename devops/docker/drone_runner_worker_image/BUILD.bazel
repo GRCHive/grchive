@@ -23,7 +23,6 @@ container_image(
     base = ":binary",
     files = [
         ":artifactory-settings",
-        "//src/core/kotlin:grchive_public_core",
     ],
     data_path = "."
 )

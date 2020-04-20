@@ -1,24 +1,40 @@
 package(default_visibility = ["//visibility:public"])
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library")
 load("//build:variables.bzl", "env")
+load(":deploy_to_artifactory.bzl", "deploy_to_artifactory")
+load(":generate_maven_release.bzl", "generate_maven_release")
+load("//build:maven.bzl", "MAVEN_DEP_ARTIFACTS")
 
 filegroup(
     name = "source_files",
     srcs = glob(["**/*.kt"]),
 )
 
+_all_deps = [
+    "@maven//:org_jdbi_jdbi3_bom",
+    "@maven//:org_jdbi_jdbi3_postgres",
+    "@maven//:org_jdbi_jdbi3_kotlin",
+    "@maven//:org_tomlj_tomlj",
+    "@maven//:com_zaxxer_HikariCP",
+    "@maven//:org_postgresql_postgresql",
+    "@maven//:com_fasterxml_jackson_core_jackson_databind",
+    "@maven//:com_fasterxml_jackson_dataformat_jackson_dataformat_yaml",
+    "@maven//:com_fasterxml_jackson_module_jackson_module_kotlin",
+]
+
 kt_jvm_library(
     name = "grchive_public_core",
     srcs = [ ":source_files" ],
-    deps = [
-        "@maven//:org_jdbi_jdbi3_bom",
-        "@maven//:org_jdbi_jdbi3_postgres",
-        "@maven//:org_jdbi_jdbi3_kotlin",
-        "@maven//:org_tomlj_tomlj",
-        "@maven//:com_zaxxer_HikariCP",
-        "@maven//:org_postgresql_postgresql",
-        "@maven//:com_fasterxml_jackson_core_jackson_databind",
-        "@maven//:com_fasterxml_jackson_dataformat_jackson_dataformat_yaml",
-        "@maven//:com_fasterxml_jackson_module_jackson_module_kotlin",
-    ],
+    deps = _all_deps,
+)
+
+generate_maven_release(
+    name = "maven_grchive_public_core",
+    jar = ":grchive_public_core",
+    deps = MAVEN_DEP_ARTIFACTS,
+)
+
+deploy_to_artifactory(
+    name = "deploy",
+    src = ":maven_grchive_public_core",
 )

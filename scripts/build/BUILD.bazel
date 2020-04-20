@@ -1,0 +1,6 @@
+package(default_visibility = ["//visibility:public"])
+
+py_binary(
+    name = "generate_maven_pom",
+    srcs = [ "generate_maven_pom.py" ],
+)

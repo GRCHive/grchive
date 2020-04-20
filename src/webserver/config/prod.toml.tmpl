@@ -94,7 +94,10 @@ username = "${GKE_REGISTRY_USER}"
 password = "${GKE_REGISTRY_PASSWORD}"
 
 [kotlin]
-bucket = "${KOTLIN_LIB_BUCKET}"
+group_id = "${KOTLIN_CORE_LIB_GROUP_ID}"
+artifact_id = "${KOTLIN_CORE_LIB_ARTIFACT_ID}"
+major_version = ${KOTLIN_CORE_LIB_MAJOR_VERSION}
+minor_version = ${KOTLIN_CORE_LIB_MINOR_VERSION}
 
 [gitea]
 protocol = "${GITEA_PROTOCOL}"

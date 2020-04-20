@@ -39,12 +39,16 @@ func loadTemplateParamsForOrg(org *core.Organization) (map[string]string, string
 	// changes, we also want to regenerate.
 	templateParams := map[string]string{
 		// TODO: Let user choose this?
-		"GRCHIVE_ORG_IDENTIFIER":  org.OktaGroupName,
-		"ARTIFACTORY_HOST":        core.EnvConfig.Artifactory.Host,
-		"ARTIFACTORY_PORT":        strconv.FormatInt(int64(core.EnvConfig.Artifactory.Port), 10),
-		"DRONE_RUNNER_TYPE":       core.EnvConfig.Drone.RunnerType,
-		"DRONE_RUNNER_IMAGE":      core.EnvConfig.Drone.RunnerImage,
-		"DRONE_RUNNER_IMAGE_PULL": core.EnvConfig.Drone.RunnerImagePull,
+		"GRCHIVE_ORG_IDENTIFIER":        org.OktaGroupName,
+		"ARTIFACTORY_HOST":              core.EnvConfig.Artifactory.Host,
+		"ARTIFACTORY_PORT":              strconv.FormatInt(int64(core.EnvConfig.Artifactory.Port), 10),
+		"KOTLIN_CORE_LIB_MAJOR_VERSION": strconv.FormatInt(int64(core.EnvConfig.Kotlin.MajorVersion), 10),
+		"KOTLIN_CORE_LIB_MINOR_VERSION": strconv.FormatInt(int64(core.EnvConfig.Kotlin.MinorVersion), 10),
+		"KOTLIN_CORE_LIB_GROUP_ID":      core.EnvConfig.Kotlin.GroupId,
+		"KOTLIN_CORE_LIB_ARTIFACT_ID":   core.EnvConfig.Kotlin.ArtifactId,
+		"DRONE_RUNNER_TYPE":             core.EnvConfig.Drone.RunnerType,
+		"DRONE_RUNNER_IMAGE":            core.EnvConfig.Drone.RunnerImage,
+		"DRONE_RUNNER_IMAGE_PULL":       core.EnvConfig.Drone.RunnerImagePull,
 	}
 
 	templateJsonRaw, err := json.Marshal(templateParams)

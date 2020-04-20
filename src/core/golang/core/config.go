@@ -90,7 +90,10 @@ type ContainerRegistryAuth struct {
 }
 
 type KotlinConfigData struct {
-	LibraryBucket string
+	GroupId      string
+	ArtifactId   string
+	MajorVersion int
+	MinorVersion int
 }
 
 type GiteaConfigData struct {
@@ -261,7 +264,10 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.GitlabRegistryAuth.Password = tomlConfig.Get("registry.gitlab.password").(string)
 
 	envConfig.Kotlin = new(KotlinConfigData)
-	envConfig.Kotlin.LibraryBucket = tomlConfig.Get("kotlin.bucket").(string)
+	envConfig.Kotlin.GroupId = tomlConfig.Get("kotlin.group_id").(string)
+	envConfig.Kotlin.ArtifactId = tomlConfig.Get("kotlin.artifact_id").(string)
+	envConfig.Kotlin.MajorVersion = int(tomlConfig.Get("kotlin.major_version").(int64))
+	envConfig.Kotlin.MinorVersion = int(tomlConfig.Get("kotlin.minor_version").(int64))
 
 	envConfig.Gitea = new(GiteaConfigData)
 	envConfig.Gitea.Host = tomlConfig.Get("gitea.host").(string)

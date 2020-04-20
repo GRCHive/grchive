@@ -78,11 +78,15 @@ func handleRunTracker(tracker *Tracker, runId int64, jar string) error {
 	// file using certain predetermine variables. This code could probably be shared with the webserver
 	// which does something similar for Gitea repository template generation?
 	templateParams := map[string]string{
-		"ARTIFACTORY_HOST":   core.EnvConfig.Artifactory.Host,
-		"ARTIFACTORY_PORT":   strconv.FormatInt(int64(core.EnvConfig.Artifactory.Port), 10),
-		"CLIENT_GROUP_ID":    mavenDep[0],
-		"CLIENT_ARTIFACT_ID": mavenDep[1],
-		"CLIENT_VERSION":     mavenDep[2],
+		"ARTIFACTORY_HOST":              core.EnvConfig.Artifactory.Host,
+		"ARTIFACTORY_PORT":              strconv.FormatInt(int64(core.EnvConfig.Artifactory.Port), 10),
+		"KOTLIN_CORE_LIB_MAJOR_VERSION": strconv.FormatInt(int64(core.EnvConfig.Kotlin.MajorVersion), 10),
+		"KOTLIN_CORE_LIB_MINOR_VERSION": strconv.FormatInt(int64(core.EnvConfig.Kotlin.MinorVersion), 10),
+		"KOTLIN_CORE_LIB_GROUP_ID":      core.EnvConfig.Kotlin.GroupId,
+		"KOTLIN_CORE_LIB_ARTIFACT_ID":   core.EnvConfig.Kotlin.ArtifactId,
+		"CLIENT_GROUP_ID":               mavenDep[0],
+		"CLIENT_ARTIFACT_ID":            mavenDep[1],
+		"CLIENT_VERSION":                mavenDep[2],
 	}
 
 	templateDirItems, err := ioutil.ReadDir(templateDir)
