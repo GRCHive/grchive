@@ -125,8 +125,11 @@
 
             <param-value-component
                 v-for="(item, index) in scriptParameterTypes"
+                v-if="!!item"
                 :key="`value-${index}`"
                 :param="item"
+                :value="scriptParameterValues[item.Name]"
+                @input="valueInput(item.Name, arguments[0])"
             >
             </param-value-component>
         </div>
@@ -192,6 +195,10 @@ const Props = Vue.extend({
             type: Array as () => Array<CodeParamType | null>,
             default: () => [],
         },
+        scriptParameterValues: {
+            type: Object,
+            default: () => Object() as Record<string, any>
+        },
         readonly: {
             type: Boolean,
             default: false,
@@ -234,6 +241,11 @@ export default class ScriptParamsEditor extends Props {
         this.$emit('runRevision')
     }
 
+    valueInput(param : string, val : any) {
+        Vue.set(this.scriptParameterValues, param, val)
+        this.$emit('update:scriptParameterValues', this.scriptParameterValues)
+    }
+
     doLinkClientData() {
         this.linkedClientData.unshift(...this.stagedClientDataForLink)
         this.$emit('update:linkedClientData', this.linkedClientData)
@@ -257,6 +269,14 @@ export default class ScriptParamsEditor extends Props {
     }
 
     removeParameterType(idx : number) {
+        let param = this.scriptParameterTypes[idx]
+        if (!!param) {
+            if (param.Name in this.scriptParameterValues) {
+                Vue.delete(this.scriptParameterValues, param.Name)
+                this.$emit('update:scriptParameterValues', this.scriptParameterValues)
+            }
+        }
+
         this.scriptParameterTypes.splice(idx, 1)
         this.$emit('update:scriptParameterTypes', this.scriptParameterTypes)
     }

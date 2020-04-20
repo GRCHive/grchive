@@ -1,8 +1,12 @@
 package grchive.core.data.types.grchive
 
+import java.sql.ResultSet
 import java.time.OffsetDateTime
+import java.util.Properties
 
+import org.jdbi.v3.core.mapper.ColumnMapper
 import org.jdbi.v3.core.mapper.reflect.ColumnName
+import org.jdbi.v3.core.statement.StatementContext
 
 /**
  * Information about the progress of a client's run request..
@@ -34,3 +38,17 @@ data class ScriptRun (
     @ColumnName("run_log") val runLog : String?,
     @ColumnName("user_id") val userId : Long
 )
+
+/**
+ * Holds the actual value to use for a script parameter for a given script run.
+ *
+ * @property runId The database ID of the script run.
+ * @property paramId  The parameter name to use.
+ * @property vals The value to use.
+ */ 
+data class ScriptRunParameter (
+    @ColumnName("run_id") val runId : Long,
+    @ColumnName("param_name") val paramName : String,
+    @ColumnName("vals") val vals : String
+)
+

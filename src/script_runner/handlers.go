@@ -144,7 +144,7 @@ func handleRunTracker(tracker *Tracker, runId int64, jar string) error {
 		return err
 	}
 
-	tracker.Log(logs, false)
+	tracker.Log(logs, tracker.stdout)
 	if retCode == 0 {
 		tracker.MarkSuccess()
 	} else {
@@ -154,10 +154,11 @@ func handleRunTracker(tracker *Tracker, runId int64, jar string) error {
 	return removeKotlinContainer(containerName)
 }
 
-func handleRun(runId int64, jar string, mavenDir string) error {
+func handleRun(runId int64, jar string, mavenDir string, stdout bool) error {
 	tracker := Tracker{
 		runId:        runId,
 		mavenRootDir: mavenDir,
+		stdout:       stdout,
 	}
 	err := tracker.Start()
 

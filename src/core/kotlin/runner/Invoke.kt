@@ -38,7 +38,7 @@ fun invokeWithMetadata(runId : Long, cls : String, fn : String, meta : Metadata)
     }
 
     val params = jdbi.withHandleUnchecked {
-        loadParamContainer(it, meta)
+        loadParamContainer(runId, it, meta)
     }
 
     val dataSources = jdbi.withHandleUnchecked {

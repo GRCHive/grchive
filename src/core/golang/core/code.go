@@ -48,6 +48,12 @@ type ScriptRun struct {
 	UserId          int64      `db:"user_id"`
 }
 
+type ScriptRunParameter struct {
+	RunId   int64                  `db:"run_id"`
+	ParamId int64                  `db:"param_id"`
+	Vals    map[string]interface{} `db:"vals"`
+}
+
 type DroneCiStatus struct {
 	CodeId     int64      `db:"code_id"`
 	OrgId      int32      `db:"org_id"`

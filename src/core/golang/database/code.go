@@ -1,6 +1,7 @@
 package database
 
 import (
+	"encoding/json"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
 )
@@ -283,7 +284,7 @@ func GetCodeBuildStatus(commit string, orgId int32, role *core.Role) (*core.Dron
 	return &status, err
 }
 
-func CreateScriptRun(codeId int64, orgId int32, scriptId int64, requiresBuild bool, role *core.Role) (*core.ScriptRun, error) {
+func CreateScriptRun(codeId int64, orgId int32, scriptId int64, requiresBuild bool, params map[string]interface{}, role *core.Role) (*core.ScriptRun, error) {
 	if !role.Permissions.HasAccess(core.ResourceScriptRun, core.AccessManage) {
 		return nil, core.ErrorUnauthorized
 	}
@@ -310,6 +311,24 @@ func CreateScriptRun(codeId int64, orgId int32, scriptId int64, requiresBuild bo
 		defer rows.Close()
 		rows.Next()
 		return rows.StructScan(&run)
+	}, func() error {
+		for k, v := range params {
+			rawV, err := json.Marshal(v)
+			if err != nil {
+				return err
+			}
+
+			_, err = tx.Exec(`
+				INSERT INTO script_run_parameters(run_id, param_name, vals)
+				SELECT $1, p.name, $3
+				FROM client_script_code_parameters AS p
+				WHERE p.name = $2 AND p.link_id = $4
+			`, run.Id, k, string(rawV), run.LinkId)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 	return &run, err
 }

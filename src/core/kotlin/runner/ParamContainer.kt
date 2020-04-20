@@ -1,6 +1,7 @@
 package grchive.core.runner
 
 import grchive.core.internal.database.getSupportedParameterTypeFromId
+import grchive.core.internal.database.getScriptRunParameterValues
 
 import org.jdbi.v3.core.Handle
 
@@ -12,9 +13,9 @@ class ParamContainer {
     private val paramTypes : MutableMap<String, String> = mutableMapOf<String, String>()
     private val paramValues : MutableMap<String, Any?> = mutableMapOf<String, Any?>()
 
-    internal fun addParamType(k : String, typ : String) {
+    internal fun addParamType(k : String, typ : String, v : Any?) {
         paramTypes.put(k, typ)
-        paramValues.put(k, null)
+        paramValues.put(k, v)
     }
 
     fun keys() : Set<String> {
@@ -48,12 +49,14 @@ class ParamContainer {
  * @param handle A JDBI handle to connect to the GRCHive database.
  * @param meta A [Metadata] object that holds what parameters we need to load.
  */
-internal fun loadParamContainer(handle : Handle, meta : Metadata) : ParamContainer {
+internal fun loadParamContainer(runId : Long, handle : Handle, meta : Metadata) : ParamContainer {
     var container = ParamContainer()
+    val paramValues = getScriptRunParameterValues(handle, runId)
 
     meta.params.forEach {
         val paramType = getSupportedParameterTypeFromId(handle, it.paramId)
-        container.addParamType(it.name, paramType.name)
+        // TODO: This needs to get converted to the proper value.
+        container.addParamType(it.name, paramType.name, paramValues.get(it.name))
     }
 
     return container

@@ -133,6 +133,7 @@
                 <script-params-editor
                     :linked-client-data.sync="currentLinkedClientData"
                     :script-parameter-types.sync="currentScriptParams"
+                    :script-parameter-values.sync="currentScriptParamValues" 
                     :readonly="finalReadonly"
                     :run-in-progress="runInProgress"
                     @runLatest="runScriptLatest"
@@ -227,6 +228,7 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
 
     currentLinkedClientData : FullClientDataWithLink[] = []
     currentScriptParams : (CodeParamType | null)[] = []
+    currentScriptParamValues : Record<string, any> = Object()
 
     $refs!: {
         editor: GenericCodeEditor,
@@ -447,6 +449,7 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
             orgId: PageParamsStore.state.organization!.Id,
             codeId: code!.Id,
             latest: latest,
+            params: this.currentScriptParamValues,
         }).then((resp : TRunCodeOutput) => {
             this.runInProgress = false
             // @ts-ignore

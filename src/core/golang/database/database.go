@@ -97,11 +97,13 @@ func CreateAuditTrailTx(role *core.Role) (*sqlx.Tx, error) {
 	return tx, nil
 }
 
-func WrapTx(tx *sqlx.Tx, fn func() error) error {
-	err := fn()
-	if err != nil {
-		tx.Rollback()
-		return err
+func WrapTx(tx *sqlx.Tx, fns ...func() error) error {
+	for _, fn := range fns {
+		err := fn()
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 	return tx.Commit()
 }

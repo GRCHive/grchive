@@ -21,7 +21,7 @@ func processScriptRunnerMessages(data []byte) *webcore.RabbitMQError {
 		return &webcore.RabbitMQError{err, false}
 	}
 
-	err = handleRun(msg.RunId, msg.Jar, mavenDir)
+	err = handleRun(msg.RunId, msg.Jar, mavenDir, false)
 	if err != nil {
 		return &webcore.RabbitMQError{
 			err,
@@ -45,15 +45,28 @@ func main() {
 	runId := flag.Int64("runId", -1, "Run ID in the database.")
 	jar := flag.String("jar", "", "Client JAR to run.")
 	local := flag.Bool("local", false, "Whether to use the runId and jar flags to run locally instead of listening using RabbitMQ.")
+	stdout := flag.Bool("stdout", false, "Whether to dump run log to stdout.")
+	maven := flag.String("maven", "", "Manually specify a directory to use as the maven directory..")
 	flag.Parse()
 
 	// Create a directory to use as the maven root for the docker containers we spawn.
 	var err error
-	mavenDir, err = ioutil.TempDir("", "maven-root")
-	if err != nil {
-		core.Error("Failed to create maven directory: " + err.Error())
+	mavenDir := ""
+
+	if *maven == "" {
+		mavenDir, err = ioutil.TempDir("", "maven-root")
+		if err != nil {
+			core.Error("Failed to create maven directory: " + err.Error())
+		}
+	} else {
+		mavenDir = *maven
 	}
-	defer os.RemoveAll(mavenDir)
+
+	defer func() {
+		if *maven == "" {
+			os.RemoveAll(mavenDir)
+		}
+	}()
 
 	{
 		err = pullKotlinImage(core.EnvConfig.Drone.RunnerImage)
@@ -63,7 +76,7 @@ func main() {
 	}
 
 	if *local {
-		err = handleRun(*runId, *jar, mavenDir)
+		err = handleRun(*runId, *jar, mavenDir, *stdout)
 		if err != nil {
 			core.Error("Failed to run: " + err.Error())
 		}

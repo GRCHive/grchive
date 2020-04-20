@@ -117,6 +117,7 @@ export interface TRunCodeInput {
     orgId: number
     codeId: number
     latest: boolean
+    params: Record<number, any>
 }
 
 export interface TRunCodeOutput {

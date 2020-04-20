@@ -380,9 +380,10 @@ func getCodeBuildStatus(w http.ResponseWriter, r *http.Request) {
 }
 
 type RunCodeInput struct {
-	OrgId  int32 `json:"orgId"`
-	CodeId int64 `json:"codeId"`
-	Latest bool  `json:"latest"`
+	OrgId  int32                  `json:"orgId"`
+	CodeId int64                  `json:"codeId"`
+	Latest bool                   `json:"latest"`
+	Params map[string]interface{} `json:"params"`
 }
 
 func runCode(w http.ResponseWriter, r *http.Request) {
@@ -444,7 +445,7 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 	// We don't need to roll this back in case of an error later on as
 	// ideally any later stages will log those changes and just let the user
 	// know there in the logs stored in the DB.
-	run, err := database.CreateScriptRun(code.Id, inputs.OrgId, script.Id, inputs.Latest, role)
+	run, err := database.CreateScriptRun(code.Id, inputs.OrgId, script.Id, inputs.Latest, inputs.Params, role)
 	if err != nil {
 		core.Warning("Failed to create script run: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

@@ -16,6 +16,15 @@
         </v-list-item-content>
 
         <v-list-item-content class="ml-1">
+            <v-text-field
+                :value="value"
+                @input="input"
+                filled
+                label="Value"
+                hide-details
+                dense
+            >
+            </v-text-field>
         </v-list-item-content>
     </v-list-item>
 </template>
@@ -30,6 +39,10 @@ import {
 
 const Props = Vue.extend({
     props: {
+        value: {
+            type: [Object, Number, String, Date],
+            default: () => null as any | null
+        },
         param: {
             type: Object,
             default: () => null as CodeParamType | null
@@ -39,6 +52,9 @@ const Props = Vue.extend({
 
 @Component
 export default class ParamValueComponent extends Props {
+    input(v : any) {
+        this.$emit('input', v)
+    }
 }
 
 </script>
