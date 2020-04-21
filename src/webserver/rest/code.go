@@ -424,9 +424,7 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 	if !inputs.Latest {
 		// In the case where we're not trying to run the latest code, we need to
 		// make sure that the version that the client requested to run has actually
-		// compiled successfully. We let the request go through even if the compilation
-		// is pending as this is just a preliminary check. The runner should be able to
-		// handle not finding the JAR (or seeing that the build status is still pending).
+		// compiled successfully.
 		status, err := database.GetCodeBuildStatus(code.GitHash, inputs.OrgId, role)
 		if err != nil {
 			core.Warning("Failed to get status: " + err.Error())
@@ -434,7 +432,7 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if status.TimeEnd.NullTime.Valid && !status.Success {
+		if !status.Success {
 			core.Warning("Failed to run a script that failed to compile.")
 			w.WriteHeader(http.StatusBadRequest)
 			return

@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <v-date-picker
+        <v-date-picker v-if="!disableDate"
             class="mr-4"
             :value="date"
             @input="onDateChange">
@@ -22,7 +22,11 @@ const Props = Vue.extend({
         value: {
             type: Date,
             default: () => new Date(),
-        }
+        },
+        disableDate: {
+            type: Boolean,
+            default: false,
+        },
     }
 })
 

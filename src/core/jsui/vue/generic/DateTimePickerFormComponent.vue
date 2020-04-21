@@ -26,6 +26,7 @@
         </template>
 
         <date-time-picker
+            :disable-date="disableDate"
             :value="value"
             @input="onInput"
             class="dt-bg"
@@ -40,7 +41,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 import DateTimePicker from './DateTimePicker.vue'
-import { standardFormatTime } from '../../ts/time'
+import { standardFormatTime, standardFormatTimeOnly } from '../../ts/time'
 
 const Props = Vue.extend({
     props: {
@@ -60,6 +61,10 @@ const Props = Vue.extend({
             type: Boolean,
             default: false
         },
+        disableDate: {
+            type: Boolean,
+            default: false,
+        }
     }
 })
 
@@ -75,7 +80,12 @@ export default class DateTimePickerFormComponent extends Props {
         if (!this.value) {
             return ""
         }
-        return standardFormatTime(new Date(this.value))
+
+        if (this.disableDate) {
+            return standardFormatTimeOnly(new Date(this.value))
+        } else {
+            return standardFormatTime(new Date(this.value))
+        }
     }
 
     onInput(d : Date) {

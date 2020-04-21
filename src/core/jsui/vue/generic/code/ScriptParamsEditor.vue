@@ -139,6 +139,54 @@
             <v-spacer></v-spacer>
 
             <v-list-item-action>
+                <v-dialog persistent max-width="40%" v-model="showHideSchedule">
+                    <template v-slot:activator="{on}">
+                        <v-btn 
+                            color="primary"
+                            :disabled="disableRun"
+                            :loading="runInProgress"
+                            v-on="on"
+                        >
+                            Schedule
+                            <v-icon small class="ml-2">
+                                mdi-calendar
+                            </v-icon>
+                        </v-btn>
+                    </template>
+
+                    <v-card>
+                        <v-card-title>
+                            Schedule Script Run
+                        </v-card-title>
+                        <v-divider></v-divider>
+
+                        <div class="ma-4">
+                            <create-scheduled-event-form
+                                v-model="schedule"
+                            >
+                            </create-scheduled-event-form>
+                        </div>
+
+                        <v-card-actions>
+                            <v-btn
+                                color="error"
+                                @click="showHideSchedule = false"
+                            >
+                                Cancel
+                            </v-btn>
+                            <v-spacer></v-spacer>
+                            <v-btn
+                                color="success"
+                                @click="scheduleRun"
+                            >
+                                Schedule
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+            </v-list-item-action>
+
+            <v-list-item-action>
                 <v-menu offset-y top left>
                     <template v-slot:activator="{on}">
                         <v-btn 
@@ -179,10 +227,12 @@ import ClientDataTable from '../ClientDataTable.vue'
 import ParamTypeComponent from './parameters/ParamTypeComponent.vue'
 import ParamValueComponent from './parameters/ParamValueComponent.vue'
 import ClientDataTableWithControls from '../resources/ClientDataTableWithControls.vue'
+import CreateScheduledEventForm from '../CreateScheduledEventForm.vue'
 import { ClientData, FullClientDataWithLink } from '../../../ts/clientData'
 import {
     CodeParamType
 } from '../../../ts/code'
+import { ScheduledEvent } from '../../../ts/event'
 import * as rules from '../../../ts/formRules'
 
 const Props = Vue.extend({
@@ -220,14 +270,17 @@ const Props = Vue.extend({
         ParamTypeComponent,
         ParamValueComponent,
         ClientDataTableWithControls,
+        CreateScheduledEventForm
     }
 })
 export default class ScriptParamsEditor extends Props {
     rules : any = rules
     parentBb : DOMRect | null = null
 
+    showHideSchedule: boolean = false
     showHideLinkDataSource : boolean = false
     stagedClientDataForLink : FullClientDataWithLink[] = []
+    schedule : ScheduledEvent | null = null
 
     $refs! : {
         parent : HTMLElement
@@ -239,6 +292,11 @@ export default class ScriptParamsEditor extends Props {
 
     runRevision() {
         this.$emit('runRevision')
+    }
+
+    scheduleRun() {
+        console.log(this.schedule)
+        this.$emit('scheduleRun', this.schedule)
     }
 
     valueInput(param : string, val : any) {
