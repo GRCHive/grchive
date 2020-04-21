@@ -72,6 +72,12 @@
 
                     <v-tab>Audit Trail</v-tab>
                     <v-tab-item>
+                        <audit-trail-viewer
+                            :resource-type="['client_scripts']"
+                            :resource-id="[`${data.Id}`]"
+                            no-header
+                        >
+                        </audit-trail-viewer>
                     </v-tab-item>
                 </v-tabs>
             </v-container>
@@ -95,13 +101,15 @@ import CreateNewScriptForm from './CreateNewScriptForm.vue'
 import GenericDeleteConfirmationForm from './GenericDeleteConfirmationForm.vue'
 import ManagedCodeIde from '../../generic/code/ManagedCodeIDE.vue'
 import RunLogList from '../../generic/logs/RunLogList.vue'
+import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 @Component({
     components: {
         CreateNewScriptForm,
         GenericDeleteConfirmationForm,
         ManagedCodeIde,
-        RunLogList
+        RunLogList,
+        AuditTrailViewer
     }
 })
 export default class FullEditClientScriptComponent extends Vue {
