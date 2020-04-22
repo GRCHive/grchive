@@ -160,12 +160,12 @@
                         </v-card-title>
                         <v-divider></v-divider>
 
-                        <div class="ma-4">
+                        <v-form class="ma-4" v-model="scheduleValid">
                             <create-scheduled-event-form
                                 v-model="schedule"
                             >
                             </create-scheduled-event-form>
-                        </div>
+                        </v-form>
 
                         <v-card-actions>
                             <v-btn
@@ -178,6 +178,7 @@
                             <v-btn
                                 color="success"
                                 @click="scheduleRun"
+                                :disabled="!scheduleValid"
                             >
                                 Schedule
                             </v-btn>
@@ -232,7 +233,7 @@ import { ClientData, FullClientDataWithLink } from '../../../ts/clientData'
 import {
     CodeParamType
 } from '../../../ts/code'
-import { ScheduledEvent } from '../../../ts/event'
+import { ScheduledEvent, createEmptyScheduledEvent } from '../../../ts/event'
 import * as rules from '../../../ts/formRules'
 
 const Props = Vue.extend({
@@ -280,7 +281,8 @@ export default class ScriptParamsEditor extends Props {
     showHideSchedule: boolean = false
     showHideLinkDataSource : boolean = false
     stagedClientDataForLink : FullClientDataWithLink[] = []
-    schedule : ScheduledEvent | null = null
+    schedule : ScheduledEvent | null = createEmptyScheduledEvent()
+    scheduleValid: boolean = false
 
     $refs! : {
         parent : HTMLElement
@@ -295,8 +297,9 @@ export default class ScriptParamsEditor extends Props {
     }
 
     scheduleRun() {
-        console.log(this.schedule)
         this.$emit('scheduleRun', this.schedule)
+        this.showHideSchedule = false
+        this.schedule = createEmptyScheduledEvent()
     }
 
     valueInput(param : string, val : any) {

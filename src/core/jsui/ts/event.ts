@@ -46,6 +46,8 @@ export interface ScheduledEvent {
     Repeat: boolean
     OneTimeDate: Date | null
     Frequency: CronFrequency
+    Name : string
+    Description: string
     Daily: DailyCron | null
     Weekly: WeeklyCron | null
     Monthly: MonthlyCron | null
@@ -54,7 +56,9 @@ export interface ScheduledEvent {
 export function createEmptyScheduledEvent() : ScheduledEvent {
     return {
         Repeat: false,
-        OneTimeDate: null,
+        OneTimeDate: new Date(),
+        Name: "",
+        Description: "",
         Frequency: CronFrequency.Daily,
         Daily: createEmptyDailyCron(),
         Weekly: null,

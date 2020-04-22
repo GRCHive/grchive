@@ -1,5 +1,21 @@
 <template>
     <div v-if="!!value">
+        <v-text-field
+            v-model="value.Name"
+            label="Name"
+            filled
+            :rules="[rules.required, rules.createMaxLength(256)]"
+        >
+        </v-text-field> 
+
+        <v-textarea
+            v-model="value.Description"
+            label="Description"
+            filled
+            hide-details
+        >
+        </v-textarea> 
+
         <v-checkbox
             :input-value="value.Repeat"
             label="Repeat?"
@@ -25,12 +41,22 @@
                     </v-col>
 
                     <v-col cols="9">
-                        <date-time-picker-form-component
-                            v-for="(t, index) in value.Daily.Times"
-                            v-model="value.Daily.Times[index]"
-                            disable-date
-                        >
-                        </date-time-picker-form-component>
+                        <div class="time-container" v-for="(t, index) in value.Daily.Times" :key="`container${index}`">
+                            <date-time-picker-form-component
+                                class="time-time"
+                                v-model="value.Daily.Times[index]"
+                                disable-date
+                            >
+                            </date-time-picker-form-component>
+
+                            <v-btn
+                                class="time-delete"
+                                color="error"
+                                icon
+                            >
+                                <v-icon>mdi-delete</v-icon>
+                            </v-btn>
+                        </div>
 
                         <v-btn
                             color="primary"
@@ -69,6 +95,8 @@
                             disable-date
                         >
                         </date-time-picker-form-component>
+
+
                     </v-col>
                 </v-row>
             </div>
@@ -170,6 +198,7 @@ import {
 import DateTimePickerFormComponent from './DateTimePickerFormComponent.vue'
 import WeekDayFormComponent from './WeekDayFormComponent.vue'
 import Ordinal from 'ordinal'
+import * as rules from '../../ts/formRules'
 
 const Props = Vue.extend({
     props: {
@@ -190,6 +219,7 @@ export default class CreateScheduledEventForm extends Props {
     CronFrequency : any = CronFrequency
     CronWeekdayHashItems: any = CronWeekdayHashItems
     DaysSelectItems: any = DaysSelectItems
+    rules : any = rules
 
     doChange(fn : (e : ScheduledEvent) => void) {
         let e : ScheduledEvent
@@ -276,6 +306,19 @@ export default class CreateScheduledEventForm extends Props {
 .cron-container {
     display: flex;
     align-items: center;
+}
+
+.time-container {
+    display: flex;
+    align-items: center;
+}
+
+.time-time {
+    flex-grow: 8;
+}
+
+.time-delete {
+    flex-grow: 0;
 }
 
 </style>

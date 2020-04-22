@@ -138,6 +138,7 @@
                     :run-in-progress="runInProgress"
                     @runLatest="runScriptLatest"
                     @runRevision="runScriptAtRevision"
+                    @scheduleRun="scheduleScript"
                     :disableRun="!selectedCode"
                 >
                 </script-params-editor>
@@ -170,6 +171,7 @@ import { FullClientDataWithLink } from '../../../ts/clientData'
 import {
     CodeParamType
 } from '../../../ts/code'
+import { ScheduledEvent } from '../../../ts/event'
 
 import LogViewer from '../logs/LogViewer.vue'
 import DynamicSplitContainer from '../DynamicSplitContainer.vue'
@@ -438,7 +440,7 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
         this.run(this.selectedCode, false)
     }
 
-    run(code : ManagedCode | null, latest : boolean) {
+    run(code : ManagedCode | null, latest : boolean, schedule : ScheduledEvent | null = null) {
         if (!code) {
             return
         }
@@ -450,18 +452,29 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
             codeId: code!.Id,
             latest: latest,
             params: this.currentScriptParamValues,
+            schedule: schedule,
         }).then((resp : TRunCodeOutput) => {
             this.runInProgress = false
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Your run job has been successfully submitted.",
-                true,
-                "Track",
-                createSingleRunLogUrl(
-                    PageParamsStore.state.organization!.OktaGroupName,
-                    resp.data,
-                ),
-                false);
+            if (!!schedule) {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Your run job has been successfully scheduled.",
+                    false,
+                    "Track",
+                    "",
+                    false);
+            } else {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Your run job has been successfully submitted.",
+                    true,
+                    "Track",
+                    createSingleRunLogUrl(
+                        PageParamsStore.state.organization!.OktaGroupName,
+                        resp.data,
+                    ),
+                    false);
+            }
         }).catch((err : any) => {
             this.runInProgress = false
             // @ts-ignore
@@ -472,6 +485,10 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
                 contactUsUrl,
                 true);
         })
+    }
+
+    scheduleScript(s : ScheduledEvent) {
+        this.run(this.selectedCode, false, s)
     }
 }
 

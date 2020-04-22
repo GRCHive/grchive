@@ -27,6 +27,7 @@ import { ClientScript } from '../clientScripts'
 import { 
     ScriptRun, cleanScriptRunFromJson
 } from '../code'
+import { ScheduledEvent } from '../event'
 
 export interface TSaveCodeInput {
     orgId: number
@@ -118,6 +119,7 @@ export interface TRunCodeInput {
     codeId: number
     latest: boolean
     params: Record<number, any>
+    schedule : ScheduledEvent | null
 }
 
 export interface TRunCodeOutput {

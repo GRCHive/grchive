@@ -497,6 +497,13 @@ go_repository(
     commit = "16388991a33441046539eb716cff4d294d556c70",
 )
 
+go_repository(
+    name = "com_github_teambition_rrule_go",
+    importpath = "github.com/teambition/rrule-go",
+    tag = "v1.5.0"
+)
+
+
 # NODE
 http_archive(
     name = "build_bazel_rules_nodejs",

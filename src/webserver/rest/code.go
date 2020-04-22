@@ -380,10 +380,11 @@ func getCodeBuildStatus(w http.ResponseWriter, r *http.Request) {
 }
 
 type RunCodeInput struct {
-	OrgId  int32                  `json:"orgId"`
-	CodeId int64                  `json:"codeId"`
-	Latest bool                   `json:"latest"`
-	Params map[string]interface{} `json:"params"`
+	OrgId    int32                       `json:"orgId"`
+	CodeId   int64                       `json:"codeId"`
+	Latest   bool                        `json:"latest"`
+	Params   map[string]interface{}      `json:"params"`
+	Schedule *core.ScheduledTaskRawInput `json:"schedule"`
 }
 
 func runCode(w http.ResponseWriter, r *http.Request) {
@@ -437,6 +438,38 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+	}
+
+	if inputs.Schedule != nil {
+		if inputs.Latest {
+			core.Warning("Can not schedule a script to run with latest.")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// Handle the case where the user wants to schedule the script to run instead.
+		// Insert the task into the database to hit this endpoint again (except with no schedule).
+		// No need to do anything else as the appropriate service should automatically be notified (or be able to figure out)
+		// when a new entry in the scheduled task is added.
+		err := webcore.CreateScheduledTaskFromRawInputs(inputs.Schedule, core.KGrchiveApiTask, core.GrchiveApiTaskData{
+			Endpoint: webcore.MustGetRouteUrl(webcore.ApiRunCodeRouteName),
+			Method:   "POST",
+			Payload: RunCodeInput{
+				OrgId:    inputs.OrgId,
+				CodeId:   inputs.CodeId,
+				Latest:   inputs.Latest,
+				Params:   inputs.Params,
+				Schedule: nil,
+			},
+		}, role.UserId, inputs.OrgId)
+
+		if err != nil {
+			core.Warning("Failed to schedule script run: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		return
 	}
 
 	// Create a DB entry to track the run. Return this to the user.

@@ -41,6 +41,8 @@ const (
 	SingleDocumentationRouteName   = "SingleDocumentation"
 	SingleClientDataRouteName      = "SingleClientData"
 	SingleClientScriptRouteName    = "SingleClientScript"
+	// Api
+	ApiRunCodeRouteName = "ApiRunCode"
 )
 
 var globalRouter *mux.Router
