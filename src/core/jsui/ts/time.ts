@@ -39,6 +39,15 @@ export function standardFormatDate(dt : Date | null) : string {
     return `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, "0")}-${dt.getDate().toString().padStart(2, "0")}`
 }
 
+export function parseStandardFormatDate(st : string) : Date {
+    let components = st.split('-')    
+    return new Date(
+        Number(components[0]),
+        Number(components[1])-1,
+        Number(components[2])
+    )
+}
+
 export function vuetifyCalendarTimeFormat(dt : Date) : string {
     return `${standardFormatDate(dt)} ${dt.getHours()}:${dt.getMinutes()}`
 }

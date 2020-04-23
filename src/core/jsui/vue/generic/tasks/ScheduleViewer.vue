@@ -1,12 +1,38 @@
 <template>
     <div>
-        <v-calendar
-            v-model="currentTimeStr"
-            type="month"
-            :events="scheduledVueitfyEvents"
-            @change="refreshSchedule"
-        >
-        </v-calendar>
+        <v-list-item>
+            <v-list-item-action>
+                <v-btn @click="resetToToday">
+                    Today
+                </v-btn>
+            </v-list-item-action>
+
+            <v-list-item-action>
+                <v-btn icon @click="prev">
+                    <v-icon>mdi-chevron-left</v-icon>
+                </v-btn>
+            </v-list-item-action>
+
+            <v-list-item-action>
+                <v-btn icon @click="next">
+                    <v-icon>mdi-chevron-right</v-icon>
+                </v-btn>
+            </v-list-item-action>
+
+            <v-list-item-content>
+                {{ monthYear }}
+            </v-list-item-content>
+        </v-list-item>
+        <div style="max-height: calc(100% - 60px); height: calc(100% - 60px);">
+            <v-calendar
+                ref="calendar"
+                v-model="currentTimeStr"
+                type="month"
+                :events="scheduledVueitfyEvents"
+                @change="refreshSchedule"
+            >
+            </v-calendar>
+        </div>
     </div>
 </template>
 
@@ -14,18 +40,28 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { VCalendar } from 'vuetify/lib'
 import { TAllScheduledTasksOutput, allScheduledTasks } from '../../../ts/api/apiTasks'
 import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { ScheduledTaskMetadata } from '../../../ts/tasks'
-import { TimeRange, vuetifyCalendarTimeFormat } from '../../../ts/time'
+import {
+    TimeRange,
+    vuetifyCalendarTimeFormat,
+    standardFormatDate,
+    parseStandardFormatDate
+} from '../../../ts/time'
 
 @Component
 export default class ScheduleViewer extends Vue {
-    currentTimeStr : string = new Date().toString()
+    currentTimeStr : string = standardFormatDate(new Date())
 
     allTasks : ScheduledTaskMetadata[] = []
     taskTimes : Record<number, TimeRange[]> = Object()
+
+    resetToToday() {
+        this.currentTimeStr = standardFormatDate(new Date())
+    }
 
     get scheduledVueitfyEvents() : any[] {
         return this.allTasks.map((ele : ScheduledTaskMetadata) => {
@@ -38,6 +74,25 @@ export default class ScheduleViewer extends Vue {
                 }
             })
         }).flat()
+    }
+
+    get currentTime() : Date {
+        return parseStandardFormatDate(this.currentTimeStr)
+    }
+
+    get monthYear() : string {
+        let opts = new Intl.DateTimeFormat('en-US', { month : 'long' })
+        return `${opts.format(this.currentTime)} ${this.currentTime.getFullYear()}`
+    }
+
+    prev() {
+        //@ts-ignore
+        this.$refs.calendar.prev()
+    }
+
+    next() {
+        //@ts-ignore
+        this.$refs.calendar.next()
     }
 
     refreshSchedule(props : any) {
