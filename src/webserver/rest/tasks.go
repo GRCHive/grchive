@@ -34,7 +34,7 @@ func allScheduledTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tasks, err := database.GetAllScheduledTasks(inputs.OrgId, role)
+	tasks, err := database.GetAllScheduledTasksForOrgId(inputs.OrgId, role)
 	if err != nil {
 		core.Warning("Failed to get tasks: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

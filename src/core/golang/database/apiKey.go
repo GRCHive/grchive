@@ -112,3 +112,11 @@ func DeleteApiKeyForUserId(userId int64) error {
 	`, userId)
 	return err
 }
+
+func DeleteApiKey(hashedRawKey string) error {
+	_, err := dbConn.Exec(`
+		DELETE FROM api_keys
+		WHERE hashed_api_key = $1
+	`, hashedRawKey)
+	return err
+}

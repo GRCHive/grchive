@@ -2,6 +2,7 @@ package database
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
 	"github.com/teambition/rrule-go"
@@ -67,8 +68,8 @@ func LinkTaskToScriptWithTx(tx *sqlx.Tx, taskId int64, scriptId int64, orgId int
 	return err
 }
 
-func GetAllScheduledTasks(orgId int32, role *core.Role) ([]*core.FullScheduledTask, error) {
-	rows, err := dbConn.Queryx(`
+func getScheduledTasksHelper(role *core.Role, condition string, args ...interface{}) ([]*core.FullScheduledTask, error) {
+	rows, err := dbConn.Queryx(fmt.Sprintf(`
 		SELECT
 			t.id,
 			t.name,
@@ -87,8 +88,8 @@ func GetAllScheduledTasks(orgId int32, role *core.Role) ([]*core.FullScheduledTa
 			ON ot.event_id = t.id
 		LEFT JOIN recurring_tasks AS rt
 			ON rt.event_id = t.id
-		WHERE org_id = $1
-	`, orgId)
+		%s
+	`, condition), args...)
 
 	if err != nil {
 		return nil, err
@@ -170,4 +171,13 @@ func GetAllScheduledTasks(orgId int32, role *core.Role) ([]*core.FullScheduledTa
 	}
 
 	return tasks, nil
+
+}
+
+func GetAllScheduledTasks(role *core.Role) ([]*core.FullScheduledTask, error) {
+	return getScheduledTasksHelper(role, "")
+}
+
+func GetAllScheduledTasksForOrgId(orgId int32, role *core.Role) ([]*core.FullScheduledTask, error) {
+	return getScheduledTasksHelper(role, "WHERE t.org_id = $1", orgId)
 }
