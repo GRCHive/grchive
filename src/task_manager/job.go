@@ -27,8 +27,13 @@ func (j *Job) Tick(c core.Clock, force bool) (bool, error) {
 		return true, nil
 	}
 
+	err := j.handler.Tick(c)
+	if err != nil {
+		return true, err
+	}
+
 	j.schedule.MarkRun(c)
-	return j.schedule.HasNextRun(c), j.handler.Tick(c)
+	return j.schedule.HasNextRun(c), nil
 }
 
 func CreateJobFromTaskMetadata(task core.ScheduledTaskMetadata, schedule *Schedule) (*Job, error) {
