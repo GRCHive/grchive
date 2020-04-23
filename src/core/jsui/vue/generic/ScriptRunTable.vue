@@ -193,7 +193,7 @@ export default class ScriptRunTable extends ResourceTableProps {
             props.item.value.RunSuccess,
             props.item.value.RunStartTime,
             props.item.value.RunFinishTime,
-            !props.item.value.BuildSuccess
+            !props.item.value.BuildSuccess && props.item.value.RequiresBuild,
         )
     }
    

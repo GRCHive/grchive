@@ -51,7 +51,7 @@ func main() {
 
 	// Create a directory to use as the maven root for the docker containers we spawn.
 	var err error
-	mavenDir := ""
+	mavenDir = ""
 
 	if *maven == "" {
 		mavenDir, err = ioutil.TempDir("", "maven-root")
