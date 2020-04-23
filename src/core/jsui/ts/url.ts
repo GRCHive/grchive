@@ -423,3 +423,5 @@ export const getClientScriptCodeLinkUrl : string = "/api/auto/scripts/link/get"
 export const getLogUrl: string = "/api/auto/logs/get"
 
 export const codeParamTypeMetadataUrl : string = "/api/metadata/paramTypes"
+
+export const allScheduleUrl : string = "/api/schedule"

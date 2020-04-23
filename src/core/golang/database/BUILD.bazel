@@ -12,6 +12,7 @@ go_library(
         "//src/core/golang/core:webserver_core_library",
         "@com_github_jmoiron_sqlx//:go_default_library",
         "@com_github_jmoiron_sqlx//types:go_default_library",
+        "@com_github_teambition_rrule_go//:go_default_library",
         "@com_github_lib_pq//:go_default_library",
     ],
 )

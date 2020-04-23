@@ -47,17 +47,29 @@ func IsPastTime(nowTime time.Time, thresholdTime time.Time, leeway int) bool {
 }
 
 func CombineDateWithTime(date time.Time, tm time.Time) time.Time {
-	utcDate := date.UTC()
-	utcTime := tm.UTC()
+	// We need this to be in the time's location mainly for RRule parsing
+	// since the RRule will take the time of the start time which is what
+	// this function is primarily used for atm.
+	locDate := date.In(tm.Location())
+	locTime := tm
 
 	return time.Date(
-		utcDate.Year(),
-		utcDate.Month(),
-		utcDate.Day(),
-		utcTime.Hour(),
-		utcTime.Minute(),
+		locDate.Year(),
+		locDate.Month(),
+		locDate.Day(),
+		locTime.Hour(),
+		locTime.Minute(),
 		0,
 		0,
-		utcTime.Location(),
+		locTime.Location(),
 	)
+}
+
+type TimeRange struct {
+	Start time.Time
+	End   time.Time
+}
+
+func (r TimeRange) InRange(t time.Time) bool {
+	return r.Start.Before(t) && r.End.After(t)
 }

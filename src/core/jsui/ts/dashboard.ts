@@ -45,6 +45,7 @@ const DashboardOrgSingleClientScript = () => import (/* webpackChunkName: "Dashb
 const DashboardOrgLogs = () => import (/* webpackChunkName: "DashboardOrgLogs" */ '../vue/pages/dashboard/DashboardOrgLogs.vue')
 const DashboardOrgSingleBuildLog = () => import (/* webpackChunkName: "DashboardOrgSingleBuildLog" */ '../vue/pages/dashboard/DashboardOrgSingleBuildLog.vue')
 const DashboardOrgSingleRunLog = () => import (/* webpackChunkName: "DashboardOrgSingleRunLog" */ '../vue/pages/dashboard/DashboardOrgSingleRunLog.vue')
+const DashboardOrgScriptSchedule = () => import (/* webpackChunkName: "DashboardOrgScriptSchedule" */ '../vue/pages/dashboard/DashboardOrgScriptSchedule.vue')
 const SnackBar = () => import( /* webpackChunkName: "SnackBar" */ '../vue/components/SnackBar.vue')
 const NotificationPopupManager = () => import( /* webpackChunkName: "NotificationPopupManager" */ '../vue/generic/notifications/NotificationPopupManager.vue')
 import { getCurrentCSRF } from './csrf'
@@ -106,6 +107,7 @@ function mountApp(inData : PageParamsStoreState) {
             DashboardOrgLogs,
             DashboardOrgSingleBuildLog,
             DashboardOrgSingleRunLog,
+            DashboardOrgScriptSchedule,
             SnackBar,
             NotificationPopupManager
         },

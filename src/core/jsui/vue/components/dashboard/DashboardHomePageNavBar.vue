@@ -129,6 +129,11 @@ export default Vue.extend({
                             url: PageParamsStore.state.organization!.Url + 'auto/scripts',
                         },
                         {
+                            title: 'Schedule',
+                            icon: 'mdi-alarm',
+                            url: PageParamsStore.state.organization!.Url + 'auto/schedule',
+                        },
+                        {
                             title: 'Logs',
                             icon: 'mdi-text-subject',
                             url: PageParamsStore.state.organization!.Url + 'auto/logs',

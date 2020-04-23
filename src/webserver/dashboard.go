@@ -93,6 +93,7 @@ func createOrganizationAutomationSubrouter(r *mux.Router) {
 		core.AutomationFeature,
 	))
 
+	s.HandleFunc("/schedule", render.RenderScriptSchedule)
 	createOrganizationDataSubrouter(s)
 	createOrganizationScriptSubrouter(s)
 	createOrganizationLogsSubrouter(s)

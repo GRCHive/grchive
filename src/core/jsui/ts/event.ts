@@ -1,4 +1,5 @@
 import { Days } from './time'
+import moment from 'moment-timezone'
 
 export enum CronFrequency {
     Daily,
@@ -51,6 +52,7 @@ export interface ScheduledEvent {
     Daily: DailyCron | null
     Weekly: WeeklyCron | null
     Monthly: MonthlyCron | null
+    Timezone: string
 }
 
 export function createEmptyScheduledEvent() : ScheduledEvent {
@@ -63,6 +65,7 @@ export function createEmptyScheduledEvent() : ScheduledEvent {
         Daily: createEmptyDailyCron(),
         Weekly: null,
         Monthly: null,
+        Timezone: moment.tz.guess(),
     }
 }
 

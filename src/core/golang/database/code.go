@@ -284,7 +284,7 @@ func GetCodeBuildStatus(commit string, orgId int32, role *core.Role) (*core.Dron
 	return &status, err
 }
 
-func CreateScriptRun(codeId int64, orgId int32, scriptId int64, requiresBuild bool, params map[string]interface{}, role *core.Role) (*core.ScriptRun, error) {
+func CreateScriptRun(codeId int64, orgId int32, scriptId int64, requiresBuild bool, params map[string]interface{}, scheduledTaskId core.NullInt64, role *core.Role) (*core.ScriptRun, error) {
 	if !role.Permissions.HasAccess(core.ResourceScriptRun, core.AccessManage) {
 		return nil, core.ErrorUnauthorized
 	}
@@ -329,6 +329,16 @@ func CreateScriptRun(codeId int64, orgId int32, scriptId int64, requiresBuild bo
 			}
 		}
 		return nil
+	}, func() error {
+		if !scheduledTaskId.NullInt64.Valid {
+			return nil
+		}
+
+		_, err := tx.Exec(`
+			INSERT INTO scheduled_task_script_run_links (event_id, run_id)
+			VALUES ($2, $1)
+		`, run.Id, scheduledTaskId.NullInt64.Int64)
+		return err
 	})
 	return &run, err
 }

@@ -380,11 +380,12 @@ func getCodeBuildStatus(w http.ResponseWriter, r *http.Request) {
 }
 
 type RunCodeInput struct {
-	OrgId    int32                       `json:"orgId"`
-	CodeId   int64                       `json:"codeId"`
-	Latest   bool                        `json:"latest"`
-	Params   map[string]interface{}      `json:"params"`
-	Schedule *core.ScheduledTaskRawInput `json:"schedule"`
+	OrgId           int32                       `json:"orgId"`
+	CodeId          int64                       `json:"codeId"`
+	Latest          bool                        `json:"latest"`
+	Params          map[string]interface{}      `json:"params"`
+	Schedule        *core.ScheduledTaskRawInput `json:"schedule"`
+	ScheduledTaskId core.NullInt64              `json:"scheduledTaskId"`
 }
 
 func runCode(w http.ResponseWriter, r *http.Request) {
@@ -461,7 +462,9 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 				Params:   inputs.Params,
 				Schedule: nil,
 			},
-		}, role.UserId, inputs.OrgId)
+		}, role.UserId, inputs.OrgId, webcore.TaskLinkOptions{
+			ScriptId: core.CreateNullInt64(script.Id),
+		})
 
 		if err != nil {
 			core.Warning("Failed to schedule script run: " + err.Error())
@@ -475,8 +478,8 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 	// Create a DB entry to track the run. Return this to the user.
 	// We don't need to roll this back in case of an error later on as
 	// ideally any later stages will log those changes and just let the user
-	// know there in the logs stored in the DB.
-	run, err := database.CreateScriptRun(code.Id, inputs.OrgId, script.Id, inputs.Latest, inputs.Params, role)
+	// know they're in the logs stored in the DB.
+	run, err := database.CreateScriptRun(code.Id, inputs.OrgId, script.Id, inputs.Latest, inputs.Params, inputs.ScheduledTaskId, role)
 	if err != nil {
 		core.Warning("Failed to create script run: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

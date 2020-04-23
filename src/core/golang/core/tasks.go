@@ -13,13 +13,14 @@ const (
 )
 
 type ScheduledTaskMetadata struct {
-	Id          int64       `db:"id"`
-	Name        string      `db:"name"`
-	Description string      `db:"description"`
-	OrgId       int32       `db:"org_id"`
-	UserId      int64       `db:"user_id"`
-	TaskType    TaskType    `db:"task_type"`
-	TaskData    interface{} `db:"task_data"`
+	Id            int64       `db:"id"`
+	Name          string      `db:"name"`
+	Description   string      `db:"description"`
+	OrgId         int32       `db:"org_id"`
+	UserId        int64       `db:"user_id"`
+	TaskType      TaskType    `db:"task_type" json:"-"`
+	TaskData      interface{} `db:"task_data" json:"-"`
+	ScheduledTime time.Time   `db:"scheduled_time"`
 }
 
 type ScheduledTaskOneTime struct {
@@ -31,6 +32,13 @@ type ScheduledTaskRecurrence struct {
 	EventId       int64     `db:"event_id"`
 	StartDateTime time.Time `db:"start_date_time"`
 	RRule         rrule.Set `db:"rrule"`
+	Timezone      string    `db:"timezone"`
+}
+
+type FullScheduledTask struct {
+	Metadata  ScheduledTaskMetadata
+	OneTime   *ScheduledTaskOneTime
+	Recurring *ScheduledTaskRecurrence
 }
 
 // Raw inputs are what we expect the clients to give us in a sort of expanded/raw
@@ -58,14 +66,15 @@ type ScheduledDailyTaskRawInput struct {
 	Times []time.Time
 }
 
-func (t ScheduledDailyTaskRawInput) GenerateRecurringTasks() (*ScheduledTaskRecurrence, error) {
+func (t ScheduledDailyTaskRawInput) GenerateRecurringTasks(tz *time.Location) (*ScheduledTaskRecurrence, error) {
 	ret := ScheduledTaskRecurrence{
-		StartDateTime: time.Now().UTC(),
+		StartDateTime: time.Now().In(tz),
 		RRule:         rrule.Set{},
+		Timezone:      tz.String(),
 	}
 
 	for _, tm := range t.Times {
-		dt := CombineDateWithTime(ret.StartDateTime, tm)
+		dt := CombineDateWithTime(ret.StartDateTime, tm.In(tz))
 
 		rule, err := rrule.NewRRule(rrule.ROption{
 			Freq:     rrule.DAILY,
@@ -88,15 +97,16 @@ type ScheduledWeeklyTaskRawInput struct {
 	Time time.Time
 }
 
-func (t ScheduledWeeklyTaskRawInput) GenerateRecurringTasks() (*ScheduledTaskRecurrence, error) {
+func (t ScheduledWeeklyTaskRawInput) GenerateRecurringTasks(tz *time.Location) (*ScheduledTaskRecurrence, error) {
 	ret := ScheduledTaskRecurrence{
-		StartDateTime: time.Now().UTC(),
+		StartDateTime: time.Now().In(tz),
 		RRule:         rrule.Set{},
+		Timezone:      tz.String(),
 	}
 
 	opt := rrule.ROption{
 		Freq:      rrule.WEEKLY,
-		Dtstart:   CombineDateWithTime(ret.StartDateTime, t.Time),
+		Dtstart:   CombineDateWithTime(ret.StartDateTime, t.Time.In(tz)),
 		Interval:  1,
 		Wkst:      rrule.SU,
 		Byweekday: make([]rrule.Weekday, 0),
@@ -123,15 +133,16 @@ type ScheduledMonthlyTaskRawInput struct {
 	Time    time.Time
 }
 
-func (t ScheduledMonthlyTaskRawInput) GenerateRecurringTasks() (*ScheduledTaskRecurrence, error) {
+func (t ScheduledMonthlyTaskRawInput) GenerateRecurringTasks(tz *time.Location) (*ScheduledTaskRecurrence, error) {
 	ret := ScheduledTaskRecurrence{
-		StartDateTime: time.Now().UTC(),
+		StartDateTime: time.Now().In(tz),
 		RRule:         rrule.Set{},
+		Timezone:      tz.String(),
 	}
 
 	opt := rrule.ROption{
 		Freq:     rrule.MONTHLY,
-		Dtstart:  CombineDateWithTime(ret.StartDateTime, t.Time),
+		Dtstart:  CombineDateWithTime(ret.StartDateTime, t.Time.In(tz)),
 		Interval: 1,
 	}
 
@@ -176,6 +187,7 @@ type ScheduledTaskRawInput struct {
 	Daily       *ScheduledDailyTaskRawInput
 	Weekly      *ScheduledWeeklyTaskRawInput
 	Monthly     *ScheduledMonthlyTaskRawInput
+	Timezone    string
 }
 
 func (t ScheduledTaskRawInput) GenerateTaskMetadata(userId int64, orgId int32, taskType TaskType, data interface{}) *ScheduledTaskMetadata {
@@ -189,9 +201,9 @@ func (t ScheduledTaskRawInput) GenerateTaskMetadata(userId int64, orgId int32, t
 	}
 }
 
-func (t ScheduledTaskRawInput) GenerateOneTimeTask() *ScheduledTaskOneTime {
+func (t ScheduledTaskRawInput) GenerateOneTimeTask(tz *time.Location) *ScheduledTaskOneTime {
 	return &ScheduledTaskOneTime{
-		EventDateTime: t.OneTimeDate.NullTime.Time,
+		EventDateTime: t.OneTimeDate.NullTime.Time.In(tz),
 	}
 }
 

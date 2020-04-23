@@ -54,6 +54,7 @@ func registerAPIPaths(r *mux.Router) {
 	registerAutomationAPIPaths(s)
 	registerFeatureAPIPaths(s)
 	registerMetadataAPIPaths(s)
+	registerScheduledTasksAPIPaths(s)
 }
 
 func registerAuditTrailAPIPaths(r *mux.Router) {
@@ -546,4 +547,9 @@ func registerFeatureAPIPaths(r *mux.Router) {
 func registerMetadataAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiMetadataPrefix).Subrouter()
 	s.HandleFunc("/paramTypes", getParamTypesMetadata).Methods("GET")
+}
+
+func registerScheduledTasksAPIPaths(r *mux.Router) {
+	s := r.PathPrefix("/schedule").Subrouter()
+	s.HandleFunc("/", allScheduledTasks).Methods("GET")
 }

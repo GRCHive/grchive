@@ -39,6 +39,10 @@ export function standardFormatDate(dt : Date | null) : string {
     return `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, "0")}-${dt.getDate().toString().padStart(2, "0")}`
 }
 
+export function vuetifyCalendarTimeFormat(dt : Date) : string {
+    return `${standardFormatDate(dt)} ${dt.getHours()}:${dt.getMinutes()}`
+}
+
 export function createLocalDateFromDateString(str : string) : Date {
     let data = str.split('-')
 
@@ -61,3 +65,13 @@ export let DaysSelectItems = Object.keys(Days)
         text: key,
         value: Days[key]
     }))
+
+export interface TimeRange {
+    Start : Date
+    End: Date
+}
+
+export function cleanTimeRangeFromJson(r : TimeRange) {
+    r.Start = new Date(r.Start)
+    r.End = new Date(r.End)
+}
