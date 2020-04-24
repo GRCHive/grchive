@@ -118,7 +118,7 @@ export interface TRunCodeInput {
     orgId: number
     codeId: number
     latest: boolean
-    params: Record<number, any>
+    params: Record<string, any>
     schedule : ScheduledEvent | null
 }
 

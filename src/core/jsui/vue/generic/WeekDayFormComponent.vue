@@ -5,6 +5,7 @@
             :outlined="!activeDays[Days.Sunday]"
             @click="toggleActive(Days.Sunday)"
             class="my-1"
+            :disabled="readonly"
         >
             Sunday
         </v-btn>
@@ -14,6 +15,7 @@
             :outlined="!activeDays[Days.Monday]"
             @click="toggleActive(Days.Monday)"
             class="ml-1 my-1"
+            :disabled="readonly"
         >
             Monday
         </v-btn>
@@ -23,6 +25,7 @@
             :outlined="!activeDays[Days.Tuesday]"
             @click="toggleActive(Days.Tuesday)"
             class="ml-1 my-1"
+            :disabled="readonly"
         >
             Tuesday
         </v-btn>
@@ -32,6 +35,7 @@
             :outlined="!activeDays[Days.Wednesday]"
             @click="toggleActive(Days.Wednesday)"
             class="ml-1 my-1"
+            :disabled="readonly"
         >
             Wednesday
         </v-btn>
@@ -41,6 +45,7 @@
             :outlined="!activeDays[Days.Thursday]"
             @click="toggleActive(Days.Thursday)"
             class="ml-1 my-1"
+            :disabled="readonly"
         >
             Thursday
         </v-btn>
@@ -50,6 +55,7 @@
             :outlined="!activeDays[Days.Friday]"
             @click="toggleActive(Days.Friday)"
             class="ml-1 my-1"
+            :disabled="readonly"
         >
             Friday
         </v-btn>
@@ -59,6 +65,7 @@
             :outlined="!activeDays[Days.Saturday]"
             @click="toggleActive(Days.Saturday)"
             class="ml-1 my-1"
+            :disabled="readonly"
         >
             Saturday
         </v-btn>
@@ -76,6 +83,10 @@ const Props = Vue.extend({
     props: {
         value: Array as () => Array<Days>,
         default: () => [],
+        readonly: {
+            type:  Boolean,
+            default: false,
+        }
     }
 })
 

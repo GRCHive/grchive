@@ -115,11 +115,6 @@ func main() {
 		}
 	}
 
-	database.InitListeners(map[string]database.ListenHandler{
-		database.NotifyChannelScheduledTaskChange: createOnNotifyScheduledTaskChange(scheduler),
-		database.NotifyChannelScheduledTaskDelete: createOnNotifyScheduledTaskDelete(scheduler),
-	})
-
 	if *immediate {
 		scheduler.RunImmediate(true)
 	} else {

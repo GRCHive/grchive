@@ -177,6 +177,10 @@ export function createSingleRunLogUrl(org: string, runId : number) : string {
     return `/dashboard/org/${org}/auto/logs/run/${runId}`
 }
 
+export function createSingleScriptRequestUrl(org: string, requestId : number) : string {
+    return `/dashboard/org/${org}/requests/scripts/${requestId}`
+}
+
 export const newProcessFlowAPIUrl : string = "/api/flows/new"
 export const deleteProcessFlowAPIUrl : string = "/api/flows/delete"
 export const getAllProcessFlowAPIUrl: string = "/api/flows/"
@@ -425,3 +429,6 @@ export const getLogUrl: string = "/api/auto/logs/get"
 export const codeParamTypeMetadataUrl : string = "/api/metadata/paramTypes"
 
 export const allScheduleUrl : string = "/api/schedule"
+
+export const allGenRequestScriptsUrl : string = "/api/v2/requests/scripts"
+export const allGenRequestsUrl : string = "/api/v2/requests"

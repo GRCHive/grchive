@@ -5,6 +5,8 @@
             label="Name"
             filled
             :rules="[rules.required, rules.createMaxLength(256)]"
+            :readonly="readonly"
+            v-if="!noName"
         >
         </v-text-field> 
 
@@ -13,6 +15,8 @@
             label="Description"
             filled
             hide-details
+            :readonly="readonly"
+            v-if="!noName"
         >
         </v-textarea> 
 
@@ -20,6 +24,7 @@
             :input-value="value.Repeat"
             label="Repeat?"
             @click="changeRepeat"
+            :readonly="readonly"
         >
         </v-checkbox>
 
@@ -31,6 +36,7 @@
                 hide-details
                 :value="value.Frequency"
                 @input="changeFrequency"
+                :readonly="readonly"
             >
             </v-select>
 
@@ -46,6 +52,7 @@
                                 class="time-time"
                                 v-model="value.Daily.Times[index]"
                                 disable-date
+                                :readonly="readonly"
                             >
                             </date-time-picker-form-component>
 
@@ -53,6 +60,7 @@
                                 class="time-delete"
                                 color="error"
                                 icon
+                                :disabled="readonly"
                             >
                                 <v-icon>mdi-delete</v-icon>
                             </v-btn>
@@ -63,6 +71,7 @@
                             block
                             outlined
                             @click="value.Daily.Times.push(new Date())"
+                            :disabled="readonly"
                         >
                             Add
                         </v-btn>
@@ -79,6 +88,7 @@
                     <v-col cols="9">
                         <week-day-form-component
                             v-model="value.Weekly.Days"
+                            :readonly="readonly"
                         >
                         </week-day-form-component>
                     </v-col>
@@ -93,6 +103,7 @@
                         <date-time-picker-form-component
                             v-model="value.Weekly.Time"
                             disable-date
+                            :readonly="readonly"
                         >
                         </date-time-picker-form-component>
 
@@ -111,6 +122,7 @@
                         <v-switch
                             v-model="value.Monthly.UseDate"
                             label="Date Mode"
+                            :readonly="readonly"
                         >
                         </v-switch>
                         
@@ -124,6 +136,7 @@
                             :items="dateItems"
                             hide-details
                             v-if="value.Monthly.UseDate"
+                            :readonly="readonly"
                         >
                             <template v-slot:append>
                                 <span style="margin-top: 10px;">days of the month</span>
@@ -138,6 +151,7 @@
                                 outlined
                                 :items="CronWeekdayHashItems"
                                 hide-details
+                                :readonly="readonly"
                             >
                             </v-select>
                             <v-select
@@ -146,6 +160,7 @@
                                 outlined
                                 :items="DaysSelectItems"
                                 hide-details
+                                :readonly="readonly"
                             >
                             </v-select>
                         </div>
@@ -161,6 +176,7 @@
                         <date-time-picker-form-component
                             v-model="value.Monthly.Time"
                             disable-date
+                            :readonly="readonly"
                         >
                         </date-time-picker-form-component>
                     </v-col>
@@ -172,6 +188,7 @@
             <date-time-picker-form-component
                 :value="value.OneTimeDate"
                 @input="changeOneTimeDate"
+                :readonly="readonly"
             >
             </date-time-picker-form-component>
         </div>
@@ -205,6 +222,14 @@ const Props = Vue.extend({
         value: {
             type: Object,
             default: () => null as ScheduledEvent | null
+        },
+        readonly: {
+            type: Boolean,
+            default: false
+        },
+        noName : {
+            type: Boolean,
+            default: false
         }
     }
 })

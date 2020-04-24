@@ -51,4 +51,3 @@ data class ScriptRunParameter (
     @ColumnName("param_name") val paramName : String,
     @ColumnName("vals") val vals : String
 )
-

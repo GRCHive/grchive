@@ -62,6 +62,7 @@ const (
 	DashboardOrgBuildLogsTemplateKey
 	DashboardOrgRunLogsTemplateKey
 	DashboardOrgScriptScheduleTemplateKey
+	DashboardOrgSingleScriptRequestTemplateKey
 	// Error Keys
 	Error403TemplateKey
 	Error404TemplateKey
@@ -175,6 +176,9 @@ func RegisterTemplates() {
 
 	allTemplates[DashboardOrgScriptScheduleTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardScriptSchedule.tmpl")
+
+	allTemplates[DashboardOrgSingleScriptRequestTemplateKey] =
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardSingleScriptRequest.tmpl")
 
 	// Dashboard Org Settings
 	allTemplates[DashboardOrgSettingsUsersTemplateKey] =

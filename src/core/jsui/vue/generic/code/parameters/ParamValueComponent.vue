@@ -23,6 +23,7 @@
                 label="Value"
                 hide-details
                 dense
+                :readonly="readonly"
             >
             </v-text-field>
         </v-list-item-content>
@@ -46,6 +47,10 @@ const Props = Vue.extend({
         param: {
             type: Object,
             default: () => null as CodeParamType | null
+        },
+        readonly: {
+            type: Boolean,
+            default: false,
         }
     }
 })

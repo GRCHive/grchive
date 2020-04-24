@@ -13,9 +13,10 @@ const (
 	UserSessionContextKey           ContextKey = "SESSION"
 	UserSessionParsedDataContextKey            = "PARSEDDATA"
 	// From Request
-	OrganizationContextKey = "ORGANIZATION"
-	UserContextKey         = "USER"
-	ApiKeyContextKey       = "APIKEY"
+	OrganizationContextKey   = "ORGANIZATION"
+	UserContextKey           = "USER"
+	ApiKeyContextKey         = "APIKEY"
+	GenericRequestContextKey = "GENREQ"
 )
 
 func AddSessionToContext(session *core.UserSession, ctx context.Context) context.Context {

@@ -55,6 +55,8 @@ func registerAPIPaths(r *mux.Router) {
 	registerFeatureAPIPaths(s)
 	registerMetadataAPIPaths(s)
 	registerScheduledTasksAPIPaths(s)
+
+	registerAPIv2Paths(s)
 }
 
 func registerAuditTrailAPIPaths(r *mux.Router) {

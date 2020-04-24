@@ -130,6 +130,7 @@
                 :param="item"
                 :value="scriptParameterValues[item.Name]"
                 @input="valueInput(item.Name, arguments[0])"
+                :readonly="disableRun"
             >
             </param-value-component>
         </div>

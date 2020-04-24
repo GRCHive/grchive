@@ -2,13 +2,14 @@ package rest
 
 import (
 	"encoding/json"
+	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
-	drone "gitlab.com/grchive/grchive/drone_api"
-	gitea "gitlab.com/grchive/grchive/gitea_api"
+	//drone "gitlab.com/grchive/grchive/drone_api"
+	//gitea "gitlab.com/grchive/grchive/gitea_api"
 	"gitlab.com/grchive/grchive/webcore"
 	"net/http"
-	"strconv"
+	//"strconv"
 	"time"
 )
 
@@ -386,6 +387,8 @@ type RunCodeInput struct {
 	Params          map[string]interface{}      `json:"params"`
 	Schedule        *core.ScheduledTaskRawInput `json:"schedule"`
 	ScheduledTaskId core.NullInt64              `json:"scheduledTaskId"`
+	RunId           core.NullInt64              `json:"runId"`
+	ApprovalId      core.NullInt64              `json:"approvalId"`
 }
 
 func runCode(w http.ResponseWriter, r *http.Request) {
@@ -442,28 +445,43 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if inputs.Schedule != nil {
+		// This endpoint only handles creating a request for a scheduled script run.
 		if inputs.Latest {
 			core.Warning("Can not schedule a script to run with latest.")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		// Handle the case where the user wants to schedule the script to run instead.
-		// Insert the task into the database to hit this endpoint again (except with no schedule).
-		// No need to do anything else as the appropriate service should automatically be notified (or be able to figure out)
-		// when a new entry in the scheduled task is added.
-		err := webcore.CreateScheduledTaskFromRawInputs(inputs.Schedule, core.KGrchiveApiTask, core.GrchiveApiTaskData{
-			Endpoint: webcore.MustGetRouteUrl(webcore.ApiRunCodeRouteName),
-			Method:   "POST",
-			Payload: RunCodeInput{
-				OrgId:    inputs.OrgId,
-				CodeId:   inputs.CodeId,
-				Latest:   inputs.Latest,
-				Params:   inputs.Params,
-				Schedule: nil,
-			},
-		}, role.UserId, inputs.OrgId, webcore.TaskLinkOptions{
-			ScriptId: core.CreateNullInt64(script.Id),
+		req := core.GenericRequest{
+			OrgId:        inputs.OrgId,
+			UploadTime:   time.Now().UTC(),
+			UploadUserId: role.UserId,
+			Name:         fmt.Sprintf("Scheduled Run Request: %s", script.Name),
+		}
+
+		tx := database.CreateTx()
+		err = database.WrapTx(tx, func() error {
+			return database.CreateGenericRequestWithTx(tx, &req)
+		}, func() error {
+			linkId, err := database.GetClientScriptCodeLinkId(code.Id, script.Id, inputs.OrgId)
+			if err != nil {
+				return err
+			}
+
+			return webcore.CreateScheduledTaskFromRawInputs(tx, inputs.Schedule, core.KGrchiveApiTask, core.GrchiveApiTaskData{
+				Endpoint: webcore.MustGetRouteUrl(webcore.ApiRunCodeRouteName),
+				Method:   "POST",
+				Payload: RunCodeInput{
+					OrgId:    inputs.OrgId,
+					CodeId:   inputs.CodeId,
+					Latest:   inputs.Latest,
+					Params:   inputs.Params,
+					Schedule: nil,
+				},
+			}, role.UserId, inputs.OrgId, webcore.TaskLinkOptions{
+				LinkId:    core.CreateNullInt64(linkId),
+				RequestId: core.CreateNullInt64(req.Id),
+			})
 		})
 
 		if err != nil {
@@ -471,80 +489,118 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
-		return
-	}
-
-	// Create a DB entry to track the run. Return this to the user.
-	// We don't need to roll this back in case of an error later on as
-	// ideally any later stages will log those changes and just let the user
-	// know they're in the logs stored in the DB.
-	run, err := database.CreateScriptRun(code.Id, inputs.OrgId, script.Id, inputs.Latest, inputs.Params, inputs.ScheduledTaskId, role)
-	if err != nil {
-		core.Warning("Failed to create script run: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if inputs.Latest {
-		repo, err := database.GetLinkedGiteaRepository(inputs.OrgId)
-		if err != nil {
-			core.Warning("Failed to get linked Gitea repository: " + err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		// In this case, we need to fire off a Drone CI job to compile the latest code + the current script revision.
-		// We must specify branch/commit here due to a Gitea issue with the /repos/{owner}/{repo}/commits/{ref} API endpoint
-		// that Drone uses to find the latest commit of the branch. This endpoint doesn't work in Gitea so we need to specify the
-		// commit directly.
-		commitSha, err := gitea.GlobalGiteaApi.RepositoryGitGetRefSha(
-			gitea.GiteaRepository{
-				Owner: repo.GiteaOrg,
-				Name:  repo.GiteaRepo,
-			},
-			"refs/heads/master",
-		)
-
-		if err != nil {
-			core.Warning("Failed to get latest Git commit: " + err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		err = drone.GlobalDroneApi.BuildCreate(repo.GiteaOrg, repo.GiteaRepo, map[string]string{
-			"branch":     "master",
-			"commit":     commitSha,
-			"SCRIPT_RUN": strconv.FormatInt(run.Id, 10),
-		})
-
-		if err != nil {
-			core.Warning("Failed to create Drone build: " + err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		jsonWriter.Encode(req.Id)
 	} else {
-		// Grab JAR path from drone CI since that's the only place we store it.
-		// This is hitting the same DB table as the GetCodeBuildStatus call earlier, can we merge it somehow?
-		jar, err := database.GetCodeJar(code.Id, code.OrgId, role)
-		if err != nil {
-			core.Warning("Failed to get JAR for code: " + err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		if inputs.ApprovalId.NullInt64.Valid {
+			// If an approval ID is specified, then that should indicate that a run was authorized.
+			// Double check that's actually the case before firing off the job. Note that a run
+			// can either be authorized via an immediate run or via a scheduled run which is a slight
+			// difference in how they get approved (in terms of what gets changed in the database).
+		} else {
+			// Create a run request for an immediate one-time run.
+			// Create a DB entry to track the run.
+			// We don't need to roll this back in case of an error later on as
+			// ideally any later stages will log those changes and just let the user
+			// know they're in the logs stored in the DB.
+			run, err := database.CreateScriptRun(
+				code.Id,
+				inputs.OrgId,
+				script.Id,
+				inputs.Latest,
+				inputs.Params,
+				core.NullInt64{},
+				role,
+			)
 
-		// In this case, we can directly send off a request to make the script runner run this script.
-		webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
-			Exchange: webcore.DEFAULT_EXCHANGE,
-			Queue:    webcore.SCRIPT_RUNNER_QUEUE,
-			Body: webcore.ScriptRunnerMessage{
-				RunId: run.Id,
-				Jar:   jar,
-			},
-		})
+			if err != nil {
+				core.Warning("Failed to create script run: " + err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			req := core.GenericRequest{
+				OrgId:        inputs.OrgId,
+				UploadTime:   time.Now().UTC(),
+				UploadUserId: role.UserId,
+				Name:         fmt.Sprintf("Immediate Script Run Request: %s", script.Name),
+			}
+
+			tx := database.CreateTx()
+			err = database.WrapTx(tx, func() error {
+				return database.CreateGenericRequestWithTx(tx, &req)
+			}, func() error {
+				return database.LinkScriptRunToRequestWithTx(tx, run.Id, req.Id)
+			})
+
+			if err != nil {
+				core.Warning("Failed to create immediate script run request: " + err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			jsonWriter.Encode(req.Id)
+		}
 	}
 
-	jsonWriter.Encode(run.Id)
+	//if inputs.Latest {
+	//	repo, err := database.GetLinkedGiteaRepository(inputs.OrgId)
+	//	if err != nil {
+	//		core.Warning("Failed to get linked Gitea repository: " + err.Error())
+	//		w.WriteHeader(http.StatusInternalServerError)
+	//		return
+	//	}
+
+	//	// In this case, we need to fire off a Drone CI job to compile the latest code + the current script revision.
+	//	// We must specify branch/commit here due to a Gitea issue with the /repos/{owner}/{repo}/commits/{ref} API endpoint
+	//	// that Drone uses to find the latest commit of the branch. This endpoint doesn't work in Gitea so we need to specify the
+	//	// commit directly.
+	//	commitSha, err := gitea.GlobalGiteaApi.RepositoryGitGetRefSha(
+	//		gitea.GiteaRepository{
+	//			Owner: repo.GiteaOrg,
+	//			Name:  repo.GiteaRepo,
+	//		},
+	//		"refs/heads/master",
+	//	)
+
+	//	if err != nil {
+	//		core.Warning("Failed to get latest Git commit: " + err.Error())
+	//		w.WriteHeader(http.StatusInternalServerError)
+	//		return
+	//	}
+
+	//	err = drone.GlobalDroneApi.BuildCreate(repo.GiteaOrg, repo.GiteaRepo, map[string]string{
+	//		"branch":     "master",
+	//		"commit":     commitSha,
+	//		"SCRIPT_RUN": strconv.FormatInt(run.Id, 10),
+	//	})
+
+	//	if err != nil {
+	//		core.Warning("Failed to create Drone build: " + err.Error())
+	//		w.WriteHeader(http.StatusInternalServerError)
+	//		return
+	//	}
+	//} else {
+	//	// Grab JAR path from drone CI since that's the only place we store it.
+	//	// This is hitting the same DB table as the GetCodeBuildStatus call earlier, can we merge it somehow?
+	//	jar, err := database.GetCodeJar(code.Id, code.OrgId, role)
+	//	if err != nil {
+	//		core.Warning("Failed to get JAR for code: " + err.Error())
+	//		w.WriteHeader(http.StatusInternalServerError)
+	//		return
+	//	}
+
+	//	// In this case, we can directly send off a request to make the script runner run this script.
+	//	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
+	//		Exchange: webcore.DEFAULT_EXCHANGE,
+	//		Queue:    webcore.SCRIPT_RUNNER_QUEUE,
+	//		Body: webcore.ScriptRunnerMessage{
+	//			RunId: run.Id,
+	//			Jar:   jar,
+	//		},
+	//	})
+	//}
+
+	//jsonWriter.Encode(run.Id)
 }
 
 type AllCodeRunsInput struct {

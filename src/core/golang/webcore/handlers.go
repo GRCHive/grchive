@@ -1,6 +1,7 @@
 package webcore
 
 import (
+	"context"
 	"github.com/gorilla/mux"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
@@ -302,5 +303,28 @@ func CreateFeatureCheck(
 			}
 		})
 	}
+}
 
+func CreateObtainGenericRequestInContext(id string) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			requestId, err := GetInt64FromRequest(r, id)
+			if err != nil {
+				core.Warning("Failed to get request Id: " + err.Error())
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
+			request, err := database.GetGenericRequestFromId(requestId)
+			if err != nil {
+				core.Warning("Failed to get request: " + err.Error())
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
+			context := context.WithValue(r.Context(), GenericRequestContextKey, request)
+			newR := r.WithContext(context)
+			next.ServeHTTP(w, newR)
+		})
+	}
 }

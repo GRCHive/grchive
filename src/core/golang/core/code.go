@@ -49,9 +49,9 @@ type ScriptRun struct {
 }
 
 type ScriptRunParameter struct {
-	RunId   int64                  `db:"run_id"`
-	ParamId int64                  `db:"param_id"`
-	Vals    map[string]interface{} `db:"vals"`
+	RunId     int64       `db:"run_id"`
+	ParamName string      `db:"param_name"`
+	Vals      interface{} `db:"vals"`
 }
 
 type DroneCiStatus struct {

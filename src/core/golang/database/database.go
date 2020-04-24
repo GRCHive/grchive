@@ -27,13 +27,11 @@ func Init() {
 type ListenHandler func(data string) error
 
 const (
-	NotifyChannelControlOwner        string = "controlowner"
-	NotifyChannelDocRequestAssignee         = "docrequestassignee"
-	NotifyChannelDocRequestStatus           = "docrequeststatus"
-	NotifyChannelSqlRequestAssignee         = "sqlrequestassignee"
-	NotifyChannelSqlRequestStatus           = "sqlrequeststatus"
-	NotifyChannelScheduledTaskChange        = "scheduledtaskchange"
-	NotifyChannelScheduledTaskDelete        = "scheduledtaskdelete"
+	NotifyChannelControlOwner       string = "controlowner"
+	NotifyChannelDocRequestAssignee        = "docrequestassignee"
+	NotifyChannelDocRequestStatus          = "docrequeststatus"
+	NotifyChannelSqlRequestAssignee        = "sqlrequestassignee"
+	NotifyChannelSqlRequestStatus          = "sqlrequeststatus"
 )
 
 func InitListeners(config map[string]ListenHandler) {

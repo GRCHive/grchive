@@ -252,3 +252,15 @@ func GetCodeFromScriptCodeLink(linkId int64, role *core.Role) (*core.ManagedCode
 	`, linkId)
 	return &code, err
 }
+
+func GetClientScriptCodeLinkId(codeId int64, scriptId int64, orgId int32) (int64, error) {
+	id := int64(0)
+	err := dbConn.Get(&id, `
+		SELECT id
+		FROM code_to_client_scripts_link
+		WHERE code_id = $1
+			AND script_id = $2
+			AND org_id = $3
+	`, codeId, scriptId, orgId)
+	return id, err
+}

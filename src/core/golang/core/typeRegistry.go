@@ -8,6 +8,7 @@ var TypeRegistry = map[string]reflect.Type{
 	DocRequestReflectType.String():  DocRequestReflectType,
 	SqlRequestReflectType.String():  SqlRequestReflectType,
 	DocMetadataReflectType.String(): DocMetadataReflectType,
+	"string":                        StringReflectType,
 }
 
 func GetBaseType(in interface{}) reflect.Type {

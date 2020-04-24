@@ -9,13 +9,13 @@
                     </v-btn>
                 </template>
                 <v-list dense>
-                    <v-list-item dense @click="save">
+                    <v-list-item dense @click="save" :disabled="disableSave">
                         <v-list-item-title>
                             Save
                         </v-list-item-title>
                     </v-list-item>
                     <v-divider></v-divider>
-                    <v-list-item dense @click="revert">
+                    <v-list-item dense @click="revert" :disabled="disableSave">
                         <v-list-item-title>
                             Revert
                         </v-list-item-title>
@@ -50,6 +50,10 @@ const Props = Vue.extend({
             type: Boolean,
             default: false,
         },
+        disableSave: {
+            type: Boolean,
+            default: false,
+        }
     }
 })
 

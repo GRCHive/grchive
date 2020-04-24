@@ -60,11 +60,11 @@ func CreateRecurringTaskWithTx(tx *sqlx.Tx, meta *core.ScheduledTaskMetadata, da
 	return err
 }
 
-func LinkTaskToScriptWithTx(tx *sqlx.Tx, taskId int64, scriptId int64, orgId int32) error {
+func LinkTaskToScriptLinkWithTx(tx *sqlx.Tx, taskId int64, linkId int64) error {
 	_, err := tx.Exec(`
-		INSERT INTO scheduled_task_script_links (event_id, org_id, script_id)
-		VALUES ($1, $2, $3)
-	`, taskId, orgId, scriptId)
+		INSERT INTO scheduled_task_script_links (event_id, link_id)
+		VALUES ($1, $2)
+	`, taskId, linkId)
 	return err
 }
 

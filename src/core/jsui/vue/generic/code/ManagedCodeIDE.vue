@@ -29,6 +29,7 @@
             @revert="pullCode"
             ref="toolbar"
             :save-in-progress="saveInProgress"
+            :disable-save="disableSave"
         >
             <template v-slot:custom-menu>
                 <v-menu offset-y>
@@ -66,6 +67,7 @@
                         :items="allCodeItems"
                         label="Version"
                         v-model="selectedCode"
+                        :readonly="readonly"
                     >
                         <template v-slot:item="{ item }">
                             <hash-renderer
@@ -139,7 +141,7 @@
                     @runLatest="runScriptLatest"
                     @runRevision="runScriptAtRevision"
                     @scheduleRun="scheduleScript"
-                    :disableRun="!selectedCode"
+                    :disableRun="!selectedCode || disableRun"
                 >
                 </script-params-editor>
             </v-col>
@@ -189,6 +191,22 @@ const ManagedProps = Vue.extend({
             type: Number,
             default: -1,
         },
+        codeId: {
+            type: Number,
+            default: -1,
+        },
+        disableRun: {
+            type: Boolean,
+            default: false,
+        },
+        disableSave: {
+            type: Boolean,
+            default: false,
+        },
+        initialParams: {
+            type: Object,
+            default: () => Object() as Record<string, any>
+        }
     }
 })
 
@@ -333,7 +351,11 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
         allCode(params).then((resp : TAllCodeOutput) => {
             this.allCode = resp.data
             if (this.allCode.length > 0) {
-                this.selectedCode = this.allCode[0]
+                if (this.codeId == -1) {
+                    this.selectedCode = this.allCode[0]
+                } else {
+                    this.selectedCode = this.allCode.find((ele : ManagedCode) => ele.Id == this.codeId)!
+                }
             } else {
                 this.selectedCode = null
 
@@ -355,6 +377,10 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     }
 
     onSave() {
+        if (this.disableSave) {
+            return
+        }
+
         let params : any = {
             orgId: PageParamsStore.state.organization!.Id,
             code: this.codeString,
@@ -403,6 +429,7 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     }
 
     mounted() {
+        this.currentScriptParamValues = this.initialParams
         this.refreshCode()
         //@ts-ignore
         let ele : HTMLElement = this.$refs.editor.$el
@@ -426,6 +453,10 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     }
 
     runScriptLatest() {
+        if (this.disableRun) {
+            return
+        }
+
         if (this.dirty) {
             // Need to make sure the user knows that their latest changes won't be picked up
             // until they save.
@@ -437,10 +468,17 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     }
 
     runScriptAtRevision() {
+        if (this.disableRun) {
+            return
+        }
         this.run(this.selectedCode, false)
     }
 
     run(code : ManagedCode | null, latest : boolean, schedule : ScheduledEvent | null = null) {
+        if (this.disableRun) {
+            return
+        }
+
         if (!code) {
             return
         }
@@ -488,6 +526,9 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
     }
 
     scheduleScript(s : ScheduledEvent) {
+        if (this.disableRun) {
+            return
+        }
         this.run(this.selectedCode, false, s)
     }
 }

@@ -83,6 +83,17 @@ func GetProcessFlowIdFromRequest(r *http.Request) (int64, error) {
 	return val, err
 }
 
+func GetInt64FromRequest(r *http.Request, queryId string) (int64, error) {
+	urlRouteVars := mux.Vars(r)
+	id, ok := urlRouteVars[queryId]
+	if !ok {
+		return 0, errors.New("No query id in request URL")
+	}
+
+	val, err := strconv.ParseInt(id, 10, 64)
+	return val, err
+}
+
 func IsRequestMultipartForm(r *http.Request) bool {
 	contentType := r.Header.Get("Content-Type")
 	return strings.Contains(contentType, "multipart/form-data")
