@@ -148,3 +148,33 @@ func GetGenericApprovalForRequest(requestId int64, orgId int32, role *core.Role)
 	err = rows.StructScan(&approval)
 	return &approval, err
 }
+
+func InsertGenericRequestComment(requestId int64, comment *core.Comment, role *core.Role) error {
+	threadId := int64(0)
+	err := dbConn.Get(&threadId, `
+		SELECT thread_id
+		FROM generic_request_comment_threads
+		WHERE request_id = $1
+	`, requestId)
+	if err != nil {
+		return err
+	}
+
+	tx := dbConn.MustBegin()
+	err = insertCommentWithTx(comment, threadId, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func GetGenericRequestComments(reqId int64, orgId int32, role *core.Role) ([]*core.Comment, error) {
+	return getComments(`
+		INNER JOIN generic_request_comment_threads AS rct
+			ON rct.thread_id = t.id
+		WHERE rct.request_id = $1
+			AND t.org_id = $2
+	`, reqId, orgId)
+}

@@ -24,15 +24,18 @@ type NewCommentInputs struct {
 	// Document
 	FileId core.NullInt64 `json:"fileId"`
 	OrgId  int32          `json:"orgId"`
+	// Generic Request
+	GenericRequestId core.NullInt64 `json:"genericRequestId"`
 
 	CatId core.NullInt64 `json:"catId"`
 }
 
 type AllCommentInputs struct {
-	SqlRequestId core.NullInt64 `webcore:"sqlRequestId,optional"`
-	RequestId    core.NullInt64 `webcore:"requestId,optional"`
-	FileId       core.NullInt64 `webcore:"fileId,optional"`
-	OrgId        int32          `webcore:"orgId"`
+	SqlRequestId     core.NullInt64 `webcore:"sqlRequestId,optional"`
+	RequestId        core.NullInt64 `webcore:"requestId,optional"`
+	FileId           core.NullInt64 `webcore:"fileId,optional"`
+	GenericRequestId core.NullInt64 `webcore:"genericRequestId,optional"`
+	OrgId            int32          `webcore:"orgId"`
 }
 
 func commentFromInputs(inp GenericNewCommentInputs) *core.Comment {
@@ -139,7 +142,24 @@ func newComment(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+	} else if inputs.GenericRequestId.NullInt64.Valid {
+		err = database.InsertGenericRequestComment(
+			inputs.GenericRequestId.NullInt64.Int64,
+			comment,
+			role)
 
+		if err != nil {
+			core.Warning("Failed to insert generic request comment: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		object, err = database.GetGenericRequestFromId(inputs.GenericRequestId.NullInt64.Int64)
+		if err != nil {
+			core.Warning("Failed to get generic request: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	} else {
 		core.Warning("Invalid combination of inputs for new comment")
 		w.WriteHeader(http.StatusBadRequest)
@@ -183,6 +203,8 @@ func allComments(w http.ResponseWriter, r *http.Request) {
 		comments, err = database.GetDocumentRequestComments(inputs.RequestId.NullInt64.Int64, inputs.OrgId, role)
 	} else if inputs.FileId.NullInt64.Valid {
 		comments, err = database.GetDocumentComments(inputs.FileId.NullInt64.Int64, inputs.OrgId, role)
+	} else if inputs.GenericRequestId.NullInt64.Valid {
+		comments, err = database.GetGenericRequestComments(inputs.GenericRequestId.NullInt64.Int64, inputs.OrgId, role)
 	} else {
 		err = errors.New("Invalid comment type.")
 	}

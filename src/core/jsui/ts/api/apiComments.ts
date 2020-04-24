@@ -29,6 +29,7 @@ export interface TNewCommentInput {
     sqlRequestId?: number
     catId?: number
     fileId?: number
+    genericRequestId? : number
     orgId: number
 }
 
@@ -48,6 +49,7 @@ export interface TAllCommentsInput {
     sqlRequestId?: number
     requestId?: number
     fileId?: number
+    genericRequestId? : number
     orgId: number
 }
 

@@ -199,6 +199,10 @@
                                     Comments
                                 </v-card-title>
                                 <v-divider></v-divider>
+                                <comment-manager
+                                    :params="commentParams"
+                                ></comment-manager>
+
                             </v-card>
                         </v-col>
                     </v-row>
@@ -252,6 +256,7 @@ import {
     createScheduledEventFromRRule
 } from '../../../ts/event'
 import CreateScheduledEventForm from '../../generic/CreateScheduledEventForm.vue'
+import CommentManager from '../../generic/CommentManager.vue'
 
 @Component({
     components: {
@@ -262,7 +267,8 @@ import CreateScheduledEventForm from '../../generic/CreateScheduledEventForm.vue
         CreateNewGenericRequestForm,
         GenericApprovalDisplay,
         ManagedCodeIde,
-        CreateScheduledEventForm
+        CreateScheduledEventForm,
+        CommentManager,
     }
 })
 export default class DashboardOrgSingleScriptRequest extends Vue {
@@ -390,6 +396,12 @@ export default class DashboardOrgSingleScriptRequest extends Vue {
         this.refreshData()
     }
 
+    get commentParams() : Object {
+        return {
+            genericRequestId: this.req!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+        }
+    }
 }
 
 </script>
