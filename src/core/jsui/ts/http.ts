@@ -10,6 +10,15 @@ export function postFormJson<T=void>(url: string, data: Object, config : AxiosRe
     return axios.post(url, JSON.stringify(data), config)
 }
 
+export function putFormJson<T=void>(url: string, data: Object, config : AxiosRequestConfig) : Promise<T> {
+    if (!config.headers) {
+        config.headers = {}
+    }
+    config.headers['Content-Type'] = 'application/json'
+    return axios.put(url, JSON.stringify(data), config)
+}
+
+
 export function postFormUrlEncoded<T=void>(url: string, data: Object, config : AxiosRequestConfig) : Promise<T> {
     if (!config.headers) {
         config.headers = {}
@@ -25,3 +34,4 @@ export function postFormMultipart<T=void>(url : string, data : FormData, config 
     config.headers['Content-Type'] = 'multipart/form-data'
     return axios.post(url, data, config)
 }
+

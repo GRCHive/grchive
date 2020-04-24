@@ -20,6 +20,22 @@ func CreateGenericRequestWithTx(tx *sqlx.Tx, req *core.GenericRequest) error {
 	return rows.Scan(&req.Id)
 }
 
+func EditGenericRequest(reqId int64, orgId int32, newData core.GenericRequest, role *core.Role) error {
+	tx := CreateTx()
+	return WrapTx(tx, func() error {
+		_, err := tx.Exec(`
+			UPDATE generic_requests
+				SET name = $3,
+					description = $4,
+					assignee = $5,
+					due_date = $6
+			WHERE id = $1
+				AND org_id = $2
+		`, reqId, orgId, newData.Name, newData.Description, newData.Assignee, newData.DueDate)
+		return err
+	})
+}
+
 func LinkScheduledTaskToRequestWithTx(tx *sqlx.Tx, taskId int64, requestId int64) error {
 	_, err := tx.Exec(`
 		INSERT INTO request_to_scheduled_task_link (request_id, task_id)
@@ -90,4 +106,45 @@ func GetCodeFromScriptRequestId(reqId int64, role *core.Role) (*core.ManagedCode
 				sl.request_id IS NOT NULL)
 	`, reqId)
 	return &code, err
+}
+
+func InsertGenericApproval(approval *core.GenericApproval, role *core.Role) error {
+	rows, err := dbConn.NamedQuery(`
+		INSERT INTO generic_approval (request_id, response_time, responder_user_id, response, reason)
+		VALUES (:request_id, :response_time, :responder_user_id, :response, :reason)
+		RETURNING id
+	`, approval)
+
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+	rows.Next()
+	return rows.Scan(&approval.Id)
+}
+
+func GetGenericApprovalForRequest(requestId int64, orgId int32, role *core.Role) (*core.GenericApproval, error) {
+	rows, err := dbConn.Queryx(`
+		SELECT appr.*
+		FROM generic_approval AS appr
+		INNER JOIN generic_requests AS req
+			ON req.id = appr.request_id
+		WHERE appr.request_id = $1 
+			AND req.org_id = $2
+	`, requestId, orgId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, nil
+	}
+
+	approval := core.GenericApproval{}
+	err = rows.StructScan(&approval)
+	return &approval, err
 }

@@ -52,7 +52,7 @@
                               max-width="40%"
                     >
                         <template v-slot:activator="{ on }">
-                            <v-btn color="error" v-on="on">
+                            <v-btn color="warning" v-on="on">
                                 Delete
                             </v-btn>
                         </template>
@@ -67,17 +67,55 @@
                     </v-dialog>
                 </v-list-item-action>
 
-                <v-list-item-action class="ml-4">
-                    <v-btn
-                        color="warning"
-                    >
-                        Deny
-                    </v-btn>
+                <v-list-item-action class="ml-4" v-if="!approval">
+                    <v-dialog persistent max-width="40%" v-model="showHideDenyReason">
+                        <template v-slot:activator="{on}">
+                            <v-btn 
+                                color="error"
+                                v-on="on"
+                            >
+                                Deny
+                            </v-btn>
+                        </template>
+
+                        <v-card>
+                            <v-card-title>
+                                Denial Reason
+                            </v-card-title>
+                            <v-divider></v-divider>
+
+                            <div class="ma-4">
+                                <v-textarea v-model="denyReason"
+                                            label="Reason"
+                                            filled
+                                            hide-details
+                                ></v-textarea> 
+                            </div>
+
+                            <v-card-actions>
+                                <v-btn
+                                    color="error"
+                                    @click="showHideDenyReason = false"
+                                >
+                                    Cancel
+                                </v-btn>
+                                <v-spacer></v-spacer>
+                                <v-btn
+                                    color="success"
+                                    @click="onApproveDeny(false, denyReason)"
+                                >
+                                    Save
+                                </v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
+
                 </v-list-item-action>
 
-                <v-list-item-action>
+                <v-list-item-action v-if="!approval">
                     <v-btn
                         color="success"
+                        @click="onApproveDeny(true)"
                     >
                         Approve
                     </v-btn>
@@ -96,8 +134,41 @@
                                 </v-card-title>
                                 <v-divider></v-divider>
 
-                                <create-new-generic-request-form>
+                                <create-new-generic-request-form
+                                    ref="editForm"
+                                    class="ma-4"
+                                    v-model="req"
+                                    :valid.sync="requestValid"
+                                    :readonly="!canEditRequest"
+                                >
                                 </create-new-generic-request-form>
+
+                                <v-card-actions>
+                                    <v-btn
+                                        color="error"
+                                        @click="cancelEditRequest"
+                                        v-if="canEditRequest"
+                                    >
+                                        Cancel
+                                    </v-btn>
+                                    <v-spacer></v-spacer>
+                                    <v-btn
+                                        color="success"
+                                        @click="saveEditRequest"
+                                        :disabled="!requestValid"
+                                        v-if="canEditRequest"
+                                    >
+                                        Save
+                                    </v-btn>
+
+                                    <v-btn
+                                        color="success"
+                                        @click="canEditRequest = true"
+                                        v-if="!canEditRequest"
+                                    >
+                                        Edit
+                                    </v-btn>
+                                </v-card-actions>
                             </v-card>
 
                             <v-card class="mt-4" v-if="!!schedule">
@@ -109,23 +180,19 @@
                                 <create-scheduled-event-form
                                     class="ma-4"
                                     :value="schedule"
-                                    readonly
                                     no-name
+                                    readonly
                                 >
                                 </create-scheduled-event-form>
+
                             </v-card>
                         </v-col>
 
                         <v-col cols="5">
-                            <v-card>
-                                <v-card-title>
-                                    Approval
-                                </v-card-title>
-                                <v-divider></v-divider>
-
-                                <generic-approval-display>
-                                </generic-approval-display>
-                            </v-card>
+                            <generic-approval-display
+                                :approval="approval"
+                            >
+                            </generic-approval-display>
 
                             <v-card class="mt-4">
                                 <v-card-title>
@@ -167,6 +234,8 @@ import { PageParamsStore } from '../../../ts/pageParams'
 import {
     getGenericRequestScript, TGetGenericRequestScriptOutput,
     getGenericRequest, TGetGenericRequestOutput,
+    editGenericRequest,
+    approveDenyGenericRequest, TApproveDenyRequestOutput
 } from '../../../ts/api/apiRequests'
 import { contactUsUrl, createSingleScriptUrl } from '../../../ts/url'
 import { ClientScript } from '../../../ts/clientScripts'
@@ -207,6 +276,17 @@ export default class DashboardOrgSingleScriptRequest extends Vue {
     runParams : Record<string, any> = Object()
 
     showHideDelete : boolean = false
+
+    canEditRequest : boolean = false
+    requestValid : boolean = false
+    editInProgress: boolean = false
+
+    showHideDenyReason : boolean = false
+    denyReason : string = ""
+
+    $refs!: {
+        editForm: CreateNewGenericRequestForm
+    }
 
     get oneTimeStr() : string {
         return standardFormatTime(this.oneTime!)
@@ -260,9 +340,56 @@ export default class DashboardOrgSingleScriptRequest extends Vue {
     onDelete() {
     }
 
+    onApproveDeny(approve : boolean, reason : string = "") {
+        approveDenyGenericRequest({
+            orgId: PageParamsStore.state.organization!.Id,
+            requestId: this.req!.Id,
+            approve: approve,
+            reason: reason,
+        }).then((resp : TApproveDenyRequestOutput) => {
+            this.approval = resp.data
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
+    cancelEditRequest() {
+        this.canEditRequest = false
+        this.$refs.editForm.resetToRefState()
+    }
+
+    saveEditRequest() {
+        this.editInProgress = true
+        editGenericRequest({
+            orgId: PageParamsStore.state.organization!.Id,
+            requestId: this.req!.Id,
+            request: this.req!,
+        }).then(() => {
+            this.editInProgress = false
+            this.canEditRequest = false
+            this.$refs.editForm.saveRefState()
+        }).catch((err : any) => {
+            this.editInProgress = false
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
+    }
+
     mounted() {
         this.refreshData()
     }
+
 }
 
 </script>

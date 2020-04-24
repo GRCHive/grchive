@@ -12,6 +12,8 @@ import { createUserString } from '../../ts/users'
 import { GenericApproval } from '../../ts/requests'
 import { VIcon, VTooltip } from 'vuetify/lib'
 import { standardFormatTime } from '../../ts/time'
+import { getGenericApproval, TGetApprovalOutput } from '../../ts/api/apiRequests'
+import { PageParamsStore } from '../../ts/pageParams'
 
 @Component({
     components: {
@@ -75,6 +77,20 @@ export default class GenericRequestTable extends ResourceTableProps {
         }
 
         this.pendingApprovalRequests.add(id)
+        getGenericApproval({
+            orgId: PageParamsStore.state.organization!.Id,
+            requestId: id,
+        }).then((resp : TGetApprovalOutput) => {
+            Vue.set(this.idToApproval, id, resp.data)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 
     transformInputResourceToTableItem(inp : any) : any {

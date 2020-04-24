@@ -1,6 +1,7 @@
 import axios from 'axios'
 import * as qs from 'query-string'
 import { getAPIRequestConfig } from './apiUtility'
+import { putFormJson, postFormJson } from '../http'
 import {
     allGenRequestScriptsUrl,
     allGenRequestsUrl
@@ -78,6 +79,52 @@ export function getGenericRequest(inp : TGetGenericRequestInput) : Promise<TGetG
         cleanGenericRequestFromJson(resp.data.Request)
         if (!!resp.data.Approval) {
             cleanGenericApprovalFromJson(resp.data.Approval)
+        }
+        return resp
+    })
+}
+
+export interface TEditGenericRequestInput {
+    requestId: number
+    orgId: number
+    request: GenericRequest
+}
+
+export function editGenericRequest(inp : TEditGenericRequestInput) : Promise<void> {
+    return putFormJson<void>(allGenRequestsUrl + `/${inp.requestId}?`, inp,  getAPIRequestConfig())
+}
+
+export interface TApproveDenyRequestInput {
+    requestId: number
+    orgId: number
+    approve: boolean
+    reason : string
+}
+
+export interface TApproveDenyRequestOutput {
+    data : GenericApproval
+}
+
+export function approveDenyGenericRequest(inp : TApproveDenyRequestInput) : Promise<TApproveDenyRequestOutput> {
+    return postFormJson<TApproveDenyRequestOutput>(allGenRequestsUrl + `/${inp.requestId}/approval`, inp,  getAPIRequestConfig()).then((resp : TApproveDenyRequestOutput) => {
+        cleanGenericApprovalFromJson(resp.data)
+        return resp
+    })
+}
+
+export interface TGetApprovalInput {
+    requestId: number
+    orgId: number
+}
+
+export interface TGetApprovalOutput {
+    data : GenericApproval | null
+}
+
+export function getGenericApproval(inp : TGetApprovalInput) : Promise<TGetApprovalOutput> {
+    return axios.get(allGenRequestsUrl + `/${inp.requestId}/approval?` + qs.stringify(inp),  getAPIRequestConfig()).then((resp : TGetApprovalOutput) => {
+        if (!!resp.data) {
+            cleanGenericApprovalFromJson(resp.data)
         }
         return resp
     })
