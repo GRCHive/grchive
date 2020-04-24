@@ -19,6 +19,15 @@ export function putFormJson<T=void>(url: string, data: Object, config : AxiosReq
 }
 
 
+export function deleteFormJson<T=void>(url: string, data: Object, config : AxiosRequestConfig) : Promise<T> {
+    if (!config.headers) {
+        config.headers = {}
+    }
+    config.headers['Content-Type'] = 'application/json'
+    config.data = data
+    return axios.delete(url, config)
+}
+
 export function postFormUrlEncoded<T=void>(url: string, data: Object, config : AxiosRequestConfig) : Promise<T> {
     if (!config.headers) {
         config.headers = {}

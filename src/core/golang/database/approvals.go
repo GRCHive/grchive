@@ -36,6 +36,18 @@ func EditGenericRequest(reqId int64, orgId int32, newData core.GenericRequest, r
 	})
 }
 
+func DeleteGenericRequest(reqId int64, orgId int32, role *core.Role) error {
+	tx := CreateTx()
+	return WrapTx(tx, func() error {
+		_, err := tx.Exec(`
+			DELETE FROM generic_requests
+			WHERE id = $1
+				AND org_id = $2
+		`, reqId, orgId)
+		return err
+	})
+}
+
 func LinkScheduledTaskToRequestWithTx(tx *sqlx.Tx, taskId int64, requestId int64) error {
 	_, err := tx.Exec(`
 		INSERT INTO request_to_scheduled_task_link (request_id, task_id)

@@ -46,7 +46,7 @@
 
                 <v-spacer></v-spacer>
 
-                <v-list-item-action>
+                <v-list-item-action v-if="!approval">
                     <v-dialog v-model="showHideDelete"
                               persistent
                               max-width="40%"
@@ -239,9 +239,14 @@ import {
     getGenericRequestScript, TGetGenericRequestScriptOutput,
     getGenericRequest, TGetGenericRequestOutput,
     editGenericRequest,
-    approveDenyGenericRequest, TApproveDenyRequestOutput
+    approveDenyGenericRequest, TApproveDenyRequestOutput,
+    deleteGenericRequest
 } from '../../../ts/api/apiRequests'
-import { contactUsUrl, createSingleScriptUrl } from '../../../ts/url'
+import {
+    contactUsUrl,
+    createSingleScriptUrl,
+    createOrgDocRequestsUrl,
+} from '../../../ts/url'
 import { ClientScript } from '../../../ts/clientScripts'
 import { ManagedCode } from '../../../ts/code'
 import { GenericRequest, GenericApproval } from '../../../ts/requests'
@@ -344,6 +349,20 @@ export default class DashboardOrgSingleScriptRequest extends Vue {
     }
 
     onDelete() {
+        deleteGenericRequest({
+            orgId: PageParamsStore.state.organization!.Id,
+            requestId: this.req!.Id,
+        }).then(() => {
+            window.location.replace(createOrgDocRequestsUrl(PageParamsStore.state.organization!.OktaGroupName))
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        })
     }
 
     onApproveDeny(approve : boolean, reason : string = "") {

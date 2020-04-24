@@ -1,7 +1,7 @@
 import axios from 'axios'
 import * as qs from 'query-string'
 import { getAPIRequestConfig } from './apiUtility'
-import { putFormJson, postFormJson } from '../http'
+import { putFormJson, postFormJson, deleteFormJson } from '../http'
 import {
     allGenRequestScriptsUrl,
     allGenRequestsUrl
@@ -128,4 +128,13 @@ export function getGenericApproval(inp : TGetApprovalInput) : Promise<TGetApprov
         }
         return resp
     })
+}
+
+export interface TDeleteGenericRequestInput {
+    requestId: number
+    orgId: number
+}
+
+export function deleteGenericRequest(inp : TDeleteGenericRequestInput) : Promise<void> {
+    return deleteFormJson<void>(allGenRequestsUrl + `/${inp.requestId}`, inp, getAPIRequestConfig())
 }

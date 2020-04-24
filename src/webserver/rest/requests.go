@@ -58,7 +58,7 @@ func getGenericRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
 	if err != nil {
 		core.Warning("Bad access: " + err.Error())
 		w.WriteHeader(http.StatusUnauthorized)
@@ -72,12 +72,19 @@ func getGenericRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	approval, err := database.GetGenericApprovalForRequest(request.Id, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to get approval for request: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	ret := struct {
 		Request  *core.GenericRequest
 		Approval *core.GenericApproval
 	}{
 		Request:  request,
-		Approval: nil,
+		Approval: approval,
 	}
 
 	jsonWriter.Encode(ret)
@@ -160,13 +167,13 @@ func getGenericRequestScript(w http.ResponseWriter, r *http.Request) {
 	jsonWriter.Encode(ret)
 }
 
-type EditGenericRequestScriptInputs struct {
+type EditGenericRequestInputs struct {
 	OrgId   int32               `json:"orgId"`
 	Request core.GenericRequest `json:"request"`
 }
 
-func editGenericRequestScript(w http.ResponseWriter, r *http.Request) {
-	inputs := EditGenericRequestScriptInputs{}
+func editGenericRequest(w http.ResponseWriter, r *http.Request) {
+	inputs := EditGenericRequestInputs{}
 	err := webcore.UnmarshalRequestForm(r, &inputs)
 	if err != nil {
 		core.Warning("Can't parse inputs: " + err.Error())
@@ -191,6 +198,41 @@ func editGenericRequestScript(w http.ResponseWriter, r *http.Request) {
 	err = database.EditGenericRequest(request.Id, inputs.OrgId, inputs.Request, role)
 	if err != nil {
 		core.Warning("Failed to edit request: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+type DeleteGenericRequestInputs struct {
+	OrgId int32 `json:"orgId"`
+}
+
+func deleteGenericRequest(w http.ResponseWriter, r *http.Request) {
+	inputs := DeleteGenericRequestInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
+	if err != nil {
+		core.Warning("Bad access: " + err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	request, ok := r.Context().Value(webcore.GenericRequestContextKey).(*core.GenericRequest)
+	if !ok || request == nil {
+		core.Warning("Failed to get request from context")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = database.DeleteGenericRequest(request.Id, inputs.OrgId, role)
+	if err != nil {
+		core.Warning("Failed to delete generic request")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

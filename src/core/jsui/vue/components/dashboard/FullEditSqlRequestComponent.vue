@@ -17,13 +17,13 @@
                     </v-list-item-subtitle>
                 </v-list-item-content>
 
-                <v-list-item-action>
+                <v-list-item-action v-if="!currentApproval">
                     <v-dialog v-model="showHideDelete"
                               persistent
                               max-width="40%"
                     >
                         <template v-slot:activator="{ on }">
-                            <v-btn color="error" v-on="on">
+                            <v-btn color="warning" v-on="on">
                                 Delete
                             </v-btn>
                         </template>
@@ -37,8 +37,6 @@
                         </generic-delete-confirmation-form>
                     </v-dialog>
                 </v-list-item-action>
-
-                <v-spacer></v-spacer>
 
                 <v-list-item-action v-if="!currentApproval">
                     <v-dialog persistent max-width="40%" v-model="showHideDenyReason">

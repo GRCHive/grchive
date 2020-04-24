@@ -26,7 +26,8 @@ func registerAPIv2RequestsPaths(r *mux.Router) {
 	singleReqRouter := s.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgScriptRequestQueryId)).Subrouter()
 	singleReqRouter.Use(webcore.CreateObtainGenericRequestInContext(core.DashboardOrgScriptRequestQueryId))
 	singleReqRouter.HandleFunc("/", getGenericRequest).Methods("GET")
-	singleReqRouter.HandleFunc("/", editGenericRequestScript).Methods("PUT")
+	singleReqRouter.HandleFunc("/", editGenericRequest).Methods("PUT")
+	singleReqRouter.HandleFunc("/", deleteGenericRequest).Methods("DELETE")
 	singleReqRouter.HandleFunc("/approval", approveDenyGenericRequest).Methods("POST")
 	singleReqRouter.HandleFunc("/approval", getGenericApproval).Methods("GET")
 }
