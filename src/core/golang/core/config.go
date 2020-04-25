@@ -123,6 +123,10 @@ type ArtifactoryConfigData struct {
 	Port int32
 }
 
+type NotificationConfig struct {
+	EnableEmail bool
+}
+
 type EnvConfigData struct {
 	SelfUri            string
 	SelfDomain         string
@@ -149,6 +153,7 @@ type EnvConfigData struct {
 	Drone              *DroneConfigData
 	Features           *FeatureFlags
 	Artifactory        *ArtifactoryConfigData
+	Notifications      *NotificationConfig
 }
 
 var EnvConfig *EnvConfigData
@@ -291,6 +296,9 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.Artifactory = new(ArtifactoryConfigData)
 	envConfig.Artifactory.Host = tomlConfig.Get("artifactory.host").(string)
 	envConfig.Artifactory.Port = int32(tomlConfig.Get("artifactory.port").(int64))
+
+	envConfig.Notifications = new(NotificationConfig)
+	envConfig.Notifications.EnableEmail = tomlConfig.Get("notifications.enable_email").(bool)
 
 	return envConfig
 }

@@ -45,6 +45,10 @@ func receiveNotification(data []byte) *webcore.RabbitMQError {
 }
 
 func sendNotification(notification *core.Notification, users []*core.User) error {
+	if !core.EnvConfig.Notifications.EnableEmail {
+		return nil
+	}
+
 	emailTemplate, err := template.ParseFiles("src/webserver/templates/email/notification.tmpl")
 	if err != nil {
 		return err

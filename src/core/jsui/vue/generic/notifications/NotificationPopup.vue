@@ -6,6 +6,7 @@
                 force-unread-display
                 enable-close
                 @close="close"
+                @onready="onready"
             >
             </notification-display>
         </v-card>
@@ -36,6 +37,10 @@ const Props = Vue.extend({
 export default class NotificationPopup extends Props {
     close() {
         NotificationStore.commit('removeRecentNotification', this.notification.Notification.Id)
+    }
+
+    onready() {
+        this.$emit('onready')
     }
 }
 

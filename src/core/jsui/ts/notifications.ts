@@ -66,7 +66,7 @@ function connectWebsocket(context : any, host : string) {
         })
 }
 
-const browserNotificationTimeMs = 5000
+const browserNotificationTimeMs = 100000
 
 const notificationStoreOptions: StoreOptions<NotificationStoreState> = {
     state: {

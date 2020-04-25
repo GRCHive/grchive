@@ -6,6 +6,7 @@
             :notification="item"
             :style="styles[index]"
             :ref="`popup${index}`"
+            @onready="recomputeHeightForNotification(index)"
         >
         </notification-popup>
     </div>
@@ -31,12 +32,16 @@ export default class NotificationPopupManager extends Vue {
     recomputeNotificationHeights() {
         this.notificationHeights = this.recentNotifications.map(() => 80)
 
+        for (let i = 0; i < this.notificationHeights.length; ++i) {
+            this.recomputeHeightForNotification(i)
+        }
+    }
+
+    recomputeHeightForNotification(i : number) {
         Vue.nextTick(() => {
-            for (let i = 0; i < this.notificationHeights.length; ++i) {
-                //@ts-ignore
-                let ele : HTMLElement = this.$refs[`popup${i}`][0].$el
-                this.notificationHeights[i] = ele.offsetHeight;
-            }
+            //@ts-ignore
+            let ele : HTMLElement = this.$refs[`popup${i}`][0].$el
+            Vue.set(this.notificationHeights, i, ele.offsetHeight)
         })
     }
 

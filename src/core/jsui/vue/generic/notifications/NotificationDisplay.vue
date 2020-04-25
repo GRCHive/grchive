@@ -43,6 +43,7 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import { NotificationWrapper } from '../../../ts/notifications'
 import { ResourceHandle, resourceTypeToIcon } from '../../../ts/resourceUtils'
 import { TGetResourceHandleOutput , getResourceHandle } from '../../../ts/api/apiResources'
@@ -116,6 +117,14 @@ export default class NotificationDisplay extends Props {
         return (!!this.subjectHandle || this.notification.Notification.SubjectType == "") && 
             (!!this.objectHandle || this.notification.Notification.ObjectType == "") &&
             (!!this.indirectObjectHandle || this.notification.Notification.IndirectObjectType == "")
+    }
+
+    @Watch('ready')
+    onReady() {
+        if (!this.ready) {
+            return
+        }
+        this.$emit('onready')
     }
 
     get timestampStr() : string {
