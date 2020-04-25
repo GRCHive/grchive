@@ -423,6 +423,28 @@ If you wish to run the Docker container:
 
 - `bazel run //devops/docker/database_query_runner:docker_database_query_runner`
 
+## Build and Run Task Manager
+
+The task manager is the microservice that makes sure user scripts get run at the requested time(s).
+
+- `cd $SRC`
+- `bazel build //src/task_manager:bin`
+- `bazel run //src/task_manager:bin`
+
+For debugging purposes, it may be useful to use the `-mul` and `-log` flags.
+The `-mul` flag sets a time multiplier (e.g. `-mul 2` means that every second will actually tick 2 seconds starting at the current time) and `-log` will print out extra data to stdout.
+
+## Build and Run Script Runner
+
+The script runner receives data about a script/JAR to run and runs it.
+It handles spinning up a docker container to run the JAR and make sure it gets linked to our core library.
+
+- `cd $SRC`
+- `bazel build //src/script_runner:frontend`
+- `SCRIPT_RUNNER_NETWORK=c3p0 bazel run //src/script_runner:frontend`
+
+Note that the environment variable is necessary to ensure that the Docker containers that get spawned have access to the PostgreSQL database as well as the other services we are running.
+
 ## Run Tests
 
 - `cd $SRC`
