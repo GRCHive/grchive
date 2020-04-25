@@ -5,11 +5,8 @@ import (
 	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
-	//drone "gitlab.com/grchive/grchive/drone_api"
-	//gitea "gitlab.com/grchive/grchive/gitea_api"
 	"gitlab.com/grchive/grchive/webcore"
 	"net/http"
-	//"strconv"
 	"time"
 )
 
@@ -498,10 +495,53 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 		jsonWriter.Encode(req.Id)
 	} else {
 		if inputs.ApprovalId.NullInt64.Valid {
+			approval, err := database.GetGenericApprovalFromId(inputs.ApprovalId.NullInt64.Int64)
+			if err != nil {
+				core.Warning("Failed to get approval: " + err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			// If there isn't a valid run already then we need to create a new script run to track
+			// this job. Scheduled jobs don't have a run id attached to them until it reaches this
+			// point when called by the task manager.
+			var runId int64
+			if inputs.RunId.NullInt64.Valid {
+				runId = inputs.RunId.NullInt64.Int64
+			} else {
+				run, err := database.CreateScriptRun(
+					code.Id,
+					inputs.OrgId,
+					script.Id,
+					inputs.Latest,
+					inputs.Params,
+					inputs.ScheduledTaskId,
+					role,
+				)
+
+				if err != nil {
+					core.Warning("Failed to creat script run: " + err.Error())
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				runId = run.Id
+			}
+
 			// If an approval ID is specified, then that should indicate that a run was authorized.
 			// Double check that's actually the case before firing off the job. Note that a run
 			// can either be authorized via an immediate run or via a scheduled run which is a slight
-			// difference in how they get approved (in terms of what gets changed in the database).
+			// difference in how they get approved (in terms of what gets changed in the database). Note
+			// that this endpoint is only going to be hit in the case where the script was scheduled to run.
+			err = webcore.RunAuthorizedScriptImmediate(
+				runId,
+				*approval,
+			)
+
+			if err != nil {
+				core.Warning("Failed to run script: " + err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 		} else {
 			// Create a run request for an immediate one-time run.
 			// Create a DB entry to track the run.
@@ -547,66 +587,6 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 			jsonWriter.Encode(req.Id)
 		}
 	}
-
-	//if inputs.Latest {
-	//	repo, err := database.GetLinkedGiteaRepository(inputs.OrgId)
-	//	if err != nil {
-	//		core.Warning("Failed to get linked Gitea repository: " + err.Error())
-	//		w.WriteHeader(http.StatusInternalServerError)
-	//		return
-	//	}
-
-	//	// In this case, we need to fire off a Drone CI job to compile the latest code + the current script revision.
-	//	// We must specify branch/commit here due to a Gitea issue with the /repos/{owner}/{repo}/commits/{ref} API endpoint
-	//	// that Drone uses to find the latest commit of the branch. This endpoint doesn't work in Gitea so we need to specify the
-	//	// commit directly.
-	//	commitSha, err := gitea.GlobalGiteaApi.RepositoryGitGetRefSha(
-	//		gitea.GiteaRepository{
-	//			Owner: repo.GiteaOrg,
-	//			Name:  repo.GiteaRepo,
-	//		},
-	//		"refs/heads/master",
-	//	)
-
-	//	if err != nil {
-	//		core.Warning("Failed to get latest Git commit: " + err.Error())
-	//		w.WriteHeader(http.StatusInternalServerError)
-	//		return
-	//	}
-
-	//	err = drone.GlobalDroneApi.BuildCreate(repo.GiteaOrg, repo.GiteaRepo, map[string]string{
-	//		"branch":     "master",
-	//		"commit":     commitSha,
-	//		"SCRIPT_RUN": strconv.FormatInt(run.Id, 10),
-	//	})
-
-	//	if err != nil {
-	//		core.Warning("Failed to create Drone build: " + err.Error())
-	//		w.WriteHeader(http.StatusInternalServerError)
-	//		return
-	//	}
-	//} else {
-	//	// Grab JAR path from drone CI since that's the only place we store it.
-	//	// This is hitting the same DB table as the GetCodeBuildStatus call earlier, can we merge it somehow?
-	//	jar, err := database.GetCodeJar(code.Id, code.OrgId, role)
-	//	if err != nil {
-	//		core.Warning("Failed to get JAR for code: " + err.Error())
-	//		w.WriteHeader(http.StatusInternalServerError)
-	//		return
-	//	}
-
-	//	// In this case, we can directly send off a request to make the script runner run this script.
-	//	webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
-	//		Exchange: webcore.DEFAULT_EXCHANGE,
-	//		Queue:    webcore.SCRIPT_RUNNER_QUEUE,
-	//		Body: webcore.ScriptRunnerMessage{
-	//			RunId: run.Id,
-	//			Jar:   jar,
-	//		},
-	//	})
-	//}
-
-	//jsonWriter.Encode(run.Id)
 }
 
 type AllCodeRunsInput struct {

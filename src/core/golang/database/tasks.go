@@ -88,7 +88,13 @@ func getScheduledTasksHelper(role *core.Role, condition string, args ...interfac
 			ON ot.event_id = t.id
 		LEFT JOIN recurring_tasks AS rt
 			ON rt.event_id = t.id
-		%s
+		LEFT JOIN request_to_scheduled_task_link AS stl
+			ON stl.task_id = t.id
+		LEFT JOIN generic_approval AS appr
+			ON appr.request_id = stl.request_id
+		WHERE
+			(appr.response = true)
+			%s
 	`, condition), args...)
 
 	if err != nil {
@@ -179,5 +185,41 @@ func GetAllScheduledTasks(role *core.Role) ([]*core.FullScheduledTask, error) {
 }
 
 func GetAllScheduledTasksForOrgId(orgId int32, role *core.Role) ([]*core.FullScheduledTask, error) {
-	return getScheduledTasksHelper(role, "WHERE t.org_id = $1", orgId)
+	return getScheduledTasksHelper(role, "AND t.org_id = $1", orgId)
+}
+
+func GetSingleTask(taskId int64, role *core.Role) (*core.FullScheduledTask, error) {
+	tasks, err := getScheduledTasksHelper(role, "AND t.id = $1", taskId)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(tasks) == 0 {
+		return nil, nil
+	}
+
+	return tasks[0], nil
+}
+
+func AddDataToTaskPayload(taskId int64, data map[string]interface{}) error {
+	rawData, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	tx := CreateTx()
+	err = WrapTx(tx, func() error {
+		_, err := tx.Exec(`
+			UPDATE scheduled_tasks
+			SET task_data = task_data || jsonb_build_object('Payload', task_data #> '{Payload}' || $2::jsonb)
+			WHERE id = $1
+		`, taskId, rawData)
+		return err
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

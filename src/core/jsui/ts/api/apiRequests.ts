@@ -105,8 +105,8 @@ export interface TApproveDenyRequestOutput {
     data : GenericApproval
 }
 
-export function approveDenyGenericRequest(inp : TApproveDenyRequestInput) : Promise<TApproveDenyRequestOutput> {
-    return postFormJson<TApproveDenyRequestOutput>(allGenRequestsUrl + `/${inp.requestId}/approval`, inp,  getAPIRequestConfig()).then((resp : TApproveDenyRequestOutput) => {
+export function approveDenyScriptRequest(inp : TApproveDenyRequestInput) : Promise<TApproveDenyRequestOutput> {
+    return postFormJson<TApproveDenyRequestOutput>(allGenRequestScriptsUrl + `/${inp.requestId}/approval`, inp,  getAPIRequestConfig()).then((resp : TApproveDenyRequestOutput) => {
         cleanGenericApprovalFromJson(resp.data)
         return resp
     })

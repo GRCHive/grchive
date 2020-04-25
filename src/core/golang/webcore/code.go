@@ -1,11 +1,14 @@
 package webcore
 
 import (
+	"errors"
 	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
-	"gitlab.com/grchive/grchive/gitea_api"
+	drone "gitlab.com/grchive/grchive/drone_api"
+	gitea "gitlab.com/grchive/grchive/gitea_api"
 	"gopkg.in/yaml.v2"
+	"strconv"
 )
 
 func GetManagedCodeFromGitea(codeId int64, orgId int32, role *core.Role) (string, error) {
@@ -119,4 +122,89 @@ func GenerateScriptMetadataYaml(params []*core.CodeParameter, clientDataId []int
 	}
 
 	return string(data), nil
+}
+
+func RunAuthorizedScriptImmediate(runId int64, approval core.GenericApproval) error {
+	if !approval.Response {
+		return errors.New("Script run not approved.")
+	}
+
+	run, err := database.GetScriptRun(runId, core.ServerRole)
+	if err != nil {
+		return err
+	}
+
+	code, err := database.GetCodeFromScriptCodeLink(run.LinkId, core.ServerRole)
+	if err != nil {
+		return err
+	}
+
+	if run.RequiresBuild {
+		repo, err := database.GetLinkedGiteaRepository(code.OrgId)
+		if err != nil {
+			return err
+		}
+
+		// In this case, we need to fire off a Drone CI job to compile the latest code + the current script revision.
+		// We must specify branch/commit here due to a Gitea issue with the /repos/{owner}/{repo}/commits/{ref} API endpoint
+		// that Drone uses to find the latest commit of the branch. This endpoint doesn't work in Gitea so we need to specify the
+		// commit directly.
+		commitSha, err := gitea.GlobalGiteaApi.RepositoryGitGetRefSha(
+			gitea.GiteaRepository{
+				Owner: repo.GiteaOrg,
+				Name:  repo.GiteaRepo,
+			},
+			"refs/heads/master",
+		)
+
+		if err != nil {
+			return err
+		}
+
+		err = drone.GlobalDroneApi.BuildCreate(repo.GiteaOrg, repo.GiteaRepo, map[string]string{
+			"branch":     "master",
+			"commit":     commitSha,
+			"SCRIPT_RUN": strconv.FormatInt(run.Id, 10),
+		})
+
+		if err != nil {
+			return err
+		}
+	} else {
+		// Grab JAR path from drone CI since that's the only place we store it.
+		// This is hitting the same DB table as the GetCodeBuildStatus call earlier, can we merge it somehow?
+		jar, err := database.GetCodeJar(code.Id, code.OrgId, core.ServerRole)
+		if err != nil {
+			return err
+		}
+
+		// In this case, we can directly send off a request to make the script runner run this script.
+		DefaultRabbitMQ.SendMessage(PublishMessage{
+			Exchange: DEFAULT_EXCHANGE,
+			Queue:    SCRIPT_RUNNER_QUEUE,
+			Body: ScriptRunnerMessage{
+				RunId: run.Id,
+				Jar:   jar,
+			},
+		})
+	}
+	return nil
+}
+
+// A bit of a misnomer, should just be called when the scheduled script run
+// gets approved.
+func RunAuthorizedScriptScheduled(taskId int64, approval core.GenericApproval) error {
+	if !approval.Response {
+		return errors.New("Script run not approved.")
+	}
+
+	DefaultRabbitMQ.SendMessage(PublishMessage{
+		Exchange: DEFAULT_EXCHANGE,
+		Queue:    TASK_MANAGER_QUEUE,
+		Body: TaskManagerMessage{
+			Action: "Add",
+			TaskId: taskId,
+		},
+	})
+	return nil
 }

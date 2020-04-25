@@ -18,8 +18,8 @@ type ScheduledTaskMetadata struct {
 	Description   string      `db:"description"`
 	OrgId         int32       `db:"org_id"`
 	UserId        int64       `db:"user_id"`
-	TaskType      TaskType    `db:"task_type" json:"-"`
-	TaskData      interface{} `db:"task_data" json:"-"`
+	TaskType      TaskType    `db:"task_type"`
+	TaskData      interface{} `db:"task_data"`
 	ScheduledTime time.Time   `db:"scheduled_time"`
 }
 

@@ -56,3 +56,29 @@ func CreateJobFromTaskMetadata(task core.ScheduledTaskMetadata, schedule *Schedu
 
 	return &job, nil
 }
+
+func createJob(t core.ScheduledTaskMetadata, oneTime *core.ScheduledTaskOneTime, recurring *core.ScheduledTaskRecurrence, c core.Clock) (*Job, error) {
+	var schedule *Schedule
+	var err error
+	if oneTime != nil {
+		schedule, err = CreateOneTimeJobSchedule(oneTime, c)
+	} else if recurring != nil {
+		schedule, err = CreateRecurringJobSchedule(recurring, c)
+	} else {
+		return nil, errors.New("No job schedule found.")
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if schedule == nil {
+		return nil, nil
+	}
+
+	job, err := CreateJobFromTaskMetadata(t, schedule)
+	if err != nil {
+		return nil, err
+	}
+	return job, nil
+}

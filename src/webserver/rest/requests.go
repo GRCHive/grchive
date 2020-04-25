@@ -244,7 +244,7 @@ type ApproveDenyGenericRequestInputs struct {
 	Reason  string `json:"reason"`
 }
 
-func approveDenyGenericRequest(w http.ResponseWriter, r *http.Request) {
+func approveDenyScriptRunRequest(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -283,6 +283,59 @@ func approveDenyGenericRequest(w http.ResponseWriter, r *http.Request) {
 		core.Warning("Failed to insert generic approval: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+
+	if approval.Response {
+		// Trigger attached script run job -it's either gonna be an immediate run or
+		// a scheduled run so figure that out first before calling the right fn to
+		// dispatch the job.
+		typ, err := database.GetGenericRequestType(request.Id)
+		if err != nil {
+			core.Warning("Failed to get request type: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		switch typ {
+		case core.KGenReqImmediateScript:
+			runId, err := database.GetScriptRunIdLinkedToGenericRequest(request.Id)
+			if err != nil {
+				core.Warning("Failed to get run id linked to request: " + err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			err = webcore.RunAuthorizedScriptImmediate(runId, approval)
+		case core.KGenReqScheduledScript:
+			taskId, err := database.GetTaskIdLinkedToGenericRequest(request.Id)
+			if err != nil {
+				core.Warning("Failed to get task id linked to request: " + err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			// Modify task to have RunId and ApprovalId in its payload before
+			// notifying the task manager to pick up the task.
+			err = database.AddDataToTaskPayload(taskId, map[string]interface{}{
+				"approvalId": approval.Id,
+			})
+			if err != nil {
+				core.Warning("Failed to modify task payload: " + err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			err = webcore.RunAuthorizedScriptScheduled(taskId, approval)
+		default:
+			core.Warning("Invalid request type")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		if err != nil {
+			core.Warning("Failed to start script job: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	jsonWriter.Encode(approval)

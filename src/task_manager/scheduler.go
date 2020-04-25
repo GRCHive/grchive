@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"gitlab.com/grchive/grchive/core"
+	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/webcore"
 	"sync"
 	"time"
 )
@@ -83,4 +86,42 @@ func (s *Scheduler) RemoveJob(jobId int64) {
 	s.jobMutex.Lock()
 	defer s.jobMutex.Unlock()
 	delete(s.jobs, jobId)
+}
+
+func (s *Scheduler) handleRabbitMQMessage(data []byte) *webcore.RabbitMQError {
+	msg := webcore.TaskManagerMessage{}
+	core.Info("RUN SCRIPT: " + string(data))
+	err := json.Unmarshal(data, &msg)
+	if err != nil {
+		return &webcore.RabbitMQError{err, false}
+	}
+
+	task, err := database.GetSingleTask(msg.TaskId, core.ServerRole)
+	if err != nil {
+		return &webcore.RabbitMQError{err, false}
+	}
+
+	if task == nil {
+		return &webcore.RabbitMQError{errors.New("Failed to find task."), false}
+	}
+
+	if msg.Action == "Add" {
+		// Using the task that came in the message since I'm sure about the eventual
+		// consistency possibilities related to any writes that might've happened on the database.
+		job, err := createJob(task.Metadata, task.OneTime, task.Recurring, s.Clock)
+		if err != nil {
+			return &webcore.RabbitMQError{err, false}
+		}
+
+		err = s.AddJob(job)
+		if err != nil {
+			return &webcore.RabbitMQError{err, false}
+		}
+	} else if msg.Action == "Delete" {
+		s.RemoveJob(msg.TaskId)
+	} else {
+		return &webcore.RabbitMQError{errors.New("Unsupported action: " + msg.Action), false}
+	}
+
+	return nil
 }

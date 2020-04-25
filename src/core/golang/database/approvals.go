@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
 )
@@ -70,6 +71,61 @@ func LinkScriptRunToRequestWithTx(tx *sqlx.Tx, runId int64, requestId int64) err
 		VALUES ($2, $1)
 	`, runId, requestId)
 	return err
+}
+
+func GetGenericRequestType(requestId int64) (core.GenericRequestType, error) {
+	rows, err := dbConn.Queryx(`
+		SELECT run.run_id, task.task_id
+		FROM generic_requests AS req
+		LEFT JOIN request_to_script_run_link AS run
+			ON run.request_id = req.id
+		LEFT JOIN request_to_scheduled_task_link AS task
+			ON task.request_id = req.id
+		WHERE req.id = $1
+	`, requestId)
+	if err != nil {
+		return core.KGenReqInvalid, err
+	}
+
+	defer rows.Close()
+	rows.Next()
+
+	data := map[string]interface{}{}
+	err = rows.MapScan(data)
+	if err != nil {
+		return core.KGenReqInvalid, err
+	}
+
+	if data["run_id"] != nil {
+		return core.KGenReqImmediateScript, nil
+	} else if data["task_id"] != nil {
+		return core.KGenReqScheduledScript, nil
+	}
+	return core.KGenReqInvalid, errors.New("Unknown request type.")
+}
+
+func GetScriptRunIdLinkedToGenericRequest(requestId int64) (int64, error) {
+	runId := int64(0)
+	err := dbConn.Get(&runId, `
+		SELECT run.run_id
+		FROM generic_requests AS req
+		LEFT JOIN request_to_script_run_link AS run
+			ON run.request_id = req.id
+		WHERE req.id = $1
+	`, requestId)
+	return runId, err
+}
+
+func GetTaskIdLinkedToGenericRequest(requestId int64) (int64, error) {
+	runId := int64(0)
+	err := dbConn.Get(&runId, `
+		SELECT task.task_id
+		FROM generic_requests AS req
+		LEFT JOIN request_to_scheduled_task_link AS task
+			ON task.request_id = req.id
+		WHERE req.id = $1
+	`, requestId)
+	return runId, err
 }
 
 func GetGenericRequestsForScriptsInOrg(orgId int32, role *core.Role) ([]*core.GenericRequest, error) {
@@ -142,6 +198,16 @@ func InsertGenericApproval(approval *core.GenericApproval, role *core.Role) erro
 	defer rows.Close()
 	rows.Next()
 	return rows.Scan(&approval.Id)
+}
+
+func GetGenericApprovalFromId(approvalId int64) (*core.GenericApproval, error) {
+	approval := core.GenericApproval{}
+	err := dbConn.Get(&approval, `
+		SELECT *
+		FROM generic_approval
+		WHERE id = $1
+	`, approvalId)
+	return &approval, err
 }
 
 func GetGenericApprovalForRequest(requestId int64, orgId int32, role *core.Role) (*core.GenericApproval, error) {

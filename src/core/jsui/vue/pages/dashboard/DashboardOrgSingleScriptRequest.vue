@@ -239,7 +239,7 @@ import {
     getGenericRequestScript, TGetGenericRequestScriptOutput,
     getGenericRequest, TGetGenericRequestOutput,
     editGenericRequest,
-    approveDenyGenericRequest, TApproveDenyRequestOutput,
+    approveDenyScriptRequest, TApproveDenyRequestOutput,
     deleteGenericRequest
 } from '../../../ts/api/apiRequests'
 import {
@@ -366,7 +366,7 @@ export default class DashboardOrgSingleScriptRequest extends Vue {
     }
 
     onApproveDeny(approve : boolean, reason : string = "") {
-        approveDenyGenericRequest({
+        approveDenyScriptRequest({
             orgId: PageParamsStore.state.organization!.Id,
             requestId: this.req!.Id,
             approve: approve,

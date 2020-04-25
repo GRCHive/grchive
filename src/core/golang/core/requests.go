@@ -31,3 +31,11 @@ func (r *GenericRequest) UnmarshalJSON(data []byte) error {
 func (r *GenericApproval) UnmarshalJSON(data []byte) error {
 	return FlexibleJsonStructUnmarshal(data, r)
 }
+
+type GenericRequestType int32
+
+const (
+	KGenReqInvalid GenericRequestType = iota
+	KGenReqImmediateScript
+	KGenReqScheduledScript
+)

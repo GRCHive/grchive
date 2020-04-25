@@ -17,6 +17,7 @@ const FILE_PREVIEW_QUEUE string = "filepreview"
 const DATABASE_REFRESH_QUEUE string = "dbrefresh"
 const EVENT_NOTIFICATION_QUEUE string = "eventnotification"
 const SCRIPT_RUNNER_QUEUE string = "scriptrun"
+const TASK_MANAGER_QUEUE string = "taskmanager"
 
 const (
 	NotificationQueueId int = iota
@@ -67,6 +68,11 @@ type ScriptRunnerMessage struct {
 	Jar   string
 }
 
+type TaskManagerMessage struct {
+	Action string
+	TaskId int64
+}
+
 type RecvMsgFn func([]byte) *RabbitMQError
 
 func SetupChannel(channel *amqp.Channel, cfg MQClientConfig, idx int, isConsume bool) *AmqpChannelWrapper {
@@ -115,6 +121,19 @@ func SetupChannel(channel *amqp.Channel, cfg MQClientConfig, idx int, isConsume 
 
 	if err != nil {
 		core.Error("Failed to declare script runner queue: " + err.Error())
+	}
+
+	_, err = channel.QueueDeclare(
+		TASK_MANAGER_QUEUE, // name
+		true,               // durable
+		false,              // auto delete
+		false,              // exclusive
+		false,              // no wait
+		nil,                // arguments
+	)
+
+	if err != nil {
+		core.Error("Failed to declare task manager queue: " + err.Error())
 	}
 
 	//
