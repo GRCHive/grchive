@@ -85,11 +85,13 @@ func main() {
 
 	core.Debug("Database Init Listeners")
 	database.InitListeners(map[string]database.ListenHandler{
-		database.NotifyChannelControlOwner:       onNotifyControlOwnerChange,
-		database.NotifyChannelDocRequestAssignee: onNotifyDocRequestAssigneeChange,
-		database.NotifyChannelDocRequestStatus:   onNotifyDocRequestStatusChange,
-		database.NotifyChannelSqlRequestAssignee: onNotifySqlRequestAssigneeChange,
-		database.NotifyChannelSqlRequestStatus:   onNotifySqlRequestApprovalChange,
+		database.NotifyChannelControlOwner:           onNotifyControlOwnerChange,
+		database.NotifyChannelDocRequestAssignee:     onNotifyDocRequestAssigneeChange,
+		database.NotifyChannelDocRequestStatus:       onNotifyDocRequestStatusChange,
+		database.NotifyChannelSqlRequestAssignee:     onNotifySqlRequestAssigneeChange,
+		database.NotifyChannelSqlRequestStatus:       onNotifySqlRequestApprovalChange,
+		database.NotifyChannelGenericRequestAssignee: onNotifyGenericRequestAssigneeChange,
+		database.NotifyChannelGenericRequestStatus:   onNotifyGenericRequestApprovalChange,
 	})
 
 	core.Debug("Render Init")

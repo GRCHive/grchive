@@ -17,6 +17,8 @@
                     </v-list-item-subtitle>
                 </v-list-item-content>
 
+                <v-spacer></v-spacer>
+
                 <v-list-item-action v-if="!currentApproval">
                     <v-dialog v-model="showHideDelete"
                               persistent
@@ -37,8 +39,8 @@
                         </generic-delete-confirmation-form>
                     </v-dialog>
                 </v-list-item-action>
-
-                <v-list-item-action v-if="!currentApproval">
+                
+                <v-list-item-action v-if="!currentApproval" class="ml-4">
                     <v-dialog persistent max-width="40%" v-model="showHideDenyReason">
                         <template v-slot:activator="{on}">
                             <v-btn 

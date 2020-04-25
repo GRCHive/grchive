@@ -42,6 +42,7 @@ const (
 	SingleDocumentationRouteName   = "SingleDocumentation"
 	SingleClientDataRouteName      = "SingleClientData"
 	SingleClientScriptRouteName    = "SingleClientScript"
+	SingleGenericRequestRouteName  = " GenericRequest"
 	// Api
 	ApiRunCodeRouteName = "ApiRunCode"
 )

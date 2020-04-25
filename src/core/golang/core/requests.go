@@ -23,3 +23,11 @@ type GenericApproval struct {
 	Response        bool      `db:"response"`
 	Reason          string    `db:"reason"`
 }
+
+func (r *GenericRequest) UnmarshalJSON(data []byte) error {
+	return FlexibleJsonStructUnmarshal(data, r)
+}
+
+func (r *GenericApproval) UnmarshalJSON(data []byte) error {
+	return FlexibleJsonStructUnmarshal(data, r)
+}

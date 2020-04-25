@@ -21,7 +21,11 @@ func CreateGenericRequestWithTx(tx *sqlx.Tx, req *core.GenericRequest) error {
 }
 
 func EditGenericRequest(reqId int64, orgId int32, newData core.GenericRequest, role *core.Role) error {
-	tx := CreateTx()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
 	return WrapTx(tx, func() error {
 		_, err := tx.Exec(`
 			UPDATE generic_requests
@@ -37,7 +41,11 @@ func EditGenericRequest(reqId int64, orgId int32, newData core.GenericRequest, r
 }
 
 func DeleteGenericRequest(reqId int64, orgId int32, role *core.Role) error {
-	tx := CreateTx()
+	tx, err := CreateAuditTrailTx(role)
+	if err != nil {
+		return err
+	}
+
 	return WrapTx(tx, func() error {
 		_, err := tx.Exec(`
 			DELETE FROM generic_requests
@@ -161,13 +169,21 @@ func GetGenericApprovalForRequest(requestId int64, orgId int32, role *core.Role)
 	return &approval, err
 }
 
-func InsertGenericRequestComment(requestId int64, comment *core.Comment, role *core.Role) error {
+func GetGenericRequestCommentThreadId(requestId int64, role *core.Role) (int64, error) {
 	threadId := int64(0)
 	err := dbConn.Get(&threadId, `
 		SELECT thread_id
 		FROM generic_request_comment_threads
 		WHERE request_id = $1
 	`, requestId)
+	if err != nil {
+		return -1, err
+	}
+	return threadId, nil
+}
+
+func InsertGenericRequestComment(requestId int64, comment *core.Comment, role *core.Role) error {
+	threadId, err := GetGenericRequestCommentThreadId(requestId, role)
 	if err != nil {
 		return err
 	}

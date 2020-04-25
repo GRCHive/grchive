@@ -211,3 +211,84 @@ func onNotifySqlRequestApprovalChange(data string) error {
 
 	return nil
 }
+
+type GenericRequestEvent struct {
+	User       core.User
+	Request    core.GenericRequest
+	OldRequest core.GenericRequest
+}
+
+func onNotifyGenericRequestAssigneeChange(data string) error {
+	parsedData := GenericRequestEvent{}
+	err := json.Unmarshal([]byte(data), &parsedData)
+	if err != nil {
+		return err
+	}
+
+	if parsedData.Request.Assignee.NullInt64.Valid {
+		assignedToUser, err := database.FindUserFromId(parsedData.Request.Assignee.NullInt64.Int64)
+		if err != nil {
+			return err
+		}
+
+		webcore.SendEventToRabbitMQ(core.Event{
+			Subject:        parsedData.User,
+			Verb:           core.VerbAssign,
+			Object:         parsedData.Request,
+			IndirectObject: assignedToUser,
+			Timestamp:      time.Now().UTC(),
+		})
+	}
+
+	if parsedData.OldRequest.Assignee.NullInt64.Valid && parsedData.Request.Assignee != parsedData.OldRequest.Assignee {
+		assignedToUser, err := database.FindUserFromId(parsedData.OldRequest.Assignee.NullInt64.Int64)
+		if err != nil {
+			return err
+		}
+
+		webcore.SendEventToRabbitMQ(core.Event{
+			Subject:        parsedData.User,
+			Verb:           core.VerbUnassign,
+			Object:         parsedData.Request,
+			IndirectObject: assignedToUser,
+			Timestamp:      time.Now().UTC(),
+		})
+	}
+
+	return nil
+}
+
+type GenericRequestApprovalEvent struct {
+	User     core.User
+	Approval core.GenericApproval
+}
+
+func onNotifyGenericRequestApprovalChange(data string) error {
+	parsedData := GenericRequestApprovalEvent{}
+	err := json.Unmarshal([]byte(data), &parsedData)
+	if err != nil {
+		return err
+	}
+
+	request, err := database.GetGenericRequestFromId(parsedData.Approval.RequestId)
+	if err != nil {
+		return err
+	}
+
+	var verb core.EventVerb
+	if parsedData.Approval.Response {
+		verb = core.VerbApprove
+	} else {
+		verb = core.VerbReject
+	}
+
+	webcore.SendEventToRabbitMQ(core.Event{
+		Subject:        parsedData.User,
+		Verb:           verb,
+		Object:         request,
+		IndirectObject: nil,
+		Timestamp:      time.Now().UTC(),
+	})
+
+	return nil
+}

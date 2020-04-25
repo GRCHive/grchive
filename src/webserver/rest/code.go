@@ -459,7 +459,13 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 			Name:         fmt.Sprintf("Scheduled Run Request: %s", script.Name),
 		}
 
-		tx := database.CreateTx()
+		tx, err := database.CreateAuditTrailTx(role)
+		if err != nil {
+			core.Warning("Failed to create tx: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		err = database.WrapTx(tx, func() error {
 			return database.CreateGenericRequestWithTx(tx, &req)
 		}, func() error {

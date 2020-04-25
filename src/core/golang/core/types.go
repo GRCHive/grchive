@@ -179,5 +179,6 @@ var ControlReflectType = reflect.TypeOf(Control{})
 var DocRequestReflectType = reflect.TypeOf(DocumentRequest{})
 var SqlRequestReflectType = reflect.TypeOf(DbSqlQueryRequest{})
 var DocMetadataReflectType = reflect.TypeOf(ControlDocumentationFile{})
+var GenericRequestReflectType = reflect.TypeOf(GenericRequest{})
 
 var DataSourceLinkReflectType = reflect.TypeOf(DataSourceLink{})

@@ -58,6 +58,7 @@ func generateNotification(data []byte) *webcore.RabbitMQError {
 		return nil
 	}
 
+	core.Debug("\tCreate Notification")
 	notification, err := webcore.CreateNotificationFromEvent(event)
 	if err != nil {
 		return &webcore.RabbitMQError{err, false}

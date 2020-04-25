@@ -45,6 +45,7 @@ const DashboardOrgClientScriptQueryId string = "clientScriptId"
 const DashboardOrgCommitQueryId string = "commitId"
 const DashboardOrgScriptRunQueryId string = "runId"
 const DashboardOrgScriptRequestQueryId = "scriptReqId"
+const DashboardOrgGenericRequestQueryId = "reqId"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 

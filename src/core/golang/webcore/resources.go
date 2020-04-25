@@ -49,6 +49,8 @@ func GetOrgIdFromResource(in interface{}) (int32, error) {
 		return v.OrgId, nil
 	case core.ClientData:
 		return v.OrgId, nil
+	case core.GenericRequest:
+		return v.OrgId, nil
 	}
 
 	return 0, errors.New("Unsupported resource (GetOrgIdFromResource).")
@@ -77,8 +79,13 @@ func FindRelevantUsersForResource(in interface{}, commentThread bool) ([]*core.U
 			if err != nil {
 				return nil, err
 			}
+		case core.GenericRequest:
+			threadId, err = database.GetGenericRequestCommentThreadId(v.Id, core.ServerRole)
+			if err != nil {
+				return nil, err
+			}
 		default:
-			return nil, errors.New("Resource does not support coments.")
+			return nil, errors.New("Resource does not support comments.")
 		}
 
 		users, err = database.FindUsersInCommentThread(threadId)
@@ -121,6 +128,20 @@ func FindRelevantUsersForResource(in interface{}, commentThread bool) ([]*core.U
 
 			if v.AssigneeUserId.NullInt64.Valid {
 				u2, err := database.FindUserFromId(v.AssigneeUserId.NullInt64.Int64)
+				if err != nil {
+					return nil, err
+				}
+				users = append(users, u2)
+			}
+		case core.GenericRequest:
+			u1, err := database.FindUserFromId(v.UploadUserId)
+			if err != nil {
+				return nil, err
+			}
+			users = append(users, u1)
+
+			if v.Assignee.NullInt64.Valid {
+				u2, err := database.FindUserFromId(v.Assignee.NullInt64.Int64)
 				if err != nil {
 					return nil, err
 				}
@@ -182,6 +203,12 @@ func GetResourceHandle(typ string, id int64, orgId int32) (*core.ResourceHandle,
 			SingleClientDataRouteName,
 			core.DashboardOrgOrgQueryId, org.OktaGroupName,
 			core.DashboardOrgClientDataQueryId, resourceIdStr,
+		))
+	case core.ResourceIdGenericRequests:
+		url = core.CreateNullString(MustGetRouteUrlAbsolute(
+			SingleGenericRequestRouteName,
+			core.DashboardOrgOrgQueryId, org.OktaGroupName,
+			core.DashboardOrgGenericRequestQueryId, resourceIdStr,
 		))
 	}
 	return &core.ResourceHandle{
