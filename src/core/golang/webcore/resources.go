@@ -205,10 +205,11 @@ func GetResourceHandle(typ string, id int64, orgId int32) (*core.ResourceHandle,
 			core.DashboardOrgClientDataQueryId, resourceIdStr,
 		))
 	case core.ResourceIdGenericRequests:
+		// TODO: Fix this because generic requests won't always just be for the script run requests...
 		url = core.CreateNullString(MustGetRouteUrlAbsolute(
-			SingleGenericRequestRouteName,
+			SingleScriptRequestRouteName,
 			core.DashboardOrgOrgQueryId, org.OktaGroupName,
-			core.DashboardOrgGenericRequestQueryId, resourceIdStr,
+			core.DashboardOrgScriptRequestQueryId, resourceIdStr,
 		))
 	}
 	return &core.ResourceHandle{
