@@ -67,6 +67,7 @@ func generateTestToml(config GenerateTomlConfig) (*toml.Tree, *core.EnvConfigDat
 		Drone:              new(core.DroneConfigData),
 		Features:           new(core.FeatureFlags),
 		Artifactory:        new(core.ArtifactoryConfigData),
+		Notifications:      new(core.NotificationConfig),
 	}
 
 	newDataVal := reflect.ValueOf(&newData).Elem()
@@ -178,6 +179,7 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"Drone.RunnerImagePull", "drone.runner_image_pull", "typetype", nil},
 					{"Artifactory.Host", "artifactory.host", "host", nil},
 					{"Artifactory.Port", "artifactory.port", int64(128), int32(128)},
+					{"Notifications.EnableEmail", "notifications.enable_email", true, nil},
 				},
 			},
 			parseError: false,
