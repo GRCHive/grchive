@@ -10,4 +10,8 @@ MAVEN_DEP_ARTIFACTS = [
     "com.fasterxml.jackson.core:jackson-databind:2.10.3",
     "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.3",
     "com.fasterxml.jackson.module:jackson-module-kotlin:2.10.3",
+    "com.squareup.retrofit2:retrofit:2.8.1",
+    "com.squareup.retrofit2:converter-jackson:2.8.1",
+    "com.squareup.okhttp3:okhttp:4.5.0",
+    "com.squareup.okio:okio:2.6.0",
 ]

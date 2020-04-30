@@ -1,5 +1,6 @@
 package grchive.core.runner
 
+import grchive.core.api.vault.VaultClient
 import grchive.core.internal.Config
 import grchive.core.internal.database.*
 
@@ -18,6 +19,7 @@ import org.jdbi.v3.core.kotlin.*
 fun invokeWithMetadata(runId : Long, cls : String, fn : String, meta : Metadata) {
     // Load in config from disk. This requires us to know the config path -- hard code this for now...
     val cfg = Config("/config/config.toml")
+    val vault = VaultClient(cfg.vault)
 
     // Create a JDBI connection for internal use - this should not get passed to the client for
     // whatever reason since it's not read only.
@@ -42,7 +44,7 @@ fun invokeWithMetadata(runId : Long, cls : String, fn : String, meta : Metadata)
     }
 
     val dataSources = jdbi.withHandleUnchecked {
-        loadDataSourceContainer(it, meta, cfg, scriptRun.userId, orgId)
+        loadDataSourceContainer(it, vault, meta, cfg, scriptRun.userId, orgId)
     }
 
     val jClass = Class.forName(cls)

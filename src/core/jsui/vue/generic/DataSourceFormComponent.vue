@@ -217,8 +217,14 @@ export default class DataSourceFormComponent extends Props {
         this.selectedTags = opt.Name.split('.').slice(1)
 
         if (opt.Name == 'Root.Database.PostgreSQL') {
+            let dbId = this.value.SourceTarget['id']
+            if (!dbId) {
+                this.db = null
+                return
+            }
+
             getDatabase({
-                dbId: this.value.SourceTarget['id'],
+                dbId: dbId,
                 orgId: PageParamsStore.state.organization!.Id,
             }).then((resp : TGetDatabaseOutputs) => {
                 this.db = resp.data.Database

@@ -17,12 +17,11 @@ import org.jdbi.v3.core.kotlin.*
  */
 class GrchiveDataSource internal constructor(
     internal val cfg : Config,
-    internal val userId : Long,
-    internal val orgId : Int) : RawDataSource {
+    val userId : Long,
+    val orgId : Int) : RawDataSource {
 
     val activeRole : FullRole
-
-    val db = PostgresDataSource(createGrchiveHikariDataSource(cfg.database, true))
+    internal val db = PostgresDataSource(createGrchiveHikariDataSource(cfg.database, true))
 
     init {
         setupGrchiveJdbi(db.jdbi)

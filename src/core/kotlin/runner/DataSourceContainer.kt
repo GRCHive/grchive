@@ -2,6 +2,8 @@ package grchive.core.runner
 
 import org.jdbi.v3.core.Handle
 
+import grchive.core.api.vault.VaultClient
+
 import grchive.core.data.sources.RawDataSource
 import grchive.core.data.sources.makeDataSourceFromClientDataSourceLink
 
@@ -46,13 +48,20 @@ class DataSourceContainer {
  * @param handle A JDBI handle to connect to the GRCHive database.
  * @param meta A [Metadata] object that holds what client data we need to load.
  */
-internal fun loadDataSourceContainer(handle : Handle, meta : Metadata, cfg : Config, userId : Long, orgId : Int) : DataSourceContainer {
+internal fun loadDataSourceContainer(
+    handle : Handle,
+    vault : VaultClient,
+    meta : Metadata,
+    cfg : Config,
+    userId : Long,
+    orgId : Int)
+: DataSourceContainer {
     val container = DataSourceContainer()
 
     meta.clientDataId.forEach {
         val clientData = getClientDataFromId(handle, it)
         val source = getClientDataSourceLinkFromDataId(handle, it)
-        container.addSource(clientData.name, makeDataSourceFromClientDataSourceLink(source, cfg, userId, orgId))
+        container.addSource(clientData.name, makeDataSourceFromClientDataSourceLink(source, cfg, userId, orgId, handle, vault))
     }
 
     return container

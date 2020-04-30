@@ -3,6 +3,8 @@ package grchive.core.internal
 import java.nio.file.*
 import org.tomlj.*
 
+import grchive.core.api.vault.VaultConfig
+
 /**
  * Configuration of how GRCHive apps connect to the main database.
  *
@@ -24,6 +26,7 @@ internal data class DatabaseConfig (
  */
 class Config {
     internal val database : DatabaseConfig
+    internal val vault : VaultConfig
 
     constructor(filename : String) {
         val filenamePath : Path = Paths.get(filename)
@@ -44,9 +47,19 @@ class Config {
             result.getString("database.username")!!,
             result.getString("database.password")!!
         )
+
+        vault = VaultConfig(
+            result.getString("vault.url")!!,
+            result.getString("vault.userpass.username")!!,
+            result.getString("vault.userpass.password")!!
+        )
     }
 
-    internal constructor(db : DatabaseConfig) {
+    internal constructor(
+        db : DatabaseConfig,
+        v : VaultConfig
+    ) {
         database = db
+        vault = v
     }
 }

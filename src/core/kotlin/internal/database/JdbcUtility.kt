@@ -32,6 +32,9 @@ fun setupGrchiveJdbi(jdbi : Jdbi) {
     jdbi.registerRowMapper(ConstructorMapper.factory(ClientScript::class.java))
     jdbi.registerRowMapper(ConstructorMapper.factory(ScriptRun::class.java))
     jdbi.registerRowMapper(ConstructorMapper.factory(ScriptRunParameter::class.java))
+    jdbi.registerRowMapper(ConstructorMapper.factory(Database::class.java))
+    jdbi.registerRowMapper(ConstructorMapper.factory(DatabaseConnection::class.java))
+    jdbi.registerRowMapper(ConstructorMapper.factory(User::class.java))
 
     jdbi.registerColumnMapper(JdbiKotlinMapColumnMapper())
 }

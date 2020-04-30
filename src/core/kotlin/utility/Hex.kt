@@ -18,3 +18,22 @@ fun hexEncode(input : ByteArray) : String {
     }
     return builder.toString()
 }
+
+/**
+ * Hex decodes the input string to a byte array.
+ *
+ * @param input The hex string to decode.
+ * @return The byte array represented by the hex string.
+ */
+fun hexDecode(input : String) : ByteArray {
+    // Need to construct this ourselves instead of using the built-in
+    // Integer.parseInt so that the decoded byte array ONLY contains
+    // the data in the input string.
+    var arr = ByteArray(input.length)
+    input.toLowerCase().forEachIndexed {
+        idx, v ->
+            arr[idx] = Integer.parseInt(v.toString(), 16).toByte()
+    }
+    return arr
+}
+

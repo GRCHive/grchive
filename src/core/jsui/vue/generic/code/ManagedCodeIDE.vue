@@ -166,7 +166,7 @@ import {
 } from '../../../ts/api/apiCode'
 import {
     contactUsUrl,
-    createSingleRunLogUrl,
+    createSingleScriptRequestUrl
 } from '../../../ts/url'
 import { standardFormatTime } from '../../../ts/time'
 import { FullClientDataWithLink } from '../../../ts/clientData'
@@ -496,18 +496,21 @@ export default class ManagedCodeIDE extends mixins(Props, ManagedProps) {
             if (!!schedule) {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
-                    "Your run job has been successfully scheduled.",
+                    "Your run request has been successfully submitted.",
                     false,
                     "Track",
-                    "",
+                    createSingleScriptRequestUrl(
+                        PageParamsStore.state.organization!.OktaGroupName,
+                        resp.data,
+                    ),
                     false);
             } else {
                 // @ts-ignore
                 this.$root.$refs.snackbar.showSnackBar(
-                    "Your run job has been successfully submitted.",
+                    "Your run request has been successfully submitted.",
                     true,
                     "Track",
-                    createSingleRunLogUrl(
+                    createSingleScriptRequestUrl(
                         PageParamsStore.state.organization!.OktaGroupName,
                         resp.data,
                     ),
