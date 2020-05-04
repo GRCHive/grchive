@@ -4,8 +4,11 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.assertions.throwables.shouldThrow
 
+import grchive.core.api.vault.VaultConfig
+
 import grchive.core.data.sources.GrchiveDataSource
 import grchive.core.data.types.grchive.AccessType
+import grchive.core.data.types.grchive.ClientData
 import grchive.core.data.types.grchive.fullRolePermissions
 import grchive.core.data.types.grchive.getRolePermissionForResource
 import grchive.core.data.types.grchive.hashRawApiKey
@@ -88,10 +91,12 @@ class GrchiveDataSourceTest: StringSpec({
                     pg.ds!!.getJdbcUrl().replace("jdbc:postgresql://", "") + "&readOnly=true",
                     pg.ds!!.getUsername(),
                     pg.ds!!.getPassword()
-                )
+                ),
+                VaultConfig("", "", "")
             ),
             refUserId,
-            refOrgId
+            refOrgId,
+            ClientData(1, 1, "Test", "Test")
         )
     }
 
