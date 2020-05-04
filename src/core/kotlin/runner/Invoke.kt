@@ -3,6 +3,7 @@ package grchive.core.runner
 import grchive.core.api.vault.VaultClient
 import grchive.core.internal.Config
 import grchive.core.internal.database.*
+import grchive.core.test.TestContainer
 
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.*
@@ -47,6 +48,17 @@ fun invokeWithMetadata(runId : Long, cls : String, fn : String, meta : Metadata)
         loadDataSourceContainer(it, vault, meta, cfg, scriptRun.userId, orgId)
     }
 
+    val testContainer = TestContainer()
+
     val jClass = Class.forName(cls)
-    jClass.getMethod(fn, ParamContainer::class.java, DataSourceContainer::class.java).invoke(null, params, dataSources)
+    jClass.getMethod(
+        fn,
+        ParamContainer::class.java,
+        DataSourceContainer::class.java,
+        TestContainer::class.java
+    ).invoke(null, params, dataSources, testContainer)
+
+    jdbi.useTransactionUnchecked {
+        testContainer.commit(it, runId, orgId)
+    }
 }

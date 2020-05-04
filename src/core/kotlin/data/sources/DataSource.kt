@@ -1,7 +1,10 @@
 package grchive.core.data.sources
 
+import grchive.core.data.types.grchive.ClientData
+
 /**
  * A generic connection to some underlying raw data.
  */
-interface RawDataSource {
+open class RawDataSource(internal val clientData : ClientData) {
+    val clientDataId get() = clientData.id
 }

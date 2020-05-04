@@ -5,6 +5,7 @@ import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.*
 
+import grchive.core.data.types.grchive.ClientData
 import grchive.core.utility.database.ReadOnlyHandler
 
 /** 
@@ -14,7 +15,11 @@ import grchive.core.utility.database.ReadOnlyHandler
  * @property ds A Java DataSource from which to create connections.
  * @property ro A read only handler for the database in question.
  */
-open class DatabaseDataSource internal constructor(val ds : DataSource, val ro : ReadOnlyHandler) : RawDataSource {
+open class DatabaseDataSource internal constructor(
+    val ds : DataSource,
+    val ro : ReadOnlyHandler,
+    clientData : ClientData
+) : RawDataSource(clientData) {
     internal val jdbi : Jdbi = Jdbi.create(ds)
 
     open fun <T> withHandle(cb : (hd : Handle) -> T) : T {

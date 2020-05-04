@@ -61,7 +61,18 @@ internal fun loadDataSourceContainer(
     meta.clientDataId.forEach {
         val clientData = getClientDataFromId(handle, it)
         val source = getClientDataSourceLinkFromDataId(handle, it)
-        container.addSource(clientData.name, makeDataSourceFromClientDataSourceLink(source, cfg, userId, orgId, handle, vault))
+        container.addSource(
+            clientData.name,
+            makeDataSourceFromClientDataSourceLink(
+                clientData,
+                source,
+                cfg,
+                userId,
+                orgId,
+                handle,
+                vault
+            )
+        )
     }
 
     return container
