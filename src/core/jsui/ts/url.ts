@@ -414,6 +414,8 @@ export const runCodeUrl : string = "/api/auto/code/runs/new"
 export const allCodeRunsUrl : string = "/api/auto/code/runs/all"
 export const getCodeRunUrl : string = "/api/auto/code/runs/get"
 
+export const getCodeRunTestsUrl : string = "/api/auto/code/runs/tests/get"
+
 export const getCodeBuildStatusUrl : string = "/api/auto/code/status/get"
 
 export const newClientScriptUrl : string = "/api/auto/scripts/new"

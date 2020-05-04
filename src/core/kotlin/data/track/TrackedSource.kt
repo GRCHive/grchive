@@ -15,8 +15,8 @@ class TrackedSource(internal val grchiveDataId : Long) {
 class TrackedSourceLogger(val src : TrackedSource) : SqlLogger {
     override fun logAfterExecution(context : StatementContext) {
         src.src = """
-            SQL: ${context.getRenderedSql().trim()}
-            Bindings: ${context.getBinding().toString().trim()}
-        """
+            |SQL: ${context.getRenderedSql().trim()}
+            |Bindings: ${context.getBinding().toString().trim()}
+        """.trimMargin()
     }
 }

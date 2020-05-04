@@ -20,12 +20,14 @@ import { VIcon, VProgressCircular } from 'vuetify/lib'
 import { standardFormatTime } from '../../ts/time'
 import { getClientScriptCodeFromLink, TGetClientScriptCodeFromLinkOutput } from '../../ts/api/apiScripts'
 import ScriptBuildRunStatus from './code/ScriptBuildRunStatus.vue'
+import TestStatusViewer from './code/TestStatusViewer.vue'
 
 @Component({
     components: {
         BaseResourceTable,
         HashRenderer,
-        ScriptBuildRunStatus
+        ScriptBuildRunStatus,
+        TestStatusViewer
     }
 })
 export default class ScriptRunTable extends ResourceTableProps {
@@ -50,6 +52,9 @@ export default class ScriptRunTable extends ResourceTableProps {
             {
                 text: 'Request Time',
                 value: 'start',
+                sort: (a : Date, b : Date) => {
+                    return a.getTime() - b.getTime()
+                }
             },
             {
                 text: 'Build Status',
@@ -58,6 +63,10 @@ export default class ScriptRunTable extends ResourceTableProps {
             {
                 text: 'Run Status',
                 value: 'run',
+            },
+            {
+                text: 'Test Status',
+                value: 'test',
             },
         ]
     }
@@ -69,7 +78,7 @@ export default class ScriptRunTable extends ResourceTableProps {
     transformInputResourceToTableItem(inp : any) : any {
         return {
             value: inp,
-            start: standardFormatTime(inp.StartTime),
+            start: inp.StartTime,
             user: createUserString(MetadataStore.getters.getUser(inp.UserId)),
         }
     }
@@ -111,6 +120,13 @@ export default class ScriptRunTable extends ResourceTableProps {
                 class: ['font-weight-bold']
             },
             `#${props.item.value.Id}`
+        )
+    }
+
+    renderStartTime(props : any) : VNode {
+        return this.$createElement(
+            'span',
+            standardFormatTime(props.item.start)
         )
     }
 
@@ -158,6 +174,17 @@ export default class ScriptRunTable extends ResourceTableProps {
                     },
                 ),
             ],
+        )
+    }
+
+    renderTest(props : any) : VNode {
+        return this.$createElement(
+            TestStatusViewer,
+            {
+                props: {
+                    runId: props.item.value.Id,
+                }
+            }
         )
     }
 
@@ -218,6 +245,8 @@ export default class ScriptRunTable extends ResourceTableProps {
                     'item.script': this.renderScriptName,
                     'item.build': this.renderBuildStatus,
                     'item.run': this.renderRunStatus,
+                    'item.start': this.renderStartTime,
+                    'item.test': this.renderTest,
                 }
             }
         )

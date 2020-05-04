@@ -513,6 +513,13 @@ func registerCodeRunAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiNewEndpoint, runCode).Methods("POST").Name(webcore.ApiRunCodeRouteName)
 	s.HandleFunc(core.ApiAllEndpoint, allCodeRuns).Methods("GET")
 	s.HandleFunc(core.ApiGetEndpoint, getCodeRun).Methods("GET")
+
+	registerCodeRunTestAPIPaths(s)
+}
+
+func registerCodeRunTestAPIPaths(r *mux.Router) {
+	s := r.PathPrefix("/tests").Subrouter()
+	s.HandleFunc(core.ApiGetEndpoint, getCodeRunTest).Methods("GET")
 }
 
 func registerCodeStatusAPIPaths(r *mux.Router) {

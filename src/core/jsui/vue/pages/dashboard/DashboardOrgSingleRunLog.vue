@@ -69,6 +69,18 @@
                     >
                     </script-build-run-status>
                 </v-list-item-content>
+
+                <v-list-item-content>
+                    <span class="font-weight-bold overline item-content-no-flex">
+                        Test Status: 
+                    </span>
+
+                    <test-status-viewer
+                        class="item-content-no-flex"
+                        :run-id="run.Id"
+                    >
+                    </test-status-viewer>
+                </v-list-item-content>
             </v-list-item>
             <v-divider></v-divider>
             <v-row>
@@ -106,6 +118,7 @@ import { standardFormatTime } from '../../../ts/time'
 import { createUserString } from '../../../ts/users'
 import MetadataStore from '../../../ts/metadata'
 import ScriptBuildRunStatus from '../../generic/code/ScriptBuildRunStatus.vue'
+import TestStatusViewer from '../../generic/code/TestStatusViewer.vue'
 
 @Component({
     components: {
@@ -113,6 +126,7 @@ import ScriptBuildRunStatus from '../../generic/code/ScriptBuildRunStatus.vue'
         DashboardHomePageNavBar,
         LogViewer,
         ScriptBuildRunStatus,
+        TestStatusViewer
     }
 })
 export default class DashboardOrgSingleRunLog extends Vue {
