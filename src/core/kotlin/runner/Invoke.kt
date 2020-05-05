@@ -59,6 +59,6 @@ fun invokeWithMetadata(runId : Long, cls : String, fn : String, meta : Metadata)
     ).invoke(null, params, dataSources, testContainer)
 
     jdbi.useTransactionUnchecked {
-        testContainer.commit(it, runId, orgId)
+        testContainer.commit(it, runId, orgId, vault)
     }
 }

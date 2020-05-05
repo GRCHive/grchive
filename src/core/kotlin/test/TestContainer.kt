@@ -1,12 +1,18 @@
 package grchive.core.test
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+
 import org.jdbi.v3.core.Handle
+
+import grchive.core.api.vault.VaultClient
+import grchive.core.api.vault.TransitEncryptBatchInput
+import grchive.core.api.vault.TransitEncryptBody
 
 import grchive.core.data.track.TrackedData
 import grchive.core.data.track.TrackedSource
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+import java.util.Base64
 
 enum class TestAction {
     Equal
@@ -36,11 +42,32 @@ class TestContainer {
         }
     }
 
-    internal fun commit(hd : Handle, runId : Long, orgId : Int) {
+    internal fun commit(hd : Handle, runId : Long, orgId : Int, vault : VaultClient) {
         val trackedDataToDbId : MutableMap<TrackedData<*>, Long> = mutableMapOf<TrackedData<*>, Long>()
 
         val mapper = ObjectMapper()
         mapper.registerModule(KotlinModule())
+
+        // Encrypt all information before storing it in the database.
+        // In particular we want to encrypt the data we pulled from the database
+        // and how that information was pulled.
+        val srcUnencryptedRaw = mutableListOf<String>()
+        val dataUnencryptedRaw = mutableListOf<String>()
+
+        uniqueSources.forEach {
+            srcUnencryptedRaw.add(it.src)
+
+            it.childData.forEach {
+                dt -> 
+                    dataUnencryptedRaw.add(mapper.writeValueAsString(dt.t))
+            }
+        }
+
+        val srcEncrypted = vault.transit.batchEncrypt("scripts", srcUnencryptedRaw)
+        val dataEncrypted = vault.transit.batchEncrypt("scripts", dataUnencryptedRaw)
+
+        var srcIdx = 0
+        var dataIdx = 0
 
         uniqueSources.forEach {
             val srcId : Long = hd.createQuery("""
@@ -51,7 +78,7 @@ class TestContainer {
                 .bind(0, runId)
                 .bind(1, it.grchiveDataId)
                 .bind(2, orgId)
-                .bind(3, it.src)
+                .bind(3, srcEncrypted.data.batchResults?.get(srcIdx++)?.ciphertext)
                 .mapTo(Long::class.java)
                 .one()
 
@@ -59,11 +86,11 @@ class TestContainer {
                 dt ->
                     val dtId : Long = hd.createQuery("""
                         INSERT INTO test_data (source_id, data)
-                        VALUES (?, ?::jsonb)
+                        VALUES (?, ?)
                         RETURNING id
                     """)
                         .bind(0, srcId)
-                        .bind(1, mapper.writeValueAsString(dt.t))
+                        .bind(1, dataEncrypted.data.batchResults?.get(dataIdx++)?.ciphertext)
                         .mapTo(Long::class.java)
                         .one()
                     trackedDataToDbId.put(dt, dtId)

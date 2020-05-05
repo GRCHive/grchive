@@ -9,3 +9,4 @@ vault policy write -address="${VAULT_HOST}:${VAULT_PORT}"  user ${VAULT_USER_POL
 vault write -address="${VAULT_HOST}:${VAULT_PORT}" auth/userpass/users/${VAULT_USER} password=${VAULT_PASSWORD} policies=user
 vault write -address="${VAULT_HOST}:${VAULT_PORT}"  -f transit/keys/passwords
 vault write -address="${VAULT_HOST}:${VAULT_PORT}"  -f transit/keys/logs
+vault write -address="${VAULT_HOST}:${VAULT_PORT}"  -f transit/keys/scripts

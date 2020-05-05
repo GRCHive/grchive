@@ -24,6 +24,6 @@ fun <T1,T2> testFieldEqual(cn : TestContainer, a : TrackedData<T1>?, b : Tracked
         ok = propa.get(at!!) == propb.get(bt!!)
     }
 
-    cn.logTest(TestAction.Equal, a, b, ok, "${propa.javaField?.getName()} -> ${propb.javaField?.getName()}")
+    cn.logTest(TestAction.Equal, a, b, ok, "${propa.javaField?.getName()},${propb.javaField?.getName()}")
     return ok
 }
