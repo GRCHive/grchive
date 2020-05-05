@@ -503,6 +503,23 @@ go_repository(
     tag = "v1.5.0"
 )
 
+go_repository(
+    name = "com_github_360entsecgroup_skylar_excelize",
+    importpath = "github.com/360EntSecGroup-Skylar/excelize",
+    commit = "5f29af258d3e1e70b76000de99b63753bb34e097",
+)
+
+go_repository(
+    name = "com_github_xurif_efp",
+    importpath = "github.com/xuri/efp",
+    commit = "b7dc4fe9aa91d98f40a481ed3d1fd36efbaf209d",
+)
+
+go_repository(
+    name = "com_github_mohae_deepcopy",
+    importpath = "github.com/mohae/deepcopy",
+    commit = "c48cc78d482608239f6c4c92a4abd87eb8761c90",
+)
 
 # NODE
 http_archive(

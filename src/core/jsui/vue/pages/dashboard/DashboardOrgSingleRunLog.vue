@@ -78,6 +78,7 @@
                     <test-status-viewer
                         class="item-content-no-flex"
                         :run-id="run.Id"
+                        show-export
                     >
                     </test-status-viewer>
                 </v-list-item-content>

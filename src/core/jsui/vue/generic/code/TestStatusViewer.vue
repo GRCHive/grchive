@@ -1,5 +1,10 @@
 <template>
     <div>
+        <v-overlay :value="exporting">
+            <v-progress-circular indeterminate size="64"></v-progress-circular>
+        </v-overlay>
+
+
         <div v-if="isLoading">
             <v-progress-circular
                 indeterminate
@@ -17,6 +22,16 @@
             </v-icon>
 
             <span>{{ summary.SuccessfulTests }} / {{ summary.TotalTests }}</span>
+
+            <v-btn
+                @click="exportToExcel"
+                class="ml-2"
+                color="primary"
+                v-if="showExport"
+                small
+            >
+                Export
+            </v-btn>
         </div>
     </div>
 </template>
@@ -26,21 +41,28 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import {
-    getCodeRunTest, TGetCodeRunTestOutput
+    getCodeRunTest, TGetCodeRunTestOutput,
+    exportTests, TExportTestOutput
 } from '../../../ts/api/apiTests'
 import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { CodeRunTestSummary } from '../../../ts/tests'
+import { saveAs } from 'file-saver'
 
 const Props = Vue.extend({
     props: {
-        runId: Number
+        runId: Number,
+        showExport: {
+            type: Boolean,
+            default: false,
+        }
     }
 })
 
 @Component
 export default class TestStatusViewer extends Props {
     summary : CodeRunTestSummary | null = null
+    exporting : boolean = false
 
     get isLoading() : boolean {
         return !this.summary
@@ -64,6 +86,26 @@ export default class TestStatusViewer extends Props {
         } else {
             return 'mdi-close-circle'
         }
+    }
+
+    exportToExcel() {
+        this.exporting = true
+        exportTests({
+            orgId: PageParamsStore.state.organization!.Id,
+            runId: this.runId,
+        }).then((resp : TExportTestOutput) => {
+            saveAs(resp.data, "tests.xlsx")
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        }).finally(() => {
+            this.exporting = false
+        })
     }
 
     refreshData() {

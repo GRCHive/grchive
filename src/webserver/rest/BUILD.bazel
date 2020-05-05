@@ -23,5 +23,6 @@ go_library(
         "@com_github_gorilla_mux//:go_default_library",
         "@com_github_teambition_rrule_go//:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
+        "@com_github_360entsecgroup_skylar_excelize//:go_default_library",
     ],
 )

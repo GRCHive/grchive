@@ -520,6 +520,7 @@ func registerCodeRunAPIPaths(r *mux.Router) {
 func registerCodeRunTestAPIPaths(r *mux.Router) {
 	s := r.PathPrefix("/tests").Subrouter()
 	s.HandleFunc(core.ApiGetEndpoint, getCodeRunTest).Methods("GET")
+	s.HandleFunc("/export", exportTests).Methods("GET")
 }
 
 func registerCodeStatusAPIPaths(r *mux.Router) {
