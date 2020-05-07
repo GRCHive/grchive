@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: gitea-deployment
+    labels:
+        app: gitea
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: gitea
+    template:
+        metadata:
+            labels:
+                app: gitea
+        spec:
+            containers:
+                - name: gitea-container
+                  image: bazel/devops/docker/gitea:gitea
+                  imagePullPolicy: Never

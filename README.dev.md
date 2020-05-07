@@ -470,7 +470,7 @@ After ensuring all these things, you may need to
 - Restart the libvirt service (e.g. `sudo systemctl restart libvirtd.service`)
 - Run `minikube delete`
 
-Finally, run `eval $(minikube docker-env)` to ensure docker containers are available to minikube.
+Run `eval $(minikube docker-env)` to ensure docker containers are available to minikube.
 At this point you will need to rebuild all Docker containers.
 
 ### Additional Build Parameters
@@ -519,7 +519,8 @@ $SRC/scripts/deploy/deploy_self_signed_certificate.sh
 - Set the `POSTGRES_HOST` build variable to be `postgresql-dev-service`.
 - `cd $SRC/devops/k8s/postgresql`
 - `cp endpoint.yaml.tmpl endpoint.yaml`
-- Modify `endpoint.yaml` to have the correct IP address (as found by `ip addr` earlier).
+- Start the PostgreSQL docker container `docker start psql`.
+- Modify `endpoint.yaml` to have the correct PostgreSQL docker address (as discussed earlier).
 - `kubectl apply -f .`
 
 ### Vault
