@@ -177,6 +177,7 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"Drone.RunnerType", "drone.runner_type", "typetype", nil},
 					{"Drone.RunnerImage", "drone.runner_image", "typetype", nil},
 					{"Drone.RunnerImagePull", "drone.runner_image_pull", "typetype", nil},
+					{"ScriptRunner.RunnerImage", "script_runner.runner_image", "typetype", nil},
 					{"Artifactory.Host", "artifactory.host", "host", nil},
 					{"Artifactory.Port", "artifactory.port", int64(128), int32(128)},
 					{"Notifications.EnableEmail", "notifications.enable_email", true, nil},
