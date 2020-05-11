@@ -12,9 +12,10 @@ class Cli : CliktCommand(help = "Wrapper program to run client scripts.") {
     val fn : String by argument(help = "Client script function name.")
     val meta : String by argument(help = "Metadata resource name.")
     val runId : Long by argument(help = "Run ID.").long()
+    val config : String by argument(help = "Config file.")
 
     override fun run() {
-        invokeWithMetadata(runId, cls, fn, loadMetadataFromResource(meta))
+        invokeWithMetadata(runId, cls, fn, loadMetadataFromResource(meta), config)
     }
 }
 

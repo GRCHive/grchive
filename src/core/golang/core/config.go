@@ -127,6 +127,10 @@ type NotificationConfig struct {
 	EnableEmail bool
 }
 
+type ScriptRunnerConfig struct {
+	RunnerImage string
+}
+
 type EnvConfigData struct {
 	SelfUri            string
 	SelfDomain         string
@@ -154,6 +158,7 @@ type EnvConfigData struct {
 	Features           *FeatureFlags
 	Artifactory        *ArtifactoryConfigData
 	Notifications      *NotificationConfig
+	ScriptRunner       ScriptRunnerConfig
 }
 
 var EnvConfig *EnvConfigData
@@ -289,6 +294,8 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.Drone.RunnerType = tomlConfig.Get("drone.runner_type").(string)
 	envConfig.Drone.RunnerImage = tomlConfig.Get("drone.runner_image").(string)
 	envConfig.Drone.RunnerImagePull = tomlConfig.Get("drone.runner_image_pull").(string)
+
+	envConfig.ScriptRunner.RunnerImage = tomlConfig.Get("script_runner.runner_image").(string)
 
 	envConfig.Features = new(FeatureFlags)
 	envConfig.Features.Automation = tomlConfig.Get("features.automation").(bool)

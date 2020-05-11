@@ -104,6 +104,10 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `DRONE_RUNNER_IMAGE`: The Docker image to use for running Drone pipelines.
 - `DRONE_RUNNER_IMAGE_PULL`: Should be `never` locally and `always` in production.
 
+### Script Runner
+
+- `SCRIPT_RUNNER_IMAGE`: The Docker image to use for running scripts.
+
 ### Artifactory
 
 - `ARTIFACTORY_DATABASE`: The database name to use for Artifactory.

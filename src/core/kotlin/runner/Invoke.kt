@@ -17,9 +17,9 @@ import org.jdbi.v3.core.kotlin.*
  * @param fn The function name to run.
  * @param meta The [Metadata] which we use to get parameters and data sources to pass to the function.
  */
-fun invokeWithMetadata(runId : Long, cls : String, fn : String, meta : Metadata) {
+fun invokeWithMetadata(runId : Long, cls : String, fn : String, meta : Metadata, configFname : String) {
     // Load in config from disk. This requires us to know the config path -- hard code this for now...
-    val cfg = Config("/config/config.toml")
+    val cfg = Config(configFname)
     val vault = VaultClient(cfg.vault)
 
     // Create a JDBI connection for internal use - this should not get passed to the client for

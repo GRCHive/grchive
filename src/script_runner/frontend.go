@@ -68,13 +68,6 @@ func main() {
 		}
 	}()
 
-	{
-		err = pullKotlinImage(core.EnvConfig.Drone.RunnerImage)
-		if err != nil {
-			core.Error(err)
-		}
-	}
-
 	if *local {
 		err = handleRun(*runId, *jar, mavenDir, *stdout)
 		if err != nil {

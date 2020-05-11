@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/script_runner/worker"
 	"gitlab.com/grchive/grchive/vault_api"
 	"strings"
 	"time"
@@ -16,6 +17,8 @@ type Tracker struct {
 
 	logs    strings.Builder
 	success bool
+
+	factory worker.WorkerFactory
 
 	// Stats
 	startTime time.Time

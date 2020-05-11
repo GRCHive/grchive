@@ -1,0 +1,8 @@
+package(default_visibility = ["//visibility:public"])
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+
+go_image(
+    name = "latest",
+    base = "//devops/docker/drone_runner_worker_image:latest",
+    binary = "//src/script_runner/worker:worker_pod",
+)
