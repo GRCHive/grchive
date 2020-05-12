@@ -29,6 +29,12 @@ if [ -z $MINIKUBE ]; then
     kubectl apply -f service-internal.yaml -f deployment.prod.yaml
     cd ../
 
+    export GITEA_IMAGE=registry.gitlab.com/grchive/grchive/gitea:`git rev-parse HEAD`
+    cd gitea
+    envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+    kubectl apply -f service.yaml -f service-external.dev.yaml -f deployment.prod.yaml
+    cd ../
+
     export RABBITMQ_IMAGE=registry.gitlab.com/grchive/grchive/rabbitmq:`git rev-parse HEAD`
     cd rabbitmq
     envsubst < statefulset.prod.yaml.tmpl > statefulset.prod.yaml
@@ -67,6 +73,7 @@ if [ -z $MINIKUBE ]; then
     cd ../
 else
     kubectl delete deployment vault-deployment  
+    kubectl delete deployment gitea-deployment  
     kubectl delete statefulset rabbitmq-set
     kubectl delete deployment preview-generator-deployment
     kubectl delete deployment database-fetcher-deployment
@@ -75,7 +82,7 @@ else
     kubectl delete deployment notification-hub-deployment
 
     cd postgresql
-    cp endpoint.yaml.tmpl endpoint.yaml
+    envsubst < deployment.dev.yaml.tmpl > deployment.dev.yaml
     kubectl apply -f .
     cd ../
 
@@ -85,6 +92,10 @@ else
     sleep 10
     VAULT_DEPLOYMENT=$(kubectl get pods | grep vault-deployment | awk {'print $1'})
     kubectl exec -it ${VAULT_DEPLOYMENT} -- sh -c "VAULT_SKIP_VERIFY=1 vault operator unseal -address=\"https://localhost:8200\""
+    cd ../
+
+    cd gitea
+    kubectl apply -f ./deployment.dev.yaml -f ./service-external.dev.yaml -f ./service.yaml
     cd ../
 
     cd rabbitmq

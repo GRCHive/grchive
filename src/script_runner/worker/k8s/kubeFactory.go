@@ -218,7 +218,7 @@ func (f KubeFactory) CreateWorker(opts WorkerOptions) (Worker, error) {
 			apiv1.Container{
 				Name:            "script-runner-worker-container",
 				Image:           core.EnvConfig.ScriptRunner.RunnerImage,
-				ImagePullPolicy: apiv1.PullIfNotPresent,
+				ImagePullPolicy: apiv1.PullAlways,
 				Args: []string{
 					"-group",
 					opts.ClientLibGroupId,

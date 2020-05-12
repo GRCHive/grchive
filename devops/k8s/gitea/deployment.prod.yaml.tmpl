@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: gitea-pvc
+spec:
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 5Gi
+    storageClassName: expandable-normal
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: gitea-deployment
+    labels:
+        app: gitea
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: gitea
+    template:
+        metadata:
+            labels:
+                app: gitea
+        spec:
+            containers:
+                - name: gitea-container
+                  image: ${GITEA_IMAGE} 
+                  volumeMounts:
+                      - name: gitea-data
+                        mountPath: /data
+            volumes:
+                - name: gitea-data
+                  persistentVolumeClaim:
+                      claimName: gitea-pvc
+            imagePullSecrets:
+                - name: regcred

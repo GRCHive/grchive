@@ -5,8 +5,8 @@ metadata:
   labels:
     app: postgres
 data:
-  POSTGRES_USER: DEVUSER
-  POSTGRES_PASSWORD: password
+  POSTGRES_USER: ${POSTGRES_USER}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
 ---
 apiVersion: v1

@@ -523,6 +523,7 @@ $SRC/scripts/deploy/deploy_self_signed_certificate.sh
 
 - Set the `POSTGRES_HOST` build variable to be `postgresql-dev-service`.
 - `cd $SRC/devops/k8s/postgresql`
+- `cp deployment.dev.yaml.tmpl deployment.dev.yaml`
 - Modify `deployment.dev.yaml` and set `POSTGRES_USER` and `POSTGRES_PASSWORD` to the values you set in `build/variables.bzl`.
 - `kubectl apply -f .`
 - Get the PostgreSQL pod name: `kubectl get pods -l app=postgresql`
@@ -575,7 +576,7 @@ $SRC/scripts/deploy/deploy_self_signed_certificate.sh
 ### Gitea
 
 - `cd $SRC/devops/k8s/gitea`
-- `kubectl apply -f .`
+- `kubectl apply -f ./deployment.dev.yaml -f ./service-external.dev.yaml -f ./service.yaml`
 - Set `GITEA_HOST` in `build/variables.bzl` to be `gitea-service`.
 - Get the external port of the external gitea service in the same manner as Vault: `kubectl get services -l app=gitea`
 - Point your browser to `http://$(minikube ip):EXTERNAL_GITEA_PORT` and ensure that you can reach the site.

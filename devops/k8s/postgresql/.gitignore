@@ -1,2 +1,3 @@
 endpoint.yaml
 deployment.prod.yaml
+deployment.dev.yaml

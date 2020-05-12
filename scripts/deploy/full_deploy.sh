@@ -41,7 +41,6 @@ case "$ENV" in
         export GRCHIVE_DOC_BUCKET="grchive-prod"
         export TERRAFORM_FOLDER="prod"
         export INGRESS_ENV="prod"
-        export KOTLIN_LIB_BUCKET="grchive-kotlin-lib-prod"
 
         USE_ENV_VARIABLES=1
         DO_TERRAFORM=1
@@ -63,7 +62,6 @@ case "$ENV" in
         export GRCHIVE_DOC_BUCKET="grchive-staging"
         export TERRAFORM_FOLDER="staging"
         export INGRESS_ENV="staging"
-        export KOTLIN_LIB_BUCKET="grchive-kotlin-lib-staging"
 
         USE_ENV_VARIABLES=1
         DO_TERRAFORM=1
@@ -88,6 +86,7 @@ if [[ ! -z "$USE_ENV_VARIABLES" ]]; then
 fi
 
 if [[ -z "$NOBUILD" ]]; then
+    ${DIR}/build_gitea_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_nginx_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_rabbitmq_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_vault_container.sh ${EXTRA_BUILD_OPTIONS}
