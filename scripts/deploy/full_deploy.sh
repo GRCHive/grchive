@@ -92,6 +92,7 @@ fi
 if [[ -z "$NOBUILD" ]]; then
     ${DIR}/build_gitea_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_artifactory_container.sh ${EXTRA_BUILD_OPTIONS}
+    ${DIR}/build_drone_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_nginx_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_rabbitmq_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_vault_container.sh ${EXTRA_BUILD_OPTIONS}
@@ -100,6 +101,8 @@ if [[ -z "$NOBUILD" ]]; then
     ${DIR}/build_database_refresh_worker.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_database_runner_worker.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_notification_hub.sh ${EXTRA_BUILD_OPTIONS}
+    ${DIR}/build_script_runner_container.sh ${EXTRA_BUILD_OPTIONS}
+    ${DIR}/build_task_manager_container.sh ${EXTRA_BUILD_OPTIONS}
 fi
 
 if [[ ! -z "$DO_TERRAFORM" ]]; then

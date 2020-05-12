@@ -83,6 +83,18 @@ if [ -z $MINIKUBE ]; then
     kubectl apply -f deployment.prod.yaml
     cd ../
 
+    export SCRIPT_RUNNER_IMAGE=registry.gitlab.com/grchive/grchive/script_runner:`git rev-parse HEAD`
+    cd script_runner
+    envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+    kubectl apply -f deployment.prod.yaml -f role.yaml
+    cd ../
+
+    export TASK_MANAGER_IMAGE=registry.gitlab.com/grchive/grchive/task_manager:`git rev-parse HEAD`
+    cd task_manager
+    envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+    kubectl apply -f deployment.prod.yaml
+    cd ../
+
     export WEBSERVER_IMAGE=registry.gitlab.com/grchive/grchive/webserver:`git rev-parse HEAD`
     export NGINX_IMAGE=registry.gitlab.com/grchive/grchive/nginx:`git rev-parse HEAD`
     cd webserver
@@ -92,6 +104,11 @@ if [ -z $MINIKUBE ]; then
 else
     kubectl delete deployment vault-deployment  
     kubectl delete deployment gitea-deployment  
+    kubectl delete deployment artifactory-deployment  
+    kubectl delete deployment drone-deployment  
+    kubectl delete deployment drone-runner-deployment  
+    kubectl delete deployment task-manager-deployment
+    kubectl delete deployment script-runner-deployment
     kubectl delete statefulset rabbitmq-set
     kubectl delete deployment preview-generator-deployment
     kubectl delete deployment database-fetcher-deployment
@@ -146,6 +163,14 @@ else
 
     cd notification_hub
     kubectl apply -f deployment.dev.yaml
+    cd ../
+
+    cd task_manager
+    kubectl apply -f deployment.dev.yaml
+    cd ../
+
+    cd script_runner
+    kubectl apply -f deployment.dev.yaml -f role.yaml
     cd ../
 
     cd webserver

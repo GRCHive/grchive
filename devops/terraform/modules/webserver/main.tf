@@ -42,7 +42,7 @@ resource "google_compute_address" "wireguard-static-ip" {
 }
 
 data "google_compute_image" "wireguard-image" {
-    family  = "debian-10"
+    name = "debian-10-buster-v20200326"
     project = "debian-cloud"
 }
 
