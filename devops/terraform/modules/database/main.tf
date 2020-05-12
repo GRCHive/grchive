@@ -4,7 +4,7 @@ resource "google_sql_database_instance" "main-db" {
     region = "us-central1"
 
     settings {
-        tier = "db-f1-micro"
+        tier = "db-g1-small"
         availability_type = "ZONAL"
 
         backup_configuration {

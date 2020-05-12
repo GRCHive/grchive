@@ -21,6 +21,11 @@ spec:
                   - mountPath: /opt/certs/rootca
                     name: rootca
                     readOnly: true
+                  resources:
+                        requests:
+                            cpu: "50m"
+                        limits:
+                            cpu: "100m"
                 - name: cloudsql-proxy
                   image: gcr.io/cloudsql-docker/gce-proxy:1.16
                   ports:
