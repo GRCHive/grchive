@@ -1,11 +1,26 @@
 package(default_visibility=["//visibility:public"])
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 
+genrule(
+    name = "drone-yml",
+    srcs = select({
+        "//:production": ["template/.drone.yml.prod.tmpl"],
+        "//conditions:default": ["template/.drone.yml.dev.tmpl"],
+    }),
+    outs = ["template/.drone.yml.tmpl"],
+    cmd = "cp $< $@",
+)
+
 pkg_tar(
     name = "gitea-project-template",
     strip_prefix = "template",
     extension = "tar.gz",
-    srcs = glob([
-        "template/**/*",
-    ])
+    srcs = [
+        "template/get_jar_from_mvn.sh",
+        "template/pom.xml.tmpl",
+        "template/VERSION",
+        "template/src/main/kotlin/DO_NOT_DELETE",
+        "template/src/main/resources/DO_NOT_DELETE",
+        ":drone-yml",
+    ],
 )

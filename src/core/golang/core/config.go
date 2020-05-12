@@ -105,13 +105,14 @@ type GiteaConfigData struct {
 }
 
 type DroneConfigData struct {
-	Token           string
-	Host            string
-	Port            int32
-	Protocol        string
-	RunnerType      string
-	RunnerImage     string
-	RunnerImagePull string
+	Token                   string
+	Host                    string
+	Port                    int32
+	Protocol                string
+	RunnerType              string
+	RunnerImage             string
+	RunnerImagePull         string
+	RunnerDbConnectOverride string
 }
 
 type FeatureFlags struct {
@@ -294,6 +295,7 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.Drone.RunnerType = tomlConfig.Get("drone.runner_type").(string)
 	envConfig.Drone.RunnerImage = tomlConfig.Get("drone.runner_image").(string)
 	envConfig.Drone.RunnerImagePull = tomlConfig.Get("drone.runner_image_pull").(string)
+	envConfig.Drone.RunnerDbConnectOverride = tomlConfig.Get("drone.runner_db_connect_override").(string)
 
 	envConfig.ScriptRunner.RunnerImage = tomlConfig.Get("script_runner.runner_image").(string)
 

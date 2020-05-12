@@ -1,0 +1,16 @@
+kind: pipeline
+type: {{ .DRONE_RUNNER_TYPE }}
+name: default
+
+steps:
+- name: build
+  image: {{ .DRONE_RUNNER_IMAGE }}
+  pull: {{ .DRONE_RUNNER_IMAGE_PULL }}
+  commands:
+  - echo "...STARTING GRCHIVE CLIENT BUILD..."
+  - cd /app/src/drone_runner_worker/worker.runfiles/grchive
+  - ../../worker -dir /drone/src
+  - echo "...FINISH GRCHIVE CLIENT BUILD..."
+
+image_pull_secrets:
+- dockerregistry

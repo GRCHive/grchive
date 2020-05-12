@@ -23,6 +23,11 @@ kubectl apply -f storage/${DEV_PROD}
 if [ -z $MINIKUBE ]; then
     kubectl apply -f ./cert-manager/letsencrypt-staging.yaml -f ./cert-manager/letsencrypt-prod.yaml
 
+    cd cloud_sql_proxy
+    envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+    kubectl apply -f service.yaml -f deployment.prod.yaml
+    cd ../
+
     export VAULT_IMAGE=registry.gitlab.com/grchive/grchive/vault:`git rev-parse HEAD`
     cd vault
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml

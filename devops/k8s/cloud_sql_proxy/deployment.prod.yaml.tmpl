@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: cloudsql-deployment
+    labels:
+        app: cloudsql
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: cloudsql
+    template:
+        metadata:
+            labels:
+                app: cloudsql
+        spec:
+            containers:
+                - name: cloudsql-proxy
+                  image: gcr.io/cloudsql-docker/gce-proxy:1.16
+                  ports:
+                    - containerPort: 5432
+                  command: ["/cloud_sql_proxy",
+                             "-instances=${GRCHIVE_PROJECT}:us-central1:${POSTGRES_INSTANCE_NAME}=tcp:0.0.0.0:5432",
+                             "-credential_file=/secrets/gke/gcloud-service-account.json"]
+                  securityContext:
+                      runAsUser: 2  # non-root user
+                      allowPrivilegeEscalation: false
+                  volumeMounts:
+                      - name: gke-service-account
+                        mountPath: /secrets/gke
+                        readOnly: true
+                  resources:
+                        requests:
+                            cpu: "10m"
+                        limits:
+                            cpu: "100m"
+            volumes:
+                - name: gke-service-account
+                  secret:
+                    secretName: gke-service-account

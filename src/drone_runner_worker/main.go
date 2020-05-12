@@ -52,6 +52,13 @@ func run(dir string) {
 
 func main() {
 	core.Init()
+
+	// This is a little hacky but the drone runner is the only thing that won't have
+	// a Cloud sql proxy sidecar so we need to access it differently.
+	if core.EnvConfig.Drone.RunnerDbConnectOverride != "" {
+		core.EnvConfig.DatabaseConnString = core.EnvConfig.Drone.RunnerDbConnectOverride
+	}
+
 	database.Init()
 	webcore.InitializeWebcore()
 
