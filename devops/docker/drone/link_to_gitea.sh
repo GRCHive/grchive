@@ -34,5 +34,5 @@ if [[ -z $SKIP_OAUTH ]]; then
 fi
 
 # Create Gitlab Registry Secret
-DOCKER_SECRET="{ \"auths\": {\"registry.gitlab.com\": { \"auth\": \"$(echo ${GKE_REGISTRY_USER}:${GKE_REGISTRY_PASSWORD} | base64)\" } } }"
+DOCKER_SECRET="{ \"auths\": {\"registry.gitlab.com\": { \"auth\": \"$(echo -n ${GKE_REGISTRY_USER}:${GKE_REGISTRY_PASSWORD} | base64)\" } } }"
 ${CLI} orgsecret add ${GITEA_GLOBAL_ORG} dockerregistry "${DOCKER_SECRET}" || ${CLI} orgsecret update ${GITEA_GLOBAL_ORG} dockerregistry "${DOCKER_SECRET}"
