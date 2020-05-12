@@ -127,7 +127,6 @@ if [[ -z "$NODEPLOY" ]]; then
         sleep 5
     fi
 
-
     if [[ -z "$NOK8S" ]]; then
         sudo wg-quick up wg0-client
 

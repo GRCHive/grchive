@@ -1,4 +1,5 @@
 #!/bin/sh
+export VAULT_SKIP_VERIFY=1
 vault login -address="${VAULT_HOST}:${VAULT_PORT}" token=${VAULT_TOKEN}
 
 vault auth enable -address="${VAULT_HOST}:${VAULT_PORT}" userpass

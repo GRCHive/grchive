@@ -38,6 +38,21 @@ resource "google_sql_database" "grchive-database" {
     instance = google_sql_database_instance.main-db.name
 }
 
+resource "google_sql_database" "gitea-database" {
+    name     = "gitea"
+    instance = google_sql_database_instance.main-db.name
+}
+
+resource "google_sql_database" "drone-database" {
+    name     = "drone"
+    instance = google_sql_database_instance.main-db.name
+}
+
+resource "google_sql_database" "artifactory-database" {
+    name     = "artifactory"
+    instance = google_sql_database_instance.main-db.name
+}
+
 resource "google_sql_user" "web-user" {
     name     = var.postgres_user
     password = var.postgres_password
