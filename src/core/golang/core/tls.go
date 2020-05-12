@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"io/ioutil"
+	"os"
 )
 
 func (t TLSConfig) Config() *tls.Config {
@@ -16,5 +17,10 @@ func (t TLSConfig) Config() *tls.Config {
 		return nil
 	}
 	tlsCfg.RootCAs.AppendCertsFromPEM(ca)
+
+	if _, ok := os.LookupEnv("ALLOW_TLS_INSECURE"); ok {
+		tlsCfg.InsecureSkipVerify = true
+	}
+
 	return tlsCfg
 }

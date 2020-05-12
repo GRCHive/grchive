@@ -24,5 +24,8 @@ container_image(
     files = [
         ":artifactory-settings",
     ],
+    env = {
+        "ALLOW_TLS_INSECURE": "true",
+    },
     data_path = "."
 )

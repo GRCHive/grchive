@@ -11,14 +11,6 @@ steps:
   - cd /app/src/drone_runner_worker/worker.runfiles/grchive
   - ../../worker -dir /drone/src
   - echo "...FINISH GRCHIVE CLIENT BUILD..."
-  volumes:
-  - name: certs
-    path: /opt/certs
 
 image_pull_secrets:
 - dockerregistry
-
-volumes:
-- name: certs
-  host:
-    path: /opt/certs
