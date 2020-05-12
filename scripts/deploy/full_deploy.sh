@@ -87,6 +87,7 @@ fi
 
 if [[ -z "$NOBUILD" ]]; then
     ${DIR}/build_gitea_container.sh ${EXTRA_BUILD_OPTIONS}
+    ${DIR}/build_artifactory_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_nginx_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_rabbitmq_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_vault_container.sh ${EXTRA_BUILD_OPTIONS}

@@ -116,7 +116,7 @@ resource "google_container_node_pool" "webserver-node-pool" {
     node_count  = 1
 
     node_config {
-        disk_size_gb        = 10
+        disk_size_gb        = 30
         disk_type           = "pd-standard"
         image_type          = "COS"
         labels = {

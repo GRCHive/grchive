@@ -32,7 +32,13 @@ if [ -z $MINIKUBE ]; then
     export GITEA_IMAGE=registry.gitlab.com/grchive/grchive/gitea:`git rev-parse HEAD`
     cd gitea
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
-    kubectl apply -f service.yaml -f service-external.dev.yaml -f deployment.prod.yaml
+    kubectl apply -f service.yaml -f deployment.prod.yaml
+    cd ../
+
+    export ARTIFACTORY_IMAGE=registry.gitlab.com/grchive/grchive/artifactory:`git rev-parse HEAD`
+    cd artifactory
+    envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+    kubectl apply -f service.yaml -f deployment.prod.yaml
     cd ../
 
     export RABBITMQ_IMAGE=registry.gitlab.com/grchive/grchive/rabbitmq:`git rev-parse HEAD`

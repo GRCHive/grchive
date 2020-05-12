@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-    name: gitea-pvc
+    name: artifactory-pvc
 spec:
     accessModes:
         - ReadWriteOnce
@@ -15,25 +15,25 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: gitea-deployment
+    name: artifactory-deployment
     labels:
-        app: gitea
+        app: artifactory
 spec:
     replicas: 1
     selector:
         matchLabels:
-            app: gitea
+            app: artifactory
     template:
         metadata:
             labels:
-                app: gitea
+                app: artifactory
         spec:
             containers:
-                - name: gitea-container
-                  image: ${GITEA_IMAGE} 
+                - name: artifactory-container
+                  image: ${ARTIFACTORY_IMAGE}
                   volumeMounts:
-                      - name: gitea-data
-                        mountPath: /data
+                      - name: artifactory-data
+                        mountPath: /opt/jfrog/artifactory/var/data/artifactory/filestore
                 - name: cloudsql-proxy
                   image: gcr.io/cloudsql-docker/gce-proxy:1.16
                   ports:
@@ -54,11 +54,8 @@ spec:
                         limits:
                             cpu: "100m"
             volumes:
-                - name: gitea-data
+                - name: artifactory-data
                   persistentVolumeClaim:
-                      claimName: gitea-pvc
-                - name: gke-service-account
-                  secret:
-                    secretName: gke-service-account
+                      claimName: artifactory-pvc
             imagePullSecrets:
                 - name: regcred
