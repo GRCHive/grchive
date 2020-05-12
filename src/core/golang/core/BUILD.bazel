@@ -16,6 +16,6 @@ go_library(
         "@com_github_speps_go_hashids//:go_default_library",
         "@com_github_gosimple_slug//:go_default_library",
         "@com_github_teambition_rrule_go//:go_default_library",
-        "@io_k8s_klog//:go_default_library",
+        "@com_github_iancoleman_strcase//:go_default_library",
     ],
 )

@@ -20,14 +20,5 @@ spec:
                   imagePullPolicy: Never
                   ports:
                     - containerPort: 8200
-                  volumeMounts:
-                      - name: internal-vault-service-certificate
-                        mountPath: /opt/certs/vault
-                        readOnly: true
-            volumes:
-                - name: internal-vault-service-certificate
-                  secret:
-                    secretName: internal-vault-service-certificate
-                    defaultMode: 256
     strategy:
         type: Recreate

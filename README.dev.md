@@ -327,7 +327,7 @@ Password: password
 - Save the deployment username as `ARTIFACTORY_DEPLOY_USER` in `build/variables.bzl`.
 
 Artifactory also has some bizarre default settings for the release and snapshot repositories.
-Go to `Settings > Repositories > Repositories` and modify
+Login as the admin and go to `Settings > Repositories > Repositories` and modify
 - `libs-release-local` to only `Handle Releases`
 - `libs-snapshot-local` to only `Handle Snapshots`
 - `libs-snapshot-local` and `libs-release-local` to only have an include pattern of `com/grchive/**/*`
@@ -339,6 +339,8 @@ Go to `Settings > Repositories > Repositories` and modify
 - `bazel run //devops/docker/drone:drone-build`
 - `docker run --network c3p0 --name drone bazel/devops/docker/drone:drone`
 - Set `DRONE_SERVER_HOST` to the result of `docker inspect -f '{{.NetworkSettings.Networks.c3p0.IPAddress}}' drone`.
+- Rebuild and restart the docker container.
+- `bazel run --action_env VAULT_TOKEN="$YOUR_ROOT_TOKEN" //devops/docker/drone:link_to_gitea`
 
 At this point, you need to authorize Drone to access Gitea; this can only be done manually.
 Point your browser to `${DRONE_PROTOCOL}://${DRONE_SERVER_HOST}:${DRONE_SERVER_PORT}` and login using the following credentials:
@@ -354,10 +356,6 @@ vault kv get -address="${VAULT_HOST}:${VAULT_PORT}" -field=password secret/gitea
 ```
 
 You will also need to set `DRONE_TOKEN` to be the value found under `Your Personal Token` under `User Settings`.
-Finally, 
-
-- `bazel run --action_env VAULT_TOKEN="$YOUR_ROOT_TOKEN" //devops/docker/drone:link_to_gitea`
-- `docker stop drone && docker start drone`
 
 ### Drone CI Runner
 
@@ -387,6 +385,10 @@ If you wish to run the Docker container:
 - `cd $SRC`
 - `bazel build //src/notification_hub:hub`
 - `bazel run //src/notification_hub:hub`
+
+If you wish to run the Docker container:
+
+- `bazel run //devops/docker/notification_hub:docker_notification_hub`
 
 ## Build and Run Preview Generator
 
@@ -438,6 +440,10 @@ The task manager is the microservice that makes sure user scripts get run at the
 For debugging purposes, it may be useful to use the `-mul` and `-log` flags.
 The `-mul` flag sets a time multiplier (e.g. `-mul 2` means that every second will actually tick 2 seconds starting at the current time) and `-log` will print out extra data to stdout.
 
+If you wish to run the Docker container:
+
+- `bazel run //devops/docker/task_manager:latest`
+
 ## Build and Run Script Runner
 
 The script runner receives data about a script/JAR to run and runs it.
@@ -449,6 +455,14 @@ It handles spinning up a docker container to run the JAR and make sure it gets l
 
 Note that the environment variable is necessary to ensure that the Docker containers that get spawned have access to the PostgreSQL database as well as the other services we are running.
 
+If you wish to run the Docker container (this doesn't work at the moment, just use this command to load the Docker container):
+
+- `bazel run //devops/docker/script_runner:latest`
+
+## Deploy Kotlin Library
+
+- `bazel run //src/core/kotlin:deploy`
+
 ## Run Tests
 
 - `cd $SRC`
@@ -459,7 +473,7 @@ Note that the environment variable is necessary to ensure that the Docker contai
 ### Setup Minikube
 
 - Ensure that you have a virtualization driver installed. See <https://kubernetes.io/docs/setup/learning-environment/minikube/#specifying-the-vm-driver>. kvm2 is what this guide will use.
-- Run `minikube start --vm-driver=kvm2`. 
+- Run `minikube start --vm-driver=kvm2 --cpus 4 --memory 8192`. 
 
 If you encounter errors when running the command:
 - Ensure both libvirt and QEMU are installed.
@@ -475,7 +489,7 @@ After ensuring all these things, you may need to
 - Run `minikube delete`
 
 Run `eval $(minikube docker-env)` to ensure docker containers are available to minikube.
-At this point you will need to rebuild all Docker containers.
+At this point you will need to rebuild all Docker containers (build the relevant docker container at the beginning of each section).
 
 ### Additional Build Parameters
 
@@ -507,25 +521,31 @@ $SRC/scripts/deploy/deploy_self_signed_certificate.sh
 
 ### PostgreSQL
 
-- Modify your `postgresql.conf` file (e.g. `/var/lib/postgres/data/postgresql.conf`) to have
-
-    ```
-    listen_addresses = '*'
-    ```
-- Find the IPv4 address of your current ethernet link using `ip addr` (e.g. `192.168.1.160`).
-- Modify your `pg_hba.conf` file (e.g. `/var/lib/postgres/data/pg_hba.conf`) to have
-
-    ```
-    host    all             all             192.168.1.160/16        trust
-    ``` 
-
-  where `192.168.1.160` is the IP address found by `ip addr`.
 - Set the `POSTGRES_HOST` build variable to be `postgresql-dev-service`.
 - `cd $SRC/devops/k8s/postgresql`
-- `cp endpoint.yaml.tmpl endpoint.yaml`
-- Start the PostgreSQL docker container `docker start psql`.
-- Modify `endpoint.yaml` to have the correct PostgreSQL docker address (as discussed earlier).
+- Modify `deployment.dev.yaml` and set `POSTGRES_USER` and `POSTGRES_PASSWORD` to the values you set in `build/variables.bzl`.
 - `kubectl apply -f .`
+- Get the PostgreSQL pod name: `kubectl get pods -l app=postgresql`
+- Setup the databases (replace DEVUSER with the value of POSTGRES_USER you used)
+    ```
+    kubectl exec -it POD_NAME -- createdb audit -O DEVUSER -U DEVUSER
+    kubectl exec -it POD_NAME -- createdb vault -O DEVUSER -U DEVUSER
+    kubectl exec -it POD_NAME -- createdb gitea -O DEVUSER -U DEVUSER
+    kubectl exec -it POD_NAME -- createdb drone -O DEVUSER -U DEVUSER
+    kubectl exec -it POD_NAME -- createdb artifactory -O DEVUSER -U DEVUSER
+    ```
+- Run `kubectl get services -l app=postgres` and get the external port of the service. For example
+
+    ```
+    external-postgres-service   NodePort   10.96.175.23   <none>        5432:30181/TCP   17s
+    ```
+
+  would indicate that the external port is `30181`.
+- `cd $SRC/devops/database/vault/flyway`
+- `cp dev-flyway.conf.tmpl dev-flyway.conf` and modify `flyway.user` and `flyway.password` to be the values of `POSTGRES_USER` and `POSTGRES_PASSWORD`. Modify `flyway.url` to be `MINIKUBE_IP:EXTERNAL_PORT` where `MINIKUBE_IP` is the current output `minikube ip`.
+- `cd ../`
+- `flyway -configFiles=./flyway/dev-flyway.conf migrate`
+- Do the same thing in the `$SRC/devops/database/webserver` folder.
 
 ### Vault
 
@@ -543,7 +563,7 @@ $SRC/scripts/deploy/deploy_self_signed_certificate.sh
   would indicate that the external port is `30296`.
 - Check that you can reach the Vault server: `vault status -address="http://$(minikube ip):30296`
 - Proceed to init/unseal the Vault server using the steps from the Docker Vault but using the new address.
-
+- Temporarily set `VAULT_HOST` to be `http://$(minikube ip)` and `VAULT_PORT` to be 30296 (in this example) before running `bazel run --action_env VAULT_TOKEN="$YOUR_ROOT_TOKEN" //devops/vault:dev_init_vault`
 
 ### RabbitMQ
 
@@ -551,6 +571,63 @@ $SRC/scripts/deploy/deploy_self_signed_certificate.sh
 - `kubectl apply -f ./service.yaml`
 - `kubectl apply -f ./statefulset.dev.yaml`
 - Set the `RABBITMQ_HOST` build variable to be `rabbitmq-service` (this will require you to rebuild some Docker containers).
+
+### Gitea
+
+- `cd $SRC/devops/k8s/gitea`
+- `kubectl apply -f .`
+- Set `GITEA_HOST` in `build/variables.bzl` to be `gitea-service`.
+- Get the external port of the external gitea service in the same manner as Vault: `kubectl get services -l app=gitea`
+- Point your browser to `http://$(minikube ip):EXTERNAL_GITEA_PORT` and ensure that you can reach the site.
+- Get the Gitea pod name: `kubectl get pods -l app=gitea`
+- Temporarily set `VAULT_HOST` to be `http://$(minikube ip)` and `VAULT_PORT` to be 30296 (in this example) before running `bazel run --action_env VAULT_TOKEN="$YOUR_ROOT_TOKEN" //devops/docker/gitea:docker_access_token -- -p POD_NAME`
+- Ensure that you can login to Gitea using the stored password in Vault.
+
+### Artifactory
+
+- `cd $SRC/devops/k8s/artifactory`
+- Set `ARTIFACTORY_HOST` in `build/variables.bzl` to `artifactory-service`.
+- `kubectl apply -f .`
+- Point your browser to the result of `minikube service --url external-artifactory-service`. Use the port that corresponds to port 9999.
+- Follow the instructions for setting up Artifactory.
+
+### Drone
+
+- `cd $SRC/devops/k8s/drone`
+- Set `DRONE_SERVER_HOST` to `drone-service`.
+- Rebuild `bazel run //devops/docker/drone:drone-build`
+- `kubectl apply -f .`
+
+### Reverse Proxy
+
+We will need to use a reverse proxy to access Drone as it'll pass back URLs that are Kubernetes service names.
+Note that this probably can be used instead of modifying `VAULT_HOST` and `VAULT_PORT` in `build/variables.bzl` for previous steps.
+It's a bit hacky though so maybe a better solution exists.
+Modify `build/variables.bzl` to include the following variables
+- `MINIKUBE_IP`: Result of `minikube ip`
+- `MINIKUBE_GITEA_PORT`: Result of `$(kubectl get services -l app=gitea | grep external | awk '{split($5, a, ":");split(a[2],b,"/");print b[1];}')`
+- `MINIKUBE_DRONE_PORT`: Result of `$(kubectl get services -l app=drone | grep external | awk '{split($5, a, ":");split(a[2],b,"/");print b[1];}')`
+- `MINIKUBE_VAULT_PORT`: Result of `$(kubectl get services -l app=vault | grep external | awk '{split($5, a, ":");split(a[2],b,"/");print b[1];}')`
+- `MINIKUBE_ARTIFACTORY_PORT`: The port mapped to 9999
+- `MINIKUBE_ARTIFACTORY_PORT_REPO`: The port mapped to 9998
+In a new terminal run:
+- `bazel run //devops/docker/reverse_proxy:latest`
+- `docker run --network host bazel/devops/docker/reverse_proxy:latest`
+
+Modify your `/etc/hosts` file to have the following line:
+- `127.0.0.1 gitea-service drone-service internal-vault-service artifactory-service`
+
+### Drone (Continued)
+
+- Delete the Drone pod and wait for it to restart.
+- Point your browser to `http://drone-service:8888` and login and auth the Gitea OAuth app.
+- Set `DRONE_TOKEN` in `build/variables.bzl` as before.
+
+### Drone Runner
+
+- `bazel run //devops/docker/drone_runner:drone-runner-k8s` (note that this is different from the Docker setup).
+- `cd $SRC/devops/k8s/drone_runner`
+- `kubectl apply -f .`
 
 ### Preview Generator
 
@@ -567,6 +644,21 @@ $SRC/scripts/deploy/deploy_self_signed_certificate.sh
 - `cd $SRC/devops/k8s/database_query_runner`
 - `kubectl apply -f ./deployment.dev.yaml -f ./service.yaml`
 - Set the `GRPC_QUERY_RUNNER_HOST` build variable to be `query-runner-service` (this will require you to rebuild some Docker containers).
+
+### Notification Hub
+
+- `cd $SRC/devops/k8s/notification_hub`
+- `kubectl apply -f ./deployment.dev.yaml`
+
+### Task Manager
+
+- `cd $SRC/devops/k8s/task_manager`
+- `kubectl apply -f ./deployment.dev.yaml`
+
+### Script Runner
+
+- `cd $SRC/devops/k8s/script_runner`
+- `kubectl apply -f ./deployment.dev.yaml`
 
 ### Webserver
 

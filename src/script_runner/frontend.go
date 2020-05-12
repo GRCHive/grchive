@@ -33,6 +33,8 @@ func processScriptRunnerMessages(data []byte) *webcore.RabbitMQError {
 }
 
 func main() {
+	core.Info("STARTING SCRIPT RUNNER...")
+
 	core.Init()
 	database.Init()
 	webcore.InitializeWebcore()

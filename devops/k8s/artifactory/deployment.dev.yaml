@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-    name: gitea-pvc
+    name: artifactory-pvc
 spec:
     accessModes:
         - ReadWriteOnce
@@ -11,34 +11,34 @@ spec:
     storageClassName: normal
     selector:
         matchLabels:
-            storage: gitea
+            storage: artifactory
 
 ---
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: gitea-deployment
+    name: artifactory-deployment
     labels:
-        app: gitea
+        app: artifactory
 spec:
     replicas: 1
     selector:
         matchLabels:
-            app: gitea
+            app: artifactory
     template:
         metadata:
             labels:
-                app: gitea
+                app: artifactory
         spec:
             containers:
-                - name: gitea-container
-                  image: bazel/devops/docker/gitea:gitea
+                - name: artifactory-container
+                  image: bazel/devops/docker/artifactory:artifactory
                   imagePullPolicy: Never
                   volumeMounts:
-                      - name: gitea-data
-                        mountPath: /data
+                      - name: artifactory-data
+                        mountPath: /opt/jfrog/artifactory/var/data/artifactory/filestore
             volumes:
-                - name: gitea-data
+                - name: artifactory-data
                   persistentVolumeClaim:
-                      claimName: gitea-pvc
+                      claimName: artifactory-pvc

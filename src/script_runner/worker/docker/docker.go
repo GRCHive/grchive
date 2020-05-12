@@ -31,6 +31,7 @@ var dockerImageMap map[string]bool = map[string]bool{}
 var dockerImageMutex sync.RWMutex = sync.RWMutex{}
 
 func mustDockerCreateClient(c *client.Client, err error) *client.Client {
+
 	if err != nil {
 		core.Error("Failed to create client: " + err.Error())
 	}
@@ -56,7 +57,13 @@ func mustDockerCreateClient(c *client.Client, err error) *client.Client {
 	return c
 }
 
-var dockerClient *client.Client = mustDockerCreateClient(client.NewEnvClient())
+var dockerClient *client.Client
+
+func InitDocker() {
+	if dockerClient == nil {
+		dockerClient = mustDockerCreateClient(client.NewEnvClient())
+	}
+}
 
 const defaultCPUPeriod int64 = 100000
 

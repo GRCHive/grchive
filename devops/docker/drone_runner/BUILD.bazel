@@ -14,3 +14,15 @@ container_image(
         "DRONE_RUNNER_NETWORKS": "c3p0",
     }
 )
+
+container_image(
+    name = "drone-runner-k8s",
+    base = "@drone-runner-kube//image",
+    env = {
+        "DRONE_RPC_HOST": "{0}:{1}".format(env["DRONE_SERVER_HOST"], env["DRONE_SERVER_PORT"]),
+        "DRONE_RPC_PROTO": env["DRONE_SERVER_PROTO"],
+        "DRONE_RPC_SECRET": env["DRONE_RPC_SECRET"],
+        "DRONE_UI_DISABLE": "true",
+        "DRONE_RUNNER_CAPACITY": "2",
+    }
+)

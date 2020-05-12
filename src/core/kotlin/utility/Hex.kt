@@ -29,10 +29,11 @@ fun hexDecode(input : String) : ByteArray {
     // Need to construct this ourselves instead of using the built-in
     // Integer.parseInt so that the decoded byte array ONLY contains
     // the data in the input string.
-    var arr = ByteArray(input.length)
-    input.toLowerCase().forEachIndexed {
-        idx, v ->
-            arr[idx] = Integer.parseInt(v.toString(), 16).toByte()
+    var lowerInput = input.toLowerCase()
+    var arr = ByteArray(input.length / 2)
+
+    for (idx in 0 until arr.size) {
+        arr[idx] = Integer.parseInt(lowerInput.substring(idx * 2, idx * 2 +2), 16).toByte()
     }
     return arr
 }

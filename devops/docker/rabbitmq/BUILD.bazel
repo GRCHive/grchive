@@ -20,7 +20,7 @@ genrule(
 genrule(
     name = "rabbitmq-conf",
     srcs = select({
-        "//build:kube-env": ["rabbitmq.prod.conf.tmpl"],
+        "//:production": ["rabbitmq.prod.conf.tmpl"],
         "//conditions:default": ["rabbitmq.dev.conf.tmpl"],
     }),
     outs = [

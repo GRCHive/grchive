@@ -18,19 +18,3 @@ spec:
                 - name: database-query-runner-container
                   image: bazel/devops/docker/database_query_runner:docker_database_query_runner
                   imagePullPolicy: Never
-                  volumeMounts:
-                  - mountPath: /opt/certs/rootca
-                    name: rootca
-                    readOnly: true
-                  - name: query-runner-service-certificate
-                    mountPath: /opt/certs/query_runner
-                    readOnly: true
-            volumes:
-                - name: rootca
-                  secret:
-                    secretName: rootca
-                    defaultMode: 256
-                - name: query-runner-service-certificate
-                  secret:
-                    secretName: query-runner-service-certificate
-                    defaultMode: 256

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: drone-runner-deployment
+    labels:
+        app: drone-runner
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: drone-runner
+    template:
+        metadata:
+            labels:
+                app: drone-runner
+        spec:
+            containers:
+                - name: drone-runner-container
+                  image: bazel/devops/docker/drone_runner:drone-runner-k8s
+                  imagePullPolicy: Never

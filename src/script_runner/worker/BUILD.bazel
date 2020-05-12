@@ -19,6 +19,17 @@ go_library(
         "@com_github_docker_docker//api/types/strslice:go_default_library",
         "@com_github_docker_docker//api/types/volume:go_default_library",
         "@com_github_docker_docker//client:go_default_library",
+        "@io_k8s_client_go//kubernetes:go_default_library",
+        "@io_k8s_client_go//kubernetes/typed/core/v1:go_default_library",
+        "@io_k8s_client_go//rest:go_default_library",
+        "@io_k8s_client_go//tools/cache:go_default_library",
+        "@io_k8s_client_go//tools/watch:go_default_library",
+        "@io_k8s_api//core/v1:go_default_library",
+        "@io_k8s_apimachinery//pkg/apis/meta/v1:go_default_library",
+        "@io_k8s_apimachinery//pkg/api/resource:go_default_library",
+        "@io_k8s_apimachinery//pkg/labels:go_default_library",
+        "@io_k8s_apimachinery//pkg/runtime:go_default_library",
+        "@io_k8s_apimachinery//pkg/watch:go_default_library",
     ],
 )
 

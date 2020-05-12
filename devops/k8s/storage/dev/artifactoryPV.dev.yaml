@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-    name: rabbitmq-pv
+    name: artifactory-pv
     labels:
-        storage: rabbitmq
+        storage: artifactory
 spec:
     capacity:
         storage: 5Gi
@@ -11,5 +11,5 @@ spec:
     - ReadWriteOnce
     storageClassName: normal
     hostPath:
-        path: /data/k8s/rabbitmq
+        path: /data/k8s/artifactory
     persistentVolumeReclaimPolicy: Retain

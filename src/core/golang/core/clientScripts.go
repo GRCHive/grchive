@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"github.com/gosimple/slug"
+	"github.com/iancoleman/strcase"
 )
 
 type ClientScript struct {
@@ -13,7 +14,7 @@ type ClientScript struct {
 }
 
 func (s ClientScript) Filename(ext string) string {
-	return fmt.Sprintf("src/main/kotlin/scripts/%s-%d.%s", slug.Make(s.Name), s.Id, ext)
+	return fmt.Sprintf("src/main/kotlin/scripts/%s-%d.%s", strcase.ToCamel(s.Name), s.Id, ext)
 }
 
 func (s ClientScript) MetadataFilename() string {

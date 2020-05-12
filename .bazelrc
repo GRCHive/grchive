@@ -3,6 +3,8 @@ common --experimental_allow_incremental_repository_updates
 build --loading_phase_threads=1
 run --loading_phase_threads=1
 
+build --platforms=//build:k8s
+
 build --java_toolchain=@bazel_tools//tools/jdk:toolchain_java11
 build --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_java11
 

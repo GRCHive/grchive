@@ -4,7 +4,6 @@ genrule(
     name = "vault_config",
     srcs = select({
         "//:production": ["prod.hcl.tmpl"],
-        "//build:kube-env": ["dev.k8s.hcl.tmpl"],
         "//conditions:default": ["dev.hcl.tmpl"],
     }),
     outs = [

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: script-runner-deployment
+    labels:
+        app: script-runner
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: script-runner
+    template:
+        metadata:
+            labels:
+                app: script-runner
+        spec:
+            containers:
+                - name: script-runner-container
+                  image: bazel/devops/docker/script_runner:latest
+                  imagePullPolicy: Never
+                  env:
+                    - name: "WORKER_K8S"
+                      value: "true"

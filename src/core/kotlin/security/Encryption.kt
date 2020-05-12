@@ -18,6 +18,5 @@ internal fun decryptPassword(pw : String, salt : String, vault : VaultClient) : 
     if (expectedSalt != salt) {
         throw Exception("Invalid salt.")
     }
-
     return hexDecode(splitData[0]).toString(Charsets.UTF_8)
 }
