@@ -41,6 +41,18 @@ if [ -z $MINIKUBE ]; then
     kubectl apply -f service.yaml -f deployment.prod.yaml
     cd ../
 
+    export DRONE_IMAGE=registry.gitlab.com/grchive/grchive/drone:`git rev-parse HEAD`
+    cd drone
+    envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+    kubectl apply -f service.yaml -f deployment.prod.yaml
+    cd ../
+
+    export DRONE_RUNNER_IMAGE=registry.gitlab.com/grchive/grchive/drone_runner_k8s:`git rev-parse HEAD`
+    cd drone_runner
+    envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+    kubectl apply -f role.yaml -f deployment.prod.yaml
+    cd ../
+
     export RABBITMQ_IMAGE=registry.gitlab.com/grchive/grchive/rabbitmq:`git rev-parse HEAD`
     cd rabbitmq
     envsubst < statefulset.prod.yaml.tmpl > statefulset.prod.yaml
@@ -102,6 +114,18 @@ else
 
     cd gitea
     kubectl apply -f ./deployment.dev.yaml -f ./service-external.dev.yaml -f ./service.yaml
+    cd ../
+
+    cd artifactory
+    kubectl apply -f ./deployment.dev.yaml -f ./service-external.dev.yaml -f ./service.yaml
+    cd ../
+
+    cd drone
+    kubectl apply -f ./deployment.dev.yaml -f ./service-external.dev.yaml -f ./service.yaml
+    cd ../
+
+    cd drone_runner
+    kubectl apply -f ./deployment.dev.yaml -f ./role.yaml
     cd ../
 
     cd rabbitmq

@@ -339,8 +339,8 @@ Login as the admin and go to `Settings > Repositories > Repositories` and modify
 - `bazel run //devops/docker/drone:drone-build`
 - `docker run --network c3p0 --name drone bazel/devops/docker/drone:drone`
 - Set `DRONE_SERVER_HOST` to the result of `docker inspect -f '{{.NetworkSettings.Networks.c3p0.IPAddress}}' drone`.
-- Rebuild and restart the docker container.
 - `bazel run --action_env VAULT_TOKEN="$YOUR_ROOT_TOKEN" //devops/docker/drone:link_to_gitea`
+- Restart the docker container.
 
 At this point, you need to authorize Drone to access Gitea; this can only be done manually.
 Point your browser to `${DRONE_PROTOCOL}://${DRONE_SERVER_HOST}:${DRONE_SERVER_PORT}` and login using the following credentials:
@@ -356,6 +356,7 @@ vault kv get -address="${VAULT_HOST}:${VAULT_PORT}" -field=password secret/gitea
 ```
 
 You will also need to set `DRONE_TOKEN` to be the value found under `Your Personal Token` under `User Settings`.
+- `bazel run --action_env VAULT_TOKEN="$YOUR_ROOT_TOKEN" //devops/docker/drone:link_to_gitea -- -s`
 
 ### Drone CI Runner
 
@@ -588,7 +589,7 @@ $SRC/scripts/deploy/deploy_self_signed_certificate.sh
 
 - `cd $SRC/devops/k8s/artifactory`
 - Set `ARTIFACTORY_HOST` in `build/variables.bzl` to `artifactory-service`.
-- `kubectl apply -f .`
+- `kubectl apply -f ./deployment.dev.yaml -f ./service-external.dev.yaml -f ./service.yaml`
 - Point your browser to the result of `minikube service --url external-artifactory-service`. Use the port that corresponds to port 9999.
 - Follow the instructions for setting up Artifactory.
 
@@ -597,7 +598,7 @@ $SRC/scripts/deploy/deploy_self_signed_certificate.sh
 - `cd $SRC/devops/k8s/drone`
 - Set `DRONE_SERVER_HOST` to `drone-service`.
 - Rebuild `bazel run //devops/docker/drone:drone-build`
-- `kubectl apply -f .`
+- `kubectl apply -f ./deployment.dev.yaml -f ./service-external.dev.yaml -f ./service.yaml`
 
 ### Reverse Proxy
 
@@ -628,7 +629,7 @@ Modify your `/etc/hosts` file to have the following line:
 
 - `bazel run //devops/docker/drone_runner:drone-runner-k8s` (note that this is different from the Docker setup).
 - `cd $SRC/devops/k8s/drone_runner`
-- `kubectl apply -f .`
+- `kubectl apply -f ./deployment.dev.yaml -f ./role.yaml`
 
 ### Preview Generator
 

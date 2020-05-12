@@ -41,6 +41,8 @@ case "$ENV" in
         export GRCHIVE_DOC_BUCKET="grchive-prod"
         export TERRAFORM_FOLDER="prod"
         export INGRESS_ENV="prod"
+        export ARTIFACTORY_ENCRYPTED_PASSWORD=$PRODUCTION_ARTIFACTORY_ENCRYPTED_PASSWORD
+        export DRONE_TOKEN=$PRODUCTION_DRONE_TOKEN
 
         USE_ENV_VARIABLES=1
         DO_TERRAFORM=1
@@ -62,6 +64,8 @@ case "$ENV" in
         export GRCHIVE_DOC_BUCKET="grchive-staging"
         export TERRAFORM_FOLDER="staging"
         export INGRESS_ENV="staging"
+        export ARTIFACTORY_ENCRYPTED_PASSWORD=$STAGING_ARTIFACTORY_ENCRYPTED_PASSWORD
+        export DRONE_TOKEN=$STAGING_DRONE_TOKEN
 
         USE_ENV_VARIABLES=1
         DO_TERRAFORM=1
