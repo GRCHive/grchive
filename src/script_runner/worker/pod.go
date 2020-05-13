@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"io/ioutil"
 	"os"
@@ -123,6 +124,20 @@ func main() {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Dir = "/data"
+	cmd.Env = os.Environ()
+
+	// Same reason we need this as the drone runner worker; however, we also need to propagate this
+	// override to Kotlin via an environment variable.
+	if core.EnvConfig.Drone.RunnerDbConnectOverride != "" {
+		cmd.Env = append(
+			cmd.Env,
+			fmt.Sprintf("DB_CONN_OVERRIDE=%s", core.EnvConfig.Drone.RunnerDbConnectOverride),
+		)
+		cmd.Env = append(
+			cmd.Env,
+			"ALLOW_TLS_INSECURE=true",
+		)
+	}
 
 	err = cmd.Run()
 	if err != nil {

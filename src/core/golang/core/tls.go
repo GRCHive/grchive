@@ -14,11 +14,13 @@ func (t TLSConfig) Config() *tls.Config {
 	ca, err := ioutil.ReadFile(t.TLSRootCaCert)
 	if err != nil {
 		Warning("Failed to read CA cert: " + err.Error())
-		return nil
+	} else {
+		tlsCfg.RootCAs.AppendCertsFromPEM(ca)
 	}
-	tlsCfg.RootCAs.AppendCertsFromPEM(ca)
 
-	if _, ok := os.LookupEnv("ALLOW_TLS_INSECURE"); ok {
+	_, ok := os.LookupEnv("ALLOW_TLS_INSECURE")
+	if ok {
+		Warning("Skipping TLS verification.")
 		tlsCfg.InsecureSkipVerify = true
 	}
 

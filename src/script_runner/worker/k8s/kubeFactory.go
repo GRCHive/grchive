@@ -16,6 +16,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	watchtools "k8s.io/client-go/tools/watch"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -128,6 +129,7 @@ func (w *KubeWorker) Run() (int, error) {
 		return -1, err
 	}
 
+	core.Info("Wait For Pod Ready...")
 	err = w.waitReady()
 	if err != nil {
 		return -1, err
@@ -192,6 +194,13 @@ func (f KubeFactory) CreateWorker(opts WorkerOptions) (Worker, error) {
 		return nil, err
 	}
 
+	pullSecrets := []apiv1.LocalObjectReference{}
+	if val, ok := os.LookupEnv("IMAGE_PULL_SECRET"); ok {
+		pullSecrets = append(pullSecrets, apiv1.LocalObjectReference{
+			Name: val,
+		})
+	}
+
 	worker.spec = apiv1.PodSpec{
 		RestartPolicy: apiv1.RestartPolicyNever,
 		Volumes: []apiv1.Volume{
@@ -247,6 +256,7 @@ func (f KubeFactory) CreateWorker(opts WorkerOptions) (Worker, error) {
 				},
 			},
 		},
+		ImagePullSecrets: pullSecrets,
 	}
 
 	return &worker, nil

@@ -42,8 +42,9 @@ class Config {
             error("Failed to parse config file [$filename].")
         }
 
+        val defaultDbConn = result.getString("database.connection")!!
         database = DatabaseConfig(
-            result.getString("database.connection")!!,
+            System.getenv("DB_CONN_OVERRIDE") ?: defaultDbConn,
             result.getString("database.username")!!,
             result.getString("database.password")!!
         )

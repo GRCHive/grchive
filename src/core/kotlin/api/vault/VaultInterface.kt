@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.*
 
 import grchive.core.api.vault.auth.UserPassInterface
 import grchive.core.api.vault.auth.UserPassLoginBody
+import grchive.core.utility.tls.okhttpClientTlsInsecure
 
 import okhttp3.OkHttpClient
 import okhttp3.Interceptor
@@ -51,9 +52,17 @@ class VaultClient (
     init {
         // Create a separate auth retrofit instance since the main retrofit
         // instance will need to set the authorization header.
-        val authClient = OkHttpClient.Builder()
-            .addInterceptor(JSONHeaderInterceptor())
-            .build()
+        var authClient : OkHttpClient
+        
+        if (System.getenv("ALLOW_TLS_INSECURE") == null) {
+            authClient = OkHttpClient.Builder()
+                .addInterceptor(JSONHeaderInterceptor())
+                .build()
+        } else {
+            authClient = okhttpClientTlsInsecure().newBuilder()
+                .addInterceptor(JSONHeaderInterceptor())
+                .build()
+        }
 
         val authRetrofit = Retrofit.Builder()
             .baseUrl(cfg.url)

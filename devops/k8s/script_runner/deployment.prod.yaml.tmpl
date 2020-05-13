@@ -20,6 +20,8 @@ spec:
                   env:
                     - name: "WORKER_K8S"
                       value: "true"
+                    - name: "IMAGE_PULL_SECRET"
+                      value: "regcred"
                   resources:
                         requests:
                             cpu: "10m"
