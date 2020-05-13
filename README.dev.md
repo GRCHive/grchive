@@ -356,7 +356,7 @@ vault kv get -address="${VAULT_HOST}:${VAULT_PORT}" -field=password secret/gitea
 ```
 
 You will also need to set `DRONE_TOKEN` to be the value found under `Your Personal Token` under `User Settings`.
-- `bazel run --action_env VAULT_TOKEN="$YOUR_ROOT_TOKEN" //devops/docker/drone:link_to_gitea -- -s`
+- `bazel run --action_env VAULT_TOKEN="$YOUR_ROOT_TOKEN" //devops/docker/drone:link_to_gitea -- -s` (this step has the additional `-- -s`).
 
 ### Drone CI Runner
 
