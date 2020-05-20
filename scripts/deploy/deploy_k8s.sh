@@ -36,8 +36,8 @@ if [ -z $MINIKUBE ]; then
     kubectl apply -f service-internal.yaml -f deployment.prod.yaml
     cd ../
 
-    export GITEA_IMAGE=${CONTAINER_REGISTRY_URL}/:`git rev-parse HEAD`
-    cd 
+    export GITEA_IMAGE=${CONTAINER_REGISTRY_URL}/gitea:`git rev-parse HEAD`
+    cd gitea
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
     kubectl apply -f service.yaml -f deployment.prod.yaml
     cd ../
