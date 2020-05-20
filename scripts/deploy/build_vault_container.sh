@@ -12,7 +12,7 @@ done
 bazel run ${BUILD_OPT} --platforms=//build:k8s //devops/docker/vault:vault 
 
 if [[ -z $MINIKUBE ]]; then
-    FULL_IMAGE_URL=registry.gitlab.com/grchive/grchive/vault:`git rev-parse HEAD`
+    FULL_IMAGE_URL=registry.gitlab.com/grchive/grchive/${CONTAINER_REGISTRY_FOLDER}/vault:`git rev-parse HEAD`
     docker tag bazel/devops/docker/vault:vault $FULL_IMAGE_URL
     docker push $FULL_IMAGE_URL
 fi

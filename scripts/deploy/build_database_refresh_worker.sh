@@ -13,7 +13,7 @@ bazel build ${BUILD_OPT} --platforms=//build:k8s //devops/docker/database_fetche
 docker load -i bazel-bin/devops/docker/database_fetcher/docker_database_fetcher.tar
 
 if [[ -z $MINIKUBE ]]; then
-    FULL_IMAGE_URL=registry.gitlab.com/grchive/grchive/database_fetcher:`git rev-parse HEAD`
+    FULL_IMAGE_URL=registry.gitlab.com/grchive/grchive/${CONTAINER_REGISTRY_FOLDER}/database_fetcher:`git rev-parse HEAD`
     docker tag bazel/devops/docker/database_fetcher:docker_database_fetcher $FULL_IMAGE_URL
     docker push $FULL_IMAGE_URL
 fi

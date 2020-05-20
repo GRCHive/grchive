@@ -43,6 +43,7 @@ case "$ENV" in
         export INGRESS_ENV="prod"
         export ARTIFACTORY_ENCRYPTED_PASSWORD=$PRODUCTION_ARTIFACTORY_ENCRYPTED_PASSWORD
         export DRONE_TOKEN=$PRODUCTION_DRONE_TOKEN
+        export CONTAINER_REGISTRY_FOLDER="prod"
 
         USE_ENV_VARIABLES=1
         DO_TERRAFORM=1
@@ -66,6 +67,7 @@ case "$ENV" in
         export INGRESS_ENV="staging"
         export ARTIFACTORY_ENCRYPTED_PASSWORD=$STAGING_ARTIFACTORY_ENCRYPTED_PASSWORD
         export DRONE_TOKEN=$STAGING_DRONE_TOKEN
+        export CONTAINER_REGISTRY_FOLDER="staging"
 
         USE_ENV_VARIABLES=1
         DO_TERRAFORM=1
@@ -84,6 +86,9 @@ case "$ENV" in
         eval $(minikube docker-env)
         ;;
 esac
+
+export DRONE_RUNNER_IMAGE="${CONTAINER_REGISTRY}/${CONTAINER_REGISTRY_FOLDER}/drone_runner_worker_image:latest"
+export SCRIPT_RUNNER_IMAGE="${CONTAINER_REGISTRY}/${CONTAINER_REGISTRY_FOLDER}/script_runner_worker_image:latest"
 
 if [[ ! -z "$USE_ENV_VARIABLES" ]]; then
     envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
