@@ -13,7 +13,7 @@ bazel build ${BUILD_OPT} --platforms=//build:k8s //devops/docker/database_query_
 docker load -i bazel-bin/devops/docker/database_query_runner/docker_database_query_runner.tar
 
 if [[ -z $MINIKUBE ]]; then
-    FULL_IMAGE_URL=registry.gitlab.com/grchive/grchive/database_query_runner:`git rev-parse HEAD`
+    FULL_IMAGE_URL=registry.gitlab.com/grchive/grchive/${CONTAINER_REGISTRY_FOLDER}/database_query_runner:`git rev-parse HEAD`
     docker tag bazel/devops/docker/database_query_runner:docker_database_query_runner $FULL_IMAGE_URL
     docker push $FULL_IMAGE_URL
 fi

@@ -28,87 +28,89 @@ if [ -z $MINIKUBE ]; then
     kubectl apply -f service.yaml -f deployment.prod.yaml
     cd ../
 
-    export VAULT_IMAGE=registry.gitlab.com/grchive/grchive/vault:`git rev-parse HEAD`
+    CONTAINER_REGISTRY_URL=${CONTAINER_REGISTRY}/${CONTAINER_REGISTRY_FOLDER}
+
+    export VAULT_IMAGE=${CONTAINER_REGISTRY_URL}/vault:`git rev-parse HEAD`
     cd vault
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
     kubectl apply -f service-internal.yaml -f deployment.prod.yaml
     cd ../
 
-    export GITEA_IMAGE=registry.gitlab.com/grchive/grchive/gitea:`git rev-parse HEAD`
+    export GITEA_IMAGE=${CONTAINER_REGISTRY_URL}/gitea:`git rev-parse HEAD`
     cd gitea
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
     kubectl apply -f service.yaml -f deployment.prod.yaml
     cd ../
 
-    export ARTIFACTORY_IMAGE=registry.gitlab.com/grchive/grchive/artifactory:`git rev-parse HEAD`
+    export ARTIFACTORY_IMAGE=${CONTAINER_REGISTRY_URL}/artifactory:`git rev-parse HEAD`
     cd artifactory
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
     kubectl apply -f service.yaml -f deployment.prod.yaml
     cd ../
 
-    export DRONE_IMAGE=registry.gitlab.com/grchive/grchive/drone:`git rev-parse HEAD`
+    export DRONE_IMAGE=${CONTAINER_REGISTRY_URL}/drone:`git rev-parse HEAD`
     cd drone
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
     kubectl apply -f service.yaml -f deployment.prod.yaml
     cd ../
 
-    export DRONE_RUNNER_IMAGE=registry.gitlab.com/grchive/grchive/drone_runner_k8s:`git rev-parse HEAD`
+    export DRONE_RUNNER_IMAGE=${CONTAINER_REGISTRY_URL}/drone_runner_k8s:`git rev-parse HEAD`
     cd drone_runner
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
     kubectl apply -f role.yaml -f deployment.prod.yaml
     cd ../
 
-    export RABBITMQ_IMAGE=registry.gitlab.com/grchive/grchive/rabbitmq:`git rev-parse HEAD`
+    export RABBITMQ_IMAGE=${CONTAINER_REGISTRY_URL}/rabbitmq:`git rev-parse HEAD`
     cd rabbitmq
     envsubst < statefulset.prod.yaml.tmpl > statefulset.prod.yaml
     kubectl apply -f service.yaml -f statefulset.prod.yaml
     cd ../
 
-    export PREVIEW_IMAGE=registry.gitlab.com/grchive/grchive/preview_generator:`git rev-parse HEAD`
+    export PREVIEW_IMAGE=${CONTAINER_REGISTRY_URL}/preview_generator:`git rev-parse HEAD`
     cd preview_generator
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
     kubectl apply -f deployment.prod.yaml
     cd ../
 
-    export RUNNER_IMAGE=registry.gitlab.com/grchive/grchive/database_query_runner:`git rev-parse HEAD`
+    export RUNNER_IMAGE=${CONTAINER_REGISTRY_URL}/database_query_runner:`git rev-parse HEAD`
     cd database_query_runner
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
     kubectl apply -f deployment.prod.yaml -f service.yaml
     cd ../
 
-    export FETCHER_IMAGE=registry.gitlab.com/grchive/grchive/database_fetcher:`git rev-parse HEAD`
+    export FETCHER_IMAGE=${CONTAINER_REGISTRY_URL}/database_fetcher:`git rev-parse HEAD`
     cd database_fetcher
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
     kubectl apply -f deployment.prod.yaml
     cd ../
 
-    export NOTIFICATION_HUB_IMAGE=registry.gitlab.com/grchive/grchive/notification_hub:`git rev-parse HEAD`
+    export NOTIFICATION_HUB_IMAGE=${CONTAINER_REGISTRY_URL}/notification_hub:`git rev-parse HEAD`
     cd notification_hub
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
     kubectl apply -f deployment.prod.yaml
     cd ../
 
-    export SCRIPT_RUNNER_IMAGE=registry.gitlab.com/grchive/grchive/script_runner:`git rev-parse HEAD`
+    export SCRIPT_RUNNER_IMAGE=${CONTAINER_REGISTRY_URL}/script_runner:`git rev-parse HEAD`
     cd script_runner
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
     kubectl apply -f deployment.prod.yaml -f role.yaml
     cd ../
 
-    export TASK_MANAGER_IMAGE=registry.gitlab.com/grchive/grchive/task_manager:`git rev-parse HEAD`
+    export TASK_MANAGER_IMAGE=${CONTAINER_REGISTRY_URL}/task_manager:`git rev-parse HEAD`
     cd task_manager
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
     kubectl apply -f deployment.prod.yaml
     cd ../
 
-    export WEBSERVER_IMAGE=registry.gitlab.com/grchive/grchive/webserver:`git rev-parse HEAD`
-    export NGINX_IMAGE=registry.gitlab.com/grchive/grchive/nginx:`git rev-parse HEAD`
+    export WEBSERVER_IMAGE=${CONTAINER_REGISTRY_URL}/webserver:`git rev-parse HEAD`
+    export NGINX_IMAGE=${CONTAINER_REGISTRY_URL}/nginx:`git rev-parse HEAD`
     cd webserver
     envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
     kubectl apply -f deployment.prod.yaml -f service.prod.yaml -f ingress.${INGRESS_ENV}.yaml -f backendconfig.prod.yaml
     cd ../
 else
     kubectl delete deployment vault-deployment  
-    kubectl delete deployment gitea-deployment  
+    kubectl delete deployment -deployment  
     kubectl delete deployment artifactory-deployment  
     kubectl delete deployment drone-deployment  
     kubectl delete deployment drone-runner-deployment  
