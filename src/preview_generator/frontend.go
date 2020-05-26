@@ -26,13 +26,13 @@ func generatePreview(data []byte) *webcore.RabbitMQError {
 	// Download file from B2.
 	encryptedBytes, err := storage.Download(msg.Storage.BucketId, msg.Storage.StorageId, core.EnvConfig.HmacKey)
 	if err != nil {
-		return &webcore.RabbitMQError{err, true}
+		return &webcore.RabbitMQError{err, false}
 	}
 
 	// Unencrypt file.
 	decryptedBytes, err := vault.TransitDecrypt(msg.File.UniqueKey(), encryptedBytes)
 	if err != nil {
-		return &webcore.RabbitMQError{err, true}
+		return &webcore.RabbitMQError{err, false}
 	}
 
 	// Write file to disk in temporary file.
