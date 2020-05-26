@@ -16,11 +16,11 @@ if [[ -z "$POD" ]]; then
     docker exec -it gitea sh -c "gitea admin create-user --username ${USERNAME} --password ${PASSWORD} --email support@grchive.com --must-change-password=false --admin || gitea admin change-password --username ${USERNAME} --password ${PASSWORD}"
 else
     echo "!!! KUBE MODE -- $POD"
-    kubectl exec -it $POD -- sh -c "gitea admin create-user --username ${USERNAME} --password ${PASSWORD} --email support@grchive.com --must-change-password=false --admin || gitea admin change-password --username ${USERNAME} --password ${PASSWORD}"
+    kubectl exec -it $POD -n backend -- sh -c "gitea admin create-user --username ${USERNAME} --password ${PASSWORD} --email support@grchive.com --must-change-password=false --admin || gitea admin change-password --username ${USERNAME} --password ${PASSWORD}"
 fi
 
 # Create token for admin user
-echo "CREATE ADMIN TOKEN"
+echo "CREATE ADMIN TOKEN ${USERNAME} ${PASSWORD}"
 USER_AUTH_URL="${GITEA_PROTOCOL}://${USERNAME}:${PASSWORD}@${GITEA_HOST}:${GITEA_PORT}"
 RESULT=$(curl \
     -H "Content-Type: application/json" \

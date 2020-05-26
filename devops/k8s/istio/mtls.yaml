@@ -16,5 +16,4 @@ metadata:
     namespace: backend
 spec:
     mtls:
-        mode: STRICT
-
+        mode: PERMISSIVE
