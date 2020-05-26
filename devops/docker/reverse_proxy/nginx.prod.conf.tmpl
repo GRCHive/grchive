@@ -7,45 +7,36 @@ events {
 http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
-
-    server {
-        listen 3000;
-        location / {
-            proxy_pass http://${MINIKUBE_IP}:${MINIKUBE_GITEA_PORT};
-        }
-    }
-
-    server {
-        listen 8888;
-        location / {
-            proxy_pass http://${MINIKUBE_IP}:${MINIKUBE_DRONE_PORT};
-        }
-    }
-
-    server {
-        listen 9999;
-        location / {
-            proxy_pass http://${MINIKUBE_IP}:${MINIKUBE_ARTIFACTORY_PORT};
-        }
-    }
-
-    server {
-        listen 9998;
-        location / {
-            proxy_pass http://${MINIKUBE_IP}:${MINIKUBE_ARTIFACTORY_PORT_REPO};
-        }
-    }
-
 }
 
 stream {
     server {
-        listen 8200;
-        proxy_pass ${MINIKUBE_IP}:${MINIKUBE_VAULT_PORT};
+        listen 5432;
+        proxy_pass ${MINIKUBE_PSQL_URL};
     }
 
     server {
-        listen 5432;
-        proxy_pass ${MINIKUBE_IP}:${MINIKUBE_PSQL_PORT};
+        listen 3000;
+        proxy_pass ${MINIKUBE_GITEA_URL};
+    }
+
+    server {
+        listen 8888;
+        proxy_pass ${MINIKUBE_DRONE_URL};
+    }
+
+    server {
+        listen 9999;
+        proxy_pass ${MINIKUBE_ARTIFACTORY_URL};
+    }
+
+    server {
+        listen 9998;
+        proxy_pass ${MINIKUBE_ARTIFACTORY_URL_REPO};
+    }
+
+    server {
+        listen 8200;
+        proxy_pass ${MINIKUBE_VAULT_URL};
     }
 }

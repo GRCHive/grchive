@@ -11,35 +11,35 @@ http {
     server {
         listen 3000;
         location / {
-            proxy_pass http://${MINIKUBE_IP}:${MINIKUBE_GITEA_PORT};
+            proxy_pass http://${MINIKUBE_GITEA_URL};
         }
     }
 
     server {
         listen 8888;
         location / {
-            proxy_pass http://${MINIKUBE_IP}:${MINIKUBE_DRONE_PORT};
+            proxy_pass http://${MINIKUBE_DRONE_URL};
         }
     }
 
     server {
         listen 8200;
         location / {
-            proxy_pass http://${MINIKUBE_IP}:${MINIKUBE_VAULT_PORT};
+            proxy_pass http://${MINIKUBE_VAULT_URL};
         }
     }
 
     server {
         listen 9999;
         location / {
-            proxy_pass http://${MINIKUBE_IP}:${MINIKUBE_ARTIFACTORY_PORT};
+            proxy_pass http://${MINIKUBE_ARTIFACTORY_URL};
         }
     }
 
     server {
         listen 9998;
         location / {
-            proxy_pass http://${MINIKUBE_IP}:${MINIKUBE_ARTIFACTORY_PORT_REPO};
+            proxy_pass http://${MINIKUBE_ARTIFACTORY_URL_REPO};
         }
     }
 
@@ -48,6 +48,6 @@ http {
 stream {
     server {
         listen 5432;
-        proxy_pass ${MINIKUBE_IP}:${MINIKUBE_PSQL_PORT};
+        proxy_pass ${MINIKUBE_PSQL_URL};
     }
 }
