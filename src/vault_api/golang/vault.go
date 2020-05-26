@@ -60,6 +60,10 @@ func sendVaultRequest(method string, endpoint string, data interface{}) (map[str
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusNoContent {
+		return nil, nil
+	}
+
 	respBodyData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
