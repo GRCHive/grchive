@@ -29,6 +29,7 @@ func createErrorReply(err error, encryptPath string) (*sqlQuery.SqlRunnerReply, 
 		}
 	}
 
+	core.Info("\tFailure Reply: ", buffer)
 	return &sqlQuery.SqlRunnerReply{
 		EncryptedData: buffer,
 		Success:       false,
@@ -58,6 +59,7 @@ func (s *server) RunSqlQuery(ctx context.Context, in *sqlQuery.SqlRunnerRequest)
 		return createErrorReply(err, "")
 	}
 
+	core.Info("\tSuccess Reply: ", encrypted)
 	return &sqlQuery.SqlRunnerReply{
 		EncryptedData: encrypted,
 		Success:       true,
