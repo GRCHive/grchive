@@ -68,3 +68,5 @@ spec:
                     secretName: gke-service-account
             imagePullSecrets:
                 - name: regcred
+    strategy:
+        type: Recreate

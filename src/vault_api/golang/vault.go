@@ -65,15 +65,13 @@ func sendVaultRequest(method string, endpoint string, data interface{}) (map[str
 		return nil, err
 	}
 
-	rootObj := map[string]*json.RawMessage{}
-	err = json.Unmarshal(respBodyData, &rootObj)
-	if err != nil {
-		// This isn't necessarily an error since not all
-		// requests will return something.
-		return rootObj, nil
-	}
-
 	if resp.StatusCode != http.StatusOK {
+		rootObj := map[string]*json.RawMessage{}
+		err = json.Unmarshal(respBodyData, &rootObj)
+		if err != nil {
+			return nil, err
+		}
+
 		rawErrors, ok := rootObj["errors"]
 		auxString := ""
 		if ok {
@@ -86,6 +84,10 @@ func sendVaultRequest(method string, endpoint string, data interface{}) (map[str
 			}
 		}
 		return nil, errors.New(fmt.Sprintf("%s -> %d -- Vault Request Failed: %s", fullUrl, resp.StatusCode, auxString))
+	} else {
+		rootObj := map[string]*json.RawMessage{}
+		// Don't handle errors error since we might not actually have a body to parse.
+		json.Unmarshal(respBodyData, &rootObj)
+		return rootObj, nil
 	}
-	return rootObj, nil
 }
