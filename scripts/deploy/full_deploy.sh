@@ -143,7 +143,6 @@ if [[ -z "$NODEPLOY" ]]; then
     if [[ -z "$NOK8S" ]]; then
         sudo wg-quick up wg0-client
 
-        ${DIR}/deploy_self_signed_certificates.sh
         ${DIR}/deploy_k8s.sh ${EXTRA_BUILD_OPTIONS}
 
         sudo wg-quick down wg0-client

@@ -6,8 +6,8 @@ env = {
     "RABBITMQ_PASSWORD": "${RABBITMQ_PASSWORD}",
     "RABBITMQ_HOST": "rabbitmq-service",
     "RABBITMQ_PORT": 5671,
-    "RABBITMQ_TLS": "true",
-    "ROOT_CA_CRT": "/opt/certs/rootca/rootca.crt",
+    "RABBITMQ_TLS": "false",
+    "ROOT_CA_CRT": "",
 
     "POSTGRES_USER": "${POSTGRES_USER}",
     "POSTGRES_PASSWORD": "${POSTGRES_PASSWORD}",
@@ -16,9 +16,9 @@ env = {
 
     "VAULT_USER": "${VAULT_USER}",
     "VAULT_PASSWORD": "${VAULT_PASSWORD}",
-    "VAULT_HOST": "https://internal-vault-service",
+    "VAULT_HOST": "http://internal-vault-service",
     "VAULT_PORT": 8200,
-    "VAULT_TLS": "true",
+    "VAULT_TLS": "false",
 
     "OKTA_URL": "https://dev-798696.okta.com",
     "OKTA_KEY": "${OKTA_KEY}",
@@ -38,7 +38,7 @@ env = {
 
     "GRPC_QUERY_RUNNER_HOST": "query-runner-service",
     "GRPC_QUERY_RUNNER_PORT": 6000,
-    "GRPC_QUERY_RUNNER_TLS": "true",
+    "GRPC_QUERY_RUNNER_TLS": "false",
 
     "KOTLIN_CORE_LIB_MAJOR_VERSION": ${KOTLIN_CORE_LIB_MAJOR_VERSION},
     "KOTLIN_CORE_LIB_MINOR_VERSION": ${KOTLIN_CORE_LIB_MINOR_VERSION},

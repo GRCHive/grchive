@@ -18,10 +18,6 @@ spec:
             containers:
                 - name: database-fetcher-container
                   image: ${FETCHER_IMAGE}
-                  volumeMounts:
-                  - mountPath: /opt/certs/rootca
-                    name: rootca
-                    readOnly: true
                   resources:
                         requests:
                             cpu: "50m"
@@ -50,9 +46,5 @@ spec:
                 - name: gke-service-account
                   secret:
                     secretName: gke-service-account
-                - name: rootca
-                  secret:
-                    secretName: rootca
-                    defaultMode: 256
             imagePullSecrets:
                 - name: regcred

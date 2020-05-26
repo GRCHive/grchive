@@ -24,9 +24,6 @@ spec:
                       - name: gke-service-account
                         mountPath: /secrets/gke
                         readOnly: true
-                      - name: internal-vault-service-certificate
-                        mountPath: /opt/certs/vault
-                        readOnly: true
                 - name: cloudsql-proxy
                   image: gcr.io/cloudsql-docker/gce-proxy:1.16
                   ports:
@@ -50,10 +47,6 @@ spec:
                 - name: gke-service-account
                   secret:
                     secretName: gke-service-account
-                - name: internal-vault-service-certificate
-                  secret:
-                    secretName: internal-vault-service-certificate
-                    defaultMode: 256
             imagePullSecrets:
                 - name: regcred
     strategy:

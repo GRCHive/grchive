@@ -28,10 +28,6 @@ spec:
                             cpu: "10m"
                         limits:
                             cpu: "100m"
-                  volumeMounts:
-                  - mountPath: /opt/certs/rootca
-                    name: rootca
-                    readOnly: true
                 - name: cloudsql-proxy
                   image: gcr.io/cloudsql-docker/gce-proxy:1.16
                   ports:
@@ -55,9 +51,5 @@ spec:
                 - name: gke-service-account
                   secret:
                     secretName: gke-service-account
-                - name: rootca
-                  secret:
-                    secretName: rootca
-                    defaultMode: 256
             imagePullSecrets:
                 - name: regcred
