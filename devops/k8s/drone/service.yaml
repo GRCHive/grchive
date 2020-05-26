@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
     name: drone-service
+    namespace: backend
     labels:
         app: drone
 spec:

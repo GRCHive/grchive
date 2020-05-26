@@ -36,6 +36,17 @@ resource "google_compute_firewall" "gke-outbound-network-firewall-wireguard-ingr
     }
 }
 
+resource "google_compute_firewall" "gke-outbound-network-firewall-istio" {
+    name                    = "gke-outbound-network-firewall-istio"
+    network                 = google_compute_network.gke-outbound-network.name
+    direction               = "INGRESS"
+
+    allow {
+        protocol = "tcp"
+        ports = ["10250", "443", "15017"]
+    }
+}
+
 resource "google_compute_address" "wireguard-static-ip" {
     name    = "wireguard-static-ip"
     region  = google_compute_subnetwork.gke-outbound-network-us-central1.region
@@ -113,7 +124,7 @@ resource "google_container_node_pool" "webserver-node-pool" {
     name        = "webserver-node-pool"
     location    = "us-central1-c"
     cluster     = google_container_cluster.webserver-gke.name
-    node_count  = 1
+    node_count  = 3
 
     node_config {
         disk_size_gb        = 30

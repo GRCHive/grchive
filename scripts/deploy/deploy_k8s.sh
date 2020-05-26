@@ -7,6 +7,14 @@ while getopts 'm' OPTION; do
     esac
 done
 
+cd devops/k8s
+
+kubectl apply -f backendNamespace.yaml
+kubectl label namespace default istio-injection=enabled
+kubectl label namespace backend istio-injection=enabled
+
+kubectl apply -f istio/mtls.yaml
+
 kubectl create secret generic gke-service-account --from-file=gcloud-service-account.json=devops/gcloud/gcloud-kubernetes-account.json -o yaml --dry-run --save-config | kubectl apply -f -
 
 if [ -z $MINIKUBE ]; then
@@ -15,8 +23,6 @@ if [ -z $MINIKUBE ]; then
 else
     DEV_PROD="dev"
 fi
-
-cd devops/k8s
 
 kubectl apply -f storage/${DEV_PROD}
 

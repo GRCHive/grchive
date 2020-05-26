@@ -22,7 +22,7 @@ spec:
               ports:
               - containerPort: 5671
               volumeMounts:
-              - mountPath: /var/lib/rabbitmq
+              - mountPath: /var/lib/rabbitmq/mnesia
                 name: rabbitmq
     volumeClaimTemplates:
       - metadata:

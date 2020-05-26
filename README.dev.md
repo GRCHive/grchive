@@ -181,6 +181,14 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
     ./download_minikube.sh
     ```
 - Add the Minikube directory to your `$PATH` (`$SRC/dependencies/minikube`).
+- Download Istio.
+
+    ```
+    cd $SRC/dependencies
+    ./download_istio.sh
+    ```
+- Add the Istio binary directory to your `$PATH` (`$SRC/dependencies/istio/bin`).
+
 
 ## Setup Google Cloud
 

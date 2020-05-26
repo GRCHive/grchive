@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
     name: external-vault-service
+    namespace: backend
     labels:
         app: vault
 spec:

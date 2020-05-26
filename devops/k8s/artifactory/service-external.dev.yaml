@@ -4,6 +4,7 @@ metadata:
     name: external-artifactory-service
     labels:
         app: artifactory
+    namespace: backend
 spec:
     ports:
         - port: 9998

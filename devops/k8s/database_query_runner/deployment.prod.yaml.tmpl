@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
     name: database-query-runner-deployment
+    namespace: backend
     labels:
         app: database-query-runner
 spec:
