@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Pull secrets from Vault.
-VAULT_RESP=$(/app/get_vault_secret_http.sh ${DRONE_GITEA_CLIENT_SECRET_VAULT})
+VAULT_RESP=$(/app/get_vault_secret_http.sh ${DRONE_GITEA_CLIENT_SECRET_VAULT} || exit 1)
+
+
 export DRONE_GITEA_CLIENT_ID=$(echo $VAULT_RESP | jq -j '.id')
 export DRONE_GITEA_CLIENT_SECRET=$(echo $VAULT_RESP | jq -j '.secret')
 
