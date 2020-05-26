@@ -391,7 +391,7 @@ func runDatabaseQuery(w http.ResponseWriter, r *http.Request) {
 
 	decrypt, err := vault.TransitDecrypt(transitKey, resp.EncryptedData)
 	if err != nil {
-		core.Warning(fmt.Sprintf("Failed to decrypt result: %s [Error: %s]", resp.EncryptedData, err.Error()))
+		core.Warning(fmt.Sprintf("Failed to decrypt result: %s [Error: %s]", string(resp.EncryptedData), err.Error()))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -29,7 +29,7 @@ func createErrorReply(err error, encryptPath string) (*sqlQuery.SqlRunnerReply, 
 		}
 	}
 
-	core.Info("\tFailure Reply: ", buffer)
+	core.Info("\tFailure Reply: ", string(buffer))
 	return &sqlQuery.SqlRunnerReply{
 		EncryptedData: buffer,
 		Success:       false,
@@ -38,28 +38,32 @@ func createErrorReply(err error, encryptPath string) (*sqlQuery.SqlRunnerReply, 
 
 func (s *server) RunSqlQuery(ctx context.Context, in *sqlQuery.SqlRunnerRequest) (*sqlQuery.SqlRunnerReply, error) {
 	core.Info("Run Query: ", in.QueryId, in.OrgId, in.VaultResultPath)
-	// Ignore this error. Should be fine?
+
+	core.Debug("\t1. Engine Key :: ", in.VaultResultPath)
 	err := vault.TransitCreateNewEngineKey(in.VaultResultPath)
 	if err != nil {
 		return createErrorReply(err, "")
 	}
 
+	core.Debug("\t2. Run Query")
 	result, err := runQuery(in.QueryId, in.OrgId)
 	if err != nil {
 		return createErrorReply(err, in.VaultResultPath)
 	}
 
+	core.Debug("\t3. Marshal")
 	marshal, err := json.Marshal(result)
 	if err != nil {
 		return createErrorReply(err, in.VaultResultPath)
 	}
 
+	core.Debug("\t4. Encrypt")
 	encrypted, err := vault.TransitEncrypt(in.VaultResultPath, marshal)
 	if err != nil {
 		return createErrorReply(err, "")
 	}
 
-	core.Info("\tSuccess Reply: ", encrypted)
+	core.Info("\tSuccess Reply: ", string(encrypted))
 	return &sqlQuery.SqlRunnerReply{
 		EncryptedData: encrypted,
 		Success:       true,
