@@ -7,6 +7,9 @@ while getopts 'm' OPTION; do
     esac
 done
 
+kubectl create secret generic gke-service-account --from-file=gcloud-service-account.json=devops/gcloud/gcloud-kubernetes-account.json -o yaml --dry-run --save-config | kubectl apply -f -
+kubectl create secret generic gke-service-account --from-file=gcloud-service-account.json=devops/gcloud/gcloud-kubernetes-account.json -o yaml --dry-run --save-config | kubectl apply --namespace backend -f -
+
 cd devops/k8s
 
 kubectl apply -f backendNamespace.yaml
@@ -14,9 +17,6 @@ kubectl label namespace default istio-injection=enabled
 kubectl label namespace backend istio-injection=enabled
 
 kubectl apply -f istio/mtls.yaml
-
-kubectl create secret generic gke-service-account --from-file=gcloud-service-account.json=devops/gcloud/gcloud-kubernetes-account.json -o yaml --dry-run --save-config | kubectl apply -f -
-kubectl create secret generic gke-service-account --from-file=gcloud-service-account.json=devops/gcloud/gcloud-kubernetes-account.json -o yaml --dry-run --save-config | kubectl apply --namespace backend -f -
 
 if [ -z $MINIKUBE ]; then
     kubectl create secret docker-registry regcred --docker-server=registry.gitlab.com --docker-username=${GKE_REGISTRY_USER} --docker-password=${GKE_REGISTRY_PASSWORD} -o yaml --dry-run --save-config | kubectl apply -f -

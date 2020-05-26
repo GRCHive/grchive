@@ -69,7 +69,7 @@ func sendVaultRequest(method string, endpoint string, data interface{}) (map[str
 		rootObj := map[string]*json.RawMessage{}
 		err = json.Unmarshal(respBodyData, &rootObj)
 		if err != nil {
-			return nil, err
+			return nil, errors.New(fmt.Sprintf("Vault Response: %s [Parse Fail: %s]", string(respBodyData), err.Error()))
 		}
 
 		rawErrors, ok := rootObj["errors"]

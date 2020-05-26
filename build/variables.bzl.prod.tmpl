@@ -4,7 +4,7 @@ env = {
 
     "RABBITMQ_USER": "${RABBITMQ_USER}",
     "RABBITMQ_PASSWORD": "${RABBITMQ_PASSWORD}",
-    "RABBITMQ_HOST": "rabbitmq-service",
+    "RABBITMQ_HOST": "rabbitmq-service.backend",
     "RABBITMQ_PORT": 5671,
     "RABBITMQ_TLS": "false",
     "ROOT_CA_CRT": "",
@@ -16,7 +16,7 @@ env = {
 
     "VAULT_USER": "${VAULT_USER}",
     "VAULT_PASSWORD": "${VAULT_PASSWORD}",
-    "VAULT_HOST": "http://internal-vault-service",
+    "VAULT_HOST": "http://internal-vault-service.backend",
     "VAULT_PORT": 8200,
     "VAULT_TLS": "false",
 
@@ -36,7 +36,7 @@ env = {
     "GRCHIVE_DOMAIN": "${GRCHIVE_DOMAIN}",
     "GRCHIVE_DOC_BUCKET": "${GRCHIVE_DOC_BUCKET}",
 
-    "GRPC_QUERY_RUNNER_HOST": "query-runner-service",
+    "GRPC_QUERY_RUNNER_HOST": "query-runner-service.backend",
     "GRPC_QUERY_RUNNER_PORT": 6000,
     "GRPC_QUERY_RUNNER_TLS": "false",
 
