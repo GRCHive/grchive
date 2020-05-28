@@ -2,6 +2,6 @@ variable "doc_storage_bucket" {
     type = string
 }
 
-variable "kotlin_lib_bucket" {
+variable "shell_storage_bucket" {
     type = string
 }

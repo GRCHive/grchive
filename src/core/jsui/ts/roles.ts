@@ -38,6 +38,7 @@ export interface Permissions {
     ClientScriptsAccess       : AccessType
     ScriptRunAccess           : AccessType
     BuildLogAccess            : AccessType
+    ShellScriptAccess         : AccessType
 }
 
 export interface FullRole {
@@ -70,5 +71,6 @@ export function emptyPermissions() : Permissions {
         ClientScriptsAccess: AccessType.NoAccess,
         ScriptRunAccess: AccessType.NoAccess,
         BuildLogAccess: AccessType.NoAccess,
+        ShellScriptAccess: AccessType.NoAccess,
     }
 }

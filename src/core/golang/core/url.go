@@ -46,6 +46,7 @@ const DashboardOrgCommitQueryId string = "commitId"
 const DashboardOrgScriptRunQueryId string = "runId"
 const DashboardOrgScriptRequestQueryId = "scriptReqId"
 const DashboardOrgGenericRequestQueryId = "reqId"
+const DashboardOrgShellScriptQueryId = "shellScriptId"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 
@@ -97,6 +98,7 @@ const DashboardSystemsPrefix string = "/it"
 const DashboardSystemHomeEndpoint string = "/systems"
 const DashboardDbSystemsEndpoint string = "/databases"
 const DashboardServersEndpoint string = "/servers"
+const DashboardShellEndpoint string = "/shell"
 
 var DashboardSingleSystemEndpoint string = fmt.Sprintf("%s/{%s}", DashboardSystemHomeEndpoint, DashboardOrgSystemQueryId)
 var DashboardSingleDbEndpoint string = fmt.Sprintf("%s/{%s}", DashboardDbSystemsEndpoint, DashboardOrgDbQueryId)

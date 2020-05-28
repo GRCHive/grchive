@@ -67,6 +67,8 @@ func createOrganizationSystemSubrouter(r *mux.Router) {
 
 	s.HandleFunc(core.DashboardServersEndpoint, render.RenderServers)
 	s.HandleFunc(core.DashboardSingleServerEndpoint, render.RenderSingleServer).Name(webcore.SingleServerRouteName)
+
+	s.HandleFunc(core.DashboardShellEndpoint, render.RenderShells)
 }
 
 func createOrganizationSettingsSubrouter(r *mux.Router) {

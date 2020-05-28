@@ -10,9 +10,10 @@ import (
 
 type GCloudStorageApi interface {
 	Init(option.ClientOption)
-	Upload(bucket string, filename string, data []byte, key []byte) error
+	Upload(bucket string, filename string, data []byte, key []byte) (int64, error)
 	Download(bucket string, filename string, key []byte) ([]byte, error)
 	Delete(bucket string, filename string) error
+	DeleteVersioned(bucket string, filename string, generation int64) error
 }
 
 type RealGCloudStorageApi struct {
@@ -31,7 +32,7 @@ func (s *RealGCloudStorageApi) Init(opt option.ClientOption) {
 	}
 }
 
-func (s *RealGCloudStorageApi) Upload(bucket string, filename string, data []byte, key []byte) error {
+func (s *RealGCloudStorageApi) Upload(bucket string, filename string, data []byte, key []byte) (int64, error) {
 	obj := s.client.Bucket(bucket).Object(filename)
 	wr := obj.NewWriter(context.Background())
 
@@ -43,7 +44,7 @@ func (s *RealGCloudStorageApi) Upload(bucket string, filename string, data []byt
 	if len(key) > 0 {
 		uploadData, err = appendHMACSHA512(data, key)
 		if err != nil {
-			return err
+			return -1, err
 		}
 	} else {
 		uploadData = data
@@ -53,9 +54,20 @@ func (s *RealGCloudStorageApi) Upload(bucket string, filename string, data []byt
 
 	_, err = wr.Write(uploadData)
 	if err != nil {
-		return err
+		return -1, err
 	}
-	return wr.Close()
+
+	err = wr.Close()
+	if err != nil {
+		return -1, err
+	}
+
+	attrs, err := obj.Attrs(context.Background())
+	if err != nil {
+		return -1, err
+	}
+
+	return attrs.Generation, nil
 }
 
 func (s *RealGCloudStorageApi) Download(bucket string, filename string, key []byte) ([]byte, error) {
@@ -80,7 +92,7 @@ func (s *RealGCloudStorageApi) Download(bucket string, filename string, key []by
 		if err == ErrNoHMAC {
 			// Chances are that this is an older file so reupload the file
 			// with an HMAC attached.
-			err = s.Upload(bucket, filename, rawData, key)
+			_, err = s.Upload(bucket, filename, rawData, key)
 			if err != nil {
 				return nil, err
 			}
@@ -94,5 +106,10 @@ func (s *RealGCloudStorageApi) Download(bucket string, filename string, key []by
 
 func (s *RealGCloudStorageApi) Delete(bucket string, filename string) error {
 	obj := s.client.Bucket(bucket).Object(filename)
+	return obj.Delete(context.Background())
+}
+
+func (s *RealGCloudStorageApi) DeleteVersioned(bucket string, filename string, generation int64) error {
+	obj := s.client.Bucket(bucket).Object(filename).Generation(generation)
 	return obj.Delete(context.Background())
 }

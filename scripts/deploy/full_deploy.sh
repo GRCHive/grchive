@@ -39,6 +39,7 @@ case "$ENV" in
         export GRCHIVE_URI="https://www.grchive.com"
         export GRCHIVE_DOMAIN="grchive.com"
         export GRCHIVE_DOC_BUCKET="grchive-prod"
+        export GRCHIVE_SHELL_BUCKET="grchive-shell-scripts-prod"
         export TERRAFORM_FOLDER="prod"
         export INGRESS_ENV="prod"
         export ARTIFACTORY_ENCRYPTED_PASSWORD=$PRODUCTION_ARTIFACTORY_ENCRYPTED_PASSWORD
@@ -63,6 +64,7 @@ case "$ENV" in
         export GRCHIVE_URI="https://staging.grchive.com"
         export GRCHIVE_DOMAIN="staging.grchive.com"
         export GRCHIVE_DOC_BUCKET="grchive-staging"
+        export GRCHIVE_SHELL_BUCKET="grchive-shell-scripts-staging"
         export TERRAFORM_FOLDER="staging"
         export INGRESS_ENV="staging"
         export ARTIFACTORY_ENCRYPTED_PASSWORD=$STAGING_ARTIFACTORY_ENCRYPTED_PASSWORD

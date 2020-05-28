@@ -70,6 +70,7 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `GRCHIVE_URI`: The URI to access the running webserver (with the http/https prefix).
 - `GRCHIVE_DOMAIN`: The domain name of the webserver (without the http or https prefix and port number).
 - `GRCHIVE_DOC_BUCKET`: The Google Cloud Storage bucket in which to store the documentation files.
+- `GRCHIVE_SHELL_BUCKET`: The Google Cloud Storage bucket in which to store the shell scripts.
 - `GRPC_QUERY_RUNNER_HOST`: The hostname of the database_query_runner worker.
 - `GRPC_QUERY_RUNNER_PORT`: The port the database_query_runner worker is listening on.
 - `GRPC_QUERY_RUNNER_TLS`: Whether or not the query runner should use TLS for communication.

@@ -6,6 +6,7 @@ import (
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"net/http"
+	"strconv"
 )
 
 func LoggedRequestMiddleware(next http.Handler) http.Handler {
@@ -100,7 +101,7 @@ func ObtainOrganizationInfoFromRequestInContextMiddleware(next http.Handler) htt
 	// Note that this runs under the assumption that we won't ever have the case where
 	// the dashboard home page directs to an invalid org...
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		org, err := GetOrganizationFromRequestUrl(r)
+		org, err := GetOrganizationFromRequestUrl(r, false)
 		if err != nil {
 			core.Info("Bad organization: " + err.Error())
 			http.Redirect(w, r, MustGetRouteUrl(DashboardHomeRouteName), http.StatusTemporaryRedirect)
@@ -108,6 +109,43 @@ func ObtainOrganizationInfoFromRequestInContextMiddleware(next http.Handler) htt
 		}
 
 		ctx := AddOrganizationInfoToContext(org, r.Context())
+		newR := r.WithContext(ctx)
+		next.ServeHTTP(w, newR)
+	})
+}
+
+func ObtainOrganizationFromIdInRequestInContextMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		org, err := GetOrganizationFromRequestUrl(r, true)
+		if err != nil {
+			core.Info("Bad organization: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		ctx := AddOrganizationInfoToContext(org, r.Context())
+		newR := r.WithContext(ctx)
+		next.ServeHTTP(w, newR)
+	})
+}
+
+func ObtainRoleFromRequestInContextMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		org, err := FindOrganizationInContext(r.Context())
+		if err != nil {
+			core.Warning("Failed to find org in context: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		role, err := GetCurrentRequestRole(r, org.Id)
+		if err != nil {
+			core.Warning("Failed to get role in request: " + err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		ctx := AddRoleToContext(role, r.Context())
 		newR := r.WithContext(ctx)
 		next.ServeHTTP(w, newR)
 	})
@@ -324,6 +362,47 @@ func CreateObtainGenericRequestInContext(id string) mux.MiddlewareFunc {
 
 			context := context.WithValue(r.Context(), GenericRequestContextKey, request)
 			newR := r.WithContext(context)
+			next.ServeHTTP(w, newR)
+		})
+	}
+}
+
+func CreateObtainResourceInContextMiddleware(queryId string) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var ctx context.Context
+
+			urlRouteVars := mux.Vars(r)
+			query, ok := urlRouteVars[queryId]
+			if !ok {
+				core.Warning("Failed to get resource query.")
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			queryInt, err := strconv.ParseInt(query, 10, 64)
+			if err != nil {
+				core.Warning("Failed to convert resource query to int: " + err.Error())
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			switch queryId {
+			case core.DashboardOrgShellScriptQueryId:
+				script, err := database.GetShellScriptFromId(queryInt)
+				if err != nil {
+					core.Warning("Failed to get shell script: " + err.Error())
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+
+				ctx = context.WithValue(r.Context(), ShellScriptContextKey, script)
+			default:
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			newR := r.WithContext(ctx)
 			next.ServeHTTP(w, newR)
 		})
 	}

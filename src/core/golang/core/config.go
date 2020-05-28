@@ -47,6 +47,7 @@ type VaultConfig struct {
 type GCloudConfig struct {
 	AuthFilename string
 	DocBucket    string
+	ShellBucket  string
 }
 
 type MailConfig struct {
@@ -242,6 +243,7 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	envConfig.Gcloud = new(GCloudConfig)
 	envConfig.Gcloud.AuthFilename = tomlConfig.Get("gcloud.credentials_file").(string)
 	envConfig.Gcloud.DocBucket = tomlConfig.Get("gcloud.storage.doc_bucket").(string)
+	envConfig.Gcloud.ShellBucket = tomlConfig.Get("gcloud.storage.shell_bucket").(string)
 
 	envConfig.Mail = new(MailConfig)
 	envConfig.Mail.Provider = mail.MailAPIProvider(tomlConfig.Get("mail.provider").(string))

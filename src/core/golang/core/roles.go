@@ -42,6 +42,7 @@ const (
 	ResourceClientScripts
 	ResourceScriptRun
 	ResourceBuildLog
+	ResourceShell
 )
 
 var AvailableResources []ResourceType = []ResourceType{
@@ -68,6 +69,12 @@ var AvailableResources []ResourceType = []ResourceType{
 	ResourceClientScripts,
 	ResourceScriptRun,
 	ResourceBuildLog,
+	ResourceShell,
+}
+
+type ResourceAccessBundle struct {
+	Resource ResourceType
+	Access   AccessType
 }
 
 type PermissionsMap struct {
@@ -94,6 +101,7 @@ type PermissionsMap struct {
 	ClientScriptsAccess        AccessType `db:"client_script_access"`
 	ScriptRunAccess            AccessType `db:"script_run_access"`
 	BuildLogAccess             AccessType `db:"build_log_access"`
+	ShellScriptAccess          AccessType `db:"shell_script_access"`
 }
 
 type RoleMetadata struct {
@@ -140,6 +148,7 @@ func CreateViewOnlyAccessPermission() PermissionsMap {
 		ClientScriptsAccess:        AccessView,
 		ScriptRunAccess:            AccessView,
 		BuildLogAccess:             AccessView,
+		ShellScriptAccess:          AccessView,
 	}
 }
 
@@ -168,6 +177,7 @@ func CreateAllAccessPermission() PermissionsMap {
 		ClientScriptsAccess:        CreateOwnerAccessType(),
 		ScriptRunAccess:            CreateOwnerAccessType(),
 		BuildLogAccess:             CreateOwnerAccessType(),
+		ShellScriptAccess:          CreateOwnerAccessType(),
 	}
 }
 
@@ -249,6 +259,8 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 		return p.ScriptRunAccess
 	case ResourceBuildLog:
 		return p.BuildLogAccess
+	case ResourceShell:
+		return p.ShellScriptAccess
 	}
 	return AccessNone
 }
@@ -301,6 +313,8 @@ func (p *PermissionsMap) SetAccessType(resource ResourceType, access AccessType)
 		p.ScriptRunAccess = access
 	case ResourceBuildLog:
 		p.BuildLogAccess = access
+	case ResourceShell:
+		p.ShellScriptAccess = access
 	}
 }
 

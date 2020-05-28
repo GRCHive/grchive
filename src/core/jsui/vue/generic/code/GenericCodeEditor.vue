@@ -18,6 +18,8 @@ import 'codemirror/addon/display/autorefresh.js'
 
 import ( /* webpackChunkName: "codemirrorClikeMode" */ 'codemirror/mode/clike/clike.js')
 import ( /* webpackChunkName: "codemirrorSqlMode" */ 'codemirror/mode/sql/sql.js')
+import ( /* webpackChunkName: "codemirrorShellMode" */ 'codemirror/mode/shell/shell.js')
+import ( /* webpackChunkName: "codemirrorPowershellMode" */ 'codemirror/mode/powershell/powershell.js')
 
 export const Props = Vue.extend({
     props: {

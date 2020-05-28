@@ -121,8 +121,8 @@ export default class CreateNewServerForm extends VueComponent {
         // @ts-ignore
         this.$root.$refs.snackbar.showSnackBar(
             "Oops. Something went wrong. Try again.",
-            false,
-            "",
+            true,
+            "Contact Us",
             contactUsUrl,
             true);
     }

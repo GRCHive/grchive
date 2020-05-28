@@ -111,6 +111,11 @@ export default Vue.extend({
                             icon: 'mdi-server-network',
                             url: PageParamsStore.state.organization!.Url + 'it/servers',
                         },
+                        {
+                            title: 'Shell',
+                            icon: 'mdi-powershell',
+                            url: PageParamsStore.state.organization!.Url + 'it/shell',
+                        },
                     ]
                 },
                 {

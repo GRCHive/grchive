@@ -92,7 +92,7 @@ func UploadNewFileWithTx(
 	}
 
 	core.Debug("\tUpload")
-	err = gcloud.Upload(bucket, *storageName, encryptedFile, core.EnvConfig.HmacKey)
+	_, err = gcloud.Upload(bucket, *storageName, encryptedFile, core.EnvConfig.HmacKey)
 	if err != nil {
 		return "", nil, err
 	}

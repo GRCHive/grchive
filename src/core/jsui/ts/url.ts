@@ -433,5 +433,12 @@ export const codeParamTypeMetadataUrl : string = "/api/metadata/paramTypes"
 
 export const allScheduleUrl : string = "/api/schedule"
 
-export const allGenRequestScriptsUrl : string = "/api/v2/requests/scripts"
-export const allGenRequestsUrl : string = "/api/v2/requests"
+export function createOrgApiv2Url(orgId : number, path : string) {
+    return `/api/v2/org/${orgId}/${path}`
+}
+
+export const allGenRequestScriptsUrl : string = "requests/scripts"
+export const allGenRequestsUrl : string = "requests"
+
+export const allShellScriptsUrl : string = "shell"
+export const allShellScriptVersionsUrl : string = "shell/version"

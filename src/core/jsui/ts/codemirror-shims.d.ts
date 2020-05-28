@@ -1,3 +1,5 @@
 declare module 'codemirror/lib/codemirror.js'
 declare module 'codemirror/mode/clike/clike.js'
 declare module 'codemirror/mode/sql/sql.js'
+declare module 'codemirror/mode/shell/shell.js'
+declare module 'codemirror/mode/powershell/powershell.js'

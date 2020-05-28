@@ -11,3 +11,4 @@ vault write -address="${VAULT_HOST}:${VAULT_PORT}" auth/userpass/users/${VAULT_U
 vault write -address="${VAULT_HOST}:${VAULT_PORT}"  -f transit/keys/passwords
 vault write -address="${VAULT_HOST}:${VAULT_PORT}"  -f transit/keys/logs
 vault write -address="${VAULT_HOST}:${VAULT_PORT}"  -f transit/keys/scripts
+vault write -address="${VAULT_HOST}:${VAULT_PORT}"  -f transit/keys/shell

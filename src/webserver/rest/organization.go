@@ -12,7 +12,7 @@ func getAllUsersInOrganization(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	org, err := webcore.GetOrganizationFromRequestUrl(r)
+	org, err := webcore.GetOrganizationFromRequestUrl(r, false)
 	if err != nil {
 		core.Warning("Failed to find org: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)

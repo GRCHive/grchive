@@ -30,6 +30,7 @@ var resourceToDatabaseMap = map[core.ResourceType]string{
 	core.ResourceClientScripts:                "resource_client_scripts_access",
 	core.ResourceScriptRun:                    "resource_script_run_access",
 	core.ResourceBuildLog:                     "resource_build_log_access",
+	core.ResourceShell:                        "resource_shell_scripts_access",
 }
 
 var resourceToColumnName = map[core.ResourceType]string{
@@ -56,6 +57,7 @@ var resourceToColumnName = map[core.ResourceType]string{
 	core.ResourceClientScripts:                "permissions.client_script_access",
 	core.ResourceScriptRun:                    "permissions.script_run_access",
 	core.ResourceBuildLog:                     "permissions.build_log_access",
+	core.ResourceShell:                        "permissions.shell_script_access",
 }
 
 func createRoleSql(cond string) string {

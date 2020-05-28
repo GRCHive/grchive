@@ -17,6 +17,8 @@ const (
 	UserContextKey           = "USER"
 	ApiKeyContextKey         = "APIKEY"
 	GenericRequestContextKey = "GENREQ"
+	RoleContextKey           = "ROLE"
+	ShellScriptContextKey    = "SHELLSCRIPT"
 )
 
 func AddSessionToContext(session *core.UserSession, ctx context.Context) context.Context {
@@ -77,4 +79,28 @@ func FindApiKeyInContext(ctx context.Context) (*core.ApiKey, error) {
 		return nil, errors.New("Failed to find api keyin context.")
 	}
 	return key, nil
+}
+
+func AddRoleToContext(role *core.Role, ctx context.Context) context.Context {
+	return context.WithValue(ctx, RoleContextKey, role)
+}
+
+func FindRoleInContext(ctx context.Context) (*core.Role, error) {
+	role, ok := ctx.Value(RoleContextKey).(*core.Role)
+	if !ok || role == nil {
+		return nil, errors.New("Failed to find role in context.")
+	}
+	return role, nil
+}
+
+func AddShellScriptToContext(script *core.ShellScript, ctx context.Context) context.Context {
+	return context.WithValue(ctx, ShellScriptContextKey, script)
+}
+
+func FindShellScriptInContext(ctx context.Context) (*core.ShellScript, error) {
+	script, ok := ctx.Value(ShellScriptContextKey).(*core.ShellScript)
+	if !ok || script == nil {
+		return nil, errors.New("Failed to find shell script in context.")
+	}
+	return script, nil
 }

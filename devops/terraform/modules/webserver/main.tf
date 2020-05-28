@@ -151,8 +151,8 @@ resource "google_storage_bucket" "webserver-control-doc-store" {
     }
 }
 
-resource "google_storage_bucket" "webserver-kotlin-lib-store" {
-    name     = var.kotlin_lib_bucket
+resource "google_storage_bucket" "webserver-shell-script-store" {
+    name     = var.shell_storage_bucket
     location = "US-CENTRAL1"
     bucket_policy_only = true
 

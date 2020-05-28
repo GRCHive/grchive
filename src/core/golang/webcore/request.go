@@ -49,14 +49,25 @@ func GetControlFromRequestUrl(r *http.Request, role *core.Role) (*core.Control, 
 	return database.FindControl(controlId, role)
 }
 
-func GetOrganizationFromRequestUrl(r *http.Request) (*core.Organization, error) {
+func GetOrganizationFromRequestUrl(r *http.Request, idMode bool) (*core.Organization, error) {
 	urlRouteVars := mux.Vars(r)
-	orgGroupName, ok := urlRouteVars[core.DashboardOrgOrgQueryId]
+	orgQuery, ok := urlRouteVars[core.DashboardOrgOrgQueryId]
 	if !ok {
 		return nil, errors.New("No valid organization in request URL")
 	}
 
-	org, err := database.FindOrganizationFromGroupName(orgGroupName)
+	var org *core.Organization
+	var err error
+
+	if idMode {
+		orgId, cerr := strconv.ParseInt(orgQuery, 10, 32)
+		if cerr != nil {
+			return nil, cerr
+		}
+		org, err = database.FindOrganizationFromId(int32(orgId))
+	} else {
+		org, err = database.FindOrganizationFromGroupName(orgQuery)
+	}
 	if err != nil {
 		return nil, err
 	}

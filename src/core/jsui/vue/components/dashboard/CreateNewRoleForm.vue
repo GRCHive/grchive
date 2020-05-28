@@ -181,6 +181,13 @@
             v-model="permissions.BuildLogAccess"
             :disabled="!canEdit"
         ></access-type-editor>
+
+        <access-type-editor
+            label="Shell Scripts"
+            v-model="permissions.ShellScriptAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+
         <v-divider></v-divider>
     </v-form>
 

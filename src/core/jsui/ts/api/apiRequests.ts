@@ -3,6 +3,7 @@ import * as qs from 'query-string'
 import { getAPIRequestConfig } from './apiUtility'
 import { putFormJson, postFormJson, deleteFormJson } from '../http'
 import {
+    createOrgApiv2Url,
     allGenRequestScriptsUrl,
     allGenRequestsUrl
 } from '../url'
@@ -27,7 +28,7 @@ export interface TAllGenericRequestsOutput {
 export function allGenericRequests(inp : TAllGenericRequestsInput) : Promise<TAllGenericRequestsOutput> {
     let url : string
     if (inp.scriptsOnly) {
-        url = allGenRequestScriptsUrl
+        url = createOrgApiv2Url(inp.orgId, allGenRequestScriptsUrl)
     } else {
         throw "Invalid parameters for retrieving generic requests."
     }
@@ -54,7 +55,10 @@ export interface TGetGenericRequestScriptOutput {
 }
 
 export function getGenericRequestScript(inp : TGetGenericRequestScriptInput) : Promise<TGetGenericRequestScriptOutput> {
-    return axios.get(allGenRequestScriptsUrl + `/${inp.requestId}?` + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetGenericRequestScriptOutput) => {
+    return axios.get(
+        createOrgApiv2Url(inp.orgId, allGenRequestScriptsUrl) + `/${inp.requestId}?` + qs.stringify(inp),
+        getAPIRequestConfig()).then(
+    (resp : TGetGenericRequestScriptOutput) => {
         if (!!resp.data.OneTime) {
             resp.data.OneTime = new Date(resp.data.OneTime)
         }
@@ -75,7 +79,10 @@ export interface TGetGenericRequestOutput {
 }
 
 export function getGenericRequest(inp : TGetGenericRequestInput) : Promise<TGetGenericRequestOutput> {
-    return axios.get(allGenRequestsUrl + `/${inp.requestId}?` + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetGenericRequestOutput) => {
+    return axios.get(
+        createOrgApiv2Url(inp.orgId, allGenRequestsUrl) + `/${inp.requestId}?` + qs.stringify(inp),
+        getAPIRequestConfig()).then(
+    (resp : TGetGenericRequestOutput) => {
         cleanGenericRequestFromJson(resp.data.Request)
         if (!!resp.data.Approval) {
             cleanGenericApprovalFromJson(resp.data.Approval)
