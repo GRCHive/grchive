@@ -62,6 +62,7 @@ fun unionAccessType(vararg v : AccessType) : Int {
  * @property clientScriptAccess
  * @property scriptRunAccess
  * @property buildLogAccess
+ * @property shellScriptAccess
  */
 data class RolePermissions (
     @field:GrchiveResource(Resources.ResourceOrgUsers) @ColumnName("users_access")
@@ -109,7 +110,9 @@ data class RolePermissions (
     @field:GrchiveResource(Resources.ResourceScriptRun) @ColumnName("script_run_access")
     val scriptRunAccess : Int,
     @field:GrchiveResource(Resources.ResourceBuildLog) @ColumnName("build_log_access")
-    val buildLogAccess : Int
+    val buildLogAccess : Int,
+    @field:GrchiveResource(Resources.ResourceShell) @ColumnName("shell_script_access")
+    val shellScriptAccess : Int
 )
 
 fun emptyRolePermissions() : RolePermissions {
@@ -136,7 +139,8 @@ fun emptyRolePermissions() : RolePermissions {
         AccessType.None.bit /* managedCodeAccess */,
         AccessType.None.bit /* clientScriptAccess */,
         AccessType.None.bit /* scriptRunAccess*/,
-        AccessType.None.bit /* buildLogAccess*/
+        AccessType.None.bit /* buildLogAccess*/,
+        AccessType.None.bit /* shellScriptAccess*/
     )
 }
 
@@ -164,7 +168,8 @@ fun fullRolePermissions() : RolePermissions {
         AccessType.All.bit /* managedCodeAccess */,
         AccessType.All.bit /* clientScriptAccess */,
         AccessType.All.bit /* scriptRunAccess*/,
-        AccessType.All.bit /* buildLogAccess*/
+        AccessType.All.bit /* buildLogAccess*/,
+        AccessType.All.bit /* shellScriptAccess*/
     )
 }
 
@@ -200,6 +205,7 @@ fun getRolePermissionForResource(p : RolePermissions, r : Resources) : Int {
         Resources.ResourceClientScripts -> p.clientScriptAccess
         Resources.ResourceScriptRun -> p.scriptRunAccess
         Resources.ResourceBuildLog -> p.buildLogAccess
+        Resources.ResourceShell -> p.shellScriptAccess
     }
 }
 

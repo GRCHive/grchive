@@ -23,7 +23,8 @@ enum class Resources {
     ResourceManagedCode,
     ResourceClientScripts,
     ResourceScriptRun,
-    ResourceBuildLog
+    ResourceBuildLog,
+    ResourceShell
 }
 
 /**
