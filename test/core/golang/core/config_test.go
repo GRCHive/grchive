@@ -141,6 +141,7 @@ func TestLoadEnvConfig(t *testing.T) {
 					{"Vault.Password", "vault.userpass.password", "password", nil},
 					{"Gcloud.AuthFilename", "gcloud.credentials_file", "filenamegoeshere", nil},
 					{"Gcloud.DocBucket", "gcloud.storage.doc_bucket", "bucketname", nil},
+					{"Gcloud.ShellBucket", "gcloud.storage.shell_bucket", "bucketname2", nil},
 					{"Mail.Provider", "mail.provider", "provider", mail.MailAPIProvider("provider")},
 					{"Mail.Key", "mail.key", "key", nil},
 					{"Mail.VeriEmailFrom.Name", "mail.verification.from.name", "name", nil},
