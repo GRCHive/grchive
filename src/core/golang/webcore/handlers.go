@@ -387,25 +387,47 @@ func CreateObtainResourceInContextMiddleware(queryId string) mux.MiddlewareFunc 
 				return
 			}
 
+			org, err := FindOrganizationInContext(r.Context())
+			if err != nil {
+				core.Warning("Failed to get org in request: " + err.Error())
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
 			switch queryId {
 			case core.DashboardOrgShellScriptQueryId:
 				script, err := database.GetShellScriptFromId(queryInt)
-				if err != nil {
-					core.Warning("Failed to get shell script: " + err.Error())
+				if err != nil || script.OrgId != org.Id {
+					core.Warning("Failed to get shell script: " + core.ErrorString(err))
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
-
 				ctx = context.WithValue(r.Context(), ShellScriptContextKey, script)
 			case core.DashboardOrgShellScriptVersionQueryId:
 				version, err := database.GetShellScriptVersionFromId(queryInt)
-				if err != nil {
-					core.Warning("Failed to get shell script version: " + err.Error())
+				if err != nil || version.OrgId != org.Id {
+					core.Warning("Failed to get shell script version: " + core.ErrorString(err))
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
 
 				ctx = context.WithValue(r.Context(), ShellScriptVersionContextKey, version)
+			case core.DashboardOrgServerQueryId:
+				server, err := database.GetServer(queryInt, org.Id, core.ServerRole)
+				if err != nil {
+					core.Warning("Failed to get server: " + err.Error())
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				ctx = context.WithValue(r.Context(), ServerContextKey, server)
+			case core.DashboardOrgServerSshConnectionQueryId:
+				conn, err := database.GetSSHPasswordConnection(queryInt)
+				if err != nil || conn.OrgId != org.Id {
+					core.Warning("Failed to get ssh password connection: " + core.ErrorString(err))
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				ctx = context.WithValue(r.Context(), ServerConnectionSshPasswordContextKey, conn)
 			default:
 				w.WriteHeader(http.StatusBadRequest)
 				return

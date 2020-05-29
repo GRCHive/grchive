@@ -14,3 +14,23 @@ type ServerHandle struct {
 	Id    int64
 	OrgId int32
 }
+
+type ServerSSHGenericConnection struct {
+	Id       int64
+	Username string
+}
+
+type ServerSSHPasswordConnection struct {
+	Id       int64  `db:"id"`
+	ServerId int64  `db:"server_id"`
+	OrgId    int32  `db:"org_id"`
+	Username string `db:"username"`
+	Password string `db:"password"`
+}
+
+func (c ServerSSHPasswordConnection) Generic() ServerSSHGenericConnection {
+	return ServerSSHGenericConnection{
+		Id:       c.Id,
+		Username: c.Username,
+	}
+}

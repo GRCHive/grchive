@@ -454,5 +454,17 @@ export function singleShellScriptUrl(orgId : number, id : number) : string {
 }
 
 export function singleShellScriptVersionUrl(orgId : number, id : number, version : number) : string {
-    return createOrgApiv2Url(orgId, `${allShellScriptsUrl}/${id}/version/${version}`)
+    return `${singleShellScriptUrl(orgId, id)}/version/${version}`
+}
+
+export function apiv2ServerConnection(orgId : number, serverId: number) : string {
+    return createOrgApiv2Url(orgId, `server/${serverId}/connection`)
+}
+
+export function apiv2ServerConnectionSSHPassword(orgId : number, serverId: number) : string {
+    return `${apiv2ServerConnection(orgId, serverId)}/ssh/password`
+}
+
+export function apiv2SingleServerConnectionSSHPassword(orgId : number, serverId: number, connId : number) : string {
+    return `${apiv2ServerConnectionSSHPassword(orgId, serverId)}/${connId}`
 }

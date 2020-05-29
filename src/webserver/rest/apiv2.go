@@ -19,6 +19,44 @@ func registerAPIv2Org(r *mux.Router) {
 
 	registerAPIv2ShellPaths(s)
 	registerAPIv2RequestsPaths(s)
+	registerAPIv2ServerPaths(s)
+}
+
+func registerAPIv2ServerPaths(r *mux.Router) {
+	s := r.PathPrefix("/server").Subrouter()
+
+	ss := s.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgServerQueryId)).Subrouter()
+	ss.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgServerQueryId))
+
+	ssc := ss.PathPrefix("/connection").Subrouter()
+	ssc.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			allServerConnections,
+			core.ResourceAccessBundle{core.ResourceServers, core.AccessView},
+		),
+	).Methods("GET")
+
+	sscsp := ssc.PathPrefix("/ssh/password").Subrouter()
+	sscsp.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			newServerConnectionSSHPassword,
+			core.ResourceAccessBundle{core.ResourceServers, core.AccessEdit},
+		),
+	).Methods("POST")
+
+	sscspc := sscsp.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgServerSshConnectionQueryId)).Subrouter()
+	sscspc.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgServerSshConnectionQueryId))
+	sscspc.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			deleteServerConnectionSSHPassword,
+			core.ResourceAccessBundle{core.ResourceServers, core.AccessEdit},
+		),
+	).Methods("DELETE")
+
+	//sscsk := ssc.PathPrefix("/ssh/key").Subrouter()
 }
 
 func registerAPIv2ShellPaths(r *mux.Router) {

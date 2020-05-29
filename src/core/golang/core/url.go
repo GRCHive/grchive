@@ -48,6 +48,7 @@ const DashboardOrgScriptRequestQueryId = "scriptReqId"
 const DashboardOrgGenericRequestQueryId = "reqId"
 const DashboardOrgShellScriptQueryId = "shellScriptId"
 const DashboardOrgShellScriptVersionQueryId = "shellScriptVersionId"
+const DashboardOrgServerSshConnectionQueryId = "serverSshConnectionId"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 

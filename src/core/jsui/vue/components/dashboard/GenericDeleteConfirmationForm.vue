@@ -35,7 +35,7 @@
             Cancel
         </v-btn>
         <div class="flex-grow-1"></div>
-        <v-btn color="error" @click="onDelete">
+        <v-btn color="error" @click="onDelete" :loading="deleteInProgress">
             Delete
         </v-btn>
     </v-card-actions>
@@ -53,6 +53,10 @@ export default Vue.extend({
         itemsToDelete : Array,
         useGlobalDeletion: Boolean,
         forceGlobalDeletion: {
+            type: Boolean,
+            default: false
+        },
+        deleteInProgress: {
             type: Boolean,
             default: false
         }

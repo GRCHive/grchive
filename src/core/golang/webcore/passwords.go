@@ -52,3 +52,27 @@ func DecryptSaltedEncryptedPassword(encPassword string, salt string) (string, er
 
 	return string(decodePw), nil
 }
+
+func CreateEncryptedPassword(rawPassword string) (string, error) {
+	basePw := hex.EncodeToString([]byte(rawPassword))
+	encPwBytes, err := vault.TransitEncrypt(pwTransitPath, []byte(basePw))
+	if err != nil {
+		return "", err
+	}
+
+	return string(encPwBytes), nil
+}
+
+func DecryptEncryptedPassword(encPassword string) (string, error) {
+	decPwBytes, err := vault.TransitDecrypt(pwTransitPath, []byte(encPassword))
+	if err != nil {
+		return "", err
+	}
+
+	decodePw, err := hex.DecodeString(string(decPwBytes))
+	if err != nil {
+		return "", err
+	}
+
+	return string(decodePw), nil
+}

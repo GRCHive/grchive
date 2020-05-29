@@ -13,13 +13,15 @@ const (
 	UserSessionContextKey           ContextKey = "SESSION"
 	UserSessionParsedDataContextKey            = "PARSEDDATA"
 	// From Request
-	OrganizationContextKey       = "ORGANIZATION"
-	UserContextKey               = "USER"
-	ApiKeyContextKey             = "APIKEY"
-	GenericRequestContextKey     = "GENREQ"
-	RoleContextKey               = "ROLE"
-	ShellScriptContextKey        = "SHELLSCRIPT"
-	ShellScriptVersionContextKey = "SHELLSCRIPTVERSION"
+	OrganizationContextKey                = "ORGANIZATION"
+	UserContextKey                        = "USER"
+	ApiKeyContextKey                      = "APIKEY"
+	GenericRequestContextKey              = "GENREQ"
+	RoleContextKey                        = "ROLE"
+	ShellScriptContextKey                 = "SHELLSCRIPT"
+	ShellScriptVersionContextKey          = "SHELLSCRIPTVERSION"
+	ServerContextKey                      = "SERVER"
+	ServerConnectionSshPasswordContextKey = "SERVERCONNECTIONSSHPASSWORD"
 )
 
 func AddSessionToContext(session *core.UserSession, ctx context.Context) context.Context {
@@ -109,7 +111,23 @@ func FindShellScriptInContext(ctx context.Context) (*core.ShellScript, error) {
 func FindShellScriptVersionInContext(ctx context.Context) (*core.ShellScriptVersion, error) {
 	version, ok := ctx.Value(ShellScriptVersionContextKey).(*core.ShellScriptVersion)
 	if !ok || version == nil {
-		return nil, errors.New("Failed to find shell script in context.")
+		return nil, errors.New("Failed to find shell script version in context.")
 	}
 	return version, nil
+}
+
+func FindServerInContext(ctx context.Context) (*core.Server, error) {
+	server, ok := ctx.Value(ServerContextKey).(*core.Server)
+	if !ok || server == nil {
+		return nil, errors.New("Failed to find server in context.")
+	}
+	return server, nil
+}
+
+func FindServerSSHPasswordConnectionInContext(ctx context.Context) (*core.ServerSSHPasswordConnection, error) {
+	resource, ok := ctx.Value(ServerConnectionSshPasswordContextKey).(*core.ServerSSHPasswordConnection)
+	if !ok || resource == nil {
+		return nil, errors.New("Failed to find ServerSSHPasswordConnection in context.")
+	}
+	return resource, nil
 }

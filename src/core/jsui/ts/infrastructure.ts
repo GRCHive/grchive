@@ -19,3 +19,8 @@ export function extractServerHandle(f : Server) : ServerHandle {
         OrgId: f.OrgId,
     }
 }
+
+export interface ServerSSHConnectionGeneric {
+    Id: number
+    Username: string
+}

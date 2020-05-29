@@ -175,6 +175,12 @@
                                         </v-tab-item>
                                     </v-tabs-items>
                                 </v-card>
+
+                                <server-connection-manager
+                                    :server-id="currentServer.Id"
+                                    class="mt-4"
+                                >
+                                </server-connection-manager>
                             </v-col>
                         </v-row>
                     </v-container>
@@ -216,6 +222,7 @@ import SystemTableWithControls from '../../generic/resources/SystemTableWithCont
 import DbTable from '../../generic/DbTable.vue'
 import DbTableWithControls from '../../generic/resources/DbTableWithControls.vue'
 import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
+import ServerConnectionManager from '../../generic/servers/ServerConnectionManager.vue'
 
 @Component({
     components: {
@@ -225,7 +232,8 @@ import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
         SystemTableWithControls,
         DbTable,
         DbTableWithControls,
-        AuditTrailViewer
+        AuditTrailViewer,
+        ServerConnectionManager
     }
 })
 export default class FullEditServerComponent extends Vue {
