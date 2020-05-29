@@ -11,7 +11,8 @@ import {
     apiv2ServerConnection,
 } from '../url'
 import {
-    ServerSSHConnectionGeneric
+    ServerSSHConnectionGeneric,
+    ServerSSHPasswordConnection
 } from '../infrastructure'
 import { getAPIRequestConfig } from './apiUtility'
 
@@ -34,6 +35,18 @@ export function newServerSSHPasswordConnection(inp : TNewServerSSHPasswordConnec
     )
 }
 
+export interface TEditServerSSHPasswordConnectionInput extends TNewServerSSHPasswordConnectionInput{
+    connectionId : number
+}
+
+export function editServerSSHPasswordConnection(inp : TEditServerSSHPasswordConnectionInput) : Promise<TNewServerSSHConnectionOutput> {
+    return putFormJson(
+        apiv2SingleServerConnectionSSHPassword(inp.orgId, inp.serverId, inp.connectionId),
+        inp,
+        getAPIRequestConfig(),
+    )
+}
+
 export interface TDeleteServerConnectionInput {
     orgId: number
     serverId: number
@@ -44,6 +57,24 @@ export function deleteServerSSHPasswordConnection(inp : TDeleteServerConnectionI
     return deleteFormJson(
         apiv2SingleServerConnectionSSHPassword(inp.orgId, inp.serverId, inp.connectionId),
         inp,
+        getAPIRequestConfig(),
+    )
+}
+
+export interface TGetServerConnectionInput {
+    orgId: number
+    serverId: number
+    connectionId: number
+}
+
+
+export interface TGetServerConnectionOutput {
+    data: ServerSSHPasswordConnection
+}
+
+export function getServerSSHPasswordConnection(inp : TGetServerConnectionInput) : Promise<TGetServerConnectionOutput> {
+    return axios.get(
+        apiv2SingleServerConnectionSSHPassword(inp.orgId, inp.serverId, inp.connectionId),
         getAPIRequestConfig(),
     )
 }

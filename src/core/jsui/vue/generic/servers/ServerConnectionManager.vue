@@ -92,6 +92,13 @@
                         </v-dialog>
                     </v-tab>
                     <v-tab-item>
+                        <create-server-ssh-password-connection
+                            :server-id="serverId"
+                            :reference-connection="sshPasswordConn"
+                            hide-header
+                            edit-mode
+                        >
+                        </create-server-ssh-password-connection>
                     </v-tab-item>
                 </template>
 

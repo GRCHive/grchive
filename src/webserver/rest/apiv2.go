@@ -56,6 +56,22 @@ func registerAPIv2ServerPaths(r *mux.Router) {
 		),
 	).Methods("DELETE")
 
+	sscspc.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			getServerConnectionSSHPassword,
+			core.ResourceAccessBundle{core.ResourceServers, core.AccessView},
+		),
+	).Methods("GET")
+
+	sscspc.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			editServerConnectionSSHPassword,
+			core.ResourceAccessBundle{core.ResourceServers, core.AccessView},
+		),
+	).Methods("PUT")
+
 	//sscsk := ssc.PathPrefix("/ssh/key").Subrouter()
 }
 

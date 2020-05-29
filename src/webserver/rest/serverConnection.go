@@ -87,6 +87,70 @@ func deleteServerConnectionSSHPassword(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getServerConnectionSSHPassword(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	conn, err := webcore.FindServerSSHPasswordConnectionInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to find SSH password connection: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	conn.Password, err = webcore.DecryptEncryptedPassword(conn.Password)
+	if err != nil {
+		core.Warning("Failed to decrypt password: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(conn)
+}
+
+func editServerConnectionSSHPassword(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	conn, err := webcore.FindServerSSHPasswordConnectionInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to find SSH password connection: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	inputs := NewServerConnectionSSHPasswordInputs{}
+	err = webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	encryptedPassword, err := webcore.CreateEncryptedPassword(inputs.Password)
+	if err != nil {
+		core.Warning("Failed to find encrypt password: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	conn.Username = inputs.Username
+	conn.Password = encryptedPassword
+
+	tx := database.CreateTx()
+	err = database.WrapTx(tx, func() error {
+		return database.EditServerSSHPasswordConnectionWithTx(tx, conn)
+	})
+
+	if err != nil {
+		core.Warning("Failed to edit server SSH password connection: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(conn.Generic())
+}
+
 func allServerConnections(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")

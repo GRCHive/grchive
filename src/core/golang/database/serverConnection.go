@@ -21,6 +21,16 @@ func NewServerSSHPasswordConnectionWithTx(tx *sqlx.Tx, conn *core.ServerSSHPassw
 	return rows.Scan(&conn.Id)
 }
 
+func EditServerSSHPasswordConnectionWithTx(tx *sqlx.Tx, conn *core.ServerSSHPasswordConnection) error {
+	_, err := tx.NamedExec(`
+		UPDATE server_username_password_connection
+		SET username = :username,
+			password = :password
+		WHERE id = :id
+	`, conn)
+	return err
+}
+
 func GetSSHPasswordConnectionForServer(serverId int64, orgId int32) (*core.ServerSSHPasswordConnection, error) {
 	rows, err := dbConn.Queryx(`
 		SELECT *

@@ -24,3 +24,11 @@ export interface ServerSSHConnectionGeneric {
     Id: number
     Username: string
 }
+
+export interface ServerSSHPasswordConnection {
+    Id: number
+    ServerId: number
+    OrgId : number
+    Username: string
+    Password : string
+}
