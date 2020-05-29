@@ -47,6 +47,7 @@ const DashboardOrgScriptRunQueryId string = "runId"
 const DashboardOrgScriptRequestQueryId = "scriptReqId"
 const DashboardOrgGenericRequestQueryId = "reqId"
 const DashboardOrgShellScriptQueryId = "shellScriptId"
+const DashboardOrgShellScriptVersionQueryId = "shellScriptVersionId"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 
@@ -68,6 +69,7 @@ var DashboardOrgSingleDocRequestEndpoint string = fmt.Sprintf("/requests/doc/{%s
 var DashboardOrgSingleSqlRequestEndpoint string = fmt.Sprintf("/requests/sql/{%s}", DashboardOrgSqlRequestQueryId)
 var DashboardOrgSingleScriptRequestEndpoint string = fmt.Sprintf("/requests/scripts/{%s}", DashboardOrgScriptRequestQueryId)
 var DashboardOrgSingleVendorEndpoint string = fmt.Sprintf("/vendors/{%s}", DashboardOrgVendorQueryId)
+var DashboardSingleShellEndpoint string = fmt.Sprintf("/shell/{%s}", DashboardOrgShellScriptQueryId)
 
 // Dashboard - Organization - Settings
 const DashboardOrgSettingsPrefix string = "/settings"

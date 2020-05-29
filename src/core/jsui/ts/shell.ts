@@ -18,6 +18,7 @@ export interface ShellScript {
 }
 
 export interface ShellScriptVersion {
+    Id: number
     ShellId: number
     OrgId: number
     UploadTime: Date

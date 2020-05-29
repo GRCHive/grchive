@@ -12,6 +12,7 @@ type GCloudStorageApi interface {
 	Init(option.ClientOption)
 	Upload(bucket string, filename string, data []byte, key []byte) (int64, error)
 	Download(bucket string, filename string, key []byte) ([]byte, error)
+	DownloadVersioned(bucket string, filename string, generation int64, key []byte) ([]byte, error)
 	Delete(bucket string, filename string) error
 	DeleteVersioned(bucket string, filename string, generation int64) error
 }
@@ -71,7 +72,16 @@ func (s *RealGCloudStorageApi) Upload(bucket string, filename string, data []byt
 }
 
 func (s *RealGCloudStorageApi) Download(bucket string, filename string, key []byte) ([]byte, error) {
+	return s.DownloadVersioned(bucket, filename, -1, key)
+}
+
+func (s *RealGCloudStorageApi) DownloadVersioned(bucket string, filename string, generation int64, key []byte) ([]byte, error) {
 	obj := s.client.Bucket(bucket).Object(filename)
+
+	if generation != -1 {
+		obj = obj.Generation(generation)
+	}
+
 	reader, err := obj.NewReader(context.Background())
 	if err != nil {
 		return nil, err

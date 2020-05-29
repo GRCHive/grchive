@@ -15,6 +15,7 @@ type ShellScript struct {
 }
 
 type ShellScriptVersion struct {
+	Id            int64     `db:"id"`
 	ShellId       int64     `db:"shell_id"`
 	OrgId         int32     `db:"org_id"`
 	UploadTime    time.Time `db:"upload_time"`

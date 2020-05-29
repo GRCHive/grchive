@@ -13,7 +13,7 @@ import { ShellTypes, ShellScriptVersion } from '../../ts/shell'
 import {
     allShellScriptVersions, TAllShellScriptVersionsOutput
 } from '../../ts/api/apiShell'
-import { contactUsUrl } from '../../ts/url'
+import { contactUsUrl, createSingleShellUrl } from '../../ts/url'
 
 @Component({
     components: {
@@ -57,6 +57,9 @@ export default class ShellTable extends ResourceTableProps {
     }
 
     goToShellScript(item : any) {
+        window.location.assign(createSingleShellUrl(
+            PageParamsStore.state.organization!.OktaGroupName,
+            item.value.Id) + `?version=${item.currentVersionNumber}`)
     }
 
     transformInputResourceToTableItem(inp : any) : any {

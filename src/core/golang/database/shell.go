@@ -12,6 +12,7 @@ func GetShellScriptsOfTypeForOrganization(shellType int32, orgId int32) ([]*core
 		FROM shell_scripts
 		WHERE type_id = $1
 			AND org_id = $2
+		ORDER BY id DESC
 	`, shellType, orgId)
 	return scripts, err
 }
@@ -23,6 +24,7 @@ func AllShellScriptVersions(shellId int64, orgId int32) ([]*core.ShellScriptVers
 		FROM shell_script_versions
 		WHERE shell_id = $1
 			AND org_id = $2
+		ORDER BY id DESC
 	`, shellId, orgId)
 	return versions, err
 }
@@ -61,6 +63,22 @@ func CreateShellScriptVersionWithTx(tx *sqlx.Tx, shellId int64, orgId int32, upl
 	return err
 }
 
+func NewShellScriptVersionWithTx(tx *sqlx.Tx, version *core.ShellScriptVersion) error {
+	rows, err := tx.NamedQuery(`
+		INSERT INTO shell_script_versions (shell_id, org_id, upload_time, upload_user_id, gcs_generation)
+		VALUES (:shell_id, :org_id, :upload_time, :upload_user_id, :gcs_generation)
+		RETURNING id
+	`, version)
+
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+	rows.Next()
+	return rows.Scan(&version.Id)
+}
+
 func GetShellScriptFromId(shellId int64) (*core.ShellScript, error) {
 	script := core.ShellScript{}
 	err := dbConn.Get(&script, `
@@ -71,10 +89,30 @@ func GetShellScriptFromId(shellId int64) (*core.ShellScript, error) {
 	return &script, err
 }
 
+func GetShellScriptVersionFromId(id int64) (*core.ShellScriptVersion, error) {
+	version := core.ShellScriptVersion{}
+	err := dbConn.Get(&version, `
+		SELECT *
+		FROM shell_script_versions
+		WHERE id = $1
+	`, id)
+	return &version, err
+}
+
 func DeleteShellScriptFromIdWithTx(tx *sqlx.Tx, shellId int64) error {
 	_, err := tx.Exec(`
 		DELETE FROM shell_scripts
 		WHERE id = $1
 	`, shellId)
+	return err
+}
+
+func EditShellScriptWithTx(tx *sqlx.Tx, script *core.ShellScript) error {
+	_, err := tx.NamedExec(`
+		UPDATE shell_scripts
+		SET name = :name,
+			description = :description
+		WHERE id = :id
+	`, script)
 	return err
 }

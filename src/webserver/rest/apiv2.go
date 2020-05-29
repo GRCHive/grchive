@@ -22,6 +22,7 @@ func registerAPIv2Org(r *mux.Router) {
 }
 
 func registerAPIv2ShellPaths(r *mux.Router) {
+	// All organization shell scripts
 	s := r.PathPrefix("/shell").Subrouter()
 	s.HandleFunc(
 		"/",
@@ -39,15 +40,7 @@ func registerAPIv2ShellPaths(r *mux.Router) {
 		),
 	).Methods("POST")
 
-	sv := s.PathPrefix("/version").Subrouter()
-	sv.HandleFunc(
-		"/",
-		webcore.CreateACLCheckPermissionHandler(
-			allShellVersions,
-			core.ResourceAccessBundle{core.ResourceShell, core.AccessView},
-		),
-	).Methods("GET")
-
+	// Individual shell scripts
 	ss := s.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgShellScriptQueryId)).Subrouter()
 	ss.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgShellScriptQueryId))
 	ss.HandleFunc(
@@ -57,6 +50,50 @@ func registerAPIv2ShellPaths(r *mux.Router) {
 			core.ResourceAccessBundle{core.ResourceShell, core.AccessManage},
 		),
 	).Methods("DELETE")
+
+	ss.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			getShellScript,
+			core.ResourceAccessBundle{core.ResourceShell, core.AccessView},
+		),
+	).Methods("GET")
+
+	ss.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			editShellScript,
+			core.ResourceAccessBundle{core.ResourceShell, core.AccessEdit},
+		),
+	).Methods("PUT")
+
+	// Shell script versions
+	ssv := ss.PathPrefix("/version").Subrouter()
+	ssv.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			allShellVersions,
+			core.ResourceAccessBundle{core.ResourceShell, core.AccessView},
+		),
+	).Methods("GET")
+
+	ssv.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			newShellVersion,
+			core.ResourceAccessBundle{core.ResourceShell, core.AccessManage},
+		),
+	).Methods("POST")
+
+	ssvv := ssv.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgShellScriptVersionQueryId)).Subrouter()
+	ssvv.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgShellScriptVersionQueryId))
+	ssvv.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			getShellVersion,
+			core.ResourceAccessBundle{core.ResourceShell, core.AccessView},
+		),
+	).Methods("GET")
 }
 
 func registerAPIv2RequestsPaths(r *mux.Router) {

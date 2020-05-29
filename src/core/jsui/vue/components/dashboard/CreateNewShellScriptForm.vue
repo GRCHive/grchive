@@ -73,9 +73,10 @@ import { Watch } from 'vue-property-decorator'
 import * as rules from '../../../ts/formRules'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
-import { ShellTypes, ShellTypeToCodeMirror } from '../../../ts/shell'
+import { ShellTypes, ShellTypeToCodeMirror, ShellScript } from '../../../ts/shell'
 import {
     newShellScript, TNewShellScriptOutput,
+    editShellScript, 
 }  from '../../../ts/api/apiShell'
 
 const VueComponent = Vue.extend({
@@ -83,6 +84,10 @@ const VueComponent = Vue.extend({
         editMode: {
             type: Boolean,
             default: false
+        },
+        referenceScript: {
+            type: Object,
+            default: () => null as ShellScript | null
         },
         shellType: Number
     }
@@ -110,10 +115,16 @@ export default class CreateNewShellScriptForm extends VueComponent {
         return ShellTypeToCodeMirror.get(<ShellTypes>this.shellType)!
     }
 
+    @Watch('referenceScript')
     clearForm() {
-        this.name = ""
-        this.description = ""
-        this.script = ""
+        if (!!this.referenceScript) {
+            this.name = this.referenceScript.Name
+            this.description = this.referenceScript.Description
+        } else {
+            this.name = ""
+            this.description = ""
+            this.script = ""
+        }
     }
 
     mounted() {
@@ -158,6 +169,16 @@ export default class CreateNewShellScriptForm extends VueComponent {
     }
 
     doEdit() {
+        editShellScript({
+            orgId: PageParamsStore.state.organization!.Id,
+            shellId: this.referenceScript!.Id,
+            name: this.name,
+            description: this.description,
+        }).then((resp: TNewShellScriptOutput) => {
+            this.onSuccess(resp)
+        }).catch((err : any) => {
+            this.onError()
+        })
     }
 
     save() {

@@ -13,12 +13,13 @@ const (
 	UserSessionContextKey           ContextKey = "SESSION"
 	UserSessionParsedDataContextKey            = "PARSEDDATA"
 	// From Request
-	OrganizationContextKey   = "ORGANIZATION"
-	UserContextKey           = "USER"
-	ApiKeyContextKey         = "APIKEY"
-	GenericRequestContextKey = "GENREQ"
-	RoleContextKey           = "ROLE"
-	ShellScriptContextKey    = "SHELLSCRIPT"
+	OrganizationContextKey       = "ORGANIZATION"
+	UserContextKey               = "USER"
+	ApiKeyContextKey             = "APIKEY"
+	GenericRequestContextKey     = "GENREQ"
+	RoleContextKey               = "ROLE"
+	ShellScriptContextKey        = "SHELLSCRIPT"
+	ShellScriptVersionContextKey = "SHELLSCRIPTVERSION"
 )
 
 func AddSessionToContext(session *core.UserSession, ctx context.Context) context.Context {
@@ -103,4 +104,12 @@ func FindShellScriptInContext(ctx context.Context) (*core.ShellScript, error) {
 		return nil, errors.New("Failed to find shell script in context.")
 	}
 	return script, nil
+}
+
+func FindShellScriptVersionInContext(ctx context.Context) (*core.ShellScriptVersion, error) {
+	version, ok := ctx.Value(ShellScriptVersionContextKey).(*core.ShellScriptVersion)
+	if !ok || version == nil {
+		return nil, errors.New("Failed to find shell script in context.")
+	}
+	return version, nil
 }

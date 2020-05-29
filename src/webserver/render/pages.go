@@ -326,6 +326,10 @@ func RenderShells(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardOrgShellsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r, ""), emptyParams)
 }
 
+func RenderSingleShell(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardOrgSingleShellTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r, core.DashboardOrgShellScriptQueryId), emptyParams)
+}
+
 func RenderRedirectPage(w http.ResponseWriter, r *http.Request, url string) {
 	RenderTemplate(w, RedirectTemplateKey, "base",
 		BuildPageTemplateParametersFull(r, ""),

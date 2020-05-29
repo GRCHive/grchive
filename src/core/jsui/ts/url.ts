@@ -181,6 +181,14 @@ export function createSingleScriptRequestUrl(org: string, requestId : number) : 
     return `/dashboard/org/${org}/requests/scripts/${requestId}`
 }
 
+export function createSingleShellUrl(org: string, shell : number) : string {
+    return `/dashboard/org/${org}/it/shell/${shell}`
+}
+
+export function createOrgShellUrl(org: string) : string {
+    return `/dashboard/org/${org}/it/shell`
+}
+
 export const newProcessFlowAPIUrl : string = "/api/flows/new"
 export const deleteProcessFlowAPIUrl : string = "/api/flows/delete"
 export const getAllProcessFlowAPIUrl: string = "/api/flows/"
@@ -441,4 +449,10 @@ export const allGenRequestScriptsUrl : string = "requests/scripts"
 export const allGenRequestsUrl : string = "requests"
 
 export const allShellScriptsUrl : string = "shell"
-export const allShellScriptVersionsUrl : string = "shell/version"
+export function singleShellScriptUrl(orgId : number, id : number) : string {
+    return createOrgApiv2Url(orgId, `${allShellScriptsUrl}/${id}`)
+}
+
+export function singleShellScriptVersionUrl(orgId : number, id : number, version : number) : string {
+    return createOrgApiv2Url(orgId, `${allShellScriptsUrl}/${id}/version/${version}`)
+}

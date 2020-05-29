@@ -43,6 +43,10 @@ export const Props = Vue.extend({
             type: Number,
             default: -1,
         },
+        heightOffset: {
+            type: Number,
+            default: 0,
+        },
     }
 })
 
@@ -59,7 +63,7 @@ export default class GenericCodeEditor extends Props {
         let bb = this.$refs.parent.getBoundingClientRect()
         // Subtract 30px to account for the 30px bottom padding
         // that CodeMirror adds.
-        return `calc(100vh -  ${bb.top}px - 30px)`
+        return `calc(100vh -  ${bb.top}px - 30px + ${this.heightOffset}px)`
     }
 
     mounted() {

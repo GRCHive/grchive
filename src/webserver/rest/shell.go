@@ -9,7 +9,10 @@ import (
 	"gitlab.com/grchive/grchive/vault_api"
 	"gitlab.com/grchive/grchive/webcore"
 	"net/http"
+	"time"
 )
+
+const ShellEncryptionPath = "shell"
 
 type AllShellsInput struct {
 	ShellType int32 `webcore:"shellType"`
@@ -44,18 +47,13 @@ func allShells(w http.ResponseWriter, r *http.Request) {
 	jsonWriter.Encode(shells)
 }
 
-type AllShellVersionsInput struct {
-	ShellId int64 `webcore:"shellId"`
-}
-
 func allShellVersions(w http.ResponseWriter, r *http.Request) {
 	jsonWriter := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
-	inputs := AllShellVersionsInput{}
-	err := webcore.UnmarshalRequestForm(r, &inputs)
+	script, err := webcore.FindShellScriptInContext(r.Context())
 	if err != nil {
-		core.Warning("Can't parse inputs: " + err.Error())
+		core.Warning("Failed to get shell script in context: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -67,7 +65,7 @@ func allShellVersions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	versions, err := database.AllShellScriptVersions(inputs.ShellId, org.Id)
+	versions, err := database.AllShellScriptVersions(script.Id, org.Id)
 	if err != nil {
 		core.Warning("Failed to get shell scripts: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -132,7 +130,7 @@ func newShell(w http.ResponseWriter, r *http.Request) {
 		script.BucketId = core.EnvConfig.Gcloud.ShellBucket
 		script.StorageId = fmt.Sprintf("shellscript-%d", script.Id)
 
-		encryptedScript, err := vault.TransitEncrypt("shell", []byte(inputs.Script))
+		encryptedScript, err := vault.TransitEncrypt(ShellEncryptionPath, []byte(inputs.Script))
 		if err != nil {
 			core.Warning("Failed to encrypt script: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -206,4 +204,169 @@ func deleteShellScript(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+}
+
+func getShellScript(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	script, err := webcore.FindShellScriptInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to get shell script in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	jsonWriter.Encode(script)
+}
+
+type EditShellInput struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+func editShellScript(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	script, err := webcore.FindShellScriptInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to get shell script in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	inputs := EditShellInput{}
+	err = webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	script.Name = inputs.Name
+	script.Description = inputs.Description
+
+	tx := database.CreateTx()
+	err = database.WrapTx(tx, func() error {
+		return database.EditShellScriptWithTx(tx, script)
+	})
+
+	if err != nil {
+		core.Warning("Failed to edit shell script: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(script)
+}
+
+func getShellVersion(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	script, err := webcore.FindShellScriptInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to get shell script in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	version, err := webcore.FindShellScriptVersionInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to get shell script version in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	storage := gcloud.DefaultGCloudApi.GetStorageApi()
+	rawData, err := storage.DownloadVersioned(
+		script.BucketId,
+		script.StorageId,
+		version.GcsGeneration,
+		core.EnvConfig.HmacKey,
+	)
+
+	if err != nil {
+		core.Warning("Failed to download version from GCS: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	decryptedScript, err := vault.TransitDecrypt(ShellEncryptionPath, rawData)
+	if err != nil {
+		core.Warning("Failed to encrypt script: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(string(decryptedScript))
+}
+
+type NewShellVersionInputs struct {
+	Script string `json:"script"`
+}
+
+func newShellVersion(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	script, err := webcore.FindShellScriptInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to get shell script in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.FindRoleInContext(r.Context())
+	if err != nil {
+		core.Warning("Can't find role: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	inputs := NewShellVersionInputs{}
+	err = webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	storage := gcloud.DefaultGCloudApi.GetStorageApi()
+
+	encryptedScript, err := vault.TransitEncrypt(ShellEncryptionPath, []byte(inputs.Script))
+	if err != nil {
+		core.Warning("Failed to encrypt script: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	gcsGeneration, err := storage.Upload(script.BucketId, script.StorageId, encryptedScript, core.EnvConfig.HmacKey)
+	if err != nil {
+		core.Warning("Failed to upload script: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	newVersion := core.ShellScriptVersion{
+		ShellId:       script.Id,
+		OrgId:         script.OrgId,
+		UploadUserId:  role.UserId,
+		UploadTime:    time.Now().UTC(),
+		GcsGeneration: gcsGeneration,
+	}
+
+	tx := database.CreateTx()
+	err = database.WrapTx(tx, func() error {
+		return database.NewShellScriptVersionWithTx(tx, &newVersion)
+	})
+
+	if err != nil {
+		core.Warning("Failed to create script version: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(newVersion)
 }

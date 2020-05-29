@@ -397,6 +397,15 @@ func CreateObtainResourceInContextMiddleware(queryId string) mux.MiddlewareFunc 
 				}
 
 				ctx = context.WithValue(r.Context(), ShellScriptContextKey, script)
+			case core.DashboardOrgShellScriptVersionQueryId:
+				version, err := database.GetShellScriptVersionFromId(queryInt)
+				if err != nil {
+					core.Warning("Failed to get shell script version: " + err.Error())
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+
+				ctx = context.WithValue(r.Context(), ShellScriptVersionContextKey, version)
 			default:
 				w.WriteHeader(http.StatusBadRequest)
 				return

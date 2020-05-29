@@ -1,0 +1,2 @@
+ALTER TABLE shell_script_versions
+ADD COLUMN id BIGSERIAL PRIMARY KEY;
