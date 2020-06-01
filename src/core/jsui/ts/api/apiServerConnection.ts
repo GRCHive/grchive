@@ -4,15 +4,20 @@ import {
     postFormJson,
     putFormJson,
     deleteFormJson,
+    postFormMultipart,
+    putFormMultipart
 } from '../http'
 import {
     apiv2SingleServerConnectionSSHPassword,
     apiv2ServerConnectionSSHPassword,
+    apiv2SingleServerConnectionSSHKey,
+    apiv2ServerConnectionSSHKey,
     apiv2ServerConnection,
 } from '../url'
 import {
     ServerSSHConnectionGeneric,
-    ServerSSHPasswordConnection
+    ServerSSHPasswordConnection,
+    ServerSSHKeyConnection
 } from '../infrastructure'
 import { getAPIRequestConfig } from './apiUtility'
 
@@ -35,6 +40,29 @@ export function newServerSSHPasswordConnection(inp : TNewServerSSHPasswordConnec
     )
 }
 
+export interface TNewServerSSHKeyConnectionInput {
+    orgId: number
+    serverId: number
+    username: string
+    file: File
+}
+
+export function newServerSSHKeyConnection(inp : TNewServerSSHKeyConnectionInput) : Promise<TNewServerSSHConnectionOutput> {
+    let data = new FormData()
+    data.set('file', inp.file)
+    data.set('username', inp.username)
+
+    return postFormMultipart(
+        apiv2ServerConnectionSSHKey(inp.orgId, inp.serverId),
+        data,
+        getAPIRequestConfig(),
+    )
+}
+
+export interface TNewServerSSHConnectionOutput {
+    data: ServerSSHConnectionGeneric
+}
+
 export interface TEditServerSSHPasswordConnectionInput extends TNewServerSSHPasswordConnectionInput{
     connectionId : number
 }
@@ -43,6 +71,22 @@ export function editServerSSHPasswordConnection(inp : TEditServerSSHPasswordConn
     return putFormJson(
         apiv2SingleServerConnectionSSHPassword(inp.orgId, inp.serverId, inp.connectionId),
         inp,
+        getAPIRequestConfig(),
+    )
+}
+
+export interface TEditServerSSHKeyConnectionInput extends TNewServerSSHKeyConnectionInput{
+    connectionId : number
+}
+
+export function editServerSSHKeyConnection(inp : TEditServerSSHKeyConnectionInput) : Promise<TNewServerSSHConnectionOutput> {
+    let data = new FormData()
+    data.set('file', inp.file)
+    data.set('username', inp.username)
+
+    return putFormMultipart(
+        apiv2SingleServerConnectionSSHKey(inp.orgId, inp.serverId, inp.connectionId),
+        data,
         getAPIRequestConfig(),
     )
 }
@@ -56,6 +100,14 @@ export interface TDeleteServerConnectionInput {
 export function deleteServerSSHPasswordConnection(inp : TDeleteServerConnectionInput) : Promise<void> {
     return deleteFormJson(
         apiv2SingleServerConnectionSSHPassword(inp.orgId, inp.serverId, inp.connectionId),
+        inp,
+        getAPIRequestConfig(),
+    )
+}
+
+export function deleteServerSSHKeyConnection(inp : TDeleteServerConnectionInput) : Promise<void> {
+    return deleteFormJson(
+        apiv2SingleServerConnectionSSHKey(inp.orgId, inp.serverId, inp.connectionId),
         inp,
         getAPIRequestConfig(),
     )
@@ -75,6 +127,17 @@ export interface TGetServerConnectionOutput {
 export function getServerSSHPasswordConnection(inp : TGetServerConnectionInput) : Promise<TGetServerConnectionOutput> {
     return axios.get(
         apiv2SingleServerConnectionSSHPassword(inp.orgId, inp.serverId, inp.connectionId),
+        getAPIRequestConfig(),
+    )
+}
+
+export interface TGetServerKeyConnectionOutput {
+    data: ServerSSHKeyConnection
+}
+
+export function getServerSSHKeyConnection(inp : TGetServerConnectionInput) : Promise<TGetServerKeyConnectionOutput> {
+    return axios.get(
+        apiv2SingleServerConnectionSSHKey(inp.orgId, inp.serverId, inp.connectionId),
         getAPIRequestConfig(),
     )
 }

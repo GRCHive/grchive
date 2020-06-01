@@ -428,6 +428,14 @@ func CreateObtainResourceInContextMiddleware(queryId string) mux.MiddlewareFunc 
 					return
 				}
 				ctx = context.WithValue(r.Context(), ServerConnectionSshPasswordContextKey, conn)
+			case core.DashboardOrgServerSshKeyQueryId:
+				conn, err := database.GetSSHKeyConnection(queryInt)
+				if err != nil || conn.OrgId != org.Id {
+					core.Warning("Failed to get ssh key connection: " + core.ErrorString(err))
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				ctx = context.WithValue(r.Context(), ServerConnectionSshKeyContextKey, conn)
 			default:
 				w.WriteHeader(http.StatusBadRequest)
 				return

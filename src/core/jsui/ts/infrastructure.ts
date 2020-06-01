@@ -32,3 +32,11 @@ export interface ServerSSHPasswordConnection {
     Username: string
     Password : string
 }
+
+export interface ServerSSHKeyConnection {
+    Id: number
+    ServerId: number
+    OrgId : number
+    Username: string
+    PrivateKey : string
+}

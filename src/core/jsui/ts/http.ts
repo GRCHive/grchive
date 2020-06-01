@@ -44,3 +44,10 @@ export function postFormMultipart<T=void>(url : string, data : FormData, config 
     return axios.post(url, data, config)
 }
 
+export function putFormMultipart<T=void>(url: string, data: FormData, config : AxiosRequestConfig) : Promise<T> {
+    if (!config.headers) {
+        config.headers = {}
+    }
+    config.headers['Content-Type'] = 'multipart/form-data'
+    return axios.put(url, data, config)
+}

@@ -22,6 +22,7 @@ const (
 	ShellScriptVersionContextKey          = "SHELLSCRIPTVERSION"
 	ServerContextKey                      = "SERVER"
 	ServerConnectionSshPasswordContextKey = "SERVERCONNECTIONSSHPASSWORD"
+	ServerConnectionSshKeyContextKey      = "SERVERCONNECTIONSSHKEY"
 )
 
 func AddSessionToContext(session *core.UserSession, ctx context.Context) context.Context {
@@ -128,6 +129,14 @@ func FindServerSSHPasswordConnectionInContext(ctx context.Context) (*core.Server
 	resource, ok := ctx.Value(ServerConnectionSshPasswordContextKey).(*core.ServerSSHPasswordConnection)
 	if !ok || resource == nil {
 		return nil, errors.New("Failed to find ServerSSHPasswordConnection in context.")
+	}
+	return resource, nil
+}
+
+func FindServerSSHKeyConnectionInContext(ctx context.Context) (*core.ServerSSHKeyConnection, error) {
+	resource, ok := ctx.Value(ServerConnectionSshKeyContextKey).(*core.ServerSSHKeyConnection)
+	if !ok || resource == nil {
+		return nil, errors.New("Failed to find ServerSSHKeyConnection in context.")
 	}
 	return resource, nil
 }

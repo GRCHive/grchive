@@ -468,3 +468,11 @@ export function apiv2ServerConnectionSSHPassword(orgId : number, serverId: numbe
 export function apiv2SingleServerConnectionSSHPassword(orgId : number, serverId: number, connId : number) : string {
     return `${apiv2ServerConnectionSSHPassword(orgId, serverId)}/${connId}`
 }
+
+export function apiv2ServerConnectionSSHKey(orgId : number, serverId: number) : string {
+    return `${apiv2ServerConnection(orgId, serverId)}/ssh/key`
+}
+
+export function apiv2SingleServerConnectionSSHKey(orgId : number, serverId: number, connId : number) : string {
+    return `${apiv2ServerConnectionSSHKey(orgId, serverId)}/${connId}`
+}

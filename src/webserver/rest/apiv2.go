@@ -72,7 +72,41 @@ func registerAPIv2ServerPaths(r *mux.Router) {
 		),
 	).Methods("PUT")
 
-	//sscsk := ssc.PathPrefix("/ssh/key").Subrouter()
+	sscsk := ssc.PathPrefix("/ssh/key").Subrouter()
+	sscsk.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			newServerConnectionSSHKey,
+			core.ResourceAccessBundle{core.ResourceServers, core.AccessEdit},
+		),
+	).Methods("POST")
+
+	sscskc := sscsk.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgServerSshKeyQueryId)).Subrouter()
+	sscskc.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgServerSshKeyQueryId))
+	sscskc.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			deleteServerConnectionSSHKey,
+			core.ResourceAccessBundle{core.ResourceServers, core.AccessEdit},
+		),
+	).Methods("DELETE")
+
+	sscskc.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			getServerConnectionSSHKey,
+			core.ResourceAccessBundle{core.ResourceServers, core.AccessView},
+		),
+	).Methods("GET")
+
+	sscskc.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			editServerConnectionSSHKey,
+			core.ResourceAccessBundle{core.ResourceServers, core.AccessView},
+		),
+	).Methods("PUT")
+
 }
 
 func registerAPIv2ShellPaths(r *mux.Router) {
