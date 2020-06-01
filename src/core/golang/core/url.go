@@ -45,6 +45,7 @@ const DashboardOrgClientScriptQueryId string = "clientScriptId"
 const DashboardOrgCommitQueryId string = "commitId"
 const DashboardOrgScriptRunQueryId string = "runId"
 const DashboardOrgScriptRequestQueryId = "scriptReqId"
+const DashboardOrgShellRequestQueryId = "shellReqId"
 const DashboardOrgGenericRequestQueryId = "reqId"
 const DashboardOrgShellScriptQueryId = "shellScriptId"
 const DashboardOrgShellScriptVersionQueryId = "shellScriptVersionId"
@@ -70,6 +71,7 @@ var DashboardOrgSingleDocFileEndpoint string = fmt.Sprintf("/documentation/file/
 var DashboardOrgSingleDocRequestEndpoint string = fmt.Sprintf("/requests/doc/{%s}", DashboardOrgDocRequestQueryId)
 var DashboardOrgSingleSqlRequestEndpoint string = fmt.Sprintf("/requests/sql/{%s}", DashboardOrgSqlRequestQueryId)
 var DashboardOrgSingleScriptRequestEndpoint string = fmt.Sprintf("/requests/scripts/{%s}", DashboardOrgScriptRequestQueryId)
+var DashboardOrgSingleShellRequestEndpoint string = fmt.Sprintf("/requests/shell/{%s}", DashboardOrgShellRequestQueryId)
 var DashboardOrgSingleVendorEndpoint string = fmt.Sprintf("/vendors/{%s}", DashboardOrgVendorQueryId)
 var DashboardSingleShellEndpoint string = fmt.Sprintf("/shell/{%s}", DashboardOrgShellScriptQueryId)
 

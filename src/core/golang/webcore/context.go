@@ -140,3 +140,11 @@ func FindServerSSHKeyConnectionInContext(ctx context.Context) (*core.ServerSSHKe
 	}
 	return resource, nil
 }
+
+func FindGenericRequestInContext(ctx context.Context) (*core.GenericRequest, error) {
+	resource, ok := ctx.Value(GenericRequestContextKey).(*core.GenericRequest)
+	if !ok || resource == nil {
+		return nil, errors.New("Failed to find GenericRequest in context.")
+	}
+	return resource, nil
+}

@@ -39,6 +39,7 @@ const (
 	SingleDocRequestRouteName      = "SingleDocRequest"
 	SingleSqlRequestRouteName      = "SingleSqlRequest"
 	SingleScriptRequestRouteName   = "SingleScriptRequest"
+	SingleShellRequestRouteName    = "SingleShellRequest"
 	SingleDocumentationRouteName   = "SingleDocumentation"
 	SingleClientDataRouteName      = "SingleClientData"
 	SingleClientScriptRouteName    = "SingleClientScript"

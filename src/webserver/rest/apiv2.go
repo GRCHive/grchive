@@ -182,6 +182,15 @@ func registerAPIv2ShellPaths(r *mux.Router) {
 			core.ResourceAccessBundle{core.ResourceShell, core.AccessView},
 		),
 	).Methods("GET")
+
+	ssvvr := ssvv.PathPrefix("/run").Subrouter()
+	ssvvr.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			runShellVersion,
+			core.ResourceAccessBundle{core.ResourceShellRun, core.AccessManage},
+		),
+	).Methods("POST")
 }
 
 func registerAPIv2RequestsPaths(r *mux.Router) {
@@ -194,6 +203,26 @@ func registerAPIv2RequestsPaths(r *mux.Router) {
 	singleScriptRouter.Use(webcore.CreateObtainGenericRequestInContext(core.DashboardOrgScriptRequestQueryId))
 	singleScriptRouter.HandleFunc("/", getGenericRequestScript).Methods("GET")
 	singleScriptRouter.HandleFunc("/approval", approveDenyScriptRunRequest).Methods("POST")
+
+	shellRouter := s.PathPrefix("/shell").Subrouter()
+	shellRouter.HandleFunc("/", allGenericRequestsShellScripts).Methods("GET")
+
+	singleShellRouter := shellRouter.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgShellRequestQueryId)).Subrouter()
+	singleShellRouter.Use(webcore.CreateObtainGenericRequestInContext(core.DashboardOrgShellRequestQueryId))
+	singleShellRouter.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			getGenericRequestShell,
+			core.ResourceAccessBundle{core.ResourceShell, core.AccessView},
+		),
+	).Methods("GET")
+	singleShellRouter.HandleFunc(
+		"/approval",
+		webcore.CreateACLCheckPermissionHandler(
+			approveDenyShellRunRequest,
+			core.ResourceAccessBundle{core.ResourceShellRun, core.AccessEdit},
+		),
+	).Methods("POST")
 
 	singleReqRouter := s.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgScriptRequestQueryId)).Subrouter()
 	singleReqRouter.Use(webcore.CreateObtainGenericRequestInContext(core.DashboardOrgScriptRequestQueryId))

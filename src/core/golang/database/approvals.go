@@ -73,6 +73,14 @@ func LinkScriptRunToRequestWithTx(tx *sqlx.Tx, runId int64, requestId int64) err
 	return err
 }
 
+func LinkShellRunToRequestWithTx(tx *sqlx.Tx, runId int64, requestId int64) error {
+	_, err := tx.Exec(`
+		INSERT INTO request_to_shell_run_link (request_id, run_id)
+		VALUES ($2, $1)
+	`, runId, requestId)
+	return err
+}
+
 func GetGenericRequestType(requestId int64) (core.GenericRequestType, error) {
 	rows, err := dbConn.Queryx(`
 		SELECT run.run_id, task.task_id
@@ -141,6 +149,19 @@ func GetGenericRequestsForScriptsInOrg(orgId int32, role *core.Role) ([]*core.Ge
 			ON rl.request_id = req.id
 		WHERE req.org_id = $1
 			AND (rl.run_id IS NOT NULL OR tsl.link_id IS NOT NULL)
+		ORDER BY req.upload_time DESC
+	`, orgId)
+	return reqs, err
+}
+
+func GetGenericRequestsForShellScriptsInOrg(orgId int32) ([]*core.GenericRequest, error) {
+	reqs := make([]*core.GenericRequest, 0)
+	err := dbConn.Select(&reqs, `
+		SELECT DISTINCT(req.*)
+		FROM generic_requests AS req
+		INNER JOIN request_to_shell_run_link AS srl
+			ON srl.request_id = req.id
+		WHERE req.org_id = $1
 		ORDER BY req.upload_time DESC
 	`, orgId)
 	return reqs, err
@@ -271,4 +292,34 @@ func GetGenericRequestComments(reqId int64, orgId int32, role *core.Role) ([]*co
 		WHERE rct.request_id = $1
 			AND t.org_id = $2
 	`, reqId, orgId)
+}
+
+func GetShellScriptFromRequest(requestId int64) (*core.ShellScript, error) {
+	shell := core.ShellScript{}
+	err := dbConn.Get(&shell, `
+		SELECT ss.*
+		FROM request_to_shell_run_link AS srl
+		INNER JOIN shell_script_runs AS ssr
+			ON ssr.id = srl.run_id
+		INNER JOIN shell_script_versions AS ssv
+			ON ssv.id = ssr.script_version_id
+		INNER JOIN shell_scripts AS ss
+			ON ss.id = ssv.shell_id
+		WHERE srl.request_id = $1
+	`, requestId)
+	return &shell, err
+}
+
+func GetShellScriptVersionFromRequest(requestId int64) (*core.ShellScriptVersion, error) {
+	shell := core.ShellScriptVersion{}
+	err := dbConn.Get(&shell, `
+		SELECT ssv.*
+		FROM request_to_shell_run_link AS srl
+		INNER JOIN shell_script_runs AS ssr
+			ON ssr.id = srl.run_id
+		INNER JOIN shell_script_versions AS ssv
+			ON ssv.id = ssr.script_version_id
+		WHERE srl.request_id = $1
+	`, requestId)
+	return &shell, err
 }

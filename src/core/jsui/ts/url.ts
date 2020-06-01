@@ -181,6 +181,10 @@ export function createSingleScriptRequestUrl(org: string, requestId : number) : 
     return `/dashboard/org/${org}/requests/scripts/${requestId}`
 }
 
+export function createSingleShellRequestUrl(org: string, requestId : number) : string {
+    return `/dashboard/org/${org}/requests/shell/${requestId}`
+}
+
 export function createSingleShellUrl(org: string, shell : number) : string {
     return `/dashboard/org/${org}/it/shell/${shell}`
 }
@@ -446,6 +450,7 @@ export function createOrgApiv2Url(orgId : number, path : string) {
 }
 
 export const allGenRequestScriptsUrl : string = "requests/scripts"
+export const allGenRequestShellUrl : string = "requests/shell"
 export const allGenRequestsUrl : string = "requests"
 
 export const allShellScriptsUrl : string = "shell"
@@ -455,6 +460,10 @@ export function singleShellScriptUrl(orgId : number, id : number) : string {
 
 export function singleShellScriptVersionUrl(orgId : number, id : number, version : number) : string {
     return `${singleShellScriptUrl(orgId, id)}/version/${version}`
+}
+
+export function singleShellScriptVersionRunUrl(orgId : number, id : number, version : number) : string {
+    return `${singleShellScriptUrl(orgId, id)}/version/${version}/run`
 }
 
 export function apiv2ServerConnection(orgId : number, serverId: number) : string {

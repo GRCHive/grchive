@@ -26,17 +26,6 @@
 
             <v-list-item-action>
                 <v-btn
-                    color="warning"
-                    icon
-                    x-small
-                    @click="resetQuery"
-                >
-                    <v-icon>mdi-bug</v-icon>
-                </v-btn>
-            </v-list-item-action>
-
-            <v-list-item-action>
-                <v-btn
                     color="primary"
                     icon
                     x-small
@@ -164,10 +153,6 @@ export default class DatabaseQueryRunner extends Props {
         Vue.nextTick(() => {
             this.cancelEditQuery()
         })
-    }
-
-    resetQuery() {
-        this.queryKey += 1
     }
 
     doExecute(runCode : string) {

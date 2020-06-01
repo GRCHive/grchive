@@ -73,6 +73,55 @@
                                     >
                                     </v-select>
                                 </v-list-item-content>
+
+                                <v-list-item-action>
+                                    <v-dialog
+                                        v-model="showHideRun"
+                                        persistent
+                                        max-width="40%"
+                                    >
+                                        <template v-slot:activator="{on}">
+                                            <v-btn
+                                                color="primary"
+                                                icon
+                                                x-small
+                                                v-on="on"
+                                            >
+                                                <v-icon>mdi-play</v-icon>
+                                            </v-btn>
+                                        </template>
+
+                                        <v-card>
+                                            <server-table-with-controls
+                                                class="ma-4"
+                                                disable-new
+                                                disable-delete
+                                                enable-select
+                                                v-model="serversToRun"
+                                            >
+                                            </server-table-with-controls>
+
+                                            <v-card-actions>
+                                                <v-btn
+                                                    color="error"
+                                                    @click="showHideRun=false"
+                                                >
+                                                    Cancel
+                                                </v-btn>
+
+                                                <v-spacer></v-spacer>
+
+                                                <v-btn
+                                                    color="success"
+                                                    @click="requestRunOnServers"
+                                                    :loading="requestRunInProgress"
+                                                >
+                                                    Run
+                                                </v-btn>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </v-dialog>
+                                </v-list-item-action>
                             </v-list-item>
 
                             <v-divider></v-divider>
@@ -138,6 +187,7 @@ import CreateNewShellScriptForm from '../../components/dashboard/CreateNewShellS
 import GenericCodeEditor from '../../generic/code/GenericCodeEditor.vue'
 import GenericDeleteConfirmationForm from '../../components/dashboard/GenericDeleteConfirmationForm.vue'
 import MetadataStore from '../../../ts/metadata'
+import ServerTableWithControls from '../../generic/resources/ServerTableWithControls.vue'
 import { createUserString } from '../../../ts/users'
 import { PageParamsStore } from '../../../ts/pageParams'
 import {
@@ -146,6 +196,7 @@ import {
     getShellScriptVersion, TGetShellScriptVersionOutput,
     newShellScriptVersion, TNewShellScriptVersionOutput,
     deleteShellScript,
+    requestRunShellScript, TRequestRunShellScriptOutput
 } from '../../../ts/api/apiShell'
 import { contactUsUrl, createOrgShellUrl } from '../../../ts/url'
 import {
@@ -155,6 +206,7 @@ import {
     ShellTypeToCodeMirror,
 } from '../../../ts/shell'
 import { standardFormatTime } from '../../../ts/time'
+import { Server } from '../../../ts/infrastructure'
 
 @Component({
     components : {
@@ -163,6 +215,7 @@ import { standardFormatTime } from '../../../ts/time'
         CreateNewShellScriptForm,
         GenericCodeEditor,
         GenericDeleteConfirmationForm,
+        ServerTableWithControls
     },
 })
 
@@ -177,9 +230,13 @@ export default class DashboardOrgSingleShell extends Vue {
 
     canEditScript: boolean = false
     showHideDelete : boolean = false
+    showHideRun: boolean = false
 
     saveInProgress : boolean = false
     loadInProgress : boolean = false
+
+    serversToRun : Server[] = []
+    requestRunInProgress : boolean = false
 
     get isReady() : boolean {
         return !!this.script && !!this.versions
@@ -336,6 +393,39 @@ export default class DashboardOrgSingleShell extends Vue {
                 "Contact Us",
                 contactUsUrl,
                 true);
+        })
+    }
+
+    requestRunOnServers() {
+        this.requestRunInProgress = true
+
+        requestRunShellScript({
+            orgId: PageParamsStore.state.organization!.Id,
+            shellId: this.script!.Id,
+            versionId: this.selectedVersion!.Id,
+            servers: this.serversToRun.map((ele : Server) => ele.Id),
+        }).then((resp : TRequestRunShellScriptOutput) => {
+            this.showHideRun = false
+            this.serversToRun = []
+
+            // @ts-ignore
+            //this.$root.$refs.snackbar.showSnackBar(
+            //    "Successfully submitted your run request.",
+            //    false,
+            //    "View",
+            //    contactUsUrl,
+            //    true);
+
+        }).catch((err: any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        }).finally(() => {
+            this.requestRunInProgress = false
         })
     }
 }

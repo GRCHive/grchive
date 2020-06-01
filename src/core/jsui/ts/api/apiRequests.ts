@@ -5,6 +5,7 @@ import { putFormJson, postFormJson, deleteFormJson } from '../http'
 import {
     createOrgApiv2Url,
     allGenRequestScriptsUrl,
+    allGenRequestShellUrl,
     allGenRequestsUrl
 } from '../url'
 import {
@@ -15,10 +16,16 @@ import {
 } from '../requests'
 import { ClientScript } from '../../ts/clientScripts'
 import { ManagedCode } from '../../ts/code'
+import {
+    ShellScript,
+    ShellScriptVersion,
+    cleanShellScriptVersionFromJson
+} from '../../ts/shell'
 
 export interface TAllGenericRequestsInput {
     orgId: number
-    scriptsOnly: boolean
+    scriptsOnly?: boolean
+    shellOnly?: boolean
 }
 
 export interface TAllGenericRequestsOutput {
@@ -27,8 +34,10 @@ export interface TAllGenericRequestsOutput {
 
 export function allGenericRequests(inp : TAllGenericRequestsInput) : Promise<TAllGenericRequestsOutput> {
     let url : string
-    if (inp.scriptsOnly) {
+    if (!!inp.scriptsOnly) {
         url = createOrgApiv2Url(inp.orgId, allGenRequestScriptsUrl)
+    } else if (!!inp.shellOnly) {
+        url = createOrgApiv2Url(inp.orgId, allGenRequestShellUrl)
     } else {
         throw "Invalid parameters for retrieving generic requests."
     }
@@ -66,6 +75,29 @@ export function getGenericRequestScript(inp : TGetGenericRequestScriptInput) : P
     })
 }
 
+export interface TGetGenericRequestShellInput {
+    requestId: number
+    orgId: number
+}
+
+export interface TGetGenericRequestShellOutput {
+    data: {
+        Shell: ShellScript
+        Version: ShellScriptVersion
+        VersionNum : number
+    }
+}
+
+export function getGenericRequestShell(inp : TGetGenericRequestShellInput) : Promise<TGetGenericRequestShellOutput> {
+    return axios.get(
+        createOrgApiv2Url(inp.orgId, allGenRequestShellUrl) + `/${inp.requestId}?` + qs.stringify(inp),
+        getAPIRequestConfig()).then(
+    (resp : TGetGenericRequestShellOutput) => {
+        cleanShellScriptVersionFromJson(resp.data.Version)
+        return resp
+    })
+}
+
 export interface TGetGenericRequestInput {
     requestId: number
     orgId: number
@@ -98,7 +130,10 @@ export interface TEditGenericRequestInput {
 }
 
 export function editGenericRequest(inp : TEditGenericRequestInput) : Promise<void> {
-    return putFormJson<void>(allGenRequestsUrl + `/${inp.requestId}?`, inp,  getAPIRequestConfig())
+    return putFormJson<void>(
+        createOrgApiv2Url(inp.orgId, allGenRequestsUrl + `/${inp.requestId}?`),
+        inp,
+        getAPIRequestConfig())
 }
 
 export interface TApproveDenyRequestInput {
@@ -113,7 +148,20 @@ export interface TApproveDenyRequestOutput {
 }
 
 export function approveDenyScriptRequest(inp : TApproveDenyRequestInput) : Promise<TApproveDenyRequestOutput> {
-    return postFormJson<TApproveDenyRequestOutput>(allGenRequestScriptsUrl + `/${inp.requestId}/approval`, inp,  getAPIRequestConfig()).then((resp : TApproveDenyRequestOutput) => {
+    return postFormJson<TApproveDenyRequestOutput>(
+        createOrgApiv2Url(inp.orgId, allGenRequestScriptsUrl + `/${inp.requestId}/approval`),
+        inp,  getAPIRequestConfig())
+    .then((resp : TApproveDenyRequestOutput) => {
+        cleanGenericApprovalFromJson(resp.data)
+        return resp
+    })
+}
+
+export function approveDenyShellRequest(inp : TApproveDenyRequestInput) : Promise<TApproveDenyRequestOutput> {
+    return postFormJson<TApproveDenyRequestOutput>(
+        createOrgApiv2Url(inp.orgId, allGenRequestShellUrl + `/${inp.requestId}/approval`),
+        inp,  getAPIRequestConfig())
+    .then((resp : TApproveDenyRequestOutput) => {
         cleanGenericApprovalFromJson(resp.data)
         return resp
     })
@@ -129,7 +177,10 @@ export interface TGetApprovalOutput {
 }
 
 export function getGenericApproval(inp : TGetApprovalInput) : Promise<TGetApprovalOutput> {
-    return axios.get(allGenRequestsUrl + `/${inp.requestId}/approval?` + qs.stringify(inp),  getAPIRequestConfig()).then((resp : TGetApprovalOutput) => {
+    return axios.get(
+        createOrgApiv2Url(inp.orgId, allGenRequestsUrl + `/${inp.requestId}/approval?` + qs.stringify(inp)),
+        getAPIRequestConfig())
+    .then((resp : TGetApprovalOutput) => {
         if (!!resp.data) {
             cleanGenericApprovalFromJson(resp.data)
         }

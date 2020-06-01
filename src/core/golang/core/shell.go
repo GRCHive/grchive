@@ -22,3 +22,21 @@ type ShellScriptVersion struct {
 	UploadUserId  int64     `db:"upload_user_id"`
 	GcsGeneration int64     `db:"gcs_generation"`
 }
+
+type ShellScriptRun struct {
+	Id              int64     `db:id"`
+	ScriptVersionId int64     `db:"script_version_id"`
+	RunUserId       int64     `db:"run_user_id"`
+	CreateTime      time.Time `db:"create_time"`
+	RunTime         NullTime  `db:"run_time"`
+	EndTime         NullTime  `db:"end_time"`
+}
+
+type ShellScriptRunPerServer struct {
+	RunId        int64      `db:"run_id"`
+	OrgId        int32      `db:"org_id"`
+	ServerId     int64      `db:"server_id"`
+	EncryptedLog NullString `db:"encrypted_log"`
+	RunTime      NullTime   `db:"run_time"`
+	EndTime      NullTime   `db:"end_time"`
+}

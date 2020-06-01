@@ -21,6 +21,11 @@
                 <v-tab-item>
                     <dashboard-script-run-request-list class="ma-4"></dashboard-script-run-request-list>
                 </v-tab-item>
+
+                <v-tab>Shell Runs</v-tab>
+                <v-tab-item>
+                    <dashboard-shell-script-run-request-list class="ma-4"></dashboard-shell-script-run-request-list>
+                </v-tab-item>
             </v-tabs>
         </v-content>
     </div>
@@ -33,6 +38,7 @@ import DashboardHomePageNavBar from '../../components/dashboard/DashboardHomePag
 import DashboardDocRequestList from '../../components/dashboard/DashboardDocRequestList.vue'
 import DashboardSqlRequestList from  '../../components/dashboard/DashboardSqlRequestList.vue'
 import DashboardScriptRunRequestList from '../../components/dashboard/DashboardScriptRunRequestList.vue'
+import DashboardShellScriptRunRequestList from '../../components/dashboard/DashboardShellScriptRunRequestList.vue'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -41,7 +47,8 @@ export default Vue.extend({
         DashboardHomePageNavBar,
         DashboardDocRequestList,
         DashboardSqlRequestList,
-        DashboardScriptRunRequestList
+        DashboardScriptRunRequestList,
+        DashboardShellScriptRunRequestList,
     },
 })
 </script>

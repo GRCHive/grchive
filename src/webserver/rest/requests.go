@@ -42,6 +42,27 @@ func allGenericRequestsScripts(w http.ResponseWriter, r *http.Request) {
 	jsonWriter.Encode(reqs)
 }
 
+func allGenericRequestsShellScripts(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	org, err := webcore.FindOrganizationInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to find org in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	reqs, err := database.GetGenericRequestsForShellScriptsInOrg(org.Id)
+	if err != nil {
+		core.Warning("Failed to get requests: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(reqs)
+}
+
 type GetGenericRequestInputs struct {
 	OrgId int32 `webcore:"orgId"`
 }
@@ -162,6 +183,65 @@ func getGenericRequestScript(w http.ResponseWriter, r *http.Request) {
 		core.Warning("Failed to get request run parameters: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+
+	jsonWriter.Encode(ret)
+}
+
+func getGenericRequestShell(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	request, err := webcore.FindGenericRequestInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to get request from context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := webcore.FindOrganizationInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to get organization from context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	ret := struct {
+		Shell      *core.ShellScript
+		Version    *core.ShellScriptVersion
+		VersionNum int32
+	}{}
+
+	ret.Shell, err = database.GetShellScriptFromRequest(request.Id)
+	if err != nil {
+		core.Warning("Failed to get shell script: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	ret.Version, err = database.GetShellScriptVersionFromRequest(request.Id)
+	if err != nil {
+		core.Warning("Failed to get shell script version: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Need to get all script versions so we can precisely know what index the returned
+	// shell script version is - this is so we can give an accurate version number. This
+	// might get slow if the number of versions increase...
+	// Doing a O(n) search just because i'm assuming the number of versions will stay somewhat low.
+	allVersions, err := database.AllShellScriptVersions(ret.Shell.Id, org.Id)
+	if err != nil {
+		core.Warning("Failed to get all script versions: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	for idx, v := range allVersions {
+		if v.Id == ret.Version.Id {
+			ret.VersionNum = int32(len(allVersions) - idx)
+			break
+		}
 	}
 
 	jsonWriter.Encode(ret)
@@ -336,6 +416,54 @@ func approveDenyScriptRunRequest(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+	}
+
+	jsonWriter.Encode(approval)
+}
+
+func approveDenyShellRunRequest(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := ApproveDenyGenericRequestInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	request, err := webcore.FindGenericRequestInContext(r.Context())
+	if err != nil {
+		core.Warning("Can't find request in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.FindRoleInContext(r.Context())
+	if err != nil {
+		core.Warning("Can't find role in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	approval := core.GenericApproval{
+		RequestId:       request.Id,
+		ResponseTime:    time.Now().UTC(),
+		ResponderUserId: role.UserId,
+		Response:        inputs.Approve,
+		Reason:          inputs.Reason,
+	}
+
+	err = database.InsertGenericApproval(&approval, role)
+	if err != nil {
+		core.Warning("Failed to insert generic approval: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if approval.Response {
+		// TODO:
 	}
 
 	jsonWriter.Encode(approval)

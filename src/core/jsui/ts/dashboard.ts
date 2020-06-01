@@ -47,6 +47,7 @@ const DashboardOrgSingleBuildLog = () => import (/* webpackChunkName: "Dashboard
 const DashboardOrgSingleRunLog = () => import (/* webpackChunkName: "DashboardOrgSingleRunLog" */ '../vue/pages/dashboard/DashboardOrgSingleRunLog.vue')
 const DashboardOrgScriptSchedule = () => import (/* webpackChunkName: "DashboardOrgScriptSchedule" */ '../vue/pages/dashboard/DashboardOrgScriptSchedule.vue')
 const DashboardOrgSingleScriptRequest = () => import (/* webpackChunkName: "DashboardOrgSingleScriptRequest" */ '../vue/pages/dashboard/DashboardOrgSingleScriptRequest.vue')
+const DashboardOrgSingleShellRequest = () => import (/* webpackChunkName: "DashboardOrgSingleShellRequest" */ '../vue/pages/dashboard/DashboardOrgSingleShellRequest.vue')
 const DashboardOrgShells = () => import (/* webpackChunkName: "DashboardOrgShells" */ '../vue/pages/dashboard/DashboardOrgShells.vue')
 const DashboardOrgSingleShell = () => import (/* webpackChunkName: "DashboardOrgSingleShell" */ '../vue/pages/dashboard/DashboardOrgSingleShell.vue')
 const SnackBar = () => import( /* webpackChunkName: "SnackBar" */ '../vue/components/SnackBar.vue')
@@ -112,6 +113,7 @@ function mountApp(inData : PageParamsStoreState) {
             DashboardOrgSingleRunLog,
             DashboardOrgScriptSchedule,
             DashboardOrgSingleScriptRequest,
+            DashboardOrgSingleShellRequest,
             DashboardOrgShells,
             DashboardOrgSingleShell,
             SnackBar,

@@ -11,6 +11,7 @@ import {
     allShellScriptsUrl,
     singleShellScriptUrl,
     singleShellScriptVersionUrl,
+    singleShellScriptVersionRunUrl,
 } from '../url'
 import {
     ShellScript,
@@ -152,5 +153,27 @@ export function newShellScriptVersion(inp : TNewShellScriptVersionInput) : Promi
         singleShellScriptUrl(inp.orgId, inp.shellId) + '/version',
         inp,
         getAPIRequestConfig(),
+    )
+}
+
+export interface TRequestRunShellScriptInput {
+    orgId: number
+    shellId: number
+    versionId : number
+    servers : number[]
+}
+
+export interface TRequestRunShellScriptOutput {
+    data: {
+        RunId : number
+        RequestId?: number
+    }
+}
+
+export function requestRunShellScript(inp : TRequestRunShellScriptInput) : Promise<TRequestRunShellScriptOutput> {
+    return postFormJson(
+        singleShellScriptVersionRunUrl(inp.orgId, inp.shellId, inp.versionId),
+        inp,
+        getAPIRequestConfig()
     )
 }

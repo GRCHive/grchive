@@ -370,3 +370,113 @@ func newShellVersion(w http.ResponseWriter, r *http.Request) {
 
 	jsonWriter.Encode(newVersion)
 }
+
+type RunShellVersionInputs struct {
+	Servers []int64 `json:"servers"`
+}
+
+func runShellVersion(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := RunShellVersionInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	script, err := webcore.FindShellScriptInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to get shell script in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	version, err := webcore.FindShellScriptVersionInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to get shell script version in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.FindRoleInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to get shell script version in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	org, err := webcore.FindOrganizationInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed to get shell script version in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// First create the shell run to store the information
+	// about on what servers we want to run this shell script.
+	// Next, create a corresponding request for approval. This shell script
+	// will only be run upon approval. We do this all in a single transaction
+	// to make sure we don't have a dangling shell script run that can't be
+	// approved and vice versa.
+	run := core.ShellScriptRun{
+		ScriptVersionId: version.Id,
+		RunUserId:       role.UserId,
+		CreateTime:      time.Now().UTC(),
+	}
+
+	request := core.GenericRequest{
+		OrgId:        org.Id,
+		UploadTime:   time.Now().UTC(),
+		UploadUserId: role.UserId,
+		Name:         fmt.Sprintf("Shell Script Run Request: %s", script.Name),
+	}
+
+	result := struct {
+		RunId     int64
+		RequestId core.NullInt64
+	}{}
+
+	tx := database.CreateTx()
+	err = database.WrapTx(tx, func() error {
+		err := database.NewShellRunWithTx(tx, &run)
+		if err != nil {
+			return err
+		}
+		result.RunId = run.Id
+		return nil
+	}, func() error {
+		for _, sid := range inputs.Servers {
+			serverRun := core.ShellScriptRunPerServer{
+				RunId:    run.Id,
+				OrgId:    org.Id,
+				ServerId: sid,
+			}
+
+			err := database.NewShellServerRunWithTx(tx, &serverRun)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}, func() error {
+		err := database.CreateGenericRequestWithTx(tx, &request)
+		if err != nil {
+			return err
+		}
+		result.RequestId = core.CreateNullInt64(request.Id)
+		return nil
+	}, func() error {
+		return database.LinkShellRunToRequestWithTx(tx, result.RunId, result.RequestId.NullInt64.Int64)
+	})
+
+	if err != nil {
+		core.Warning("Failed to create new shell run and approval: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(result)
+}
