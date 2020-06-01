@@ -323,3 +323,17 @@ func GetShellScriptVersionFromRequest(requestId int64) (*core.ShellScriptVersion
 	`, requestId)
 	return &shell, err
 }
+
+func GetShellScriptServersFromRequest(requestId int64) ([]*core.Server, error) {
+	servers := make([]*core.Server, 0)
+	err := dbConn.Select(&servers, `
+		SELECT srv.*
+		FROM request_to_shell_run_link AS srl
+		INNER JOIN shell_script_run_servers AS ssrs
+			ON ssrs.run_id = srl.run_id
+		INNER JOIN infrastructure_servers AS srv
+			ON srv.id = ssrs.server_id
+		WHERE srl.request_id = $1
+	`, requestId)
+	return servers, err
+}

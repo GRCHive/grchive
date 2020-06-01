@@ -210,6 +210,7 @@ func getGenericRequestShell(w http.ResponseWriter, r *http.Request) {
 		Shell      *core.ShellScript
 		Version    *core.ShellScriptVersion
 		VersionNum int32
+		Servers    []*core.Server
 	}{}
 
 	ret.Shell, err = database.GetShellScriptFromRequest(request.Id)
@@ -222,6 +223,13 @@ func getGenericRequestShell(w http.ResponseWriter, r *http.Request) {
 	ret.Version, err = database.GetShellScriptVersionFromRequest(request.Id)
 	if err != nil {
 		core.Warning("Failed to get shell script version: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	ret.Servers, err = database.GetShellScriptServersFromRequest(request.Id)
+	if err != nil {
+		core.Warning("Failed to get shell script servers: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

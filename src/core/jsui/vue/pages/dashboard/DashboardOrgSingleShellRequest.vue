@@ -184,6 +184,14 @@
                     >
                     </generic-code-editor>
                 </v-tab-item>
+
+                <v-tab>Servers</v-tab>
+                <v-tab-item>
+                    <server-table
+                        :resources="relevantServers"
+                    >
+                    </server-table>
+                </v-tab-item>
             </v-tabs>
         </v-content>
     </div>
@@ -218,6 +226,7 @@ import {
     ShellTypeToCodeMirror,
     ShellTypes,
 } from '../../../ts/shell'
+import { Server } from '../../../ts/infrastructure'
 import { GenericRequest, GenericApproval } from '../../../ts/requests'
 import GenericDeleteConfirmationForm from '../../components/dashboard/GenericDeleteConfirmationForm.vue'
 import CreateNewGenericRequestForm from '../../components/dashboard/CreateNewGenericRequestForm.vue'
@@ -229,6 +238,7 @@ import {
 } from '../../../ts/event'
 import CommentManager from '../../generic/CommentManager.vue'
 import GenericCodeEditor from '../../generic/code/GenericCodeEditor.vue'
+import ServerTable from '../../generic/ServerTable.vue'
 
 @Component({
     components: {
@@ -239,6 +249,7 @@ import GenericCodeEditor from '../../generic/code/GenericCodeEditor.vue'
         GenericApprovalDisplay,
         CommentManager,
         GenericCodeEditor,
+        ServerTable
     }
 })
 export default class DashboardOrgSingleShellRequest extends Vue {
@@ -257,6 +268,7 @@ export default class DashboardOrgSingleShellRequest extends Vue {
     shell : ShellScript | null = null
     shellVersion : ShellScriptVersion | null = null
     version : number = -1
+    relevantServers: Server[] = []
 
     currentScriptText : string | null = null
 
@@ -304,6 +316,7 @@ export default class DashboardOrgSingleShellRequest extends Vue {
             this.shell = resp.data.Shell
             this.shellVersion = resp.data.Version
             this.version = resp.data.VersionNum
+            this.relevantServers = resp.data.Servers
 
             getShellScriptVersion({
                 orgId: PageParamsStore.state.organization!.Id,

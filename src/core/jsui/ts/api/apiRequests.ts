@@ -21,6 +21,7 @@ import {
     ShellScriptVersion,
     cleanShellScriptVersionFromJson
 } from '../../ts/shell'
+import { Server } from '../../ts/infrastructure'
 
 export interface TAllGenericRequestsInput {
     orgId: number
@@ -85,6 +86,7 @@ export interface TGetGenericRequestShellOutput {
         Shell: ShellScript
         Version: ShellScriptVersion
         VersionNum : number
+        Servers: Server[]
     }
 }
 
