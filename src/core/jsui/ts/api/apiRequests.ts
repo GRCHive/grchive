@@ -196,5 +196,7 @@ export interface TDeleteGenericRequestInput {
 }
 
 export function deleteGenericRequest(inp : TDeleteGenericRequestInput) : Promise<void> {
-    return deleteFormJson<void>(allGenRequestsUrl + `/${inp.requestId}`, inp, getAPIRequestConfig())
+    return deleteFormJson<void>(
+        createOrgApiv2Url(inp.orgId, allGenRequestsUrl + `/${inp.requestId}`),
+        inp, getAPIRequestConfig())
 }

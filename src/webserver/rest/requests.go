@@ -320,7 +320,7 @@ func deleteGenericRequest(w http.ResponseWriter, r *http.Request) {
 
 	err = database.DeleteGenericRequest(request.Id, inputs.OrgId, role)
 	if err != nil {
-		core.Warning("Failed to delete generic request")
+		core.Warning("Failed to delete generic request: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -471,7 +471,20 @@ func approveDenyShellRunRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if approval.Response {
-		// TODO:
+		runId, err := database.GetShellRunIdLinkedToGenericRequest(request.Id)
+		if err != nil {
+			core.Warning("Failed to get run id linked to request: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
+			Exchange: webcore.DEFAULT_EXCHANGE,
+			Queue:    webcore.SHELL_RUNNER_QUEUE,
+			Body: webcore.ShellRunnerMessage{
+				RunId: runId,
+			},
+		})
 	}
 
 	jsonWriter.Encode(approval)

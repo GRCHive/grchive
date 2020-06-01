@@ -124,6 +124,18 @@ func GetScriptRunIdLinkedToGenericRequest(requestId int64) (int64, error) {
 	return runId, err
 }
 
+func GetShellRunIdLinkedToGenericRequest(requestId int64) (int64, error) {
+	runId := int64(0)
+	err := dbConn.Get(&runId, `
+		SELECT run.run_id
+		FROM generic_requests AS req
+		LEFT JOIN request_to_shell_run_link AS run
+			ON run.request_id = req.id
+		WHERE req.id = $1
+	`, requestId)
+	return runId, err
+}
+
 func GetTaskIdLinkedToGenericRequest(requestId int64) (int64, error) {
 	runId := int64(0)
 	err := dbConn.Get(&runId, `
