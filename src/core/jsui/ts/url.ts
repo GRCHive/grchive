@@ -453,6 +453,12 @@ export const allGenRequestScriptsUrl : string = "requests/scripts"
 export const allGenRequestShellUrl : string = "requests/shell"
 export const allGenRequestsUrl : string = "requests"
 
+export const allShellScriptRunsUrl : string = "shell/run"
+
+export function singleShellRunUrl(orgId: number, runId: number) : string {
+    return createOrgApiv2Url(orgId, `${allShellScriptRunsUrl}/${runId}`)
+}
+
 export const allShellScriptsUrl : string = "shell"
 export function singleShellScriptUrl(orgId : number, id : number) : string {
     return createOrgApiv2Url(orgId, `${allShellScriptsUrl}/${id}`)

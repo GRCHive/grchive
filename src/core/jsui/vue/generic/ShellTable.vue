@@ -222,7 +222,6 @@ export default class ShellTable extends ResourceTableProps {
                     tableItems: this.tableItems,
                     resourceName: "shell scripts",
                     showExpand: true,
-                    value: this.value.map((ele : any) => ele.File),
                 },
                 on: {
                     input: (items : any[]) => this.$emit('input', items),

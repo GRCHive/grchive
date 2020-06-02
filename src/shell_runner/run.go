@@ -33,7 +33,8 @@ func genericRunSshStdin(cmd *exec.Cmd, script string, t *PerServerTracker) error
 		outputBuffer.WriteString("\nFailed to run: " + err.Error())
 	}
 
-	return t.MarkSuccessFailure(outputBuffer.String(), err != nil)
+	t.MarkSuccessFailure(outputBuffer.String(), err == nil)
+	return err
 }
 
 func runBashScriptSshPassword(

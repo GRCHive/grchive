@@ -29,3 +29,43 @@ export interface ShellScriptVersion {
 export function cleanShellScriptVersionFromJson(v : ShellScriptVersion) {
     v.UploadTime = new Date(v.UploadTime)
 }
+
+export interface ShellScriptRun {
+    Id: number
+    ScriptVersionId: number
+    RunUserId: number
+    CreateTime: Date
+    RunTime: Date | null
+    EndTime: Date | null
+}
+
+export function cleanShellScriptRunFromJson(r : ShellScriptRun) {
+    r.CreateTime = new Date(r.CreateTime)
+    if (!!r.RunTime) {
+        r.RunTime = new Date(r.RunTime)
+    }
+
+    if (!!r.EndTime) {
+        r.EndTime = new Date(r.EndTime)
+    }
+}
+
+export interface ShellScriptRunPerServer {
+    RunId: number
+    OrgId: number
+    ServerId: number
+    Log: string | null
+    RunTime: Date | null
+    EndTime: Date | null
+    Success: boolean
+}
+
+export function cleanShellScriptRunPerServerFromJson(r : ShellScriptRunPerServer) {
+    if (!!r.RunTime) {
+        r.RunTime = new Date(r.RunTime)
+    }
+
+    if (!!r.EndTime) {
+        r.EndTime = new Date(r.EndTime)
+    }
+}

@@ -436,6 +436,14 @@ func CreateObtainResourceInContextMiddleware(queryId string) mux.MiddlewareFunc 
 					return
 				}
 				ctx = context.WithValue(r.Context(), ServerConnectionSshKeyContextKey, conn)
+			case core.DashboardOrgShellRunQueryId:
+				run, err := database.GetShellRun(queryInt)
+				if err != nil {
+					core.Warning("Failed to get shell script run: " + core.ErrorString(err))
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				ctx = context.WithValue(r.Context(), ShellScriptRunContextKey, run)
 			default:
 				w.WriteHeader(http.StatusBadRequest)
 				return

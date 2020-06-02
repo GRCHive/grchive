@@ -19,6 +19,7 @@ const (
 	GenericRequestContextKey              = "GENREQ"
 	RoleContextKey                        = "ROLE"
 	ShellScriptContextKey                 = "SHELLSCRIPT"
+	ShellScriptRunContextKey              = "SHELLSCRIPTRUN"
 	ShellScriptVersionContextKey          = "SHELLSCRIPTVERSION"
 	ServerContextKey                      = "SERVER"
 	ServerConnectionSshPasswordContextKey = "SERVERCONNECTIONSSHPASSWORD"
@@ -145,6 +146,14 @@ func FindGenericRequestInContext(ctx context.Context) (*core.GenericRequest, err
 	resource, ok := ctx.Value(GenericRequestContextKey).(*core.GenericRequest)
 	if !ok || resource == nil {
 		return nil, errors.New("Failed to find GenericRequest in context.")
+	}
+	return resource, nil
+}
+
+func FindShellScriptRunInContext(ctx context.Context) (*core.ShellScriptRun, error) {
+	resource, ok := ctx.Value(ShellScriptRunContextKey).(*core.ShellScriptRun)
+	if !ok || resource == nil {
+		return nil, errors.New("Failed to find ShellScriptRun in context.")
 	}
 	return resource, nil
 }

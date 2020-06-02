@@ -128,6 +128,27 @@ func registerAPIv2ShellPaths(r *mux.Router) {
 		),
 	).Methods("POST")
 
+	sr := s.PathPrefix("/run").Subrouter()
+	sr.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			allShellRuns,
+			core.ResourceAccessBundle{core.ResourceShellRun, core.AccessView},
+		),
+	).Methods("GET")
+
+	srr := sr.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgShellRunQueryId)).Subrouter()
+	srr.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgShellRunQueryId))
+
+	srr.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			getShellRun,
+			core.ResourceAccessBundle{core.ResourceShellRun, core.AccessView},
+			core.ResourceAccessBundle{core.ResourceShell, core.AccessView},
+		),
+	).Methods("GET")
+
 	// Individual shell scripts
 	ss := s.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgShellScriptQueryId)).Subrouter()
 	ss.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgShellScriptQueryId))

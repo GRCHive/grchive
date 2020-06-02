@@ -84,3 +84,10 @@ export function cleanTimeRangeFromJson(r : TimeRange) {
     r.Start = new Date(r.Start)
     r.End = new Date(r.End)
 }
+
+export function sortDate(a : Date | null, b : Date | null) : number { 
+    if (a == null || b == null) {
+        return 0
+    }
+    return a.getTime() - b.getTime()
+}

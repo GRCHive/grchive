@@ -51,6 +51,16 @@ func GetShellRun(runId int64) (*core.ShellScriptRun, error) {
 	return &run, err
 }
 
+func GetServerShellRuns(runId int64) ([]*core.ShellScriptRunPerServer, error) {
+	run := []*core.ShellScriptRunPerServer{}
+	err := dbConn.Select(&run, `
+		SELECT *
+		FROM shell_script_run_servers
+		WHERE run_id = $1
+	`, runId)
+	return run, err
+}
+
 func GetShellRunForServer(runId int64, serverId int64) (*core.ShellScriptRunPerServer, error) {
 	run := core.ShellScriptRunPerServer{}
 	err := dbConn.Get(&run, `
@@ -99,4 +109,30 @@ func MarkShellScriptRunForServerFinishWithTx(tx *sqlx.Tx, runId int64, serverId 
 			AND server_id = $2
 	`, runId, serverId, tm, success, log)
 	return err
+}
+
+func AllShellRunsForServer(serverId int64) ([]*core.ShellScriptRun, error) {
+	runs := make([]*core.ShellScriptRun, 0)
+	err := dbConn.Select(&runs, `
+		SELECT DISTINCT(ssr.*)
+		FROM shell_script_runs AS ssr
+		INNER JOIN shell_script_run_servers AS ssrs
+			ON ssrs.run_id = ssr.id
+		WHERE ssrs.serer_id = $1
+		ORDER BY ssr.id DESC
+	`, serverId)
+	return runs, err
+}
+
+func AllShellRunsForShellScript(scriptId int64) ([]*core.ShellScriptRun, error) {
+	runs := make([]*core.ShellScriptRun, 0)
+	err := dbConn.Select(&runs, `
+		SELECT ssr.*
+		FROM shell_script_runs AS ssr
+		INNER JOIN shell_script_versions AS ssv
+			ON ssv.id = ssr.script_version_id
+		WHERE ssv.shell_id = $1
+		ORDER BY ssr.id DESC
+	`, scriptId)
+	return runs, err
 }

@@ -11,7 +11,6 @@ import {
     allShellScriptsUrl,
     singleShellScriptUrl,
     singleShellScriptVersionUrl,
-    singleShellScriptVersionRunUrl,
 } from '../url'
 import {
     ShellScript,
@@ -149,31 +148,13 @@ export interface TNewShellScriptVersionOutput {
 }
 
 export function newShellScriptVersion(inp : TNewShellScriptVersionInput) : Promise<TNewShellScriptVersionOutput> {
-    return postFormJson(
+    return postFormJson<TNewShellScriptVersionOutput>(
         singleShellScriptUrl(inp.orgId, inp.shellId) + '/version',
         inp,
         getAPIRequestConfig(),
-    )
+    ).then((resp : TNewShellScriptVersionOutput) => {
+        cleanShellScriptVersionFromJson(resp.data)
+        return resp
+    })
 }
 
-export interface TRequestRunShellScriptInput {
-    orgId: number
-    shellId: number
-    versionId : number
-    servers : number[]
-}
-
-export interface TRequestRunShellScriptOutput {
-    data: {
-        RunId : number
-        RequestId?: number
-    }
-}
-
-export function requestRunShellScript(inp : TRequestRunShellScriptInput) : Promise<TRequestRunShellScriptOutput> {
-    return postFormJson(
-        singleShellScriptVersionRunUrl(inp.orgId, inp.shellId, inp.versionId),
-        inp,
-        getAPIRequestConfig()
-    )
-}

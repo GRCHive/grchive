@@ -480,3 +480,133 @@ func runShellVersion(w http.ResponseWriter, r *http.Request) {
 
 	jsonWriter.Encode(result)
 }
+
+type AllShellRunsInputs struct {
+	ServerId core.NullInt64 `webcore:"serverId,optional"`
+	ShellId  core.NullInt64 `webcore:"shellId,optional"`
+}
+
+func allShellRuns(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := AllShellRunsInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var runs []*core.ShellScriptRun
+
+	if inputs.ServerId.NullInt64.Valid {
+		runs, err = database.AllShellRunsForServer(inputs.ServerId.NullInt64.Int64)
+	} else if inputs.ShellId.NullInt64.Valid {
+		runs, err = database.AllShellRunsForShellScript(inputs.ShellId.NullInt64.Int64)
+	} else {
+		core.Warning("Invalid inputs for all shell runs.")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if err != nil {
+		core.Warning("Failed to get shell runs: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(runs)
+}
+
+type GetShellRunInputs struct {
+	IncludeLogs bool `webcore:"includeLogs"`
+}
+
+func getShellRun(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	inputs := GetShellRunInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	ret := struct {
+		Run        *core.ShellScriptRun
+		Script     *core.ShellScript
+		Version    *core.ShellScriptVersion
+		VersionNum int
+		ServerRuns []*core.ShellScriptRunPerServer
+	}{}
+
+	ctx := r.Context()
+
+	org, err := webcore.FindOrganizationInContext(ctx)
+	if err != nil {
+		core.Warning("Can't find organization in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	ret.Run, err = webcore.FindShellScriptRunInContext(ctx)
+	if err != nil {
+		core.Warning("Can't find shell run in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	ret.Version, err = database.GetShellScriptVersionFromId(ret.Run.ScriptVersionId)
+	if err != nil {
+		core.Warning("Can't get shell script version: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	ret.Script, err = database.GetShellScriptFromId(ret.Version.ShellId)
+	if err != nil {
+		core.Warning("Can't get shell script: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	allVersions, err := database.AllShellScriptVersions(ret.Script.Id, org.Id)
+	if err != nil {
+		core.Warning("Failed to get all script versions: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	for idx, v := range allVersions {
+		if v.Id == ret.Version.Id {
+			ret.VersionNum = len(allVersions) - idx
+			break
+		}
+	}
+
+	ret.ServerRuns, err = database.GetServerShellRuns(ret.Run.Id)
+	if err != nil {
+		core.Warning("Failed to get server shell runs: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	for _, sr := range ret.ServerRuns {
+		if inputs.IncludeLogs {
+			decryptedLogs, err := vault.TransitDecrypt(core.EnvConfig.LogEncryptionPath, []byte(sr.EncryptedLog.NullString.String))
+			if err != nil {
+				core.Warning("Failed to decrypt server logs: " + err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			sr.EncryptedLog = core.CreateNullString(string(decryptedLogs))
+		} else {
+			sr.EncryptedLog = core.NullString{}
+		}
+	}
+
+	jsonWriter.Encode(ret)
+}
