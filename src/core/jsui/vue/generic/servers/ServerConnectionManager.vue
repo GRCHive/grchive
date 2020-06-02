@@ -49,7 +49,7 @@
                             @click="showHideNewSSHPassword = true"
                             :disabled="!!sshPasswordConn"
                         >
-                            <v-list-item-title>SSH (Password)</v-list-item-title>
+                            <v-list-item-title>Basic</v-list-item-title>
                         </v-list-item>
                         <v-list-item
                             @click="showHideNewSSHKey = true"
@@ -65,7 +65,7 @@
             <v-tabs>
                 <template v-if="!!sshPasswordConn">
                     <v-tab>
-                        SSH (Password)
+                        Basic
                         <v-dialog v-model="showHideDeleteSshPassword"
                                   persistent
                                   max-width="40%"
@@ -87,7 +87,7 @@
 
                             <generic-delete-confirmation-form
                                 item-name="server connection information"
-                                :items-to-delete="[`SSH (Password)`]"
+                                :items-to-delete="[`Basic`]"
                                 :use-global-deletion="false"
                                 @do-cancel="showHideDeleteSshPassword = false"
                                 @do-delete="onDeleteSshPasswordConnection"

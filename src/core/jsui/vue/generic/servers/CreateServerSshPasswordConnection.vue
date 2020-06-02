@@ -3,7 +3,7 @@
 <v-card :flat="hideHeader">
     <template v-if="!hideHeader">
         <v-card-title>
-            {{ editMode ? "Edit" : "New" }} SSH Connection (Password)
+            {{ editMode ? "Edit" : "New" }} Basic Connection
         </v-card-title>
         <v-divider></v-divider>
     </template>
