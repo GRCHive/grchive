@@ -214,7 +214,7 @@ import {
 import {
     requestRunShellScript, TRequestRunShellScriptOutput
 } from '../../../ts/api/apiShellRun'
-import { contactUsUrl, createOrgShellUrl } from '../../../ts/url'
+import { contactUsUrl, createOrgShellUrl, createSingleShellRequestUrl } from '../../../ts/url'
 import {
     ShellTypes,
     ShellScript,
@@ -426,12 +426,15 @@ export default class DashboardOrgSingleShell extends Vue {
             this.serversToRun = []
 
             // @ts-ignore
-            //this.$root.$refs.snackbar.showSnackBar(
-            //    "Successfully submitted your run request.",
-            //    false,
-            //    "View",
-            //    contactUsUrl,
-            //    true);
+            this.$root.$refs.snackbar.showSnackBar(
+                "Successfully submitted your run request.",
+                true,
+                "View",
+                createSingleShellRequestUrl(
+                    PageParamsStore.state.organization!.OktaGroupName,
+                    resp.data.RequestId!,
+                ),
+                false);
 
         }).catch((err: any) => {
             // @ts-ignore

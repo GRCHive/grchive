@@ -595,7 +595,7 @@ func getShellRun(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, sr := range ret.ServerRuns {
-		if inputs.IncludeLogs {
+		if inputs.IncludeLogs && sr.EncryptedLog.NullString.Valid {
 			decryptedLogs, err := vault.TransitDecrypt(core.EnvConfig.LogEncryptionPath, []byte(sr.EncryptedLog.NullString.String))
 			if err != nil {
 				core.Warning("Failed to decrypt server logs: " + err.Error())
