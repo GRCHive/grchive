@@ -110,7 +110,7 @@ func newShell(w http.ResponseWriter, r *http.Request) {
 
 	script := core.ShellScript{
 		OrgId:       org.Id,
-		TypeId:      inputs.ShellType,
+		TypeId:      core.ShellTypeId(inputs.ShellType),
 		Name:        inputs.Name,
 		Description: inputs.Description,
 	}

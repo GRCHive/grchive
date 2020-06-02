@@ -36,6 +36,11 @@ type ServerSSHKeyConnection struct {
 	PrivateKey string `db:"private_key"`
 }
 
+type ServerConnectionOptions struct {
+	SshPassword *ServerSSHPasswordConnection
+	SshKey      *ServerSSHKeyConnection
+}
+
 func (c ServerSSHPasswordConnection) Generic() ServerSSHGenericConnection {
 	return ServerSSHGenericConnection{
 		Id:       c.Id,

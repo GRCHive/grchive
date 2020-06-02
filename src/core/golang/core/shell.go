@@ -4,14 +4,21 @@ import (
 	"time"
 )
 
+type ShellTypeId int32
+
+const (
+	BashShellId  ShellTypeId = 1
+	PowerShellId             = 2
+)
+
 type ShellScript struct {
-	Id          int64  `db:"id"`
-	OrgId       int32  `db:"org_id"`
-	TypeId      int32  `db:"type_id"`
-	Name        string `db:"name"`
-	Description string `db:"description"`
-	BucketId    string `db:"bucket_id"`
-	StorageId   string `db:"storage_id"`
+	Id          int64       `db:"id"`
+	OrgId       int32       `db:"org_id"`
+	TypeId      ShellTypeId `db:"type_id"`
+	Name        string      `db:"name"`
+	Description string      `db:"description"`
+	BucketId    string      `db:"bucket_id"`
+	StorageId   string      `db:"storage_id"`
 }
 
 type ShellScriptVersion struct {
@@ -24,7 +31,7 @@ type ShellScriptVersion struct {
 }
 
 type ShellScriptRun struct {
-	Id              int64     `db:id"`
+	Id              int64     `db:"id"`
 	ScriptVersionId int64     `db:"script_version_id"`
 	RunUserId       int64     `db:"run_user_id"`
 	CreateTime      time.Time `db:"create_time"`
@@ -39,4 +46,5 @@ type ShellScriptRunPerServer struct {
 	EncryptedLog NullString `db:"encrypted_log"`
 	RunTime      NullTime   `db:"run_time"`
 	EndTime      NullTime   `db:"end_time"`
+	Success      bool       `db:"success"`
 }
