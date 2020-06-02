@@ -118,7 +118,7 @@ func AllShellRunsForServer(serverId int64) ([]*core.ShellScriptRun, error) {
 		FROM shell_script_runs AS ssr
 		INNER JOIN shell_script_run_servers AS ssrs
 			ON ssrs.run_id = ssr.id
-		WHERE ssrs.serer_id = $1
+		WHERE ssrs.server_id = $1
 		ORDER BY ssr.id DESC
 	`, serverId)
 	return runs, err

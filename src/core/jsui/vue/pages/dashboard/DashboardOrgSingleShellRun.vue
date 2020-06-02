@@ -57,22 +57,32 @@
                 <v-tabs>
                     <v-tab>Logs</v-tab>
                     <v-tab-item>
-                        <v-tabs vertical>
-                            <template v-for="(item, idx) in serverRuns">
-                                <v-tab :key="`tab-${idx}`">
-                                    <span v-if="hasServerInfo(item.ServerId)">{{ singleServerInfo(item.ServerId).Name }}</span>
-                                    <span v-else>Loading...</span>
-                                </v-tab>
-
-                                <v-tab-item :key="`tab-item-${idx}`">
-                                    <generic-log-viewer
-                                        full-height
-                                        :raw-log="item.EncryptedLog"
-                                    >
-                                    </generic-log-viewer>
-                                </v-tab-item>
+                        <v-select
+                            filled
+                            label="Server"
+                            v-model="selectedServer"
+                            hide-details
+                            :items="serverItems"
+                            class="ma-2"
+                        >
+                            <template v-slot:append-outer>
+                                <v-btn
+                                    icon
+                                    @click="goToServer"
+                                    :disabled="!selectedServer"
+                                >
+                                    <v-icon>mdi-open-in-new</v-icon>
+                                </v-btn>
                             </template>
-                        </v-tabs>
+                        </v-select>
+
+                        <div v-if="!!selectedServer">
+                            <generic-log-viewer
+                                full-height
+                                :raw-log="serverToRun[selectedServer.Id].EncryptedLog"
+                            >
+                            </generic-log-viewer>
+                        </div>
                     </v-tab-item>
 
                     <v-tab>Script</v-tab>
@@ -124,6 +134,7 @@ import {
 import {
     contactUsUrl,
     createSingleShellUrl,
+    createSingleServerUrl,
 } from '../../../ts/url'
 import {
     standardFormatTime
@@ -148,7 +159,9 @@ export default class DashboardOrgSingleShellRun extends Vue {
     version: ShellScriptVersion | null = null
     versionNum: number = -1
     serverRuns : ShellScriptRunPerServer[] | null = null
+    serverToRun : Record<number, ShellScriptRunPerServer> = Object()
     serverInfo: Record<number, Server> = Object()
+    selectedServer : Server | null = null
     scriptText : string | null = null
 
     get hasServerInfo() : (idx : number) => boolean {
@@ -195,6 +208,28 @@ export default class DashboardOrgSingleShellRun extends Vue {
             return "Pending..."
         }
         return standardFormatTime(this.run!.EndTime!)
+    }
+
+    get serverItems() : any[] {
+        if (!this.serverRuns) {
+            return []
+        }
+
+        let ret = []
+
+        for (let ele of this.serverRuns!) {
+            let server : Server | undefined = this.serverInfo[ele.ServerId]
+            if (!server) {
+                continue
+            }
+
+            ret.push({
+                text: server.Name,
+                value: server,
+            })
+        }
+
+        return ret
     }
 
     loadServerInformation() {
@@ -246,6 +281,10 @@ export default class DashboardOrgSingleShellRun extends Vue {
 
             this.loadServerInformation()
 
+            for (let sr of this.serverRuns!) {
+                this.serverToRun[sr.ServerId] = sr
+            }
+
             getShellScriptVersion({
                 orgId: PageParamsStore.state.organization!.Id,
                 shellId: this.script!.Id,
@@ -271,12 +310,17 @@ export default class DashboardOrgSingleShellRun extends Vue {
                 contactUsUrl,
                 true);
         })
-
-
     }
 
     mounted() {
         this.refreshData()
+    }
+
+    goToServer() {
+        if (!this.selectedServer) {
+            return
+        }
+        window.open(createSingleServerUrl(PageParamsStore.state.organization!.OktaGroupName, this.selectedServer!.Id), '_blank')
     }
 }
 

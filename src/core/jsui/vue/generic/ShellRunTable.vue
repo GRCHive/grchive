@@ -16,7 +16,7 @@ import {
     createSingleShellRunUrl,
 } from '../../ts/url'
 import { sortDate } from '../../ts/time'
-import { ShellScriptRunPerServer } from '../../ts/shell'
+import { ShellScriptRunPerServer, ShellTypes } from '../../ts/shell'
 import {
     getShellRunInformation, TGetShellRunOutput,
 } from '../../ts/api/apiShellRun'
@@ -32,6 +32,10 @@ export default class ShellRunTable extends ResourceTableProps {
 
     get tableHeaders() : any[] {
         return [
+            {
+                text: 'Type',
+                value: 'type',
+            },
             {
                 text: 'Shell',
                 value: 'shell',
@@ -79,6 +83,7 @@ export default class ShellRunTable extends ResourceTableProps {
     transformInputResourceToTableItem(inp : any) : any {
         let obj = {
             id: inp.Id,
+            type: "Loading...",
             shell: null,
             version: null,
             user: createUserString(MetadataStore.getters.getUser(inp.RunUserId)),
@@ -104,6 +109,7 @@ export default class ShellRunTable extends ResourceTableProps {
             includeLogs: false,
         }).then((resp : TGetShellRunOutput) => {
             obj.shell = resp.data.Script
+            obj.type = ShellTypes[obj.shell.TypeId]
             obj.version = resp.data.VersionNum
             obj.progress = resp.data.ServerRuns
         }).catch((err : any) => {

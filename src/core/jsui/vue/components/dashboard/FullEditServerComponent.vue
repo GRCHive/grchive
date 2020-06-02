@@ -186,6 +186,14 @@
                     </v-container>
                 </v-tab-item>
 
+                <v-tab>Shell</v-tab>
+                <v-tab-item>
+                    <shell-run-table-with-controls
+                        :server-id="currentServer.Id"
+                    >
+                    </shell-run-table-with-controls>
+                </v-tab-item>
+
                 <v-tab>Audit Trail</v-tab>
                 <v-tab-item>
                     <audit-trail-viewer
@@ -223,6 +231,7 @@ import DbTable from '../../generic/DbTable.vue'
 import DbTableWithControls from '../../generic/resources/DbTableWithControls.vue'
 import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 import ServerConnectionManager from '../../generic/servers/ServerConnectionManager.vue'
+import ShellRunTableWithControls from '../../generic/resources/ShellRunTableWithControls.vue'
 
 @Component({
     components: {
@@ -233,7 +242,8 @@ import ServerConnectionManager from '../../generic/servers/ServerConnectionManag
         DbTable,
         DbTableWithControls,
         AuditTrailViewer,
-        ServerConnectionManager
+        ServerConnectionManager,
+        ShellRunTableWithControls
     }
 })
 export default class FullEditServerComponent extends Vue {
