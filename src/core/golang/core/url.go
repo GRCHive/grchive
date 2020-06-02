@@ -75,6 +75,7 @@ var DashboardOrgSingleScriptRequestEndpoint string = fmt.Sprintf("/requests/scri
 var DashboardOrgSingleShellRequestEndpoint string = fmt.Sprintf("/requests/shell/{%s}", DashboardOrgShellRequestQueryId)
 var DashboardOrgSingleVendorEndpoint string = fmt.Sprintf("/vendors/{%s}", DashboardOrgVendorQueryId)
 var DashboardSingleShellEndpoint string = fmt.Sprintf("/shell/{%s}", DashboardOrgShellScriptQueryId)
+var DashboardSingleShellRunEndpoint string = fmt.Sprintf("%s/run/{%s}", DashboardShellEndpoint, DashboardOrgShellRunQueryId)
 
 // Dashboard - Organization - Settings
 const DashboardOrgSettingsPrefix string = "/settings"

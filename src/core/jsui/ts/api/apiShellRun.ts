@@ -72,7 +72,7 @@ export interface TGetShellRunOutput {
     data: {
         Run: ShellScriptRun
         Script: ShellScript
-        Version?: ShellScriptVersion
+        Version: ShellScriptVersion
         VersionNum: number
         ServerRuns: ShellScriptRunPerServer[]
     }

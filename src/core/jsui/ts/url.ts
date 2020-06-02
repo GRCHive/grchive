@@ -185,6 +185,10 @@ export function createSingleShellRequestUrl(org: string, requestId : number) : s
     return `/dashboard/org/${org}/requests/shell/${requestId}`
 }
 
+export function createSingleShellRunUrl(org: string, runId : number) : string {
+    return `/dashboard/org/${org}/it/shell/run/${runId}`
+}
+
 export function createSingleShellUrl(org: string, shell : number) : string {
     return `/dashboard/org/${org}/it/shell/${shell}`
 }

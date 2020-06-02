@@ -13,6 +13,7 @@ import { standardFormatTime } from '../../ts/time'
 import {
     contactUsUrl,
     createSingleShellUrl,
+    createSingleShellRunUrl,
 } from '../../ts/url'
 import { sortDate } from '../../ts/time'
 import { ShellScriptRunPerServer } from '../../ts/shell'
@@ -70,9 +71,9 @@ export default class ShellRunTable extends ResourceTableProps {
     }
 
     goToShellScriptRun(item : any) {
-        //window.location.assign(createSingleShellUrl(
-        //    PageParamsStore.state.organization!.OktaGroupName,
-        //    item.value.Id) + `?version=${item.currentVersionNumber}`)
+        window.location.assign(createSingleShellRunUrl(
+            PageParamsStore.state.organization!.OktaGroupName,
+            item.value.Id))
     }
 
     transformInputResourceToTableItem(inp : any) : any {

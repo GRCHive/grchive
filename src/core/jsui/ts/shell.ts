@@ -54,7 +54,7 @@ export interface ShellScriptRunPerServer {
     RunId: number
     OrgId: number
     ServerId: number
-    Log: string | null
+    EncryptedLog: string | null
     RunTime: Date | null
     EndTime: Date | null
     Success: boolean

@@ -1,29 +1,22 @@
 <template>
-    <div ref="parent" :style="parentContainerStyle">
-        <div v-if="!!rawLog" id="logContainer">
-            <div v-html="rawHtml"></div>
-        </div>
-
-        <v-progress-circular
-            indeterminate
-            size="64"
-            v-else
-        ></v-progress-circular>
-    </div>
+    <generic-log-viewer
+        :full-height="fullHeight"
+        :raw-log="rawLog"
+    >
+    </generic-log-viewer>
 </template>
 
 <script lang="ts">
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { Watch } from 'vue-property-decorator'
+import GenericLogViewer from './GenericLogViewer.vue'
 import { ManagedCode } from '../../../ts/code'
 import {
     getLog, TGetLogOutput, TGetLogInput
 } from '../../../ts/api/apiLogs'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
-import Ansi2Html from 'ansi-to-html'
 
 const Props = Vue.extend({
     props: {
@@ -46,45 +39,14 @@ const Props = Vue.extend({
     }
 })
 
-@Component
+@Component({
+    components: {
+        GenericLogViewer
+    }
+})
 export default class LogViewer extends Props {
     rawLog : string | null = null
-    parentBb : DOMRect | null = null
 
-    $refs! : {
-        parent : HTMLElement
-    }
-
-    get rawHtml() : string {
-        if (!this.rawLog) {
-            return ""
-        }
-
-        const filteredLog = this.rawLog.replace(/\r/g, '\n')
-        const converter = new Ansi2Html({
-            newline: true,
-        })
-        return converter.toHtml(filteredLog)
-    }
-
-    get parentContainerStyle() : any {
-        if (!this.parentBb) {
-            Vue.nextTick(() => {
-                this.parentBb = <DOMRect>this.$refs.parent.getBoundingClientRect()
-            })
-
-            return {}
-        }
-
-        let ht = `calc(100vh - ${this.parentBb.top}px)`
-        return {
-            'height': ht,
-            'max-height': ht,
-            'overflow': 'auto',
-        }
-    }
-
-    @Watch('code')
     refreshLog() {
         this.rawLog = null
         
@@ -118,15 +80,3 @@ export default class LogViewer extends Props {
 }
 
 </script>
-
-<style scoped>
-
-#logContainer {
-    overflow: auto;
-    font-family: monospace;
-    font-size: 12px;
-    color: white;
-    background-color: #111;
-}
-
-</style>
