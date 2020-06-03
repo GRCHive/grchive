@@ -56,9 +56,9 @@ export interface ScheduledEvent {
     Timezone: string
 }
 
-export function createEmptyScheduledEvent() : ScheduledEvent {
+export function createEmptyScheduledEvent(repeat : boolean = false) : ScheduledEvent {
     return {
-        Repeat: false,
+        Repeat: repeat,
         OneTimeDate: new Date(),
         Name: "",
         Description: "",

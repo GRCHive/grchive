@@ -20,6 +20,31 @@ func registerAPIv2Org(r *mux.Router) {
 	registerAPIv2ShellPaths(s)
 	registerAPIv2RequestsPaths(s)
 	registerAPIv2ServerPaths(s)
+	registerAPIv2DatabasePaths(s)
+}
+
+func registerAPIv2DatabasePaths(r *mux.Router) {
+	s := r.PathPrefix("/database").Subrouter()
+
+	sd := s.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgDbQueryId)).Subrouter()
+	sd.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgDbQueryId))
+
+	sds := sd.PathPrefix("/settings").Subrouter()
+	sds.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			getDatabaseSettings,
+			core.ResourceAccessBundle{core.ResourceDatabases, core.AccessView},
+		),
+	).Methods("GET")
+
+	sds.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			editDatabaseSettings,
+			core.ResourceAccessBundle{core.ResourceDatabases, core.AccessEdit},
+		),
+	).Methods("PUT")
 }
 
 func registerAPIv2ServerPaths(r *mux.Router) {

@@ -444,6 +444,14 @@ func CreateObtainResourceInContextMiddleware(queryId string) mux.MiddlewareFunc 
 					return
 				}
 				ctx = context.WithValue(r.Context(), ShellScriptRunContextKey, run)
+			case core.DashboardOrgDbQueryId:
+				db, err := database.GetDb(queryInt, org.Id, core.ServerRole)
+				if err != nil {
+					core.Warning("Failed to get database: " + core.ErrorString(err))
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				ctx = context.WithValue(r.Context(), DatabaseContextKey, db)
 			default:
 				w.WriteHeader(http.StatusBadRequest)
 				return

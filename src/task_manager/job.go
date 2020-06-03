@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"gitlab.com/grchive/grchive/core"
 )
 
@@ -27,6 +28,7 @@ func (j *Job) Tick(c core.Clock, force bool) (bool, error) {
 		return true, nil
 	}
 
+	core.Info(fmt.Sprintf("\tRunning Job %d", j.Id()))
 	err := j.handler.Tick(c)
 	if err != nil {
 		return true, err

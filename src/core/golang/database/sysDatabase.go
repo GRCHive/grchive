@@ -3,6 +3,7 @@ package database
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
 	"gitlab.com/grchive/grchive/core"
 )
@@ -351,4 +352,32 @@ func LinkSystemsToDatabase(dbId int64, orgId int32, sysIds []int64, role *core.R
 		}
 	}
 	return tx.Commit()
+}
+
+func GetDatabaseSettings(dbId int64) (*core.DatabaseSettings, error) {
+	settings := core.DatabaseSettings{}
+	err := dbConn.Get(&settings, `
+		SELECT
+			ds.db_id,
+			ds.org_id,
+			ds.auto_refresh_task,
+			st.id IS NOT NULL AS "auto_refresh_enabled",
+			rt.rrule AS "auto_refresh_rrule"
+		FROM database_settings AS ds
+		LEFT JOIN scheduled_tasks AS st
+			ON st.id = ds.auto_refresh_task
+		LEFT JOIN recurring_tasks AS rt
+			ON rt.event_id = st.id
+		WHERE ds.db_id = $1
+	`, dbId)
+	return &settings, err
+}
+
+func LinkDatabaseSettingToScheduledTaskWithTx(tx *sqlx.Tx, dbId int64, taskId int64) error {
+	_, err := tx.Exec(`
+		UPDATE database_settings
+		SET auto_refresh_task = $2
+		WHERE db_id = $1
+	`, dbId, taskId)
+	return err
 }

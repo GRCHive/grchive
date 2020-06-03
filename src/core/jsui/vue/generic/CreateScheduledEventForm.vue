@@ -24,7 +24,7 @@
             :input-value="value.Repeat"
             label="Repeat?"
             @click="changeRepeat"
-            :readonly="readonly"
+            :readonly="!canChangeRepeat"
         >
         </v-checkbox>
 
@@ -230,7 +230,11 @@ const Props = Vue.extend({
         noName : {
             type: Boolean,
             default: false
-        }
+        },
+        forceRepeat: {
+            type: Boolean,
+            default: false,
+        },
     }
 })
 
@@ -246,10 +250,14 @@ export default class CreateScheduledEventForm extends Props {
     DaysSelectItems: any = DaysSelectItems
     rules : any = rules
 
+    get canChangeRepeat() : boolean {
+        return !this.readonly && !this.forceRepeat
+    }
+
     doChange(fn : (e : ScheduledEvent) => void) {
         let e : ScheduledEvent
         if (!this.value) {
-            e = createEmptyScheduledEvent()
+            e = createEmptyScheduledEvent(this.forceRepeat)
         } else {
             e = JSON.parse(JSON.stringify(this.value))
             cleanScheduledEventFromJson(e)
@@ -261,6 +269,10 @@ export default class CreateScheduledEventForm extends Props {
     }
 
     changeRepeat(e : MouseEvent) {
+        if (!this.canChangeRepeat) {
+            return
+        }
+
         // Clicking on the checkbox throws this event twice for
         // whatever reason and the @input event doesn't work on
         // v-checkbox...for whatever reason. v-model works fine though.
@@ -319,7 +331,7 @@ export default class CreateScheduledEventForm extends Props {
 
     mounted() {
         if (!this.value) {
-            this.$emit('input', createEmptyScheduledEvent())
+            this.$emit('input', createEmptyScheduledEvent(this.forceRepeat))
         }
     }
 }

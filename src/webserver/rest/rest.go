@@ -338,7 +338,7 @@ func registerITSqlRefreshAPIPaths(r *mux.Router) {
 	s := r.PathPrefix(core.ApiITSqlRefreshPrefix).Subrouter()
 	s.HandleFunc(core.ApiAllEndpoint, allDatabaseRefresh).Methods("GET")
 	s.HandleFunc(core.ApiGetEndpoint, getDatabaseRefresh).Methods("GET")
-	s.HandleFunc(core.ApiNewEndpoint, newDatabaseRefresh).Methods("POST")
+	s.HandleFunc(core.ApiNewEndpoint, newDatabaseRefresh).Methods("POST").Name(webcore.ApiDbRefreshRouteName)
 	s.HandleFunc(core.ApiDeleteEndpoint, deleteDatabaseRefresh).Methods("POST")
 }
 

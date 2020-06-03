@@ -471,7 +471,7 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 				return err
 			}
 
-			return webcore.CreateScheduledTaskFromRawInputs(tx, inputs.Schedule, core.KGrchiveApiTask, core.GrchiveApiTaskData{
+			_, err = webcore.CreateScheduledTaskFromRawInputs(tx, inputs.Schedule, core.KGrchiveApiTask, core.GrchiveApiTaskData{
 				Endpoint: webcore.MustGetRouteUrl(webcore.ApiRunCodeRouteName),
 				Method:   "POST",
 				Payload: RunCodeInput{
@@ -485,6 +485,7 @@ func runCode(w http.ResponseWriter, r *http.Request) {
 				LinkId:    core.CreateNullInt64(linkId),
 				RequestId: core.CreateNullInt64(req.Id),
 			})
+			return err
 		})
 
 		if err != nil {

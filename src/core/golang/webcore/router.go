@@ -47,7 +47,8 @@ const (
 	SingleShellRouteName           = "SingleShell"
 	SingleShellRunRouteName        = "SingleShellRun"
 	// Api
-	ApiRunCodeRouteName = "ApiRunCode"
+	ApiRunCodeRouteName   = "ApiRunCode"
+	ApiDbRefreshRouteName = "ApiDbRefresh"
 )
 
 var globalRouter *mux.Router

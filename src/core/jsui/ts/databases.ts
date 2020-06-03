@@ -49,3 +49,10 @@ export interface DatabaseFilterData {
 export let NullDatabaseFilterData : DatabaseFilterData = {
     Type: JSON.parse(JSON.stringify(NullNumericFilterData))
 }
+
+export interface DatabaseSettings {
+    DbId: number
+    OrgId: number
+    AutoRefreshEnabled: boolean
+    AutoRefreshRRule: string | null
+}

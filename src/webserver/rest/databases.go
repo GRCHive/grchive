@@ -435,3 +435,143 @@ func linkSystemsToDatabase(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func getDatabaseSettings(w http.ResponseWriter, r *http.Request) {
+	jsonWriter := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	db, err := webcore.FindDatabaseInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed find database in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	settings, err := database.GetDatabaseSettings(db.Id)
+	if err != nil {
+		core.Warning("Failed find get database settings: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonWriter.Encode(settings)
+}
+
+type EditDatabaseSettingsInputs struct {
+	AutoRefreshEnabled  bool                        `json:"autoRefreshEnabled"`
+	AutoRefreshSchedule *core.ScheduledTaskRawInput `json:"autoRefreshSchedule"`
+}
+
+func editDatabaseSettings(w http.ResponseWriter, r *http.Request) {
+	db, err := webcore.FindDatabaseInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed find database in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.FindRoleInContext(r.Context())
+	if err != nil {
+		core.Warning("Failed find get role in context: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	settings, err := database.GetDatabaseSettings(db.Id)
+	if err != nil {
+		core.Warning("Failed find get database settings: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	inputs := EditDatabaseSettingsInputs{}
+	err = webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tx := database.CreateTx()
+
+	isEditingAutoRefresh := settings.AutoRefreshEnabled && inputs.AutoRefreshEnabled
+	isChangeAutoRefresh := settings.AutoRefreshEnabled != inputs.AutoRefreshEnabled
+
+	// This function needs to handle three cases:
+	// 	1) Creating a new task where no task existed before
+	//  2) Removing a task when there was a task already
+	//  3) Editing a task when there was a task already
+	// There doesn't exist functionality to edit a task, so #3 needs to be
+	// handles by doing a delete followed creationg of a new task. Therefore
+	// we can handle case #3 by performing #2 followed by #1.
+	err = database.WrapTx(tx, func() error {
+		// Removing a task happens when the user disables auto-refresh
+		// and the current refresh setting is enabled or user is editing.
+		if !isEditingAutoRefresh && !(isChangeAutoRefresh && !inputs.AutoRefreshEnabled) {
+			return nil
+		}
+
+		storedId := settings.AutoRefreshTaskId.NullInt64.Int64
+		settings.AutoRefreshTaskId = core.NullInt64{}
+
+		webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
+			Exchange: webcore.DEFAULT_EXCHANGE,
+			Queue:    webcore.TASK_MANAGER_QUEUE,
+			Body: webcore.TaskManagerMessage{
+				Action: "Delete",
+				TaskId: storedId,
+			},
+		})
+
+		return database.DeleteScheduledTaskWithTx(tx, storedId)
+	}, func() error {
+		if !isEditingAutoRefresh && !(isChangeAutoRefresh && inputs.AutoRefreshEnabled) {
+			return nil
+		}
+
+		metadata, err := webcore.CreateScheduledTaskFromRawInputs(
+			tx,
+			inputs.AutoRefreshSchedule,
+			core.KGrchiveApiTask,
+			core.GrchiveApiTaskData{
+				Endpoint: webcore.MustGetRouteUrl(webcore.ApiDbRefreshRouteName),
+				Method:   "POST",
+				Payload: NewRefreshInput{
+					DbId:  db.Id,
+					OrgId: db.OrgId,
+				},
+			},
+			role.UserId,
+			db.OrgId,
+			webcore.TaskLinkOptions{
+				DbId: core.CreateNullInt64(db.Id),
+			},
+		)
+
+		if err != nil {
+			return err
+		}
+
+		settings.AutoRefreshTaskId = core.CreateNullInt64(metadata.Id)
+		return nil
+	})
+
+	if err != nil {
+		core.Warning("Failed to edit database settings: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// This needs to be here just in case the RabbitMQ gets sent and processed
+	// before the database transaction is processed.
+	if settings.AutoRefreshTaskId.NullInt64.Valid {
+		webcore.DefaultRabbitMQ.SendMessage(webcore.PublishMessage{
+			Exchange: webcore.DEFAULT_EXCHANGE,
+			Queue:    webcore.TASK_MANAGER_QUEUE,
+			Body: webcore.TaskManagerMessage{
+				Action: "Add",
+				TaskId: settings.AutoRefreshTaskId.NullInt64.Int64,
+			},
+		})
+	}
+}

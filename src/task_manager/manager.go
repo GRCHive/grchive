@@ -41,6 +41,7 @@ func main() {
 		core.Error("Failed to grab initial tasks: " + err.Error())
 	}
 
+	core.Info("Loading initial tasks: ", len(tasks))
 	for _, t := range tasks {
 		j, err := createJob(t.Metadata, t.OneTime, t.Recurring, scheduler.Clock)
 		if err != nil {

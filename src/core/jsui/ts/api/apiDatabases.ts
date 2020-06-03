@@ -1,8 +1,14 @@
 import axios from 'axios'
 import * as qs from 'query-string'
 import { getAPIRequestConfig } from './apiUtility'
-import { DatabaseType, Database, DatabaseConnection, DatabaseFilterData } from '../databases'
-import { postFormJson } from '../http'
+import {
+    DatabaseType,
+    Database,
+    DatabaseConnection,
+    DatabaseFilterData,
+    DatabaseSettings,
+} from '../databases'
+import { postFormJson, putFormJson } from '../http'
 import {
     newDatabaseUrl,
     allDatabaseUrl,
@@ -12,10 +18,12 @@ import {
     getDatabaseUrl,
     newDbConnUrl,
     deleteDbConnUrl,
-    linkSystemsToDbUrl
+    linkSystemsToDbUrl,
+    apiv2SingleDatabaseSettings,
 } from '../url'
 import { System } from '../systems'
 import { FullDeployment } from '../deployments'
+import { ScheduledEvent } from '../event'
 
 export interface TDbTypeOutputs {
     data: DatabaseType[]
@@ -146,4 +154,35 @@ export interface TLinkSystemOutputs {
 
 export function linkSystemsToDatabase(inp : TLinkSystemInputs) : Promise<TLinkSystemOutputs> {
     return postFormJson<TLinkSystemOutputs>(linkSystemsToDbUrl, inp, getAPIRequestConfig())
+}
+
+export interface TGetDatabaseSettingsInputs {
+    orgId : number
+    dbId : number
+}
+
+export interface TGetDatabaseSettingsOutputs {
+    data : DatabaseSettings
+}
+
+export function getDatabaseSettings(inp : TGetDatabaseSettingsInputs) : Promise<TGetDatabaseSettingsOutputs> {
+    return axios.get(
+        apiv2SingleDatabaseSettings(inp.orgId, inp.dbId),
+        getAPIRequestConfig(),
+    )
+}
+
+export interface TSaveDatabaseSettingsInputs {
+    orgId : number
+    dbId : number
+    autoRefreshEnabled: boolean
+    autoRefreshSchedule : ScheduledEvent | null
+}
+
+export function saveDatabaseSettings(inp : TSaveDatabaseSettingsInputs) : Promise<void> {
+    return putFormJson(
+        apiv2SingleDatabaseSettings(inp.orgId, inp.dbId),
+        inp,
+        getAPIRequestConfig(),
+    )
 }

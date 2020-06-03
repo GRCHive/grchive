@@ -213,6 +213,14 @@
                         </dashboard-sql-request-list>
                     </v-tab-item>
 
+                    <v-tab>Settings</v-tab>
+                    <v-tab-item>
+                        <database-settings-manager
+                            :db-id="currentDb.Id"
+                        >
+                        </database-settings-manager>
+                    </v-tab-item>
+
                     <v-tab>Audit Trail</v-tab>
                     <v-tab-item>
                         <audit-trail-viewer
@@ -256,6 +264,7 @@ import DatabaseSqlEditor from '../../generic/DatabaseSqlEditor.vue'
 import DashboardSqlRequestList from './DashboardSqlRequestList.vue'
 import { newDeployment, TNewDeploymentOutput } from '../../../ts/api/apiDeployments'
 import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
+import DatabaseSettingsManager from '../../generic/database/DatabaseSettingsManager.vue'
 
 @Component({
     components: {
@@ -268,7 +277,8 @@ import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
         DeploymentEditor,
         DatabaseSqlEditor,
         DashboardSqlRequestList,
-        AuditTrailViewer
+        AuditTrailViewer,
+        DatabaseSettingsManager,
     }
 })
 export default class FullEditDatabaseComponent extends Vue {

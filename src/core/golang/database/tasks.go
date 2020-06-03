@@ -93,7 +93,7 @@ func getScheduledTasksHelper(role *core.Role, condition string, args ...interfac
 		LEFT JOIN generic_approval AS appr
 			ON appr.request_id = stl.request_id
 		WHERE
-			(appr.response = true)
+			(appr.response = true OR stl.task_id IS NULL)
 			%s
 	`, condition), args...)
 
@@ -222,4 +222,12 @@ func AddDataToTaskPayload(taskId int64, data map[string]interface{}) error {
 	}
 
 	return nil
+}
+
+func DeleteScheduledTaskWithTx(tx *sqlx.Tx, taskId int64) error {
+	_, err := tx.Exec(`
+		DELETE FROM scheduled_tasks
+		WHERE id = $1
+	`, taskId)
+	return err
 }

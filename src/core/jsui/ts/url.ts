@@ -495,3 +495,11 @@ export function apiv2ServerConnectionSSHKey(orgId : number, serverId: number) : 
 export function apiv2SingleServerConnectionSSHKey(orgId : number, serverId: number, connId : number) : string {
     return `${apiv2ServerConnectionSSHKey(orgId, serverId)}/${connId}`
 }
+
+export function apiv2SingleDatabase(orgId: number, dbId: number) : string{
+    return createOrgApiv2Url(orgId, `database/${dbId}`)
+}
+
+export function apiv2SingleDatabaseSettings(orgId: number, dbId: number) : string{
+    return `${apiv2SingleDatabase(orgId, dbId)}/settings`
+}

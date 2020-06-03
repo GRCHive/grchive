@@ -24,6 +24,7 @@ const (
 	ServerContextKey                      = "SERVER"
 	ServerConnectionSshPasswordContextKey = "SERVERCONNECTIONSSHPASSWORD"
 	ServerConnectionSshKeyContextKey      = "SERVERCONNECTIONSSHKEY"
+	DatabaseContextKey                    = "DATABASE"
 )
 
 func AddSessionToContext(session *core.UserSession, ctx context.Context) context.Context {
@@ -154,6 +155,14 @@ func FindShellScriptRunInContext(ctx context.Context) (*core.ShellScriptRun, err
 	resource, ok := ctx.Value(ShellScriptRunContextKey).(*core.ShellScriptRun)
 	if !ok || resource == nil {
 		return nil, errors.New("Failed to find ShellScriptRun in context.")
+	}
+	return resource, nil
+}
+
+func FindDatabaseInContext(ctx context.Context) (*core.Database, error) {
+	resource, ok := ctx.Value(DatabaseContextKey).(*core.Database)
+	if !ok || resource == nil {
+		return nil, errors.New("Failed to find Database in context.")
 	}
 	return resource, nil
 }
