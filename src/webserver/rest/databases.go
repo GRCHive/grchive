@@ -2,6 +2,7 @@ package rest
 
 import (
 	"encoding/json"
+	"fmt"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/webcore"
@@ -490,6 +491,10 @@ func editDatabaseSettings(w http.ResponseWriter, r *http.Request) {
 		core.Warning("Can't parse inputs: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
+	}
+
+	if inputs.AutoRefreshSchedule != nil {
+		inputs.AutoRefreshSchedule.Name = fmt.Sprintf("Refresh DB: %s", db.Name)
 	}
 
 	tx := database.CreateTx()
