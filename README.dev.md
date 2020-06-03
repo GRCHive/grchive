@@ -683,6 +683,11 @@ Modify your `/etc/hosts` file to have the following line:
 - `cd $SRC/devops/k8s/script_runner`
 - `kubectl apply -f ./deployment.dev.yaml`
 
+### Shell Runner
+
+- `cd $SRC/devops/k8s/shell_runner`
+- `kubectl apply -f ./deployment.dev.yaml`
+
 ### Webserver
 
 - `cd $SRC`

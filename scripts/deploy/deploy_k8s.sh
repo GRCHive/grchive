@@ -110,6 +110,12 @@ if [ -z $MINIKUBE ]; then
     kubectl apply -f deployment.prod.yaml
     cd ../
 
+    export SHELL_RUNNER_IMAGE=${CONTAINER_REGISTRY_URL}/shell_runner:`git rev-parse HEAD`
+    cd shell_runner
+    envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
+    kubectl apply -f deployment.prod.yaml
+    cd ../
+
     export WEBSERVER_IMAGE=${CONTAINER_REGISTRY_URL}/webserver:`git rev-parse HEAD`
     export NGINX_IMAGE=${CONTAINER_REGISTRY_URL}/nginx:`git rev-parse HEAD`
     cd webserver
