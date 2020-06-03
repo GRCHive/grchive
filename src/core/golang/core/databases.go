@@ -40,6 +40,7 @@ type DbRefresh struct {
 	RefreshFinishTime NullTime `db:"refresh_finish_time"`
 	RefreshSuccess    bool     `db:"refresh_success"`
 	RefreshErrors     string   `db:"refresh_errors"`
+	HasDiff           bool     `db:"refresh_has_diff"`
 }
 
 type DbSchema struct {

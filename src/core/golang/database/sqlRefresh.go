@@ -35,6 +35,32 @@ func GetDatabaseRefresh(refreshId int64, orgId int32, role *core.Role) (*core.Db
 	return &refresh, err
 }
 
+func GetLatestCompleteDatabaseRefresh(dbId int64, orgId int32) (*core.DbRefresh, error) {
+	rows, err := dbConn.Queryx(`
+		SELECT *
+		FROM database_refresh
+		WHERE refresh_success = true
+			AND db_id = $1
+			AND org_id = $2
+		ORDER BY id DESC
+		LIMIT 1
+	`, dbId, orgId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, nil
+	}
+
+	refresh := core.DbRefresh{}
+	err = rows.StructScan(&refresh)
+	return &refresh, err
+}
+
 func DeleteDatabaseRefresh(refreshId int64, orgId int32, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceDbSql, core.AccessManage) {
 		return core.ErrorUnauthorized
@@ -54,7 +80,7 @@ func DeleteDatabaseRefresh(refreshId int64, orgId int32, role *core.Role) error 
 	return tx.Commit()
 }
 
-func MarkSuccessfulRefreshWithTx(refreshId int64, tx *sqlx.Tx, role *core.Role) error {
+func MarkSuccessfulRefreshWithTx(refreshId int64, hasDiff bool, tx *sqlx.Tx, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceDbSql, core.AccessEdit) {
 		return core.ErrorUnauthorized
 	}
@@ -62,9 +88,10 @@ func MarkSuccessfulRefreshWithTx(refreshId int64, tx *sqlx.Tx, role *core.Role) 
 	_, err := tx.Exec(`
 		UPDATE database_refresh
 		SET refresh_success = true,
-			refresh_finish_time = $2
+			refresh_finish_time = $2,
+			refresh_has_diff = $3
 		WHERE id = $1
-	`, refreshId, time.Now().UTC())
+	`, refreshId, time.Now().UTC(), hasDiff)
 	return err
 }
 

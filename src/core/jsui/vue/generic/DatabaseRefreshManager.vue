@@ -176,6 +176,7 @@ export default class DatabaseRefreshManager extends Props {
             orgId: PageParamsStore.state.organization!.Id,
         }).then(() => {
             this.store.dispatch('deleteRefresh', refresh)
+            this.showHideDelete = false
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

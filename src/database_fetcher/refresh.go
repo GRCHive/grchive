@@ -18,8 +18,8 @@ func onRefreshError(conn *core.DatabaseConnection, refresh *core.DbRefresh, err 
 	return &webcore.RabbitMQError{errors.New(err), false}
 }
 
-func onRefreshSuccess(refresh *core.DbRefresh, tx *sqlx.Tx) error {
-	return database.MarkSuccessfulRefreshWithTx(refresh.Id, tx, core.ServerRole)
+func onRefreshSuccess(refresh *core.DbRefresh, hasDiff bool, tx *sqlx.Tx) error {
+	return database.MarkSuccessfulRefreshWithTx(refresh.Id, hasDiff, tx, core.ServerRole)
 }
 
 func processRefreshRequest(refresh *core.DbRefresh) *webcore.RabbitMQError {
@@ -62,6 +62,20 @@ func processRefreshRequest(refresh *core.DbRefresh) *webcore.RabbitMQError {
 		return onRefreshError(conn, refresh, "The database user has non-read permissions.")
 	}
 
+	latestRefresh, err := database.GetLatestCompleteDatabaseRefresh(refresh.DbId, refresh.OrgId)
+	if err != nil {
+		return onRefreshError(conn, refresh, "Failed to get latest refresh: "+err.Error())
+	}
+
+	var latestDbState *core.FullDbState
+	if latestRefresh != nil {
+		latestDbState, err = webcore.GetDbStateFromRefresh(latestRefresh.Id, latestRefresh.OrgId)
+		if err != nil {
+			return onRefreshError(conn, refresh, "Failed to get latest db state: "+err.Error())
+		}
+	}
+
+	currentDbState := core.FullDbState{}
 	tx := database.CreateTx()
 
 	schemas, err := driver.GetSchemas()
@@ -78,6 +92,7 @@ func processRefreshRequest(refresh *core.DbRefresh) *webcore.RabbitMQError {
 			tx.Rollback()
 			return onRefreshError(conn, refresh, "Failed to store schema ["+sch.SchemaName+"]: "+err.Error())
 		}
+		currentDbState.AddSchema(sch)
 
 		fns, err := driver.GetFunctions(sch)
 		if err != nil {
@@ -93,6 +108,8 @@ func processRefreshRequest(refresh *core.DbRefresh) *webcore.RabbitMQError {
 				tx.Rollback()
 				return onRefreshError(conn, refresh, "Failed to store function ["+fn.Name+"]: "+err.Error())
 			}
+
+			currentDbState.AddFunction(sch, fn)
 		}
 
 		tables, err := driver.GetTables(sch)
@@ -110,6 +127,8 @@ func processRefreshRequest(refresh *core.DbRefresh) *webcore.RabbitMQError {
 				return onRefreshError(conn, refresh, "Failed to store table ["+tbl.TableName+"]: "+err.Error())
 			}
 
+			currentDbState.AddTable(sch, tbl)
+
 			columns, err := driver.GetColumns(sch, tbl)
 			if err != nil {
 				tx.Rollback()
@@ -124,11 +143,17 @@ func processRefreshRequest(refresh *core.DbRefresh) *webcore.RabbitMQError {
 					tx.Rollback()
 					return onRefreshError(conn, refresh, "Failed to store column ["+col.ColumnName+"]: "+err.Error())
 				}
+				currentDbState.AddColumn(sch, tbl, col)
 			}
 		}
 	}
 
-	err = onRefreshSuccess(refresh, tx)
+	hasDiff := true
+	if latestDbState != nil {
+		hasDiff = currentDbState.HasDiff(latestDbState)
+	}
+
+	err = onRefreshSuccess(refresh, hasDiff, tx)
 	if err != nil {
 		tx.Rollback()
 		return onRefreshError(conn, refresh, "Failed to mark successful refresh: "+err.Error())
