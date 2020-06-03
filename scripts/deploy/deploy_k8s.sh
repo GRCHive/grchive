@@ -124,7 +124,7 @@ if [ -z $MINIKUBE ]; then
     cd ../
 else
     kubectl delete deployment vault-deployment  
-    kubectl delete deployment -deployment  
+    kubectl delete deployment gitea-deployment  
     kubectl delete deployment artifactory-deployment  
     kubectl delete deployment drone-deployment  
     kubectl delete deployment drone-runner-deployment  
