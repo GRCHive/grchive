@@ -1042,6 +1042,14 @@ container_pull(
     digest = "sha256:9023e528680b023bc9b8a49d6f87259f34537dbaf81fb00bdcc183c99c29546d",
 )
 
+container_pull(
+    name = "powershell7-ubuntu18.04",
+    registry = "mcr.microsoft.com",
+    repository = "powershell",
+    tag = "7.0.1-ubuntu-18.04",
+
+)
+
 load(
     "@io_bazel_rules_docker//go:image.bzl",
     _go_image_repos = "repositories",

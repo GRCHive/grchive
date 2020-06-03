@@ -1,0 +1,8 @@
+package(default_visibility=["//visibility:public"])
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+
+go_image(
+    name = "latest",
+    binary = "//src/shell_runner:frontend",
+    base = "@powershell7-ubuntu18.04//image"
+)
