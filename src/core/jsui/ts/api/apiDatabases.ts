@@ -177,6 +177,7 @@ export interface TSaveDatabaseSettingsInputs {
     dbId : number
     autoRefreshEnabled: boolean
     autoRefreshSchedule : ScheduledEvent | null
+    onSchemaChangeNotifyUsers: number[]
 }
 
 export function saveDatabaseSettings(inp : TSaveDatabaseSettingsInputs) : Promise<void> {

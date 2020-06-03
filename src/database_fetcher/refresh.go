@@ -164,5 +164,15 @@ func processRefreshRequest(refresh *core.DbRefresh) *webcore.RabbitMQError {
 		return onRefreshError(conn, refresh, "Failed to commit results: "+err.Error())
 	}
 
+	// Ideally this would happen elsewhere and be sent out as a general "event"
+	// but our event/notification system is kind of rigid at the moment and needs
+	// a revamp. We can ignore errors here.
+	if hasDiff {
+		err = sendDbSchemaChangeEmails(db)
+		if err != nil {
+			core.Warning("Failed to send Db schema change emails: " + err.Error())
+		}
+	}
+
 	return nil
 }

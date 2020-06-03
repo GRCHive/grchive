@@ -1,6 +1,7 @@
 <template>
     <div>
         <div v-if="!!settings">
+            <span class="title">Refresh</span>
             <v-checkbox
                 v-model="settings.AutoRefreshEnabled"
                 hide-details
@@ -17,6 +18,73 @@
                 force-repeat
             >
             </create-scheduled-event-form>
+
+            <v-divider class="my-2"></v-divider>
+
+            <div>
+                <span class="title">Notifications</span>
+            </div>
+
+            <div style="display: flex;">
+                <span class="subtitle-2" style="align-self: center;">On Schema Change</span>
+                <v-dialog
+                    persistent
+                    max-width="40%"
+                    v-model="showHideAddSchemaChangeUser"
+                >
+                    <template v-slot:activator="{on}">
+                        <v-btn
+                            icon
+                            color="primary"
+                            :disabled="!canEdit"
+                            v-on="on"
+                        >
+                            <v-icon>mdi-plus</v-icon>
+                        </v-btn>
+                    </template>
+
+                    <v-card>
+                        <v-card-title>
+                            Select User
+                        </v-card-title>
+                        <v-divider></v-divider>
+
+                        <user-search-form-component
+                            class="ma-4"
+                            label="User"
+                            :user.sync="userToAdd"
+                        >
+                        </user-search-form-component>
+
+                        <v-card-actions>
+                            <v-btn
+                                color="error"
+                                @click="showHideAddSchemaChangeUser = false"
+                            >
+                                Cancel
+                            </v-btn>
+
+                            <v-spacer></v-spacer>
+
+                            <v-btn
+                                color="success"
+                                @click="addSchemaChangeNotifyUser"
+                            >
+                                Add
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+            </div>
+
+            <user-table
+                :resources="settings.OnSchemaChangeNotifyUsers"
+                :use-crud-delete="canEdit"
+                @delete="removeSchemaChangeNotifyUser"
+            >
+            </user-table>
+
+            <v-divider class="my-2"></v-divider>
 
             <v-list-item class="px-0">
                 <v-list-item-action>
@@ -80,10 +148,14 @@ import {
 } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
 import CreateScheduledEventForm from '../CreateScheduledEventForm.vue'
+import UserTable from '../UserTable.vue'
+import UserSearchFormComponent from '../UserSearchFormComponent.vue'
 
 @Component({
     components: {
         CreateScheduledEventForm,
+        UserTable,
+        UserSearchFormComponent,
     }
 })
 export default class DatabaseSettingsManager extends Vue {
@@ -97,6 +169,9 @@ export default class DatabaseSettingsManager extends Vue {
 
     canEdit : boolean = false
     saveInProgress : boolean = false
+
+    showHideAddSchemaChangeUser : boolean = false
+    userToAdd : User | null = null
 
     @Watch('settings.AutoRefreshEnabled')
     resetSchedule() {
@@ -147,8 +222,10 @@ export default class DatabaseSettingsManager extends Vue {
             dbId: this.dbId,
             autoRefreshEnabled: this.settings!.AutoRefreshEnabled,
             autoRefreshSchedule: this.refreshSchedule,
+            onSchemaChangeNotifyUsers: this.settings!.OnSchemaChangeNotifyUsers.map((ele : User) => ele.Id),
         }).then(() => {
             this.canEdit = false
+            this.refSettings = JSON.parse(JSON.stringify(this.settings!))
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
@@ -160,6 +237,30 @@ export default class DatabaseSettingsManager extends Vue {
         }).finally(() => {
             this.saveInProgress = false
         })
+    }
+
+    addSchemaChangeNotifyUser() {
+        this.showHideAddSchemaChangeUser = false
+        if (!!this.userToAdd) {
+            let idx = this.settings!.OnSchemaChangeNotifyUsers.findIndex(
+                (ele : User) => ele.Id == this.userToAdd!.Id)
+
+            if (idx == -1) {
+                this.settings!.OnSchemaChangeNotifyUsers.push(this.userToAdd)
+            }
+        }
+        this.userToAdd = null
+    }
+
+    removeSchemaChangeNotifyUser(u : User) {
+        let idx = this.settings!.OnSchemaChangeNotifyUsers.findIndex(
+            (ele : User) => ele.Id == u.Id)
+
+        if (idx == -1) {
+            return
+        }
+
+        this.settings!.OnSchemaChangeNotifyUsers.splice(idx, 1)
     }
 }
 

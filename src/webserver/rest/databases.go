@@ -459,8 +459,9 @@ func getDatabaseSettings(w http.ResponseWriter, r *http.Request) {
 }
 
 type EditDatabaseSettingsInputs struct {
-	AutoRefreshEnabled  bool                        `json:"autoRefreshEnabled"`
-	AutoRefreshSchedule *core.ScheduledTaskRawInput `json:"autoRefreshSchedule"`
+	AutoRefreshEnabled        bool                        `json:"autoRefreshEnabled"`
+	AutoRefreshSchedule       *core.ScheduledTaskRawInput `json:"autoRefreshSchedule"`
+	OnSchemaChangeNotifyUsers []int64                     `json:"onSchemaChangeNotifyUsers"`
 }
 
 func editDatabaseSettings(w http.ResponseWriter, r *http.Request) {
@@ -502,7 +503,7 @@ func editDatabaseSettings(w http.ResponseWriter, r *http.Request) {
 	isEditingAutoRefresh := settings.AutoRefreshEnabled && inputs.AutoRefreshEnabled
 	isChangeAutoRefresh := settings.AutoRefreshEnabled != inputs.AutoRefreshEnabled
 
-	// This function needs to handle three cases:
+	// This function needs to handle three cases when dealing with the scheduled tasks:
 	// 	1) Creating a new task where no task existed before
 	//  2) Removing a task when there was a task already
 	//  3) Editing a task when there was a task already
@@ -510,6 +511,8 @@ func editDatabaseSettings(w http.ResponseWriter, r *http.Request) {
 	// handles by doing a delete followed creationg of a new task. Therefore
 	// we can handle case #3 by performing #2 followed by #1.
 	err = database.WrapTx(tx, func() error {
+		return database.SyncSchemaChangeNotifyUsersWithTx(tx, db.Id, db.OrgId, inputs.OnSchemaChangeNotifyUsers)
+	}, func() error {
 		// Removing a task happens when the user disables auto-refresh
 		// and the current refresh setting is enabled or user is editing.
 		if !isEditingAutoRefresh && !(isChangeAutoRefresh && !inputs.AutoRefreshEnabled) {

@@ -6,6 +6,7 @@ go_binary(
     srcs = [
         "fetcher.go",
         "refresh.go",
+        "mail.go",
     ],
     deps = [
         "//src/core/golang/core:webserver_core_library",
@@ -13,9 +14,11 @@ go_binary(
         "//src/core/golang/webcore:webserver_webcore_library",
         "//src/generic_database_api/golang:library",
         "//src/vault_api/golang:vault_golang_api",
+        "//src/mail_api/golang:mail_golang_api",
         "@com_github_jmoiron_sqlx//:go_default_library",
     ],
     data = [
         "//src/webserver/config:config",
+        "//src/webserver:templates",
     ],
 )

@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
 	"gitlab.com/grchive/grchive/core"
+	"strings"
 )
 
 func GetAllSupportedDatabaseTypes(role *core.Role) ([]*core.DatabaseType, error) {
@@ -355,21 +356,55 @@ func LinkSystemsToDatabase(dbId int64, orgId int32, sysIds []int64, role *core.R
 }
 
 func GetDatabaseSettings(dbId int64) (*core.DatabaseSettings, error) {
-	settings := core.DatabaseSettings{}
-	err := dbConn.Get(&settings, `
+	rows, err := dbConn.Queryx(`
 		SELECT
 			ds.db_id,
 			ds.org_id,
 			ds.auto_refresh_task,
 			st.id IS NOT NULL AS "auto_refresh_enabled",
-			rt.rrule AS "auto_refresh_rrule"
+			rt.rrule AS "auto_refresh_rrule",
+			ARRAY_TO_JSON(ARRAY_REMOVE(ARRAY_AGG(u.*), null)) AS "on_schema_change_notify_users"
 		FROM database_settings AS ds
 		LEFT JOIN scheduled_tasks AS st
 			ON st.id = ds.auto_refresh_task
 		LEFT JOIN recurring_tasks AS rt
 			ON rt.event_id = st.id
+		LEFT JOIN db_refresh_diff_message_recipients AS dmr
+			ON dmr.db_id = ds.db_id
+		LEFT JOIN users AS u
+			ON u.id = dmr.user_id
 		WHERE ds.db_id = $1
+		GROUP BY ds.db_id, ds.org_id, ds.auto_refresh_task, st.id, rt.rrule
 	`, dbId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	rows.Next()
+
+	settings := core.DatabaseSettings{}
+
+	rawOnSchemaChangeNotifyUsers := []uint8{}
+
+	err = rows.Scan(
+		&settings.DbId,
+		&settings.OrgId,
+		&settings.AutoRefreshTaskId,
+		&settings.AutoRefreshEnabled,
+		&settings.AutoRefreshRRule,
+		&rawOnSchemaChangeNotifyUsers,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	settings.OnSchemaChangeNotifyUsers, err = readUserArray(rawOnSchemaChangeNotifyUsers)
+	if err != nil {
+		return nil, err
+	}
+
 	return &settings, err
 }
 
@@ -380,4 +415,47 @@ func LinkDatabaseSettingToScheduledTaskWithTx(tx *sqlx.Tx, dbId int64, taskId in
 		WHERE db_id = $1
 	`, dbId, taskId)
 	return err
+}
+
+func SyncSchemaChangeNotifyUsersWithTx(tx *sqlx.Tx, dbId int64, orgId int32, userIds []int64) error {
+	if len(userIds) > 0 {
+		// Do the sync in two steps:
+		// 1) Delete user entries that don't match.
+		// 2) Add users that don't exist.
+		query, args, err := sqlx.In(`
+			DELETE FROM db_refresh_diff_message_recipients
+			WHERE db_id = ? 
+				AND user_id NOT IN (?)
+		`, dbId, userIds)
+
+		if err != nil {
+			return err
+		}
+
+		query = tx.Rebind(query)
+		_, err = tx.Exec(query, args...)
+		if err != nil {
+			return err
+		}
+
+		queryBuilder := strings.Builder{}
+		queryBuilder.WriteString("INSERT INTO db_refresh_diff_message_recipients (db_id, org_id, user_id) VALUES ")
+
+		for idx, uid := range userIds {
+			queryBuilder.WriteString(fmt.Sprintf("(%d, %d, %d)", dbId, orgId, uid))
+			if idx != len(userIds)-1 {
+				queryBuilder.WriteString(",")
+			}
+		}
+
+		queryBuilder.WriteString("ON CONFLICT (db_id, user_id) DO NOTHING")
+		_, err = tx.Exec(queryBuilder.String())
+		return err
+	} else {
+		_, err := tx.Exec(`
+			DELETE FROM db_refresh_diff_message_recipients
+			WHERE db_id = $1
+		`, dbId)
+		return err
+	}
 }

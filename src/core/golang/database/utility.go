@@ -44,6 +44,23 @@ func readProcessFlowInputOutputArray(data []uint8) ([]core.ProcessFlowInputOutpu
 	return retArr, nil
 }
 
+func readUserArray(data []uint8) ([]core.User, error) {
+	mapArr := make([]map[string]interface{}, 0)
+	err := json.Unmarshal([]byte(data), &mapArr)
+	if err != nil {
+		return nil, err
+	}
+
+	retArr := make([]core.User, len(mapArr))
+	for i := 0; i < len(mapArr); i++ {
+		retArr[i].Id = int64(mapArr[i]["id"].(float64))
+		retArr[i].FirstName = mapArr[i]["first_name"].(string)
+		retArr[i].LastName = mapArr[i]["last_name"].(string)
+		retArr[i].Email = mapArr[i]["email"].(string)
+	}
+	return retArr, nil
+}
+
 func readInt64Array(data []uint8) ([]int64, error) {
 	retArr := make([]int64, 0)
 	err := json.Unmarshal([]byte(data), &retArr)

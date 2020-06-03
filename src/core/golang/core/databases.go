@@ -135,9 +135,10 @@ var NullDatabaseFilterData DatabaseFilterData = DatabaseFilterData{
 }
 
 type DatabaseSettings struct {
-	DbId               int64      `db:"db_id"`
-	OrgId              int32      `db:"org_id"`
-	AutoRefreshTaskId  NullInt64  `db:"auto_refresh_task" json:"-"`
-	AutoRefreshEnabled bool       `db:"auto_refresh_enabled"`
-	AutoRefreshRRule   NullString `db:"auto_refresh_rrule"`
+	DbId                      int64      `db:"db_id"`
+	OrgId                     int32      `db:"org_id"`
+	AutoRefreshTaskId         NullInt64  `db:"auto_refresh_task" json:"-"`
+	AutoRefreshEnabled        bool       `db:"auto_refresh_enabled"`
+	AutoRefreshRRule          NullString `db:"auto_refresh_rrule"`
+	OnSchemaChangeNotifyUsers []User     `db:"on_schema_change_notify_users"`
 }

@@ -55,4 +55,5 @@ export interface DatabaseSettings {
     OrgId: number
     AutoRefreshEnabled: boolean
     AutoRefreshRRule: string | null
+    OnSchemaChangeNotifyUsers : User[]
 }

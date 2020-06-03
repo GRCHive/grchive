@@ -5,6 +5,7 @@ import (
 	"flag"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/mail_api"
 	"gitlab.com/grchive/grchive/vault_api"
 	"gitlab.com/grchive/grchive/webcore"
 )
@@ -28,6 +29,7 @@ func main() {
 		Username: core.EnvConfig.Vault.Username,
 		Password: core.EnvConfig.Vault.Password,
 	}, core.EnvConfig.Tls.Config())
+	mail.InitializeMailAPI(core.EnvConfig.Mail.Provider, core.EnvConfig.Mail.Key)
 
 	refreshId := flag.Int64("refreshId", -1, "Refresh ID to retrieve data for. Will not read from RabbitMQ if specified.")
 	orgId := flag.Int64("orgId", -1, "Org ID to retrieve data for. Will not read from RabbitMQ if specified.")
