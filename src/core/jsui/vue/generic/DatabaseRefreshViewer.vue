@@ -12,7 +12,7 @@
             <div>
                 <p class="display-1">Oops! We were unable to retrieve your schemas.</p>
                 <v-divider class="mb-3"></v-divider>
-                <pre>{{ refresh.RefreshErrors }}</pre>
+                <pre id="dbRefreshErrors">{{ refresh.RefreshErrors }}</pre>
             </div>
         </v-row>
 
@@ -141,3 +141,12 @@ export default class DatabaseRefreshViewer extends Props {
 }
 
 </script>
+
+<style scoped>
+
+#dbRefreshErrors {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+</style>
