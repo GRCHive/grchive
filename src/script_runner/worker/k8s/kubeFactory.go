@@ -141,7 +141,9 @@ func (w *KubeWorker) Run() (int, error) {
 
 func (w KubeWorker) Logs() (string, error) {
 	core.Info("Log Pods...")
-	logReq := w.client.CoreV1().Pods("backend").GetLogs(w.pod.ObjectMeta.Name, &apiv1.PodLogOptions{})
+	logReq := w.client.CoreV1().Pods("backend").GetLogs(w.pod.ObjectMeta.Name, &apiv1.PodLogOptions{
+		Container: "script-runner-worker-container",
+	})
 
 	reqStream, err := logReq.Stream()
 	if err != nil {
