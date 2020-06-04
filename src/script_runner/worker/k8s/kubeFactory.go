@@ -36,12 +36,12 @@ func (w KubeWorker) wait(condition func(e watch.Event) (bool, error)) error {
 
 	lw := &cache.ListWatch{
 		ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
-			return w.client.CoreV1().Pods("default").List(metav1.ListOptions{
+			return w.client.CoreV1().Pods("backend").List(metav1.ListOptions{
 				LabelSelector: selector,
 			})
 		},
 		WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
-			return w.client.CoreV1().Pods("default").Watch(metav1.ListOptions{
+			return w.client.CoreV1().Pods("backend").Watch(metav1.ListOptions{
 				LabelSelector: selector,
 			})
 		},
@@ -117,7 +117,7 @@ func (w *KubeWorker) Run() (int, error) {
 
 	var err error
 	core.Info("Create Pods...")
-	w.pod, err = w.client.CoreV1().Pods("default").Create(&apiv1.Pod{
+	w.pod, err = w.client.CoreV1().Pods("backend").Create(&apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: "script-runner-worker",
 			Labels:       w.labels,
@@ -141,7 +141,7 @@ func (w *KubeWorker) Run() (int, error) {
 
 func (w KubeWorker) Logs() (string, error) {
 	core.Info("Log Pods...")
-	logReq := w.client.CoreV1().Pods("default").GetLogs(w.pod.ObjectMeta.Name, &apiv1.PodLogOptions{})
+	logReq := w.client.CoreV1().Pods("backend").GetLogs(w.pod.ObjectMeta.Name, &apiv1.PodLogOptions{})
 
 	reqStream, err := logReq.Stream()
 	if err != nil {
@@ -169,7 +169,7 @@ func (w KubeWorker) Logs() (string, error) {
 }
 
 func (w KubeWorker) Cleanup() {
-	w.client.CoreV1().Pods("default").Delete(w.pod.ObjectMeta.Name, nil)
+	w.client.CoreV1().Pods("backend").Delete(w.pod.ObjectMeta.Name, nil)
 }
 
 type KubeFactory struct {
