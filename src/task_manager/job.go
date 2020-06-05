@@ -62,11 +62,13 @@ func (j *Job) Backoff() {
 
 // Returns a boolean that indicates whether this job will want to run again.
 func (j *Job) Tick(c core.Clock, force bool) (bool, error) {
+	defer func() {
+		j.lastTick = c.Now()
+	}()
+
 	if j.TickBackoff(c) {
 		return true, nil
 	}
-
-	j.lastTick = c.Now()
 
 	if !j.schedule.ShouldRun(c) && !force {
 		return true, nil
