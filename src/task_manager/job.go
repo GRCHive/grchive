@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"gitlab.com/grchive/grchive/core"
+	"math"
+	"time"
 )
 
 type JobTaskHandler interface {
@@ -15,15 +17,57 @@ type Job struct {
 	schedule *Schedule
 	typ      core.TaskType
 
-	handler JobTaskHandler
+	handler  JobTaskHandler
+	lastTick time.Time
+
+	backoffCount int
+	backoffTime  time.Duration
 }
 
 func (j Job) Id() int64 {
 	return j.id
 }
 
+// Returns whether or not the job is currently "backed off".
+func (j *Job) TickBackoff(c core.Clock) bool {
+	if j.backoffCount == 0 {
+		return false
+	}
+
+	elapsed := c.Now().Sub(j.lastTick)
+	j.backoffTime = j.backoffTime - elapsed
+	if j.backoffTime > 0 {
+		return true
+	}
+
+	return false
+}
+
+func (j *Job) Backoff() {
+	j.backoffCount = j.backoffCount + 1
+
+	// Each backoff should take longer than the last.
+	// Don't want to backoff for more than 5 minutes.
+	// Use the function y = e^{0.5x}. This reaches max backoff in ~11 tries.
+	backoffSeconds := int64(math.Min(
+		math.Max(
+			math.Exp(0.5*float64(j.backoffCount)),
+			0,
+		),
+		300,
+	))
+
+	j.backoffTime = time.Duration(backoffSeconds) * time.Second
+}
+
 // Returns a boolean that indicates whether this job will want to run again.
 func (j *Job) Tick(c core.Clock, force bool) (bool, error) {
+	if j.TickBackoff(c) {
+		return true, nil
+	}
+
+	j.lastTick = c.Now()
+
 	if !j.schedule.ShouldRun(c) && !force {
 		return true, nil
 	}
@@ -31,7 +75,12 @@ func (j *Job) Tick(c core.Clock, force bool) (bool, error) {
 	core.Info(fmt.Sprintf("\tRunning Job %d", j.Id()))
 	err := j.handler.Tick(c)
 	if err != nil {
+		// If the job fails we don't want to immediately retry.
+		j.Backoff()
 		return true, err
+	} else {
+		j.backoffCount = 0
+		j.backoffTime = time.Duration(0)
 	}
 
 	j.schedule.MarkRun(c)
@@ -40,9 +89,12 @@ func (j *Job) Tick(c core.Clock, force bool) (bool, error) {
 
 func CreateJobFromTaskMetadata(task core.ScheduledTaskMetadata, schedule *Schedule) (*Job, error) {
 	job := Job{
-		id:       task.Id,
-		schedule: schedule,
-		typ:      task.TaskType,
+		id:           task.Id,
+		schedule:     schedule,
+		typ:          task.TaskType,
+		backoffCount: 0,
+		backoffTime:  time.Duration(0),
+		lastTick:     time.Now(),
 	}
 
 	switch task.TaskType {
