@@ -189,7 +189,8 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
     ./download_istio.sh
     ```
 - Add the Istio binary directory to your `$PATH` (`$SRC/dependencies/istio/bin`).
-
+- Copy the the shared library files under `dependencies/sap-nw-rfc/nwrfcsdk/lib` to `/usr/lib`.
+- Set the full path of the `dependencies/sap-nw-rfc/nwrfcsdk/lib` folder as `SAP_NW_RFC_SDK` in `build/variables.bzl`.
 
 ## Setup Google Cloud
 

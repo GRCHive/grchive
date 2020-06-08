@@ -1,0 +1,18 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+
+go_binary(
+    name = "bin",
+    srcs = glob([
+        "*.go",
+    ]),
+    data = [
+        "//src/webserver/config:config",
+        "//devops/gcloud:gcloud-webserver-account.json",
+    ],
+    deps = [
+        "//src/core/golang/core:webserver_core_library",
+        "//dependencies/sap-nw-rfc/sap-gorfc:gorfc",
+    ],
+)
