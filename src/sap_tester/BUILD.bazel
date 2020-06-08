@@ -14,5 +14,6 @@ go_binary(
     deps = [
         "//src/core/golang/core:webserver_core_library",
         "//dependencies/sap-nw-rfc/sap-gorfc:gorfc",
+        "@com_github_txn2_txeh//:go_default_library",
     ],
 )

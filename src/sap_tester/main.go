@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/sap/gorfc/gorfc"
+	"github.com/txn2/txeh"
 	"gitlab.com/grchive/grchive/core"
 )
 
@@ -10,16 +11,35 @@ func main() {
 	client := flag.String("client", "", "SAP Client.")
 	sys := flag.String("sys", "", "SAP System Number.")
 	host := flag.String("host", "", "SAP Hostname.")
+	hostOverride := flag.String("override", "", "SAP Hostname.")
 	username := flag.String("username", "", "SAP Username.")
 	password := flag.String("password", "", "SAP Password.")
 	flag.Parse()
+
+	hostname := *host
+	if *hostOverride != "" {
+		hsts, err := txeh.NewHostsDefault()
+		if err != nil {
+			core.Error(err.Error())
+		}
+
+		hsts.AddHost(*host, *hostOverride)
+
+		core.Info(hsts.RenderHostsFile())
+		err = hsts.Save()
+		if err != nil {
+			core.Error(err.Error())
+		}
+
+		hostname = *hostOverride
+	}
 
 	system := gorfc.ConnectionParameters{
 		"client": *client,
 		"user":   *username,
 		"passwd": *password,
 		"lang":   "EN",
-		"ashost": *host,
+		"ashost": hostname,
 		"sysnr":  *sys,
 	}
 

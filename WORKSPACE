@@ -891,6 +891,12 @@ go_repository(
     version = "v0.0.0-20190313210603-aa82965741a9",
 )
 
+go_repository(
+    name = "com_github_txn2_txeh",
+    importpath = "github.com/txn2/txeh",
+    tag = "v1.3.0",
+)
+
 
 # NODE
 http_archive(
