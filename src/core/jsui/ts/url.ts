@@ -503,3 +503,14 @@ export function apiv2SingleDatabase(orgId: number, dbId: number) : string{
 export function apiv2SingleDatabaseSettings(orgId: number, dbId: number) : string{
     return `${apiv2SingleDatabase(orgId, dbId)}/settings`
 }
+
+export const integrationBaseUrl = "integration"
+export const sapErpIntegrationBaseUrl = `${integrationBaseUrl}/sap/erp`
+
+export function apiv2SingleIntegrationUrl(orgId: number, integrationId: number) : string {
+    return createOrgApiv2Url(orgId, `${integrationBaseUrl}/${integrationId}`)
+}
+
+export function apiv2SingleSapErpIntegrationUrl(orgId: number, integrationId: number) : string {
+    return `${apiv2SingleIntegrationUrl(orgId, integrationId)}/sap/erp`
+}

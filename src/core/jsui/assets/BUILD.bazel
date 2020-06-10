@@ -30,6 +30,7 @@ filegroup(
     srcs = [
         ":corejsui-image-assets",
     ] + glob([
-        "icons/**/*.svg"
+        "icons/**/*.svg",
+        "logos/**/*.png",
     ])
 )

@@ -10,6 +10,7 @@ go_library(
     importpath = "gitlab.com/grchive/grchive/database",
     deps = [
         "//src/core/golang/core:webserver_core_library",
+        "//src/sap_api/golang:lib",
         "@com_github_jmoiron_sqlx//:go_default_library",
         "@com_github_jmoiron_sqlx//types:go_default_library",
         "@com_github_teambition_rrule_go//:go_default_library",

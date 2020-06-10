@@ -25,6 +25,8 @@ const (
 	ServerConnectionSshPasswordContextKey = "SERVERCONNECTIONSSHPASSWORD"
 	ServerConnectionSshKeyContextKey      = "SERVERCONNECTIONSSHKEY"
 	DatabaseContextKey                    = "DATABASE"
+	SystemContextKey                      = "SYSTEM"
+	GenericIntegrationContextKey          = "INTEGRATION"
 )
 
 func AddSessionToContext(session *core.UserSession, ctx context.Context) context.Context {
@@ -163,6 +165,22 @@ func FindDatabaseInContext(ctx context.Context) (*core.Database, error) {
 	resource, ok := ctx.Value(DatabaseContextKey).(*core.Database)
 	if !ok || resource == nil {
 		return nil, errors.New("Failed to find Database in context.")
+	}
+	return resource, nil
+}
+
+func FindSystemInContext(ctx context.Context) (*core.System, error) {
+	resource, ok := ctx.Value(SystemContextKey).(*core.System)
+	if !ok || resource == nil {
+		return nil, errors.New("Failed to find System in context.")
+	}
+	return resource, nil
+}
+
+func FindGenericIntegrationInContext(ctx context.Context) (*core.GenericIntegration, error) {
+	resource, ok := ctx.Value(GenericIntegrationContextKey).(*core.GenericIntegration)
+	if !ok || resource == nil {
+		return nil, errors.New("Failed to find GenericIntegration in context.")
 	}
 	return resource, nil
 }

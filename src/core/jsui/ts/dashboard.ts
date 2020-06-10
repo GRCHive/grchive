@@ -1,6 +1,5 @@
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
-import './highlight'
 import './vueInit'
 
 import vueOpts from  './vueSetup'

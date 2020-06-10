@@ -21,6 +21,8 @@ func registerAPIv2Org(r *mux.Router) {
 	registerAPIv2RequestsPaths(s)
 	registerAPIv2ServerPaths(s)
 	registerAPIv2DatabasePaths(s)
+	registerAPIv2SystemPaths(s)
+	registerAPIv2IntegrationPaths(s)
 }
 
 func registerAPIv2DatabasePaths(r *mux.Router) {
@@ -276,4 +278,62 @@ func registerAPIv2RequestsPaths(r *mux.Router) {
 	singleReqRouter.HandleFunc("/", editGenericRequest).Methods("PUT")
 	singleReqRouter.HandleFunc("/", deleteGenericRequest).Methods("DELETE")
 	singleReqRouter.HandleFunc("/approval", getGenericApproval).Methods("GET")
+}
+
+func registerAPIv2SystemPaths(r *mux.Router) {
+	s := r.PathPrefix("/system").Subrouter()
+
+	singleSystemRouter := s.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgSystemQueryId)).Subrouter()
+	singleSystemRouter.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgSystemQueryId))
+	registerAPIv2SystemIntegrationPaths(singleSystemRouter)
+}
+
+// This function currently assumes that the only time we deal with integrations is under the context of a system.
+func registerAPIv2SystemIntegrationPaths(r *mux.Router) {
+	s := r.PathPrefix("/integration").Subrouter()
+	s.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			allIntegrations,
+			core.ResourceAccessBundle{core.ResourceSystems, core.AccessView},
+		),
+	)
+
+	sapErpRouter := s.PathPrefix("/sap/erp").Subrouter()
+	sapErpRouter.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			newSapErpIntegration,
+			core.ResourceAccessBundle{core.ResourceSystems, core.AccessEdit},
+		),
+	).Methods("POST")
+}
+
+func registerAPIv2IntegrationPaths(r *mux.Router) {
+	s := r.PathPrefix("/integration").Subrouter()
+
+	ss := s.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgIntegrationQueryId)).Subrouter()
+	ss.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgIntegrationQueryId))
+
+	ss.HandleFunc(
+		"/",
+		editGenericIntegration,
+	).Methods("PUT")
+
+	ss.HandleFunc(
+		"/",
+		deleteGenericIntegration,
+	).Methods("DELETE")
+
+	ssSapErp := ss.PathPrefix("/sap/erp").Subrouter()
+	ssSapErp.HandleFunc(
+		"/",
+		getSapErpIntegration,
+	).Methods("GET")
+
+	ssSapErp.HandleFunc(
+		"/",
+		editSapErpIntegration,
+	).Methods("PUT")
+
 }

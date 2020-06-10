@@ -8,9 +8,9 @@
 [[end]]
 
 [[define "js"]]
-<% for (key in htmlWebpackPlugin.files.chunks) { %>
+<% for (key in htmlWebpackPlugin.files.js) { %>
 <script
-    src="<%= htmlWebpackPlugin.files.chunks[key].entry %>"
+    src="<%= htmlWebpackPlugin.files.js[key] %>"
     type="text/javascript"
 >
 </script>

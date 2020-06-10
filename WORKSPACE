@@ -909,10 +909,9 @@ load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories", "npm_install"
 
 node_repositories(
     package_json = ["//src/core/jsui:package.json"],
-    node_version = "13.4.0",
+    node_version = "14.4.0",
     node_repositories = {
-        "13.4.0-linux_amd64": ("node-v13.4.0-linux-x64.tar.gz", "node-v13.4.0-linux-x64", "63411f61d4156b1f3ee6f088b855a1cebea3ab32a0cabc28419f8b6cc3ffa161"),
-        "13.4.0-darwin_amd64": ("node-v13.4.0-darwin-x64.tar.gz", "node-v13.4.0-darwin-x64", "4de08a89054416595228d6ff40fcf20c375d00556f2e95dfde8602cbb42c0b6e"),
+        "14.4.0-linux_amd64": ("node-v14.4.0-linux-x64.tar.gz", "node-v14.4.0-linux-x64", "8e219f15f496d975910c3964d7ccb7b88d4dc68992b52a18396e05280b1cd642"),
     },
     node_urls = ["https://nodejs.org/dist/v{version}/{filename}"],
 )

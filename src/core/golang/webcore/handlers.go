@@ -452,6 +452,22 @@ func CreateObtainResourceInContextMiddleware(queryId string) mux.MiddlewareFunc 
 					return
 				}
 				ctx = context.WithValue(r.Context(), DatabaseContextKey, db)
+			case core.DashboardOrgSystemQueryId:
+				sys, err := database.GetSystem(queryInt, org.Id, core.ServerRole)
+				if err != nil {
+					core.Warning("Failed to get system: " + core.ErrorString(err))
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				ctx = context.WithValue(r.Context(), SystemContextKey, sys)
+			case core.DashboardOrgIntegrationQueryId:
+				integration, err := database.GetGenericIntegration(queryInt)
+				if err != nil {
+					core.Warning("Failed to get generic integration: " + core.ErrorString(err))
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				ctx = context.WithValue(r.Context(), GenericIntegrationContextKey, integration)
 			default:
 				w.WriteHeader(http.StatusBadRequest)
 				return

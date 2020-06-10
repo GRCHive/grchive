@@ -140,4 +140,7 @@ module.exports = {
         },
         extensions: ['.ts', '.js', '.vue', '.json',]
     },
+    node: {
+        fs: "empty"
+    }
 };

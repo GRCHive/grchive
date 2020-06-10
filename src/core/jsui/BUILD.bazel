@@ -94,4 +94,3 @@ genrule(
             cp \"dist/`basename $$X`\" $$X;\
         done",
 )
-

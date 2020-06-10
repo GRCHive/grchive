@@ -172,6 +172,12 @@
                         </v-row>
                     </v-tab-item>
 
+                    <v-tab>Integrations</v-tab>
+                    <v-tab-item>
+                        <integration-manager :system-id="currentSystem.Id">
+                        </integration-manager>
+                    </v-tab-item>
+
                     <v-tab>Audit Trail</v-tab>
                     <v-tab-item>
                         <audit-trail-viewer
@@ -212,6 +218,7 @@ import RiskTable from '../../generic/RiskTable.vue'
 import ControlTable from '../../generic/ControlTable.vue'
 import ProcessFlowTable from '../../generic/ProcessFlowTable.vue'
 import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
+import IntegrationManager from '../../generic/integrations/IntegrationManager.vue'
 
 @Component({
     components: {
@@ -223,7 +230,8 @@ import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
         RiskTable,
         ControlTable,
         ProcessFlowTable,
-        AuditTrailViewer
+        AuditTrailViewer,
+        IntegrationManager,
     }
 })
 export default class FullEditSystemComponent extends Vue {
