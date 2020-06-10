@@ -18,6 +18,9 @@ spec:
             containers:
                 - name: drone-runner-container
                   image: ${DRONE_RUNNER_IMAGE}
+                  env:
+                    - name: "DRONE_NAMESPACE_DEFAULT"
+                      value: "backend"
                   resources:
                         requests:
                             cpu: "10m"

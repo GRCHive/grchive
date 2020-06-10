@@ -1,0 +1,2 @@
+ALTER TABLE db_refresh_diff_message_recipients 
+DROP CONSTRAINT db_refresh_diff_message_recipients_db_id_key;

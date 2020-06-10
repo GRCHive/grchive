@@ -2,7 +2,15 @@ kind: pipeline
 type: {{ .DRONE_RUNNER_TYPE }}
 name: default
 
+clone:
+    disable: true
+
 steps:
+- name: clone
+  image: drone/git:latest
+  commands:
+  - sleep 5
+  - /usr/local/bin/clone
 - name: build
   image: {{ .DRONE_RUNNER_IMAGE }}
   pull: {{ .DRONE_RUNNER_IMAGE_PULL }}

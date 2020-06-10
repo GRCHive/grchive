@@ -53,7 +53,10 @@ func main() {
 
 		forever := make(chan bool)
 
-		webcore.DefaultRabbitMQ.ReceiveMessages(webcore.DATABASE_REFRESH_QUEUE, processRefreshRequestMessage)
+		err := webcore.DefaultRabbitMQ.ReceiveMessages(webcore.DATABASE_REFRESH_QUEUE, processRefreshRequestMessage)
+		if err != nil {
+			core.Error("Failed to receive messages: " + err.Error())
+		}
 
 		<-forever
 	}

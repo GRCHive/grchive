@@ -64,7 +64,17 @@ func InitListeners(config map[string]ListenHandler) {
 		defer listener.Close()
 		for {
 			n := <-listener.Notify
-			handler := config[n.Channel]
+			// I believe the listener channel has a 1hr timeout for its context
+			// or something which is the reason why we get spit out nil values sometimes.
+			if n == nil {
+				continue
+			}
+
+			handler, ok := config[n.Channel]
+			if !ok {
+				continue
+			}
+
 			err = handler(n.Extra)
 			if err != nil {
 				core.Warning("Failed to handle DB notify: " + err.Error())
