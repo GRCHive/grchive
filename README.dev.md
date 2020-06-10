@@ -482,6 +482,18 @@ If you wish to run the Docker container:
 
 - `bazel run //devops/docker/shell_runner:latest`
 
+## Build and Run Integration Runner
+
+The shell runner is responsible for executing Bash/Powershell scripts on remote servers.
+
+- `cd $SRC`
+- `bazel build //src/integration_runner:frontend`
+- `bazel run //src/integration_runner:frontend`
+
+If you wish to run the Docker container:
+
+- `bazel run //devops/docker/integration_runner:latest`
+
 ## Deploy Kotlin Library
 
 - `bazel run //src/core/kotlin:deploy`

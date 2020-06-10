@@ -1,0 +1,8 @@
+exports_files([
+    "libicudata.so.50",
+    "libicudecnumber.so",
+    "libicui18n.so.50",
+    "libicuuc.so.50",
+    "libsapnwrfc.so",
+    "libsapucum.so",
+])
