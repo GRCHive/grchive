@@ -30,5 +30,15 @@ func main() {
 			core.Error("Failed to run SAP ERP: " + err.Error())
 		}
 	} else {
+		webcore.DefaultRabbitMQ.Connect(*core.EnvConfig.RabbitMQ, webcore.MQClientConfig{
+			ConsumerQos: 3,
+		}, core.EnvConfig.Tls)
+		defer webcore.DefaultRabbitMQ.Cleanup()
+
+		forever := make(chan bool)
+
+		webcore.DefaultRabbitMQ.ReceiveMessages(webcore.SAP_ERP_RFC_QUEUE, handleSapErpVersionMQ)
+
+		<-forever
 	}
 }

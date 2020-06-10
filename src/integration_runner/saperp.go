@@ -9,6 +9,21 @@ import (
 	"gitlab.com/grchive/grchive/webcore"
 )
 
+func handleSapErpVersionMQ(data []byte) *webcore.RabbitMQError {
+	msg := webcore.SapErpRfcMessage{}
+	core.Info("RUN SAP ERP RFC: " + string(data))
+	err := json.Unmarshal(data, &msg)
+	if err != nil {
+		return &webcore.RabbitMQError{err, false}
+	}
+
+	err = handleSapErpVersionWrapper(msg.VersionId, msg.RfcId)
+	if err != nil {
+		return &webcore.RabbitMQError{err, true}
+	}
+	return nil
+}
+
 func handleSapErpVersionWrapper(versionId int64, rfcId int64) error {
 	data, err := handleSapErpVersion(versionId, rfcId)
 
