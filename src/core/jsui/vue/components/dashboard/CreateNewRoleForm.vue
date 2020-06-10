@@ -188,6 +188,24 @@
             :disabled="!canEdit"
         ></access-type-editor>
 
+        <access-type-editor
+            label="Shell Script Runs"
+            v-model="permissions.ShellScriptRunsAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+
+        <access-type-editor
+            label="Integrations"
+            v-model="permissions.IntegrationAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+
+        <access-type-editor
+            label="SAP ERP"
+            v-model="permissions.SapErpAccess"
+            :disabled="!canEdit"
+        ></access-type-editor>
+
         <v-divider></v-divider>
     </v-form>
 

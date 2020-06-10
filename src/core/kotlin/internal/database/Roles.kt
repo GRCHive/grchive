@@ -34,7 +34,10 @@ internal val resourceToDatabaseMap = mapOf(
     Resources.ResourceClientScripts to                "resource_client_scripts_access",
     Resources.ResourceScriptRun to                    "resource_script_run_access",
     Resources.ResourceBuildLog to                     "resource_build_log_access",
-    Resources.ResourceShell to                        "resource_shell_scripts_access"
+    Resources.ResourceShell to                        "resource_shell_scripts_access",
+    Resources.ResourceShellRun to                     "resource_shell_script_runs_access",
+    Resources.ResourceIntegrations to                 "resource_integrations_access",
+    Resources.ResourceSapErp to                       "resource_sap_erp_access"
 )
 
 internal val resourceToColumnName = mapOf(
@@ -61,7 +64,10 @@ internal val resourceToColumnName = mapOf(
     Resources.ResourceClientScripts to                "permissions_client_scripts_access",
     Resources.ResourceScriptRun to                    "permissions_script_run_access",
     Resources.ResourceBuildLog to                     "permissions_build_log_access",
-    Resources.ResourceShell to                        "permissions_shell_script_access"
+    Resources.ResourceShell to                        "permissions_shell_script_access",
+    Resources.ResourceShellRun to                     "permissions_shell_script_run_access",
+    Resources.ResourceIntegrations to                 "permissions_integration_access",
+    Resources.ResourceSapErp to                       "permissions_sap_erp_access"
 )
 
 private fun createResourceSelect() : String {

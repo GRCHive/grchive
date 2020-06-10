@@ -63,6 +63,9 @@ fun unionAccessType(vararg v : AccessType) : Int {
  * @property scriptRunAccess
  * @property buildLogAccess
  * @property shellScriptAccess
+ * @property shellScriptRunAccess
+ * @property integrationAccess
+ * @property sapErpAccess
  */
 data class RolePermissions (
     @field:GrchiveResource(Resources.ResourceOrgUsers) @ColumnName("users_access")
@@ -112,7 +115,13 @@ data class RolePermissions (
     @field:GrchiveResource(Resources.ResourceBuildLog) @ColumnName("build_log_access")
     val buildLogAccess : Int,
     @field:GrchiveResource(Resources.ResourceShell) @ColumnName("shell_script_access")
-    val shellScriptAccess : Int
+    val shellScriptAccess : Int,
+    @field:GrchiveResource(Resources.ResourceShellRun) @ColumnName("shell_script_run_access")
+    val shellScriptRunAccess : Int,
+    @field:GrchiveResource(Resources.ResourceIntegrations) @ColumnName("integration_access")
+    val integrationAccess : Int,
+    @field:GrchiveResource(Resources.ResourceSapErp) @ColumnName("sap_erp_access")
+    val sapErpAccess : Int
 )
 
 fun emptyRolePermissions() : RolePermissions {
@@ -140,7 +149,10 @@ fun emptyRolePermissions() : RolePermissions {
         AccessType.None.bit /* clientScriptAccess */,
         AccessType.None.bit /* scriptRunAccess*/,
         AccessType.None.bit /* buildLogAccess*/,
-        AccessType.None.bit /* shellScriptAccess*/
+        AccessType.None.bit /* shellScriptAccess*/,
+        AccessType.None.bit /* shellScriptRunAccess*/,
+        AccessType.None.bit /* integrationAccess*/,
+        AccessType.None.bit /* sapErpAccess*/
     )
 }
 
@@ -169,7 +181,10 @@ fun fullRolePermissions() : RolePermissions {
         AccessType.All.bit /* clientScriptAccess */,
         AccessType.All.bit /* scriptRunAccess*/,
         AccessType.All.bit /* buildLogAccess*/,
-        AccessType.All.bit /* shellScriptAccess*/
+        AccessType.All.bit /* shellScriptAccess*/,
+        AccessType.All.bit /* shellScriptRunAccess*/,
+        AccessType.All.bit /* integrationAccess*/,
+        AccessType.All.bit /* sapErpAccess*/
     )
 }
 
@@ -206,6 +221,9 @@ fun getRolePermissionForResource(p : RolePermissions, r : Resources) : Int {
         Resources.ResourceScriptRun -> p.scriptRunAccess
         Resources.ResourceBuildLog -> p.buildLogAccess
         Resources.ResourceShell -> p.shellScriptAccess
+        Resources.ResourceShellRun -> p.shellScriptRunAccess
+        Resources.ResourceIntegrations -> p.integrationAccess
+        Resources.ResourceSapErp -> p.sapErpAccess
     }
 }
 

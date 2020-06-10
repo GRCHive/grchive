@@ -44,6 +44,8 @@ const (
 	ResourceBuildLog
 	ResourceShell
 	ResourceShellRun
+	ResourceIntegrations
+	ResourceSapErp
 )
 
 var AvailableResources []ResourceType = []ResourceType{
@@ -72,6 +74,8 @@ var AvailableResources []ResourceType = []ResourceType{
 	ResourceBuildLog,
 	ResourceShell,
 	ResourceShellRun,
+	ResourceIntegrations,
+	ResourceSapErp,
 }
 
 type ResourceAccessBundle struct {
@@ -105,6 +109,8 @@ type PermissionsMap struct {
 	BuildLogAccess             AccessType `db:"build_log_access"`
 	ShellScriptAccess          AccessType `db:"shell_script_access"`
 	ShellScriptRunsAccess      AccessType `db:"shell_script_runs_access"`
+	IntegrationAccess          AccessType `db:"integration_access"`
+	SapErpAccess               AccessType `db:"sap_erp_access"`
 }
 
 type RoleMetadata struct {
@@ -153,6 +159,8 @@ func CreateViewOnlyAccessPermission() PermissionsMap {
 		BuildLogAccess:             AccessView,
 		ShellScriptAccess:          AccessView,
 		ShellScriptRunsAccess:      AccessView,
+		IntegrationAccess:          AccessView,
+		SapErpAccess:               AccessView,
 	}
 }
 
@@ -183,6 +191,8 @@ func CreateAllAccessPermission() PermissionsMap {
 		BuildLogAccess:             CreateOwnerAccessType(),
 		ShellScriptAccess:          CreateOwnerAccessType(),
 		ShellScriptRunsAccess:      CreateOwnerAccessType(),
+		IntegrationAccess:          CreateOwnerAccessType(),
+		SapErpAccess:               CreateOwnerAccessType(),
 	}
 }
 
@@ -268,6 +278,10 @@ func (p PermissionsMap) GetAccessType(resource ResourceType) AccessType {
 		return p.ShellScriptAccess
 	case ResourceShellRun:
 		return p.ShellScriptRunsAccess
+	case ResourceIntegrations:
+		return p.IntegrationAccess
+	case ResourceSapErp:
+		return p.SapErpAccess
 	}
 	return AccessNone
 }
@@ -324,6 +338,10 @@ func (p *PermissionsMap) SetAccessType(resource ResourceType, access AccessType)
 		p.ShellScriptAccess = access
 	case ResourceShellRun:
 		p.ShellScriptRunsAccess = access
+	case ResourceIntegrations:
+		p.IntegrationAccess = access
+	case ResourceSapErp:
+		p.SapErpAccess = access
 	}
 }
 

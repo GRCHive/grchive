@@ -296,6 +296,7 @@ func registerAPIv2SystemIntegrationPaths(r *mux.Router) {
 		webcore.CreateACLCheckPermissionHandler(
 			allIntegrations,
 			core.ResourceAccessBundle{core.ResourceSystems, core.AccessView},
+			core.ResourceAccessBundle{core.ResourceIntegrations, core.AccessView},
 		),
 	)
 
@@ -305,6 +306,8 @@ func registerAPIv2SystemIntegrationPaths(r *mux.Router) {
 		webcore.CreateACLCheckPermissionHandler(
 			newSapErpIntegration,
 			core.ResourceAccessBundle{core.ResourceSystems, core.AccessEdit},
+			core.ResourceAccessBundle{core.ResourceIntegrations, core.AccessManage},
+			core.ResourceAccessBundle{core.ResourceSapErp, core.AccessManage},
 		),
 	).Methods("POST")
 }
@@ -317,23 +320,35 @@ func registerAPIv2IntegrationPaths(r *mux.Router) {
 
 	ss.HandleFunc(
 		"/",
-		editGenericIntegration,
+		webcore.CreateACLCheckPermissionHandler(
+			editGenericIntegration,
+			core.ResourceAccessBundle{core.ResourceIntegrations, core.AccessEdit},
+		),
 	).Methods("PUT")
 
 	ss.HandleFunc(
 		"/",
-		deleteGenericIntegration,
+		webcore.CreateACLCheckPermissionHandler(
+			deleteGenericIntegration,
+			core.ResourceAccessBundle{core.ResourceIntegrations, core.AccessManage},
+		),
 	).Methods("DELETE")
 
 	ssSapErp := ss.PathPrefix("/sap/erp").Subrouter()
 	ssSapErp.HandleFunc(
 		"/",
-		getSapErpIntegration,
+		webcore.CreateACLCheckPermissionHandler(
+			getSapErpIntegration,
+			core.ResourceAccessBundle{core.ResourceSapErp, core.AccessView},
+		),
 	).Methods("GET")
 
 	ssSapErp.HandleFunc(
 		"/",
-		editSapErpIntegration,
+		webcore.CreateACLCheckPermissionHandler(
+			editSapErpIntegration,
+			core.ResourceAccessBundle{core.ResourceSapErp, core.AccessEdit},
+		),
 	).Methods("PUT")
 
 }

@@ -24,7 +24,10 @@ enum class Resources {
     ResourceClientScripts,
     ResourceScriptRun,
     ResourceBuildLog,
-    ResourceShell
+    ResourceShell,
+    ResourceShellRun,
+    ResourceIntegrations,
+    ResourceSapErp
 }
 
 /**

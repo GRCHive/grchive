@@ -47,7 +47,10 @@ class RoleTest: StringSpec({
         unionAccessType(AccessType.Manage) /* clientScriptAccess */,
         unionAccessType(AccessType.Edit, AccessType.Manage) /* scriptRunAccess */,
         unionAccessType(AccessType.Edit) /* buildLogAccess */,
-        unionAccessType(AccessType.View, AccessType.Manage) /* shellScriptAccess */
+        unionAccessType(AccessType.View, AccessType.Manage) /* shellScriptAccess */,
+        unionAccessType(AccessType.View) /* shellScriptRunAccess */,
+        unionAccessType(AccessType.Edit) /* integrationAccess */,
+        unionAccessType(AccessType.Manage) /* sapErpAccess */
     )
 
     val pg = KotestGrchivePgContainer {
