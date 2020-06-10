@@ -70,6 +70,7 @@ RUN mkdir -p /gcloud
 RUN curl -o /gcloud/cloud_sql_proxy https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
 RUN chmod +x /gcloud/cloud_sql_proxy
 ENV PATH="/gcloud:${PATH}"
+ENV SAP_NW_RFC_SDK="/builds/grchive/grchive/dependencies/sap-nw-rfc/nwrfcsdk"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["bash"]
