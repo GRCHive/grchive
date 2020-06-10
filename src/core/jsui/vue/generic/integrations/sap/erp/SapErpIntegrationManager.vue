@@ -106,6 +106,10 @@
                 RFC
             </v-tab>
             <v-tab-item>
+                <sap-erp-rfc-manager
+                    :integration="integration"
+                >
+                </sap-erp-rfc-manager>
             </v-tab-item>
         </v-tabs>
 
@@ -133,11 +137,13 @@ import { contactUsUrl } from '../../../../../ts/url'
 import { PageParamsStore } from '../../../../../ts/pageParams'
 import GenericIntegrationForm from '../../GenericIntegrationForm.vue'
 import SapErpSetup from './SapErpSetup.vue'
+import SapErpRfcManager from './SapErpRfcManager.vue'
 
 @Component({
     components: {
         GenericIntegrationForm,
         SapErpSetup,
+        SapErpRfcManager,
     }
 })
 export default class SapErpIntegrationManager extends Vue {

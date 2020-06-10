@@ -351,4 +351,60 @@ func registerAPIv2IntegrationPaths(r *mux.Router) {
 		),
 	).Methods("PUT")
 
+	ssSapErpRfc := ssSapErp.PathPrefix("/rfc").Subrouter()
+	ssSapErpRfc.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			allSapErpRfc,
+			core.ResourceAccessBundle{core.ResourceSapErp, core.AccessView},
+		),
+	).Methods("GET")
+
+	ssSapErpRfc.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			newSapErpRfc,
+			core.ResourceAccessBundle{core.ResourceSapErp, core.AccessEdit},
+		),
+	).Methods("POST")
+
+	ssSapErpRfcSingle := ssSapErpRfc.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgSapErpRfcQueryId)).Subrouter()
+	ssSapErpRfcSingle.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgSapErpRfcQueryId))
+
+	ssSapErpRfcSingle.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			deleteSapErpRfc,
+			core.ResourceAccessBundle{core.ResourceSapErp, core.AccessEdit},
+		),
+	).Methods("DELETE")
+
+	ssSapErpRfcSingleVersions := ssSapErpRfcSingle.PathPrefix("/version").Subrouter()
+	ssSapErpRfcSingleVersions.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			allSapErpRfcVersions,
+			core.ResourceAccessBundle{core.ResourceSapErp, core.AccessView},
+		),
+	).Methods("GET")
+
+	ssSapErpRfcSingleVersions.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			newSapErpRfcVersion,
+			core.ResourceAccessBundle{core.ResourceSapErp, core.AccessEdit},
+		),
+	).Methods("POST")
+
+	ssSapErpRfcSingleVersionSingle := ssSapErpRfcSingleVersions.PathPrefix(
+		fmt.Sprintf("/{%s}", core.DashboardOrgSapErpRfcVersionQueryId),
+	).Subrouter()
+	ssSapErpRfcSingleVersionSingle.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgSapErpRfcVersionQueryId))
+	ssSapErpRfcSingleVersionSingle.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			getSapErpRfcVersion,
+			core.ResourceAccessBundle{core.ResourceSapErp, core.AccessView},
+		),
+	).Methods("GET")
 }

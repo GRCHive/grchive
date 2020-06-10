@@ -8,5 +8,6 @@ go_library(
     importpath = "gitlab.com/grchive/grchive/sap_api",
     deps = [
         "//src/core/golang/core:webserver_core_library",
+        "//dependencies/sap-nw-rfc/sap-gorfc:gorfc",
     ],
 )

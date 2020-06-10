@@ -16,6 +16,7 @@ import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/material.css'
 import 'codemirror/addon/display/autorefresh.js'
 
+import ( /* webpackChunkName: "codemirrorJavascriptMode" */ 'codemirror/mode/javascript/javascript.js')
 import ( /* webpackChunkName: "codemirrorClikeMode" */ 'codemirror/mode/clike/clike.js')
 import ( /* webpackChunkName: "codemirrorSqlMode" */ 'codemirror/mode/sql/sql.js')
 import ( /* webpackChunkName: "codemirrorShellMode" */ 'codemirror/mode/shell/shell.js')
@@ -42,6 +43,10 @@ export const Props = Vue.extend({
         fixedWidth: {
             type: Number,
             default: -1,
+        },
+        fixedHeight: {
+            type: String,
+            default: "",
         },
         heightOffset: {
             type: Number,
@@ -84,7 +89,9 @@ export default class GenericCodeEditor extends Props {
             this.$emit('input', this.cm!.getValue())
         })
 
-        if (this.fullHeight) {
+        if (this.fixedHeight != "") {
+            this.cm!.setSize(null, this.fixedHeight)
+        } else if (this.fullHeight) {
             this.cm!.setSize(null, this.desiredHeight)
         }
 

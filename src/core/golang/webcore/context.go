@@ -27,6 +27,8 @@ const (
 	DatabaseContextKey                    = "DATABASE"
 	SystemContextKey                      = "SYSTEM"
 	GenericIntegrationContextKey          = "INTEGRATION"
+	SapErpRfcContextKey                   = "SAPERPRFC"
+	SapErpRfcVersionContextKey            = "SAPERPRFCVERSION"
 )
 
 func AddSessionToContext(session *core.UserSession, ctx context.Context) context.Context {
@@ -181,6 +183,22 @@ func FindGenericIntegrationInContext(ctx context.Context) (*core.GenericIntegrat
 	resource, ok := ctx.Value(GenericIntegrationContextKey).(*core.GenericIntegration)
 	if !ok || resource == nil {
 		return nil, errors.New("Failed to find GenericIntegration in context.")
+	}
+	return resource, nil
+}
+
+func FindSapErpRfcInContext(ctx context.Context) (*core.SapErpRfc, error) {
+	resource, ok := ctx.Value(SapErpRfcContextKey).(*core.SapErpRfc)
+	if !ok || resource == nil {
+		return nil, errors.New("Failed to find SapErpRfc in context.")
+	}
+	return resource, nil
+}
+
+func FindSapErpRfcVersionInContext(ctx context.Context) (*core.SapErpRfcVersion, error) {
+	resource, ok := ctx.Value(SapErpRfcVersionContextKey).(*core.SapErpRfcVersion)
+	if !ok || resource == nil {
+		return nil, errors.New("Failed to find SapErpRfcVersion in context.")
 	}
 	return resource, nil
 }

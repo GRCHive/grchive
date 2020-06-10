@@ -3,7 +3,6 @@ package database
 import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
-	"gitlab.com/grchive/grchive/sap_api"
 )
 
 func NewIntegrationWithTx(tx *sqlx.Tx, integration *core.GenericIntegration) error {
@@ -18,28 +17,6 @@ func NewIntegrationWithTx(tx *sqlx.Tx, integration *core.GenericIntegration) err
 	defer rows.Close()
 	rows.Next()
 	return rows.Scan(&integration.Id)
-}
-
-func NewSapErpIntegrationWithTx(tx *sqlx.Tx, integrationId int64, setup sap_api.SapRfcConnectionOptions) error {
-	_, err := tx.NamedExec(`
-		INSERT INTO sap_erp_integration_info (integration_id, client, sysnr, host, real_hostname, username, password)
-		VALUES (
-			:integration_id,
-			:setup.client,
-			:setup.sysnr,
-			:setup.host,
-			:setup.real_hostname,
-			:setup.username,
-			:setup.password
-		)
-	`, struct {
-		IntegrationId int64                           `db:"integration_id"`
-		Setup         sap_api.SapRfcConnectionOptions `db:"setup"`
-	}{
-		IntegrationId: integrationId,
-		Setup:         setup,
-	})
-	return err
 }
 
 func LinkIntegrationWithSystemWithTx(tx *sqlx.Tx, integrationId int64, systemId int64, orgId int32) error {
@@ -87,41 +64,5 @@ func DeleteGenericIntegrationWithTx(tx *sqlx.Tx, integrationId int64) error {
 		DELETE FROM integrations
 		WHERE id = $1
 	`, integrationId)
-	return err
-}
-
-func GetSapErpIntegration(integrationId int64) (*sap_api.SapRfcConnectionOptions, error) {
-	connection := sap_api.SapRfcConnectionOptions{}
-	err := dbConn.Get(&connection, `
-		SELECT
-			client,
-			sysnr,
-			host,
-			real_hostname,
-			username,
-			password
-		FROM sap_erp_integration_info
-		WHERE integration_id = $1
-	`, integrationId)
-	return &connection, err
-}
-
-func EditSapErpIntegrationWithTx(tx *sqlx.Tx, integrationId int64, setup sap_api.SapRfcConnectionOptions) error {
-	_, err := tx.NamedExec(`
-		UPDATE sap_erp_integration_info
-		SET client = :setup.client,
-			sysnr = :setup.sysnr,
-			host = :setup.host,
-			real_hostname = :setup.real_hostname,
-			username = :setup.username,
-			password = :setup.password
-		WHERE integration_id = :integration_id
-	`, struct {
-		IntegrationId int64                           `db:"integration_id"`
-		Setup         sap_api.SapRfcConnectionOptions `db:"setup"`
-	}{
-		IntegrationId: integrationId,
-		Setup:         setup,
-	})
 	return err
 }

@@ -446,7 +446,7 @@ func CreateObtainResourceInContextMiddleware(queryId string) mux.MiddlewareFunc 
 				ctx = context.WithValue(r.Context(), ShellScriptRunContextKey, run)
 			case core.DashboardOrgDbQueryId:
 				db, err := database.GetDb(queryInt, org.Id, core.ServerRole)
-				if err != nil {
+				if err != nil || db.OrgId != org.Id {
 					core.Warning("Failed to get database: " + core.ErrorString(err))
 					w.WriteHeader(http.StatusInternalServerError)
 					return
@@ -454,7 +454,7 @@ func CreateObtainResourceInContextMiddleware(queryId string) mux.MiddlewareFunc 
 				ctx = context.WithValue(r.Context(), DatabaseContextKey, db)
 			case core.DashboardOrgSystemQueryId:
 				sys, err := database.GetSystem(queryInt, org.Id, core.ServerRole)
-				if err != nil {
+				if err != nil || sys.OrgId != org.Id {
 					core.Warning("Failed to get system: " + core.ErrorString(err))
 					w.WriteHeader(http.StatusInternalServerError)
 					return
@@ -462,12 +462,50 @@ func CreateObtainResourceInContextMiddleware(queryId string) mux.MiddlewareFunc 
 				ctx = context.WithValue(r.Context(), SystemContextKey, sys)
 			case core.DashboardOrgIntegrationQueryId:
 				integration, err := database.GetGenericIntegration(queryInt)
-				if err != nil {
+				if err != nil || integration.OrgId != org.Id {
 					core.Warning("Failed to get generic integration: " + core.ErrorString(err))
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
 				ctx = context.WithValue(r.Context(), GenericIntegrationContextKey, integration)
+			case core.DashboardOrgSapErpRfcQueryId:
+				rfc, err := database.GetSapErpRfc(queryInt)
+				if err != nil {
+					core.Warning("Failed to get SAP ERP RFC: " + core.ErrorString(err))
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+
+				integration, err := FindGenericIntegrationInContext(r.Context())
+				if err != nil {
+					core.Warning("Failed to get generic integration: " + core.ErrorString(err))
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+
+				if rfc.IntegrationId != integration.Id {
+					core.Warning("SAP ERP RFC integration ID mismatch.")
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+
+				ctx = context.WithValue(r.Context(), SapErpRfcContextKey, rfc)
+			case core.DashboardOrgSapErpRfcVersionQueryId:
+				rfc, err := FindSapErpRfcInContext(r.Context())
+				if err != nil {
+					core.Warning("Failed to get SAP ERP RFC in context: " + core.ErrorString(err))
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+
+				vers, err := database.GetSapErpRfcVersion(queryInt, rfc.Id)
+				if err != nil {
+					core.Warning("Failed to get SAP ERP RFC version: " + core.ErrorString(err))
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+
+				ctx = context.WithValue(r.Context(), SapErpRfcVersionContextKey, vers)
 			default:
 				w.WriteHeader(http.StatusBadRequest)
 				return

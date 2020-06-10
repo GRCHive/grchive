@@ -514,3 +514,19 @@ export function apiv2SingleIntegrationUrl(orgId: number, integrationId: number) 
 export function apiv2SingleSapErpIntegrationUrl(orgId: number, integrationId: number) : string {
     return `${apiv2SingleIntegrationUrl(orgId, integrationId)}/sap/erp`
 }
+
+export function apiv2SingleSapErpIntegrationRfcUrl(orgId: number, integrationId: number) : string {
+    return `${apiv2SingleSapErpIntegrationUrl(orgId, integrationId)}/rfc`
+}
+
+export function apiv2SingleSapErpIntegrationSingleRfcUrl(orgId: number, integrationId: number, rfcId : number) : string {
+    return `${apiv2SingleSapErpIntegrationRfcUrl(orgId, integrationId)}/${rfcId}`
+}
+
+export function apiv2SingleSapErpIntegrationSingleRfcVersionsUrl(orgId: number, integrationId: number, rfcId : number) : string {
+    return `${apiv2SingleSapErpIntegrationSingleRfcUrl(orgId, integrationId, rfcId)}/version`
+}
+
+export function apiv2SingleSapErpIntegrationSingleRfcSingleVersionUrl(orgId: number, integrationId: number, rfcId : number, versionId : number) : string {
+    return `${apiv2SingleSapErpIntegrationSingleRfcVersionsUrl(orgId, integrationId, rfcId)}/${versionId}`
+}

@@ -19,6 +19,7 @@ const EVENT_NOTIFICATION_QUEUE string = "eventnotification"
 const SCRIPT_RUNNER_QUEUE string = "scriptrun"
 const TASK_MANAGER_QUEUE string = "taskmanager"
 const SHELL_RUNNER_QUEUE string = "shellrun"
+const SAP_ERP_RFC_QUEUE string = "saperprfc"
 
 const (
 	NotificationQueueId int = iota
@@ -76,6 +77,11 @@ type TaskManagerMessage struct {
 
 type ShellRunnerMessage struct {
 	RunId int64
+}
+
+type SapErpRfcMessage struct {
+	RfcId     int64
+	VersionId int64
 }
 
 type RecvMsgFn func([]byte) *RabbitMQError
@@ -152,6 +158,19 @@ func SetupChannel(channel *amqp.Channel, cfg MQClientConfig, idx int, isConsume 
 
 	if err != nil {
 		core.Error("Failed to declare shell runner queue: " + err.Error())
+	}
+
+	_, err = channel.QueueDeclare(
+		SAP_ERP_RFC_QUEUE, // name
+		true,              // durable
+		false,             // auto delete
+		false,             // exclusive
+		false,             // no wait
+		nil,               // arguments
+	)
+
+	if err != nil {
+		core.Error("Failed to declare SAP ERP RFC: " + err.Error())
 	}
 
 	//
