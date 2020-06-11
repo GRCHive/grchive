@@ -8,20 +8,6 @@
     <v-divider></v-divider>
 
     <v-form class="ma-4" ref="form" v-model="formValid">
-        <v-text-field v-model="name"
-                      label="Name"
-                      filled
-                      :rules="[rules.required, rules.createMaxLength(255)]"
-                      :readonly="!canEdit"
-        ></v-text-field>
-
-        <v-textarea v-model="description"
-                    label="Description"
-                    filled
-                    :readonly="!canEdit"
-                    hide-details
-        ></v-textarea> 
-
         <user-search-form-component
             class="mt-4"
             label="Requester"
@@ -136,8 +122,6 @@ export default class CreateNewSqlRequestForm extends Props {
     canEdit: boolean = false
     formValid: boolean = false
 
-    name : string = ""
-    description: string = ""
     rules: any = rules
     assignee : User | null = null
     dueDate : Date | null = null
@@ -188,8 +172,6 @@ export default class CreateNewSqlRequestForm extends Props {
         updateSqlRequest({
             requestId: this.referenceRequest!.Id,
             orgId: PageParamsStore.state.organization!.Id,
-            name: this.name,
-            description: this.description,
             assigneeUserId: !!this.assignee ? this.assignee.Id : null,
             dueDate: this.dueDate,
         }).then((resp : TUpdateSqlRequestOutput) => {
@@ -210,8 +192,6 @@ export default class CreateNewSqlRequestForm extends Props {
         newSqlRequest({
             queryId: this.queryId,
             orgId: PageParamsStore.state.organization!.Id,
-            name: this.name,
-            description: this.description,
             assigneeUserId: !!this.assignee ? this.assignee.Id : null,
             dueDate: this.dueDate,
         }).then((resp : TNewSqlRequestOutput) => {
@@ -236,13 +216,9 @@ export default class CreateNewSqlRequestForm extends Props {
     @Watch('referenceRequest')
     clearForm() {
         if (!!this.referenceRequest) {
-            this.name = this.referenceRequest.Name
-            this.description = this.referenceRequest.Description
             this.assignee = MetadataStore.getters.getUser(this.referenceRequest.AssigneeUserId)
             this.dueDate = this.referenceRequest.DueDate
         } else {
-            this.name = ""
-            this.description = ""
             this.assignee = null
             this.dueDate = null
         }

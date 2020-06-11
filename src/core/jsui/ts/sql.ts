@@ -93,8 +93,6 @@ export interface DbSqlQueryRequest {
     AssigneeUserId  : number | null
     DueDate         : Date | null
     OrgId           : number
-    Name            : string
-    Description     : string
 }
 
 export function cleanDbSqlQueryFromJson(q : DbSqlQuery) {

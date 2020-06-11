@@ -98,8 +98,6 @@ type DbSqlQueryRequest struct {
 	AssigneeUserId NullInt64 `db:"assignee"`
 	DueDate        NullTime  `db:"due_date"`
 	OrgId          int32     `db:"org_id"`
-	Name           string    `db:"name"`
-	Description    string    `db:"description"`
 }
 
 func (r *DbSqlQueryRequest) UnmarshalJSON(data []byte) error {

@@ -8,7 +8,7 @@
             <v-list-item two-line class="pa-0">
                 <v-list-item-content id="reqTitle">
                     <v-list-item-title class="title">
-                        SQL Query Request: {{ currentRequest.Name }}
+                        SQL Query Request
                     </v-list-item-title>
 
                     <v-list-item-subtitle v-if="!!currentMetadata">

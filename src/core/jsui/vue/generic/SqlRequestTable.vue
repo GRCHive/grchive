@@ -38,10 +38,6 @@ export default class SqlRequestTable extends ResourceTableProps {
     get tableHeaders() : any[] {
         return [
             {
-                text: 'Name',
-                value: 'name',
-            },
-            {
                 text: 'Query',
                 value: 'query',
             },
@@ -239,16 +235,6 @@ export default class SqlRequestTable extends ResourceTableProps {
     }
 
     renderExpansion(props : any) : VNode {
-        let descriptionCol = this.$createElement(
-            VCol,
-            {
-                props: {
-                    cols: 4,
-                }
-            },
-            props.item.value.Description
-        )
-
         let queryColChildren : VNode[] = []
 
         if (!!this.idToQuery[props.item.value.QueryId])  {
@@ -269,7 +255,7 @@ export default class SqlRequestTable extends ResourceTableProps {
             VCol,
             {
                 props: {
-                    cols: 8,
+                    cols: 12,
                 }
             },
             queryColChildren
@@ -291,7 +277,7 @@ export default class SqlRequestTable extends ResourceTableProps {
                     }
                 },
                 [
-                    descriptionCol, queryCol,
+                    queryCol,
                 ]
             )]
         )

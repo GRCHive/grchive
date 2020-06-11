@@ -20,8 +20,6 @@ import {
 export interface TNewSqlRequestInput {
     queryId: number
     orgId : number
-    name: string
-    description: string
     assigneeUserId: number | null
     dueDate: Date | null
 }
@@ -96,8 +94,6 @@ export function statusSqlRequest(inp : TStatusSqlRequestInput) : Promise<TStatus
 export interface TUpdateSqlRequestInput {
     requestId: number
     orgId : number
-    name: string
-    description: string
     assigneeUserId: number | null
     dueDate: Date | null
 }

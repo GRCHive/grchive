@@ -22,8 +22,6 @@ func CreateNewSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.
 			upload_time,
 			upload_user_id,
 			org_id,
-			name,
-			description,
 			assignee,
 			due_date
 		)
@@ -32,8 +30,6 @@ func CreateNewSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.
 			:upload_time,
 			:upload_user_id,
 			:org_id,
-			:name,
-			:description,
 			:assignee,
 			:due_date
 		)
@@ -78,9 +74,7 @@ func UpdateSqlQueryRequestWithTx(request *core.DbSqlQueryRequest, role *core.Rol
 
 	rows, err := tx.NamedQuery(`
 		UPDATE database_sql_query_requests
-		SET name = :name,
-			description = :description,
-			assignee = :assignee,
+		SET assignee = :assignee,
 			due_date = :due_date
 		WHERE id = :id
 			AND org_id = :org_id
