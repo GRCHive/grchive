@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: integration-runner-deployment
+    namespace: backend
+    labels:
+        app: integration-runner
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: integration-runner
+    template:
+        metadata:
+            labels:
+                app: integration-runner
+        spec:
+            containers:
+                - name: integration-runner-container
+                  image: ${INTEGRATION_RUNNER_IMAGE}
+                  env:
+                    - name: "IMAGE_PULL_SECRET"
+                      value: "regcred"
+                  resources:
+                        requests:
+                            cpu: "10m"
+                        limits:
+                            cpu: "100m"
+                - name: cloudsql-proxy
+                  image: gcr.io/cloudsql-docker/gce-proxy:1.16
+                  ports:
+                    - containerPort: 5432
+                  command: ["/cloud_sql_proxy",
+                             "-instances=${GRCHIVE_PROJECT}:us-central1:${POSTGRES_INSTANCE_NAME}=tcp:5432",
+                             "-credential_file=/secrets/gke/gcloud-service-account.json"]
+                  securityContext:
+                      runAsUser: 2  # non-root user
+                      allowPrivilegeEscalation: false
+                  volumeMounts:
+                      - name: gke-service-account
+                        mountPath: /secrets/gke
+                        readOnly: true
+                  resources:
+                        requests:
+                            cpu: "10m"
+                        limits:
+                            cpu: "100m"
+            volumes:
+                - name: gke-service-account
+                  secret:
+                    secretName: gke-service-account
+            imagePullSecrets:
+                - name: regcred

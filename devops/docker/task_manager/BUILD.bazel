@@ -4,4 +4,5 @@ load("@io_bazel_rules_docker//go:image.bzl", "go_image")
 go_image(
     name = "latest",
     binary = "//src/task_manager:bin",
+    base = "//:common_base",
 )

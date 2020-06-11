@@ -4,4 +4,5 @@ load("@io_bazel_rules_docker//go:image.bzl", "go_image")
 go_image(
     name = "docker_database_query_runner",
     binary = "//src/database_query_runner:runner",
+    base = "//:common_base",
 )

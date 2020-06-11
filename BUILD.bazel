@@ -18,3 +18,35 @@ define_kt_toolchain(
     jvm_target = "11",
     language_version = "1.3",
 )
+
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+
+SAP_NWRFC_FILES = [
+    "//dependencies/sap-nw-rfc/nwrfcsdk/lib:libicudata.so.50",
+    "//dependencies/sap-nw-rfc/nwrfcsdk/lib:libicudecnumber.so",
+    "//dependencies/sap-nw-rfc/nwrfcsdk/lib:libicui18n.so.50",
+    "//dependencies/sap-nw-rfc/nwrfcsdk/lib:libicuuc.so.50",
+    "//dependencies/sap-nw-rfc/nwrfcsdk/lib:libsapnwrfc.so",
+    "//dependencies/sap-nw-rfc/nwrfcsdk/lib:libsapucum.so",
+]
+
+container_image (
+    name = "common_base",
+    base = "@debian-slim//image",
+    files = SAP_NWRFC_FILES,
+    directory = "/usr/lib",
+)
+
+container_image (
+    name = "preview_generator_base",
+    base = "@preview-generator-base//image",
+    files = SAP_NWRFC_FILES,
+    directory = "/usr/lib",
+)
+
+container_image (
+    name = "powershell_base",
+    base = "@powershell7-ubuntu18.04//image"
+    files = SAP_NWRFC_FILES,
+    directory = "/usr/lib",
+)

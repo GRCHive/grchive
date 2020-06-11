@@ -1,23 +1,8 @@
 package(default_visibility=["//visibility:public"])
-load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 load("@io_bazel_rules_docker//go:image.bzl", "go_image")
-
-container_image (
-    name = "integration_base",
-    base = "@debian-slim//image",
-    files = [
-        "//dependencies/sap-nw-rfc/nwrfcsdk/lib:libicudata.so.50",
-        "//dependencies/sap-nw-rfc/nwrfcsdk/lib:libicudecnumber.so",
-        "//dependencies/sap-nw-rfc/nwrfcsdk/lib:libicui18n.so.50",
-        "//dependencies/sap-nw-rfc/nwrfcsdk/lib:libicuuc.so.50",
-        "//dependencies/sap-nw-rfc/nwrfcsdk/lib:libsapnwrfc.so",
-        "//dependencies/sap-nw-rfc/nwrfcsdk/lib:libsapucum.so",
-    ],
-    directory = "/usr/lib",
-)
 
 go_image(
     name = "latest",
     binary = "//src/integration_runner:frontend",
-    base = ":integration_base"
+    base = "//:common_base"
 )

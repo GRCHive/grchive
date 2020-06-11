@@ -4,4 +4,5 @@ load("@io_bazel_rules_docker//go:image.bzl", "go_image")
 go_image(
     name = "docker_notification_hub",
     binary = "//src/notification_hub:hub",
+    base = "//:common_base",
 )

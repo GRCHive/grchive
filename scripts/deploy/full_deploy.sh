@@ -111,6 +111,7 @@ if [[ -z "$NOBUILD" ]]; then
     ${DIR}/build_script_runner_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_task_manager_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_shell_runner_container.sh ${EXTRA_BUILD_OPTIONS}
+    ${DIR}/build_integration_runner_container.sh ${EXTRA_BUILD_OPTIONS}
 fi
 
 if [[ ! -z "$DO_TERRAFORM" ]]; then

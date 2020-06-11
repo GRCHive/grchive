@@ -99,7 +99,7 @@ genrule (
 
 container_image (
     name = "fixed-base",
-    base = "@debian-slim//image",
+    base = "//:common_base",
     files = [
         ":tmp",
     ],

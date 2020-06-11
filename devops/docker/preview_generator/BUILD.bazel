@@ -4,5 +4,5 @@ load("@io_bazel_rules_docker//go:image.bzl", "go_image")
 go_image(
     name = "docker_preview_generator",
     binary = "//src/preview_generator:frontend",
-    base = "@preview-generator-base//image"
+    base = "//:preview_generator_base"
 )
