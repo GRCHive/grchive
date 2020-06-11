@@ -20,6 +20,8 @@ define_kt_toolchain(
 )
 
 load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("@io_bazel_rules_docker//docker/package_managers:download_pkgs.bzl", "download_pkgs")
+load("@io_bazel_rules_docker//docker/package_managers:install_pkgs.bzl", "install_pkgs")
 
 SAP_NWRFC_FILES = [
     "//dependencies/sap-nw-rfc/nwrfcsdk/lib:libicudata.so.50",
@@ -31,10 +33,25 @@ SAP_NWRFC_FILES = [
 ]
 
 container_image (
-    name = "common_base",
+    name = "pre_common_base",
     base = "@debian-slim//image",
     files = SAP_NWRFC_FILES,
     directory = "/usr/lib",
+)
+
+download_pkgs(
+    name = "common_base_deps",
+    packages = [
+        "ca-certificates",
+    ],
+    image_tar = ":pre_common_base.tar"
+)
+
+install_pkgs(
+    name = "common_base",
+    image_tar = ":pre_common_base.tar",
+    installables_tar = ":common_base_deps.tar",
+    output_image_name = "common_base"
 )
 
 container_image (
@@ -46,7 +63,7 @@ container_image (
 
 container_image (
     name = "powershell_base",
-    base = "@powershell7-ubuntu18.04//image"
+    base = "@powershell7-ubuntu18.04//image",
     files = SAP_NWRFC_FILES,
     directory = "/usr/lib",
 )
