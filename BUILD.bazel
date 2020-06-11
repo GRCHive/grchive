@@ -43,6 +43,8 @@ download_pkgs(
     name = "common_base_deps",
     packages = [
         "ca-certificates",
+        "openssl",
+        "tzdata",
     ],
     image_tar = ":pre_common_base.tar"
 )
