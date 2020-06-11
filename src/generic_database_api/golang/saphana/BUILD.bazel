@@ -3,16 +3,12 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "library",
-    srcs = [
-        "driver.go",
-        "connection.go",
-        "query.go",
-        "state.go",
-    ],
-    importpath = "gitlab.com/grchive/grchive/db_api/pg_api",
+    srcs = glob(["*.go*"]),
+    importpath = "gitlab.com/grchive/grchive/db_api/saphana_api",
     deps = [
         "//src/core/golang/core:webserver_core_library",
         "//src/generic_database_api/golang/utility:library",
         "@com_github_jmoiron_sqlx//:go_default_library",
+        "@com_github_SAP_go_hdb//driver:go_default_library",
     ]
 )

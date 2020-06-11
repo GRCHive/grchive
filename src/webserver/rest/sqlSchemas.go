@@ -43,9 +43,12 @@ func allDatabaseSchemas(w http.ResponseWriter, r *http.Request) {
 }
 
 type GetDatabaseSchemasInput struct {
-	SchemaId int64 `webcore:"schemaId"`
-	OrgId    int32 `webcore:"orgId"`
-	FnMode   bool  `webcore:"fnMode"`
+	SchemaId int64           `webcore:"schemaId"`
+	OrgId    int32           `webcore:"orgId"`
+	FnMode   bool            `webcore:"fnMode"`
+	Start    int64           `webcore:"start"`
+	Limit    int64           `webcore:"limit"`
+	Filter   core.NullString `webcore:"filter,optional"`
 }
 
 func getDatabaseSchema(w http.ResponseWriter, r *http.Request) {
@@ -67,10 +70,8 @@ func getDatabaseSchema(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type ColumnMap map[int64][]*core.DbColumn
 	type SchemaOutput struct {
-		Tables  []*core.DbTable
-		Columns ColumnMap
+		Tables []*core.DbTable
 	}
 
 	retStruct := struct {
@@ -87,27 +88,21 @@ func getDatabaseSchema(w http.ResponseWriter, r *http.Request) {
 		}
 		retStruct.Functions = &functions
 	} else {
-		tables, err := database.GetAllTablesForSchema(inputs.SchemaId, inputs.OrgId, role)
+		tables, err := database.GetAllTablesForSchema(
+			inputs.SchemaId,
+			inputs.OrgId,
+			inputs.Start,
+			inputs.Limit,
+			inputs.Filter.NullString.String,
+			role)
 		if err != nil {
 			core.Warning("Failed to get tables: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		allColumns := ColumnMap{}
-
-		for _, tbl := range tables {
-			allColumns[tbl.Id], err = database.GetAllColumnsForTable(tbl.Id, inputs.OrgId, role)
-			if err != nil {
-				core.Warning("Failed to get columns: " + err.Error())
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-		}
-
 		retStruct.Schema = &SchemaOutput{
-			Tables:  tables,
-			Columns: allColumns,
+			Tables: tables,
 		}
 	}
 

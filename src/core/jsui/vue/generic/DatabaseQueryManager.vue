@@ -113,6 +113,7 @@
 
                 <v-col cols="6">
                     <database-query-runner
+                        v-if="!!currentVersion"
                         :query="currentVersion"
                         @on-new-version="saveEditQuery"
                     >

@@ -1,5 +1,5 @@
 <template>
-    <div class="ma-4">
+    <div class="mx-4 mt-4">
         <v-overlay :value="!ready">
             <v-progress-circular indeterminate size="64"></v-progress-circular>
         </v-overlay>

@@ -2,16 +2,18 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/db_api"
 	"gitlab.com/grchive/grchive/webcore"
 	"strings"
+	"time"
 )
 
 func onRefreshError(conn *core.DatabaseConnection, refresh *core.DbRefresh, err string) *webcore.RabbitMQError {
-	if conn != nil {
+	if conn != nil && conn.Password != "" {
 		err = strings.Replace(err, conn.Password, "*******", -1)
 	}
 	database.MarkFailureRefresh(refresh.Id, err, core.ServerRole)
@@ -22,7 +24,7 @@ func onRefreshSuccess(refresh *core.DbRefresh, hasDiff bool, tx *sqlx.Tx) error 
 	return database.MarkSuccessfulRefreshWithTx(refresh.Id, hasDiff, tx, core.ServerRole)
 }
 
-func processRefreshRequest(refresh *core.DbRefresh) *webcore.RabbitMQError {
+func processRefreshRequest(refresh *core.DbRefresh, sendEmail bool) *webcore.RabbitMQError {
 	db, err := database.GetDb(refresh.DbId, refresh.OrgId, core.ServerRole)
 	if err != nil {
 		return onRefreshError(nil, refresh, "Failed to get DB: "+err.Error())
@@ -51,16 +53,11 @@ func processRefreshRequest(refresh *core.DbRefresh) *webcore.RabbitMQError {
 		return onRefreshError(conn, refresh, "Failed to decrypt password: "+err.Error())
 	}
 
-	driver, err := db_api.CreateDriver(dbType, conn)
+	driver, err := db_api.CreateDriver(dbType, conn, true)
 	if err != nil {
-		// Don't put error here just in case there's a PW lurking around.
-		return onRefreshError(conn, refresh, "Failed to connect to database.")
+		return onRefreshError(conn, refresh, "Failed to connect to database: "+err.Error())
 	}
 	defer driver.Close()
-
-	if !driver.ConnectionReadOnly() {
-		return onRefreshError(conn, refresh, "The database user has non-read permissions.")
-	}
 
 	latestRefresh, err := database.GetLatestCompleteDatabaseRefresh(refresh.DbId, refresh.OrgId)
 	if err != nil {
@@ -75,99 +72,70 @@ func processRefreshRequest(refresh *core.DbRefresh) *webcore.RabbitMQError {
 		}
 	}
 
-	currentDbState := core.FullDbState{}
+	err = driver.ConstructState()
+	if err != nil {
+		return onRefreshError(conn, refresh, "Failed to construct state: "+err.Error())
+	}
+
+	currentDbState := driver.GetState()
 	tx := database.CreateTx()
 
-	schemas, err := driver.GetSchemas()
-	if err != nil {
-		tx.Rollback()
-		return onRefreshError(conn, refresh, "Failed to get schemas: "+err.Error())
-	}
-
-	for _, sch := range schemas {
-		sch.RefreshId = refresh.Id
-		sch.OrgId = refresh.OrgId
-		err = database.CreateNewDatabaseSchemaWithTx(sch, tx, core.ServerRole)
-		if err != nil {
-			tx.Rollback()
-			return onRefreshError(conn, refresh, "Failed to store schema ["+sch.SchemaName+"]: "+err.Error())
-		}
-		currentDbState.AddSchema(sch)
-
-		fns, err := driver.GetFunctions(sch)
-		if err != nil {
-			tx.Rollback()
-			return onRefreshError(conn, refresh, "Failed to get functions ["+sch.SchemaName+"]: "+err.Error())
-		}
-
-		for _, fn := range fns {
-			fn.SchemaId = sch.Id
-			fn.OrgId = sch.OrgId
-			err = database.CreateNewDatabaseFunctionWithTx(fn, tx, core.ServerRole)
-			if err != nil {
-				tx.Rollback()
-				return onRefreshError(conn, refresh, "Failed to store function ["+fn.Name+"]: "+err.Error())
-			}
-
-			currentDbState.AddFunction(sch, fn)
-		}
-
-		tables, err := driver.GetTables(sch)
-		if err != nil {
-			tx.Rollback()
-			return onRefreshError(conn, refresh, "Failed to get tables ["+sch.SchemaName+"]: "+err.Error())
-		}
-
-		for _, tbl := range tables {
-			tbl.SchemaId = sch.Id
-			tbl.OrgId = sch.OrgId
-			err = database.CreateNewDatabaseTableWithTx(tbl, tx, core.ServerRole)
-			if err != nil {
-				tx.Rollback()
-				return onRefreshError(conn, refresh, "Failed to store table ["+tbl.TableName+"]: "+err.Error())
-			}
-
-			currentDbState.AddTable(sch, tbl)
-
-			columns, err := driver.GetColumns(sch, tbl)
-			if err != nil {
-				tx.Rollback()
-				return onRefreshError(conn, refresh, "Failed to get columns ["+tbl.TableName+"]: "+err.Error())
-			}
-
-			for _, col := range columns {
-				col.TableId = tbl.Id
-				col.OrgId = tbl.OrgId
-				err = database.CreateNewDatabaseColumnWithTx(col, tx, core.ServerRole)
-				if err != nil {
-					tx.Rollback()
-					return onRefreshError(conn, refresh, "Failed to store column ["+col.ColumnName+"]: "+err.Error())
-				}
-				currentDbState.AddColumn(sch, tbl, col)
-			}
-		}
-	}
-
+	startCommit := time.Now()
 	hasDiff := true
-	if latestDbState != nil {
-		hasDiff = currentDbState.HasDiff(latestDbState)
+	err = database.WrapTx(tx, func() error {
+		schemas := currentDbState.AllSchemas()
+		for _, sch := range schemas {
+			sch.DbSchema.OrgId = refresh.OrgId
+			sch.DbSchema.RefreshId = refresh.Id
+
+			err = database.CreateNewDatabaseSchemaWithTx(&sch.DbSchema, tx, core.ServerRole)
+			if err != nil {
+				return err
+			}
+
+			fns := sch.AllFunctions()
+			for _, fn := range fns {
+				fn.OrgId = refresh.OrgId
+				fn.SchemaId = sch.DbSchema.Id
+				err = database.CreateNewDatabaseFunctionWithTx(fn, tx, core.ServerRole)
+				if err != nil {
+					return err
+				}
+			}
+
+			tables := sch.AllTables()
+			for _, tbl := range tables {
+				tbl.OrgId = refresh.OrgId
+				tbl.SchemaId = sch.DbSchema.Id
+				err = database.CreateNewDatabaseTableWithTx(tbl, tx, core.ServerRole)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	}, func() error {
+		if latestDbState != nil {
+			hasDiff = currentDbState.HasDiff(latestDbState)
+		}
+
+		return onRefreshSuccess(refresh, hasDiff, tx)
+	})
+
+	if err != nil {
+		return onRefreshError(conn, refresh, "Failed to perform refresh: "+err.Error())
 	}
 
-	err = onRefreshSuccess(refresh, hasDiff, tx)
-	if err != nil {
-		tx.Rollback()
-		return onRefreshError(conn, refresh, "Failed to mark successful refresh: "+err.Error())
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return onRefreshError(conn, refresh, "Failed to commit results: "+err.Error())
-	}
+	core.Debug(fmt.Sprintf(
+		"\tFinish Commit: %f seconds",
+		float64(time.Since(startCommit).Milliseconds())/1000.0,
+	))
 
 	// Ideally this would happen elsewhere and be sent out as a general "event"
 	// but our event/notification system is kind of rigid at the moment and needs
 	// a revamp. We can ignore errors here.
-	if hasDiff {
+	if hasDiff && sendEmail {
 		err = sendDbSchemaChangeEmails(db)
 		if err != nil {
 			core.Warning("Failed to send Db schema change emails: " + err.Error())

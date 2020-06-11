@@ -7,7 +7,7 @@
         <div v-else>
             <v-list-item class="pa-0">
                 <v-list-item-content id="querySelector">
-                    <v-select
+                    <v-autocomplete
                         label="Functions"
                         filled
                         hide-details
@@ -16,14 +16,16 @@
                         :value="currentFunction"
                         @input="selectFunction"
                     >
-                    </v-select>
+                    </v-autocomplete>
                 </v-list-item-content>
             </v-list-item>
 
             <sql-text-area
-                :value="currentFunction.Src"
+                v-if="!!currentFunction"
+                :value="prettySrc"
                 readonly
                 :key="fnKey"
+                full-height
             >
             </sql-text-area>
         </div>
@@ -43,6 +45,7 @@ import { Watch } from 'vue-property-decorator'
 import { contactUsUrl } from '../../ts/url'
 import { PageParamsStore } from '../../ts/pageParams'
 import SqlTextArea from './SqlTextArea.vue'
+import sqlFormatter from 'sql-formatter'
 
 const Props = Vue.extend({
     props: {
@@ -64,8 +67,16 @@ export default class DatabaseFunctionViewer extends Props {
 
     fnKey : number = 0
 
+    get prettySrc() : string {
+        if (!this.currentFunction) {
+            return ""
+        }
+
+        return sqlFormatter.format(this.currentFunction.Src)
+    }
+
     get isLoading() : boolean {
-        return this.allFunctions == null
+        return (!this.allFunctions)
     }
 
     get fnItems() : any[] {
@@ -95,6 +106,7 @@ export default class DatabaseFunctionViewer extends Props {
     @Watch('schema')
     refreshData() {
         this.allFunctions = null
+        this.currentFunction = null
 
         if (!this.schema) {
             return
@@ -103,7 +115,9 @@ export default class DatabaseFunctionViewer extends Props {
         getSqlSchema({
             schemaId: this.schema!.Id,
             orgId: PageParamsStore.state.organization!.Id,
-            fnMode: true
+            fnMode: true,
+            start: -1,
+            limit: -1,
         }).then((resp : TGetSqlSchemaOutput) => {
             this.allFunctions = resp.data.Functions!
             if (this.allFunctions!.length > 0) {

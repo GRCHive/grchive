@@ -1,16 +1,17 @@
-package pg_api
+package saphana_api
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
+	_ "github.com/SAP/go-hdb/driver"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
 	"strings"
 	"time"
 )
 
-type PgDriver struct {
+type SapHanaDriver struct {
 	connInfo   *core.DatabaseConnection
 	db         *sqlx.DB
 	connection *sql.Conn
@@ -19,12 +20,12 @@ type PgDriver struct {
 
 func CreateDatabaseConnectionString(conn *core.DatabaseConnection) string {
 	build := strings.Builder{}
-	_, err := build.WriteString(fmt.Sprintf("postgres://%s:%s@%s:%d/%s?",
+	_, err := build.WriteString(fmt.Sprintf("sap://%s:%s@%s:%d?",
 		conn.Username,
 		conn.Password,
 		conn.Host,
 		conn.Port,
-		conn.DbName))
+	))
 	if err != nil {
 		core.Error("Failed to create connection string: " + err.Error())
 	}
@@ -35,33 +36,29 @@ func CreateDatabaseConnectionString(conn *core.DatabaseConnection) string {
 			core.Error("Failed to add parameters to connection string: " + err.Error())
 		}
 	}
-
-	// Force a timeout
-	build.WriteString(fmt.Sprintf("%s=%d", "connect_timeout", 10))
 	return build.String()
 }
 
-func (pg *PgDriver) Connect(conn *core.DatabaseConnection, ro bool) error {
+func (hdb *SapHanaDriver) Connect(conn *core.DatabaseConnection, ro bool) error {
 	var err error
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	pg.connInfo = conn
-	pg.db, err = sqlx.ConnectContext(ctx, "postgres", CreateDatabaseConnectionString(conn))
+	hdb.connInfo = conn
+	hdb.db, err = sqlx.ConnectContext(ctx, "hdb", CreateDatabaseConnectionString(conn))
 	if err != nil {
 		return err
 	}
 
-	pg.connection, err = pg.db.Conn(context.Background())
+	hdb.connection, err = hdb.db.Conn(context.Background())
 	if err != nil {
 		return err
 	}
 
 	if ro {
-		_, err := pg.connection.ExecContext(context.Background(), `
-			SET SESSION CHARACTERISTICS AS TRANSACTION READ ONLY
+		_, err = hdb.connection.ExecContext(context.Background(), `
+			SET TRANSACTION READ ONLY
 		`)
-
 		if err != nil {
 			return err
 		}

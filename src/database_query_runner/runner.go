@@ -63,7 +63,7 @@ func (s *server) RunSqlQuery(ctx context.Context, in *sqlQuery.SqlRunnerRequest)
 		return createErrorReply(err, "")
 	}
 
-	core.Info("\tSuccess Reply: ", string(encrypted))
+	core.Info("\tSuccess Reply")
 	return &sqlQuery.SqlRunnerReply{
 		EncryptedData: encrypted,
 		Success:       true,

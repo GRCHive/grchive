@@ -25,22 +25,13 @@ func GetDbStateFromRefresh(refreshId int64, orgId int32) (*core.FullDbState, err
 			state.AddFunction(sch, fn)
 		}
 
-		tables, err := database.GetAllTablesForSchema(sch.Id, sch.OrgId, core.ServerRole)
+		tables, err := database.GetAllTablesForSchema(sch.Id, sch.OrgId, -1, -1, "", core.ServerRole)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, tbl := range tables {
 			state.AddTable(sch, tbl)
-
-			columns, err := database.GetAllColumnsForTable(tbl.Id, tbl.OrgId, core.ServerRole)
-			if err != nil {
-				return nil, err
-			}
-
-			for _, col := range columns {
-				state.AddColumn(sch, tbl, col)
-			}
 		}
 	}
 

@@ -111,11 +111,11 @@ export default class NotificationViewer extends Props {
         this.pullMoreNotifications()
 
         if (this.useWindowScroll) {
-            window.addEventListener('wheel', this.handleWheel)
+            window.addEventListener('scroll', this.handleWheel)
         } else {
             // Not sure why Typescript doesn't like this line?
             //@ts-ignore
-            document.querySelector(`#${this.uniqueScrollerId}`)!.addEventListener('wheel', this.handleWheel)
+            document.querySelector(`#${this.uniqueScrollerId}`)!.addEventListener('scroll', this.handleWheel)
         }
     }
 
@@ -156,7 +156,7 @@ export default class NotificationViewer extends Props {
         }
     }
 
-    handleWheel(e : MouseEvent) {
+    handleWheel(e : Event) {
         let currentScroll: number = 0
         let maxScroll: number = 0
 

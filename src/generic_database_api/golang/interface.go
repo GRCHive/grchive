@@ -6,14 +6,11 @@ import (
 )
 
 type DbDriver interface {
-	Connect(*core.DatabaseConnection) error
-	ConnectionReadOnly() bool
+	Connect(*core.DatabaseConnection, bool) error
 	Close()
 
-	GetSchemas() ([]*core.DbSchema, error)
-	GetTables(*core.DbSchema) ([]*core.DbTable, error)
-	GetColumns(*core.DbSchema, *core.DbTable) ([]*core.DbColumn, error)
-	GetFunctions(*core.DbSchema) ([]*core.DbFunction, error)
+	ConstructState() error
+	GetState() *core.FullDbState
 
 	RunQuery(query string) (*utility.SqlQueryResult, error)
 }

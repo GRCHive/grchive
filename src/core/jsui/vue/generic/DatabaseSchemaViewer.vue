@@ -4,7 +4,7 @@
             <v-progress-circular indeterminate size="64"></v-progress-circular>
         </v-row>
 
-        <div v-else>
+        <div v-else id="schemaTableGrid">
             <v-text-field outlined
                           v-model="filterString"
                           prepend-inner-icon="mdi-magnify"
@@ -25,12 +25,15 @@
                     <div class="tableGrid">
                         <database-table-viewer
                             :table="table"
-                            :columns="allColumns[table.Id]"
                             :height="400"
                         >
                         </database-table-viewer>
                     </div>
                 </v-col>
+            </v-row>
+
+            <v-row v-if="pullInProgress" align="center" justify="center">
+                <v-progress-circular indeterminate size="64"></v-progress-circular>
             </v-row>
         </div>
     </div>
@@ -44,7 +47,6 @@ import { getSqlSchema, TGetSqlSchemaOutput } from '../../ts/api/apiSqlSchemas'
 import {
     DbSchema,
     DbTable,
-    DbColumn
 } from '../../ts/sql'
 import { Watch } from 'vue-property-decorator'
 import { contactUsUrl } from '../../ts/url'
@@ -61,6 +63,7 @@ const Props = Vue.extend({
 })
 
 const gridWidth : number = 4
+const initialPull : number = 56
 
 @Component({
     components: {
@@ -69,15 +72,20 @@ const gridWidth : number = 4
 })
 export default class DatabaseSchemaViewer extends Props {
     allTables : DbTable[] | null = null
-    allColumns : Record<number, DbColumn[]> | null = null
-    filterString: string | null = ""
+    filterString: string = ""
+    pullInProgress :boolean = false
+    hasMoreData : boolean = true
 
     get isLoading() : boolean {
-        return this.allTables == null || this.allColumns == null
+        return this.allTables == null
     }
 
     get hasSchema() : boolean {
         return !!this.schema
+    }
+
+    get processedFilterString() : string {
+        return this.filterString.trim()
     }
 
     get filteredTables() : DbTable[] {
@@ -85,17 +93,12 @@ export default class DatabaseSchemaViewer extends Props {
             return []
         }
 
-        if (!this.filterString) {
-            return this.allTables
-        }
-
-        let trimmedFilter = this.filterString.trim()
-        if (trimmedFilter == "") {
+        if (this.processedFilterString == "") {
             return this.allTables
         }
 
         return this.allTables.filter((ele : DbTable) => {
-            return ele.TableName.toLowerCase().includes(trimmedFilter.toLowerCase())
+            return ele.TableName.toLowerCase().includes(this.processedFilterString.toLowerCase())
         })
     }
 
@@ -115,10 +118,11 @@ export default class DatabaseSchemaViewer extends Props {
     }
 
     @Watch('schema')
+    @Watch('processedFilterString')
     refreshData() {
+        this.hasMoreData = true
         if (!this.schema) {
             this.allTables = null
-            this.allColumns = null
             return
         }
 
@@ -126,9 +130,11 @@ export default class DatabaseSchemaViewer extends Props {
             schemaId: this.schema!.Id,
             orgId: PageParamsStore.state.organization!.Id,
             fnMode: false,
+            start: 0,
+            limit: initialPull,
+            filter: this.processedFilterString,
         }).then((resp : TGetSqlSchemaOutput) => {
             this.allTables = resp.data.Schema!.Tables
-            this.allColumns = resp.data.Schema!.Columns
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(
@@ -140,8 +146,52 @@ export default class DatabaseSchemaViewer extends Props {
         })
     }
 
+    pullMoreTables() {
+        if (this.pullInProgress || !this.hasMoreData || !this.allTables) {
+            return
+        }
+
+        this.pullInProgress = true
+        getSqlSchema({
+            schemaId: this.schema!.Id,
+            orgId: PageParamsStore.state.organization!.Id,
+            fnMode: false,
+            start: this.allTables!.length,
+            limit: initialPull,
+            filter: this.processedFilterString,
+        }).then((resp : TGetSqlSchemaOutput) => {
+            let toAdd = resp.data.Schema!.Tables
+            this.hasMoreData = (toAdd.length > 0)
+            this.allTables!.push(...toAdd)
+        }).catch((err : any) => {
+            // @ts-ignore
+            this.$root.$refs.snackbar.showSnackBar(
+                "Oops! Something went wrong. Try again.",
+                true,
+                "Contact Us",
+                contactUsUrl,
+                true);
+        }).finally(() => {
+            this.pullInProgress = false
+        })
+    }
+
     mounted() { 
         this.refreshData()
+
+        window.addEventListener('scroll', this.handleWheel)
+    }
+
+    handleWheel(e : Event) {
+        //@ts-ignore
+        let ele : HTMLElement = document.querySelector(`#schemaTableGrid`)!
+
+        let currentScroll = window.pageYOffset
+        let maxScroll = document.documentElement.scrollHeight - document.documentElement.clientHeight
+
+        if (currentScroll >= maxScroll) {
+            this.pullMoreTables()
+        }
     }
 }
 

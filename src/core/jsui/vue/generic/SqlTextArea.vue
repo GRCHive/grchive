@@ -4,6 +4,7 @@
         @input="onInput"
         :readonly="readonly"
         lang="text/x-pgsql"
+        :full-height="fullHeight"
     >
     </generic-code-editor>
 </template>
@@ -21,6 +22,10 @@ const Props = Vue.extend({
             default: ""
         },
         readonly: {
+            type: Boolean,
+            default: false,
+        },
+        fullHeight: {
             type: Boolean,
             default: false,
         },

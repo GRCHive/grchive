@@ -2,6 +2,7 @@ package utility
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/csv"
 	"fmt"
 	"github.com/jmoiron/sqlx"
@@ -12,7 +13,7 @@ type SqlQueryResult struct {
 	CsvText string
 }
 
-func CreateSqlQueryResultFromRows(rows *sqlx.Rows) (*SqlQueryResult, error) {
+func CreateSqlQueryResultFromRows(rows *sql.Rows) (*SqlQueryResult, error) {
 	columns, err := rows.Columns()
 	if err != nil {
 		return nil, err
@@ -24,15 +25,23 @@ func CreateSqlQueryResultFromRows(rows *sqlx.Rows) (*SqlQueryResult, error) {
 
 	dest := map[string]interface{}{}
 	for rows.Next() {
-		err = rows.MapScan(dest)
+		err = sqlx.MapScan(rows, dest)
 		if err != nil {
 			return nil, err
 		}
 
 		for i, col := range columns {
-			record[i] = fmt.Sprintf("%v", dest[col])
+			val := dest[col]
+			switch val.(type) {
+			case []uint8:
+				record[i] = string(val.([]uint8))
+			default:
+				record[i] = fmt.Sprintf("%v", dest[col])
+			}
 		}
 
+		// record represents a single row so we need to write
+		// for each row.
 		err = writer.Write(record)
 		if err != nil {
 			return nil, err

@@ -9,7 +9,6 @@ import { getAPIRequestConfig } from './apiUtility'
 import { 
     DbSchema,
     DbTable,
-    DbColumn,
     DbFunction
 } from '../sql'
 
@@ -30,13 +29,15 @@ export interface TGetSqlSchemaInput {
     schemaId: number
     orgId: number
     fnMode: boolean
+    start: number
+    limit: number
+    filter? : string
 }
 
 export interface TGetSqlSchemaOutput {
     data: {
         Schema: {
             Tables: DbTable[]
-            Columns: Record<number, DbColumn[]>
         } | null
         
         Functions: DbFunction[] | null

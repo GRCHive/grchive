@@ -49,19 +49,17 @@ export interface DbFunction {
     RetType     : string | null
 }
 
+export interface RawDbColumn {
+    Name        : string
+    Type        : string
+}
+
 export interface DbTable {
     Id          : number
     OrgId       : number
     SchemaId    : number
     TableName   : string
-}
-
-export interface DbColumn {
-    Id          : number
-    OrgId       : number
-    TableId     : number
-    ColumnName  : string
-    ColumnType  : string
+    Columns     : RawDbColumn[]
 }
 
 export interface DbSqlQueryMetadata {

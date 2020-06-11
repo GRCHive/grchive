@@ -1,45 +1,45 @@
 package core
 
-type FullDbTable struct {
-	DbTable
-
-	Columns map[string]DbColumn
-}
-
-func (s *FullDbTable) AddColumn(col *DbColumn) {
-	if s.Columns == nil {
-		s.Columns = map[string]DbColumn{}
-	}
-	s.Columns[col.ColumnName] = *col
-}
-
 type FullDbSchema struct {
 	DbSchema
 
-	Tables    map[string]*FullDbTable
-	Functions map[string]DbFunction
+	Tables    map[string]*DbTable
+	Functions map[string]*DbFunction
+}
+
+func (s *FullDbSchema) AllTables() []*DbTable {
+	ret := make([]*DbTable, 0)
+	for _, tbl := range s.Tables {
+		ret = append(ret, tbl)
+	}
+	return ret
+}
+
+func (s *FullDbSchema) AllFunctions() []*DbFunction {
+	ret := make([]*DbFunction, 0)
+	for _, fn := range s.Functions {
+		ret = append(ret, fn)
+	}
+	return ret
+}
+
+func (s *FullDbSchema) GetTable(nm string) *DbTable {
+	return s.Tables[nm]
 }
 
 func (s *FullDbSchema) AddTable(table *DbTable) {
 	if s.Tables == nil {
-		s.Tables = map[string]*FullDbTable{}
+		s.Tables = map[string]*DbTable{}
 	}
 
-	s.Tables[table.TableName] = &FullDbTable{
-		DbTable: *table,
-	}
-}
-
-func (s *FullDbSchema) AddColumn(table *DbTable, col *DbColumn) {
-	tbl := s.Tables[table.TableName]
-	tbl.AddColumn(col)
+	s.Tables[table.TableName] = table
 }
 
 func (s *FullDbSchema) AddFunction(fn *DbFunction) {
 	if s.Functions == nil {
-		s.Functions = map[string]DbFunction{}
+		s.Functions = map[string]*DbFunction{}
 	}
-	s.Functions[fn.Name] = *fn
+	s.Functions[fn.Name] = fn
 }
 
 type FullDbState struct {
@@ -56,14 +56,34 @@ func (s *FullDbState) AddSchema(schema *DbSchema) {
 	}
 }
 
+func (s *FullDbState) AllSchemas() []*FullDbSchema {
+	ret := make([]*FullDbSchema, 0)
+	for _, sch := range s.Schemas {
+		ret = append(ret, sch)
+	}
+	return ret
+}
+
+func (s *FullDbState) AllTables() []*DbTable {
+	schemas := s.AllSchemas()
+	ret := make([]*DbTable, 0)
+	for _, sch := range schemas {
+		ret = append(ret, sch.AllTables()...)
+	}
+	return ret
+}
+
+func (s *FullDbState) GetSchema(nm string) *FullDbSchema {
+	return s.Schemas[nm]
+}
+
+func (s *FullDbState) GetTable(schema string, nm string) *DbTable {
+	return s.GetSchema(schema).GetTable(nm)
+}
+
 func (s *FullDbState) AddTable(schema *DbSchema, table *DbTable) {
 	sch := s.Schemas[schema.SchemaName]
 	sch.AddTable(table)
-}
-
-func (s *FullDbState) AddColumn(schema *DbSchema, table *DbTable, col *DbColumn) {
-	sch := s.Schemas[schema.SchemaName]
-	sch.AddColumn(table, col)
 }
 
 func (s *FullDbState) AddFunction(schema *DbSchema, fn *DbFunction) {
@@ -75,7 +95,11 @@ func (s *FullDbState) AddFunction(schema *DbSchema, fn *DbFunction) {
 // Diffs
 //
 
-func (a DbFunction) HasDiff(b DbFunction) bool {
+func (a *RawDbColumn) HasDiff(b *RawDbColumn) bool {
+	return a.Type != b.Type
+}
+
+func (a *DbFunction) HasDiff(b *DbFunction) bool {
 	if a.Src != b.Src {
 		return true
 	}
@@ -87,28 +111,26 @@ func (a DbFunction) HasDiff(b DbFunction) bool {
 	return false
 }
 
-func (a DbColumn) HasDiff(b DbColumn) bool {
-	if a.ColumnName != b.ColumnName {
-		return true
+func (a *DbTable) HasDiff(b *DbTable) bool {
+	aColumns := map[string]*RawDbColumn{}
+	for _, aCol := range a.Columns {
+		aColumns[aCol.Name] = aCol
 	}
 
-	if a.ColumnType != b.ColumnType {
-		return true
+	bColumns := map[string]*RawDbColumn{}
+	for _, bCol := range b.Columns {
+		bColumns[bCol.Name] = bCol
 	}
 
-	return false
-}
-
-func (a *FullDbTable) HasDiff(b *FullDbTable) bool {
 	processedColumns := map[string]bool{}
-	for aName, aCol := range a.Columns {
-		_, processed := processedColumns[aName]
+	for aKey, aCol := range aColumns {
+		_, processed := processedColumns[aKey]
 		if processed {
 			continue
 		}
-		processedColumns[aName] = true
+		processedColumns[aKey] = true
 
-		bCol, ok := b.Columns[aName]
+		bCol, ok := bColumns[aKey]
 		if !ok {
 			return true
 		}
@@ -119,12 +141,12 @@ func (a *FullDbTable) HasDiff(b *FullDbTable) bool {
 		}
 	}
 
-	for bName, _ := range b.Columns {
-		_, processed := processedColumns[bName]
+	for bKey, _ := range bColumns {
+		_, processed := processedColumns[bKey]
 		if processed {
 			continue
 		}
-		processedColumns[bName] = true
+		processedColumns[bKey] = true
 		return true
 	}
 	return false

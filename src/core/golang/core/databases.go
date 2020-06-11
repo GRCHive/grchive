@@ -50,19 +50,17 @@ type DbSchema struct {
 	SchemaName string `db:"schema_name"`
 }
 
-type DbTable struct {
-	Id        int64  `db:"id"`
-	OrgId     int32  `db:"org_id"`
-	SchemaId  int64  `db:"schema_id"`
-	TableName string `db:"table_name"`
+type RawDbColumn struct {
+	Name string `db:"name"`
+	Type string `db:"type"`
 }
 
-type DbColumn struct {
-	Id         int64  `db:"id"`
-	OrgId      int32  `db:"org_id"`
-	TableId    int64  `db:"table_id"`
-	ColumnName string `db:"column_name"`
-	ColumnType string `db:"column_type"`
+type DbTable struct {
+	Id        int64          `db:"id"`
+	OrgId     int32          `db:"org_id"`
+	SchemaId  int64          `db:"schema_id"`
+	TableName string         `db:"table_name"`
+	Columns   []*RawDbColumn `db:"columns"`
 }
 
 type DbFunction struct {

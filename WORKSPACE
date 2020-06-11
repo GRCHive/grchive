@@ -897,6 +897,11 @@ go_repository(
     tag = "v1.3.0",
 )
 
+go_repository(
+    name = "com_github_SAP_go_hdb",
+    importpath = "github.com/SAP/go-hdb",
+    tag = "v0.100.5",
+)
 
 # NODE
 http_archive(

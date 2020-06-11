@@ -17,7 +17,7 @@ func processRefreshRequestMessage(data []byte) *webcore.RabbitMQError {
 	if err != nil {
 		return &webcore.RabbitMQError{err, false}
 	}
-	return processRefreshRequest(&msg.Refresh)
+	return processRefreshRequest(&msg.Refresh, true)
 }
 
 func main() {
@@ -41,7 +41,7 @@ func main() {
 			core.Error("Failed to get database refresh: " + err.Error())
 		}
 
-		rerr := processRefreshRequest(refresh)
+		rerr := processRefreshRequest(refresh, false)
 		if rerr != nil {
 			core.Error("Failed to process refresh: " + rerr.Err.Error())
 		}

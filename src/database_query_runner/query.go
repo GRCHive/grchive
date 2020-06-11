@@ -39,7 +39,7 @@ func runQuery(queryId int64, orgId int32) (*utility.SqlQueryResult, error) {
 		return nil, err
 	}
 
-	driver, err := db_api.CreateDriver(dbType, dbConn)
+	driver, err := db_api.CreateDriver(dbType, dbConn, true)
 	if err != nil {
 		return nil, errors.New("Failed to connect to database.")
 	}

@@ -11,11 +11,11 @@
                 </thead>
                 <tbody>
                     <tr
-                        v-for="(col, i) in columns"
+                        v-for="(col, i) in table.Columns"
                         :key="i"
                     >
-                        <td>{{ col.ColumnName }}</td>
-                        <td>{{ normalizeType(col.ColumnType) }}</td>
+                        <td>{{ col.Name }}</td>
+                        <td>{{ normalizeType(col.Type) }}</td>
                     </tr>
                 </tbody>
             </template>
@@ -29,7 +29,6 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import {
     DbTable,
-    DbColumn
 } from '../../ts/sql'
 
 const Props = Vue.extend({
@@ -38,7 +37,6 @@ const Props = Vue.extend({
             type: Object,
             default: () => null as DbTable | null
         },
-        columns: Array,
         height: {
             type: Number,
             default: undefined

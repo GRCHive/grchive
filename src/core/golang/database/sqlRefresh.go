@@ -1,6 +1,7 @@
 package database
 
 import (
+	"encoding/json"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
 	"time"
@@ -185,11 +186,16 @@ func CreateNewDatabaseTableWithTx(table *core.DbTable, tx *sqlx.Tx, role *core.R
 		return core.ErrorUnauthorized
 	}
 
-	rows, err := tx.NamedQuery(`
-		INSERT INTO database_tables (org_id, schema_id, table_name)
-		VALUES (:org_id, :schema_id, :table_name)
+	rawColumns, err := json.Marshal(table.Columns)
+	if err != nil {
+		return err
+	}
+
+	rows, err := tx.Queryx(`
+		INSERT INTO database_tables (org_id, schema_id, table_name, columns)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id
-	`, table)
+	`, table.OrgId, table.SchemaId, table.TableName, rawColumns)
 
 	if err != nil {
 		return err
@@ -199,28 +205,6 @@ func CreateNewDatabaseTableWithTx(table *core.DbTable, tx *sqlx.Tx, role *core.R
 
 	rows.Next()
 	err = rows.Scan(&table.Id)
-	return err
-}
-
-func CreateNewDatabaseColumnWithTx(column *core.DbColumn, tx *sqlx.Tx, role *core.Role) error {
-	if !role.Permissions.HasAccess(core.ResourceDbSql, core.AccessManage) {
-		return core.ErrorUnauthorized
-	}
-
-	rows, err := tx.NamedQuery(`
-		INSERT INTO database_columns (org_id, table_id, column_name, column_type)
-		VALUES (:org_id, :table_id, :column_name, :column_type)
-		RETURNING id
-	`, column)
-
-	if err != nil {
-		return err
-	}
-
-	defer rows.Close()
-
-	rows.Next()
-	err = rows.Scan(&column.Id)
 	return err
 }
 
