@@ -113,6 +113,7 @@ func AllSapErpRfcVersions(rfcId int64) ([]*core.SapErpRfcVersion, error) {
 		SELECT *
 		FROM sap_erp_rfc_versions
 		WHERE rfc_id = $1
+		ORDER BY id DESC
 	`, rfcId)
 	return versions, err
 }
