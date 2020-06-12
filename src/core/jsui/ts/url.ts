@@ -5,7 +5,7 @@ export const contactUsUrl : string = "/contact-us"
 export const homePageUrl : string = "/"
 export const loginPageUrl : string = "/login"
 export const registerPageUrl : string = "/register"
-
+export const blogUrl : string = "https://blog.grchive.com"
 
 export function createAssetUrl(asset : string) : string {
     return "/static/assets/" + asset

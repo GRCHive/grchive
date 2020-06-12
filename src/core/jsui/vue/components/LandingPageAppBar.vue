@@ -15,6 +15,13 @@
 
             <v-btn
                 text color="primary"
+                :href="blogUrl"
+            >
+                Blog
+            </v-btn>
+
+            <v-btn
+                text color="primary"
                 :href="dashboardUrl"
                 v-if="hasAuth"
             >
@@ -35,7 +42,7 @@
 
 <script lang="ts">
 
-import { contactUsUrl, loginPageUrl, homePageUrl, dashboardUrl } from '../../ts/url'
+import { contactUsUrl, loginPageUrl, homePageUrl, dashboardUrl, blogUrl } from '../../ts/url'
 import { PageParamsStore } from '../../ts/pageParams'
 
 export default {
@@ -43,7 +50,8 @@ export default {
         contactUsUrl,
         loginPageUrl,
         homePageUrl,
-        dashboardUrl
+        dashboardUrl,
+        blogUrl
     }),
     props: {
         companyName : String
