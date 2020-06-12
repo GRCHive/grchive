@@ -1,31 +1,35 @@
 <template>
-    <section>
-        <landing-page-app-bar
-            :company-name="companyName"
-        >
-        </landing-page-app-bar>
-
+    <div>
         <v-content>
-            <hero-image
-                :src="bannerImageUrl"
-                :max-height=300
-                position="center center"
-                text="Welcome Back"
-            ></hero-image>
-
-            <v-container fluid>
+            <v-container class="pa-0" fluid>
                 <v-row justify="center">
-                    <v-card width="30%">
-                        <v-card-title>
-                            Login
-                        </v-card-title>
-                        <login-form></login-form>
-                    </v-card>
+                    <v-col cols="10" id="mainContent" class="pa-0">
+                        <landing-page-app-bar
+                            :company-name="companyName"
+                        >
+                        </landing-page-app-bar>
+
+                        <hero-image
+                            :src="bannerImageUrl"
+                            :max-height=300
+                            position="center center"
+                            text="Welcome Back"
+                        ></hero-image>
+
+                        <v-row justify="center">
+                            <v-card width="30%">
+                                <v-card-title>
+                                    Login
+                                </v-card-title>
+                                <login-form></login-form>
+                            </v-card>
+                        </v-row>
+                    </v-col>
                 </v-row>
             </v-container>
         </v-content>
 
-    </section>
+    </div>
 </template>
 
 <script lang="ts">

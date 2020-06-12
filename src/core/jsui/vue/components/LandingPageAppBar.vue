@@ -1,8 +1,15 @@
 <template>
     <v-app-bar>
-        <v-toolbar-title color="primary">
-            <a :href="homePageUrl">{{ companyName }} </a>
-        </v-toolbar-title>
+        <a :href="homePageUrl">
+            <v-img
+                src="/static/assets/logos/grchive.png"
+                height="40px"
+                max-height="40px"
+                max-width="254px"
+                contain
+            >
+            </v-img>
+        </a>
         <div class="flex-grow-1"></div>
 
         <v-toolbar-items>

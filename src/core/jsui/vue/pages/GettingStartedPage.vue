@@ -1,53 +1,51 @@
 <template>
     <div>
-        <landing-page-app-bar
-            :company-name="companyName"
-        >
-        </landing-page-app-bar>
+        <v-content>
+            <v-container fluid class="pa-0">
+                <v-row justify="center">
+                    <v-col cols="10" id="mainContent" class="pa-0">
+                        <landing-page-app-bar
+                            :company-name="companyName"
+                        >
+                        </landing-page-app-bar>
 
-        <v-content class="hide-overflow">
-            <hero-image
-                :src="bannerImageUrl"
-                :max-height=300
-                position="center center"
-                text="Get Started"
-            ></hero-image>
+                        <hero-image
+                            :src="bannerImageUrl"
+                            :max-height=300
+                            position="center center"
+                            text="Get Started"
+                        ></hero-image>
 
-            <v-container fluid class="pa-0" id="content">
-                <div class="mainContent">
-                    <v-row 
-                        align="center"
-                        justify="center"
-                        class="max-height"
-                    >
-                        <v-card width="80%" id="card-content" elevation=12 raised>
-                            <v-row
-                                align="center"
-                            >
-                                <v-col cols=8>
-                                    <v-card-title>
-                                        Request a live demo.
-                                    </v-card-title>
-                                    <v-col cols=12>
-                                        <collect-email 
-                                            :company-name="companyName"
-                                        ></collect-email>
+                        <v-row
+                            justify="center"
+                        >
+                            <v-card width="80%" id="card-content">
+                                <v-row>
+                                    <v-col cols=8>
+                                        <v-card-title>
+                                            Request a live demo.
+                                        </v-card-title>
+                                        <v-col cols=12>
+                                            <collect-email 
+                                                :company-name="companyName"
+                                            ></collect-email>
+                                        </v-col>
                                     </v-col>
-                                </v-col>
-                                <v-col
-                                    cols=4
-                                    class="pa-0 hide-overflow"
-                                >
-                                    <v-img 
-                                        :src="imageUrl"
-                                        height="100%"
-                                        class="pa-0"
-                                    ></v-img>
-                                </v-col>
-                            </v-row>
-                        </v-card>
-                    </v-row>
-                </div>
+                                    <v-col
+                                        cols=4
+                                        class="pa-0 hide-overflow"
+                                    >
+                                        <v-img 
+                                            :src="imageUrl"
+                                            height="100%"
+                                            class="pa-0"
+                                        ></v-img>
+                                    </v-col>
+                                </v-row>
+                            </v-card>
+                        </v-row>
+                    </v-col>
+                </v-row>
             </v-container>
         </v-content>
     </div>
@@ -77,15 +75,3 @@ export default {
 }
 
 </script>
-
-<style scoped>
-
-#content {
-    height: calc(100% - 300px);
-}
-
-#card-content {
-    transform: translateY(-80px);
-}
-
-</style>
