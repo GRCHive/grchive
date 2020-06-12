@@ -28,7 +28,7 @@ EXTRA_BUILD_OPTIONS=""
 
 case "$ENV" in
     prod)
-        . ${DIR}/pull_env_variables.sh
+        . ${DIR}/pull_env_variables.sh ${DIR}
         echo $GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
         echo $GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
         echo $GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json
@@ -52,7 +52,7 @@ case "$ENV" in
         ;;
 
     staging)
-        . ${DIR}/pull_env_variables.sh
+        . ${DIR}/pull_env_variables.sh ${DIR}
         echo $STAGING_GCLOUD_WEBSERVER_ACCOUNT > devops/gcloud/gcloud-webserver-account.json
         echo $STAGING_GCLOUD_TERRAFORM_ACCOUNT > devops/gcloud/gcloud-terraform-account.json
         echo $STAGING_GCLOUD_KUBERNETES_ACCOUNT > devops/gcloud/gcloud-kubernetes-account.json

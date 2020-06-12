@@ -1057,7 +1057,14 @@ container_pull(
     registry = "mcr.microsoft.com",
     repository = "powershell",
     tag = "7.0.1-ubuntu-18.04",
+)
 
+
+container_pull(
+    name = "wordpress",
+    registry = "index.docker.io",
+    repository = "library/wordpress",
+    tag = "5.4-php7.4-apache",
 )
 
 load(

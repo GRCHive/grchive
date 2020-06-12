@@ -120,6 +120,18 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `ARTIFACTORY_DEPLOY_USER` : Deployment username in Artifactory.
 - `ARTIFACTORY_ENCRYPTED_PASSWORD` : Encrypted password of the deployment user in Artifactory.
 
+### SAP
+
+- `SAP_NW_RFC_SDK`: Full path to your `dependencies/sap-nw-rfc/nwrfcsdk` folder.
+
+### Wordpress
+
+- `WORDPRESS_DB_HOST`: Database host to use for Wordpress.
+- `WORDPRESS_DB_USER`: Database user to use for Wordpress.
+- `WORDPRESS_DB_PASSWORD`: Database password to use for Wordpress.
+- `WORDPRESS_DB_NAME`: Database to use for Wordpress.
+- `WORDPRESS_INSTANCE_NAME`: Name to give the instance created to run the Wordpress blog.
+
 ## Grchive Standard Ports
 
 - Webserver: `8080`
