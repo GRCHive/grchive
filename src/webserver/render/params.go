@@ -34,6 +34,12 @@ type PageTemplateParameters struct {
 	Resource struct {
 		Id string
 	} `json:"resource"`
+
+	// These are available for server-side rendering
+	ServerSide struct {
+		OrgName  string
+		UserName string
+	} `json:"-"`
 }
 
 func BuildPageTemplateParametersFull(r *http.Request, resourceQuery string) PageTemplateParameters {
@@ -46,6 +52,7 @@ func BuildPageTemplateParametersFull(r *http.Request, resourceQuery string) Page
 	if err == nil {
 		retParams.User.User = parsedData.CurrentUser
 		retParams.User.Verified = parsedData.VerifiedEmail
+		retParams.ServerSide.UserName = retParams.User.User.FullName()
 	}
 
 	org, err := webcore.FindOrganizationInContext(r.Context())
@@ -55,6 +62,7 @@ func BuildPageTemplateParametersFull(r *http.Request, resourceQuery string) Page
 			webcore.DashboardOrgHomeRouteName,
 			core.DashboardOrgOrgQueryId,
 			org.OktaGroupName)
+		retParams.ServerSide.OrgName = org.Name
 	}
 
 	retParams.Site.CompanyConfig = *core.EnvConfig.Company
@@ -80,24 +88,6 @@ func BuildTemplateParams(w http.ResponseWriter, r *http.Request) map[string]inte
 	_, err := webcore.FindSessionInContext(r.Context())
 	params["HasSession"] = (err == nil)
 	params["Host"] = r.Host
-	return params
-}
-
-func BuildOrgTemplateParams(org *core.Organization) map[string]interface{} {
-	params := make(map[string]interface{})
-	params["OrgUrl"] = webcore.MustGetRouteUrl(
-		webcore.DashboardOrgHomeRouteName,
-		core.DashboardOrgOrgQueryId,
-		org.OktaGroupName)
-	params["OrgName"] = org.Name
-	params["OrgGroupId"] = org.OktaGroupName
-	params["OrgId"] = org.Id
-	return params
-}
-
-func BuildUserTemplateParams(user *core.User) map[string]interface{} {
-	params := make(map[string]interface{})
-	params["User"] = core.StructToMap(*user)
 	return params
 }
 

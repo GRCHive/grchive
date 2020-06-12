@@ -16,8 +16,6 @@ import { PageParamsStore, PageParamsStoreState  } from '../ts/pageParams'
 
 function mountApp(inData : PageParamsStoreState) {
     PageParamsStore.commit('replaceState', inData)
-    document.title = `${PageParamsStore.state.site!.CompanyName}`
-
     new Vue({
         el: '#app',
         components: {

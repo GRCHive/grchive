@@ -248,8 +248,7 @@ func getAuditTrailEntry(w http.ResponseWriter, r *http.Request) {
 
 			if metadata != nil && query != nil {
 				handle.DisplayText = fmt.Sprintf(
-					"%s #%s for Query %s v%d #%d",
-					latestData["name"].(string),
+					"#%s for Query %s v%d #%d",
 					event.ResourceId,
 					metadata["name"].(string),
 					int32(math.Round(query["version_number"].(float64))),

@@ -241,6 +241,7 @@ func RenderTemplate(w http.ResponseWriter, key templateKey, name string, params 
 			w,
 			name,
 			core.MergeMaps(map[string]interface{}{
-				"Params": string(jsonRaw),
+				"Params":     string(jsonRaw),
+				"ServerSide": params.ServerSide,
 			}, extraParams, CoreParams()))
 }

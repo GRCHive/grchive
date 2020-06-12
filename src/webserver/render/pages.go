@@ -76,24 +76,6 @@ func RenderDashboardOrgHomePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//data, err := webcore.FindSessionParsedDataInContext(r.Context())
-	//if err != nil {
-	//	core.Warning("No user data: " + err.Error())
-	//	http.Redirect(w, r,
-	//		webcore.MustGetRouteUrl(webcore.DashboardHomeRouteName),
-	//		http.StatusTemporaryRedirect)
-	//	return
-	//}
-
-	//RetrieveTemplate(DashboardOrgHomeTemplateKey).
-	//	ExecuteTemplate(
-	//		w,
-	//		"dashboardBase",
-	//		core.MergeMaps(
-	//			BuildTemplateParams(w, r),
-	//			BuildOrgTemplateParams(org),
-	//			BuildUserTemplateParams(data.CurrentUser)))
-
 	// TODO: Create some sort of dashboard. For now just redirect to process flows.
 	http.Redirect(w, r,
 		webcore.MustGetRouteUrl(webcore.DashboardProcessFlowsRouteName, "orgId", org.OktaGroupName),

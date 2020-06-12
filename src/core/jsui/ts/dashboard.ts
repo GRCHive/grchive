@@ -60,13 +60,6 @@ import '../sass/main.scss'
 
 function mountApp(inData : PageParamsStoreState) {
     PageParamsStore.commit('replaceState', inData)
-
-    if (!!PageParamsStore.state.organization!.Name) {
-        document.title = `${PageParamsStore.state.organization!.Name} :: ${PageParamsStore.state.site!.CompanyName}`
-    } else {
-        document.title = `${PageParamsStore.state.user!.FirstName}  ${PageParamsStore.state.user!.LastName} :: ${PageParamsStore.state.site!.CompanyName}`
-    }
-
     startTemporaryApiKeyRefresh()
 
     new Vue({
