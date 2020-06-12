@@ -1,0 +1,13 @@
+version: '3.3'
+services:
+    wordpress:
+        image: "registry.gitlab.com/grchive/grchive/wordpress:latest"
+        volumes:
+            - type: bind
+              source: /mnt/stateful_partition/wordpress/html
+              target: /var/www/html
+    nginx:
+        image: "registry.gitlab.com/grchive/grchive/wordpress/nginx:latest"
+        ports:
+            - "80:80"
+            - "443:443"

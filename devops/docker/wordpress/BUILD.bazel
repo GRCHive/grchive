@@ -1,0 +1,22 @@
+package(default_visibility=["//visibility:public"])
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("//build:variables.bzl", "env")
+
+container_image(
+    name = "latest",
+    base = "@wordpress//image",
+    env = {
+        "WORDPRESS_DB_HOST" : "127.0.0.1:3306",
+        "WORDPRESS_DB_USER" : env["WORDPRESS_DB_USER"],
+        "WORDPRESS_DB_PASSWORD" : env["WORDPRESS_DB_PASSWORD"],
+        "WORDPRESS_DB_NAME" : env["WORDPRESS_DB_NAME"],
+        "WORDPRESS_INSTANCE_NAME" : env["WORDPRESS_INSTANCE_NAME"],
+        "WORDPRESS_CONFIG_EXTRA": """
+        """
+    },
+    files = [
+        "entrypoint.sh",
+        "//devops/gcloud:gcloud-webserver-account.json",
+    ],
+    entrypoint = "exec /entrypoint.sh",
+)
