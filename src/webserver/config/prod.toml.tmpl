@@ -34,6 +34,9 @@ scope = "openid email offline_access groups profile"
 redirect_uri = "/authorization-code/callback"
 grant_type = "authorization_code"
 
+[website]
+use_analytics = ${USE_ANALYTICS}
+
 [security]
 session_keys = [
     "${SECURITY_KEY_0}",

@@ -59,6 +59,7 @@ To generate this file, copy `$SRC/build/variables.bzl.tmpl` to `$SRC/build/varia
 - `SECURITY_KEY_0`: A key used to encrypt webserver cookies.
 - `SECURITY_KEY_1`: A key used to encrypt webserver cookies.
 - `HMAC_KEY`: A key used to generate HMACs (e.g. for uploading/downloading from Google Cloud Sorage).
+- `USE_ANALYTICS`: Whether to insert Google Tag Manager code on the webserver.
 
 ### Sendgrid
 

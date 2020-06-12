@@ -143,6 +143,7 @@ type EnvConfigData struct {
 	Okta               *OktaConfig
 	SessionKeys        [][]byte
 	HmacKey            []byte
+	UseAnalytics       bool
 	UseSecureCookies   bool
 	LogEncryptionPath  string
 	Company            *CompanyConfig
@@ -228,6 +229,7 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 		Error(err.Error())
 	}
 
+	envConfig.UseAnalytics = tomlConfig.Get("website.use_analytics").(bool)
 	envConfig.UseSecureCookies = tomlConfig.Get("security.use_secure_cookies").(bool)
 	envConfig.LogEncryptionPath = tomlConfig.Get("security.log_encryption_path").(string)
 

@@ -108,3 +108,9 @@ func CreateRedirectParams(w http.ResponseWriter, r *http.Request, title string, 
 	newMap["Redirect"] = redirectUrl
 	return newMap
 }
+
+func CoreParams() map[string]interface{} {
+	params := make(map[string]interface{})
+	params["UseAnalytics"] = core.EnvConfig.UseAnalytics
+	return params
+}
