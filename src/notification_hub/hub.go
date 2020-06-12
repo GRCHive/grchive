@@ -47,6 +47,10 @@ func generateNotification(data []byte) *webcore.RabbitMQError {
 		return handleGettingStartedEvent(event)
 	}
 
+	if core.EnvConfig.DisableDashboard {
+		return nil
+	}
+
 	core.Debug("\tFind Relevant Users")
 	relevantUsers, err := webcore.FindRelevantUsersForEvent(event)
 	if err != nil {

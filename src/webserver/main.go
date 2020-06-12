@@ -83,16 +83,18 @@ func main() {
 	core.Debug("Database Init")
 	database.Init()
 
-	core.Debug("Database Init Listeners")
-	database.InitListeners(map[string]database.ListenHandler{
-		database.NotifyChannelControlOwner:           onNotifyControlOwnerChange,
-		database.NotifyChannelDocRequestAssignee:     onNotifyDocRequestAssigneeChange,
-		database.NotifyChannelDocRequestStatus:       onNotifyDocRequestStatusChange,
-		database.NotifyChannelSqlRequestAssignee:     onNotifySqlRequestAssigneeChange,
-		database.NotifyChannelSqlRequestStatus:       onNotifySqlRequestApprovalChange,
-		database.NotifyChannelGenericRequestAssignee: onNotifyGenericRequestAssigneeChange,
-		database.NotifyChannelGenericRequestStatus:   onNotifyGenericRequestApprovalChange,
-	})
+	if !core.EnvConfig.DisableDashboard {
+		core.Debug("Database Init Listeners")
+		database.InitListeners(map[string]database.ListenHandler{
+			database.NotifyChannelControlOwner:           onNotifyControlOwnerChange,
+			database.NotifyChannelDocRequestAssignee:     onNotifyDocRequestAssigneeChange,
+			database.NotifyChannelDocRequestStatus:       onNotifyDocRequestStatusChange,
+			database.NotifyChannelSqlRequestAssignee:     onNotifySqlRequestAssigneeChange,
+			database.NotifyChannelSqlRequestStatus:       onNotifySqlRequestApprovalChange,
+			database.NotifyChannelGenericRequestAssignee: onNotifyGenericRequestAssigneeChange,
+			database.NotifyChannelGenericRequestStatus:   onNotifyGenericRequestApprovalChange,
+		})
+	}
 
 	core.Debug("Render Init")
 	render.RegisterTemplates()
@@ -100,24 +102,26 @@ func main() {
 	core.Debug("Webcore Init")
 	webcore.InitializeWebcore()
 
-	core.Debug("Mail Init")
-	mail.InitializeMailAPI(core.EnvConfig.Mail.Provider, core.EnvConfig.Mail.Key)
+	if !core.EnvConfig.DisableDashboard {
+		core.Debug("Mail Init")
+		mail.InitializeMailAPI(core.EnvConfig.Mail.Provider, core.EnvConfig.Mail.Key)
 
-	core.Debug("Okta Init")
-	okta.InitializeOktaAPI(okta.OktaConfig{
-		ApiKey:    core.EnvConfig.Okta.ApiKey,
-		ApiDomain: core.EnvConfig.Okta.BaseUrl,
-	})
+		core.Debug("Okta Init")
+		okta.InitializeOktaAPI(okta.OktaConfig{
+			ApiKey:    core.EnvConfig.Okta.ApiKey,
+			ApiDomain: core.EnvConfig.Okta.BaseUrl,
+		})
 
-	core.Debug("Vault Init")
-	vault.Initialize(vault.VaultConfig{
-		Url:      core.EnvConfig.Vault.Url,
-		Username: core.EnvConfig.Vault.Username,
-		Password: core.EnvConfig.Vault.Password,
-	}, core.EnvConfig.Tls.Config())
+		core.Debug("Vault Init")
+		vault.Initialize(vault.VaultConfig{
+			Url:      core.EnvConfig.Vault.Url,
+			Username: core.EnvConfig.Vault.Username,
+			Password: core.EnvConfig.Vault.Password,
+		}, core.EnvConfig.Tls.Config())
 
-	core.Debug("GCloud Init")
-	gcloud.DefaultGCloudApi.InitFromJson(core.EnvConfig.Gcloud.AuthFilename)
+		core.Debug("GCloud Init")
+		gcloud.DefaultGCloudApi.InitFromJson(core.EnvConfig.Gcloud.AuthFilename)
+	}
 
 	core.Debug("RabbitMQ Init")
 	webcore.DefaultRabbitMQ.Connect(
@@ -129,7 +133,7 @@ func main() {
 		core.EnvConfig.Tls)
 	defer webcore.DefaultRabbitMQ.Cleanup()
 
-	if core.EnvConfig.Features.Automation {
+	if core.EnvConfig.Features.Automation && !core.EnvConfig.DisableDashboard {
 		core.Debug("Gitea Init")
 		giteaToken, err := vault.GetSecretWithKey(core.EnvConfig.Gitea.Token, "token")
 		if err != nil {
@@ -198,13 +202,23 @@ func main() {
 	pageRouter.HandleFunc(core.GetStartedUrl, render.RenderGettingStartedPage)
 	pageRouter.HandleFunc(core.ContactUsUrl, render.RenderContactUsPage)
 	pageRouter.HandleFunc(core.HomePageUrl, render.RenderHomePage).Name(webcore.LandingPageRouteName)
-	pageRouter.HandleFunc(core.LoginUrl, render.RenderLoginPage).Name(webcore.LoginRouteName)
-	pageRouter.HandleFunc(core.RegisterUrl, render.RenderRegisterPage).Name(webcore.RegisterRouteName)
+
+	if !core.EnvConfig.DisableDashboard {
+		pageRouter.HandleFunc(core.LoginUrl, render.RenderLoginPage).Name(webcore.LoginRouteName)
+		pageRouter.HandleFunc(core.RegisterUrl, render.RenderRegisterPage).Name(webcore.RegisterRouteName)
+	}
+
 	pageRouter.HandleFunc(core.LearnMoreUrl, render.RenderLearnMorePage)
-	createDashboardSubrouter(pageRouter)
+
+	if !core.EnvConfig.DisableDashboard {
+		createDashboardSubrouter(pageRouter)
+	}
 
 	rest.RegisterPaths(dynamicRouter)
-	websocket.RegisterPaths(dynamicRouter)
+
+	if !core.EnvConfig.DisableDashboard {
+		websocket.RegisterPaths(dynamicRouter)
+	}
 
 	// Should be last?
 	webcore.RegisterRouter(r)
@@ -212,7 +226,9 @@ func main() {
 	// Custom 404
 	r.NotFoundHandler = http.HandlerFunc(render.Render404)
 
-	SetupRabbitMQInterface()
+	if !core.EnvConfig.DisableDashboard {
+		SetupRabbitMQInterface()
+	}
 
 	// TODO: Configurable port?
 	srv := &http.Server{

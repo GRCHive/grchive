@@ -27,22 +27,23 @@
                 Blog
             </v-btn>
 
-            <v-btn
-                text color="primary"
-                :href="dashboardUrl"
-                v-if="hasAuth"
-            >
-                Dashboard
-            </v-btn>
+            <template v-if="!disableDashboard">
+                <v-btn
+                    text color="primary"
+                    :href="dashboardUrl"
+                    v-if="hasAuth"
+                >
+                    Dashboard
+                </v-btn>
 
-            <v-btn
-                text color="primary"
-                :href="loginPageUrl"
-                v-else
-            >
-                Login
-            </v-btn>
-
+                <v-btn
+                    text color="primary"
+                    :href="loginPageUrl"
+                    v-else
+                >
+                    Login
+                </v-btn>
+            </template>
         </v-toolbar-items>
     </v-app-bar>
 </template>
@@ -66,6 +67,9 @@ export default {
     computed: {
         hasAuth() : boolean {
             return PageParamsStore.state.user!.Auth
+        },
+        disableDashboard() : boolean {
+            return PageParamsStore.state.site!.DisableDashboard
         }
     }
 }

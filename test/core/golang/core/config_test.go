@@ -132,6 +132,8 @@ func TestLoadEnvConfig(t *testing.T) {
 						mustDecodeString("ABCDEF"),
 					}},
 					{"HmacKey", "security.hmac_key", "ABCDEF", mustDecodeString("ABCDEF")},
+					{"UseAnalytics", "website.use_analytics", true, nil},
+					{"DisableDashboard", "website.disable_dashboard", true, nil},
 					{"UseSecureCookies", "security.use_secure_cookies", true, nil},
 					{"LogEncryptionPath", "security.log_encryption_path", "path", nil},
 					{"Company.CompanyName", "company.company_name", "company_name", nil},

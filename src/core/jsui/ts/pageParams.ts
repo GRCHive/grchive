@@ -19,6 +19,7 @@ export interface PageParamsStoreState {
         CompanyName: string
         Domain: string
         Host: string
+        DisableDashboard: boolean
     } | null,
     auth: {
         OktaServer: string

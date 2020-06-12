@@ -21,7 +21,8 @@ type PageTemplateParameters struct {
 
 	Site struct {
 		core.CompanyConfig
-		Host string
+		Host             string
+		DisableDashboard bool
 	} `json:"site"`
 
 	Auth struct {
@@ -67,6 +68,7 @@ func BuildPageTemplateParametersFull(r *http.Request, resourceQuery string) Page
 
 	retParams.Site.CompanyConfig = *core.EnvConfig.Company
 	retParams.Site.Host = r.Host
+	retParams.Site.DisableDashboard = core.EnvConfig.DisableDashboard
 
 	retParams.Auth.OktaServer = core.EnvConfig.Okta.BaseUrl
 	retParams.Auth.OktaClientId = core.EnvConfig.Login.ClientId

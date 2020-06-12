@@ -40,4 +40,8 @@ module "webserver" {
 
     doc_storage_bucket = "grchive-staging"
     shell_storage_bucket = "grchive-shell-scripts-staging"
+
+    gke_node_count = 3
+    gke_node_type = "n1-standard-2"
+
 }

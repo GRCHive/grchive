@@ -144,6 +144,7 @@ type EnvConfigData struct {
 	SessionKeys        [][]byte
 	HmacKey            []byte
 	UseAnalytics       bool
+	DisableDashboard   bool
 	UseSecureCookies   bool
 	LogEncryptionPath  string
 	Company            *CompanyConfig
@@ -230,6 +231,7 @@ func LoadEnvConfig(tomlConfig *toml.Tree) *EnvConfigData {
 	}
 
 	envConfig.UseAnalytics = tomlConfig.Get("website.use_analytics").(bool)
+	envConfig.DisableDashboard = tomlConfig.Get("website.disable_dashboard").(bool)
 	envConfig.UseSecureCookies = tomlConfig.Get("security.use_secure_cookies").(bool)
 	envConfig.LogEncryptionPath = tomlConfig.Get("security.log_encryption_path").(string)
 

@@ -46,6 +46,8 @@ case "$ENV" in
         export DRONE_TOKEN=$PRODUCTION_DRONE_TOKEN
         export CONTAINER_REGISTRY_FOLDER="prod"
         export USE_ANALYTICS="true"
+        export DISABLE_DASHBOARD="true"
+        export BASH_DISABLE_DASHBOARD=1
 
         USE_ENV_VARIABLES=1
         DO_TERRAFORM=1
@@ -72,6 +74,7 @@ case "$ENV" in
         export DRONE_TOKEN=$STAGING_DRONE_TOKEN
         export CONTAINER_REGISTRY_FOLDER="staging"
         export USE_ANALYTICS="false"
+        export DISABLE_DASHBOARD="false"
 
         USE_ENV_VARIABLES=1
         DO_TERRAFORM=1
@@ -99,21 +102,21 @@ if [[ ! -z "$USE_ENV_VARIABLES" ]]; then
 fi
 
 if [[ -z "$NOBUILD" ]]; then
-    ${DIR}/build_gitea_container.sh ${EXTRA_BUILD_OPTIONS}
-    ${DIR}/build_artifactory_container.sh ${EXTRA_BUILD_OPTIONS}
-    ${DIR}/build_drone_container.sh ${EXTRA_BUILD_OPTIONS}
+    [[ ! -z $BASH_DISABLE_DASHBOARD ]] || ${DIR}/build_gitea_container.sh ${EXTRA_BUILD_OPTIONS}
+    [[ ! -z $BASH_DISABLE_DASHBOARD ]] || ${DIR}/build_artifactory_container.sh ${EXTRA_BUILD_OPTIONS}
+    [[ ! -z $BASH_DISABLE_DASHBOARD ]] || ${DIR}/build_drone_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_nginx_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_rabbitmq_container.sh ${EXTRA_BUILD_OPTIONS}
-    ${DIR}/build_vault_container.sh ${EXTRA_BUILD_OPTIONS}
-    ${DIR}/build_preview_generator_container.sh ${EXTRA_BUILD_OPTIONS}
+    [[ ! -z $BASH_DISABLE_DASHBOARD ]] || ${DIR}/build_vault_container.sh ${EXTRA_BUILD_OPTIONS}
+    [[ ! -z $BASH_DISABLE_DASHBOARD ]] || ${DIR}/build_preview_generator_container.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_webserver_container.sh ${EXTRA_BUILD_OPTIONS}
-    ${DIR}/build_database_refresh_worker.sh ${EXTRA_BUILD_OPTIONS}
-    ${DIR}/build_database_runner_worker.sh ${EXTRA_BUILD_OPTIONS}
+    [[ ! -z $BASH_DISABLE_DASHBOARD ]] || ${DIR}/build_database_refresh_worker.sh ${EXTRA_BUILD_OPTIONS}
+    [[ ! -z $BASH_DISABLE_DASHBOARD ]] || ${DIR}/build_database_runner_worker.sh ${EXTRA_BUILD_OPTIONS}
     ${DIR}/build_notification_hub.sh ${EXTRA_BUILD_OPTIONS}
-    ${DIR}/build_script_runner_container.sh ${EXTRA_BUILD_OPTIONS}
-    ${DIR}/build_task_manager_container.sh ${EXTRA_BUILD_OPTIONS}
-    ${DIR}/build_shell_runner_container.sh ${EXTRA_BUILD_OPTIONS}
-    ${DIR}/build_integration_runner_container.sh ${EXTRA_BUILD_OPTIONS}
+    [[ ! -z $BASH_DISABLE_DASHBOARD ]] || ${DIR}/build_script_runner_container.sh ${EXTRA_BUILD_OPTIONS}
+    [[ ! -z $BASH_DISABLE_DASHBOARD ]] || ${DIR}/build_task_manager_container.sh ${EXTRA_BUILD_OPTIONS}
+    [[ ! -z $BASH_DISABLE_DASHBOARD ]] || ${DIR}/build_shell_runner_container.sh ${EXTRA_BUILD_OPTIONS}
+    [[ ! -z $BASH_DISABLE_DASHBOARD ]] || ${DIR}/build_integration_runner_container.sh ${EXTRA_BUILD_OPTIONS}
 fi
 
 if [[ ! -z "$DO_TERRAFORM" ]]; then
