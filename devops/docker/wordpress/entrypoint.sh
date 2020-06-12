@@ -1,6 +1,5 @@
 #!/bin/bash
-chown -R root /usr/src
-chown -R root /var/www/html
+chown -R www-data:www-data /var/www/html
 
 curl -o /cloud_sql_proxy https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
 chmod +x /cloud_sql_proxy

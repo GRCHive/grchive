@@ -12,6 +12,7 @@ container_image(
         "WORDPRESS_DB_NAME" : env["WORDPRESS_DB_NAME"],
         "WORDPRESS_INSTANCE_NAME" : env["WORDPRESS_INSTANCE_NAME"],
         "WORDPRESS_CONFIG_EXTRA": """
+@ini_set('upload_max_size' , '20M' );
         """
     },
     files = [
