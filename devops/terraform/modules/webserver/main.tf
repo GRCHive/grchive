@@ -124,7 +124,7 @@ resource "google_container_node_pool" "webserver-node-pool" {
     name        = "webserver-node-pool"
     location    = "us-central1-c"
     cluster     = google_container_cluster.webserver-gke.name
-    node_count  = 3
+    node_count  = var.gke_node_count
 
     node_config {
         disk_size_gb        = 30
@@ -133,7 +133,7 @@ resource "google_container_node_pool" "webserver-node-pool" {
         labels = {
             app = "webserver"
         }
-        machine_type = "n1-standard-2"
+        machine_type = var.gke_node_type
     }
 }
 

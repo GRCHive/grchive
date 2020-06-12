@@ -42,5 +42,5 @@ module "webserver" {
     shell_storage_bucket = "grchive-shell-scripts-prod"
 
     gke_node_count = 1
-    gke_node_type = "n1-standard-1"
+    gke_node_type = "n1-standard-2"
 }

@@ -38,7 +38,7 @@ if [ -z $MINIKUBE ]; then
 
     CONTAINER_REGISTRY_URL=${CONTAINER_REGISTRY}/${CONTAINER_REGISTRY_FOLDER}
 
-    if [[ ! -z $BASH_DISABLE_DASHBOARD ]]; then
+    if [[ -z $BASH_DISABLE_DASHBOARD ]]; then
         export VAULT_IMAGE=${CONTAINER_REGISTRY_URL}/vault:`git rev-parse HEAD`
         cd vault
         envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
@@ -46,7 +46,7 @@ if [ -z $MINIKUBE ]; then
         cd ../
     fi
 
-    if [[ ! -z $BASH_DISABLE_DASHBOARD ]]; then
+    if [[ -z $BASH_DISABLE_DASHBOARD ]]; then
         export GITEA_IMAGE=${CONTAINER_REGISTRY_URL}/gitea:`git rev-parse HEAD`
         cd gitea
         envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
@@ -54,7 +54,7 @@ if [ -z $MINIKUBE ]; then
         cd ../
     fi
 
-    if [[ ! -z $BASH_DISABLE_DASHBOARD ]]; then
+    if [[ -z $BASH_DISABLE_DASHBOARD ]]; then
         export ARTIFACTORY_IMAGE=${CONTAINER_REGISTRY_URL}/artifactory:`git rev-parse HEAD`
         cd artifactory
         envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
@@ -62,7 +62,7 @@ if [ -z $MINIKUBE ]; then
         cd ../
     fi
 
-    if [[ ! -z $BASH_DISABLE_DASHBOARD ]]; then
+    if [[ -z $BASH_DISABLE_DASHBOARD ]]; then
         export DRONE_IMAGE=${CONTAINER_REGISTRY_URL}/drone:`git rev-parse HEAD`
         cd drone
         envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
@@ -70,7 +70,7 @@ if [ -z $MINIKUBE ]; then
         cd ../
     fi
 
-    if [[ ! -z $BASH_DISABLE_DASHBOARD ]]; then
+    if [[ -z $BASH_DISABLE_DASHBOARD ]]; then
         export DRONE_RUNNER_IMAGE=${CONTAINER_REGISTRY_URL}/drone_runner_k8s:`git rev-parse HEAD`
         cd drone_runner
         envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
@@ -84,7 +84,7 @@ if [ -z $MINIKUBE ]; then
     kubectl apply -f service.yaml -f statefulset.prod.yaml
     cd ../
 
-    if [[ ! -z $BASH_DISABLE_DASHBOARD ]]; then
+    if [[ -z $BASH_DISABLE_DASHBOARD ]]; then
         export PREVIEW_IMAGE=${CONTAINER_REGISTRY_URL}/preview_generator:`git rev-parse HEAD`
         cd preview_generator
         envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
@@ -92,7 +92,7 @@ if [ -z $MINIKUBE ]; then
         cd ../
     fi
 
-    if [[ ! -z $BASH_DISABLE_DASHBOARD ]]; then
+    if [[ -z $BASH_DISABLE_DASHBOARD ]]; then
         export RUNNER_IMAGE=${CONTAINER_REGISTRY_URL}/database_query_runner:`git rev-parse HEAD`
         cd database_query_runner
         envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
@@ -100,7 +100,7 @@ if [ -z $MINIKUBE ]; then
         cd ../
     fi
 
-    if [[ ! -z $BASH_DISABLE_DASHBOARD ]]; then
+    if [[ -z $BASH_DISABLE_DASHBOARD ]]; then
         export FETCHER_IMAGE=${CONTAINER_REGISTRY_URL}/database_fetcher:`git rev-parse HEAD`
         cd database_fetcher
         envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
@@ -114,7 +114,7 @@ if [ -z $MINIKUBE ]; then
     kubectl apply -f deployment.prod.yaml
     cd ../
 
-    if [[ ! -z $BASH_DISABLE_DASHBOARD ]]; then
+    if [[ -z $BASH_DISABLE_DASHBOARD ]]; then
         export SCRIPT_RUNNER_IMAGE=${CONTAINER_REGISTRY_URL}/script_runner:`git rev-parse HEAD`
         cd script_runner
         envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
@@ -122,7 +122,7 @@ if [ -z $MINIKUBE ]; then
         cd ../
     fi
 
-    if [[ ! -z $BASH_DISABLE_DASHBOARD ]]; then
+    if [[ -z $BASH_DISABLE_DASHBOARD ]]; then
         export TASK_MANAGER_IMAGE=${CONTAINER_REGISTRY_URL}/task_manager:`git rev-parse HEAD`
         cd task_manager
         envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
@@ -130,7 +130,7 @@ if [ -z $MINIKUBE ]; then
         cd ../
     fi
 
-    if [[ ! -z $BASH_DISABLE_DASHBOARD ]]; then
+    if [[ -z $BASH_DISABLE_DASHBOARD ]]; then
         export SHELL_RUNNER_IMAGE=${CONTAINER_REGISTRY_URL}/shell_runner:`git rev-parse HEAD`
         cd shell_runner
         envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
@@ -138,7 +138,7 @@ if [ -z $MINIKUBE ]; then
         cd ../
     fi
 
-    if [[ ! -z $BASH_DISABLE_DASHBOARD ]]; then
+    if [[ -z $BASH_DISABLE_DASHBOARD ]]; then
         export INTEGRATION_RUNNER_IMAGE=${CONTAINER_REGISTRY_URL}/integration_runner:`git rev-parse HEAD`
         cd integration_runner
         envsubst < deployment.prod.yaml.tmpl > deployment.prod.yaml
