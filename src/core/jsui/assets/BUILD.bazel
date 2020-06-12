@@ -25,10 +25,32 @@ genrule(
            done"
 )
 
+genrule(
+    name = "robots-txt",
+    srcs = ["robots.txt.tmpl"],
+    outs = ["robots.txt"],
+    cmd = ". $(location //build:bash_env) && envsubst < $< > $@",
+    tools = [
+        "//build:bash_env"
+    ]
+)
+
+genrule(
+    name = "sitemap-xml",
+    srcs = ["sitemap.xml.tmpl"],
+    outs = ["sitemap.xml"],
+    cmd = ". $(location //build:bash_env) && envsubst < $< > $@",
+    tools = [
+        "//build:bash_env"
+    ]
+)
+
 filegroup(
     name = "corejsui-assets",
     srcs = [
         ":corejsui-image-assets",
+        ":robots-txt",
+        ":sitemap-xml",
     ] + glob([
         "icons/**/*.svg",
         "logos/**/*.png",

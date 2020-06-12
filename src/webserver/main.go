@@ -158,7 +158,6 @@ func main() {
 
 	r := baser.NewRoute().Subrouter()
 	r.Use(webcore.LoggedRequestMiddleware)
-
 	staticRouter := r.PathPrefix("/static").Subrouter()
 
 	// Static assets that can eventually be served by Nginx.
@@ -181,6 +180,14 @@ func main() {
 		http.StripPrefix(
 			"/static/assets/",
 			http.FileServer(http.Dir("src/core/jsui/assets"))))
+
+	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/static/assets/robots.txt", http.StatusTemporaryRedirect)
+	})
+
+	r.HandleFunc("/sitemap.xml", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/static/assets/sitemap.xml", http.StatusTemporaryRedirect)
+	})
 
 	dynamicRouter := r.PathPrefix("/").Subrouter()
 
