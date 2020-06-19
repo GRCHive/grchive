@@ -59,8 +59,10 @@ resource "google_compute_firewall" "wordpress-network-firewall-http-ingress" {
 
 resource "google_compute_instance" "wordpress" {
     name            = "grchive-wordpress-central1-c"
-    machine_type    = "f1-micro"
+    machine_type    = "g1-small"
     zone            = "us-central1-c"
+
+    allow_stopping_for_update = true
 
     boot_disk {
         auto_delete = false
