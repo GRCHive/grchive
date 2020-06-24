@@ -3,7 +3,7 @@
         <v-list-item class="pa-0">
             <v-list-item-content class="disable-flex mr-4">
                 <v-list-item-title class="title">
-                    Document Requests
+                    PBC Requests
                 </v-list-item-title>
             </v-list-item-content>
             <v-list-item-action>

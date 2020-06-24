@@ -7,7 +7,7 @@
 
         <v-content>
             <v-tabs>
-                <v-tab>Documents</v-tab>
+                <v-tab>PBCs</v-tab>
                 <v-tab-item>
                     <dashboard-doc-request-list></dashboard-doc-request-list>
                 </v-tab-item>

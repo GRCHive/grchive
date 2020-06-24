@@ -8,7 +8,7 @@
             <v-list-item two-line class="pa-0">
                 <v-list-item-content>
                     <v-list-item-title class="title">
-                        Document Request: {{ currentRequest.Name }}
+                        PBC Request: {{ currentRequest.Name }}
                     </v-list-item-title>
 
                     <v-list-item-subtitle>
