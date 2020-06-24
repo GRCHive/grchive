@@ -59,7 +59,7 @@ const DashboardOrgSapErpRfcVersionQueryId = "sapErpRfcVersionQueryId"
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 
 const DashboardOrgHomeUrl string = "/"
-const DashboardOrgDashboardUrl string = "/"
+const DashboardOrgDashboardUrl string = "/dashboard"
 
 const DashboardOrgAllFlowsEndpoint string = "/flows"
 const DashboardOrgAllRiskEndpoint string = "/risks"
