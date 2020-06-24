@@ -258,7 +258,7 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, fileHeader, err := r.FormFile("file")
+	file, fileHeader, err := r.FormFile("files[]")
 	if err != nil {
 		core.Warning("Can't find uploaded file: " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
