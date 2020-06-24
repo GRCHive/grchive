@@ -16,17 +16,17 @@ export default Vue.extend({
         return {
             navLinks : [
                 {
+                    title: 'Dashboard',
+                    icon: 'mdi-view-dashboard',
+                    url: PageParamsStore.state.organization!.Url + 'dashboard',
+                    disabled : false,
+                    hidden: false
+                },
+                {
                     title: 'Business',
                     icon : 'mdi-domain',
                     disabled: false,
                     children: [
-                        {
-                            title: 'Dashboard',
-                            icon: 'mdi-view-dashboard',
-                            url: PageParamsStore.state.organization!.Url + 'dashboard',
-                            disabled : false,
-                            hidden: true
-                        },
                         {
                             title: 'Process Flows',
                             icon: 'mdi-graph-outline',

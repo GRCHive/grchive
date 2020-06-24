@@ -22,6 +22,7 @@ const (
 	LoginRouteName                 = "Login"
 	DashboardHomeRouteName         = "DashboardHome"
 	DashboardProcessFlowsRouteName = "ProcessFlows"
+	DashboardOrgDashboardRouteName = "DashboardDashboard"
 	DashboardUserOrgsRouteName     = "DashboardUserOrgs"
 	DashboardOrgHomeRouteName      = "DashboardOrgHome"
 	DashboardUserHomeRouteName     = "DashboardUserHome"

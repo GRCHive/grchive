@@ -76,9 +76,8 @@ func RenderDashboardOrgHomePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Create some sort of dashboard. For now just redirect to process flows.
 	http.Redirect(w, r,
-		webcore.MustGetRouteUrl(webcore.DashboardProcessFlowsRouteName, "orgId", org.OktaGroupName),
+		webcore.MustGetRouteUrl(webcore.DashboardOrgDashboardRouteName, "orgId", org.OktaGroupName),
 		http.StatusTemporaryRedirect)
 }
 
@@ -102,6 +101,9 @@ func verifyContextForOrgDashboard(w http.ResponseWriter, r *http.Request) error 
 	}
 
 	return nil
+}
+
+func RenderDashboardOrgDashboardPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func RenderDashboardUserHomePage(w http.ResponseWriter, r *http.Request) {
