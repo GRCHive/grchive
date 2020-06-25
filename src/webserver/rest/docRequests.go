@@ -13,8 +13,9 @@ import (
 type NewDocumentRequestInputs struct {
 	Name            string         `json:"name"`
 	Description     string         `json:"description"`
-	CatId           core.NullInt64 `json:"catId"`
+	CatId           int64          `json:"catId"`
 	ControlId       core.NullInt64 `json:"controlId"`
+	FolderId        core.NullInt64 `json:"folderId"`
 	OrgId           int32          `json:"orgId"`
 	RequestedUserId int64          `json:"requestedUserId"`
 	VendorProductId int64          `json:"vendorProductId"`
@@ -92,42 +93,35 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.CreateNewDocumentRequestWithTx(&request, role, tx)
-	if err != nil {
-		tx.Rollback()
-		core.Warning("Failed to create new doc request: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if inputs.VendorProductId != -1 {
-		err = database.LinkRequestToVendorProductWithTx(inputs.VendorProductId, request.Id, request.OrgId, role, tx)
-		if err != nil {
-			tx.Rollback()
-			core.Warning("Failed to link request to vendor product: " + err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+	err = database.WrapTx(tx, func() error {
+		return database.CreateNewDocumentRequestWithTx(&request, role, tx)
+	}, func() error {
+		// We either need to be linking to a vendor or linking to a control/folder.
+		if inputs.VendorProductId != -1 {
+			return database.LinkRequestToVendorProductWithTx(inputs.VendorProductId, request.Id, request.OrgId, role, tx)
+		} else if inputs.ControlId.NullInt64.Valid && inputs.FolderId.NullInt64.Valid {
+			err := database.AddDocRequestControlLinkWithTx(request.Id, inputs.ControlId.NullInt64.Int64, inputs.OrgId, role, tx)
+			if err != nil {
+				return err
+			}
+			return database.AddDocRequestControlFolderLinkWithTx(
+				request.Id,
+				inputs.ControlId.NullInt64.Int64,
+				inputs.FolderId.NullInt64.Int64,
+				inputs.OrgId,
+				role,
+				tx,
+			)
+		} else {
+			return errors.New("Invalid combination.")
 		}
-	}
-
-	if inputs.CatId.NullInt64.Valid {
-		err = database.AddDocRequestDocCatLinkWithTx(request.Id, inputs.CatId.NullInt64.Int64, inputs.OrgId, role, tx)
-	} else if inputs.ControlId.NullInt64.Valid {
-		err = database.AddDocRequestControlLinkWithTx(request.Id, inputs.ControlId.NullInt64.Int64, inputs.OrgId, role, tx)
-	} else {
-		err = errors.New("Invalid combination")
-	}
+		return nil
+	}, func() error {
+		return database.AddDocRequestDocCatLinkWithTx(request.Id, inputs.CatId, inputs.OrgId, role, tx)
+	})
 
 	if err != nil {
-		tx.Rollback()
-		core.Warning("Failed to link doc request: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if err = tx.Commit(); err != nil {
-		tx.Rollback()
-		core.Warning("Failed to commit new doc request: " + err.Error())
+		core.Warning("Failed to create new doc request: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -228,12 +222,23 @@ func getDocumentRequest(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	vendorId, vendorProductId, err := database.GetVendorProductIdForDocRequest(inputs.RequestId, inputs.OrgId)
+	if err != nil {
+		core.Warning("Failed to get vendor product id: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	jsonWriter.Encode(struct {
-		Request *core.DocumentRequest
-		Files   []*core.ControlDocumentationFile
+		Request         *core.DocumentRequest
+		Files           []*core.ControlDocumentationFile
+		VendorProductId int64
+		VendorId        int64
 	}{
-		Request: req,
-		Files:   files,
+		Request:         req,
+		Files:           files,
+		VendorProductId: vendorProductId,
+		VendorId:        vendorId,
 	})
 }
 
@@ -318,6 +323,44 @@ func completeDocumentRequest(w http.ResponseWriter, r *http.Request) {
 	err = database.CompleteDocumentRequest(inputs.RequestId, inputs.OrgId, inputs.Complete, role)
 	if err != nil {
 		core.Warning("Failed to complete/reopen doc request: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+type NewDocumentRequestFileLinksInputs struct {
+	Files []int64 `json:"files"`
+}
+
+func newDocRequestFileLinks(w http.ResponseWriter, r *http.Request) {
+	inputs := NewDocumentRequestFileLinksInputs{}
+	err := webcore.UnmarshalRequestForm(r, &inputs)
+	if err != nil {
+		core.Warning("Can't parse inputs: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	request, err := webcore.FindDocumentRequestInContext(r.Context())
+	if err != nil {
+		core.Warning("Can't find doc request: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tx := database.CreateTx()
+	err = database.WrapTx(tx, func() error {
+		for _, fid := range inputs.Files {
+			err := database.FulfillDocumentRequestWithTx(request.Id, fid, request.OrgId, core.ServerRole, tx)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		core.Warning("Failed to link files to request: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

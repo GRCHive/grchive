@@ -16,7 +16,7 @@
             >
             </document-category-search-form-component>
 
-            <div v-if="requestId != -1 && requestLinkedToControl">
+            <div v-if="requestId != -1 && requestLinkedToControl && !requestControl && folderId == -1">
                 <control-search-form-component
                     v-model="chosenControl"
                     :rules="[rules.required]"
@@ -214,8 +214,11 @@ export default class UploadDocumentationForm extends Vue {
             orgId: PageParamsStore.state.organization!.Id,
             relevantTime: currentDate.toISOString(),
             uploadUserId: !!this.uploadUser ? this.uploadUser.Id : -1,
-            folderId: this.getRelevantFolderId,
         })
+
+        if (this.getRelevantFolderId != null) {
+            this.uppy!.setMeta({folderId: this.getRelevantFolderId})
+        }
 
         if (this.requestId != -1) {
             this.uppy!.setMeta({fulfilledRequestId: this.requestId})

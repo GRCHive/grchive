@@ -82,7 +82,10 @@
                             </v-col>
 
                             <v-col cols="8">
-                                <documentation-category-viewer :cat-id="currentCat.Id">
+                                <documentation-category-viewer
+                                    :cat-id="currentCat.Id"
+                                    :reference-cat="currentCat"
+                                >
                                 </documentation-category-viewer>
                             </v-col>
                         </v-row>

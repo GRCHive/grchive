@@ -158,7 +158,7 @@
                                             </v-tab>
                                             <v-tab-item :key="`item-${folder.Id}`">
                                                 <doc-file-manager
-                                                    :folder-id="folder.Id"
+                                                    :folder="folder"
                                                     disable-sample
                                                 >
                                                 </doc-file-manager>

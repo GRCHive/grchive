@@ -18,11 +18,12 @@ func registerAPIv2Org(r *mux.Router) {
 	s.Use(webcore.ObtainRoleFromRequestInContextMiddleware)
 
 	registerAPIv2ShellPaths(s)
-	registerAPIv2RequestsPaths(s)
+	registerAPIv2GenericRequestsPaths(s)
 	registerAPIv2ServerPaths(s)
 	registerAPIv2DatabasePaths(s)
 	registerAPIv2SystemPaths(s)
 	registerAPIv2IntegrationPaths(s)
+	registerAPIv2PBCRequestsPaths(s)
 }
 
 func registerAPIv2DatabasePaths(r *mux.Router) {
@@ -241,7 +242,36 @@ func registerAPIv2ShellPaths(r *mux.Router) {
 	).Methods("POST")
 }
 
-func registerAPIv2RequestsPaths(r *mux.Router) {
+func registerAPIv2PBCRequestsPaths(r *mux.Router) {
+	s := r.PathPrefix("/pbc").Subrouter()
+
+	singleReq := s.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgDocRequestQueryId)).Subrouter()
+	singleReq.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgDocRequestQueryId))
+
+	singleReqFiles := singleReq.PathPrefix("/files").Subrouter()
+	singleReqFiles.HandleFunc(
+		"/",
+		webcore.CreateACLCheckPermissionHandler(
+			newDocRequestFileLinks,
+			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessEdit},
+			core.ResourceAccessBundle{core.ResourceControlDocumentationMetadata, core.AccessEdit},
+		),
+	).Methods("POST")
+
+	singleReqControl := singleReq.PathPrefix("/control").Subrouter()
+	singleReqSingleControl := singleReqControl.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgControlQueryId)).Subrouter()
+	singleReqSingleControl.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgControlQueryId))
+
+	singleReqSingleControl.HandleFunc("/folders",
+		webcore.CreateACLCheckPermissionHandler(
+			allDocRequestControlFolderLinks,
+			core.ResourceAccessBundle{core.ResourceControls, core.AccessView},
+			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
+		),
+	).Methods("GET")
+}
+
+func registerAPIv2GenericRequestsPaths(r *mux.Router) {
 	s := r.PathPrefix("/requests").Subrouter()
 
 	scriptRouter := s.PathPrefix("/scripts").Subrouter()
@@ -272,8 +302,8 @@ func registerAPIv2RequestsPaths(r *mux.Router) {
 		),
 	).Methods("POST")
 
-	singleReqRouter := s.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgScriptRequestQueryId)).Subrouter()
-	singleReqRouter.Use(webcore.CreateObtainGenericRequestInContext(core.DashboardOrgScriptRequestQueryId))
+	singleReqRouter := s.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgGenericRequestQueryId)).Subrouter()
+	singleReqRouter.Use(webcore.CreateObtainGenericRequestInContext(core.DashboardOrgGenericRequestQueryId))
 	singleReqRouter.HandleFunc("/", getGenericRequest).Methods("GET")
 	singleReqRouter.HandleFunc("/", editGenericRequest).Methods("PUT")
 	singleReqRouter.HandleFunc("/", deleteGenericRequest).Methods("DELETE")

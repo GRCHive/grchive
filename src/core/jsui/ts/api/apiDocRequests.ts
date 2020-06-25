@@ -7,15 +7,18 @@ import { newDocRequestUrl,
          getDocRequestUrl,
          deleteDocRequestUrl,
          completeDocRequestUrl,
-         updateDocRequestUrl } from '../url'
+         updateDocRequestUrl,
+         apiv2DocRequestFileLinks,
+} from '../url'
 import { DocumentRequest, cleanJsonDocumentRequest } from '../docRequests'
 import { ControlDocumentationCategory, ControlDocumentationFile, cleanJsonControlDocumentationFile } from '../controls'
 
 export interface TNewDocRequestInput {
     name: string
     description: string
-    catId?: number
+    catId: number
     controlId? : number
+    folderId?: number
     orgId: number
     requestedUserId: number
     assigneeUserId: number | null
@@ -79,6 +82,8 @@ export interface TGetSingleDocumentRequestOutput {
     data: {
         Request: DocumentRequest
         Files: ControlDocumentationFile[]
+        VendorProductId: number
+        VendorId: number
     }
 }
 
@@ -109,3 +114,16 @@ export function completeDocRequest(inp : TCompleteDocumentRequestInput) : Promis
     return postFormJson(completeDocRequestUrl, inp, getAPIRequestConfig())
 }
 
+export interface TLinkFilesToDocumentRequestInput {
+    requestId: number
+    orgId : number
+    files : number[]
+}
+
+export function linkFilesToDocRequest(inp : TLinkFilesToDocumentRequestInput) : Promise<void> {
+    return postFormJson(
+        apiv2DocRequestFileLinks(inp.orgId, inp.requestId),
+        { files: inp.files },
+        getAPIRequestConfig(),
+    )
+}

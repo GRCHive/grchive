@@ -219,6 +219,7 @@ func FulfillDocumentRequestWithTx(requestId int64, fileId int64, orgId int32, ro
 			$2,
 			$3
 		)
+		ON CONFLICT (org_id, request_id, fulfilled_file_id) DO NOTHING
 	`, orgId, fileId, requestId)
 	if err != nil {
 		return err
@@ -232,6 +233,7 @@ func FulfillDocumentRequestWithTx(requestId int64, fileId int64, orgId int32, ro
 		INNER JOIN document_requests AS req
 			ON req.id = link.request_id
 		WHERE req.id = $1 AND req.org_id = $2
+		ON CONFLICT (product_id, file_id) DO NOTHING
 	`, requestId, orgId, fileId)
 	if err != nil {
 		return err
@@ -318,4 +320,26 @@ func LinkRequestToVendorProductWithTx(productId int64, requestId int64, orgId in
 	`, productId, orgId, requestId)
 
 	return err
+}
+
+func GetVendorProductIdForDocRequest(requestId int64, orgId int32) (int64, int64, error) {
+	rows, err := dbConn.Queryx(`
+		SELECT prod.vendor_id, link.vendor_product_id
+		FROM vendor_soc_request_link AS link
+		INNER JOIN vendor_products AS prod
+			ON prod.id = link.vendor_product_id
+		WHERE link.request_id = $1 AND link.org_id = $2
+	`, requestId, orgId)
+	if err != nil {
+		return -1, -1, err
+	}
+
+	defer rows.Close()
+	if !rows.Next() {
+		return -1, -1, nil
+	}
+	vendorId := int64(0)
+	productId := int64(0)
+	err = rows.Scan(&vendorId, &productId)
+	return vendorId, productId, err
 }

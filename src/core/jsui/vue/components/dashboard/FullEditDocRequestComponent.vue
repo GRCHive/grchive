@@ -12,14 +12,17 @@
                     </v-list-item-title>
 
                     <v-list-item-subtitle>
-                        <p class="ma-0" v-if="!!parentCategory">
+                        <p class="ma-0">
                             <span class="font-weight-bold">Relevant Document Category:</span>
                             <a :href="parentCategoryUrl">{{ parentCategory.Name }}</a>
                         </p>
 
-                        <p class="ma-0" v-if="!!parentControl">
+                        <p class="ma-0" v-if="!!parentControl && !!controlFolder">
                             <span class="font-weight-bold">Relevant Control:</span>
                             <a :href="parentControlUrl">{{ parentControl.Name }}</a>
+
+                            <span class="font-weight-bold">, Folder:</span>
+                            <span>{{ controlFolder.Name }}</span>
                         </p>
 
                         <p class="ma-0">
@@ -106,6 +109,8 @@
                                     :reference-cat="parentCategory"
                                     :reference-req="currentRequest"
                                     :reference-control="parentControl"
+                                    :reference-folder="controlFolder"
+                                    :vendor-product-id="vendorProductId"
                                     @do-save="onEdit"
                                 ></create-new-request-form>
 
@@ -144,6 +149,9 @@
                                         :request-id="currentRequest.Id"
                                         :request-linked-to-control="!!parentControl"
                                         :request-control="parentControl"
+                                        :vendor-id="vendorId"
+                                        :vendor-product-id="vendorProductId"
+                                        :folder="controlFolder"
                                         disable-sample
                                         disable-delete
                                     ></doc-file-manager>
@@ -201,6 +209,8 @@ import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 import { standardFormatTime } from '../../../ts/time'
 import { allDocRequestDocCatLink, TAllDocRequestDocCatLinksOutput } from '../../../ts/api/apiDocRequestsDocCatLinks'
 import { allDocRequestControlLink, TAllDocRequestControlLinksOutput } from '../../../ts/api/apiDocRequestControlLinks'
+import { getDocRequestControlFolderLink, TGetDocRequestControlFolderLinksOutput } from '../../.././ts/api/apiDocRequestFolderLinks'
+import { FileFolder } from '../../../ts/folders'
 import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 
 @Component({
@@ -216,9 +226,12 @@ import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
 export default class FullEditDocRequestComponent extends Vue {
     currentRequest : DocumentRequest | null = null
     relevantFiles: ControlDocumentationFile[] = []
+    vendorId: number = -1
+    vendorProductId: number = -1
 
     parentCategory : ControlDocumentationCategory | null = null
     parentControl : ProcessFlowControl | null = null
+    controlFolder : FileFolder | null = null
 
     showHideDelete: boolean = false
 
@@ -230,7 +243,7 @@ export default class FullEditDocRequestComponent extends Vue {
     }
 
     get ready() : boolean {
-        return !!this.currentRequest
+        return !!this.currentRequest && !!this.parentCategory
     }
 
     get parentControlUrl() : string {
@@ -272,13 +285,33 @@ export default class FullEditDocRequestComponent extends Vue {
         return standardFormatTime(this.currentRequest.CompletionTime)
     }
 
+    onError(err : any) { 
+        // @ts-ignore
+        this.$root.$refs.snackbar.showSnackBar(
+            "Oops! Something went wrong. Try again.",
+            true,
+            "Contact Us",
+            contactUsUrl,
+            true);
+    }
+
     refreshParentControl() {
         allDocRequestControlLink({
             requestId: this.currentRequest!.Id,
             orgId: PageParamsStore.state.organization!.Id
         }).then((resp : TAllDocRequestControlLinksOutput) => {
             this.parentControl = resp.data.Control!
-        })
+
+            if (!!this.parentControl) {
+                getDocRequestControlFolderLink({
+                    requestId: this.currentRequest!.Id,
+                    orgId: PageParamsStore.state.organization!.Id,
+                    controlId: this.parentControl.Id,
+                }).then((resp : TGetDocRequestControlFolderLinksOutput) => {
+                    this.controlFolder = resp.data
+                }).catch(this.onError)
+            }
+        }).catch(this.onError)
     }
 
     refreshParentCategory() {
@@ -287,7 +320,7 @@ export default class FullEditDocRequestComponent extends Vue {
             orgId: PageParamsStore.state.organization!.Id
         }).then((resp : TAllDocRequestDocCatLinksOutput) => {
             this.parentCategory = resp.data.Cat!
-        })
+        }).catch(this.onError)
     }
 
     refreshData() {
@@ -300,18 +333,12 @@ export default class FullEditDocRequestComponent extends Vue {
         }).then((resp : TGetSingleDocumentRequestOutput) => {
             this.currentRequest = resp.data.Request
             this.relevantFiles = resp.data.Files
+            this.vendorProductId = resp.data.VendorProductId
+            this.vendorId = resp.data.VendorId
 
             this.refreshParentCategory()
             this.refreshParentControl()
-        }).catch((err : any) => {
-            // @ts-ignore
-            this.$root.$refs.snackbar.showSnackBar(
-                "Oops! Something went wrong. Try again.",
-                true,
-                "Contact Us",
-                contactUsUrl,
-                true);
-        })
+        }).catch(this.onError)
     }
 
     onEdit(req : DocumentRequest) {

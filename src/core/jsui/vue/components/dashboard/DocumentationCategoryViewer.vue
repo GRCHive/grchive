@@ -21,8 +21,11 @@
 
                     <create-new-request-form
                         :cat-id="catId"
+                        :reference-cat="referenceCat"
                         @do-cancel="showHideRequest = false"
-                        @do-save="newRequest">
+                        @do-save="newRequest"
+                        load-cats
+                    >
                     </create-new-request-form>
                 </v-dialog>
             </v-card-title>
@@ -48,10 +51,15 @@ import CreateNewRequestForm from './CreateNewRequestForm.vue'
 import { DocumentRequest } from '../../../ts/docRequests'
 import DocRequestTable from '../../generic/DocRequestTable.vue'
 import { contactUsUrl } from '../../../ts/url'
+import { ControlDocumentationCategory } from '../../../ts/controls'
 
 const Props = Vue.extend({
     props : {
         catId: Number,
+        referenceCat: {
+            type: Object,
+            default: () => null as ControlDocumentationCategory | null
+        }
     }
 })
 

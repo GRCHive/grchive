@@ -48,6 +48,15 @@ export default class ControlSearchFormComponent extends Props {
         }))
     }
 
+
+    compare(a : ProcessFlowControl | null, b : ProcessFlowControl | null) : boolean {
+        if (!a || !b) {
+            return false
+        }
+
+        return a.Id == b.Id
+    }
+
     refreshControls() {
         getAllControls({
             orgName: PageParamsStore.state.organization!.OktaGroupName,

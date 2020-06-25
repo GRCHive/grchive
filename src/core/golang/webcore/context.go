@@ -29,6 +29,8 @@ const (
 	GenericIntegrationContextKey          = "INTEGRATION"
 	SapErpRfcContextKey                   = "SAPERPRFC"
 	SapErpRfcVersionContextKey            = "SAPERPRFCVERSION"
+	ControlContextKey                     = "CONTROL"
+	DocumentRequestContextKey             = "DOCREQUEST"
 )
 
 func AddSessionToContext(session *core.UserSession, ctx context.Context) context.Context {
@@ -199,6 +201,22 @@ func FindSapErpRfcVersionInContext(ctx context.Context) (*core.SapErpRfcVersion,
 	resource, ok := ctx.Value(SapErpRfcVersionContextKey).(*core.SapErpRfcVersion)
 	if !ok || resource == nil {
 		return nil, errors.New("Failed to find SapErpRfcVersion in context.")
+	}
+	return resource, nil
+}
+
+func FindControlInContext(ctx context.Context) (*core.Control, error) {
+	resource, ok := ctx.Value(ControlContextKey).(*core.Control)
+	if !ok || resource == nil {
+		return nil, errors.New("Failed to find Control in context.")
+	}
+	return resource, nil
+}
+
+func FindDocumentRequestInContext(ctx context.Context) (*core.DocumentRequest, error) {
+	resource, ok := ctx.Value(DocumentRequestContextKey).(*core.DocumentRequest)
+	if !ok || resource == nil {
+		return nil, errors.New("Failed to find DocumentRequest in context.")
 	}
 	return resource, nil
 }

@@ -6,6 +6,7 @@
         :items="items"
         :readonly="readonly"
         :rules="rules"
+        :value-comparator="compare"
         filled
     >
     </v-autocomplete>
@@ -25,7 +26,7 @@ const Props = Vue.extend({
         controlId: Number,
         value: {
             type: Object,
-            default: () => null as ProcessFlowControl | null
+            default: () => null as FileFolder | null
         },
         readonly: {
             type: Boolean,
@@ -47,6 +48,14 @@ export default class ControlFolderFormComponent extends Props {
             text: ele.Name,
             value: ele
         }))
+    }
+
+    compare(a : FileFolder | null, b : FileFolder | null) : boolean {
+        if (!a || !b) {
+            return false
+        }
+
+        return a.Id == b.Id
     }
 
     refreshData() {

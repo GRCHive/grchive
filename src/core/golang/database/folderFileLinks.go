@@ -33,6 +33,7 @@ func AddFileToFolderWithTx(fileId int64, folderId int64, orgId int32, role *core
 	_, err := tx.Exec(`
 		INSERT INTO file_folder_link (file_id, folder_id, org_id)
 		VALUES ($1, $2, $3)
+		ON CONFLICT (org_id, folder_id, file_id) DO NOTHING
 	`, fileId, folderId, orgId)
 	return err
 }

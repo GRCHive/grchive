@@ -36,35 +36,31 @@
         >
         </date-time-picker-form-component>
 
-        <v-select
-            v-model="currentLinkage"
-            :items="requestLinkageItems"
-            label="Link To"
-            :rules="[rules.nonZero]"
-            :readonly="!canEdit || !!referenceCat || !!referenceControl || catId != -1"
-            filled
-        >
-        </v-select>
-
-        <div v-if="currentLinkage == 1">
+        <template v-if="vendorProductId == -1">
             <document-category-search-form-component
                 v-model="realCat"
                 :available-cats="availableCats"
                 :load-cats="loadCats"
                 :rules="[rules.required]"
-                :readonly="editMode"
-                v-if="catId == -1 || !!referenceCat"
+                :readonly="editMode || catId != -1 || !!referenceCat"
             ></document-category-search-form-component>
-        </div>
 
-        <div v-if="currentLinkage == 2">
             <control-search-form-component
                 v-model="linkControl"
                 :rules="[rules.required]"
                 :readonly="editMode || !!referenceControl"
             >
             </control-search-form-component>
-        </div>
+
+            <control-folder-search-form-component
+                v-if="!!linkControl"
+                :control-id="linkControl.Id"
+                v-model="currentFolder"
+                :readonly="editMode || !!referenceFolder"
+                :rules="[rules.required]"
+            >
+            </control-folder-search-form-component>
+        </template>
     </v-form>
 
     <v-card-actions>
@@ -109,12 +105,14 @@ import { updateDocRequest, TUpdateDocRequestOutput, TUpdateDocRequestInput } fro
 import { ControlDocumentationCategory } from '../../../ts/controls'
 import { contactUsUrl } from '../../../ts/url'
 import { PageParamsStore } from '../../../ts/pageParams'
-import { DocumentRequest, RequestLinkageMode, requestLinkageItems } from '../../../ts/docRequests'
+import { DocumentRequest } from '../../../ts/docRequests'
+import { FileFolder } from '../../../ts/folders'
 import MetadataStore from '../../../ts/metadata'
 import DocumentCategorySearchFormComponent from '../../generic/DocumentCategorySearchFormComponent.vue'
 import ControlSearchFormComponent from '../../generic/ControlSearchFormComponent.vue'
 import UserSearchFormComponent from '../../generic/UserSearchFormComponent.vue'
 import DateTimePickerFormComponent from '../../generic/DateTimePickerFormComponent.vue'
+import ControlFolderSearchFormComponent from '../../generic/ControlFolderSearchFormComponent.vue'
 
 const Props = Vue.extend({
     props: {
@@ -150,12 +148,17 @@ const Props = Vue.extend({
             type: Object,
             default: () => null as ProcessFlowControl | null
         },
+        referenceFolder: {
+            type: Object,
+            default: () => null as FileFolder | null
+        },
     },
     components: {
         DocumentCategorySearchFormComponent,
         ControlSearchFormComponent,
         UserSearchFormComponent,
-        DateTimePickerFormComponent
+        DateTimePickerFormComponent,
+        ControlFolderSearchFormComponent,
     }
 })
 
@@ -170,9 +173,7 @@ export default class CreateNewRequestForm extends Props {
     canEdit: boolean = false
     assignee : User | null = null
     dueDate : Date | null = null
-
-    currentLinkage : RequestLinkageMode = RequestLinkageMode.None
-    requestLinkageItems: any[] = requestLinkageItems
+    currentFolder: FileFolder | null = null
 
     get realCatId() : number {
         if (this.catId == -1) {
@@ -215,12 +216,15 @@ export default class CreateNewRequestForm extends Props {
             vendorProductId: this.vendorProductId,
             assigneeUserId: !!this.assignee ? this.assignee.Id : null,
             dueDate: this.dueDate,
+            catId: this.realCatId,
         }
 
-        if (this.currentLinkage == RequestLinkageMode.DocCat) {
-            params.catId = this.realCatId
-        } else if (this.currentLinkage == RequestLinkageMode.Controls) {
-            params.controlId = this.linkControl!.Id
+        if (!!this.linkControl) {
+            params.controlId = this.linkControl.Id
+        }
+
+        if (!!this.currentFolder) {
+            params.folderId = this.currentFolder.Id
         }
 
         newDocRequest(
@@ -243,6 +247,7 @@ export default class CreateNewRequestForm extends Props {
             vendorProductId: this.vendorProductId,
             assigneeUserId: !!this.assignee ? this.assignee.Id : null,
             dueDate: this.dueDate,
+            catId: this.realCatId,
         }
 
         // Don't let people update cat or controls. NO need 
@@ -272,11 +277,11 @@ export default class CreateNewRequestForm extends Props {
 
     @Watch('referenceControl')
     @Watch('referenceCat')
+    @Watch('referenceFolder')
     clearForm() {
         if (!!this.referenceReq) {
             this.name = this.referenceReq.Name
             this.description = this.referenceReq.Description
-            this.realCat = this.referenceCat
             this.assignee = MetadataStore.getters.getUser(this.referenceReq.AssigneeUserId)
             this.dueDate = this.referenceReq.DueDate
         } else {
@@ -286,15 +291,21 @@ export default class CreateNewRequestForm extends Props {
                 this.realCat = null
             }
             this.linkControl = null
+            this.currentFolder = null
             this.assignee = null
             this.dueDate = null
         }
 
-        if (!!this.referenceCat || this.catId != -1) {
-            this.currentLinkage = RequestLinkageMode.DocCat
-        } else if (!!this.referenceControl) {
-            this.currentLinkage = RequestLinkageMode.Controls
+        if (!!this.referenceCat) {
+            this.realCat = this.referenceCat
+        }
+
+        if (!!this.referenceControl) {
             this.linkControl = this.referenceControl
+        }
+
+        if (!!this.referenceFolder) {
+            this.currentFolder = this.referenceFolder
         }
     }
 }

@@ -125,6 +125,7 @@ func LinkVendorProductToSocFiles(productId int64, orgId int32, files []*core.Con
 		_, err := tx.Exec(`
 			INSERT INTO vendor_product_soc_reports (product_id, org_id, file_id)
 			VALUES ($1, $2, $3)
+			ON CONFLICT (product_id, file_id) DO NOTHING
 		`, productId, orgId, file.Id)
 
 		if err != nil {

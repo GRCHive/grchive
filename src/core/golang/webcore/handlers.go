@@ -506,6 +506,22 @@ func CreateObtainResourceInContextMiddleware(queryId string) mux.MiddlewareFunc 
 				}
 
 				ctx = context.WithValue(r.Context(), SapErpRfcVersionContextKey, vers)
+			case core.DashboardOrgDocRequestQueryId:
+				req, err := database.GetDocumentRequest(queryInt, org.Id, core.ServerRole)
+				if err != nil {
+					core.Warning("Failed to get doc request: " + err.Error())
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+				ctx = context.WithValue(r.Context(), DocumentRequestContextKey, req)
+			case core.DashboardOrgControlQueryId:
+				control, err := database.FindControl(queryInt, core.ServerRole)
+				if err != nil || control.OrgId != org.Id {
+					core.Warning("Failed to get control: " + err.Error())
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+				ctx = context.WithValue(r.Context(), ControlContextKey, control)
 			default:
 				w.WriteHeader(http.StatusBadRequest)
 				return

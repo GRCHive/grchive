@@ -530,3 +530,15 @@ export function apiv2SingleSapErpIntegrationSingleRfcVersionsUrl(orgId: number, 
 export function apiv2SingleSapErpIntegrationSingleRfcSingleVersionUrl(orgId: number, integrationId: number, rfcId : number, versionId : number) : string {
     return `${apiv2SingleSapErpIntegrationSingleRfcVersionsUrl(orgId, integrationId, rfcId)}/${versionId}`
 }
+
+export function apiv2PbcRequestLink(orgId: number, requestId: number) : string {
+    return createOrgApiv2Url(orgId, `pbc/${requestId}`)
+}
+
+export function apiv2DocRequestControlFolderLinks(orgId : number, requestId : number, controlId: number) : string {
+    return `${apiv2PbcRequestLink(orgId, requestId)}/control/${controlId}/folders`
+}
+
+export function apiv2DocRequestFileLinks(orgId : number, requestId : number) : string {
+    return `${apiv2PbcRequestLink(orgId, requestId)}/files`
+}
