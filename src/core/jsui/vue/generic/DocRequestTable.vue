@@ -1,7 +1,7 @@
 <script lang="ts">
 
 import Vue, {VNode} from 'vue'
-import { VIcon } from 'vuetify/lib'
+import { VIcon, VChip } from 'vuetify/lib'
 import Component from 'vue-class-component'
 import BaseResourceTable from './BaseResourceTable.vue'
 import ResourceTableProps from './ResourceTableProps'
@@ -11,10 +11,12 @@ import { createSingleDocRequestUrl, contactUsUrl } from '../../ts/url'
 import { TGetDocCatOutput, getDocumentCategory } from '../../ts/api/apiControlDocumentation'
 import { PageParamsStore } from '../../ts/pageParams'
 import { standardFormatTime } from '../../ts/time'
+import DocRequestStatusDisplay from './requests/DocRequestStatusDisplay.vue'
 
 @Component({
     components: {
-        BaseResourceTable
+        BaseResourceTable,
+        DocRequestStatusDisplay
     }
 })
 export default class DocRequestTable extends ResourceTableProps {
@@ -47,8 +49,8 @@ export default class DocRequestTable extends ResourceTableProps {
                 }
             },
             {
-                text: 'Complete',
-                value: 'complete',
+                text: 'Status',
+                value: 'status',
             },
         ]
     }
@@ -70,23 +72,20 @@ export default class DocRequestTable extends ResourceTableProps {
             name: inp.Name,
             requester: createUserString(MetadataStore.getters.getUser(inp.RequestedUserId)),
             requestTime: inp.RequestTime,
-            complete: !!inp.CompletionTime,
             assignee: createUserString(MetadataStore.getters.getUser(inp.AssigneeUserId)),
             dueDate: inp.DueDate,
             value: inp
         }
     }
 
-    renderFulfilled(props : any) : VNode {
+    renderStatus(props : any) : VNode {
         return this.$createElement(
-            VIcon,
+            DocRequestStatusDisplay,
             {
                 props: {
-                    small : true,
-                    color: props.item.complete ? 'success' : 'error'
+                    documentRequest: props.item.value,
                 }
             },
-            props.item.complete ? 'mdi-check' : 'mdi-close'
         )
     }
 
@@ -133,7 +132,7 @@ export default class DocRequestTable extends ResourceTableProps {
                 },
                 scopedSlots: {
                     'expanded-item': this.renderExpansion,
-                    'item.complete': this.renderFulfilled,
+                    'item.status': this.renderStatus,
                     'item.requestTime': this.renderRequestTime,
                     'item.dueDate': this.renderDueDate,
                 }

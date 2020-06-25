@@ -13,7 +13,9 @@ type DocumentRequest struct {
 	AssigneeUserId  NullInt64 `db:"assignee"`
 	DueDate         NullTime  `db:"due_date"`
 	CompletionTime  NullTime  `db:"completion_time"`
+	FeedbackTime    NullTime  `db:"feedback_time"`
 	RequestTime     time.Time `db:"request_time"`
+	ProgressTime    NullTime  `db:"progress_time"`
 }
 
 func (r *DocumentRequest) UnmarshalJSON(data []byte) error {

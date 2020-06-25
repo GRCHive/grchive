@@ -9,6 +9,10 @@
                 <v-list-item-content>
                     <v-list-item-title class="title">
                         PBC Request: {{ currentRequest.Name }}
+                        <doc-request-status-display
+                            :document-request="currentRequest"
+                        >
+                        </doc-request-status-display>
                     </v-list-item-title>
 
                     <v-list-item-subtitle>
@@ -23,30 +27,6 @@
 
                             <span class="font-weight-bold">, Folder:</span>
                             <span>{{ controlFolder.Name }}</span>
-                        </p>
-
-                        <p class="ma-0">
-                            <span class="font-weight-bold">Status:</span>
-
-                            <span v-if="!currentRequest.CompletionTime">
-                                Pending
-                                <v-icon
-                                    small
-                                    color="warning"
-                                >
-                                    mdi-help-circle
-                                </v-icon>
-                            </span>
-
-                            <span v-else>
-                                Complete ({{ completionTime }})
-                                <v-icon
-                                    small
-                                    color="success"
-                                >
-                                    mdi-check
-                                </v-icon>
-                            </span>
                         </p>
                     </v-list-item-subtitle>
 
@@ -212,6 +192,7 @@ import { allDocRequestControlLink, TAllDocRequestControlLinksOutput } from '../.
 import { getDocRequestControlFolderLink, TGetDocRequestControlFolderLinksOutput } from '../../.././ts/api/apiDocRequestFolderLinks'
 import { FileFolder } from '../../../ts/folders'
 import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
+import DocRequestStatusDisplay from '../../generic/requests/DocRequestStatusDisplay.vue'
 
 @Component({
     components: {
@@ -221,6 +202,7 @@ import AuditTrailViewer from '../../generic/AuditTrailViewer.vue'
         CommentManager,
         UserSearchFormComponent,
         AuditTrailViewer,
+        DocRequestStatusDisplay,
     }
 })
 export default class FullEditDocRequestComponent extends Vue {
