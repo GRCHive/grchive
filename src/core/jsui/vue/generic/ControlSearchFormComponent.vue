@@ -7,6 +7,7 @@
         :readonly="readonly"
         :rules="rules"
         filled
+        clearable
     >
     </v-autocomplete>
 </template>
