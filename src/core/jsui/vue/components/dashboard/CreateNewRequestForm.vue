@@ -47,8 +47,8 @@
 
             <control-search-form-component
                 v-model="linkControl"
-                :rules="[rules.required]"
                 :readonly="editMode || !!referenceControl"
+                v-if="!editMode || !!linkControl"
             >
             </control-search-form-component>
 

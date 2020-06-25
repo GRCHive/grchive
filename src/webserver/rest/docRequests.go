@@ -2,7 +2,6 @@ package rest
 
 import (
 	"encoding/json"
-	"errors"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
 	"gitlab.com/grchive/grchive/webcore"
@@ -112,8 +111,6 @@ func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
 				role,
 				tx,
 			)
-		} else {
-			return errors.New("Invalid combination.")
 		}
 		return nil
 	}, func() error {
