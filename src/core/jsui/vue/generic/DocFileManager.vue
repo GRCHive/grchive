@@ -314,6 +314,7 @@ export default class DocFileManager extends Props {
         cleanJsonControlDocumentationFile(newDoc)
         this.allFiles.unshift(newDoc)
         this.$emit('new-doc', newDoc)
+        this.$emit('changed-all-files')
     }
 
     startDeleteFlow() {
@@ -541,6 +542,7 @@ export default class DocFileManager extends Props {
         }
 
         this.allFiles.unshift(...files)
+        this.$emit('changed-all-files')
     }
 }
 

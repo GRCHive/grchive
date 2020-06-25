@@ -58,7 +58,7 @@
                     <v-btn 
                         @click="doComplete(true)"
                         color="success"
-                        v-if="!currentRequest.CompletionTime"
+                        v-if="canComplete"
                     >
                         Complete  
                     </v-btn>
@@ -66,7 +66,7 @@
                     <v-btn 
                         @click="doComplete(false)"
                         color="warning"
-                        v-else
+                        v-if="canReopen"
                     >
                         Reopen
                     </v-btn>
@@ -134,6 +134,7 @@
                                         :folder="controlFolder"
                                         disable-sample
                                         disable-delete
+                                        @changed-all-files="onChangedFiles"
                                     ></doc-file-manager>
                                 </v-card>
                             </v-col>
@@ -174,7 +175,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
-import { DocumentRequest } from '../../../ts/docRequests'
+import { DocumentRequest, DocRequestStatus, getDocumentRequestStatus } from '../../../ts/docRequests'
 import { TGetSingleDocumentRequestOutput, getSingleDocRequest } from '../../../ts/api/apiDocRequests'
 import { deleteSingleDocRequest, completeDocRequest } from '../../../ts/api/apiDocRequests'
 import { PageParamsStore } from '../../../ts/pageParams'
@@ -216,6 +217,18 @@ export default class FullEditDocRequestComponent extends Vue {
     controlFolder : FileFolder | null = null
 
     showHideDelete: boolean = false
+
+    get status() : DocRequestStatus {
+        return getDocumentRequestStatus(this.currentRequest!)
+    }
+
+    get canComplete() : boolean {
+        return this.status != DocRequestStatus.Complete
+    }
+
+    get canReopen() : boolean {
+        return !this.canComplete && (this.status != DocRequestStatus.Feedback)
+    }
 
     get commentParams() : Object {
         return {
@@ -353,7 +366,7 @@ export default class FullEditDocRequestComponent extends Vue {
             if (val) {
                 this.currentRequest!.CompletionTime = new Date()
             } else {
-                this.currentRequest!.CompletionTime = null
+                this.currentRequest!.FeedbackTime = new Date()
             }
         }).catch((err : any) => {
             // @ts-ignore
@@ -364,6 +377,10 @@ export default class FullEditDocRequestComponent extends Vue {
                 contactUsUrl,
                 true);
         })
+    }
+
+    onChangedFiles() {
+        this.currentRequest!.ProgressTime = new Date()
     }
 
     mounted() {

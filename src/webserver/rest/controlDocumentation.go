@@ -361,6 +361,19 @@ func uploadControlDocumentation(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
+		err = database.MarkDocumentRequestProgressWithTx(
+			inputs.FulfilledRequestId.NullInt64.Int64,
+			inputs.OrgId,
+			tx)
+		if err != nil {
+			tx.Rollback()
+			storage.Delete(bucket, finalFilename)
+
+			core.Warning("Failed to mark in progress: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	core.Debug("\tPost to RabbitMQ")

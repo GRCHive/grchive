@@ -136,26 +136,44 @@ func DeleteDocumentRequest(requestId int64, orgId int32, role *core.Role) error 
 	return tx.Commit()
 }
 
+func MarkDocumentRequestProgressWithTx(requestId int64, orgId int32, tx *sqlx.Tx) error {
+	_, err := tx.Exec(`
+		UPDATE document_requests
+		SET progress_time = NOW()
+		WHERE id = $1
+			AND org_id = $2
+	`, requestId, orgId)
+	return err
+}
+
 func CompleteDocumentRequest(requestId int64, orgId int32, complete bool, role *core.Role) error {
 	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessEdit) {
 		return core.ErrorUnauthorized
-	}
-
-	newTime := core.NullTime{}
-	if complete {
-		newTime = core.CreateNullTime(time.Now().UTC())
 	}
 
 	tx, err := CreateAuditTrailTx(role)
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec(`
-		UPDATE document_requests
-		SET completion_time = $3
-		WHERE id = $1
-			AND org_id = $2
-	`, requestId, orgId, newTime)
+
+	tm := time.Now().UTC()
+
+	if complete {
+		_, err = tx.Exec(`
+			UPDATE document_requests
+			SET completion_time = $3
+			WHERE id = $1
+				AND org_id = $2
+		`, requestId, orgId, tm)
+	} else {
+		_, err = tx.Exec(`
+			UPDATE document_requests
+			SET feedback_time = $3
+			WHERE id = $1
+				AND org_id = $2
+		`, requestId, orgId, tm)
+	}
+
 	if err != nil {
 		tx.Rollback()
 		return err

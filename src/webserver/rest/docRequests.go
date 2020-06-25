@@ -354,6 +354,8 @@ func newDocRequestFileLinks(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		return nil
+	}, func() error {
+		return database.MarkDocumentRequestProgressWithTx(request.Id, request.OrgId, tx)
 	})
 
 	if err != nil {
