@@ -542,3 +542,15 @@ export function apiv2DocRequestControlFolderLinks(orgId : number, requestId : nu
 export function apiv2DocRequestFileLinks(orgId : number, requestId : number) : string {
     return `${apiv2PbcRequestLink(orgId, requestId)}/files`
 }
+
+export function apiv2PbcAnalyticsLink(orgId: number) : string {
+    return createOrgApiv2Url(orgId, `analytics/pbc`)
+}
+
+export function apiv2PbcOverallAnalyticsLink(orgId: number) : string {
+    return `${apiv2PbcAnalyticsLink(orgId)}/overall`
+}
+
+export function apiv2PbcCategoryAnalyticsLink(orgId: number, category : string) : string {
+    return `${apiv2PbcAnalyticsLink(orgId)}/category/${category}`
+}

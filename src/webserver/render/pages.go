@@ -104,6 +104,7 @@ func verifyContextForOrgDashboard(w http.ResponseWriter, r *http.Request) error 
 }
 
 func RenderDashboardOrgDashboardPage(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardOrgHomeTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r, ""), emptyParams)
 }
 
 func RenderDashboardUserHomePage(w http.ResponseWriter, r *http.Request) {

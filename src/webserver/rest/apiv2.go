@@ -24,6 +24,7 @@ func registerAPIv2Org(r *mux.Router) {
 	registerAPIv2SystemPaths(s)
 	registerAPIv2IntegrationPaths(s)
 	registerAPIv2PBCRequestsPaths(s)
+	registerAPIv2AnalyticsPaths(s)
 }
 
 func registerAPIv2DatabasePaths(r *mux.Router) {
@@ -437,4 +438,84 @@ func registerAPIv2IntegrationPaths(r *mux.Router) {
 			core.ResourceAccessBundle{core.ResourceSapErp, core.AccessView},
 		),
 	).Methods("GET")
+}
+
+func registerAPIv2AnalyticsPaths(r *mux.Router) {
+	s := r.PathPrefix("/analytics").Subrouter()
+	registerAPIv2PbcAnalytics(s)
+}
+
+func registerAPIv2PbcAnalytics(r *mux.Router) {
+	s := r.PathPrefix("/pbc").Subrouter()
+	s.HandleFunc(
+		"/overall",
+		webcore.CreateACLCheckPermissionHandler(
+			getOverallPbcAnalytics,
+			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
+		),
+	)
+
+	s.HandleFunc(
+		"/category/requester",
+		webcore.CreateACLCheckPermissionHandler(
+			getCategoryRequesterPbcAnalytics,
+			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
+		),
+	)
+
+	s.HandleFunc(
+		"/category/assignee",
+		webcore.CreateACLCheckPermissionHandler(
+			getCategoryAssigneePbcAnalytics,
+			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
+		),
+	)
+
+	s.HandleFunc(
+		"/category/cat",
+		webcore.CreateACLCheckPermissionHandler(
+			getCategoryDocCatPbcAnalytics,
+			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
+		),
+	)
+
+	s.HandleFunc(
+		"/category/flow",
+		webcore.CreateACLCheckPermissionHandler(
+			getCategoryProcessFlowPbcAnalytics,
+			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
+		),
+	)
+
+	s.HandleFunc(
+		"/category/control",
+		webcore.CreateACLCheckPermissionHandler(
+			getCategoryControlPbcAnalytics,
+			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
+		),
+	)
+
+	s.HandleFunc(
+		"/category/risk",
+		webcore.CreateACLCheckPermissionHandler(
+			getCategoryRiskPbcAnalytics,
+			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
+		),
+	)
+
+	s.HandleFunc(
+		"/category/gl",
+		webcore.CreateACLCheckPermissionHandler(
+			getCategoryGLPbcAnalytics,
+			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
+		),
+	)
+
+	s.HandleFunc(
+		"/category/system",
+		webcore.CreateACLCheckPermissionHandler(
+			getCategorySystemPbcAnalytics,
+			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
+		),
+	)
 }

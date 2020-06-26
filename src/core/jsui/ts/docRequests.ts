@@ -40,6 +40,29 @@ export enum DocRequestStatus {
     Overdue,
 }
 
+export function getDocRequestStatusString(s : DocRequestStatus) : string {
+    switch (s) {
+        case DocRequestStatus.Open:
+            return 'Open'
+        case DocRequestStatus.InProgress:
+            return 'In Progress'
+        case DocRequestStatus.Feedback:
+            return 'Feedback'
+        case DocRequestStatus.Complete:
+            return 'Complete'
+        case DocRequestStatus.Overdue:
+            return 'Overdue'
+    }
+}
+
+export const allDocRequestStatus : DocRequestStatus[] = [
+    DocRequestStatus.Open,
+    DocRequestStatus.InProgress,
+    DocRequestStatus.Feedback,
+    DocRequestStatus.Complete,
+    DocRequestStatus.Overdue,
+]
+
 export function getDocumentRequestStatus(r : DocumentRequest) : DocRequestStatus {
     let currentTime = new Date()
     if (!r.CompletionTime) {
