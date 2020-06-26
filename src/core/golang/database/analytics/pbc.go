@@ -52,6 +52,7 @@ func GetGenericCategoryPbcAnalytics(query string, orgId int32, filter core.DocRe
 	}
 	defer rows.Close()
 
+	order := make([]string, 0)
 	mapResults := map[string]*PbcCategoryAnalyticsResult{}
 	for rows.Next() {
 		var id string
@@ -69,14 +70,15 @@ func GetGenericCategoryPbcAnalytics(query string, orgId int32, filter core.DocRe
 			result = mapResults[id]
 			result.Name = id
 			result.Data = map[core.DocRequestStatus]int32{}
+			order = append(order, id)
 		}
 
 		result.Data[status] = count
 	}
 
 	data := make([]PbcCategoryAnalyticsResult, 0)
-	for _, v := range mapResults {
-		data = append(data, *v)
+	for _, v := range order {
+		data = append(data, *mapResults[v])
 	}
 
 	return data, nil
@@ -86,7 +88,7 @@ func GetGenericCategoryPbcAnalytics(query string, orgId int32, filter core.DocRe
 func GetAssigneeCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData) ([]PbcCategoryAnalyticsResult, error) {
 	return GetGenericCategoryPbcAnalytics(`
 		SELECT 
-			COALESCE(u.first_name || ' ' || u.last_name, 'No User') AS "id",
+			COALESCE(u.first_name || ' ' || u.last_name, 'No User') AS "cid",
 			data.status,
 			COUNT(data.id)
 		FROM (
@@ -97,15 +99,15 @@ func GetAssigneeCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterDa
 		) AS data
 		LEFT JOIN users AS u
 			ON u.id = data.assignee
-		GROUP BY data.status, u.id
-		ORDER BY id
+		GROUP BY data.status, cid
+		ORDER BY cid
 	`, orgId, filter)
 }
 
 func GetRequesterCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData) ([]PbcCategoryAnalyticsResult, error) {
 	return GetGenericCategoryPbcAnalytics(`
 		SELECT 
-			COALESCE(u.first_name || ' ' || u.last_name, 'No User') AS "id",
+			COALESCE(u.first_name || ' ' || u.last_name, 'No User') AS "cid",
 			data.status,
 			COUNT(data.id)
 		FROM (
@@ -116,15 +118,15 @@ func GetRequesterCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterD
 		) AS data
 		LEFT JOIN users AS u
 			ON u.id = data.requested_user_id
-		GROUP BY data.status, u.id
-		ORDER BY id
+		GROUP BY data.status, cid
+		ORDER BY cid
 	`, orgId, filter)
 }
 
 func GetDocCatCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData) ([]PbcCategoryAnalyticsResult, error) {
 	return GetGenericCategoryPbcAnalytics(`
 		SELECT 
-			COALESCE(cat.name, 'N/A') AS "id",
+			COALESCE(cat.name, 'N/A') AS "cid",
 			data.status,
 			COUNT(data.id)
 		FROM (
@@ -137,15 +139,15 @@ func GetDocCatCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData
 		) AS data
 		LEFT JOIN process_flow_control_documentation_categories AS cat
 			ON cat.id = data.cat_id
-		GROUP BY data.status, cat.name
-		ORDER BY id
+		GROUP BY data.status, cid
+		ORDER BY cid
 	`, orgId, filter)
 }
 
 func GetProcessFlowCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData) ([]PbcCategoryAnalyticsResult, error) {
 	return GetGenericCategoryPbcAnalytics(`
 		SELECT 
-			COALESCE(data.name, 'N/A') AS "id",
+			COALESCE(data.name, 'N/A') AS "cid",
 			data.status,
 			COUNT(data.id)
 		FROM (
@@ -162,15 +164,15 @@ func GetProcessFlowCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilte
 		WHERE req.org_id = $1
 			AND %s
 		) AS data
-		GROUP BY data.status, data.name
-		ORDER BY id
+		GROUP BY data.status, cid
+		ORDER BY cid
 	`, orgId, filter)
 }
 
 func GetControlCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData) ([]PbcCategoryAnalyticsResult, error) {
 	return GetGenericCategoryPbcAnalytics(`
 		SELECT 
-			COALESCE(ctrl.identifier, 'N/A') AS "id",
+			COALESCE(ctrl.identifier, 'N/A') AS "cid",
 			data.status,
 			COUNT(data.id)
 		FROM (
@@ -183,15 +185,15 @@ func GetControlCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterDat
 		) AS data
 		LEFT JOIN process_flow_controls AS ctrl
 			ON ctrl.id = data.control_id
-		GROUP BY data.status, ctrl.identifier
-		ORDER BY id
+		GROUP BY data.status, cid
+		ORDER BY cid
 	`, orgId, filter)
 }
 
 func GetRiskCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData) ([]PbcCategoryAnalyticsResult, error) {
 	return GetGenericCategoryPbcAnalytics(`
 		SELECT 
-			COALESCE(rsk.identifier, 'N/A') AS "id",
+			COALESCE(rsk.identifier, 'N/A') AS "cid",
 			data.status,
 			COUNT(data.id)
 		FROM (
@@ -206,15 +208,15 @@ func GetRiskCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData) 
 			ON rc.control_id = data.control_id
 		LEFT JOIN process_flow_risks AS rsk
 			ON rsk.id = rc.risk_id
-		GROUP BY data.status, rsk.identifier
-		ORDER BY id
+		GROUP BY data.status, cid
+		ORDER BY cid
 	`, orgId, filter)
 }
 
 func GetGLCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData) ([]PbcCategoryAnalyticsResult, error) {
 	return GetGenericCategoryPbcAnalytics(`
 		SELECT
-			COALESCE(data.account_name, 'N/A') AS "id",
+			COALESCE(data.account_name, 'N/A') AS "cid",
 			data.status,
 			COUNT(data.id)
 		FROM (
@@ -232,15 +234,15 @@ func GetGLCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData) ([
 			AND ngl.gl_account_id IS NOT NULL
 			AND %s
 		) AS data
-		GROUP BY data.status, data.account_name
-		ORDER BY id
+		GROUP BY data.status, cid
+		ORDER BY cid
 	`, orgId, filter)
 }
 
 func GetSystemCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData) ([]PbcCategoryAnalyticsResult, error) {
 	return GetGenericCategoryPbcAnalytics(`
 		SELECT
-			COALESCE(data.name, 'N/A') AS "id",
+			COALESCE(data.name, 'N/A') AS "cid",
 			data.status,
 			COUNT(data.id)
 		FROM (
@@ -258,8 +260,8 @@ func GetSystemCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData
 			AND nsl.system_id IS NOT NULL
 			AND %s
 		) AS data
-		GROUP BY data.status, data.name
-		ORDER BY id
+		GROUP BY data.status, cid
+		ORDER BY cid
 	`, orgId, filter)
 
 }
