@@ -60,6 +60,7 @@ import 'echarts/lib/chart/pie'
 import 'echarts/lib/component/tooltip'
 import 'echarts/lib/component/legend'
 import 'echarts/lib/component/dataZoom'
+import 'zrender/lib/svg/svg'
 
 import {
     DocRequestFilterData,
@@ -275,8 +276,8 @@ export default class PbcDashboard extends Vue {
     }
 
     mounted() {
-        this.overallGraph = echarts.init(this.$refs.overallDiv)
-        this.categoryGraph = echarts.init(this.$refs.categoryDiv)
+        this.overallGraph = echarts.init(this.$refs.overallDiv, null, { renderer: 'svg' })
+        this.categoryGraph = echarts.init(this.$refs.categoryDiv, null, { renderer : 'svg' })
 
         this.refreshOverallGraph()
         this.refreshCategoryGraph()
