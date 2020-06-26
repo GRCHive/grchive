@@ -56,6 +56,10 @@ variables:
         - export GRCHIVE_URI="https://www.grchive.com"
         - export GRCHIVE_DOMAIN="grchive.com"
         - export GRCHIVE_DOC_BUCKET="grchive-prod"
+        - export GRCHIVE_SHELL_BUCKET="grchive-shell-scripts-prod"
+        - export USE_ANALYTICS="true"
+        - export DISABLE_DASHBOARD="true"
+        - export BASH_DISABLE_DASHBOARD=1
         - rm build/variables.bzl && envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
 
 .staging-before-script: &staging-before-script
@@ -74,6 +78,9 @@ variables:
         - export GRCHIVE_URI="https://staging.grchive.com"
         - export GRCHIVE_DOMAIN="staging.grchive.com"
         - export GRCHIVE_DOC_BUCKET="grchive-staging"
+        - export GRCHIVE_SHELL_BUCKET="grchive-shell-scripts-staging"
+        - export USE_ANALYTICS="false"
+        - export DISABLE_DASHBOARD="false"
         - rm build/variables.bzl && envsubst < build/variables.bzl.prod.tmpl > build/variables.bzl
 
 include:
