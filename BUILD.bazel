@@ -64,8 +64,23 @@ container_image (
 )
 
 container_image (
-    name = "powershell_base",
+    name = "powershell_raw",
     base = "@powershell7-ubuntu18.04//image",
     files = SAP_NWRFC_FILES,
     directory = "/usr/lib",
+)
+
+download_pkgs(
+    name = "powershell_deps",
+    packages = [
+        "openssh-client",
+    ],
+    image_tar = ":powershell_raw.tar"
+)
+
+install_pkgs(
+    name = "powershell_base",
+    image_tar = ":powershell_raw.tar",
+    installables_tar = ":powershell_deps.tar",
+    output_image_name = "powershell_base"
 )
