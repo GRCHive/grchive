@@ -2,6 +2,8 @@
     <v-chip
         small
         :color="colorStr"
+        :close="canClose"
+        @click:close="onClose"
     >
         {{ statusStr }}
         <v-icon
@@ -18,15 +20,18 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Prop } from 'vue-property-decorator'
-import { DocumentRequest, DocRequestStatus, getDocumentRequestStatus } from '../../../ts/docRequests'
+import { DocRequestStatus, getDocumentRequestStatus } from '../../../ts/docRequests'
 
 @Component
 export default class DocRequestStatusDisplay extends Vue {
     @Prop()
-    documentRequest! : DocumentRequest
+    status! : DocRequestStatus
 
-    get status() : DocRequestStatus {
-        return getDocumentRequestStatus(this.documentRequest)
+    @Prop({default:false})
+    canClose : boolean = false
+
+    onClose() {
+        this.$emit('click:close')
     }
 
     get iconStr() : string {

@@ -11,6 +11,7 @@ import { createSingleDocRequestUrl, contactUsUrl } from '../../ts/url'
 import { TGetDocCatOutput, getDocumentCategory } from '../../ts/api/apiControlDocumentation'
 import { PageParamsStore } from '../../ts/pageParams'
 import { standardFormatTime } from '../../ts/time'
+import { getDocumentRequestStatus } from '../../ts/docRequests'
 import DocRequestStatusDisplay from './requests/DocRequestStatusDisplay.vue'
 
 @Component({
@@ -83,7 +84,7 @@ export default class DocRequestTable extends ResourceTableProps {
             DocRequestStatusDisplay,
             {
                 props: {
-                    documentRequest: props.item.value,
+                    status: getDocumentRequestStatus(props.item.value),
                 }
             },
         )

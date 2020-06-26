@@ -13,7 +13,11 @@
                     label="Start Time"
                     prepend-icon="mdi-calendar"
                     readonly
-                    v-on="on">
+                    v-on="on"
+                    clearable
+                    @click:clear="clearStart"
+                    @click="resetStart"
+                >
                 </v-text-field>
             </template>
 
@@ -36,7 +40,11 @@
                     label="End Time"
                     prepend-icon="mdi-calendar"
                     readonly
-                    v-on="on">
+                    v-on="on"
+                    clearable
+                    @click:clear="clearEnd"
+                    @click="resetEnd"
+                >
                 </v-text-field>
             </template>
 
@@ -79,6 +87,30 @@ const Props = Vue.extend({
 export default class TimeRangeFilter extends Props {
     showStartDate : boolean = false
     showEndDate: boolean = false
+
+    clearStart() {
+        this.value.Start = null
+        this.$emit('input', this.value)
+    }
+
+    clearEnd() {
+        this.value.End = null
+        this.$emit('input', this.value)
+    }
+
+    resetStart() {
+        if (this.value.Start == null) {
+            this.value.Start = new Date()
+            this.$emit('input', this.value)
+        }
+    }
+
+    resetEnd() {
+        if (this.value.End == null) {
+            this.value.End = new Date()
+            this.$emit('input', this.value)
+        }
+    }
     
     get startStr() : string {
         return standardFormatTime(this.value.Start)

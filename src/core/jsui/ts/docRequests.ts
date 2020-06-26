@@ -70,3 +70,48 @@ export function getDocumentRequestStatus(r : DocumentRequest) : DocRequestStatus
         return DocRequestStatus.Complete
     }
 }
+
+export interface DocRequestStatusFilterData {
+    ValidStatuses: DocRequestStatus[]
+}
+
+export let NullDocRequestStatusFilterData : DocRequestStatusFilterData = {
+    ValidStatuses: []
+}
+
+export function copyDocRequestStatusFilterData(c : DocRequestStatusFilterData) : DocRequestStatusFilterData {
+    let ret = JSON.parse(JSON.stringify(c))
+    return ret
+}
+
+import {
+    TimeRangeFilterData, NullTimeRangeFilterDate, copyTimeRangeFilterData, cleanTimeRangeFilterDataFromJson,
+    UserFilterData, NullUserFilterData, copyUserFilterData,
+} from './filters'
+
+export interface DocRequestFilterData {
+    RequestTimeFilter: TimeRangeFilterData
+    DueDateFilter: TimeRangeFilterData
+    StatusFilter: DocRequestStatusFilterData
+    RequesterFilter: UserFilterData
+    AssigneeFilter: UserFilterData
+}
+
+export let NullDocRequestFilterData : DocRequestFilterData = {
+    RequestTimeFilter : copyTimeRangeFilterData(NullTimeRangeFilterDate),
+    DueDateFilter: copyTimeRangeFilterData(NullTimeRangeFilterDate),
+    StatusFilter: copyDocRequestStatusFilterData(NullDocRequestStatusFilterData),
+    RequesterFilter: copyUserFilterData(NullUserFilterData),
+    AssigneeFilter: copyUserFilterData(NullUserFilterData),
+}
+
+export function copyDocRequestFilterData(c : DocRequestFilterData) : DocRequestFilterData {
+    let ret = JSON.parse(JSON.stringify(c))
+    cleanDocRequestFilterDataFromJson(ret)
+    return ret
+}
+
+export function cleanDocRequestFilterDataFromJson(c : DocRequestFilterData) {
+    cleanTimeRangeFilterDataFromJson(c.DueDateFilter)    
+    cleanTimeRangeFilterDataFromJson(c.RequestTimeFilter)    
+}

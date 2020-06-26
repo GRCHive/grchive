@@ -1,9 +1,5 @@
 package core
 
-import (
-	"time"
-)
-
 type ComparisonOperators int
 
 const (
@@ -46,6 +42,10 @@ var NullStringFilterData StringFilterData = StringFilterData{
 
 type TimeRangeFilterData struct {
 	Enabled bool
-	Start   time.Time
-	End     time.Time
+	Start   NullTime
+	End     NullTime
+}
+
+type UserFilterData struct {
+	UserIds []NullInt64
 }

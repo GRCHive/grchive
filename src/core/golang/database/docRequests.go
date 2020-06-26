@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/grchive/grchive/core"
 	"time"
@@ -193,6 +194,7 @@ func GetAllDocumentRequestsForVendorProduct(productId int64, orgId int32, role *
 		INNER JOIN vendor_soc_request_link AS link
 			ON req.id = link.request_id
 		WHERE req.org_id = $1 AND link.vendor_product_id = $2
+		ORDER BY req.id DESC
 	`, orgId, productId)
 
 	if err != nil {
@@ -202,17 +204,19 @@ func GetAllDocumentRequestsForVendorProduct(productId int64, orgId int32, role *
 	return requests, nil
 }
 
-func GetAllDocumentRequestsForOrganization(orgId int32, role *core.Role) ([]*core.DocumentRequest, error) {
+func GetAllDocumentRequestsForOrganization(orgId int32, filter core.DocRequestFilterData, role *core.Role) ([]*core.DocumentRequest, error) {
 	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessView) {
 		return nil, core.ErrorUnauthorized
 	}
 
 	requests := make([]*core.DocumentRequest, 0)
-	err := dbConn.Select(&requests, `
+	err := dbConn.Select(&requests, fmt.Sprintf(`
 		SELECT *
 		FROM document_requests
 		WHERE org_id = $1
-	`, orgId)
+			AND %s
+		ORDER BY id DESC
+	`, buildDocRequestFilter("document_requests", filter)), orgId)
 
 	if err != nil {
 		return nil, err

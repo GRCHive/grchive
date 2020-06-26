@@ -49,6 +49,7 @@ import { PageParamsStore } from '../../../ts/pageParams'
 import DocFileManager from '../../generic/DocFileManager.vue'
 import CreateNewRequestForm from './CreateNewRequestForm.vue'
 import { DocumentRequest } from '../../../ts/docRequests'
+import { NullDocRequestFilterData ,copyDocRequestFilterData } from '../../../ts/docRequests'
 import DocRequestTable from '../../generic/DocRequestTable.vue'
 import { contactUsUrl } from '../../../ts/url'
 import { ControlDocumentationCategory } from '../../../ts/controls'
@@ -79,6 +80,7 @@ export default class DocumentationCategoryViewer extends Props {
         getAllDocRequests({
             orgId: PageParamsStore.state.organization!.Id,
             catId: this.catId,
+            filter: copyDocRequestFilterData(NullDocRequestFilterData),
         }).then((resp : TGetAllDocumentRequestOutput) => {
             this.requests = resp.data
         }).catch((err : any) => {

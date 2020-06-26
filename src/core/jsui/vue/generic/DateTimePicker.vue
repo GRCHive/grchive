@@ -3,11 +3,13 @@
         <v-date-picker v-if="!disableDate"
             class="mr-4"
             :value="date"
-            @input="onDateChange">
+            @input="onDateChange"
+        >
         </v-date-picker>
         <v-time-picker
             :value="time"
-            @input="onTimeChange">
+            @input="onTimeChange"
+        >
         </v-time-picker>
     </v-row>
 </template>

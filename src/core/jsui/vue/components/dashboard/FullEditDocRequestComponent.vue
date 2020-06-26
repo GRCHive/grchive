@@ -10,7 +10,7 @@
                     <v-list-item-title class="title">
                         PBC Request: {{ currentRequest.Name }}
                         <doc-request-status-display
-                            :document-request="currentRequest"
+                            :status="status"
                         >
                         </doc-request-status-display>
                     </v-list-item-title>

@@ -61,6 +61,7 @@ func FindDocRequestsLinkedToDocCat(catId int64, orgId int32, role *core.Role) ([
 		INNER JOIN request_doc_cat_link AS link
 			ON link.request_id = req.id
 		WHERE link.cat_id = $1 AND link.org_id = $2
+		ORDER BY req.id DESC
 	`, catId, orgId)
 
 	if err != nil {

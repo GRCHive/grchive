@@ -173,6 +173,8 @@ var RiskFilterDataType = reflect.TypeOf(RiskFilterData{})
 var ControlFilterDataType = reflect.TypeOf(ControlFilterData{})
 var DatabaseFilterDataType = reflect.TypeOf(DatabaseFilterData{})
 var AuditTrailFilterDataType = reflect.TypeOf(AuditTrailFilterData{})
+var DocRequestFilterDataType = reflect.TypeOf(DocRequestFilterData{})
+var UserFilterDataType = reflect.TypeOf(UserFilterData{})
 
 var UserReflectType = reflect.TypeOf(User{})
 var ControlReflectType = reflect.TypeOf(Control{})

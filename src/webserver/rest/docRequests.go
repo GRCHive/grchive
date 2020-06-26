@@ -50,9 +50,10 @@ type CompleteDocumentRequestInputs struct {
 }
 
 type AllDocumentRequestsInputs struct {
-	OrgId           int32          `webcore:"orgId"`
-	CatId           core.NullInt64 `webcore:"catId,optional"`
-	VendorProductId core.NullInt64 `webcore:"vendorProductId,optional"`
+	OrgId           int32                     `webcore:"orgId"`
+	CatId           core.NullInt64            `webcore:"catId,optional"`
+	VendorProductId core.NullInt64            `webcore:"vendorProductId,optional"`
+	Filter          core.DocRequestFilterData `webcore:"filter"`
 }
 
 func newDocumentRequest(w http.ResponseWriter, r *http.Request) {
@@ -265,7 +266,7 @@ func allDocumentRequests(w http.ResponseWriter, r *http.Request) {
 	} else if inputs.CatId.NullInt64.Valid {
 		reqs, err = database.FindDocRequestsLinkedToDocCat(inputs.CatId.NullInt64.Int64, inputs.OrgId, role)
 	} else {
-		reqs, err = database.GetAllDocumentRequestsForOrganization(inputs.OrgId, role)
+		reqs, err = database.GetAllDocumentRequestsForOrganization(inputs.OrgId, inputs.Filter, role)
 	}
 
 	if err != nil {

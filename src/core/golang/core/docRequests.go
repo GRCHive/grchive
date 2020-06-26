@@ -21,3 +21,25 @@ type DocumentRequest struct {
 func (r *DocumentRequest) UnmarshalJSON(data []byte) error {
 	return FlexibleJsonStructUnmarshal(data, r)
 }
+
+type DocRequestStatus int32
+
+const (
+	DocRequestOpen       DocRequestStatus = 0
+	DocRequestInProgress                  = 1
+	DocRequestFeedback                    = 2
+	DocRequestComplete                    = 3
+	DocRequestOverdue                     = 4
+)
+
+type DocRequestStatusFilterData struct {
+	ValidStatuses []DocRequestStatus
+}
+
+type DocRequestFilterData struct {
+	RequestTimeFilter TimeRangeFilterData
+	DueDateFilter     TimeRangeFilterData
+	StatusFilter      DocRequestStatusFilterData
+	RequesterFilter   UserFilterData
+	AssigneeFilter    UserFilterData
+}

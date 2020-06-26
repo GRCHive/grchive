@@ -90,21 +90,42 @@ export let NullStringFilterData : StringFilterData = {
 
 export interface TimeRangeFilterData {
     Enabled : boolean
-    Start   : Date
-    End     : Date
+    Start   : Date | null
+    End     : Date | null
 }
 
 export let NullTimeRangeFilterDate : TimeRangeFilterData = {
     Enabled: true,
-    Start: (() => {
-        let d : Date = new Date()
-        return new Date(d.getTime() - 1000*60*60*24)
-    })(),
-    End: new Date()
+    Start: null,
+    End: null,
+}
+
+export function copyTimeRangeFilterData(c : TimeRangeFilterData) : TimeRangeFilterData {
+    let ret = JSON.parse(JSON.stringify(c))
+    cleanTimeRangeFilterDataFromJson(ret)
+    return ret
 }
 
 export function cleanTimeRangeFilterDataFromJson(d : TimeRangeFilterData) : TimeRangeFilterData {
-    d.Start = new Date(d.Start)
-    d.End = new Date(d.End)
+    if (!!d.Start) {
+        d.Start = new Date(d.Start)
+    }
+
+    if (!!d.End) {
+        d.End = new Date(d.End)
+    }
     return d
+}
+
+export interface UserFilterData {
+    UserIds: (number | null)[]
+}
+
+export let NullUserFilterData : UserFilterData = {
+    UserIds: [],
+}
+
+export function copyUserFilterData(c : UserFilterData) : UserFilterData {
+    let ret = JSON.parse(JSON.stringify(c))
+    return ret
 }

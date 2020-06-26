@@ -35,6 +35,12 @@
                 </v-dialog>
             </v-list-item-action>
         </v-list-item>
+
+        <advanced-doc-request-filters
+            v-model="filterData"
+        >
+        </advanced-doc-request-filters>
+
         <v-divider></v-divider>
 
         <doc-request-table
@@ -48,6 +54,7 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import DocRequestTable from '../../generic/DocRequestTable.vue'
 import { DocumentRequest } from '../../../ts/docRequests'
 import { ControlDocumentationCategory } from '../../../ts/controls'
@@ -55,12 +62,15 @@ import { TGetAllDocumentRequestOutput, getAllDocRequests } from '../../../ts/api
 import { TGetAllDocumentationCategoriesOutput, getAllDocumentationCategories } from '../../../ts/api/apiControlDocumentation'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl } from '../../../ts/url'
+import { DocRequestFilterData, NullDocRequestFilterData ,copyDocRequestFilterData } from '../../../ts/docRequests'
 import CreateNewRequestForm from './CreateNewRequestForm.vue'
+import AdvancedDocRequestFilters from '../../generic/filters/AdvancedDocRequestFilters.vue'
 
 @Component({
     components: {
         DocRequestTable,
-        CreateNewRequestForm
+        CreateNewRequestForm,
+        AdvancedDocRequestFilters,
     }
 })
 export default class DashboardDocRequestList extends Vue {
@@ -68,10 +78,13 @@ export default class DashboardDocRequestList extends Vue {
     filterText: string = ""
     requests : DocumentRequest[] = []
     availableCats: ControlDocumentationCategory[] = []
+    filterData: DocRequestFilterData = copyDocRequestFilterData(NullDocRequestFilterData)
 
-    mounted() {
+    @Watch('filterData', {deep:true})
+    refreshDocRequests() {
         getAllDocRequests({
             orgId: PageParamsStore.state.organization!.Id,
+            filter: this.filterData,
         }).then((resp : TGetAllDocumentRequestOutput) => {
             this.requests = resp.data
         }).catch((err : any) => {
@@ -83,6 +96,10 @@ export default class DashboardDocRequestList extends Vue {
                 contactUsUrl,
                 true);
         })
+    }
+
+    mounted() {
+        this.refreshDocRequests()
 
         getAllDocumentationCategories({
             orgId: PageParamsStore.state.organization!.Id,

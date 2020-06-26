@@ -10,7 +10,7 @@ import { newDocRequestUrl,
          updateDocRequestUrl,
          apiv2DocRequestFileLinks,
 } from '../url'
-import { DocumentRequest, cleanJsonDocumentRequest } from '../docRequests'
+import { DocumentRequest, cleanJsonDocumentRequest, DocRequestFilterData } from '../docRequests'
 import { ControlDocumentationCategory, ControlDocumentationFile, cleanJsonControlDocumentationFile } from '../controls'
 
 export interface TNewDocRequestInput {
@@ -60,6 +60,7 @@ export interface TGetAllDocumentRequestInput {
     orgId: number
     catId?: number
     vendorProductId?: number
+    filter: DocRequestFilterData
 }
 
 export interface TGetAllDocumentRequestOutput {
@@ -67,7 +68,12 @@ export interface TGetAllDocumentRequestOutput {
 }
 
 export function getAllDocRequests(inp : TGetAllDocumentRequestInput) : Promise<TGetAllDocumentRequestOutput> {
-    return axios.get(allDocRequestUrl + '?' + qs.stringify(inp), getAPIRequestConfig()).then((resp : TGetAllDocumentRequestOutput) => {
+    let passData : any = {
+        ...inp,
+        filter: JSON.stringify(inp.filter),
+    }
+
+    return axios.get(allDocRequestUrl + '?' + qs.stringify(passData), getAPIRequestConfig()).then((resp : TGetAllDocumentRequestOutput) => {
         resp.data.forEach(cleanJsonDocumentRequest)
         return resp
     })

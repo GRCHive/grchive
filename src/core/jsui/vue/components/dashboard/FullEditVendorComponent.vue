@@ -238,6 +238,7 @@ import FullEditDocumentationCategoryComponent from './FullEditDocumentationCateg
 import CreateNewVendorProductForm from './CreateNewVendorProductForm.vue'
 import { ControlDocumentationFile, VersionedMetadata, extractControlDocumentationFileHandle } from '../../../ts/controls'
 import { DocumentRequest } from '../../../ts/docRequests'
+import { NullDocRequestFilterData ,copyDocRequestFilterData } from '../../../ts/docRequests'
 import {
     TGetAllDocumentRequestOutput,
     getAllDocRequests
@@ -394,6 +395,7 @@ export default class FullEditVendorComponent extends Vue {
             orgId: PageParamsStore.state.organization!.Id,
             catId: this.currentVendor!.DocCatId,
             vendorProductId: this.selectedProduct!.Id,
+            filter: copyDocRequestFilterData(NullDocRequestFilterData),
         }).then((resp : TGetAllDocumentRequestOutput) => {
             this.productSocRequests = resp.data
         }).catch((err : any) => {
