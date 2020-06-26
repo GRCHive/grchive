@@ -28,7 +28,7 @@ export default class DocRequestStatusDisplay extends Vue {
     status! : DocRequestStatus
 
     @Prop({default:false})
-    canClose : boolean = false
+    canClose! : boolean
 
     onClose() {
         this.$emit('click:close')
