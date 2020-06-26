@@ -69,7 +69,11 @@ export function getDocumentRequestStatus(r : DocumentRequest) : DocRequestStatus
         // No completion time: open, in progress, overdue.
         if (!!r.DueDate) {
             if (currentTime <= r.DueDate) {
-                return DocRequestStatus.Open
+                if (!!r.ProgressTime) {
+                    return DocRequestStatus.InProgress
+                } else {
+                    return DocRequestStatus.Open
+                }
             } else {
                 return DocRequestStatus.Overdue
             }
