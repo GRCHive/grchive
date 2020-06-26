@@ -229,6 +229,7 @@ func GetGLCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData) ([
 		LEFT JOIN general_ledger_accounts AS acc
 			ON acc.id = ngl.gl_account_id
 		WHERE req.org_id = $1
+			AND ngl.gl_account_id IS NOT NULL
 			AND %s
 		) AS data
 		GROUP BY data.status, data.account_name
@@ -254,6 +255,7 @@ func GetSystemCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData
 		LEFT JOIN systems AS sys
 			ON sys.id = nsl.system_id
 		WHERE req.org_id = $1
+			AND nsl.system_id IS NOT NULL
 			AND %s
 		) AS data
 		GROUP BY data.status, data.name
