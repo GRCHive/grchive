@@ -145,24 +145,24 @@ func GetDocCatCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData
 func GetProcessFlowCategoryPbcAnalytics(orgId int32, filter core.DocRequestFilterData) ([]PbcCategoryAnalyticsResult, error) {
 	return GetGenericCategoryPbcAnalytics(`
 		SELECT 
-			COALESCE(flow.name, 'N/A') AS "id",
+			COALESCE(data.name, 'N/A') AS "id",
 			data.status,
 			COUNT(data.id)
 		FROM (
-		SELECT get_pbc_request_status(req.*) AS status, req.id, lnk.control_id
+		SELECT DISTINCT get_pbc_request_status(req.*) AS status, req.id, flow.name
 		FROM document_requests AS req
 		LEFT JOIN request_control_link AS lnk
 			ON lnk.request_id = req.id
-		WHERE req.org_id = $1
-			AND %s
-		) AS data
 		LEFT JOIN process_flow_control_node AS cn
-			ON cn.control_id = data.control_id
+			ON cn.control_id = lnk.control_id
 		LEFT JOIN process_flow_nodes AS fn
 			ON fn.id = cn.node_id
 		LEFT JOIN process_flows AS flow
 			ON flow.id = fn.process_flow_id
-		GROUP BY data.status, flow.name
+		WHERE req.org_id = $1
+			AND %s
+		) AS data
+		GROUP BY data.status, data.name
 		ORDER BY id
 	`, orgId, filter)
 }
