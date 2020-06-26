@@ -16,7 +16,7 @@
                     <v-row justify="center" v-if="loadingOverall">
                         <v-progress-circular size="64" indeterminate></v-progress-circular>
                     </v-row>
-                    <div id="overall" ref="overallDiv" style="width: 100%; height: 500px;"></div>
+                    <div id="overall" ref="overallDiv" style="width: 100%; height: 600px;"></div>
                 </v-card>
             </v-col>
 
@@ -41,7 +41,7 @@
                     <v-row justify="center" v-if="loadingCategory">
                         <v-progress-circular size="64" indeterminate></v-progress-circular>
                     </v-row>
-                    <div id="category" ref="categoryDiv" style="width: 100%; height: 500px;"></div>
+                    <div id="category" ref="categoryDiv" style="width: 100%; height: 600px;"></div>
                 </v-card>
             </v-col>
         </v-row>
@@ -59,6 +59,7 @@ import 'echarts/lib/chart/bar'
 import 'echarts/lib/chart/pie'
 import 'echarts/lib/component/tooltip'
 import 'echarts/lib/component/legend'
+import 'echarts/lib/component/dataZoom'
 
 import {
     DocRequestFilterData,
@@ -105,6 +106,7 @@ export default class PbcDashboard extends Vue {
     categoryGraph : any | null = null
     loadingCategory: boolean = false
     selectedCategory : string = 'assignee'
+    numCategories : number = 0
 
     readonly categoryItems = [
         {
@@ -200,6 +202,7 @@ export default class PbcDashboard extends Vue {
             category: this.selectedCategory,
             filter: this.filterData,
         }).then((resp : TGetPbcCategoryProgressOutputs) => {
+            this.numCategories = resp.data.length
             let dataSeries : any[] = allDocRequestStatus.map((s : DocRequestStatus) => {
                 return {
                     name: getDocRequestStatusString(s),
@@ -240,6 +243,20 @@ export default class PbcDashboard extends Vue {
                 grid: {
                     containLabel: true,
                 },
+                dataZoom: [
+                    {
+                        show: true,
+                        start: 0,
+                        end: 100,
+                        yAxisIndex: 0,
+                    },
+                    {
+                        type: 'inside',
+                        start: 0,
+                        end: 100,
+                        yAxisIndex: 0,
+                    },
+                ],
                 series: dataSeries,
             });
 
