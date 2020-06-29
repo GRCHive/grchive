@@ -86,6 +86,10 @@ export default class DocRequestStatusFilter extends Vue {
                 text: 'Overdue',
                 value: DocRequestStatus.Overdue,
             },
+            {
+                text: 'Approved',
+                value: DocRequestStatus.Approved,
+            },
         ]
     }
 

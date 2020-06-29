@@ -385,7 +385,6 @@ func registerDocRequestsAPIPaths(r *mux.Router) {
 	s.HandleFunc(core.ApiAllEndpoint, allDocumentRequests).Methods("GET")
 	s.HandleFunc(core.ApiDeleteEndpoint, deleteDocumentRequest).Methods("POST")
 	s.HandleFunc(core.ApiUpdateEndpoint, updateDocumentRequest).Methods("POST")
-	s.HandleFunc(core.ApiDocRequestCompleteEndpoint, completeDocumentRequest).Methods("POST")
 
 	registerDocRequestLinksAPIPaths(s)
 }

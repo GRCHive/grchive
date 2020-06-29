@@ -43,9 +43,11 @@ export default class DocRequestStatusDisplay extends Vue {
             case DocRequestStatus.Feedback:
                 return "mdi-message-alert-outline"
             case DocRequestStatus.Complete:
-                return "mdi-check-circle-outline"
+                return "mdi-account-check-outline"
             case DocRequestStatus.Overdue:
                 return "mdi-alert-circle-outline"
+            case DocRequestStatus.Approved:
+                return "mdi-check-circle-outline"
         }
 
         return ''
@@ -60,9 +62,11 @@ export default class DocRequestStatusDisplay extends Vue {
             case DocRequestStatus.Feedback:
                 return "Feedback"
             case DocRequestStatus.Complete:
-                return "Complete"
+                return "Pending Approval"
             case DocRequestStatus.Overdue:
                 return "Overdue"
+            case DocRequestStatus.Approved:
+                return "Approved"
         }
 
         return ''
@@ -77,9 +81,11 @@ export default class DocRequestStatusDisplay extends Vue {
             case DocRequestStatus.Feedback:
                 return "warning"
             case DocRequestStatus.Complete:
-                return "success"
+                return "accent"
             case DocRequestStatus.Overdue:
                 return "error"
+            case DocRequestStatus.Approved:
+                return "success"
         }
         return ''
     }

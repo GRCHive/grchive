@@ -363,7 +363,6 @@ export const newDocRequestUrl : string = "/api/requests/new"
 export const allDocRequestUrl : string = "/api/requests/all"
 export const getDocRequestUrl : string = "/api/requests/get"
 export const deleteDocRequestUrl : string = "/api/requests/delete"
-export const completeDocRequestUrl : string = "/api/requests/complete"
 export const updateDocRequestUrl : string = "/api/requests/update"
 
 export const allDocRequestDocCatLinksUrl : string = "/api/requests/link/cat/all"
@@ -541,6 +540,18 @@ export function apiv2DocRequestControlFolderLinks(orgId : number, requestId : nu
 
 export function apiv2DocRequestFileLinks(orgId : number, requestId : number) : string {
     return `${apiv2PbcRequestLink(orgId, requestId)}/files`
+}
+
+export function apiv2DocRequestComplete(orgId : number, requestId: number) : string {
+    return `${apiv2PbcRequestLink(orgId, requestId)}/complete`
+}
+
+export function apiv2DocRequestReopen(orgId : number, requestId: number) : string {
+    return `${apiv2PbcRequestLink(orgId, requestId)}/reopen`
+}
+
+export function apiv2DocRequestApprove(orgId : number, requestId: number) : string {
+    return `${apiv2PbcRequestLink(orgId, requestId)}/approve`
 }
 
 export function apiv2PbcAnalyticsLink(orgId: number) : string {

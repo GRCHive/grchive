@@ -16,6 +16,8 @@ type DocumentRequest struct {
 	FeedbackTime    NullTime  `db:"feedback_time"`
 	RequestTime     time.Time `db:"request_time"`
 	ProgressTime    NullTime  `db:"progress_time"`
+	ApproveTime     NullTime  `db:"approve_time"`
+	ApproveUserId   NullInt64 `db:"approve_user_id"`
 }
 
 func (r *DocumentRequest) UnmarshalJSON(data []byte) error {
@@ -30,6 +32,7 @@ const (
 	DocRequestFeedback                    = 2
 	DocRequestComplete                    = 3
 	DocRequestOverdue                     = 4
+	DocRequestApproved                    = 5
 )
 
 type DocRequestStatusFilterData struct {

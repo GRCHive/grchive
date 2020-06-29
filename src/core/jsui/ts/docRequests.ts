@@ -5,11 +5,13 @@ export interface DocumentRequest {
     OrgId:           number
     RequestedUserId: number
     AssigneeUserId:  number | null
-    DueDate         : Date | null
+    DueDate:         Date | null
     CompletionTime:  Date | null
-    FeedbackTime: Date | null
-    ProgressTime: Date | null
+    FeedbackTime:    Date | null
+    ProgressTime:    Date | null
     RequestTime:     Date
+    ApproveTime:     Date | null
+    ApproveUserId:   number | null
 }
 
 export function cleanJsonDocumentRequest(f : DocumentRequest) {
@@ -29,6 +31,10 @@ export function cleanJsonDocumentRequest(f : DocumentRequest) {
         f.ProgressTime = new Date(f.ProgressTime)
     }
 
+    if (!!f.ApproveTime) {
+        f.ApproveTime = new Date(f.ApproveTime)
+    }
+
     f.RequestTime = new Date(f.RequestTime)
 }
 
@@ -38,6 +44,7 @@ export enum DocRequestStatus {
     Feedback,
     Complete,
     Overdue,
+    Approved
 }
 
 export function getDocRequestStatusString(s : DocRequestStatus) : string {
@@ -49,9 +56,11 @@ export function getDocRequestStatusString(s : DocRequestStatus) : string {
         case DocRequestStatus.Feedback:
             return 'Feedback'
         case DocRequestStatus.Complete:
-            return 'Complete'
+            return 'Pending Approval'
         case DocRequestStatus.Overdue:
             return 'Overdue'
+        case DocRequestStatus.Approved:
+            return 'Approved'
     }
 }
 
@@ -61,11 +70,14 @@ export const allDocRequestStatus : DocRequestStatus[] = [
     DocRequestStatus.Feedback,
     DocRequestStatus.Complete,
     DocRequestStatus.Overdue,
+    DocRequestStatus.Approved,
 ]
 
 export function getDocumentRequestStatus(r : DocumentRequest) : DocRequestStatus {
     let currentTime = new Date()
-    if (!r.CompletionTime) {
+    if (!!r.ApproveTime && !!r.ApproveUserId) {
+        return DocRequestStatus.Approved
+    } else if (!r.CompletionTime) {
         // No completion time: open, in progress, overdue.
         if (!!r.DueDate) {
             if (currentTime <= r.DueDate) {

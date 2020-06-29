@@ -82,8 +82,9 @@ const statusToColor  = new Map<DocRequestStatus, string>()
 statusToColor.set(DocRequestStatus.Open, '#424242')
 statusToColor.set(DocRequestStatus.InProgress, '#1976d2')
 statusToColor.set(DocRequestStatus.Feedback, '#fb8c00')
-statusToColor.set(DocRequestStatus.Complete, '#4caf50')
+statusToColor.set(DocRequestStatus.Complete, '#82b1ff')
 statusToColor.set(DocRequestStatus.Overdue, '#ff5252')
+statusToColor.set(DocRequestStatus.Approved, '#4caf50')
 
 @Component({
     components: {
@@ -276,8 +277,8 @@ export default class PbcDashboard extends Vue {
     }
 
     mounted() {
-        this.overallGraph = echarts.init(this.$refs.overallDiv, null, { renderer: 'svg' })
-        this.categoryGraph = echarts.init(this.$refs.categoryDiv, null, { renderer : 'svg' })
+        this.overallGraph = echarts.init(this.$refs.overallDiv, null, { renderer: 'canvas' })
+        this.categoryGraph = echarts.init(this.$refs.categoryDiv, null, { renderer : 'canvas' })
 
         this.refreshOverallGraph()
         this.refreshCategoryGraph()

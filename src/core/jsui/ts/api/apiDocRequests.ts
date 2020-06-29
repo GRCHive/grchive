@@ -6,9 +6,11 @@ import { newDocRequestUrl,
          allDocRequestUrl,
          getDocRequestUrl,
          deleteDocRequestUrl,
-         completeDocRequestUrl,
          updateDocRequestUrl,
          apiv2DocRequestFileLinks,
+         apiv2DocRequestReopen,
+         apiv2DocRequestComplete,
+         apiv2DocRequestApprove,
 } from '../url'
 import { DocumentRequest, cleanJsonDocumentRequest, DocRequestFilterData } from '../docRequests'
 import { ControlDocumentationCategory, ControlDocumentationFile, cleanJsonControlDocumentationFile } from '../controls'
@@ -110,14 +112,21 @@ export function deleteSingleDocRequest(inp : TDeleteDocumentRequestInput) : Prom
     return postFormJson(deleteDocRequestUrl, inp, getAPIRequestConfig())
 }
 
-export interface TCompleteDocumentRequestInput {
+export interface TDocumentRequestStatusInput {
     requestId: number
     orgId: number
-    complete: boolean
 }
 
-export function completeDocRequest(inp : TCompleteDocumentRequestInput) : Promise<void> {
-    return postFormJson(completeDocRequestUrl, inp, getAPIRequestConfig())
+export function completeDocRequest(inp : TDocumentRequestStatusInput) : Promise<void> {
+    return postFormJson(apiv2DocRequestComplete(inp.orgId, inp.requestId), {}, getAPIRequestConfig())
+}
+
+export function reopenDocRequest(inp : TDocumentRequestStatusInput) : Promise<void> {
+    return postFormJson(apiv2DocRequestReopen(inp.orgId, inp.requestId), {}, getAPIRequestConfig())
+}
+
+export function approveDocRequest(inp : TDocumentRequestStatusInput) : Promise<void> {
+    return postFormJson(apiv2DocRequestApprove(inp.orgId, inp.requestId), {}, getAPIRequestConfig())
 }
 
 export interface TLinkFilesToDocumentRequestInput {

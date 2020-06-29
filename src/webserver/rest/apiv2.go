@@ -249,6 +249,30 @@ func registerAPIv2PBCRequestsPaths(r *mux.Router) {
 	singleReq := s.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgDocRequestQueryId)).Subrouter()
 	singleReq.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgDocRequestQueryId))
 
+	singleReq.HandleFunc(
+		"/complete",
+		webcore.CreateACLCheckPermissionHandler(
+			completeDocumentRequest,
+			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessEdit},
+		),
+	)
+
+	singleReq.HandleFunc(
+		"/reopen",
+		webcore.CreateACLCheckPermissionHandler(
+			reopenDocumentRequest,
+			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessEdit},
+		),
+	)
+
+	singleReq.HandleFunc(
+		"/approve",
+		webcore.CreateACLCheckPermissionHandler(
+			approveDocumentRequest,
+			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessEdit},
+		),
+	)
+
 	singleReqFiles := singleReq.PathPrefix("/files").Subrouter()
 	singleReqFiles.HandleFunc(
 		"/",

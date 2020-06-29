@@ -72,84 +72,24 @@ func buildTimeRangeFilter(ref string, f core.TimeRangeFilterData) string {
 	return builder.String()
 }
 
-func buildDocRequestStatusFilter(completionTime string, feedbackTime string, progressTime string, dueDate string, f core.DocRequestStatusFilterData) string {
+func buildDocRequestStatusFilter(
+	docRequestTable string,
+	f core.DocRequestStatusFilterData,
+) string {
 	if len(f.ValidStatuses) == 0 {
 		return "TRUE = TRUE"
 	}
 
 	builder := strings.Builder{}
+	builder.WriteString(fmt.Sprintf("get_pbc_request_status(%s.*) IN (", docRequestTable))
 
 	for idx, status := range f.ValidStatuses {
-		builder.WriteString("(")
-		switch status {
-		case core.DocRequestOpen:
-			builder.WriteString(fmt.Sprintf("%s IS NULL", completionTime))
-			builder.WriteString(" AND ")
-			builder.WriteString(fmt.Sprintf("%s IS NULL", progressTime))
-			builder.WriteString(" AND ")
-			{
-				builder.WriteString("(")
-				builder.WriteString(fmt.Sprintf("%s IS NULL", dueDate))
-				builder.WriteString(" OR ")
-				builder.WriteString(fmt.Sprintf("NOW() <= %s", dueDate))
-				builder.WriteString(")")
-			}
-		case core.DocRequestInProgress:
-			builder.WriteString(fmt.Sprintf("%s IS NULL", completionTime))
-			builder.WriteString(" AND ")
-			builder.WriteString(fmt.Sprintf("%s IS NOT NULL", progressTime))
-			builder.WriteString(" AND ")
-			{
-				builder.WriteString("(")
-				builder.WriteString(fmt.Sprintf("%s IS NULL", dueDate))
-				builder.WriteString(" OR ")
-				builder.WriteString(fmt.Sprintf("NOW() <= %s", dueDate))
-				builder.WriteString(")")
-			}
-		case core.DocRequestFeedback:
-			builder.WriteString(fmt.Sprintf("%s IS NOT NULL", completionTime))
-			builder.WriteString(" AND ")
-			builder.WriteString(fmt.Sprintf("%s IS NOT NULL", feedbackTime))
-			builder.WriteString(" AND ")
-			builder.WriteString(fmt.Sprintf("%s < %s", completionTime, feedbackTime))
-			builder.WriteString(" AND ")
-			{
-				builder.WriteString("(")
-				builder.WriteString(fmt.Sprintf("%s IS NULL", dueDate))
-				builder.WriteString(" OR ")
-				builder.WriteString(fmt.Sprintf("NOW() <= %s", dueDate))
-				builder.WriteString(")")
-			}
-		case core.DocRequestComplete:
-			builder.WriteString(fmt.Sprintf("%s IS NOT NULL", completionTime))
-			builder.WriteString(" AND ")
-			{
-				builder.WriteString("(")
-				builder.WriteString(fmt.Sprintf("%s IS NULL", feedbackTime))
-				builder.WriteString(" OR ")
-				builder.WriteString(fmt.Sprintf("%s > %s", completionTime, feedbackTime))
-				builder.WriteString(")")
-			}
-		case core.DocRequestOverdue:
-			builder.WriteString(fmt.Sprintf("%s IS NOT NULL", dueDate))
-			builder.WriteString(" AND ")
-			builder.WriteString(fmt.Sprintf("NOW() > %s", dueDate))
-			builder.WriteString(" AND ")
-			{
-				builder.WriteString("(")
-				builder.WriteString(fmt.Sprintf("%s IS NULL", completionTime))
-				builder.WriteString(" OR ")
-				builder.WriteString(fmt.Sprintf("%s < %s", completionTime, feedbackTime))
-				builder.WriteString(")")
-			}
-		}
-		builder.WriteString(")")
-
+		builder.WriteString(fmt.Sprintf("%d", status))
 		if idx != len(f.ValidStatuses)-1 {
-			builder.WriteString(" OR ")
+			builder.WriteString(", ")
 		}
 	}
-
+	builder.WriteString(")")
 	return builder.String()
 }
 
@@ -207,10 +147,7 @@ func buildDocRequestFilter(docReqTable string, f core.DocRequestFilterData) stri
 	builder.WriteString(buildTimeRangeFilter(fmt.Sprintf("%s.due_date", docReqTable), f.DueDateFilter))
 	builder.WriteString(" AND ")
 	builder.WriteString(buildDocRequestStatusFilter(
-		fmt.Sprintf("%s.completion_time", docReqTable),
-		fmt.Sprintf("%s.feedback_time", docReqTable),
-		fmt.Sprintf("%s.progress_time", docReqTable),
-		fmt.Sprintf("%s.due_date", docReqTable),
+		docReqTable,
 		f.StatusFilter,
 	))
 	builder.WriteString(" AND ")

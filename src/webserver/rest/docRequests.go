@@ -43,12 +43,6 @@ type DeleteDocumentRequestInputs struct {
 	OrgId     int32 `json:"orgId"`
 }
 
-type CompleteDocumentRequestInputs struct {
-	RequestId int64 `json:"requestId"`
-	OrgId     int32 `json:"orgId"`
-	Complete  bool  `json:"complete"`
-}
-
 type AllDocumentRequestsInputs struct {
 	OrgId           int32                     `webcore:"orgId"`
 	CatId           core.NullInt64            `webcore:"catId,optional"`
@@ -302,30 +296,6 @@ func deleteDocumentRequest(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func completeDocumentRequest(w http.ResponseWriter, r *http.Request) {
-	inputs := CompleteDocumentRequestInputs{}
-	err := webcore.UnmarshalRequestForm(r, &inputs)
-	if err != nil {
-		core.Warning("Can't parse inputs: " + err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	role, err := webcore.GetCurrentRequestRole(r, inputs.OrgId)
-	if err != nil {
-		core.Warning("Bad access: " + err.Error())
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	err = database.CompleteDocumentRequest(inputs.RequestId, inputs.OrgId, inputs.Complete, role)
-	if err != nil {
-		core.Warning("Failed to complete/reopen doc request: " + err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
 type NewDocumentRequestFileLinksInputs struct {
 	Files []int64 `json:"files"`
 }
@@ -361,6 +331,106 @@ func newDocRequestFileLinks(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		core.Warning("Failed to link files to request: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func completeDocumentRequest(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	request, err := webcore.FindDocumentRequestInContext(ctx)
+	if err != nil {
+		core.Warning("Failed to get document request in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.FindRoleInContext(ctx)
+	if err != nil {
+		core.Warning("Failed to get role in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tx, err := database.CreateAuditTrailTx(role)
+	if err != nil {
+		core.Warning("Failed to create audit trail tx: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = database.WrapTx(tx, func() error {
+		return database.CompleteDocumentRequestWithTx(tx, request.Id, request.OrgId)
+	})
+	if err != nil {
+		core.Warning("Failed to complete doc request: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func reopenDocumentRequest(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	request, err := webcore.FindDocumentRequestInContext(ctx)
+	if err != nil {
+		core.Warning("Failed to get document request in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.FindRoleInContext(ctx)
+	if err != nil {
+		core.Warning("Failed to get role in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tx, err := database.CreateAuditTrailTx(role)
+	if err != nil {
+		core.Warning("Failed to create audit trail tx: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = database.WrapTx(tx, func() error {
+		return database.ReopenDocumentRequestWithTx(tx, request.Id, request.OrgId)
+	})
+	if err != nil {
+		core.Warning("Failed to reopen doc request: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func approveDocumentRequest(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	request, err := webcore.FindDocumentRequestInContext(ctx)
+	if err != nil {
+		core.Warning("Failed to get document request in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	role, err := webcore.FindRoleInContext(ctx)
+	if err != nil {
+		core.Warning("Failed to get role in context: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tx, err := database.CreateAuditTrailTx(role)
+	if err != nil {
+		core.Warning("Failed to create audit trail tx: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = database.WrapTx(tx, func() error {
+		return database.ApproveDocumentRequestWithTx(tx, request.Id, request.OrgId, role.UserId)
+	})
+
+	if err != nil {
+		core.Warning("Failed to approve doc request: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

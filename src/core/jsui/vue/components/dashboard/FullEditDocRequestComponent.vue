@@ -28,6 +28,13 @@
                             <span class="font-weight-bold">, Folder:</span>
                             <span>{{ controlFolder.Name }}</span>
                         </p>
+
+                        <p class="ma-0" v-if="isApproved">
+                            <span class="font-weight-bold">Approved By:</span>
+                            <span>{{ approveUserName }}</span>
+                            <span> at </span>
+                            <span>{{ approveTime }}</span>
+                        </p>
                     </v-list-item-subtitle>
 
                 </v-list-item-content>
@@ -54,21 +61,31 @@
 
                 </v-list-item-action>
 
-                <v-list-item-action>
+                <v-list-item-action v-if="canComplete">
                     <v-btn 
                         @click="doComplete(true)"
                         color="success"
-                        v-if="canComplete"
                     >
                         Complete  
                     </v-btn>
+                </v-list-item-action>
 
+                <v-list-item-action v-if="canReopen">
                     <v-btn 
                         @click="doComplete(false)"
                         color="warning"
-                        v-if="canReopen"
+                        :class="isApproved ? '' : 'ml-4'"
                     >
                         Reopen
+                    </v-btn>
+                </v-list-item-action>
+
+                <v-list-item-action v-if="canApprove">
+                    <v-btn 
+                        @click="doApprove"
+                        color="success"
+                    >
+                        Approve
                     </v-btn>
                 </v-list-item-action>
 
@@ -176,8 +193,14 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 import { DocumentRequest, DocRequestStatus, getDocumentRequestStatus } from '../../../ts/docRequests'
+import { createUserString } from '../../../ts/users'
 import { TGetSingleDocumentRequestOutput, getSingleDocRequest } from '../../../ts/api/apiDocRequests'
-import { deleteSingleDocRequest, completeDocRequest } from '../../../ts/api/apiDocRequests'
+import { 
+    deleteSingleDocRequest,
+    completeDocRequest,
+    reopenDocRequest,
+    approveDocRequest,
+} from '../../../ts/api/apiDocRequests'
 import { PageParamsStore } from '../../../ts/pageParams'
 import { contactUsUrl, createOrgDocRequestsUrl, createSingleDocCatUrl, createControlUrl } from '../../../ts/url'
 import { ControlDocumentationCategory, ControlDocumentationFile } from '../../../ts/controls'
@@ -223,11 +246,18 @@ export default class FullEditDocRequestComponent extends Vue {
     }
 
     get canComplete() : boolean {
-        return this.status != DocRequestStatus.Complete
+        return this.status == DocRequestStatus.Open ||
+            this.status == DocRequestStatus.InProgress ||
+            this.status == DocRequestStatus.Feedback ||
+            this.status == DocRequestStatus.Overdue
     }
 
     get canReopen() : boolean {
-        return !this.canComplete && (this.status != DocRequestStatus.Feedback)
+        return !this.canComplete
+    }
+
+    get canApprove() : boolean {
+        return !this.canComplete && this.status != DocRequestStatus.Approved
     }
 
     get commentParams() : Object {
@@ -239,6 +269,10 @@ export default class FullEditDocRequestComponent extends Vue {
 
     get ready() : boolean {
         return !!this.currentRequest && !!this.parentCategory
+    }
+
+    get isApproved() : boolean { 
+        return !!this.currentRequest && !!this.currentRequest.ApproveTime && !!this.currentRequest.ApproveUserId
     }
 
     get parentControlUrl() : string {
@@ -278,6 +312,21 @@ export default class FullEditDocRequestComponent extends Vue {
             return ""
         }
         return standardFormatTime(this.currentRequest.CompletionTime)
+    }
+
+    get approveUserName() : string {
+        if (!this.currentRequest) {
+            return ""
+        }
+        let user = MetadataStore.getters.getUser(this.currentRequest.ApproveUserId)
+        return createUserString(user)
+    }
+
+    get approveTime() : string {
+        if (!this.currentRequest || !this.currentRequest.ApproveTime) {
+            return ""
+        }
+        return standardFormatTime(this.currentRequest.ApproveTime)
     }
 
     onError(err : any) { 
@@ -358,16 +407,48 @@ export default class FullEditDocRequestComponent extends Vue {
     }
 
     doComplete(val : boolean) {
-        completeDocRequest({
+        if (val) {
+            completeDocRequest({
+                requestId: this.currentRequest!.Id,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then(() => {
+                this.currentRequest!.CompletionTime = new Date()
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        } else {
+            reopenDocRequest({
+                requestId: this.currentRequest!.Id,
+                orgId: PageParamsStore.state.organization!.Id,
+            }).then(() => {
+                this.currentRequest!.FeedbackTime = new Date()
+                this.currentRequest!.ApproveTime = null
+                this.currentRequest!.ApproveUserId = null
+            }).catch((err : any) => {
+                // @ts-ignore
+                this.$root.$refs.snackbar.showSnackBar(
+                    "Oops! Something went wrong. Try again.",
+                    true,
+                    "Contact Us",
+                    contactUsUrl,
+                    true);
+            })
+        }
+    }
+
+    doApprove() {
+        approveDocRequest({
             requestId: this.currentRequest!.Id,
             orgId: PageParamsStore.state.organization!.Id,
-            complete: val,
         }).then(() => {
-            if (val) {
-                this.currentRequest!.CompletionTime = new Date()
-            } else {
-                this.currentRequest!.FeedbackTime = new Date()
-            }
+            this.currentRequest!.ApproveTime = new Date()
+            this.currentRequest!.ApproveUserId = PageParamsStore.state.user!.Id
         }).catch((err : any) => {
             // @ts-ignore
             this.$root.$refs.snackbar.showSnackBar(

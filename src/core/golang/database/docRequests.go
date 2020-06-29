@@ -147,41 +147,6 @@ func MarkDocumentRequestProgressWithTx(requestId int64, orgId int32, tx *sqlx.Tx
 	return err
 }
 
-func CompleteDocumentRequest(requestId int64, orgId int32, complete bool, role *core.Role) error {
-	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessEdit) {
-		return core.ErrorUnauthorized
-	}
-
-	tx, err := CreateAuditTrailTx(role)
-	if err != nil {
-		return err
-	}
-
-	tm := time.Now().UTC()
-
-	if complete {
-		_, err = tx.Exec(`
-			UPDATE document_requests
-			SET completion_time = $3
-			WHERE id = $1
-				AND org_id = $2
-		`, requestId, orgId, tm)
-	} else {
-		_, err = tx.Exec(`
-			UPDATE document_requests
-			SET feedback_time = $3
-			WHERE id = $1
-				AND org_id = $2
-		`, requestId, orgId, tm)
-	}
-
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	return tx.Commit()
-}
-
 func GetAllDocumentRequestsForVendorProduct(productId int64, orgId int32, role *core.Role) ([]*core.DocumentRequest, error) {
 	if !role.Permissions.HasAccess(core.ResourceDocRequests, core.AccessView) {
 		return nil, core.ErrorUnauthorized
@@ -364,4 +329,46 @@ func GetVendorProductIdForDocRequest(requestId int64, orgId int32) (int64, int64
 	productId := int64(0)
 	err = rows.Scan(&vendorId, &productId)
 	return vendorId, productId, err
+}
+
+func CompleteDocumentRequestWithTx(tx *sqlx.Tx, requestId int64, orgId int32) error {
+	tm := time.Now().UTC()
+
+	_, err := tx.Exec(`
+		UPDATE document_requests
+		SET completion_time = $3
+		WHERE id = $1
+			AND org_id = $2
+	`, requestId, orgId, tm)
+
+	return err
+}
+
+func ReopenDocumentRequestWithTx(tx *sqlx.Tx, requestId int64, orgId int32) error {
+	tm := time.Now().UTC()
+
+	_, err := tx.Exec(`
+		UPDATE document_requests
+		SET feedback_time = $3,
+			approve_time = NULL,
+			approve_user_id = NULL
+		WHERE id = $1
+			AND org_id = $2
+	`, requestId, orgId, tm)
+
+	return err
+}
+
+func ApproveDocumentRequestWithTx(tx *sqlx.Tx, requestId int64, orgId int32, approveUserId int64) error {
+	tm := time.Now().UTC()
+
+	_, err := tx.Exec(`
+		UPDATE document_requests
+		SET approve_time = $3,
+			approve_user_id = $4
+		WHERE id = $1
+			AND org_id = $2
+	`, requestId, orgId, tm, approveUserId)
+
+	return err
 }
