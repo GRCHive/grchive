@@ -522,6 +522,14 @@ func CreateObtainResourceInContextMiddleware(queryId string) mux.MiddlewareFunc 
 					return
 				}
 				ctx = context.WithValue(r.Context(), ControlContextKey, control)
+			case core.DashboardOrgSettingsPbcNotificationQueryId:
+				setting, err := database.GetPbcNotificationCadenceSettings(queryInt)
+				if err != nil || setting.OrgId != org.Id {
+					core.Warning("Failed to get PBC notification cadence settings: " + err.Error())
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+				ctx = context.WithValue(r.Context(), PbcNotificationCadenceSettingsContextKey, setting)
 			default:
 				w.WriteHeader(http.StatusBadRequest)
 				return

@@ -565,3 +565,15 @@ export function apiv2PbcOverallAnalyticsLink(orgId: number) : string {
 export function apiv2PbcCategoryAnalyticsLink(orgId: number, category : string) : string {
     return `${apiv2PbcAnalyticsLink(orgId)}/category/${category}`
 }
+
+export function apiv2OrgSettings(orgId: number) : string {
+    return createOrgApiv2Url(orgId, 'settings')
+}
+
+export function apiv2OrgPbcNotificationsSettings(orgId: number) : string {
+    return `${apiv2OrgSettings(orgId)}/notifications/pbc`
+}
+
+export function apiv2OrgSinglePbcNotificationSetting(orgId: number, id : number) : string {
+    return `${apiv2OrgPbcNotificationsSettings(orgId)}/${id}`
+}

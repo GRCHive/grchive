@@ -19,6 +19,7 @@ const DashboardUserNotifications = () => import( /* webpackChunkName: "Dashboard
 const DashboardOrgSettingsUsers = () => import( /* webpackChunkName: "DashboardOrgSettingsUsers" */ '../vue/pages/dashboard/DashboardOrgSettingsUsers.vue')
 const DashboardOrgSettingsRoles = () => import( /* webpackChunkName: "DashboardOrgSettingsRoles" */ '../vue/pages/dashboard/DashboardOrgSettingsRoles.vue')
 const DashboardOrgSettingsSingleRole = () => import( /* webpackChunkName: "DashboardOrgSettingsSingleRole" */ '../vue/pages/dashboard/DashboardOrgSettingsSingleRole.vue')
+const DashboardOrgSettingsNotifications = () => import( /* webpackChunkName: "DashboardOrgSettingsNotifications" */ '../vue/pages/dashboard/DashboardOrgSettingsNotifications.vue')
 const DashboardOrgGeneralLedger = () => import( /* webpackChunkName: "DashboardOrgGeneralLedger" */ '../vue/pages/dashboard/DashboardOrgGeneralLedger.vue')
 const DashboardOrgSingleGeneralLedgerAccount = () => import( /* webpackChunkName: "DashboardOrgSingleGeneralLedgerAccount" */ '../vue/pages/dashboard/DashboardOrgSingleGeneralLedgerAccount.vue')
 const DashboardOrgSystems = () => import( /* webpackChunkName: "DashboardOrgSystems" */ '../vue/pages/dashboard/DashboardOrgSystems.vue')
@@ -79,6 +80,7 @@ function mountApp(inData : PageParamsStoreState) {
             DashboardOrgSettingsUsers,
             DashboardOrgSettingsRoles,
             DashboardOrgSettingsSingleRole,
+            DashboardOrgSettingsNotifications,
             DashboardOrgGeneralLedger,
             DashboardOrgSingleGeneralLedgerAccount,
             DashboardOrgSystems,

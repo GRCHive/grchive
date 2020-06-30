@@ -36,6 +36,7 @@ const (
 	DashboardOrgSettingsUsersTemplateKey
 	DashboardOrgSettingsRolesTemplateKey
 	DashboardOrgSettingsSingleRoleTemplateKey
+	DashboardOrgSettingsNotificationsTemplateKey
 	DashboardGeneralLedgerTemplateKey
 	DashboardGLAccountTemplateKey
 	DashboardSystemHomeTemplateKey
@@ -200,6 +201,8 @@ func RegisterTemplates() {
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardOrgSettingsRoles.tmpl")
 	allTemplates[DashboardOrgSettingsSingleRoleTemplateKey] =
 		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardOrgSettingsSingleRole.tmpl")
+	allTemplates[DashboardOrgSettingsNotificationsTemplateKey] =
+		defaultLoadTemplateWithDashboardBase("src/webserver/templates/dashboard/dashboardOrgSettingsNotifications.tmpl")
 
 	// Dashboard User
 	allTemplates[DashboardUserOrgsTemplateKey] =

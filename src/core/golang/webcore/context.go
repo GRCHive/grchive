@@ -13,24 +13,25 @@ const (
 	UserSessionContextKey           ContextKey = "SESSION"
 	UserSessionParsedDataContextKey            = "PARSEDDATA"
 	// From Request
-	OrganizationContextKey                = "ORGANIZATION"
-	UserContextKey                        = "USER"
-	ApiKeyContextKey                      = "APIKEY"
-	GenericRequestContextKey              = "GENREQ"
-	RoleContextKey                        = "ROLE"
-	ShellScriptContextKey                 = "SHELLSCRIPT"
-	ShellScriptRunContextKey              = "SHELLSCRIPTRUN"
-	ShellScriptVersionContextKey          = "SHELLSCRIPTVERSION"
-	ServerContextKey                      = "SERVER"
-	ServerConnectionSshPasswordContextKey = "SERVERCONNECTIONSSHPASSWORD"
-	ServerConnectionSshKeyContextKey      = "SERVERCONNECTIONSSHKEY"
-	DatabaseContextKey                    = "DATABASE"
-	SystemContextKey                      = "SYSTEM"
-	GenericIntegrationContextKey          = "INTEGRATION"
-	SapErpRfcContextKey                   = "SAPERPRFC"
-	SapErpRfcVersionContextKey            = "SAPERPRFCVERSION"
-	ControlContextKey                     = "CONTROL"
-	DocumentRequestContextKey             = "DOCREQUEST"
+	OrganizationContextKey                   = "ORGANIZATION"
+	UserContextKey                           = "USER"
+	ApiKeyContextKey                         = "APIKEY"
+	GenericRequestContextKey                 = "GENREQ"
+	RoleContextKey                           = "ROLE"
+	ShellScriptContextKey                    = "SHELLSCRIPT"
+	ShellScriptRunContextKey                 = "SHELLSCRIPTRUN"
+	ShellScriptVersionContextKey             = "SHELLSCRIPTVERSION"
+	ServerContextKey                         = "SERVER"
+	ServerConnectionSshPasswordContextKey    = "SERVERCONNECTIONSSHPASSWORD"
+	ServerConnectionSshKeyContextKey         = "SERVERCONNECTIONSSHKEY"
+	DatabaseContextKey                       = "DATABASE"
+	SystemContextKey                         = "SYSTEM"
+	GenericIntegrationContextKey             = "INTEGRATION"
+	SapErpRfcContextKey                      = "SAPERPRFC"
+	SapErpRfcVersionContextKey               = "SAPERPRFCVERSION"
+	ControlContextKey                        = "CONTROL"
+	DocumentRequestContextKey                = "DOCREQUEST"
+	PbcNotificationCadenceSettingsContextKey = "PBCNOTIFCADENCESETTINGS"
 )
 
 func AddSessionToContext(session *core.UserSession, ctx context.Context) context.Context {
@@ -217,6 +218,14 @@ func FindDocumentRequestInContext(ctx context.Context) (*core.DocumentRequest, e
 	resource, ok := ctx.Value(DocumentRequestContextKey).(*core.DocumentRequest)
 	if !ok || resource == nil {
 		return nil, errors.New("Failed to find DocumentRequest in context.")
+	}
+	return resource, nil
+}
+
+func FindPbcNotificationCadenceSettingsInContext(ctx context.Context) (*core.PbcNotificationCadenceSettings, error) {
+	resource, ok := ctx.Value(PbcNotificationCadenceSettingsContextKey).(*core.PbcNotificationCadenceSettings)
+	if !ok || resource == nil {
+		return nil, errors.New("Failed to find PbcNotificationCadenceSettings in context.")
 	}
 	return resource, nil
 }

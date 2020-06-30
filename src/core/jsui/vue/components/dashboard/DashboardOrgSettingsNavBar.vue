@@ -31,6 +31,13 @@ export default Vue.extend({
                     disabled : false,
                     hidden: false
                 },
+                {
+                    title: 'Notifications',
+                    icon: 'mdi-bell',
+                    url: PageParamsStore.state.organization!.Url + 'settings/notifications',
+                    disabled : false,
+                    hidden: false
+                },
             ],
         }
     },

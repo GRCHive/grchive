@@ -203,6 +203,10 @@ func RenderDashboardOrgSettingsSingleRole(w http.ResponseWriter, r *http.Request
 	RenderTemplate(w, DashboardOrgSettingsSingleRoleTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r, ""), emptyParams)
 }
 
+func RenderDashboardOrgSettingsNotifications(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, DashboardOrgSettingsNotificationsTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r, ""), emptyParams)
+}
+
 func RenderDashboardGeneralLedger(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, DashboardGeneralLedgerTemplateKey, "dashboardBase", BuildPageTemplateParametersFull(r, ""), emptyParams)
 }

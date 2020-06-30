@@ -27,7 +27,7 @@ export function email(v : string) : boolean | string {
 }
 
 export function numeric(v : string) : boolean | string {
-    return !isNaN(Number(v)) || "Must be numeric."
+    return (v !== "" && !isNaN(Number(v))) || "Must be numeric."
 }
 
 export function hasLowerCase(v : string) : boolean | string {
@@ -40,6 +40,10 @@ export function hasUpperCase(v : string) : boolean | string {
 
 export function hasNumeric(v : string) : boolean | string {
     return (/[0-9]/.test(v)) || "Must have numeric characters."
+}
+
+export function geq(cmp : number) : (_: string) => boolean | string {
+    return (v : string) => Number(v) >= cmp || `Invalid value, must be greater than or equal to ${cmp}.`
 }
 
 export function password(v: string) : boolean | string {

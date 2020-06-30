@@ -55,6 +55,7 @@ const DashboardOrgServerSshKeyQueryId = "serverSshKeyId"
 const DashboardOrgIntegrationQueryId = "integrationId"
 const DashboardOrgSapErpRfcQueryId = "sapErpRfcQueryId"
 const DashboardOrgSapErpRfcVersionQueryId = "sapErpRfcVersionQueryId"
+const DashboardOrgSettingsPbcNotificationQueryId = "pbcNotifQueryId"
 
 var DashboardOrgUrl string = fmt.Sprintf("/org/{%s}", DashboardOrgOrgQueryId)
 

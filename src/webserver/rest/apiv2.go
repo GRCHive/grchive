@@ -25,6 +25,8 @@ func registerAPIv2Org(r *mux.Router) {
 	registerAPIv2IntegrationPaths(s)
 	registerAPIv2PBCRequestsPaths(s)
 	registerAPIv2AnalyticsPaths(s)
+
+	registerAPIv2OrgSettingsPaths(s)
 }
 
 func registerAPIv2DatabasePaths(r *mux.Router) {
@@ -477,7 +479,7 @@ func registerAPIv2PbcAnalytics(r *mux.Router) {
 			getOverallPbcAnalytics,
 			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
 		),
-	)
+	).Methods("GET")
 
 	s.HandleFunc(
 		"/category/requester",
@@ -485,7 +487,7 @@ func registerAPIv2PbcAnalytics(r *mux.Router) {
 			getCategoryRequesterPbcAnalytics,
 			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
 		),
-	)
+	).Methods("GET")
 
 	s.HandleFunc(
 		"/category/assignee",
@@ -493,7 +495,7 @@ func registerAPIv2PbcAnalytics(r *mux.Router) {
 			getCategoryAssigneePbcAnalytics,
 			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
 		),
-	)
+	).Methods("GET")
 
 	s.HandleFunc(
 		"/category/cat",
@@ -501,7 +503,7 @@ func registerAPIv2PbcAnalytics(r *mux.Router) {
 			getCategoryDocCatPbcAnalytics,
 			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
 		),
-	)
+	).Methods("GET")
 
 	s.HandleFunc(
 		"/category/flow",
@@ -509,7 +511,7 @@ func registerAPIv2PbcAnalytics(r *mux.Router) {
 			getCategoryProcessFlowPbcAnalytics,
 			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
 		),
-	)
+	).Methods("GET")
 
 	s.HandleFunc(
 		"/category/control",
@@ -517,7 +519,7 @@ func registerAPIv2PbcAnalytics(r *mux.Router) {
 			getCategoryControlPbcAnalytics,
 			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
 		),
-	)
+	).Methods("GET")
 
 	s.HandleFunc(
 		"/category/risk",
@@ -525,7 +527,7 @@ func registerAPIv2PbcAnalytics(r *mux.Router) {
 			getCategoryRiskPbcAnalytics,
 			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
 		),
-	)
+	).Methods("GET")
 
 	s.HandleFunc(
 		"/category/gl",
@@ -533,7 +535,7 @@ func registerAPIv2PbcAnalytics(r *mux.Router) {
 			getCategoryGLPbcAnalytics,
 			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
 		),
-	)
+	).Methods("GET")
 
 	s.HandleFunc(
 		"/category/system",
@@ -541,5 +543,38 @@ func registerAPIv2PbcAnalytics(r *mux.Router) {
 			getCategorySystemPbcAnalytics,
 			core.ResourceAccessBundle{core.ResourceDocRequests, core.AccessView},
 		),
-	)
+	).Methods("GET")
+}
+
+func registerAPIv2OrgSettingsPaths(r *mux.Router) {
+	s := r.PathPrefix("/settings").Subrouter()
+	registerAPIv2OrgNotificationSettingsPaths(s)
+}
+
+func registerAPIv2OrgNotificationSettingsPaths(r *mux.Router) {
+	s := r.PathPrefix("/notifications").Subrouter()
+
+	pbcSettings := s.PathPrefix("/pbc").Subrouter()
+	pbcSettings.HandleFunc(
+		"/",
+		getOrgPbcNotificationSettings,
+	).Methods("GET")
+
+	pbcSettings.HandleFunc(
+		"/",
+		newOrgPbcNotificationSetting,
+	).Methods("POST")
+
+	singlePbcSettings := pbcSettings.PathPrefix(fmt.Sprintf("/{%s}", core.DashboardOrgSettingsPbcNotificationQueryId)).Subrouter()
+	singlePbcSettings.Use(webcore.CreateObtainResourceInContextMiddleware(core.DashboardOrgSettingsPbcNotificationQueryId))
+	singlePbcSettings.HandleFunc(
+		"/",
+		deleteOrgPbcNotificationSetting,
+	).Methods("DELETE")
+
+	singlePbcSettings.HandleFunc(
+		"/",
+		editOrgPbcNotificationSetting,
+	).Methods("PUT")
+
 }

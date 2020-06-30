@@ -81,6 +81,7 @@ func createOrganizationSettingsSubrouter(r *mux.Router) {
 	s.HandleFunc(core.DashboardOrgSettingsUsersEndpoint, render.RenderDashboardOrgSettingsUsers).Name(webcore.OrgSettingsUsersRouteName)
 	s.HandleFunc(core.DashboardOrgSettingsRolesEndpoint, render.RenderDashboardOrgSettingsRoles)
 	s.HandleFunc(core.DashboardOrgSettingsSingleRoleEndpoint, render.RenderDashboardOrgSettingsSingleRole)
+	s.HandleFunc("/notifications", render.RenderDashboardOrgSettingsNotifications)
 }
 
 func createOrganizationAutomationSubrouter(r *mux.Router) {
