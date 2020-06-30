@@ -38,8 +38,8 @@
                         <v-form v-model="newIsValid" class="ma-4">
                             <v-text-field
                                 type="number"
-                                label="Days Before Due"
-                                :rules="[ rules.numeric, rules.geq(0) ]"
+                                label="Days Before/After Due"
+                                :rules="[ rules.numeric ]"
                                 v-model="newDaysBefore"
                             >
                             </v-text-field>
@@ -84,8 +84,12 @@
                                 Due Date
                             </span>
 
-                            <span v-else>
+                            <span v-else-if="n.DaysBeforeDue > 0">
                                 T-{{ n.DaysBeforeDue }} Days
+                            </span>
+
+                            <span v-else>
+                                T+{{ -n.DaysBeforeDue }} Days
                             </span>
                         </v-stepper-step>
 
@@ -102,8 +106,8 @@
                 <v-form v-model="editableIsValid">
                     <v-text-field
                         type="number"
-                        label="Days Before Due"
-                        :rules="[ rules.numeric, rules.geq(0) ]"
+                        label="Days Before/After Due"
+                        :rules="[ rules.numeric ]"
                         :value="editableNotification.DaysBeforeDue"
                         @input="editableNotification.DaysBeforeDue = Number(arguments[0])"
                     >
