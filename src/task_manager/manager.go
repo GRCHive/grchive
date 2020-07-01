@@ -4,6 +4,7 @@ import (
 	"flag"
 	"gitlab.com/grchive/grchive/core"
 	"gitlab.com/grchive/grchive/database"
+	"gitlab.com/grchive/grchive/mail_api"
 	"gitlab.com/grchive/grchive/webcore"
 )
 
@@ -16,6 +17,7 @@ func main() {
 	core.Init()
 	database.Init()
 	webcore.InitializeWebcore()
+	mail.InitializeMailAPI(core.EnvConfig.Mail.Provider, core.EnvConfig.Mail.Key)
 
 	var c core.Clock
 	if *mul == -1 {
@@ -52,6 +54,12 @@ func main() {
 		if err != nil {
 			core.Error("Failed to add job: " + err.Error())
 		}
+	}
+
+	// Load internal tasks that must be run at a set time interval.
+	err = scheduler.AddJob(createPbcNotificationJob(scheduler.Clock))
+	if err != nil {
+		core.Error("Failed to add PBC notification job: " + err.Error())
 	}
 
 	if *immediate {

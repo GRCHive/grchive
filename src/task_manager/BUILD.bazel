@@ -12,6 +12,7 @@ go_binary(
         "//src/core/golang/core:webserver_core_library",
         "//src/core/golang/database:webserver_database_library",
         "//src/core/golang/webcore:webserver_webcore_library",
+        "//src/mail_api/golang:mail_golang_api",
         "@com_github_teambition_rrule_go//:go_default_library",
     ],
 )

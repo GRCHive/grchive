@@ -167,3 +167,32 @@ func EditAllPbcNotificationCadenceSettingWithTx(tx *sqlx.Tx, setting core.PbcNot
 
 	return nil
 }
+
+func GetPbcNotificationRecord(orgId int32) (map[core.PbcNotificationRecordKey]bool, error) {
+	ret := map[core.PbcNotificationRecordKey]bool{}
+
+	data := make([]core.PbcNotificationRecordKey, 0)
+	err := dbConn.Select(&data, `
+		SELECT cadence_id, org_id, request_id
+		FROM org_pbc_notification_record
+		WHERE org_id = $1
+	`, orgId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, d := range data {
+		ret[d] = true
+	}
+
+	return ret, nil
+}
+
+func MarkPbcNotificationRecordWithTx(tx *sqlx.Tx, rec core.PbcNotificationRecordKey) error {
+	_, err := tx.NamedExec(`
+		INSERT INTO org_pbc_notification_record (cadence_id, org_id, request_id, notif_time)
+		VALUES (:cadence_id, :org_id, :request_id, NOW())
+	`, rec)
+	return err
+}

@@ -10,6 +10,7 @@ type TaskType int32
 const (
 	KRabbitMQTask   TaskType = 1
 	KGrchiveApiTask          = 2
+	KInternalTask            = 3
 )
 
 type ScheduledTaskMetadata struct {

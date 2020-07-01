@@ -46,3 +46,11 @@ type DocRequestFilterData struct {
 	RequesterFilter   UserFilterData
 	AssigneeFilter    UserFilterData
 }
+
+var ValidDueDateDocRequestFilter = DocRequestFilterData{
+	DueDateFilter: TimeRangeFilterData{
+		Enabled: true,
+		// Just an arbitrarily large date
+		End: CreateNullTime(time.Date(3000, 12, 1, 0, 0, 0, 0, time.UTC)),
+	},
+}

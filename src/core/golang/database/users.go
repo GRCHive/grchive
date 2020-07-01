@@ -78,6 +78,39 @@ func FindUserFromId(id int64) (*core.User, error) {
 	return &user, nil
 }
 
+func FindMultipleUsersFromIds(ids []int64) ([]*core.User, error) {
+	query, args, err := sqlx.In(`
+		SELECT DISTINCT *
+		FROM users
+		WHERE id IN (?)
+	`, ids)
+
+	if err != nil {
+		return nil, err
+	}
+
+	query = dbConn.Rebind(query)
+	rows, err := dbConn.Queryx(query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	users := make([]*core.User, 0)
+	for rows.Next() {
+		u := core.User{}
+		err = rows.StructScan(&u)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, &u)
+	}
+
+	return users, nil
+}
+
 func FindUserFromEmail(email string) (*core.User, error) {
 	user := core.User{}
 

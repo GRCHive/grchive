@@ -4,6 +4,15 @@ import (
 	"gitlab.com/grchive/grchive/core"
 )
 
+func FindOrganizations() ([]*core.Organization, error) {
+	orgs := make([]*core.Organization, 0)
+	err := dbConn.Select(&orgs, `
+		SELECT *
+		FROM organizations
+	`)
+	return orgs, err
+}
+
 func FindOrganizationFromId(orgId int32) (*core.Organization, error) {
 	rows, err := dbConn.Queryx(`
 		SELECT * FROM organizations WHERE id = $1
